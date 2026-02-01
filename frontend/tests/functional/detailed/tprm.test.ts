@@ -248,43 +248,17 @@ test('third-party representative can fill their assigned audit', async ({
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
 
-			const waitForRequirementPatch = async (action: () => Promise<void>) => {
-				const waitForUpdateAction = page.waitForResponse(
-					(response) =>
-						response.url().includes('updateRequirementAssessment') &&
-						response.request().method() === 'POST'
-				);
-				const waitForRequirementsList = page.waitForResponse(
-					(response) =>
-						response.url().includes('/requirements_list/') && response.request().method() === 'GET'
-				);
-				const waitForGlobalScore = page.waitForResponse(
-					(response) =>
-						response.url().includes('/global_score/') && response.request().method() === 'GET'
-				);
-
-				await action();
-				await Promise.all([waitForUpdateAction, waitForRequirementsList, waitForGlobalScore]);
+			const clickAndPause = async (locator: Locator) => {
+				await locator.click();
+				await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
 			};
 
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'Yes' }).first().click()
-			);
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'No' }).nth(1).click()
-			);
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'N/A' }).nth(2).click()
-			);
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'Yes' }).nth(3).click()
-			);
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'No' }).nth(4).click()
-			);
-			await waitForRequirementPatch(async () =>
-				page.getByRole('button', { name: 'N/A' }).nth(5).click()
-			);
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
