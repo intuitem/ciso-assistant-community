@@ -34,6 +34,10 @@ services:
       - AUTH_TOKEN_TTL=7200
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -72,6 +76,10 @@ services:
       - AUTH_TOKEN_TTL=7200
       - LICENSE_SEATS=5
       - LICENSE_EXPIRATION=2025-12-21
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
       - POSTGRES_NAME={{ postgres.name }}
       - POSTGRES_USER={{ postgres.user }}
       {% if postgres.password is defined %}
@@ -86,8 +94,16 @@ services:
       - EMAIL_HOST_PASSWORD={{ email.password }}
       - DEFAULT_FROM_EMAIL={{ email.from_email }}
       {% endif %}
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
     volumes:
       - ./db:/code/db
+    user: "1001:1001"
     entrypoint:
       - /bin/sh
       - -c
@@ -101,11 +117,16 @@ services:
       - PUBLIC_BACKEND_API_EXPOSED_URL=https://{{ fqdn }}:{{ port }}/api
       - PROTOCOL_HEADER=x-forwarded-proto
       - HOST_HEADER=x-forwarded-host
+      - HOME=/tmp
+      - XDG_CACHE_HOME=/tmp/.cache
+      - XDG_CONFIG_HOME=/tmp/.config
+      - XDG_DATA_HOME=/tmp/.local/share
     image: ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest
     pull_policy: always
     depends_on:
       backend:
         condition: service_healthy
+    user: "1001:1001"
 
   caddy:
     container_name: caddy
