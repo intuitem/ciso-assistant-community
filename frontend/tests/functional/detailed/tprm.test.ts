@@ -247,12 +247,18 @@ test('third-party representative can fill their assigned audit', async ({
 
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
-			await page.getByRole('button', { name: 'Yes' }).first().click();
-			await page.getByRole('button', { name: 'No' }).nth(1).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(2).click();
-			await page.getByRole('button', { name: 'Yes' }).nth(3).click();
-			await page.getByRole('button', { name: 'No' }).nth(4).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(5).click();
+
+			const clickAndPause = async (locator: Locator) => {
+				await locator.click();
+				await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
+			};
+
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
