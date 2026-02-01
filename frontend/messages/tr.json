@@ -596,6 +596,7 @@
 	"mediumSOK": "Değerlendirmeyi destekleyen bilginin gücü orta",
 	"highSOK": "Değerlendirmeyi destekleyen bilginin gücü yüksek",
 	"libraryLoadingError": "Kütüphanenizi yüklerken bir hata oluştu",
+	"processingError": "İşleme hatası",
 	"libraryAlreadyLoadedError": "Bu kütüphane zaten yüklü",
 	"invalidLibraryFileError": "Geçersiz kütüphane dosyası. Lütfen formatın doğru olduğundan emin olun.",
 	"taintedFormMessage": "Bu sayfadan ayrılmak istiyor musunuz? Yaptığınız değişiklikler kaydedilmemiş olabilir.",

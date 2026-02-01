@@ -553,6 +553,7 @@
 	"mediumSOK": "Puterea cunoștințelor care susține evaluarea este medie",
 	"highSOK": "Puterea cunoștințelor care susține evaluarea este ridicată",
 	"libraryLoadingError": "A apărut o eroare în timpul încărcării bibliotecii",
+	"processingError": "Eroare de procesare",
 	"libraryAlreadyLoadedError": "Această bibliotecă a fost deja încărcată",
 	"invalidLibraryFileError": "Fișier de bibliotecă invalid. Vă rugăm să vă asigurați că formatul este corect.",
 	"taintedFormMessage": "Doriți să părăsiți această pagină? Modificările pe care le-ați făcut este posibil să nu fie salvate.",

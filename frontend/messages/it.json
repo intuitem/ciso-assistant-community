@@ -560,6 +560,7 @@
 	"mediumSOK": "La forza della conoscenza a supporto della valutazione è media",
 	"highSOK": "La forza della conoscenza a supporto della valutazione è alta",
 	"libraryLoadingError": "Si è verificato un errore durante il caricamento della libreria",
+	"processingError": "Errore di elaborazione",
 	"libraryAlreadyLoadedError": "Questa libreria è già stata caricata",
 	"invalidLibraryFileError": "File della libreria non valido. Assicurati che il formato sia corretto.",
 	"taintedFormMessage": "Vuoi lasciare questa pagina? Le modifiche apportate potrebbero non essere salvate.",
