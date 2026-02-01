@@ -5,13 +5,13 @@
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		duplicate?: boolean;
 		cacheLocks?: Record<string, CacheLock>;

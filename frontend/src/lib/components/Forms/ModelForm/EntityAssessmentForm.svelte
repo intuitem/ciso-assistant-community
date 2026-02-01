@@ -9,10 +9,10 @@
 	import { m } from '$paraglide/messages';
 
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
