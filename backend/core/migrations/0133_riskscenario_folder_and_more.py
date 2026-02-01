@@ -7,7 +7,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0132_complianceassessment_score_calculation_method"),
+        ("core", "0133_organisationissue_expiration_date_and_more"),
         ("iam", "0019_add_view_globalsettings_in_custom_roles"),
     ]
 
