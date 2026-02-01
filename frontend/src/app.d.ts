@@ -15,7 +15,12 @@ declare global {
 			generalSettings: Record<string, any>;
 		}
 		interface PageData {
-			flash?: { type: 'success' | 'error' | 'warning' | 'info'; message: string };
+			flash?: {
+				type: 'success' | 'error' | 'warning' | 'info';
+				message: string;
+				timeout?: number;
+				autohide?: boolean;
+			};
 		}
 		// interface Platform {}
 	}

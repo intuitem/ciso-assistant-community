@@ -913,8 +913,11 @@ export const organisationIssueSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	observation: z.string().optional().nullable(),
 	category: z.string().optional(),
+	status: z.string().optional().default('draft'),
 	origin: z.string().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
 export const quantitativeRiskStudySchema = z.object({
