@@ -1971,7 +1971,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'organisationIssues',
 		verboseName: 'Organisation issue',
 		verboseNamePlural: 'Organisation issues',
-		selectFields: [{ field: 'category' }, { field: 'origin' }],
+		selectFields: [{ field: 'category' }, { field: 'origin' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO' },
 			{ field: 'assets', urlModel: 'assets' }

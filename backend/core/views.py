@@ -7919,7 +7919,7 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
 class OrganisationIssueViewSet(BaseModelViewSet):
     model = OrganisationIssue
 
-    filterset_fields = ["folder", "category", "origin"]
+    filterset_fields = ["folder", "category", "origin", "status"]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -7931,6 +7931,11 @@ class OrganisationIssueViewSet(BaseModelViewSet):
     @action(detail=False, name="Get origin choices")
     def origin(self, request):
         return Response(dict(OrganisationIssue.Origin.choices))
+
+    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(OrganisationIssue.Status.choices))
 
 
 class CampaignViewSet(BaseModelViewSet):

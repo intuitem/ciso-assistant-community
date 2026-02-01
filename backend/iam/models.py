@@ -1192,8 +1192,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     result_delete.add(obj_id)
 
         # Published inheritance: published parents for local-view folders
-        # PERF: collect all ancestor folder_ids first, then do ONE query.
-        if hasattr(object_type, "is_published") and hasattr(object_type, "folder"):
+        # PERF: collect all ancestor folder_ids first, then do ONE query.""
+        if hasattr(object_type, "is_published") and (
+            hasattr(object_type, "folder") or object_type is Folder
+        ):
             ancestor_ids: set[uuid.UUID] = set()
 
             for folder_id, perms in folder_perm_codes.items():
@@ -1210,11 +1212,18 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                     parent_id = state.parent_map.get(parent_id)
 
             if ancestor_ids:
-                result_view.update(
-                    object_type.objects.filter(
-                        folder_id__in=ancestor_ids, is_published=True
-                    ).values_list("id", flat=True)
-                )
+                if object_type is Folder:
+                    result_view.update(
+                        object_type.objects.filter(
+                            id__in=ancestor_ids, is_published=True
+                        ).values_list("id", flat=True)
+                    )
+                else:
+                    result_view.update(
+                        object_type.objects.filter(
+                            folder_id__in=ancestor_ids, is_published=True
+                        ).values_list("id", flat=True)
+                    )
 
         return (list(result_view), list(result_change), list(result_delete))
 

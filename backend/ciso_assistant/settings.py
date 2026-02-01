@@ -116,10 +116,21 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
-MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes")
+
+# SECURITY WARNING: Sensitive operations, such as excel file processing, are to be run
+# in a sandbox in production. This is enabled by default unless in DEBUG mode.
+ENABLE_SANDBOX = not DEBUG or os.environ.get("ENABLE_SANDBOX", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
+logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get(
@@ -234,9 +245,9 @@ LOGOUT_REDIRECT_URL = "/api"
 AUTH_TOKEN_TTL = int(
     os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
 )  # defaults to 60 minutes
-AUTH_TOKEN_AUTO_REFRESH = (
-    os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
-)  # prevents token from expiring while user is active
+AUTH_TOKEN_AUTO_REFRESH = os.environ.get(
+    "AUTH_TOKEN_AUTO_REFRESH", default="True"
+).lower() in ("true", "1", "yes")  # prevents token from expiring while user is active
 AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
     int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
@@ -252,13 +263,17 @@ EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False") == "True"
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False") == "True"
+EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
@@ -523,6 +538,6 @@ HUEY = {
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
 
-WEBHOOK_ALLOW_PRIVATE_IPS = (
-    os.environ.get("WEBHOOK_ALLOW_PRIVATE_IPS", "False") == "True"
-)
+WEBHOOK_ALLOW_PRIVATE_IPS = os.environ.get(
+    "WEBHOOK_ALLOW_PRIVATE_IPS", "False"
+).lower() in ("true", "1", "yes")

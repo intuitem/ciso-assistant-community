@@ -305,10 +305,10 @@ class StoredLibrary(LibraryMixin):
 
     @classmethod
     def store_library_content(
-        cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+        cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
+    ) -> Union["StoredLibrary", dict, None]:
         hash_checksum = sha256(library_content)
-        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
+        if not dry_run and hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
             return None
         try:
@@ -331,12 +331,35 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"].lower()
         if not match_urn(urn):
+            logger.error("Library URN is badly formatted", urn=urn)
             raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
+
+        if dry_run:
+            objects_meta = {
+                key: (1 if key == "framework" else len(value))
+                for key, value in library_data["objects"].items()
+            }
+            return {
+                "name": library_data["name"],
+                "urn": urn,
+                "locale": locale,
+                "version": version,
+                "ref_id": library_data.get("ref_id"),
+                "description": library_data.get("description"),
+                "provider": library_data.get("provider"),
+                "packager": library_data.get("packager"),
+                "publication_date": library_data.get("publication_date"),
+                "objects_meta": objects_meta,
+                "is_loaded": is_loaded,
+                "builtin": builtin,
+                "copyright": library_data.get("copyright"),
+            }
+
         same_version_lib = StoredLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).first()
@@ -3310,7 +3333,12 @@ class Asset(
             real_value = capabilities.get(key)
 
             verdict = None
-            if isinstance(exp_value, int) and isinstance(real_value, int):
+            if (
+                isinstance(exp_value, int)
+                and isinstance(real_value, int)
+                and exp_value > 0
+                and real_value > 0
+            ):
                 verdict = real_value <= exp_value
 
             result.append(
@@ -4589,6 +4617,11 @@ class OrganisationIssue(
         INTERNAL = "internal", "Internal"
         EXTERNAL = "external", "External"
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        ACTIVE = "active", _("Active")
+        INACTIVE = "inactive", _("Inactive")
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -4611,6 +4644,22 @@ class OrganisationIssue(
         Asset,
         blank=True,
         verbose_name="asset",
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    expiration_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiration date"),
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
     )
     fields_to_check = ["name"]
 

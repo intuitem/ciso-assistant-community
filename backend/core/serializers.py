@@ -1799,6 +1799,21 @@ class OrganisationIssueWriteSerializer(BaseModelSerializer):
         model = OrganisationIssue
         fields = "__all__"
 
+    def validate(self, attrs):
+        start_date = attrs.get(
+            "start_date",
+            getattr(getattr(self, "instance", None), "start_date", None),
+        )
+        expiration_date = attrs.get(
+            "expiration_date",
+            getattr(getattr(self, "instance", None), "expiration_date", None),
+        )
+        if start_date and expiration_date and start_date > expiration_date:
+            raise serializers.ValidationError(
+                {"expiration_date": "Expiration date must be on or after start date"}
+            )
+        return super().validate(attrs)
+
     def create(self, validated_data: Any):
         return super().create(validated_data)
 
