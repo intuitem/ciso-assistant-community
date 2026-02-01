@@ -51,6 +51,13 @@ class ExcelUploadHandler:
                 f"Ensure scripts/convert_library_v2.py exists in backend directory."
             )
 
+    @staticmethod
+    def _error(message: str, status: int, detail: str | None = None) -> dict[str, Any]:
+        response = {"error": message, "status": status}
+        if detail:
+            response["detail"] = detail
+        return response
+
     def _get_sheet_names(self, content: bytes) -> list[str]:
         """
         Extract sheet names from the Excel file content without full parsing.
@@ -75,17 +82,14 @@ class ExcelUploadHandler:
         """
         if not uploaded_file.size:
             logger.error("No file uploaded or file is empty")
-            return {"error": "No file uploaded", "status": 400}
+            return self._error("No file uploaded", 400)
         if uploaded_file.size > self.max_file_size:
             logger.error(
                 "Uploaded file exceeds maximum size",
                 uploaded_file_size=uploaded_file.size,
                 max_size=self.max_file_size,
             )
-            return {
-                "error": f"File too large (max {self.max_file_size} bytes)",
-                "status": 413,
-            }
+            return self._error(f"File too large (max {self.max_file_size} bytes)", 413)
 
         mode = compat_mode if compat_mode is not None else self.compat_mode
 
@@ -143,19 +147,16 @@ class ExcelUploadHandler:
 
         except SandboxViolationError as e:
             logger.warning(f"Security violation in Excel upload: {e}", exc_info=True)
-            return {"error": "File failed security validation", "status": 400}
+            return self._error("File failed security validation", 400, detail=str(e))
         except SandboxTimeoutError:
             logger.warning("Excel conversion timed out", exc_info=True)
-            return {
-                "error": "Processing timeout - file may be too complex",
-                "status": 504,
-            }
+            return self._error("Processing timeout - file may be too complex", 504)
         except FileNotFoundError as e:
             logger.error(f"Configuration error: {e}")
-            return {"error": "Server configuration error", "status": 500}
-        except Exception:
+            return self._error("Server configuration error", 500, detail=str(e))
+        except Exception as e:
             logger.exception("Conversion failed")
-            return {"error": "Processing failed", "status": 500}
+            return self._error("Processing failed", 500, detail=str(e))
 
     def _validate_excel(self, data: bytes):
         """Basic validation to prevent zip bombs"""

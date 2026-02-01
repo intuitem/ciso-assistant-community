@@ -58,6 +58,7 @@ export const actions: Actions = {
 	upload: async (event) => {
 		const formData = await event.request.formData();
 		const form = await superValidate(formData, zod(LibraryUploadSchema));
+		const locale = event.locals.user?.preferences?.lang;
 
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
@@ -74,15 +75,38 @@ export const actions: Actions = {
 				const response = await req.json();
 				console.error(response);
 
-				const translate_error = safeTranslate(response.error);
-				const toast_error_message =
-					translate_error ?? m.libraryLoadingError() + '(' + response.error + ')';
+				const translate_error = safeTranslate(response.error, {}, locale ? { locale } : {});
 
-				setFlash({ type: 'error', message: toast_error_message }, event);
+				let toast_error_message: string;
+				if (!translate_error || translate_error === response.error) {
+					toast_error_message =
+						m.libraryLoadingError({}, locale ? { locale } : {}) + '(' + response.error + ')';
+				} else {
+					toast_error_message = translate_error;
+				}
+
+				if (response.detail) {
+					toast_error_message += `: ${response.detail}`;
+				}
+
+				setFlash(
+					{
+						type: 'error',
+						message: toast_error_message,
+						timeout: 15000
+					},
+					event
+				);
 				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
-			setFlash({ type: 'success', message: m.librarySuccessfullyLoaded() }, event);
+			setFlash(
+				{
+					type: 'success',
+					message: m.librarySuccessfullyLoaded({}, locale ? { locale } : {})
+				},
+				event
+			);
 		} else {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });

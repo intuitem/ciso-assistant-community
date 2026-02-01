@@ -556,6 +556,7 @@
 	"mediumSOK": "Die Wissensstärke ist mittel",
 	"highSOK": "Die Wissensstärke ist hoch",
 	"libraryLoadingError": "Beim Laden Ihrer Bibliothek ist ein Fehler aufgetreten",
+	"processingError": "Verarbeitungsfehler",
 	"libraryAlreadyLoadedError": "Diese Bibliothek wurde bereits geladen",
 	"invalidLibraryFileError": "Ungültige Bibliotheksdatei. Stellen Sie sicher, dass das Format korrekt ist.",
 	"taintedFormMessage": "Möchten Sie diese Seite verlassen? Änderungen werden möglicherweise nicht gespeichert.",
