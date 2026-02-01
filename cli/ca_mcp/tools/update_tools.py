@@ -1,6 +1,11 @@
 """Update MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_patch_request, make_delete_request, get_paginated_results
+from ..client import (
+    make_get_request,
+    make_patch_request,
+    make_delete_request,
+    get_paginated_results,
+)
 from ..resolvers import (
     resolve_asset_id,
     resolve_risk_scenario_id,
@@ -239,7 +244,7 @@ async def update_applied_control(
         category: policy | process | technical | physical
         csf_function: identify | protect | detect | respond | recover | govern
         effort: XS | S | M | L | XL
-        cost: is a JSON object composed by follwing keys : 
+        cost: is a JSON object composed by follwing keys :
             currency: € (euros),
             amortization_period (typically 1 year),
             build: One-time implementation costs
@@ -827,7 +832,7 @@ async def update_task_template(
 
         if not payload:
             return "Error: No fields provided to update"
-            
+
         # Resolve task name to ID if needed
         resolved_task_id = resolve_task_template_id(task_id)
 
