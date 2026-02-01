@@ -4,6 +4,7 @@
 
 	import { page } from '$app/state';
 	import FileInput from '$lib/components/Forms/FileInput.svelte';
+	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superValidate } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -49,6 +50,12 @@
 						label={m.addYourLibrary()}
 						resetSignal={fileResetSignal}
 						allowedExtensions={['yaml', 'yml', 'xlsx']}
+					/>
+					<Checkbox
+						{form}
+						field="dry_run"
+						label={m.libraryDryRunLabel()}
+						helpText={m.libraryDryRunHelpText()}
 					/>
 					<button
 						class="btn preset-filled-primary-500 font-semibold w-full"

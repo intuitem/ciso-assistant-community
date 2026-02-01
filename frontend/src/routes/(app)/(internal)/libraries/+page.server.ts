@@ -44,7 +44,9 @@ export const load = (async ({ fetch }) => {
 
 	const schema = z.object({ id: z.string() });
 	const deleteForm = await superValidate(zod(schema));
-	const uploadForm = await superValidate({}, zod(LibraryUploadSchema), { errors: false });
+	const uploadForm = await superValidate({ dry_run: false }, zod(LibraryUploadSchema), {
+		errors: false
+	});
 
 	return {
 		storedLibrariesTable,
@@ -63,7 +65,9 @@ export const actions: Actions = {
 		if (formData.has('file')) {
 			const { file } = Object.fromEntries(formData) as { file: File };
 			// Should i check if attachment.size > 0 ?
-			const endpoint = `${BASE_API_URL}/stored-libraries/upload/`;
+			const dryRun = Boolean(form.data?.dry_run);
+			const baseEndpoint = `${BASE_API_URL}/stored-libraries/upload/`;
+			const endpoint = dryRun ? `${baseEndpoint}?dry_run=true` : baseEndpoint;
 			const req = await event.fetch(endpoint, {
 				method: 'POST',
 				headers: {
@@ -100,13 +104,10 @@ export const actions: Actions = {
 				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
-			setFlash(
-				{
-					type: 'success',
-					message: m.librarySuccessfullyLoaded({}, locale ? { locale } : {})
-				},
-				event
-			);
+			const successMessage = dryRun
+				? m.libraryDryRunSuccess({}, locale ? { locale } : {})
+				: m.librarySuccessfullyLoaded({}, locale ? { locale } : {});
+			setFlash({ type: dryRun ? 'info' : 'success', message: successMessage }, event);
 		} else {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });

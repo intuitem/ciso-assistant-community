@@ -102,7 +102,8 @@ export const RiskMatrixSchema = z.object({
 });
 
 export const LibraryUploadSchema = z.object({
-	file: z.instanceof(File).optional()
+	file: z.instanceof(File).optional(),
+	dry_run: z.coerce.boolean().optional().default(true)
 });
 
 export const RiskAssessmentSchema = z.object({
