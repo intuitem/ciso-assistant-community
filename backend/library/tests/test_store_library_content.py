@@ -156,9 +156,10 @@ class TestStoreLibraryContent:
 
     @pytest.mark.django_db
     def test_store_library_content_dry_run(self):
-        library_data = StoredLibrary.store_library_content(
+        library_data, error = StoredLibrary.store_library_content(
             SAMPLE_YAML_LIB_NO_MAPPINGS, dry_run=True
         )
+        assert error is None
         assert isinstance(library_data, dict)
         assert library_data["urn"] == "urn:intuitem:test:library:nist-csf-1.1"
         assert library_data["version"] == 5

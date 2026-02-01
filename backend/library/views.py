@@ -441,7 +441,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 dry_run = request.query_params.get("dry_run", "false").lower() == "true"
 
                 # Store the library content (YAML bytes)
-                library, error = StoredLibrary.store_library_content(content, dry_run=dry_run)
+                library, error = StoredLibrary.store_library_content(
+                    content, dry_run=dry_run
+                )
                 if error is not None:
                     return HttpResponse(
                         json.dumps({"error": error}),
