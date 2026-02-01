@@ -249,14 +249,22 @@ test('third-party representative can fill their assigned audit', async ({
 			await expect(assessableRequirements).not.toHaveCount(0);
 
 			const waitForRequirementPatch = async (action: () => Promise<void>) => {
-				await Promise.all([
-					page.waitForResponse(
-						(response) =>
-							response.url().includes('updateRequirementAssessment') &&
-							response.request().method() === 'POST'
-					),
-					action()
-				]);
+				const waitForUpdateAction = page.waitForResponse(
+					(response) =>
+						response.url().includes('updateRequirementAssessment') &&
+						response.request().method() === 'POST'
+				);
+				const waitForRequirementsList = page.waitForResponse(
+					(response) =>
+						response.url().includes('/requirements_list/') && response.request().method() === 'GET'
+				);
+				const waitForGlobalScore = page.waitForResponse(
+					(response) =>
+						response.url().includes('/global_score/') && response.request().method() === 'GET'
+				);
+
+				await action();
+				await Promise.all([waitForUpdateAction, waitForRequirementsList, waitForGlobalScore]);
 			};
 
 			await waitForRequirementPatch(async () =>
