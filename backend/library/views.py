@@ -397,8 +397,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                     error=result.get("error"),
                                 )
 
+                            error_payload = {"error": error_code}
+                            detail = result.get("detail") or result.get("error")
+                            if detail:
+                                error_payload["detail"] = detail
+
                             return HttpResponse(
-                                json.dumps({"error": error_code}),
+                                json.dumps(error_payload),
                                 status=result["status"],
                             )
 

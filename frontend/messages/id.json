@@ -556,6 +556,7 @@
 	"mediumSOK": "Kekuatan pengetahuan untuk penilaian sedang",
 	"highSOK": "Kekuatan pengetahuan untuk penilaian tinggi",
 	"libraryLoadingError": "Terjadi kesalahan saat memuat pustaka Anda",
+	"processingError": "Kesalahan pemrosesan",
 	"libraryAlreadyLoadedError": "Pustaka ini sudah dimuat",
 	"invalidLibraryFileError": "File pustaka tidak valid. Pastikan formatnya benar.",
 	"taintedFormMessage": "Apakah Anda ingin meninggalkan halaman ini? Perubahan yang Anda buat mungkin tidak akan disimpan.",

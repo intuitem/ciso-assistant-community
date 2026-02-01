@@ -597,6 +597,7 @@
 	"mediumSOK": "Siła wiedzy wspierającej ocenę jest średnia",
 	"highSOK": "Siła wiedzy wspierającej ocenę jest wysoka",
 	"libraryLoadingError": "Wystąpił błąd podczas ładowania biblioteki",
+	"processingError": "Błąd przetwarzania",
 	"libraryAlreadyLoadedError": "Ta biblioteka już została załadowana",
 	"invalidLibraryFileError": "Nieprawidłowy plik biblioteki. Upewnij się, że format jest poprawny.",
 	"taintedFormMessage": "Czy chcesz opuścić tę stronę? Wprowadzone zmiany mogą nie zostać zapisane.",

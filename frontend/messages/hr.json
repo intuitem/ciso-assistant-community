@@ -608,6 +608,7 @@
 	"mediumSOK": "Pouzdanost informacije kojom je procjena podržana je srednja",
 	"highSOK": "Pouzdanost informacije kojom je procjena podržana je visoka",
 	"libraryLoadingError": "Došlo je do pogreške pri učitavanju vaše knjižnice",
+	"processingError": "Pogreška obrade",
 	"libraryAlreadyLoadedError": "Ova knjižnica je već učitana",
 	"invalidLibraryFileError": "Neispravna datoteka knjižnice. Molimo provjerite da je format točan.",
 	"taintedFormMessage": "Želite li napustiti ovu stranicu? Promjene možda nisu spremljene.",

@@ -556,6 +556,7 @@
 	"mediumSOK": "La fortaleza del conocimiento que respalda la evaluación es media",
 	"highSOK": "La fortaleza del conocimiento que respalda la evaluación es alta",
 	"libraryLoadingError": "Se produjo un error durante la carga de su biblioteca.",
+	"processingError": "Error de procesamiento",
 	"libraryAlreadyLoadedError": "Esta biblioteca ya está cargada.",
 	"invalidLibraryFileError": "Archivo de biblioteca no válido. Asegúrese de que el formato sea correcto.",
 	"taintedFormMessage": "¿Desea abandonar esta página? Es posible que no se guarden los cambios que haya realizado.",
