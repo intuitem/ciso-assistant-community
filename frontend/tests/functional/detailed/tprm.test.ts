@@ -9,7 +9,7 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
-	folder: vars.folderName,
+	// folder is inherited from the entity via initialData, no need to specify it
 	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
