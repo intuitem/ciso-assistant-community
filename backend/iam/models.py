@@ -254,9 +254,6 @@ class Folder(NameDescriptionMixin):
             ["entity", "folder"],
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
-            ["risk_assessment", "perimeter", "folder"],
-            ["risk_scenario", "risk_assessment", "perimeter", "folder"],
-            ["compliance_assessment", "perimeter", "folder"],
             ["processing", "folder"],
         ]
 

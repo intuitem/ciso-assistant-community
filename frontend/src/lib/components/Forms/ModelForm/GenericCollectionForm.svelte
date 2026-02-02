@@ -33,7 +33,7 @@
 		{form}
 		multiple
 		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
@@ -45,7 +45,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}
@@ -93,7 +93,7 @@
 		{form}
 		multiple
 		optionsEndpoint="findings-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="findings_assessments"
 		cacheLock={cacheLocks['findings_assessments']}
@@ -188,7 +188,7 @@
 			{form}
 			multiple
 			optionsEndpoint="compliance-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="compliance_assessments"
 			cacheLock={cacheLocks['compliance_assessments']}
@@ -200,7 +200,7 @@
 			{form}
 			multiple
 			optionsEndpoint="risk-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="risk_assessments"
 			cacheLock={cacheLocks['risk_assessments']}
@@ -248,7 +248,7 @@
 			{form}
 			multiple
 			optionsEndpoint="findings-assessments"
-			optionsExtraFields={[['perimeter', 'str']]}
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="auto"
 			field="findings_assessments"
 			cacheLock={cacheLocks['findings_assessments']}

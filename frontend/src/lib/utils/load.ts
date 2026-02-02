@@ -107,12 +107,6 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					if (
-						e.urlModel === 'perimeters' &&
-						model.urlModel === 'folders' &&
-						data.content_type === 'GLOBAL'
-					)
-						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {
 						head: [...tableFieldsRef.head],
