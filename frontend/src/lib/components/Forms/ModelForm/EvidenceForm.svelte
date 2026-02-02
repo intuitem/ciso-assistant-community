@@ -73,12 +73,17 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
+	optionsInfoFields={{
+		fields: [{ field: 'content_type', translate: true }],
+		position: 'suffix',
+		classes: 'text-xxs bg-gray-200 px-1.5 py-0.5 rounded'
+	}}
 />
 {#if context !== 'edit'}
 	<TextField

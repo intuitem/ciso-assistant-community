@@ -79,6 +79,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	const applyMappingForm = new FormContent(page, 'Create audit from baseline', [
 		{ name: 'name', type: FormFieldType.TEXT },
 		{ name: 'description', type: FormFieldType.TEXT },
+		{ name: 'folder', type: FormFieldType.SELECT_AUTOCOMPLETE },
 		{ name: 'perimeter', type: FormFieldType.SELECT_AUTOCOMPLETE },
 		{ name: 'framework', type: FormFieldType.SELECT_AUTOCOMPLETE }
 	]);
@@ -135,6 +136,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await applyMappingForm.fill({
 			name: 'Mapped-' + vars.assessmentName,
 			description: vars.description,
+			folder: vars.folderName,
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			framework: vars.framework.name
 		});

@@ -1742,8 +1742,26 @@ export const listViewFields = {
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
-		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
+		head: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'dueDate',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
+		body: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'due_date',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
@@ -1799,8 +1817,8 @@ export const listViewFields = {
 		}
 	},
 	'business-impact-analysis': {
-		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status'],
+		head: ['name', 'perimeter', 'folder', 'status'],
+		body: ['name', 'perimeter', 'folder', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2179,8 +2197,8 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter'],
+		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter', 'folder'],
+		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
