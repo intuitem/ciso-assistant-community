@@ -498,7 +498,7 @@
 							{/if}
 							{safeTranslate(key)}
 							{#if isUpdatableFramework}
-								{`(${m.updateAvailable()})`}
+								({m.updateAvailable()})
 							{/if}
 						</div>
 						<ul class="text-sm">
