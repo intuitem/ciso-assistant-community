@@ -5018,7 +5018,12 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+        if self.perimeter:
+            return (
+                f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+            )
+        else:
+            return f"{self.folder}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
