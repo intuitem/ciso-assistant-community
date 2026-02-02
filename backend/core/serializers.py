@@ -1853,6 +1853,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "implementation_groups_definition",
             "ref_id",
             "reference_controls",
+            "has_update",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(

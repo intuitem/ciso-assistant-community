@@ -486,12 +486,19 @@
 					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
 					return true;
 				}) as [key, value]}
+					{@const isUpdatableFramework = (key === "framework" && value.has_update)}
 					<div class="flex flex-col">
 						<div
 							class="text-sm font-medium text-gray-800 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
+							{#if isUpdatableFramework}
+								<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"></i>
+							{/if}
 							{safeTranslate(key)}
+							{#if isUpdatableFramework}
+								{`(${m.updateAvailable()})`}
+							{/if}
 						</div>
 						<ul class="text-sm">
 							<li

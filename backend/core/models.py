@@ -2062,6 +2062,10 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             )
         return reference_controls
 
+    @property
+    def has_update(self) -> bool:
+        return self.library.has_update
+
     def get_requirement_nodes(self):
         # Prefetch related objects if they exist to reduce database queries.
         # Adjust prefetch_related paths according to your model relationships.
