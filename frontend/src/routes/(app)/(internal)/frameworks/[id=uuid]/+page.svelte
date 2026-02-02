@@ -59,7 +59,7 @@
 			<div class="mb-1">
 				{#if data.framework.has_update}
 					<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"></i>
-					<span>({m.updateAvailable()})</span>
+					<span>{m.updateAvailable()}</span>
 				{/if}
 			</div>
 			<div class="flex flex-col space-y-2">
