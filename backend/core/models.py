@@ -2064,6 +2064,8 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def has_update(self) -> bool:
+        if self.library is None:
+            return False
         return self.library.has_update
 
     def get_requirement_nodes(self):
