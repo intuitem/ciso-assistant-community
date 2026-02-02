@@ -110,7 +110,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -184,7 +184,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 enclave = Folder.objects.create(
                     content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.perimeter.name}/{instance.name}",
+                    name=f"{instance.entity.name}/{instance.name}",
                     parent_folder=instance.folder,
                 )
                 audit.folder = enclave

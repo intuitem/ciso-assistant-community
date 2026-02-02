@@ -73,7 +73,7 @@
 
 	let tabStates = $state({});
 
-	const processPerimetersData = (rawData: any) => {
+	const processFoldersData = (rawData: any) => {
 		if (!rawData || typeof rawData !== 'object') {
 			return [];
 		}
@@ -102,13 +102,13 @@
 			<LoadingSpinner />
 		</div>
 	{:then rawData}
-		{@const perimeters = processPerimetersData(rawData)}
-		{#if perimeters.length == 0}
+		{@const folders = processFoldersData(rawData)}
+		{#if folders.length == 0}
 			<span class="text-2xl">{m.xRaysEmptyMessage()}</span>
 		{/if}
-		{#each perimeters as perimeter, index}
-			{@const compliance_assessments = Object.values(perimeter.compliance_assessments.objects)}
-			{@const risk_assessments = Object.values(perimeter.risk_assessments.objects)}
+		{#each folders as folder, index}
+			{@const compliance_assessments = Object.values(folder.compliance_assessments.objects)}
+			{@const risk_assessments = Object.values(folder.risk_assessments.objects)}
 			<div
 				class="border border-gray-200 rounded-lg p-6 bg-gray-50/50 hover:shadow-md transition-shadow"
 			>
@@ -116,55 +116,54 @@
 					<span class="text-3xl">💡</span>
 					<Anchor
 						class="text-2xl font-bold hover:underline text-blue-600 hover:text-blue-700 transition-colors"
-						href="/perimeters/{perimeter.perimeter.id}"
+						href="/folders/{folder.folder.id}"
 					>
-						{perimeter.perimeter.folder.str}/{perimeter.perimeter.name}
+						{folder.folder.name}
 					</Anchor>
 				</div>
 				<Tabs
-					value={tabStates[perimeter.id] || 'compliance_assessments'}
+					value={tabStates[folder.id] || 'compliance_assessments'}
 					onValueChange={(e) => {
-						if (!tabStates[perimeter.id]) {
-							tabStates[perimeter.id] = 'compliance_assessments';
+						if (!tabStates[folder.id]) {
+							tabStates[folder.id] = 'compliance_assessments';
 						}
-						tabStates[perimeter.id] = e.value;
+						tabStates[folder.id] = e.value;
 					}}
 					listJustify="justify-center"
 				>
 					{#snippet list()}
 						<Tabs.Control value="compliance_assessments" labelBase="inert px-2"
 							>{m.complianceAssessments()}
-							{#if perimeter.compliance_assessments.errors.length > 0}
+							{#if folder.compliance_assessments.errors.length > 0}
 								<span class="badge preset-tonal-error"
-									>{perimeter.compliance_assessments.errors.length}</span
+									>{folder.compliance_assessments.errors.length}</span
 								>
 							{/if}
-							{#if perimeter.compliance_assessments.warnings.length > 0}
+							{#if folder.compliance_assessments.warnings.length > 0}
 								<span class="badge preset-tonal-warning"
-									>{perimeter.compliance_assessments.warnings.length}</span
+									>{folder.compliance_assessments.warnings.length}</span
 								>
 							{/if}
-							{#if perimeter.compliance_assessments.info.length > 0}
+							{#if folder.compliance_assessments.info.length > 0}
 								<span class="badge preset-tonal-secondary"
-									>{perimeter.compliance_assessments.info.length}</span
+									>{folder.compliance_assessments.info.length}</span
 								>
 							{/if}
 						</Tabs.Control>
 						<Tabs.Control value="risk_assessments" labelBase="inert px-2"
 							>{m.riskAssessments()}
-							{#if perimeter.risk_assessments.errors.length > 0}
-								<span class="badge preset-tonal-error"
-									>{perimeter.risk_assessments.errors.length}</span
+							{#if folder.risk_assessments.errors.length > 0}
+								<span class="badge preset-tonal-error">{folder.risk_assessments.errors.length}</span
 								>
 							{/if}
-							{#if perimeter.risk_assessments.warnings.length > 0}
+							{#if folder.risk_assessments.warnings.length > 0}
 								<span class="badge preset-tonal-warning"
-									>{perimeter.risk_assessments.warnings.length}</span
+									>{folder.risk_assessments.warnings.length}</span
 								>
 							{/if}
-							{#if perimeter.risk_assessments.info.length > 0}
+							{#if folder.risk_assessments.info.length > 0}
 								<span class="badge preset-tonal-secondary"
-									>{perimeter.risk_assessments.info.length}</span
+									>{folder.risk_assessments.info.length}</span
 								>
 							{/if}
 						</Tabs.Control>
@@ -536,7 +535,7 @@
 					{/snippet}
 				</Tabs>
 			</div>
-			{#if index != perimeters.length - 1}
+			{#if index != folders.length - 1}
 				<hr />
 			{/if}
 		{/each}
