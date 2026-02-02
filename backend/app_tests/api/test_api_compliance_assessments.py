@@ -94,6 +94,7 @@ class TestComplianceAssessmentsUnauthenticated:
             },
         )
 
+
 @pytest.mark.django_db
 class TestComplianceAssessmentsAuthenticated:
     """Perform tests on ComplianceAssessments API endpoint with authentication"""
