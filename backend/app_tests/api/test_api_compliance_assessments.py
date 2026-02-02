@@ -11,7 +11,6 @@ COMPLIANCE_ASSESSMENT_NAME = "Test Compliance Assessment"
 COMPLIANCE_ASSESSMENT_DESCRIPTION = "Test Description"
 COMPLIANCE_ASSESSMENT_VERSION = "1.0"
 
-
 @pytest.mark.django_db
 class TestComplianceAssessmentsUnauthenticated:
     """Perform tests on ComplianceAssessments API endpoint without authentication"""
@@ -227,6 +226,7 @@ class TestComplianceAssessmentsAuthenticated:
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,
                     "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "has_update": False,
                 },
             },
             user_group=test.user_group,
