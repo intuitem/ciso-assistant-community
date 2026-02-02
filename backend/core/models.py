@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal
+from typing import Self, Union, List, Optional, Literal, Tuple
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -306,11 +306,11 @@ class StoredLibrary(LibraryMixin):
     @classmethod
     def store_library_content(
         cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
-    ) -> Union["StoredLibrary", dict, None]:
+    ) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
         hash_checksum = sha256(library_content)
         if not dry_run and hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
-            return None
+            return None, "libraryAlreadyLoadedError"
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -344,21 +344,24 @@ class StoredLibrary(LibraryMixin):
                 key: (1 if key == "framework" else len(value))
                 for key, value in library_data["objects"].items()
             }
-            return {
-                "name": library_data["name"],
-                "urn": urn,
-                "locale": locale,
-                "version": version,
-                "ref_id": library_data.get("ref_id"),
-                "description": library_data.get("description"),
-                "provider": library_data.get("provider"),
-                "packager": library_data.get("packager"),
-                "publication_date": library_data.get("publication_date"),
-                "objects_meta": objects_meta,
-                "is_loaded": is_loaded,
-                "builtin": builtin,
-                "copyright": library_data.get("copyright"),
-            }
+            return (
+                {
+                    "name": library_data["name"],
+                    "urn": urn,
+                    "locale": locale,
+                    "version": version,
+                    "ref_id": library_data.get("ref_id"),
+                    "description": library_data.get("description"),
+                    "provider": library_data.get("provider"),
+                    "packager": library_data.get("packager"),
+                    "publication_date": library_data.get("publication_date"),
+                    "objects_meta": objects_meta,
+                    "is_loaded": is_loaded,
+                    "builtin": builtin,
+                    "copyright": library_data.get("copyright"),
+                },
+                None,
+            )
 
         same_version_lib = StoredLibrary.objects.filter(
             urn=urn, locale=locale, version=version
@@ -368,10 +371,13 @@ class StoredLibrary(LibraryMixin):
             logger.info("update hash", urn=urn)
             same_version_lib.hash_checksum = hash_checksum
             same_version_lib.save()
-            return None
+            return None, "libraryAlreadyLoadedError"
 
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return None  # We do not accept to store outdated libraries
+            return (
+                None,
+                "libraryOutdatedError",
+            )  # We do not accept to store outdated libraries
 
         with transaction.atomic():
             # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
@@ -425,16 +431,16 @@ class StoredLibrary(LibraryMixin):
                 ),  # autoload is true if the library contains requirement mapping sets
             )
             new_library.filtering_labels.set(filtering_labels)
-            return new_library
+            return new_library, None
 
     @classmethod
     def store_library_file(
         cls, fname: Path, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> Tuple[Optional["StoredLibrary"], Optional[str]]:
         with open(fname, "rb") as f:
             library_content = f.read()
 
-        return StoredLibrary.store_library_content(library_content, builtin)
+        return StoredLibrary.store_library_content(library_content, builtin=builtin)
 
     def get_loaded_library(self) -> Optional["LoadedLibrary"]:
         if not self.is_loaded:
