@@ -94,7 +94,6 @@ class TestComplianceAssessmentsUnauthenticated:
             },
         )
 
-
 @pytest.mark.django_db
 class TestComplianceAssessmentsAuthenticated:
     """Perform tests on ComplianceAssessments API endpoint with authentication"""
@@ -133,6 +132,7 @@ class TestComplianceAssessmentsAuthenticated:
                     "min_score": 1,
                     "max_score": 4,
                     "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "has_update": False,
                 },
             },
             user_group=test.user_group,
@@ -173,6 +173,7 @@ class TestComplianceAssessmentsAuthenticated:
                     "min_score": Framework.objects.all()[0].min_score,
                     "max_score": Framework.objects.all()[0].max_score,
                     "ref_id": str(Framework.objects.all()[0].ref_id),
+                    "has_update": False,
                 },
             },
             user_group=test.user_group,
