@@ -128,7 +128,9 @@ for instance, for localhost: `http://localhost:8000/api/accounts/oidc/openid_con
 
 ![Save your configuration](https://static.guidde.com/v0/qg%2FIEuhINveF1g6sYuIJ0IpcFfUJDz2%2Frk5UfQgUTG1bXn6gWdkGLo%2FdecHPQUuEQRJt82tDzpzkA_doc.png?alt=media\&token=38769a0b-9b81-4013-9a86-6319b84b6de7)
 
+{% hint style="success" %}
 You have successfully configured OpenID Connect (OIDC) integration with EntraID.
+{% endhint %}
 {% endtab %}
 {% endtabs %}
 
