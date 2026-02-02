@@ -73,7 +73,7 @@
 	{form}
 	optionsEndpoint="compliance-assessments"
 	optionsLabelField="auto"
-	optionsExtraFields={[['perimeter', 'str']]}
+	optionsExtraFields={[['folder', 'str']]}
 	field="checklist"
 	cacheLock={cacheLocks['checklist']}
 	bind:cachedValue={formDataCache['checklist']}

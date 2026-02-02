@@ -76,7 +76,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO"
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}
@@ -220,7 +220,7 @@
 		multiple
 		{form}
 		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}

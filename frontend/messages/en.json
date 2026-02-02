@@ -3353,5 +3353,6 @@
 	"viewTeam": "View team",
 	"changeTeam": "Change team",
 	"deleteTeam": "Delete team",
-	"appliedControlsPlaceholder": "Select applied controls..."
+	"appliedControlsPlaceholder": "Select applied controls...",
+	"jumpTo": "Jump to"
 }

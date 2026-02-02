@@ -216,6 +216,7 @@ test('ebios rm study', async ({
 			}).toPass({ timeout: 80_000, intervals: [500, 1000, 2000] });
 			await complianceAssessmentsPage.createItem({
 				name: 'security foundation audit',
+				folder: vars.folderName,
 				perimeter: `${vars.folderName}/${vars.perimeterName}`,
 				framework: vars.framework.name,
 				authors: [LoginPage.defaultEmail]
@@ -594,6 +595,7 @@ test('ebios rm study', async ({
 		await page.waitForTimeout(3000);
 		await riskAssessmentsPage.form.fill({
 			name: 'test-risk-assessment-ebios-rm',
+			folder: vars.folderName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`
 		});
 		await page.getByTestId('save-button').click();
