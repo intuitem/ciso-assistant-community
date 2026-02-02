@@ -6092,10 +6092,19 @@ class FolderViewSet(BaseModelViewSet):
             my_map[item.name] = item.id
         return Response(my_map)
 
-    def _get_quality_checks_for_folders(self, folders):
+    def _get_quality_checks_for_folders(self, folders, user):
         """
         Helper method to aggregate quality checks for a queryset of folders.
+        Enforces RBAC for both folders and assessments.
         """
+        # Get viewable assessment IDs for proper RBAC
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=user, object_type=ComplianceAssessment
+        )
+        (viewable_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=user, object_type=RiskAssessment
+        )
+
         res = {
             str(f.id): {
                 "folder": FolderReadSerializer(f).data,
@@ -6104,12 +6113,16 @@ class FolderViewSet(BaseModelViewSet):
             }
             for f in folders
         }
-        for ca in ComplianceAssessment.objects.filter(folder__in=folders):
+        for ca in ComplianceAssessment.objects.filter(
+            folder__in=folders, id__in=viewable_ca_ids
+        ):
             res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
                 "object": ComplianceAssessmentReadSerializer(ca).data,
                 "quality_check": ca.quality_check(),
             }
-        for ra in RiskAssessment.objects.filter(folder__in=folders):
+        for ra in RiskAssessment.objects.filter(
+            folder__in=folders, id__in=viewable_ra_ids
+        ):
             res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
                 "object": RiskAssessmentReadSerializer(ra).data,
                 "quality_check": ra.quality_check(),
@@ -6127,7 +6140,9 @@ class FolderViewSet(BaseModelViewSet):
         folders = Folder.objects.filter(id__in=viewable_objects).exclude(
             content_type=Folder.ContentType.ROOT
         )
-        return Response({"results": self._get_quality_checks_for_folders(folders)})
+        return Response(
+            {"results": self._get_quality_checks_for_folders(folders, request.user)}
+        )
 
     @action(detail=True, methods=["get"], url_path="quality_check")
     def quality_check_detail(self, request, pk):
@@ -6142,7 +6157,7 @@ class FolderViewSet(BaseModelViewSet):
 
         folder = self.get_object()
         result = self._get_quality_checks_for_folders(
-            Folder.objects.filter(pk=folder.pk)
+            Folder.objects.filter(pk=folder.pk), request.user
         )
         return Response(result.get(str(folder.id), {}))
 

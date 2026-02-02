@@ -4897,9 +4897,7 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if self.perimeter and (
-            not self.folder or self.folder == Folder.get_root_folder()
-        ):
+        if self.perimeter and (not self.folder):
             self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
@@ -5744,11 +5742,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
         return result
 
     def save(self, *args, **kwargs):
-        # Set folder from parent risk assessment if not provided
-        if self.risk_assessment and (
-            not self.folder or self.folder == Folder.get_root_folder()
-        ):
-            self.folder = self.risk_assessment.folder
+        self.folder = self.risk_assessment.folder
 
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
