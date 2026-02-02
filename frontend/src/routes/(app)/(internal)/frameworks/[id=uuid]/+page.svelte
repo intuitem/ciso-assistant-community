@@ -44,6 +44,13 @@
 		}
 		return count;
 	}
+
+	const blacklistedKeys: Set<string> = new Set([
+		'id',
+		'created_at',
+		'reference_controls',
+		'has_update'
+	]);
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -56,7 +63,7 @@
 				{/if}
 			</div>
 			<div class="flex flex-col space-y-2">
-				{#each Object.entries(data.framework).filter(([key, _]) => key !== 'id' && key !== 'created_at' && key !== 'reference_controls') as [key, value]}
+				{#each Object.entries(data.framework).filter(([key, _]) => !blacklistedKeys.has(key)) as [key, value]}
 					<div class="flex flex-col">
 						<div class="text-sm font-medium text-gray-800 capitalize-first">
 							{#if key === 'urn'}
