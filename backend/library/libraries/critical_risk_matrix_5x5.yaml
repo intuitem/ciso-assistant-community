@@ -3,7 +3,7 @@ locale: en
 ref_id: critical_5x5
 name: Critical risk matrix 5x5
 description: Critical risk matrix 5x5
-version: 2
+version: 3
 publication_date: 2024-03-02
 provider: intuitem
 packager: intuitem
@@ -11,6 +11,9 @@ translations:
   fr:
     name: Matrice de risque critique 5x5
     description: Matrice de risque critique 5x5
+  de:
+    name: Kritische Risikomatrix 5x5
+    description: Kritische Risikomatrix 5x5
 objects:
   risk_matrix:
     - urn: urn:intuitem:risk:matrix:critical_risk_matrix_5x5
@@ -21,6 +24,9 @@ objects:
         fr:
           name: Matrice de risque critique 5x5
           description: Matrice de risque critique 5x5
+        de:
+          name: Kritische Risikomatrix 5x5
+          description: Kritische Risikomatrix 5x5
       probability:
         - abbreviation: VL
           name: Very Low
@@ -30,6 +36,9 @@ objects:
             fr:
               name: Très faible
               description: Événement très peu fréquent
+            de:
+              name: Sehr gering
+              description: Sehr seltenes Ereignis
         - abbreviation: L
           name: Low
           description: Unfrequent event
@@ -38,6 +47,9 @@ objects:
             fr:
               name: Faible
               description: Événement peu fréquent
+            de:
+              name: Gering
+              description: Seltenes Ereignis
         - abbreviation: M
           name: Medium
           description: Occasional event
@@ -46,6 +58,9 @@ objects:
             fr:
               name: Moyen
               description: Événement occasionnel
+            de:
+              name: Mittel
+              description: Gelegentliches Ereignis
         - abbreviation: H
           name: High
           description: Frequent event
@@ -54,6 +69,9 @@ objects:
             fr:
               name: Élevé
               description: Événement fréquent
+            de:
+              name: Hoch
+              description: Häufiges Ereignis
         - abbreviation: VH
           name: Very High
           description: Very frequent event
@@ -62,6 +80,9 @@ objects:
             fr:
               name: Très élevé
               description: Événement très fréquent
+            de:
+              name: Sehr hoch
+              description: Sehr häufiges Ereignis
       impact:
         - abbreviation: VL
           name: Very Low
@@ -71,6 +92,9 @@ objects:
             fr:
               name: Très faible
               description: Impact très faible
+            de:
+              name: Sehr gering
+              description: Sehr geringe Auswirkung
         - abbreviation: L
           name: Low
           description: Low impact
@@ -79,6 +103,9 @@ objects:
             fr:
               name: Faible
               description: Impact faible
+            de:
+              name: Gering
+              description: Geringe Auswirkung
         - abbreviation: M
           name: Medium
           description: Medium impact
@@ -87,6 +114,9 @@ objects:
             fr:
               name: Moyen
               description: Impact moyen
+            de:
+              name: Mittel
+              description: Mittlere Auswirkung
         - abbreviation: H
           name: High
           description: High impact
@@ -95,6 +125,9 @@ objects:
             fr:
               name: Élevé
               description: Impact élevé
+            de:
+              name: Hoch
+              description: Hohe Auswirkung
         - abbreviation: VH
           name: Very High
           description: Very high impact
@@ -103,6 +136,9 @@ objects:
             fr:
               name: Très élevé
               description: Impact très élevé
+            de:
+              name: Sehr hoch
+              description: Sehr hohe Auswirkung
       risk:
         - abbreviation: VL
           name: Very Low
@@ -112,6 +148,9 @@ objects:
             fr:
               name: Très faible
               description: Risque négligeable
+            de:
+              name: Sehr gering
+              description: Vernachlässigbares Risiko
         - abbreviation: L
           name: Low
           description: acceptable risk
@@ -120,6 +159,9 @@ objects:
             fr:
               name: Faible
               description: Risque acceptable
+            de:
+              name: Gering
+              description: Akzeptables Risiko
         - abbreviation: M
           name: Medium
           description: risk requiring mitigation within 2 years
@@ -128,6 +170,9 @@ objects:
             fr:
               name: Moyen
               description: Risque nécessitant une atténuation dans les 2 ans
+            de:
+              name: Mittel
+              description: Risiko mit Behandlungsbedarf innerhalb von 2 Jahren
         - abbreviation: H
           name: High
           description: risk requiring mitigation within 6 months
@@ -136,6 +181,9 @@ objects:
             fr:
               name: Élevé
               description: Risque nécessitant une atténuation dans les 6 mois
+            de:
+              name: Hoch
+              description: Risiko mit Behandlungsbedarf innerhalb von 6 Monaten
         - abbreviation: VH
           name: Very High
           description: unacceptable risk
@@ -144,6 +192,9 @@ objects:
             fr:
               name: Très élevé
               description: Risque inacceptable
+            de:
+              name: Sehr hoch
+              description: Inakzeptables Risiko
       grid:
         - - 0
           - 0

@@ -4,7 +4,7 @@ ref_id: risk-matrix-3x3-mult
 name: Matrice 3x3 multiplicative
 description: Matrice de risque simple 3x3 multiplicative
 copyright: domaine public
-version: 2
+version: 3
 publication_date: 2024-05-04
 provider: intuitem
 packager: intuitem
@@ -13,12 +13,23 @@ translations:
     name: 3x3 multiplicative matrix
     description: simple 3x3 multiplicative matrix
     copyright: public domain
+  de:
+    name: 3x3-multiplikative Risikomatrix
+    description: Einfache 3x3-multiplikative Risikomatrix
+    copyright: Gemeinfrei
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:3x3-mult
     ref_id: risk-matrix-3x3-mult
     name: Matrice 3x3 multiplicative
     description: Matrice de risque simple 3x3 multiplicative
+    translations:
+      en:
+        name: 3x3 multiplicative matrix
+        description: simple 3x3 multiplicative matrix
+      de:
+        name: 3x3-multiplikative Risikomatrix
+        description: Einfache 3x3-multiplikative Risikomatrix
     probability:
     - id: 0
       abbreviation: 1
@@ -28,6 +39,9 @@ objects:
         en:
           name: '[1] unlikely'
           description: 0-33%
+        de:
+          name: '[1] unwahrscheinlich'
+          description: 0–33 %
       hexcolor: '#92D050'
     - id: 1
       abbreviation: 2
@@ -37,15 +51,21 @@ objects:
         en:
           name: '[2] rather likely'
           description: 34-66%
+        de:
+          name: '[2] mäßig wahrscheinlich'
+          description: 34–66 %
       hexcolor: '#FFFF00'
     - id: 2
       abbreviation: 3
-      name: "[3] tr\xE8s probable"
+      name: "[3] très probable"
       description: '>66%'
       translations:
         en:
           name: '[3] very likely'
           description: '>66%'
+        de:
+          name: '[3] sehr wahrscheinlich'
+          description: '>66 %'
       hexcolor: '#FF0000'
     impact:
     - id: 0
@@ -56,15 +76,21 @@ objects:
         en:
           name: '[1] minor'
           description: minor impact
+        de:
+          name: '[1] geringfügig'
+          description: Geringfügige Auswirkung
       hexcolor: '#92D050'
     - id: 1
       abbreviation: 2
-      name: "[2] mod\xE9r\xE9"
-      description: "impact mod\xE9r\xE9"
+      name: "[2] modéré"
+      description: "impact modéré"
       translations:
         en:
           name: '[2] moderate'
           description: moderate impact
+        de:
+          name: '[2] moderat'
+          description: Moderate Auswirkung
       hexcolor: '#FFFF00'
     - id: 2
       abbreviation: 3
@@ -74,61 +100,82 @@ objects:
         en:
           name: '[3] major'
           description: major impact
+        de:
+          name: '[3] erheblich'
+          description: Erhebliche Auswirkung
       hexcolor: '#FF0000'
     risk:
     - id: 0
       abbreviation: 1
       name: '[1] faible'
-      description: "n\xE9gligeable"
+      description: "négligeable"
       translations:
         en:
           name: '[1] low'
           description: negligible
+        de:
+          name: '[1] gering'
+          description: Vernachlässigbares Risiko
       hexcolor: '#92D050'
     - id: 1
       abbreviation: 2
       name: '[2] moyen'
-      description: "tol\xE9rable"
+      description: "tolérable"
       translations:
         en:
           name: '[2] medium'
           description: tolerable
+        de:
+          name: '[2] mittel'
+          description: Tolerierbares Risiko
       hexcolor: '#D3FF4E'
     - id: 2
       abbreviation: 3
       name: '[3] moyen'
-      description: "tol\xE9rable"
+      description: "tolérable"
       translations:
         en:
           name: '[3] medium'
           description: tolerable
+        de:
+          name: '[3] mittel'
+          description: Tolerierbares Risiko
       hexcolor: '#EAFF03'
     - id: 3
       abbreviation: 4
       name: '[4] moyen'
-      description: "tol\xE9rable"
+      description: "tolérable"
       translations:
         en:
           name: '[4] medium'
           description: tolerable
+        de:
+          name: '[4] mittel'
+          description: Tolerierbares Risiko
       hexcolor: '#FFFF00'
     - id: 4
       abbreviation: 6
       name: '[6] fort'
-      description: "rem\xE9diation sous 6 mois"
+      description: "remédiation sous 6 mois"
       translations:
         en:
           name: '[6] high'
           description: remediation within 6 months
+        de:
+          name: '[6] hoch'
+          description: Risikobehandlung innerhalb von 6 Monaten
       hexcolor: '#FFC000'
     - id: 5
       abbreviation: 9
       name: '[9] critique'
-      description: "Rem\xE9diation sous 2 mois"
+      description: "Remédiation sous 2 mois"
       translations:
         en:
           name: '[9] critical'
           description: Remediation within 2 months
+        de:
+          name: '[9] kritisch'
+          description: Risikobehandlung innerhalb von 2 Monaten
       hexcolor: '#FF0000'
     grid:
     - - 0
@@ -144,3 +191,6 @@ objects:
       en:
         name: 3x3 multiplicative matrix
         description: simple 3x3 multiplicative matrix
+      de:
+        name: 3x3-multiplikative Risikomatrix
+        description: Einfache 3x3-multiplikative Risikomatrix

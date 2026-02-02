@@ -4,89 +4,153 @@ ref_id: risk-matrix-5x5-sensitive
 name: 5x5 sensitive
 description: 5x5 matrix for highly sensitive
 copyright: domaine public
-version: 1
+version: 2
 publication_date: 2024-05-04
 provider: intuitem
 packager: intuitem
+translations:
+  de:
+    name: 5x5 – hochsensible Risikomatrix
+    description: 5x5-Matrix für hochsensible Risiken
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:5x5-sensitive
     ref_id: risk-matrix-5x5-sensitive
     name: 5x5 sensitive
     description: 5x5 matrix for highly sensitive
+    translations:
+      de:
+        name: 5x5 – hochsensible Risikomatrix
+        description: 5x5-Matrix für hochsensible Risiken
     probability:
     - id: 0
       abbreviation: AC
       name: rare
       description: rare
       hexcolor: '#BBF7D0'
+      translations:
+        de:
+          name: Selten
+          description: Selten
     - id: 1
       abbreviation: LI
       name: unlikely
       description: unlikely
       hexcolor: '#BEF264'
+      translations:
+        de:
+          name: Unwahrscheinlich
+          description: Unwahrscheinlich
     - id: 2
       abbreviation: MO
       name: moderate
       description: moderate
       hexcolor: '#FEF08A'
+      translations:
+        de:
+          name: Moderat
+          description: Moderat
     - id: 3
       abbreviation: UN
       name: likely
       description: likely
       hexcolor: '#FBBF24'
+      translations:
+        de:
+          name: Wahrscheinlich
+          description: Wahrscheinlich
     - id: 4
       abbreviation: RA
       name: almost certain
       description: almost certain
       hexcolor: '#F87171'
+      translations:
+        de:
+          name: Nahezu sicher
+          description: Nahezu sicher
     impact:
     - id: 0
       abbreviation: IN
       name: insignificant
       description: insignificant
       hexcolor: '#BBF7D0'
+      translations:
+        de:
+          name: Unbedeutend
+          description: Unbedeutend
     - id: 1
       abbreviation: MI
       name: minor
       description: minor
       hexcolor: '#BEF264'
+      translations:
+        de:
+          name: Geringfügig
+          description: Geringfügig
     - id: 2
       abbreviation: SI
       name: significant
       description: significant
       hexcolor: '#FEF08A'
+      translations:
+        de:
+          name: Bedeutend
+          description: Bedeutend
     - id: 3
       abbreviation: MA
       name: major
       description: major
       hexcolor: '#FBBF24'
+      translations:
+        de:
+          name: Schwerwiegend
+          description: Schwerwiegend
     - id: 4
       abbreviation: SE
       name: severe
       description: severe
       hexcolor: '#F87171'
+      translations:
+        de:
+          name: Schwer
+          description: Schwer
     risk:
     - id: 0
       abbreviation: LO
       name: low
       description: low
       hexcolor: '#02A45A'
+      translations:
+        de:
+          name: Niedrig
+          description: Niedrig
     - id: 1
       abbreviation: ME
       name: medium
       description: medium
       hexcolor: '#FFCE02'
+      translations:
+        de:
+          name: Mittel
+          description: Mittel
     - id: 2
       abbreviation: HI
       name: high
       description: high
       hexcolor: '#FFA600'
+      translations:
+        de:
+          name: Hoch
+          description: Hoch
     - id: 3
       abbreviation: CR
       name: critical
       description: critical
       hexcolor: '#FF1A00'
+      translations:
+        de:
+          name: Kritisch
+          description: Kritisch
     grid:
     - - 0
       - 0
