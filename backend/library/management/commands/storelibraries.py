@@ -31,12 +31,18 @@ class Command(BaseCommand):
         for fname in library_files:
             # logger.info("Begin library file storage", filename=fname)
             try:
-                library = StoredLibrary.store_library_file(fname, True)
+                library, error = StoredLibrary.store_library_file(fname, True)
                 if library:
                     logger.info(
                         "Successfully stored library",
                         filename=fname,
                         library=library,
+                    )
+                elif error:
+                    logger.warning(
+                        "Library skipped",
+                        filename=fname,
+                        reason=error,
                     )
             except Exception:
                 logger.error("Invalid library file", filename=fname)
