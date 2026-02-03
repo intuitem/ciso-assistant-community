@@ -2000,6 +2000,8 @@
 	"linkedCollection": "colección",
 	"linkedModels": "Objetos asociados",
 	"loadDemoData": "Cargar datos de demostración",
+	"importingDemoData": "Importando datos de demostración...",
+	"demoEnvironmentBeingPrepared": "Su entorno de demostración está siendo preparado. Esto puede tomar algunos segundos.",
 	"loadMissingLibraries": "Cargar bibliotecas faltantes",
 	"loadMissingLibrariesHelpText": "Cargar las bibliotecas faltantes para completar la importación si están disponibles.",
 	"loadedLibrary": "Biblioteca Cargada",
