@@ -465,10 +465,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     logger.info("Attempting to load newly uploaded library")
                     try:
                         load_error = library.load()
-                    except Exception as load_exc:
-                        logger.exception(
-                            "Exception while loading newly uploaded library, removing stored entry",
+                    except ValueError as load_exc:
+                        logger.error(
+                            "Validation error while loading newly uploaded library, removing stored entry",
                             urn=library.urn,
+                            error=str(load_exc),
                         )
                         library.delete()
                         return HttpResponse(
@@ -476,6 +477,21 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                 {
                                     "error": "libraryLoadFailed",
                                     "detail": str(load_exc),
+                                }
+                            ),
+                            status=HTTP_422_UNPROCESSABLE_ENTITY,
+                        )
+                    except Exception as load_exc:
+                        logger.exception(
+                            "Unexpected exception while loading newly uploaded library, removing stored entry",
+                            urn=library.urn,
+                        )
+                        library.delete()
+                        return HttpResponse(
+                            json.dumps(
+                                {
+                                    "error": "libraryLoadFailed",
+                                    "detail": "An unexpected error occurred while loading the library.",
                                 }
                             ),
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
