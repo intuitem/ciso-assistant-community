@@ -21,7 +21,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	let formElement: HTMLFormElement = $state();
+	let formElement: HTMLFormElement | null = $state(null);
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 	let searchQuery = $state('');
@@ -82,7 +82,7 @@
 			title: 'Caution',
 			body: 'The following will create multiple objects in batch mode and possibly on different domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
 			response: (r: boolean) => {
-				if (r) formElement.requestSubmit();
+				if (r) formElement?.requestSubmit();
 			}
 		};
 
@@ -507,7 +507,9 @@
 					<div class="alert alert-success preset-filled-success-500">
 						<div>{form.message || 'File uploaded successfully'}</div>
 					</div>
-					<div class="text-xs font-mono p-2">{JSON.stringify(form?.results, null, 2)}</div>
+					<p class="wrap-break-word break-all whitespace-pre-wrap font-mono p-2">
+						{JSON.stringify(form?.results, null, 2)}
+					</p>
 				{:else}
 					<div class="alert alert-error preset-filled-error-500">
 						<p>

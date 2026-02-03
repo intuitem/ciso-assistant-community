@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal
+from typing import Self, Union, List, Optional, Literal, Tuple
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -305,12 +305,12 @@ class StoredLibrary(LibraryMixin):
 
     @classmethod
     def store_library_content(
-        cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+        cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
+    ) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
         hash_checksum = sha256(library_content)
-        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
+        if not dry_run and hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
-            return None
+            return None, "libraryAlreadyLoadedError"
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -331,12 +331,38 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"].lower()
         if not match_urn(urn):
+            logger.error("Library URN is badly formatted", urn=urn)
             raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
+
+        if dry_run:
+            objects_meta = {
+                key: (1 if key == "framework" else len(value))
+                for key, value in library_data["objects"].items()
+            }
+            return (
+                {
+                    "name": library_data["name"],
+                    "urn": urn,
+                    "locale": locale,
+                    "version": version,
+                    "ref_id": library_data.get("ref_id"),
+                    "description": library_data.get("description"),
+                    "provider": library_data.get("provider"),
+                    "packager": library_data.get("packager"),
+                    "publication_date": library_data.get("publication_date"),
+                    "objects_meta": objects_meta,
+                    "is_loaded": is_loaded,
+                    "builtin": builtin,
+                    "copyright": library_data.get("copyright"),
+                },
+                None,
+            )
+
         same_version_lib = StoredLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).first()
@@ -345,10 +371,13 @@ class StoredLibrary(LibraryMixin):
             logger.info("update hash", urn=urn)
             same_version_lib.hash_checksum = hash_checksum
             same_version_lib.save()
-            return None
+            return None, "libraryAlreadyLoadedError"
 
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return None  # We do not accept to store outdated libraries
+            return (
+                None,
+                "libraryOutdatedError",
+            )  # We do not accept to store outdated libraries
 
         with transaction.atomic():
             # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
@@ -402,16 +431,16 @@ class StoredLibrary(LibraryMixin):
                 ),  # autoload is true if the library contains requirement mapping sets
             )
             new_library.filtering_labels.set(filtering_labels)
-            return new_library
+            return new_library, None
 
     @classmethod
     def store_library_file(
         cls, fname: Path, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> Tuple[Optional["StoredLibrary"], Optional[str]]:
         with open(fname, "rb") as f:
             library_content = f.read()
 
-        return StoredLibrary.store_library_content(library_content, builtin)
+        return StoredLibrary.store_library_content(library_content, builtin=builtin)
 
     def get_loaded_library(self) -> Optional["LoadedLibrary"]:
         if not self.is_loaded:
@@ -3310,7 +3339,12 @@ class Asset(
             real_value = capabilities.get(key)
 
             verdict = None
-            if isinstance(exp_value, int) and isinstance(real_value, int):
+            if (
+                isinstance(exp_value, int)
+                and isinstance(real_value, int)
+                and exp_value > 0
+                and real_value > 0
+            ):
                 verdict = real_value <= exp_value
 
             result.append(
@@ -4589,6 +4623,11 @@ class OrganisationIssue(
         INTERNAL = "internal", "Internal"
         EXTERNAL = "external", "External"
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        ACTIVE = "active", _("Active")
+        INACTIVE = "inactive", _("Inactive")
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -4611,6 +4650,22 @@ class OrganisationIssue(
         Asset,
         blank=True,
         verbose_name="asset",
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    expiration_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiration date"),
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
     )
     fields_to_check = ["name"]
 
@@ -4802,9 +4857,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     perimeter = models.ForeignKey(
         Perimeter,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Perimeter"),
         null=True,
+        blank=True,
     )
     version = models.CharField(
         max_length=100,
@@ -4847,7 +4903,9 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if not self.folder or self.folder == Folder.get_root_folder():
+        if self.perimeter and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
             self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
@@ -4968,7 +5026,12 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+        if self.perimeter:
+            return (
+                f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+            )
+        else:
+            return f"{self.folder}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
@@ -5310,7 +5373,7 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
+class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -5680,7 +5743,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return extra_controls
 
     def __str__(self):
-        return str(self.parent_perimeter()) + _(": ") + str(self.name)
+        return f"{self.folder}/{self.risk_assessment}/{self.name}"
 
     def delete(self, *args, **kwargs):
         risk_assessment_id = self.risk_assessment.id
@@ -5692,6 +5755,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return result
 
     def save(self, *args, **kwargs):
+        self.folder = self.risk_assessment.folder
+
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
                 self.inherent_proba,

@@ -1,4 +1,3 @@
-pandas
 rich
 requests
 click

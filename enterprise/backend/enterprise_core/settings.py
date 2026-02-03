@@ -118,7 +118,18 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes")
 
+# SECURITY WARNING: Sensitive operations, such as excel file processing, are to be run
+# in a sandbox in production. This is enabled by default unless in DEBUG mode.
+ENABLE_SANDBOX = not DEBUG or os.environ.get("ENABLE_SANDBOX", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
+
 logger.info("DEBUG mode: %s", DEBUG)
+logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
