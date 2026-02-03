@@ -1,0 +1,2167 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:india-rbi-itgrcap-2023
+locale: en
+ref_id: india-rbi-itgrcap-2023
+name: RBI Master Direction 2023
+description: The RBI Master Direction on Information Technology Governance, Risk,
+  Controls and Assurance Practices, effective April 1, 2024, mandates a comprehensive,
+  unified framework for banks, NBFCs, and financial institutions to strengthen IT
+  governance, security, and risk management. It requires robust board oversight, independent
+  IT audits, and enhanced cybersecurity, covering seven key domains from infrastructure
+  management to business continuity.
+copyright: Ministry of Finance, Government of India
+version: 1
+publication_date: null
+provider: Ministry of Finance, Government of India
+packager: raghibawan
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:india-rbi-itgrcap-2023
+    ref_id: india-rbi-itgrcap-2023
+    name: RBI Master Direction 2023
+    description: RBI Master Direction on Information Technology Governance, Risk,
+      Controls and Assurance Practices, 2023
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      assessable: false
+      depth: 1
+      name: Chapter II - IT Governance
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      ref_id: '4'
+      name: IT Governance Framework
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4
+      ref_id: 4(a)
+      description: The key focus areas of IT Governance shall include strategic alignment,
+        risk management, resource management, performance management and Business
+        Continuity/ Disaster Recovery Management.
+      annotation: RBI's rules state that IT Governance is about ensuring tech supports
+        business goals (strategic alignment), minimizing IT threats (risk management),
+        efficiently using IT assets (resource management), tracking IT's effectiveness
+        (performance management), and having backup plans for emergencies (Business
+        Continuity/ Disaster Recovery Management), ensuring stability for customers
+        and the institution.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4
+      ref_id: 4(b)
+      description: REs shall put in place a robust IT Governance Framework based on
+        the aforementioned focus areas that inter alia;
+      annotation: Regulated Entities (REs) must build a strong set of rules and practices
+        (an IT Governance Framework) for managing technology. This framework ensures
+        IT supports business goals, manages technology risks (like cyberattacks),
+        and efficiently uses resources. For example, setting up a committee of senior
+        leaders to review security policies is part of this framework.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)
+      ref_id: 4(b) i
+      description: "Specifies the governance structure and processes necessary to\
+        \ meet the RE\u2019s business/ strategic objectives."
+      annotation: This means the RE must set up a clear leadership structure and rules
+        (like who makes decisions about technology and security) to ensure its IT
+        supports its main business goals, such as securely launching a new mobile
+        app or protecting customer data. The actionable step is establishing committees
+        and policies that define responsibilities for IT control and strategy, making
+        sure technology decisions help the bank succeed and stay compliant.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)
+      ref_id: 4(b) ii
+      description: Specifies the roles (including authority) and responsibilities
+        of the Board of Directors (Board) / Board level Committee and Senior Management.
+      annotation: "This means the RE's top leaders\u2014the Board and Senior Management\u2014\
+        must clearly define who is in charge of managing IT, cyber risks, and compliance.\
+        \ For example, the Board approves major IT strategies and security policies,\
+        \ while Senior Management executes those plans and ensures daily operations\
+        \ are secure. This accountability ensures IT decisions align with the RE's\
+        \ overall goals and safety."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(b)
+      ref_id: 4(b) iii
+      description: Includes adequate oversight mechanisms to ensure accountability
+        and mitigation of IT and cyber/ information security risks.
+      annotation: This means the highest level of management, like the Board of Directors,
+        must actively supervise technology and security risks. They need to set up
+        clear rules and committees to watch over IT operations and cyber defenses,
+        making sure people are held accountable and risks, like data breaches or system
+        failures, are actively minimized.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4
+      ref_id: 4(c)
+      description: "Enterprise-wide risk management policy or operational risk management\
+        \ \npolicy shall also incorporate periodic assessment of IT-related risks\
+        \ (both inherent and potential risk)."
+      annotation: RBI guidelines mandate that REs regularly check their IT setup for
+        weaknesses and potential problems (like a hacking threat or a system failure).
+        This means regularly assessing all IT risks, both those built into the system
+        (inherent) and those that might pop up (potential), to ensure technology risks
+        are managed just like any other business risk.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      ref_id: '5'
+      name: Role of the Board of Directors
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5
+      ref_id: 5(a)
+      description: The strategies and policies related to IT, Information Assets,
+        Business Continuity, Information Security, Cyber Security (including Incident
+        Response and Recovery Management/ Cyber Crisis Management) shall be approved
+        by the Board of Directors.
+      annotation: This means the top leadership (the Board) must officially approve
+        all major plans and rules for technology, data protection, keeping operations
+        running during a crisis (like a system failure), and handling cyberattacks.
+        For example, they must sign off on the plan for securing customer data or
+        the steps to recover systems after a cyber incident. This ensures accountability
+        and senior oversight for managing critical risks.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5
+      ref_id: 5(b)
+      description: Strategies and policies shall be reviewed at least annually by
+        the Board.
+      annotation: 'The RE''s governing Board must check and approve all IT, security,
+        and operational plans every year to make sure they are current and effective.
+        For example, the plan for recovering systems after a major cyber incident
+        must be reviewed annually. Actionable: Schedule mandatory annual Board meetings
+        to formally review and re-approve all IT-related strategies and policies.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      ref_id: '6'
+      name: IT Strategy Committee of the Board
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
+      ref_id: 6(a)
+      description: REs shall establish a Board-level IT Strategy Committee (ITSC).
+      annotation: Regulated Entities (REs), like REs, must form a special group of
+        top executives and directors called the IT Strategy Committee (ITSC). This
+        committee, overseen by the Board, is responsible for setting the technology
+        direction and ensuring IT investments support the business goals and manage
+        risks, much like a general plans a campaign before deploying resources.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
+      ref_id: 6(b)
+      description: While constituting the ITSC, REs shall ensure;
+      annotation: REs (like REs) must form a Board-level IT Strategy Committee (ITSC)
+        to oversee all technology matters, meeting at least quarterly. This ensures
+        that the use of technology aligns with the business goals, manages IT risks,
+        and maintains regulatory compliance. For example, the ITSC makes sure new
+        digital services are secure and compliant with RBI rules.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)
+      ref_id: 6(b) i
+      description: Minimum of three directors as members.
+      annotation: The RBI mandates that IT oversight bodies, such as the Board-level
+        IT Strategy Committee, must have at least three directors to ensure diverse
+        perspectives and effective governance over technology and cybersecurity. This
+        means that important decisions about the RE's digital safety and strategy
+        require approval from a group of at least three high-level leaders, preventing
+        any single person from dominating critical IT risk decisions.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)
+      ref_id: 6(b) ii
+      description: The Chairperson of the ITSC shall be an independent director and
+        have substantial IT expertise in managing/ guiding information technology
+        initiatives.
+      annotation: The head of the IT Strategy Committee (ITSC) must be an independent
+        board member with deep knowledge in IT management, like a CEO or CTO from
+        another tech company. This ensures that IT decisions, such as approving major
+        system upgrades or cybersecurity policies, are guided by expert, unbiased
+        advice for better technology strategy and risk oversight.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(b)
+      ref_id: 6(b) iii
+      description: Members are technically competent.
+      annotation: It means that all individuals involved in overseeing or managing
+        the regulated entity's technology (like Board members, IT steering committee,
+        or IT staff) must have the proper technical skills and knowledge to understand,
+        govern, and protect the organization's systems and data. For example, a committee
+        member needs to understand what cybersecurity risks are to approve adequate
+        controls.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
+      ref_id: 6(c)
+      description: The ITSC shall meet at least on a quarterly basis.
+      annotation: This RBI rule mandates that the IT Strategy Committee (ITSC), which
+        provides high-level IT oversight for the board, must formally convene at least
+        once every three months. This ensures continuous review of the institution's
+        technology strategy, IT risks, and security posture. For example, they must
+        regularly check if cybersecurity defenses are adequate or if new digital projects
+        align with business goals. Regular meetings prevent major issues from being
+        overlooked.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
+      ref_id: 6(d)
+      description: The ITSC shall;
+      annotation: 'The ITSC (IT Steering Committee) acts as the senior management
+        group responsible for overseeing IT strategy and ensuring technology supports
+        business goals, as mandated by RBI. Actionable: ITSC must meet regularly to
+        monitor IT performance, approve major IT projects like a new customer portal,
+        and manage technology risks, ensuring IT investments are smart and secure.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) i
+      description: Ensure that the RE has put an effective IT strategic planning process
+        in place.
+      annotation: This rule ensures REs plan their technology use wisely for the long
+        term (3-5 years). This IT strategy must align with the overall business goals,
+        helping the institution use tech effectively and manage risks, similar to
+        creating a roadmap for all major future technology projects and investments.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) ii
+      description: Guide in preparation of IT Strategy and ensure that the IT Strategy
+        aligns with the overall strategy of the RE towards accomplishment of its business
+        objectives.
+      annotation: This mandate requires the organization's technology plan (IT Strategy)
+        to directly support and help achieve the company's main business goals (overall
+        strategy). For example, if the business goal is rapid digital customer service
+        expansion, the IT strategy must focus on securing necessary cloud infrastructure
+        and developing user-friendly apps. The actionable step is creating a formal
+        IT plan that clearly shows how every major technology project contributes
+        to a specific business objective.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) iii
+      description: Satisfy itself that the IT Governance and Information Security
+        Governance structure fosters accountability, is effective and efficient, has
+        adequate skilled resources, well defined objectives and unambiguous responsibilities
+        for each level in the organisation.
+      annotation: This means the RE's technology leadership must ensure their IT and
+        security structure clearly assigns responsibility, has the right people, and
+        operates efficiently with clear goals. For example, knowing exactly who is
+        in charge of fixing a network outage or approving a new security policy.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) iv
+      description: Ensure that the RE has put in place processes for assessing and
+        managing IT and cybersecurity risks.
+      annotation: Regulated Entities (REs) must have formal procedures to find, measure,
+        and handle technology and cyber threats, like creating a plan to stop unauthorized
+        access (hacking) or ensuring data backup works after a system failure. This
+        ensures the RE is protected and resilient against digital risks.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) v
+      description: "Ensure that the budgetary allocations for the IT function (including\
+        \ for IT security), cyber security are commensurate with the RE\u2019s IT\
+        \ maturity, digital depth, threat environment and industry standards and are\
+        \ utilised in a manner intended for meeting the stated objectives."
+      annotation: Simply put, the RE must spend enough money on IT and cybersecurity
+        to match how much they use technology (digital depth), how good their existing
+        IT is (IT maturity), the level of cyber risk they face (threat environment),
+        and what is standard for the industry. This money must be spent specifically
+        to achieve their defined IT and security goals, ensuring, for example, that
+        the budget for new anti-virus software is sufficient for their size and risk
+        profile.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(d)
+      ref_id: 6(d) vi
+      description: Review, at least on annual basis, the adequacy and effectiveness
+        of the Business Continuity Planning and Disaster Recovery Management11 of
+        the RE.
+      annotation: "Regulated Entities (REs) must check their emergency plans\u2014\
+        Business Continuity Planning (BCP) and Disaster Recovery (DR)\u2014at least\
+        \ yearly. This ensures the plans remain adequate and effective so the RE can\
+        \ quickly recover vital operations, like online REing, after major disruptions\
+        \ such as a server failure or data center outage. The actionable step is the\
+        \ mandatory annual review and testing of BCP/DR management."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      ref_id: '7'
+      name: Senior Management and IT Steering Committee
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
+      ref_id: 7(a)
+      description: The Senior Management of the RE shall, inter alia, ensure;
+      annotation: Senior Management in regulated entities (REs) must actively lead
+        and oversee the entire IT framework, ensuring it aligns with business goals
+        and is secure. This means they are responsible for approving key IT policies,
+        managing IT risks, allocating necessary resources (like budget and staff)
+        for technology and security, and making sure all IT-related mandates (e.g.,
+        conducting regular risk assessments or implementing a Business Continuity
+        Plan) are carried out effectively.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      ref_id: 7(a) i
+      description: Execution of the IT Strategy approved by the Board.
+      annotation: Executing the Board-approved IT Strategy means making the high-level
+        technology plan a reality. For example, if the Board approves a strategy to
+        enhance cybersecurity, the RE must implement new security systems or conduct
+        frequent vulnerability tests. This ensures that the technology goals set by
+        the highest level of management are actually put into practice to support
+        the business securely and effectively.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      ref_id: 7(a) ii
+      description: IT/ IS and their support infrastructure are functioning effectively
+        and efficiently.
+      annotation: This means the RE's technology, like their apps and networks, must
+        work reliably and fast for customers and staff. For example, online REing
+        shouldn't crash, and ATMs must process transactions quickly. To ensure this,
+        the RBI requires regular checks like audits, vulnerability assessments, and
+        having backup systems (BCP/DR) in place.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      ref_id: 7(a) iii
+      description: Necessary IT risk management processes are in place and create
+        a culture of IT risk awareness and cyber hygiene practices in the RE.
+      annotation: Regulated Entities (RE) must set up formal processes to manage IT
+        risks (like regular checks for weaknesses) and actively promote a culture
+        where all employees are aware of IT risks and follow basic cyber safety rules.
+        This means everyone knows simple actions like using strong passwords and being
+        careful with suspicious emails to protect the organization's systems.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      ref_id: 7(a) iv
+      description: Cyber security posture of the RE is robust.
+      annotation: Robust cyber security means the Regulated Entity (RE) has strong
+        defenses against digital threats, like having well-maintained security systems,
+        regular monitoring, and quick response plans. It is crucial to have Board-approved
+        policies, continuous security monitoring, and effective controls for areas
+        like access management and vendor risks. For example, regularly patching systems
+        prevents known vulnerabilities from being exploited.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
+      ref_id: 7(a) v
+      description: Overall, IT contributes to productivity, effectiveness and efficiency
+        in business operations.
+      annotation: The RBI Master Direction ensures that REs and NBFCs leverage IT
+        for productivity and efficiency by mandating a formal IT Governance Framework.
+        This means having things like a Board-level IT Strategy Committee and regular
+        risk assessments (like checking for system weaknesses or having a backup plan
+        if systems fail) to manage the risks that come with using technology, ensuring
+        IT benefits the business safely.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
+      ref_id: 7(b)
+      description: REs shall establish an IT Steering Committee with representation
+        at Senior Management level from IT and business functions.
+      annotation: To ensure technology aligns with business goals, regulated entities
+        must form an IT Steering Committee. This committee is made up of senior leaders
+        from both the IT department and core business units (like finance or operations).
+        Their job is to oversee major IT projects, manage risks, and make sure IT
+        spending supports the overall business strategy. For example, if the RE wants
+        to launch a new mobile app, this committee decides on the priority, budget,
+        and resources.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
+      ref_id: 7(c)
+      description: The responsibilities of IT Steering Committee, inter alia, shall
+        be to;
+      annotation: The IT Steering Committee (ITSC) is a senior management body that
+        ensures technology plans support the RE's business strategy. Its key role,
+        as per RBI, is providing high-level direction, overseeing IT risk management
+        (like checking for security flaws and recovery plans), resource allocation,
+        and ensuring IT projects deliver value, ultimately keeping the RE's systems
+        secure and aligned with its mission.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)
+      ref_id: 7(c) i
+      description: Assist the ITSC in strategic IT planning, oversight of IT performance,
+        and aligning IT activities with business needs.
+      annotation: The RBI requires regulated entities to have an IT Strategy Committee
+        (ITSC) that helps the Board oversee all major technology decisions. This involves
+        ensuring IT plans support business goals (like using a new mobile app for
+        faster service), monitoring how well IT is working (checking for system outages
+        or slow performance), and making sure IT projects align with what the business
+        actually needs.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)
+      ref_id: 7(c) ii
+      description: Oversee the processes put in place for business continuity and
+        disaster recovery.
+      annotation: "This means continuously checking that the plans for Business Continuity\
+        \ (BCP) and Disaster Recovery (DR) are working correctly. Think of it as regularly\
+        \ testing fire drills and backup systems. The goal is to ensure that if a\
+        \ major event occurs\u2014like a power outage or a cyberattack\u2014critical\
+        \ REing services can quickly get back up and running with minimal downtime\
+        \ and data loss."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)
+      ref_id: 7(c) iii
+      description: Ensure implementation of a robust IT architecture meeting statutory
+        and regulatory compliance.
+      annotation: This means financial institutions must build a strong, reliable
+        IT system that follows all laws and rules, such as setting up an IT Governance
+        Framework and performing regular security checks (like risk assessments and
+        IS audits) to protect customer data and maintain stable operations.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(c)
+      ref_id: 7(c) iv
+      description: Update ITSC and CEO periodically on the activities of IT Steering
+        Committee.
+      annotation: The IT Steering Committee (ITSC) must regularly inform the CEO and
+        the ITSC members about what they are working on, such as reviewing IT projects,
+        managing risks, and ensuring IT strategy supports business goals. This keeps
+        top leadership updated on IT health and compliance with directions like the
+        RBI Master Direction.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
+      ref_id: 7(d)
+      description: The IT Steering Committee shall meet at least on a quarterly basis.
+      annotation: The committee that guides the RE's technology strategy must meet
+        at least every three months. This regular meeting ensures that technology
+        decisions stay aligned with the business goals, manages IT risks like cybersecurity
+        threats, and reviews progress on major IT projects. For example, they check
+        if a new core REing system implementation is on track.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      ref_id: '8'
+      name: Head of IT Function
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8
+      ref_id: 8(a)
+      description: REs shall appoint a sufficiently senior level, technically competent
+        and experienced official in IT related aspects as Head of IT Function.
+      annotation: Regulated Entities (REs) must appoint a skilled, experienced, and
+        senior-level official to lead the IT department. This ensures that the person
+        responsible for managing all technology, like securing customer data and keeping
+        systems running smoothly, has the necessary expertise and authority to protect
+        the organization from tech risks.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8
+      ref_id: 8(b)
+      description: The Head of IT Function shall, inter alia, be responsible for the
+        following;
+      annotation: 'The Head of IT ensures all technology aligns with business goals
+        and RBI rules, acting as the primary driver for IT strategy, security policies,
+        and managing IT risks, like making sure online REing systems are secure and
+        always available. Actionable: Establish clear procedures for managing technology
+        vendors and ensuring system disaster recovery plans are tested regularly.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)
+      ref_id: 8(b) i
+      description: "Ensuring that the execution of IT projects/ initiatives is aligned\
+        \ with the RE\u2019s IT Policy and IT Strategy."
+      annotation: This means all new technology work, like launching a new app or
+        upgrading systems, must stick strictly to the organization's existing IT rules
+        and long-term tech strategy. For example, if the strategy is to use only secure
+        cloud providers, a new project cannot choose a non-approved provider. This
+        ensures IT investments support business goals safely and efficiently, minimizing
+        risks and ensuring regulatory compliance.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)
+      ref_id: 8(b) ii
+      description: Ensuring that there is an effective organisational structure to
+        support IT functions in the RE.
+      annotation: Financial firms must set up a clear structure for IT, including
+        dedicated committees and senior staff, to manage all technology tasks and
+        risks effectively. This ensures IT systems are reliable, secure, and support
+        the company's goals. For example, appointing a Head of IT function and forming
+        an IT Steering Committee helps ensure proper oversight and accountability.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(b)
+      ref_id: 8(b) iii
+      description: Putting in place an effective disaster recovery setup and business
+        continuity strategy/ plan.
+      annotation: The RBI mandates that financial entities must have plans (BCP/DR)
+        to quickly recover critical IT systems and operations after major disruptions
+        like a power outage or cyberattack. This ensures the continuous availability
+        of customer services, like ATM transactions or online REing, by having backup
+        systems and procedures ready to take over.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8
+      ref_id: 8(c)
+      description: "As a first line of defence, the Head of IT Function shall ensure\
+        \ effective assessment, evaluation and management of IT controls and IT risk,\
+        \ including the implementation of robust internal controls, to (i) secure\
+        \ the RE\u2019s information assets (ii) comply with extant internal policies,\
+        \ regulatory and legal requirements on IT related aspects."
+      annotation: The Head of IT acts as the primary protector (first line of defense),
+        making sure IT systems are regularly checked for risks and security weaknesses.
+        They must implement strong internal security measures (like secure passwords
+        or access controls) to protect the financial institution's data and technology,
+        ensuring full compliance with both internal rules and external RBI regulations.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      assessable: false
+      depth: 1
+      name: Chapter III - IT Infrastructure & Services Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '9'
+      name: IT Services Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      ref_id: 9(a)
+      description: REs shall put in place a robust IT Service Management Framework
+        for supporting their information systems and infrastructure to ensure the
+        operational resilience of their entire IT environment (including DR sites).
+      annotation: 'This direction mandates that regulated entities must establish
+        a strong IT Service Management (ITSM) system, like a help desk and processes
+        for managing changes, to keep all their technology and systems, including
+        backup sites, reliable and continuously operating. This is crucial for business
+        continuity. Actionable: Implement an ITSM solution and processes (e.g., based
+        on ITIL) covering incident, change, and capacity management for all IT infrastructure.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      ref_id: 9(b)
+      description: A Service Level Management (SLM) process shall be put in place
+        to manage the IT operations while ensuring effective segregation of duties.
+      annotation: This means the RE must set formal agreements (SLAs) for IT service
+        quality, like fixing issues quickly, and track performance. Crucially, different
+        people must handle different parts of the process, for example, the person
+        who sets the service level should not be the same person who signs off on
+        the performance report. This separation prevents conflicts of interest and
+        unauthorized changes, ensuring reliable and secure IT operations.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      ref_id: 9(c)
+      description: "REs shall ensure identification and mapping of the security classification\
+        \ (in terms of Confidentiality, Integrity, and Availability) of information\
+        \ assets based on their criticality to the REs\u2019 operations."
+      annotation: Regulated Entities (REs) must classify all their information (like
+        customer data or transaction records) by determining its sensitivity based
+        on Confidentiality (who can see it), Integrity (is it accurate), and Availability
+        (is it accessible). This classification must align with how important the
+        information is to the RE's daily operations. For example, highly critical
+        customer data requires the highest levels across all three criteria.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      ref_id: 9(d)
+      description: "For seamless continuity of business operations, REs shall avoid\
+        \ using outdated and unsupported hardware or software and shall monitor software\u2019\
+        s end-of-support (EOS) date and Annual Maintenance Contract (AMC) dates of\
+        \ IT hardware on an ongoing basis."
+      annotation: 'This RBI rule requires financial entities to stop using old tech,
+        like outdated operating systems or servers whose support has expired (EOS),
+        to keep operations smooth and secure. Actionable: continuously track the retirement
+        dates of all software and hardware (EOS/AMC) and plan for upgrades or replacements
+        before they become unsupported, like updating Windows 7 to Windows 11.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
+      ref_id: 9(e)
+      description: REs shall develop a technology refresh plan for the replacement
+        of hardware and software in a timely manner before they reach EOS.
+      annotation: Regulated Entities (REs), like REs, must plan ahead to replace all
+        IT equipment (servers, computers, software) before its support ends (EOS).
+        This is like trading in an old phone when the manufacturer stops providing
+        security updates, ensuring systems remain secure and functional. The action
+        is creating and executing a technology refresh plan.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '10'
+      name: Third-Party Arrangements
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10
+      ref_id: 10(a)
+      description: 'Where third-party arrangements in the Information Technology/
+        Cyber Security ecosystem are not within the applicability of the Reserve Bank
+        of India (Outsourcing of Information Technology Services) Directions, 2023,
+        REs shall, put in place appropriate vendor risk assessment process and controls
+        proportionate to the assessed risk and materiality to, inter alia:'
+      annotation: When REs or financial companies use external vendors for IT/cyber
+        security services that are not specifically covered by the main RBI outsourcing
+        rules, they must still check how risky that vendor is and put in place appropriate
+        safety measures. For example, if a RE uses a small, external tool for internal
+        security reporting, they still need to assess the vendor's security practices,
+        even if they aren't fully outsourcing their main IT operations. This ensures
+        that essential IT services remain secure.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) i
+      description: Mitigate concentration risk.
+      annotation: Concentration risk in IT means over-relying on a single vendor,
+        technology, or service, making the entity vulnerable if that provider fails
+        (e.g., using one cloud provider for everything). The actionable is to spread
+        reliance across different vendors or technologies to reduce the impact of
+        any single failure, ensuring business continuity and avoiding single points
+        of failure.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) ii
+      description: Eliminate or address any conflict of interests.
+      annotation: This means people involved in IT decisions, like choosing a vendor,
+        must ensure their personal interests dont improperly influence those decisions.
+        For instance, the IT Head should not pick a security company owned by their
+        family member unless any conflict is officially reported and managed.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) iii
+      description: Mitigate risks associated with single point of failure.
+      annotation: To comply with RBI guidelines, institutions must eliminate dependence
+        on any single component, person, or system (a "single point of failure").
+        This means ensuring critical systems have backups (like having two servers
+        instead of one) and essential staff roles have cross-training so operations
+        can continue seamlessly even if one element fails or becomes unavailable.
+        The actionable step is implementing redundancy, load balancing, and comprehensive
+        business continuity and disaster recovery plans.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) iv
+      description: Comply with applicable legal, regulatory requirements and standards
+        to protect customer data.
+      annotation: Financial institutions must follow all rules and laws, like the
+        RBI's IT directions, to keep customer data safe. This means having strong
+        security controls, performing regular checks (audits), and assessing risks
+        to prevent data leaks, similar to REs using secure systems and firewalls to
+        protect your account details.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) v
+      description: Provide high availability (for uninterrupted customer service).
+      annotation: This means RE systems must be robust enough to avoid outages, ensuring
+        services like mobile REing, ATM withdrawals, and online transactions are always
+        available, even during unexpected events. The RBI mandates strong Business
+        Continuity and Disaster Recovery plans to keep customer service uninterrupted.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
+      ref_id: 10(a) vi
+      description: Manage supply chain risks effectively.
+      annotation: This means financial entities must carefully manage the risks that
+        come from relying on external vendors for IT services, like cloud providers
+        or software suppliers. For example, ensuring these vendors have strong security
+        so customer data is safe. The actionable step is to enforce policies for vendor
+        selection, contract management, and regular security audits of all third-party
+        partners.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '11'
+      name: Capacity Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11
+      ref_id: 11(a)
+      description: REs shall ensure that information systems and infrastructure are
+        able to support business functions and ensure availability of all service
+        delivery channels.
+      annotation: 'This rule means financial institutions must guarantee their tech
+        (like websites and apps) works reliably so customers can always use services,
+        such as accessing accounts or making payments, even during issues. Actionable:
+        Regularly test systems for uptime and have backup plans ready.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11(a)-ii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11
+      ref_id: 11(a) ii
+      description: On an annual or more frequent basis, REs shall proactively assess
+        capacity requirement of IT resources. REs shall ensure that IT capacity planning
+        across components, services, system resources, supporting infrastructure is
+        consistent with past trends (peak usage), the current business requirements
+        and projected future needs as per the IT strategy of the RE.
+      annotation: 'Regulated Entities (REs) must regularly check their IT infrastructure
+        (like servers and network) usage at least yearly to ensure they have enough
+        power to handle normal operations, busy periods (peak usage), and future growth.
+        Actionable: Review system usage data and project future needs based on business
+        plans, ensuring your IT can support expected demand, like adding more server
+        capacity before a major customer launch.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11(a)-iii
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11
+      ref_id: 11(a) iii
+      description: The assessment of IT capacity requirements and measures taken to
+        address the issues shall be reviewed by the ITSC.
+      annotation: The ITSC (IT Strategy Committee) must regularly check if IT systems
+        can handle current and future needs (capacity assessment), like handling a
+        holiday surge in online transactions. They must also review the steps taken
+        to fix any shortages found, ensuring technology keeps up with business demands
+        and growth efficiently.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '12'
+      name: Project Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(a)
+      description: REs shall follow a consistent and formally defined project management
+        approach for IT projects undertaken by them. The project management approach
+        shall, inter alia, enable appropriate stakeholder participation for effective
+        monitoring and management of project risks and progress.
+      annotation: Regulated entities must use a standardized and documented process
+        for all IT projects, like using a checklist and regular check-ins (e.g., weekly
+        status meetings) to ensure everything is on track. This approach ensures all
+        relevant parties (stakeholders) are involved to monitor risks and progress
+        effectively.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(b)
+      description: While adopting new or emerging technologies, tools, or revamping
+        their existing ones in the technology stack, REs shall follow a standard enterprise
+        architecture planning methodology or framework.
+      annotation: When REs upgrade technology (like adopting cloud services or a new
+        core REing system), they must follow a predefined blueprint or framework,
+        known as enterprise architecture planning. This ensures the new tools integrate
+        smoothly and securely with existing systems, preventing chaos and ensuring
+        compliance, rather than just randomly plugging in new technology.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(c)
+      description: Adoption of new or emerging technologies shall be commensurate
+        with the risk appetite and align with overall Business/ IT strategy of the
+        RE. It should facilitate optimal creation, use, or sharing of information
+        by a business in a secure and resilient way.
+      annotation: When REs or financial institutions adopt new technology, like AI
+        or cloud services, they must ensure the technology's risk level matches how
+        much risk the institution is willing to take (risk appetite) and supports
+        the company's overall business and technology goals. The technology must help
+        handle information securely and reliably. For example, moving customer data
+        to a new cloud service must be managed to prevent data breaches and outages.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(d)
+      description: REs shall maintain enterprise data dictionary to enable the sharing
+        of data among applications and information systems and promote a common understanding
+        of data.
+      annotation: Regulated Entities (REs) must keep a central 'data dictionary,'
+        like a master glossary for all their data. This ensures every system and employee
+        uses the same definitions for terms (e.g., "customer ID" means the same thing
+        everywhere), making data sharing seamless and reducing errors across applications.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(e)
+      description: REs shall ensure that maintenance and necessary support of software
+        applications is provided by the software vendors and the same is enforced
+        through formal agreement.
+      annotation: REs and financial institutions (REs) must have a signed contract
+        with their software providers to guarantee continuous maintenance and technical
+        help for all applications. This ensures that if the software breaks or needs
+        updates (like security patches), the vendor is legally obligated to fix it
+        promptly, preventing disruptions in operations.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(f)
+      description: REs shall obtain the source codes for all critical applications
+        from their vendors. Where obtaining of the source code is not possible, REs
+        shall put in place a source code escrow arrangement or other arrangements
+        to adequately mitigate the risk of default by the vendor. REs shall ensure
+        that all product updates and programme fixes are included in the source code
+        escrow arrangement.
+      annotation: REs and financial institutions must get the source code for essential
+        software from their vendors. If not possible, they must use a source code
+        escrow, which is like a safe deposit box for the code, held by a neutral third
+        party. This ensures that if the vendor fails or goes out of business, the
+        institution can still access the code to fix the system or maintain services,
+        thereby preventing disruptions.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(g)
+      description: REs shall obtain a certificate or a written confirmation from the
+        application developer or vendor stating that the application is free of known
+        vulnerabilities, malware, and any covert channels in the code. Such a certificate
+        or a written confirmation shall also be obtained whenever material changes
+        to the code, including upgrades, occur.
+      annotation: As a regulated financial entity, you must get an official document
+        from the software provider every time you install or update an application.
+        This document confirms the software is safe and free from known flaws, harmful
+        code (malware), and secret data leaks (covert channels). For example, if your
+        RE updates its mobile app, the developer must certify that the new version
+        is secure. This is essential for protecting customer data and systems.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
+      ref_id: 12(h)
+      description: Any new IT application proposed to be introduced as a business
+        product13 shall be subjected to product approval and quality assurance process.
+      annotation: When a RE or financial institution introduces a new tech tool for
+        customers or internal use, like a new mobile app feature or lending platform,
+        it must first be officially approved and thoroughly tested for quality, security,
+        and compliance. This ensures the new system works reliably, protects customer
+        data, and meets all regulatory standards before it goes live.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '13'
+      name: Change and Patch Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13
+      ref_id: 13(a)
+      description: 'REs shall put in place documented policy(ies) and procedures for
+        change and patch management to ensure the following:'
+      annotation: Regulated Entities (REs) must have formal steps (policies/procedures)
+        for managing all system updates or changes (like new software or security
+        fixes). This ensures every change is safely tested, approved, and applied
+        after checking if it might negatively impact business operations (e.g., assessing
+        if a security patch will disrupt the online REing system).
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
+      ref_id: 13(a) i
+      description: The business impact of implementing patches/ changes (or not implementing
+        a particular patch/ change request) are assessed.
+      annotation: Financial institutions must check how updating (patching) or changing
+        their IT systems will affect their operations, customers, and risks. This
+        means understanding if a change will fix a problem safely, or if delaying
+        a critical security patch could lead to a major business disruption or data
+        breach.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
+      ref_id: 13(a) ii
+      description: The patches/ changes are applied/ implemented and reviewed in a
+        secure and timely manner with necessary approvals;
+      annotation: This means all software updates or system changes (like security
+        patches or feature improvements) must be installed quickly, securely, and
+        only after authorized sign-offs. For example, fixing a system vulnerability
+        should happen fast and be properly documented and approved before deployment
+        to keep the RE safe and compliant.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
+      ref_id: 13(a) iii
+      description: Any changes to an application system or data are justified by genuine
+        business needs and approvals supported by documentation and subjected to a
+        robust change management process; and
+      annotation: All system or data changes must be truly necessary, officially approved,
+        documented, and follow a strict change management process. This prevents mistakes
+        and unauthorized alterations; for example, a new feature in a mobile REing
+        app needs proper business justification, approval from management, records
+        of testing, and scheduled rollout.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
+      ref_id: 13(a) iv
+      description: Mechanism is established to recover from failed changes/ patch
+        deployment or unexpected results.
+      annotation: Every financial institution must have a quick way to reverse or
+        fix IT updates, patches, or system changes if they fail or cause unexpected
+        problems, ensuring critical systems stay operational. This is like a "rollback"
+        plan; if a software update breaks the system, they can instantly revert to
+        the working version, preventing service disruption.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:14
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '14'
+      name: Data Migration Controls
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:14(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:14
+      ref_id: 14(a)
+      description: REs shall have a documented data migration policy specifying a
+        systematic process for data migration, ensuring data integrity, completeness
+        and consistency. The policy shall, inter alia, contain provisions pertaining
+        to signoffs from business users and application owners at each stage of migration,
+        maintenance of audit trails, etc.
+      annotation: As per the RBI IT Master Direction, when financial institutions
+        (REs) move data between systems, they must follow a documented plan (data
+        migration policy) to guarantee the data remains accurate, complete, and consistent.
+        This policy requires key personnel, like business users, to formally approve
+        (signoff) each step, and maintain records (audit trails) of the entire process
+        to ensure accountability and data trust.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '15'
+      name: Audit Trails
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15
+      ref_id: 15(a)
+      description: Every IT application which can access or affect critical or sensitive
+        information, shall have necessary audit and system logging capability and
+        should provide audit trails.
+      annotation: Any system handling critical data (like RE accounts or customer
+        info) must keep a complete, timestamped record of who did what and when. This
+        'audit trail' helps detect fraud or errors, similar to a security camera for
+        your IT systems, ensuring accountability and compliance.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15
+      ref_id: 15(b)
+      description: "The audit trails shall satisfy a RE\u2019s business requirements\
+        \ apart from regulatory and legal requirements. The audit trails must be detailed\
+        \ enough to facilitate the conduct of audit, serve as forensic evidence when\
+        \ required and assist in dispute resolution, including for non-repudiation\
+        \ purposes."
+      annotation: 'As an expert, this means REs must keep detailed electronic logs
+        (audit trails) that track all system and user activity. These logs must meet
+        internal business needs and legal mandates like the RBI directions, serving
+        as reliable evidence for audits, investigations, and settling disputes (e.g.,
+        proving who did what and when for non-repudiation). Actionable: Ensure all
+        critical systems have tamper-proof, time-stamped logs of key events like fund
+        transfers and access changes.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15
+      ref_id: 15(c)
+      description: REs shall put in place a system for regularly monitoring the audit
+        trails and system logs to detect any unauthorised activity.
+      annotation: "Financial institutions must set up a system to regularly check\
+        \ all recorded activity (audit trails and system logs)\u2014like reviewing\
+        \ security camera footage\u2014to quickly spot and address any suspicious\
+        \ access, data changes, or other unauthorized actions by users or hackers."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:16
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '16'
+      name: Cryptographic controls
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:16(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:16
+      ref_id: 16(a)
+      description: The key length, algorithms, cipher suites and applicable protocols
+        used in transmission channels, processing of data and authentication purpose
+        shall be strong. REs shall adopt internationally accepted and published standards
+        that are not deprecated/ demonstrated to be insecure/ vulnerable and the configurations
+        involved in implementing such controls shall be compliant with extant laws
+        and regulatory instructions.
+      annotation: 'This rule means REs and financial institutions must use the strongest,
+        most current security methods (like robust encryption keys and up-to-date
+        protocols) to protect all digital communications, data storage, and login
+        processes. For example, they must use modern encryption standards like TLS
+        1.2 or 1.3, not older, vulnerable ones like SSL/TLS 1.0. Actionable: Update
+        all cryptographic controls and configurations annually to ensure they meet
+        the latest international security benchmarks and are compliant with RBI guidelines.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '17'
+      name: Straight Through Processing
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17
+      ref_id: 17(a)
+      description: In order to prevent unauthorised modification of data, REs shall
+        ensure that there is no manual intervention or manual modification in data
+        while it is being transferred from one process to another or from one application
+        to another, in respect of critical applications.
+      annotation: 'Regulated Entities (REs) must use automated systems for critical
+        data transfer (like moving customer balance data from one system to another)
+        to ensure it is not manually changed, preventing errors or fraud and safeguarding
+        data integrity. Actionable: Implement secure, automated data transfer mechanisms,
+        minimizing human access points for data modification during movement.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17
+      ref_id: 17(b)
+      description: "Data transfer mechanism between processes or applications must\
+        \ be properly tested, securely automated with necessary checks and balances,\
+        \ and properly integrated through \u201CStraight Through Processing\u201D\
+        \ methodology with appropriate authentication mechanism and audit trails."
+      annotation: The rule mandates that moving data between systems (like a payment
+        from initiation to final credit) must be fully automated using "Straight Through
+        Processing" (STP) to eliminate manual steps. This ensures faster, accurate
+        transfers, prevents unauthorized changes, and requires logging every action
+        (audit trails) with proper user verification (authentication). This prevents
+        payment errors and fraud.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '18'
+      name: Physical and Environmental Controls
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18
+      ref_id: 18(a)
+      description: REs shall implement suitable physical and environmental controls
+        in Data Centre and Disaster Recovery sites used by them.
+      annotation: Regulated Entities must secure their data centers (where systems
+        and data live) and backup sites by controlling physical access (like using
+        key cards and security guards) and managing the environment (like ensuring
+        proper cooling and fire protection). This is crucial to prevent unauthorized
+        access, equipment damage, and service interruptions.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18
+      ref_id: 18(b)
+      description: The DC and DR sites should be geographically well separated so
+        that both the sites are not affected by a similar threat associated to their
+        location.
+      annotation: 'Data Center (DC) and Disaster Recovery (DR) sites must be far apart
+        to prevent a single event, like a flood or regional power outage, from impacting
+        both locations simultaneously. For example, if the DC is in Mumbai, the DR
+        site should not be in a neighboring suburb but perhaps in Chennai. Actionable:
+        Ensure DC and DR locations are in different seismic zones or have separate
+        critical infrastructure providers.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18
+      ref_id: 18(c)
+      description: REs shall ensure that their DC and DR sites are subjected to necessary
+        e-surveillance mechanism.
+      annotation: REs and financial institutions (REs) must install electronic monitoring
+        systems, like CCTV and other smart surveillance, at their main data storage
+        sites (DC) and backup locations (DR) to continuously watch for any physical
+        security breaches or suspicious activities. This ensures the protection of
+        critical customer and system data 24/7.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '19'
+      name: Access Controls
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19
+      ref_id: 19(a)
+      description: Access to information assets shall be allowed only where a valid
+        business need exists. REs shall have documented standards and procedures,
+        which are approved by the ITSC and kept up to date for administering need-based
+        access to an information system.
+      annotation: Only employees who absolutely need specific IT access (like a teller
+        needing access to customer accounts, but not payroll) should get it. Regulated
+        entities must create and maintain written rules and steps, approved by the
+        IT Strategy Committee (ITSC), to manage and grant this 'need-based' access
+        effectively.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19
+      ref_id: 19(b)
+      description: Personnel with elevated system access entitlements shall be closely
+        supervised with all their systems activities logged and periodically reviewed.
+      annotation: People who can access sensitive RE systems (like system administrators)
+        must be watched closely. All their actions are recorded (logged) and checked
+        regularly to prevent misuse, like making sure they only perform authorized
+        tasks or don't access customer data without a valid reason.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19
+      ref_id: 19(c)
+      description: "REs shall adopt multi-factor authentication for privileged users\
+        \ of i) critical information systems and ii) for critical activities, basis\
+        \ the RE\u2019s risk assessment."
+      annotation: REs and financial institutions (REs) must use Multi-Factor Authentication
+        (MFA), like a password plus an SMS code, for employees who have special access
+        (privileged users) to critical computer systems or for important tasks. This
+        is mandatory for systems holding sensitive customer or financial data, based
+        on the institution's own risk analysis. This stops unauthorized access even
+        if a password is stolen.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '20'
+      name: Controls on Teleworking
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
+      ref_id: 20(a)
+      description: "Ensure that the systems used and the remote access from alternate\
+        \ work location to the environment hosting RE\u2019s information assets are\
+        \ secure;"
+      annotation: This means when employees work from home or another location, the
+        devices they use and the way they connect to the company's sensitive data
+        must be completely safe, like using strong passwords, having updated anti-virus
+        software, and using secure connections (VPNs) to prevent unauthorized access
+        to the RE's or financial institution's information.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
+      ref_id: 20(b)
+      description: Implement multi-factor authentication for enterprise access (logical)
+        to critical systems;
+      annotation: This means REs must require at least two different proofs of identity
+        (like a password and a one-time code from your phone) for staff logging into
+        important computer systems that handle sensitive data or control critical
+        operations. This stops unauthorized people from accessing these systems even
+        if they steal one password.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
+      ref_id: 20(c)
+      description: "Put in place a mechanism to identify all remote-access devices\
+        \ attached/ connected to the RE\u2019s systems; and"
+      annotation: "The RBI requires regulated entities (REs) to implement a system\
+        \ to accurately track and identify every device\u2014such as an employee's\
+        \ laptop or smartphone\u2014that connects remotely to the RE's network. This\
+        \ is like keeping a continuous inventory of all outside connections to ensure\
+        \ only authorized devices are accessing sensitive systems, thereby limiting\
+        \ security risks from unknown access points."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
+      ref_id: 20(d)
+      description: Ensure that data/ information shared/ presented in teleworking
+        is secured appropriately.
+      annotation: When employees work from home, the RBI requires that they protect
+        the company's data just as if they were in the office. This means using secure
+        connections like VPNs, locking devices, and not leaving confidential information
+        visible. It ensures sensitive customer and financial data stays private and
+        safe from unauthorized access while working remotely.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      ref_id: '21'
+      name: Metrics
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21
+      ref_id: 21(a)
+      description: REs shall define suitable metrics for system performance, recovery
+        and business resumption, including Recovery Point Objective (RPO) and Recovery
+        Time Objective (RTO), for all critical information systems.
+      annotation: 'Regulated Entities must set specific targets for how fast critical
+        systems recover after a failure (RTO - e.g., systems must be back online within
+        4 hours) and how much data loss is acceptable (RPO - e.g., maximum 1 hour
+        of lost transaction data). Actionable: define these time-based metrics for
+        all key IT systems and implement solutions (like frequent backups) to meet
+        them.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21
+      ref_id: 21(b)
+      description: For non-critical information systems, REs shall adopt a risk-based
+        approach to define suitable metrics.
+      annotation: 'For systems that are not vital, regulated entities (REs) must use
+        a risk-based method to set performance measures. This means the level of monitoring
+        and reporting (metrics) should match the potential risk if the system fails.
+        For example, a basic internal website needs fewer metrics than a payment processing
+        system. Actionable: Classify systems by criticality and design proportionate
+        metrics.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21
+      ref_id: 21(c)
+      description: REs shall implement suitable scorecard/ metrics/ methodology to
+        measure IT performance and IT maturity level.
+      annotation: Regulated Entities (REs) must use a consistent method, like a report
+        card (scorecard) with specific measurements (metrics), to check how well their
+        IT systems are performing and how mature their IT processes are. This ensures
+        IT contributes effectively and securely to the business. For example, metrics
+        could track system uptime or how quickly security issues are fixed.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      assessable: false
+      depth: 1
+      name: Chapter IV - IT and Information Security Risk Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:22
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '22'
+      name: Periodic review of IT related risks
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:22(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:22
+      ref_id: 22(a)
+      description: The risk management policy of the RE shall include IT related risks,
+        including the Cyber Security related risks, and the Risk Management Committee
+        of the Board (RMCB) in consultation with the ITSC shall periodically review
+        and update the same at least on a yearly basis.
+      annotation: The RE's risk plan must cover technology risks, including cyber
+        threats (like hacking), and a board-level committee (RMCB) must review and
+        update this policy yearly, consulting with the IT Steering Committee (ITSC).
+        This ensures the RE proactively manages digital security risks and stays safe
+        from modern threats.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '23'
+      name: IT and Information Security Risk Management Framework
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23
+      ref_id: 23(a)
+      description: 'REs shall establish a robust IT and Information Security Risk
+        Management Framework covering, inter alia, the following aspects:'
+      annotation: Regulated Entities must build a strong framework to manage technology
+        risks and information security, which includes regularly assessing risks,
+        performing security testing (like checking for vulnerabilities), and having
+        comprehensive plans for business continuity and disaster recovery to ensure
+        operations continue even after a system failure.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
+      ref_id: 23(a) i
+      description: Implementation of comprehensive Information Security management
+        function, internal controls and processes (including applicable insurance
+        covers) to mitigate/ manage identified risks. The implemented controls and
+        processes must be reviewed periodically on their efficacy in a risk environment
+        characterised by change;
+      annotation: Implement a full security system (like firewalls and access rules)
+        and get insurance to protect against IT risks. For example, use strong passwords
+        and encrypt data. Regularly check if these security measures are still working
+        well, especially as technology and threats keep changing.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(b)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
+      ref_id: 23(b) ii
+      description: Definition of roles and responsibilities of stakeholders (including
+        third-party personnel) involved in IT risk management. Areas of possible role
+        conflicts and accountability gaps must be specifically identified and eliminated
+        or managed;
+      annotation: REs must clearly define who is responsible for managing IT risks,
+        including external partners. For example, the Chief Information Security Officer
+        (CISO) may be accountable for security policy while the IT team executes controls.
+        It is crucial to spot and fix situations where two people think they own the
+        same task (conflict) or where a task is missed entirely (gap).
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(c)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
+      ref_id: 23(c) iii
+      description: Identification of critical information systems of the organisation
+        and fortification of the security environment of such systems; and
+      annotation: This rule means organizations must find their most important computer
+        systems (like those handling customer money or key transactions) and make
+        them super secure. This involves adding strong defenses (like better firewalls
+        and access controls) to protect them from cyber threats, ensuring vital business
+        operations are safe and reliable.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(d)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
+      ref_id: 23(d) iv
+      description: Definition and implementation of necessary systems, procedures
+        and controls to ensure secure storage/ transmission/ processing of data/ information.
+      annotation: This requires putting essential security measures, like strong passwords,
+        encryption, and access permissions, in place to keep all customer and RE data
+        safe, whether it's sitting in a database, moving between systems, or being
+        used for a transaction. Actionable steps include deploying up-to-date firewalls
+        and ensuring regular employee training on data handling best practices.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '24'
+      name: Information Security Policy and Cyber Security Policy
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
+      ref_id: 24(a)
+      description: The Information Security Policy shall take into consideration,
+        inter alia, aspects such as the objectives, scope, ownership and responsibility
+        for the Policy; information security organisational structure; exceptions;
+        compliance review and penal measures for non-compliance of Policies. REs shall
+        also put in place a Cyber Security Policy and Cyber Crisis Management Plan
+        (CCMP).
+      annotation: REs and financial entities must have a detailed Information Security
+        Policy (ISP) covering who is responsible, what it covers, and penalties for
+        breaking rules. Think of the ISP as a rulebook for protecting data. Additionally,
+        they must have a Cyber Security Policy for day-to-day threats and a Cyber
+        Crisis Management Plan (CCMP) to quickly respond if a major cyber incident
+        happens, like a system hack or data breach.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
+      ref_id: 24(b)
+      description: 'An Information Security Committee (ISC), under the oversight of
+        the ITSC, shall be formed for managing cyber/ information security. The constitution
+        of the ISC, with Chief Information Security Officer (CISO) and other representatives
+        from business and IT functions, etc., shall be decided by the ITSC. The head
+        of the ISC shall be from risk management vertical. Major responsibilities
+        of the ISC, inter alia, shall include:'
+      annotation: The Information Security Committee (ISC) is formed under the ITSC
+        to manage cyber and information security. It includes the CISO and IT/business
+        reps, and is led by someone from risk management. It's essentially the task
+        force ensuring the RE's digital safety, like a dedicated team protecting online
+        systems and customer data from breaches.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)
+      ref_id: 24(b) i
+      description: "Development of information/ cyber security policies, implementation\
+        \ of policies, standards and procedures to ensure that all identified risks\
+        \ are managed within the RE\u2019s risk appetite;"
+      annotation: This means the organization must create rules (policies) for cyber
+        security, put them into action, and make sure any security problems (risks)
+        are handled properly so the business stays safe and follows its own acceptable
+        level of risk. For example, having a policy that requires strong passwords
+        and then making sure everyone actually uses them.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)
+      ref_id: 24(b) ii
+      description: Approving and monitoring information security projects and security
+        awareness initiatives;
+      annotation: This means the organization's top leadership (like the Board or
+        IT Strategy Committee) must formally sign off on and track all security-related
+        efforts, such as implementing a new firewall (project) or conducting employee
+        training on phishing emails (awareness). This ensures security gets the necessary
+        attention and resources, making sure everyone knows their role in protecting
+        data.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)
+      ref_id: 24(b) iii
+      description: Reviewing cyber incidents, information systems audit observations,
+        monitoring and mitigation activities; and
+      annotation: This means regularly checking for hacks (cyber incidents), fixing
+        identified weaknesses from internal technology checks (IS audit observations),
+        and continuously watching systems and taking steps to reduce risks (monitoring
+        and mitigation). Essentially, it's about checking, fixing, and preventing
+        IT problems to keep the RE safe and compliant with RBI rules.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(b)
+      ref_id: 24(b) iv
+      description: Updating ITSC and CEO periodically on the activities of ISC.
+      annotation: This means the Intermediate Steering Committee (ISC) must regularly
+        brief the IT Strategy Committee (ITSC) and the CEO about what IT projects
+        are running, their risks, and performance. For example, if the ISC is managing
+        a critical system upgrade, they inform the ITSC/CEO if the project is on track
+        or if there are major security issues, ensuring high-level oversight of IT
+        safety and strategy.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
+      ref_id: 24(c)
+      description: 'A senior level executive (preferably in the rank of a General
+        Manager or an equivalent position) shall be designated as the Chief Information
+        Security Officer (CISO). The CISO shall not have any direct reporting relationship
+        with the Head of IT Function and shall not be given any business targets.
+        REs shall ensure the following:'
+      annotation: The RBI requires a highly ranked CISO (like a GM) to manage cyber
+        risks. This role must be independent from the IT department (meaning they
+        don't report to the Head of IT) and cannot have sales targets. This ensures
+        the CISO can prioritize security without pressure from business goals or conflicts
+        of interest with IT operations, keeping customer data safe.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)
+      ref_id: 24(c) i
+      description: The CISO has the requisite technical background and expertise;
+      annotation: The RBI mandates that the CISO must be a technical expert (like
+        having degrees/certifications in cybersecurity) to effectively lead IT security.
+        This ensures they have the knowledge to protect the institution's systems,
+        like knowing how to defend against hacking or managing data breaches. The
+        actionable requirement is ensuring the appointed CISO meets these necessary
+        technical qualifications.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)
+      ref_id: 24(c) ii
+      description: She/He is appointed for a reasonable minimum term;
+      annotation: This means key IT leaders, like the Head of IT or CISO, must be
+        guaranteed a minimum term in their position. This stability ensures they have
+        enough time to implement strategic plans, like strengthening cyber defenses,
+        without frequent turnover disrupting critical projects. The regulated entity
+        needs to define this "reasonable minimum term" and stick to it.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)
+      ref_id: 24(c) iii
+      description: "The CISO\u2019s Office is adequately staffed with people having\
+        \ necessary technical expertise, commensurate with the business volume, extent\
+        \ of technology adoption and complexity; and"
+      annotation: The security chief's team must have enough people with the right
+        technical skills to match the size of the business, how much technology is
+        used (like mobile REing apps or AI), and how complicated the IT systems are.
+        For example, a larger RE with complex cloud infrastructure needs more specialized
+        staff than a smaller one, ensuring security management keeps pace with technology
+        risk.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(c)
+      ref_id: 24(c) iv
+      description: The budget for the information/ cyber security is determined keeping
+        in view the current/ emerging threat landscape.
+      annotation: Financial institutions must allocate security budgets based on current
+        and future cyber risks, treating security spending not just as an expense
+        but as a necessary investment to protect customer data and operations. For
+        example, if new ransomware threats are emerging, the budget should increase
+        to acquire advanced detection tools and conduct staff training.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      assessable: false
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
+      ref_id: 24(d)
+      description: 'REs shall ensure that the roles and responsibilities of the CISO
+        are clearly defined and documented covering, at a minimum, the following points:'
+      annotation: The RBI mandates that REs and financial institutions must clearly
+        spell out the Chief Information Security Officer (CISO)'s job. This means
+        detailing their responsibilities like setting the cybersecurity plan, ensuring
+        security tools work well, and making sure the organization follows all cyber-related
+        regulations. For example, the CISO defines how to prevent hackers and handles
+        compliance checks.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-i
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) i
+      description: The CISO shall be responsible for driving cyber security strategy
+        and ensuring compliance to the extant regulatory/ statutory instructions on
+        information/ cyber security.
+      annotation: The Chief Information Security Officer (CISO) is the boss of all
+        things cybersecurity. Their job is to plan how the organization stays safe
+        online (strategy) and make sure the company follows all the cyber laws and
+        rules (compliance), such as protecting customer data from hackers and keeping
+        systems secure as required by the RBI.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-ii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) ii
+      description: The CISO shall be responsible for enforcing the policies that a
+        RE uses to protect its information assets apart from coordinating information/
+        cyber security related issues within the RE as well as with relevant external
+        agencies.
+      annotation: The Chief Information Security Officer (CISO) is the key person
+        in a regulated entity (RE) who ensures all security rules are followed to
+        protect sensitive data and systems, like ensuring only authorized staff can
+        access customer RE details. The CISO also acts as the central point for handling
+        all internal and external cybersecurity matters, coordinating responses to
+        threats or incidents with other organizations and regulators.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-iii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) iii
+      description: The CISO shall be a permanent invitee to the ITSC and IT Steering
+        Committee.
+      annotation: The CISO must always attend IT Strategy (ITSC) and IT Steering Committee
+        meetings. This ensures security is part of major IT decisions and projects
+        from the start, preventing issues later. For example, if the committee considers
+        a new mobile app, the CISO ensures it meets security standards before launch.
+        This guarantees accountability and better cyber risk management.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-iv
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) iv
+      description: "The CISO\u2019s Office shall manage and monitor Security Operations\
+        \ Centre (SOC) and drive cyber security related projects."
+      annotation: The CISO's Office must oversee the security 'control center' (SOC),
+        which constantly watches for cyber threats (like monitoring for hacking attempts).
+        This office is also responsible for launching new security defenses (projects
+        like setting up stronger access controls) to keep the organization safe and
+        compliant with RBI rules.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-v
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) v
+      description: "The CISO\u2019s office shall ensure effective functioning of the\
+        \ security solutions deployed."
+      annotation: 'The CISO''s team must actively manage and maintain all security
+        tools, like firewalls and anti-virus software, to ensure they are always running
+        properly and providing the intended protection against cyber threats. Actionable:
+        Regularly test, patch, and monitor all security solutions to confirm they
+        are functional and effective, preventing system breaches.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-vi
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) vi
+      description: The CISO shall directly report to the Executive Director or equivalent
+        executive overseeing the risk management function; and
+      annotation: This RBI rule ensures the Chief Information Security Officer (CISO)
+        reports directly to a top executive (like the Executive Director) who manages
+        overall risks. This elevates security to the highest level, making sure cybersecurity
+        strategies and concerns are immediately addressed by senior leadership, not
+        buried lower down the organizational structure. This direct reporting line
+        ensures prompt action on security matters, like major data breaches or compliance
+        failures.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)-vii
+      assessable: true
+      depth: 4
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(d)
+      ref_id: 24(d) vii
+      description: CISO shall place a review of cyber security risks/ arrangements/
+        preparedness of the RE before the Board/ RMCB/ ITSC atleast on a quarterly
+        basis.
+      annotation: "The Chief Information Security Officer (CISO) must regularly\u2014\
+        at least every three months\u2014report the institution's cyber risks, security\
+        \ setup, and readiness status to the top governing bodies (Board/Risk Management\
+        \ Committee/IT Strategy Committee). This ensures leadership understands and\
+        \ acts on digital protection issues, similar to checking a car's safety features\
+        \ before a long trip."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '25'
+      name: Risk Assessment
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25
+      ref_id: 25(a)
+      description: "The risk assessment for each information asset within the RE\u2019\
+        s scope shall be guided by appropriate security standards/ IT control frameworks."
+      annotation: For every IT system or data (information asset) the regulated entity
+        (RE) uses, a security check (risk assessment) must be done following recognized
+        best practices or security checklists (standards/frameworks). This ensures
+        the RE knows the system's vulnerabilities, just like using ISO 27001 or COBIT
+        controls to protect a core REing system or customer database.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25
+      ref_id: 25(b)
+      description: REs shall ensure that all staff members and service providers comply
+        with the extant information security and acceptable-use policies as applicable
+        to them.
+      annotation: This means financial institutions (REs) must make sure their employees
+        and outside vendors strictly follow all current rules for data security and
+        proper use of technology. For example, staff must not share passwords or use
+        work computers for unauthorized personal activities, ensuring sensitive customer
+        data is protected.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25
+      ref_id: 25(c)
+      description: REs shall review their security infrastructure and security policies
+        at least annually, factoring in their own experiences and emerging threats
+        and risks. REs shall take steps to adequately tackle cyber-attacks including
+        phishing, spoofing attacks and mitigate their adverse effects.
+      annotation: Regulated Entities (REs), like REs, must check their security defenses
+        and rules every year based on new risks and experiences. They must actively
+        protect customers and systems from online attacks, such as fake emails (phishing)
+        or impersonation (spoofing), to minimize harm and keep financial data safe.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '26'
+      name: Conduct of Vulnerability Assessment (VA) / Penetration Testing (PT)
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(a)
+      description: For critical information systems and/ or those in the De-Militarized
+        Zone (DMZ) having customer interface, VA shall be conducted at least once
+        in every six months and PT at least once in 12 months. Also, REs shall conduct
+        VA/ PT of such information systems throughout their lifecycle (pre-implementation,
+        post implementation, after major changes, etc.).
+      annotation: For important customer-facing computer systems (like online REing),
+        REs must regularly check for security flaws. They need a basic check (VA)
+        every six months and a deeper attack simulation (PT) yearly to find and fix
+        weak points quickly. This ensures your data and the RE's services are kept
+        secure throughout their entire life.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(b)
+      description: For non-critical information systems, a risk-based approach shall
+        be adopted to decide the requirement and periodicity of conduct of VA/ PT.
+      annotation: For less important systems, like a public website versus the main
+        REing transaction system, REs must use judgment based on potential risks to
+        decide if and how often they need vulnerability assessment/penetration testing
+        (VA/PT). This means if a system has low risk, like storing only non-sensitive
+        data, VA/PT may be done less frequently or not required, prioritizing resources
+        for high-risk systems.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(c)
+      description: VA/ PT shall be conducted by appropriately trained and independent
+        information security experts/ auditors.
+      annotation: This means a regulated entity must hire skilled, unbiased external
+        or internal experts to regularly test its digital systems for security weaknesses,
+        like checking if a RE's website has weak points a hacker could exploit. This
+        independent testing ensures the results are reliable and the entity acts to
+        fix any security gaps found.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(d)
+      description: In the post implementation (of IT project/ system upgrade, etc.)
+        scenario, the VA/ PT shall be performed on the production environment. Under
+        unavoidable circumstances, if the PT is conducted in test environment, REs
+        shall ensure that the version and configuration of the test environment resembles
+        the production environment. Any deviation should be documented and approved
+        by the ISC.
+      annotation: 'After updating an IT system, security testing (VA/PT) must be done
+        on the live system to ensure it''s safe. If testing the live system is impossible,
+        the test system used must be an exact duplicate (same software versions and
+        setup). If there are any differences, they must be recorded and approved by
+        the ISC. Actionable: Always prioritize production testing; if using a test
+        environment, ensure 100% similarity to production or get formal ISC approval
+        for deviations.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(e)
+      description: REs shall ensure to fix the identified vulnerabilities and associated
+        risks in a time-bound manner by undertaking requisite corrective measures
+        and ensure that the compliance is sustained to avoid recurrence of known vulnerabilities
+        such as those available in Common Vulnerabilities and Exposures (CVE) database.
+      annotation: Financial entities must quickly fix security weaknesses (like bugs
+        or gaps often listed in public databases like CVEs) to reduce risks. This
+        means they need to take necessary steps to correct issues right away and continuously
+        maintain these fixes so the same problems don't happen again. For example,
+        if a security patch is released for a system, they must apply it fast.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
+      ref_id: 26(f)
+      description: "REs shall put in place a documented approach for conduct of VA/\
+        \ PT covering the scope, coverage, vulnerability scoring mechanism (e.g.,\
+        \ Common Vulnerability Scoring System) and all other aspects. This may also\
+        \ apply to the RE\u2019s information systems hosted in a cloud environment."
+      annotation: 'Financial entities must plan and document how they will regularly
+        check their systems, even those in the cloud, for security weaknesses (VA/PT).
+        This is like having a detailed checklist for a security guard (REs) to inspect
+        doors (systems), rate how severe the lock problems (vulnerabilities) are using
+        a standard like CVSS, and then fix the worst issues first. Actionable: Establish
+        a policy detailing when, how, and by whom these security tests are performed.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      ref_id: '27'
+      name: Cyber Incident Response and Recovery Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      ref_id: 27(a)
+      description: The cyber incident response and recovery management policy shall
+        address the classification and assessment of incidents; include a clear communication
+        strategy and plan to manage such incidents, contain exposures and achieve
+        timely recovery.
+      annotation: This policy is essentially a firefighting guide for cyber attacks,
+        ensuring the RE can quickly assess the damage (classification/assessment),
+        tell the right people what happened (communication strategy), stop the attack
+        from spreading (contain exposures), and get back to normal operations fast
+        (timely recovery). Actionable steps include having defined teams, testing
+        the plan regularly, and isolating affected systems immediately.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      ref_id: 27(b)
+      description: REs shall analyse cyber incidents (including through forensic analysis,
+        if necessary) for their severity, impact and root cause. REs shall take measures,
+        corrective and preventive, to mitigate the adverse impact of incidents on
+        business operations.
+      annotation: "When a cyber incident happens, REs (REs) must quickly investigate\
+        \ it\u2014like finding out how bad the problem is, who or what caused it,\
+        \ and what the damage is. Then, they must fix the issue and put steps in place\
+        \ to stop it from happening again, ensuring their normal business activities\
+        \ are not seriously affected. For example, if a malware attack happens, they\
+        \ analyze it, stop the attack, and update security systems."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      ref_id: 27(c)
+      description: REs shall have written incident response and recovery procedures
+        including identification of key roles of staff/ outsourced staff handling
+        such incidents.
+      annotation: Regulated entities must have a documented plan to handle cybersecurity
+        issues, like a system hack, and recover quickly. This plan must clearly name
+        the staff and outsourced people responsible for leading the immediate fix,
+        containment, and restoration of services. This ensures a coordinated, fast
+        response to minimize damage and get business operations back online.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      ref_id: 27(d)
+      description: "REs shall have clear communication plans for escalation and reporting\
+        \ the incidents to the Board and Senior Management as well as to customers,\
+        \ as required. REs shall pro-actively notify CERT-In and RBI regarding incidents,\
+        \ as per regulatory requirements. REs are also encouraged to report the incidents\
+        \ to Indian Banks \u2013 Centre for Analysis of Risks and Threats (IB-CART)\
+        \ set up by IDRBT."
+      annotation: REs must have clear plans to quickly tell their leaders and customers
+        about security incidents (like a data breach). They are required to immediately
+        inform CERT-In and RBI about these incidents. They should also share information
+        with IB-CART to help the entire REing sector stay safer. This ensures fast
+        response and broad awareness for effective risk management.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
+      ref_id: 27(e)
+      description: REs shall establish processes to improve incident response and
+        recovery activities and capabilities through lessons learnt from past incidents
+        as well as from the conduct of tests and drills. REs, inter alia, shall ensure
+        effectiveness of crisis communication plan/ process by conduct of periodic
+        drills/ testing with stakeholders (including service providers).
+      annotation: To handle IT failures or security incidents better, regulated entities
+        must continuously improve their response and recovery plans by analyzing what
+        went wrong in past events and conducting regular simulated drills. Actionable
+        items include mandatory mock incident drills and testing crisis communication
+        plans with all relevant parties, including third-party service providers,
+        to ensure prompt and coordinated action during a real emergency.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+      assessable: false
+      depth: 1
+      name: Chapter V - Business Continuity and Disaster Recovery Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+      ref_id: '28'
+      name: Business Continuity Plan (BCP) and Disaster Recovery (DR) Policy
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28
+      ref_id: 28(a)
+      description: The BCP and DR policy shall adopt best practices to guide its actions
+        in reducing the likelihood or impact of the disruptive incidents and maintaining
+        business continuity. The policy shall be updated based on major developments/
+        risk assessment.
+      annotation: This means the plan for keeping operations running during and after
+        major disruptions (BCP/DR) must use top industry standards. The goal is to
+        lower the chance or severity of incidents, like a data center outage or cyber
+        attack, and ensure business keeps moving. Crucially, this plan must be reviewed
+        and updated regularly based on new risks or technology changes.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28
+      ref_id: 28(b)
+      description: "RE\u2019s BCP/ DR capabilities shall be designed to effectively\
+        \ support its resilience objectives and enable it to rapidly recover and securely\
+        \ resume its critical operations (including security controls) post cyber-attacks/\
+        \ other incidents."
+      annotation: The RE must have a backup plan (BCP) and recovery steps (DR) ready
+        so that if a cyber-attack or other major issue happens, essential services,
+        like online REing or security systems, can quickly and safely get back up
+        and running. Think of it like having a fire drill for computer systems to
+        ensure we can restore normal service fast. This is required under the RBI
+        Master Direction on IT Governance.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+      ref_id: '29'
+      name: Disaster Recovery Management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(a)
+      description: "Periodicity of DR drills for critical information systems shall\
+        \ be at least on a half-yearly basis and for other information systems, as\
+        \ per RE\u2019s risk assessment."
+      annotation: REs must test their critical system backups (like online REing)
+        at least twice a year to ensure they can quickly recover from disasters. For
+        non-critical systems, the testing frequency is based on the RE's own risk
+        analysis. This mandatory testing proves the RE can maintain services even
+        if a major outage occurs.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(b)
+      description: Any major issues observed during the DR drill shall be resolved
+        and tested again to ensure successful conduct of drill before the next cycle.
+      annotation: The RBI requires that if critical issues surface during a mock disaster
+        recovery test (DR drill), those problems must be fixed immediately. The test
+        must be rerun successfully before the next scheduled cycle to guarantee that
+        the organization can reliably recover all systems and data, minimizing downtime
+        in case of a real disaster like a major power outage or cyberattack.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(c)
+      description: The DR testing shall involve switching over to the DR / alternate
+        site and thus using it as the primary site for sufficiently long period where
+        usual business operations of at least a full working day (including Beginning
+        of Day to End of Day operations) are covered.
+      annotation: "DR testing must simulate a real disaster by fully switching all\
+        \ operations to the backup site. This switch must last a minimum of one full\
+        \ business day\u2014from when the workday starts (BOD) until it ends (EOD)\
+        \ and all daily reports are completed. This proves the backup site can truly\
+        \ support the business as the primary site."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(d)
+      description: REs shall regularly test the BCP / DR under different scenarios
+        for possible types of contingencies, to ensure that it is up-to-date and effective.
+      annotation: 'REs must practice their backup plans (BCP/DR) often, testing how
+        they would handle different problems, like a power outage or cyberattack.
+        This ensures the plans work perfectly when a real crisis hits, keeping services
+        running smoothly. Actionable: Schedule and conduct BCP/DR drills (e.g., system
+        failover tests) at least annually.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(e)
+      description: REs shall backup data and periodically restore such backed-up data
+        to check its usability. The integrity of such backup data shall be preserved
+        along with securing it from unauthorised access.
+      annotation: 'REs must regularly save copies of all important data (backup) and
+        test these copies occasionally to ensure they can be used if the primary system
+        fails. The backup data must be accurate and protected against anyone who shouldn''t
+        see it (unauthorised access). Actionable: Schedule daily backups, conduct
+        quarterly restore tests, and encrypt all stored backup media.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(f)
+      description: REs shall ensure that DR architecture and procedures are robust,
+        meeting the defined RTO and RPO for any recovery operations in case of contingency.
+      annotation: 'Regulated Entities (REs) must build strong backup systems (DR architecture)
+        and plans to quickly restore essential services after a major failure, like
+        a power outage or cyberattack. They must meet two key targets: Recovery Time
+        Objective (RTO), which is the maximum time allowed for systems to be down,
+        and Recovery Point Objective (RPO), which is the maximum amount of data they
+        can afford to lose (e.g., restoring systems within 4 hours (RTO) and losing
+        no more than 1 hour of data (RPO)).'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(g)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(g)
+      description: "REs should prioritise achieving minimal RTO (as approved by the\
+        \ RE\u2019s ITSC) and a near zero RPO for critical information systems."
+      annotation: "Regulated Entities (REs) must focus on quickly restoring critical\
+        \ systems after a failure\u2014this speed is the minimal Recovery Time Objective\
+        \ (RTO). They also need to ensure almost no data is lost during the incident,\
+        \ which is known as a near zero Recovery Point Objective (RPO). For example,\
+        \ if a REing server fails, it must be back up very fast (minimal RTO), and\
+        \ all recent customer transactions must be saved (near zero RPO), ensuring\
+        \ business continuity and data integrity as guided by the RE\u2019s IT Strategy\
+        \ Committee (ITSC)."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(h)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(h)
+      description: In a scenario of non-zero RPO, REs shall have a documented methodology
+        for reconciliation of data while resuming operations from the alternate location.
+      annotation: When a regulated entity (RE) recovers from a system failure and
+        there is some allowed data loss (non-zero RPO), they must have a plan (documented
+        methodology) to check that the recovered data is accurate and consistent before
+        fully restarting services at the backup location. For example, if a day's
+        transactions are lost, the RE needs a process to verify all recovered balances
+        and transactions match what was known before the incident.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(i)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(i)
+      description: REs shall ensure that the configurations of information systems
+        and deployed security patches at the DC and DR19 are identical.
+      annotation: 'Regulated Entities (REs) must make sure their main computer center
+        (DC) and backup recovery site (DR) have the exact same system setups and security
+        updates. This prevents failure during a switch, like ensuring both production
+        and backup servers run the same version of Windows and all necessary security
+        fixes. Actionable: Automate configuration and patch deployment across both
+        sites.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(j)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
+      ref_id: 29(j)
+      description: "REs shall ensure BCP and DR capabilities in critical interconnected\
+        \ systems and networks including those of vendors and partners. REs shall\
+        \ ensure demonstrated readiness through collaborative and co-ordinated resilience\
+        \ testing that meets the REs\u2019 RTO."
+      annotation: REs must have backup plans (BCP/DR) for all vital IT systems, including
+        those managed by external partners. This ensures that if a system fails, services
+        can be restored quickly, meeting the Recovery Time Objective (RTO). They must
+        regularly test these recovery plans with vendors to prove they work under
+        pressure.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi---information-systems-(is)-audit
+      assessable: false
+      depth: 1
+      name: Chapter VI - Information Systems (IS) Audit
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi---information-systems-(is)-audit
+      ref_id: '30'
+      name: Information Systems (IS) Audit
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(a)
+      description: The Audit Committee of the Board (ACB) shall be responsible for
+        exercising oversight of IS Audit of the RE.
+      annotation: "The Audit Committee of the Board (ACB) acts as a high-level watchdog,\
+        \ ensuring that Information Systems (IS) Audits\u2014like annual security\
+        \ checks on REing software or systems\u2014are performed properly and that\
+        \ management addresses any risks or weaknesses found. Actionable: The ACB\
+        \ must regularly review the IS audit reports, confirm issues are fixed, and\
+        \ ensure the RE's technology remains secure and compliant with RBI rules."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(b)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(b)
+      description: REs shall put in place an IS Audit Policy. The IS Audit Policy
+        shall contain a clear description of its mandate, purpose, authority, audit
+        universe, periodicity of audit etc. The policy shall be approved by the ACB
+        and reviewed at least annually.
+      annotation: Regulated Entities (REs) must establish an Information System (IS)
+        Audit Policy, essentially a rulebook for checking their technology and systems
+        (like how often passwords must be changed or server access is reviewed). This
+        policy needs to clearly define the audit's scope and frequency, be formally
+        approved by the Audit Committee of the Board (ACB), and be reviewed annually
+        to stay current.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(c)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(c)
+      description: "The ACB shall review critical issues highlighted related to IT\
+        \ / information security / cyber security and provide appropriate direction\
+        \ and guidance to the RE\u2019s Management."
+      annotation: "The Audit Committee of the Board (ACB) acts as a high-level oversight\
+        \ body, ensuring that critical technology, information security, and cyber\
+        \ security problems\u2014such as a major data breach or system downtime\u2014\
+        are properly addressed. The ACB reviews these serious issues and provides\
+        \ guidance to the regulated entity\u2019s management on the necessary actions\
+        \ and direction for mitigation and improvement."
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(d)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(d)
+      description: REs shall have a separate IS Audit function or resources who possess
+        required professional skills and competence within the Internal Audit function.
+        Where the RE uses external resources for conducting IS audit in areas where
+        skills are lacking within the RE, the responsibility and accountability for
+        such external IS audits would continue to remain with the competent authority
+        within Internal Audit function.
+      annotation: REs and financial institutions must have a dedicated Internal Audit
+        team or resource for checking their IT systems (IS Audit) to ensure they are
+        secure and compliant. If the RE needs outside help for specialized IT checks,
+        the internal audit head is still fully responsible for the quality and results
+        of those external audits.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(e)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(e)
+      description: REs shall carry out IS Audit planning by adopting a risk-based
+        audit approach.
+      annotation: Regulated Entities (REs) must plan their IT audits based on risk.
+        This means they focus more attention and resources on checking their most
+        critical and risky IT systems (e.g., core REing or payment systems) rather
+        than spending equal time on low-risk ones, ensuring the most important areas
+        are secure and compliant.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(f)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
+      ref_id: 30(f)
+      description: REs may consider, wherever possible, a continuous auditing approach
+        for critical systems, performing control and risk assessments on a more frequent
+        basis.
+      annotation: Regulated Entities should try to audit their most important IT systems
+        constantly, rather than just once a year. This means checking controls and
+        risks more often to catch issues quickly. For example, instead of annual checks
+        on payment systems, they would use automated tools to monitor security settings
+        daily. The action is to adopt technology and processes for frequent, automated
+        system checks.
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+      assessable: false
+      depth: 1
+      name: "Chapter VII \u2013 Repeal and Other Provisions"
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:31
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+      ref_id: '31'
+      name: Application of other laws not barred
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:31(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:31
+      ref_id: 31(a)
+      description: The provisions of these Directions shall be in addition to, and
+        not in derogation of the provisions of any other laws, rules, regulations
+        or directions, for the time being in force.
+      annotation: 'These RBI rules add to, but do not replace, any other existing
+        laws, rules, or directions that REs and financial institutions must follow.
+        For example, if a separate law requires more data security than the RBI direction,
+        the entity must meet the higher standard. Actionable: Always ensure compliance
+        with the strictest applicable laws and regulations regarding IT.'
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:32
+      assessable: false
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+      ref_id: '32'
+      name: Interpretation
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:32(a)
+      assessable: true
+      depth: 3
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:32
+      ref_id: 32(a)
+      description: For the purpose of giving effect to the provisions of these Directions
+        or in order to remove any difficulties in the application or interpretation
+        of the provisions of these Directions, the Reserve Bank of India may, if it
+        considers necessary, issue necessary clarifications in respect of any matter
+        covered herein and the interpretation of any provision of these Directions
+        given by the Reserve Bank of India shall be final and binding.
+      annotation: 'The RBI is the final authority on these IT rules. If there are
+        any misunderstandings or problems applying them, the RBI can issue official
+        clarifications. Their interpretation of any rule is conclusive and must be
+        followed. Actionable: Always defer to the RBI''s guidance for clarity on complex
+        issues like data security or IT audits.'
