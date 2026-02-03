@@ -1211,6 +1211,8 @@
 	"updateAvailable": "Aggiornamento disponibile",
 	"showGuidedTour": "Mostra tour guidato",
 	"loadDemoData": "Carica dati demo",
+	"importingDemoData": "Importazione dati demo in corso...",
+	"demoEnvironmentBeingPrepared": "Il tuo ambiente demo è in fase di preparazione. Questo può richiedere alcuni secondi.",
 	"firstTimeLoginModalTitle": "Benvenuto in CISO Assistant!",
 	"firstTimeLoginModalDescription": "È la prima volta che accedi. Vuoi fare un tour guidato per iniziare?",
 	"ebiosRadarParameters": "Parametri radar Ebios RM",

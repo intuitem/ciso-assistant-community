@@ -1164,6 +1164,8 @@
 	"updateAvailable": "Opdatering tilgængelig",
 	"showGuidedTour": "Vis guidet rundvisning",
 	"loadDemoData": "Indlæs demodata",
+	"importingDemoData": "Importerer demodata...",
+	"demoEnvironmentBeingPrepared": "Dit demo-miljø er i gang med at blive forberedt. Det kan tage et par sekunder.",
 	"firstTimeLoginModalTitle": "Velkommen til CISO Assistant!",
 	"firstTimeLoginModalDescription": "Det er din første gang her. Vil du tage en guidet rundtur for at komme i gang?",
 	"ebiosRadarParameters": "Ebios RM radarparametre",

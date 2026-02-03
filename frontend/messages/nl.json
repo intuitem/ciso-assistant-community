@@ -1997,6 +1997,8 @@
 	"linkedCollection": "collectie",
 	"linkedModels": "Geassocieerde objecten",
 	"loadDemoData": "Demo-gegevens laden",
+	"importingDemoData": "Demo-gegevens importeren...",
+	"demoEnvironmentBeingPrepared": "Uw demo-omgeving wordt voorbereid. Dit kan enkele minuten duren.",
 	"loadMissingLibraries": "Ontbrekende bibliotheken laden",
 	"loadMissingLibrariesHelpText": "Laad de ontbrekende bibliotheken om de import te voltooien als ze beschikbaar zijn.",
 	"loadedLibrary": "Geladen bibliotheek",
