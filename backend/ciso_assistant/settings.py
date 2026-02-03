@@ -119,12 +119,16 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
 MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes")
 
-# SECURITY WARNING: Sensitive operations, such as excel file processing, are to be run
-# in a sandbox in production. This is enabled by default unless in DEBUG mode.
-ENABLE_SANDBOX = not DEBUG or os.environ.get("ENABLE_SANDBOX", "False").lower() in (
-    "true",
-    "1",
-    "yes",
+# SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
+# The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+ENABLE_SANDBOX = (
+    os.environ.get(
+        "ENABLE_SANDBOX",
+        "False",
+    )
+    .strip()
+    .lower()
+    in ("true", "1", "yes")
 )
 
 LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
