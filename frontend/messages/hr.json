@@ -437,7 +437,7 @@
 	"dependencies": "Dependencies",
 	"copyright": "Copyright",
 	"addYourLibrary": "Dodaj svoju knjižnicu",
-	"libraryFileInYamlOrXlsx": "Datoteka knjižnice u YAML formatu",
+	"libraryFileInYamlOrXlsx": "Datoteka knjižnice u YAML ili XLSX formatu",
 	"importBackup": "Učitaj backup",
 	"exportBackup": "Izvezi backup",
 	"confirmImportBackup": "Jeste li sigurni da želite učitati ovaj backup? To će pregaziti sve postojeće podatke, uključujući i vaše vjerodajnice.",

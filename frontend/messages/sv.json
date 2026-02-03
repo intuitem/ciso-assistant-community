@@ -390,7 +390,7 @@
 	"dependencies": "Beroenden",
 	"copyright": "Upphovsrätt",
 	"addYourLibrary": "Lägg till ditt eget bibliotek",
-	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML-format",
+	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML- eller XLSX-format",
 	"importBackup": "Importera säkerhetskopia",
 	"exportBackup": "Exportera säkerhetskopia",
 	"confirmImportBackup": "Är du säker på att du vill importera denna säkerhetskopia? Detta kommer att skriva över all befintlig data.",
