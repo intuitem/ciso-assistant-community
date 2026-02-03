@@ -117,6 +117,12 @@
 	"providerColon": "Aanbieder:",
 	"domain": "Domein",
 	"domainSemiColon": "Domein:",
+	"allDomains": "Alle domeinen",
+	"selectDomain": "Selecteer domein",
+	"focusMode": "Focusmodus",
+	"focusModeTooltip": "Focus op een specifiek domein",
+	"clearFocus": "Wis focus",
+	"noDomainsAvailable": "Geen domeinen beschikbaar",
 	"urn": "URN",
 	"treatmentStatus": "Behandelstatus",
 	"qualification": "Kwalificatie",
@@ -385,7 +391,7 @@
 	"dependencies": "Afhankelijkheden",
 	"copyright": "Auteursrecht",
 	"addYourLibrary": "Voeg je eigen bibliotheek toe",
-	"libraryFileInYaml": "Bibliotheekbestand in YAML-indeling",
+	"libraryFileInYamlOrXlsx": "Bibliotheekbestand in YAML-indeling",
 	"importBackup": "Back-up importeren",
 	"exportBackup": "Back-up exporteren",
 	"confirmImportBackup": "Weet je zeker dat je deze back-up wilt importeren? Dit overschrijft alle bestaande gegevens.",
@@ -550,6 +556,7 @@
 	"mediumSOK": "De sterkte van de kennis die de beoordeling ondersteunt is medium",
 	"highSOK": "De sterkte van de kennis die de beoordeling ondersteunt is hoog",
 	"libraryLoadingError": "Er is een fout opgetreden tijdens het laden van uw bibliotheek",
+	"processingError": "Verwerkingsfout",
 	"libraryAlreadyLoadedError": "Deze bibliotheek is al geladen.",
 	"invalidLibraryFileError": "Ongeldig bibliotheekbestand. Zorg ervoor dat het formaat correct is.",
 	"taintedFormMessage": "Wil je deze pagina verlaten? Wijzigingen die je hebt aangebracht, worden mogelijk niet opgeslagen.",
@@ -784,6 +791,7 @@
 	"graph": "Grafiek",
 	"startDate": "Startdatum",
 	"startDateHelpText": "Startdatum (handig voor tijdlijn)",
+	"expirationDateMustBeOnOrAfterStartDate": "De vervaldatum moet gelijk zijn aan of later zijn dan de startdatum",
 	"backupLoadingError": "Er is een fout opgetreden tijdens het laden van de back-up.",
 	"backupGreaterVersionError": "De back-up kan niet worden geladen. De versie van de back-up is hoger dan de huidige versie van uw applicatie.",
 	"backupLowerVersionError": "Er is een fout opgetreden. Mogelijk is de back-upversie te oud. Als dat zo is, moet u deze bijwerken voordat u het opnieuw probeert.",
@@ -958,6 +966,16 @@
 			"match": {
 				"countPlural=one": "{count} Dag",
 				"countPlural=other": "{count} Dagen"
+			}
+		}
+	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} object niet zichtbaar.",
+				"countPlural=other": "{count} objecten niet zichtbaar."
 			}
 		}
 	],
@@ -1504,6 +1522,8 @@
 	"dataBreaches": "Datalekken",
 	"dataBreachesByType": "Datalekken per type",
 	"dataBreachesDescription": "Datalek incidenten en meldingen",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Gegevensbescherming en privacy management functies (GDPR-compliance)",
 	"dataContractor": "Gegevensverwerker",
 	"dataContractors": "Gegevensverwerkers",
 	"dataFlowOverview": "Datastroomoverzicht",
@@ -2928,6 +2948,10 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
-	"libraryFilteringLabels": "Bibliotheek etiketten",
-	"campaignsDescription": "Beheer van auditcampagnes"
+	"campaignsDescription": "Beheer van auditcampagnes",
+	"libraryFilteringLabels": "Bibliotheeklabels",
+	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
+	"assignmentSettings": "Toewijzingsinstellingen",
+	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
 }

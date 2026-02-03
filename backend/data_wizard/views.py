@@ -5,22 +5,20 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
+
 from .serializers import LoadFileSerializer
 from core.models import (
     Asset,
     Folder,
     Perimeter,
     RequirementAssessment,
-    Framework,
     RequirementNode,
-    RiskAssessment,
-    RiskScenario,
     RiskMatrix,
     AppliedControl,
-    ReferenceControl,
-    Threat,
+    FindingsAssessment,
 )
 from core.serializers import (
+    BaseModelSerializer,
     AssetWriteSerializer,
     PerimeterWriteSerializer,
     AppliedControlWriteSerializer,
@@ -33,6 +31,7 @@ from core.serializers import (
     RiskScenarioWriteSerializer,
     ReferenceControlWriteSerializer,
     ThreatWriteSerializer,
+    EvidenceWriteSerializer,
     FolderWriteSerializer,
 )
 from ebios_rm.models import (
@@ -48,6 +47,10 @@ from ebios_rm.serializers import (
     ElementaryActionWriteSerializer,
     EbiosRMStudyWriteSerializer,
 )
+from .ebios_rm_excel_helpers import (
+    extract_elementary_actions,
+    process_excel_file as process_ebios_rm_excel,
+)
 from core.models import Terminology
 from data_wizard.arm_helpers import process_arm_file
 from tprm.models import Entity, Solution, Contract
@@ -60,11 +63,19 @@ from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from uuid import UUID
+from django.core.files.uploadedfile import UploadedFile
+from django.http import HttpRequest
+from datetime import datetime
+from typing import Optional, Final, ClassVar
+from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
+import enum
 
 logger = logging.getLogger(__name__)
 
 
-def get_accessible_folders_map(user):
+def get_accessible_folders_map(user: User) -> dict[str, UUID]:
     """
     Build a map of folder names to IDs that the provided user can access.
     Used by the data wizard import flow to validate targets.
@@ -78,14 +89,493 @@ def get_accessible_folders_map(user):
     return folders_map
 
 
+ZIP_MAGIC_NUMBER: Final[bytes] = bytes([0x50, 0x4B, 0x03, 0x04])
+
+
+def is_excel_file(file: io.BytesIO) -> bool:
+    file_data = file.read(len(ZIP_MAGIC_NUMBER))
+    is_excel = file_data == ZIP_MAGIC_NUMBER
+    file.seek(0)
+    return is_excel
+
+
+class RecordFileType(enum.StrEnum):
+    XLSX = "Excel"
+    CSV = "CSV"
+
+    def get_error(self) -> str:
+        match self:
+            case RecordFileType.XLSX:
+                return "ExcelParsingFailed"
+            case RecordFileType.CSV:
+                return "CSVParsingFailed"
+            case _:
+                raise NotImplementedError(
+                    f"Unreachable code detected (unknown {type(self).__name__} enum variant)."
+                )
+
+
+class ModelType(enum.StrEnum):
+    TPRM = "TPRM"
+    EBIOS_RM_STUDY_ARM = "EbiosRMStudyARM"
+    EBIOS_RM_STUDY_EXCEL = "EbiosRMStudyExcel"
+    ASSET = "Asset"
+    APPLIED_CONTROL = "AppliedControl"
+    PERIMETER = "Perimeter"
+    USER = "User"
+    COMPLIANCE_ASSESSMENT = "ComplianceAssessment"
+    FINDINGS_ASSESSMENT = "FindingsAssessment"
+    RISK_ASSESSMENT = "RiskAssessment"
+    ELEMENTARY_ACTION = "ElementaryAction"
+    REFERENCE_CONTROL = "ReferenceControl"
+    THREAT = "Threat"
+    PROCESSING = "Processing"
+    FOLDER = "Folder"
+    EVIDENCE = "Evidence"
+
+    @staticmethod
+    def from_string(model_type: str) -> Optional["ModelType"]:
+        """Returns a ModelType on success, otherwise return None."""
+        try:
+            return ModelType(model_type)
+        except ValueError:
+            return
+
+
+@dataclass(frozen=True)
+class Error:
+    record: dict
+    error: str
+
+    def to_dict(self) -> dict:
+        return {"record": self.record, "error": self.error}
+
+
+@dataclass
+class Result:
+    successful: int = 0
+    failed: int = 0
+    errors: list[Error] = field(default_factory=list)
+    details: dict = field(default_factory=dict)
+
+    def add_success(self):
+        self.successful += 1
+
+    def add_error(self, error: Error, fail_count: int = 1):
+        self.failed += fail_count
+        self.errors.append(error)
+
+    def to_dict(self) -> dict:
+        return {
+            "successful": self.successful,
+            "failed": self.failed,
+            "errors": [error.to_dict() for error in self.errors],
+            **({"details": self.details} if self.details else {}),
+        }
+
+
+@dataclass(frozen=True)
+class BaseContext:
+    request: HttpRequest
+    folders_map: dict[str, UUID] = field(default_factory=dict)
+    folder_id: Optional[str] = None
+    perimeter_id: Optional[str] = None
+    matrix_id: Optional[str] = None
+    framework_id: Optional[str] = None
+
+
+class RecordConsumer[Context](ABC):
+    SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
+
+    def __init__(self, base_context: BaseContext):
+        self.request = base_context.request
+        self.folders_map = base_context.folders_map
+        self.folder_id = base_context.folder_id
+        self.perimeter_id = base_context.perimeter_id
+        self.matrix_id = base_context.matrix_id
+        self.framework_id = base_context.framework_id
+
+    def __init_subclass__(cls):
+        provided_class = getattr(cls, "SERIALIZER_CLASS", None)
+        is_defined = provided_class is not None
+        is_serializer = is_defined and issubclass(provided_class, BaseModelSerializer)
+
+        assert is_serializer, f"Invalid serializer for class {cls.__name__}"
+
+    @abstractmethod
+    def create_context(self) -> tuple[Context, Optional[Error]]:
+        pass
+
+    @abstractmethod
+    def prepare_create(
+        self, record: dict, context: Context
+    ) -> tuple[dict, Optional[Error]]:
+        pass
+
+    def process_records(self, records: list[dict]) -> Result:
+        results = Result()
+
+        context, error = self.create_context()
+        if error is not None:
+            results.add_error(error, fail_count=len(records))
+            return results
+
+        for record in records:
+            record_data, error = self.prepare_create(record, context)
+            if error is not None:
+                results.add_error(error)
+                continue
+
+            serializer = self.SERIALIZER_CLASS(
+                data=record_data, context={"request": self.request}
+            )
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    results.add_success()
+                except Exception as e:
+                    results.add_error(Error(record=record, error=str(e)))
+                    continue
+            else:
+                results.add_error(Error(record=record, error=str(serializer.errors)))
+
+        logger.info(
+            f"{self.__class__.__name__} record processing complete. Success: {results.successful}, Failed: {results.failed}"
+        )
+        return results
+
+
+class AssetRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = AssetWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        return {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "type": record.get("type", "SP"),
+            "folder": domain,
+            "description": record.get("description", ""),
+        }, None
+
+
+class AppliedControlRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = AppliedControlWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        priority = record.get("priority")
+        if isinstance(priority, str) and priority.isdigit():
+            priority = int(priority)
+        else:
+            priority = None
+
+        return {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "category": record.get("category", ""),
+            "folder": domain,
+            "status": record.get("status", "to_do"),
+            "priority": priority,
+            "csf_function": record.get("csf_function", "govern"),
+        }, None
+
+
+class EvidenceRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = EvidenceWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        return {
+            "name": name,
+            "description": record.get("description", ""),
+            "ref_id": record.get("ref_id", ""),
+            "folder": domain,
+        }, None
+
+
+class UserRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = UserWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        email = record.get("email")
+        if email is None:
+            return {}, Error(record=record, error="email field is mandatory")
+
+        return {
+            "email": email,
+            "first_name": record.get("first_name"),
+            "last_name": record.get("last_name"),
+        }, None
+
+
+class PerimeterRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = PerimeterWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        return {
+            "name": name,
+            "folder": domain,
+            "ref_id": record.get("ref_id", ""),
+            "description": record.get("description", ""),
+            "status": record.get("status"),
+        }, None
+
+
+class ThreatRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = ThreatWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        return {
+            "name": name,
+            "description": record.get("description", ""),
+            "folder": domain,
+            "ref_id": record.get("ref_id", ""),
+        }, None
+
+
+class ReferenceControlRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = ReferenceControlWriteSerializer
+    CATEGORY_MAP: Final[dict[str, str]] = {
+        "policy": "policy",
+        "process": "process",
+        "technical": "technical",
+        "physical": "physical",
+        "procedure": "procedure",
+    }
+    FUNCTION_MAP: Final[dict[str, str]] = {
+        "govern": "govern",
+        "identify": "identify",
+        "protect": "protect",
+        "detect": "detect",
+        "respond": "respond",
+        "recover": "recover",
+        "governance": "govern",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        category = None
+        if record.get("category", ""):
+            category_value = str(record.get("category")).strip().lower()
+            category = self.CATEGORY_MAP.get(category_value)
+
+        csf_function = None
+        if record.get("function", ""):
+            function_value = str(record.get("function")).strip().lower()
+            csf_function = self.FUNCTION_MAP.get(function_value)
+
+        reference_control_data = {
+            "name": name,
+            "description": record.get("description", ""),
+            "ref_id": record.get("ref_id", ""),
+            "folder": domain,
+        }
+
+        if category:
+            reference_control_data["category"] = category
+        if csf_function:
+            reference_control_data["csf_function"] = csf_function
+
+        return reference_control_data, None
+
+
+@dataclass(frozen=True)
+class FindingsAssessmentContext:
+    findings_assessment: FindingsAssessment
+
+
+class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
+    SERIALIZER_CLASS = FindingWriteSerializer
+    FILTERING_LABEL_SEPARATOR: Final[str] = "|"
+    SEVERITY_MAP: Final[dict[Optional[str], int]] = {
+        None: -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+
+    def create_context(self):
+        try:
+            perimeter_id = self.perimeter_id
+            perimeter = Perimeter.objects.get(id=perimeter_id)
+            folder_id = perimeter.folder.id
+
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            assessment_name = f"Followup_{timestamp}"
+            assessment_data = {
+                "name": assessment_name,
+                "perimeter": perimeter_id,
+                "folder": folder_id,
+            }
+
+            serializer = FindingsAssessmentWriteSerializer(
+                data=assessment_data,
+                context={"request": self.request},
+            )
+
+            if serializer.is_valid():
+                findings_assessment: FindingsAssessment = serializer.save()
+                logger.info(
+                    f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
+                )
+
+                return FindingsAssessmentContext(
+                    findings_assessment=findings_assessment
+                ), None
+            return None, Error(record=assessment_data, error=str(serializer.errors))
+
+        except Exception as e:
+            return None, Error(record={}, error=str(e))
+
+    def prepare_create(
+        self, record: dict, context: FindingsAssessmentContext
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        record_severity = record.get("severity")
+        severity = self.SEVERITY_MAP.get(record_severity, -1)
+
+        record_filtering_labels = record.get("filtering_labels")
+        if record_filtering_labels:
+            filtering_label_names = record_filtering_labels.split(
+                self.FILTERING_LABEL_SEPARATOR
+            )
+            filtering_label_names = [
+                label_name.strip() for label_name in filtering_label_names
+            ]
+        else:
+            filtering_label_names = []
+
+        filtering_label_ids: list[UUID] = []
+        unknown_label_names = []
+
+        for label_name in filtering_label_names:
+            filtering_label = FilteringLabel.objects.filter(label=label_name).first()
+            if filtering_label is None:
+                unknown_label_names.append(label_name)
+                continue
+
+            filtering_label_ids.append(filtering_label.id)
+
+        if len(unknown_label_names) > 0:
+            return {}, Error(
+                record=record,
+                error=f"Unknown filtering labels: {repr(unknown_label_names)}",
+            )
+
+        finding_data = {
+            "name": name,
+            "description": record.get("description"),
+            "ref_id": record.get("ref_id"),
+            "status": record.get("status"),
+            "findings_assessment": context.findings_assessment.id,
+            "severity": severity,
+            "filtering_labels": filtering_label_ids,
+        }
+
+        return finding_data, None
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
 
-    def process_excel_file(self, request, excel_data):
+    def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
         # Parse Excel data
         # Note: I can still pick the request.user for extra checks on the legit access for write operations
-        model_type = request.META.get("HTTP_X_MODEL_TYPE")
+        model_type_string = request.META.get("HTTP_X_MODEL_TYPE")
+        model_type = ModelType.from_string(model_type_string)
         folder_id = request.META.get("HTTP_X_FOLDER_ID")
         perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")
         framework_id = request.META.get("HTTP_X_FRAMEWORK_ID")
@@ -98,36 +588,115 @@ class LoadFileView(APIView):
         # get viewable and actionable folders, perimeters and frameworks
         # build a map from the name to the id
 
+        folders_map = get_accessible_folders_map(request.user)
+        file_type: RecordFileType = RecordFileType.XLSX
         res = None
         try:
-            # Special handling for TPRM multi-sheet import
-            if model_type == "TPRM":
-                folders_map = get_accessible_folders_map(request.user)
-                res = self._process_tprm_file(
-                    request, excel_data, folders_map, folder_id
-                )
-            # Special handling for EBIOS RM Study ARM format (multi-sheet)
-            elif model_type == "EbiosRMStudyARM":
-                res = self._process_ebios_rm_study_arm(
-                    request, excel_data, folder_id, matrix_id
-                )
-            else:
-                # Read Excel file into a pandas DataFrame
-                df = pd.read_excel(excel_data).fillna("")
-                res = self.process_data(
-                    request,
-                    df,
-                    model_type,
-                    folder_id,
-                    perimeter_id,
-                    framework_id,
-                    matrix_id,
+            if model_type is None:
+                logger.error(f"Unknown model type: {repr(model_type_string)}")
+                return Response(
+                    {"error": "UnknownModelType"},
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            # Special handling for TPRM multi-sheet import
+            match model_type:
+                case ModelType.TPRM:
+                    res = self._process_tprm_file(
+                        request, record_file, folders_map, folder_id
+                    )
+                # Special handling for EBIOS RM Study ARM format (multi-sheet)
+                case ModelType.EBIOS_RM_STUDY_ARM:
+                    res = self._process_ebios_rm_study_arm(
+                        request, record_file, folder_id, matrix_id
+                    )
+                # Special handling for EBIOS RM Study Excel export format
+                case ModelType.EBIOS_RM_STUDY_EXCEL:
+                    res = self._process_ebios_rm_study_excel(
+                        request, record_file, folder_id, matrix_id
+                    )
+                case _:
+                    is_excel = is_excel_file(record_file)
+                    if is_excel:
+                        df = pd.read_excel(record_file).fillna("")
+                    else:
+                        file_type = RecordFileType.CSV
+                        df = pd.read_csv(record_file).fillna("")
+
+                    base_context = BaseContext(
+                        request,
+                        folders_map=folders_map,
+                        folder_id=folder_id,
+                        perimeter_id=perimeter_id,
+                        matrix_id=matrix_id,
+                        framework_id=framework_id,
+                    )
+                    records = df.to_dict(orient="records")
+
+                    match model_type:
+                        case ModelType.ASSET:
+                            res = (
+                                AssetRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.APPLIED_CONTROL:
+                            res = (
+                                AppliedControlRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.EVIDENCE:
+                            res = (
+                                EvidenceRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.USER:
+                            res = (
+                                UserRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.PERIMETER:
+                            res = (
+                                PerimeterRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.THREAT:
+                            res = (
+                                ThreatRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.REFERENCE_CONTROL:
+                            res = (
+                                ReferenceControlRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.FINDINGS_ASSESSMENT:
+                            res = (
+                                FindingsAssessmentRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case _:
+                            res = self.process_data(
+                                request,
+                                records,
+                                model_type,
+                                folder_id,
+                                perimeter_id,
+                                framework_id,
+                                matrix_id,
+                            )
+
         except Exception as e:
-            logger.error("Error parsing Excel file", exc_info=e)
+            logger.error(f"Error parsing {file_type} file", exc_info=e)
             return Response(
-                {"error": "ExcelParsingFailed"},
+                {"error": file_type.get_error()},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -139,259 +708,41 @@ class LoadFileView(APIView):
     def process_data(
         self,
         request,
-        dataframe,
-        model_type,
+        records,
+        model_type: ModelType,
         folder_id,
         perimeter_id,
         framework_id,
         matrix_id=None,
     ):
-        records = dataframe.to_dict(orient="records")
         folders_map = get_accessible_folders_map(request.user)
 
         # Dispatch to appropriate handler
-        if model_type == "Asset":
-            return self._process_assets(request, records, folders_map, folder_id)
-        elif model_type == "AppliedControl":
-            return self._process_applied_controls(
-                request, records, folders_map, folder_id
-            )
-        elif model_type == "Perimeter":
-            return self._process_perimeters(request, records, folders_map, folder_id)
-        elif model_type == "User":
-            return self._process_users(request, records)
-        elif model_type == "ComplianceAssessment":
-            return self._process_compliance_assessment(
-                request, records, folder_id, perimeter_id, framework_id
-            )
-        elif model_type == "FindingsAssessment":
-            return self._process_findings_assessment(
-                request,
-                records,
-                folder_id,
-                perimeter_id,
-            )
-        elif model_type == "RiskAssessment":
-            return self._process_risk_assessment(
-                request, records, folder_id, perimeter_id, matrix_id
-            )
-        elif model_type == "ElementaryAction":
-            return self._process_elementary_actions(
-                request, records, folders_map, folder_id
-            )
-        elif model_type == "ReferenceControl":
-            return self._process_reference_controls(
-                request, records, folders_map, folder_id
-            )
-        elif model_type == "Threat":
-            return self._process_threats(request, records, folders_map, folder_id)
-        elif model_type == "TPRM":
-            return self._process_tprm(request, records, folders_map, folder_id)
-        elif model_type == "Processing":
-            return self._process_processings(request, records, folders_map, folder_id)
-        elif model_type == "Folder":
-            return self._process_folders(request, records)
-        else:
-            return {
-                "successful": 0,
-                "failed": 0,
-                "errors": [{"error": f"Unknown model type: {model_type}"}],
-            }
-
-    def _process_users(self, request, records):
-        results = {"successful": 0, "failed": 0, "errors": []}
-        for record in records:
-            # check if the email is available
-            if not record.get("email"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "email field is mandatory"}
+        match model_type:
+            case ModelType.COMPLIANCE_ASSESSMENT:
+                return self._process_compliance_assessment(
+                    request, records, folder_id, perimeter_id, framework_id
                 )
-                continue
-            # Prepare data for serializer
-            user_data = {
-                "email": record.get("email"),  # Email is mandatory
-                "first_name": record.get("first_name"),
-                "last_name": record.get("last_name"),
-            }
-            # Use the serializer for validation and saving
-            serializer = UserWriteSerializer(
-                data=user_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(f"Error creating user {record.get('email')}: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-        logger.info(
-            f"User import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
-
-    def _process_assets(self, request, records, folders_map, folder_id):
-        # Collection to track successes and errors
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        for record in records:
-            # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
-            domain = folder_id
-            if record.get("domain") != "":
-                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
-            # Check if name is provided as it's mandatory
-            if not record.get("name"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "Name field is mandatory"}
+            case ModelType.RISK_ASSESSMENT:
+                return self._process_risk_assessment(
+                    request, records, folder_id, perimeter_id, matrix_id
                 )
-                continue
-
-            # Prepare data for serializer
-            asset_data = {
-                "ref_id": record.get("ref_id", ""),
-                "name": record.get("name"),  # Name is mandatory
-                "type": record.get("type", "SP"),
-                "folder": domain,
-                "description": record.get("description", ""),
-            }
-            # Use the serializer for validation and saving
-            serializer = AssetWriteSerializer(
-                data=asset_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(f"Error creating asset {record.get('name')}: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-        logger.info(
-            f"Asset import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
-
-    def _process_applied_controls(self, request, records, folders_map, folder_id):
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        for record in records:
-            domain = folder_id
-            if record.get("domain") != "":
-                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
-
-            # Handle priority conversion with error checking
-            priority = None
-            if record.get("priority", ""):
-                try:
-                    priority = int(record.get("priority"))
-                except (ValueError, TypeError):
-                    priority = None
-
-            # Check if name is provided as it's mandatory
-            if not record.get("name"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "Name field is mandatory"}
+            case ModelType.ELEMENTARY_ACTION:
+                return self._process_elementary_actions(
+                    request, records, folders_map, folder_id
                 )
-                continue
-
-            # Prepare data for serializer
-            control_data = {
-                "ref_id": record.get("ref_id", ""),
-                "name": record.get("name"),  # Name is mandatory
-                "description": record.get("description", ""),
-                "category": record.get("category", ""),
-                "folder": domain,
-                "status": record.get("status", "to_do"),
-                "priority": priority,
-                "csf_function": record.get("csf_function", "govern"),
-            }
-
-            # Use the serializer for validation and saving
-            serializer = AppliedControlWriteSerializer(
-                data=control_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(
-                    f"Error creating applied control {record.get('name')}: {str(e)}"
+            case ModelType.PROCESSING:
+                return self._process_processings(
+                    request, records, folders_map, folder_id
                 )
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-
-        logger.info(
-            f"Applied Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
-
-    def _process_perimeters(self, request, records, folders_map, folder_id):
-        # Collection to track successes and errors
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        for record in records:
-            # if folder is set use it on the folder map to get the id, otherwise fallback to folder_id passed
-            domain = folder_id
-            if record.get("domain") != "":
-                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
-            # Check if name is provided as it's mandatory
-            if not record.get("name"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "Name field is mandatory"}
-                )
-                continue
-
-            # Prepare data for serializer
-            perimeter_data = {
-                "ref_id": record.get("ref_id", ""),
-                "name": record.get("name"),  # Name is mandatory
-                "folder": domain,
-                "description": record.get("description", ""),
-                "status": record.get("status"),
-            }
-            # Use the serializer for validation and saving
-            serializer = PerimeterWriteSerializer(
-                data=perimeter_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(
-                    f"Error creating perimeter {record.get('name')}: {str(e)}"
-                )
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-        logger.info(
-            f"Perimeter import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
+            case ModelType.FOLDER:
+                return self._process_folders(request, records)
+            case _:
+                return {
+                    "successful": 0,
+                    "failed": 0,
+                    "errors": [{"error": f"Unknown model type: {model_type}"}],
+                }
 
     def _process_elementary_actions(self, request, records, folders_map, folder_id):
         """Process elementary actions import from Excel"""
@@ -477,9 +828,9 @@ class LoadFileView(APIView):
 
             # Prepare data for serializer
             elementary_action_data = {
-                "ref_id": record.get("ref_id", ""),
                 "name": record.get("name"),  # Name is mandatory
                 "description": record.get("description", ""),
+                "ref_id": record.get("ref_id", ""),
                 "folder": domain,
                 "attack_stage": attack_stage,
             }
@@ -513,98 +864,6 @@ class LoadFileView(APIView):
         )
         return results
 
-    def _process_reference_controls(self, request, records, folders_map, folder_id):
-        """Process reference controls import from Excel"""
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        # Define category mapping
-        CATEGORY_MAP = {
-            # English
-            "policy": "policy",
-            "process": "process",
-            "technical": "technical",
-            "physical": "physical",
-            "procedure": "procedure",
-        }
-
-        # Define CSF function mapping
-        FUNCTION_MAP = {
-            # English
-            "govern": "govern",
-            "identify": "identify",
-            "protect": "protect",
-            "detect": "detect",
-            "respond": "respond",
-            "recover": "recover",
-            # Variations
-            "governance": "govern",
-        }
-
-        for record in records:
-            # Get domain from record or use fallback
-            domain = folder_id
-            if record.get("domain") != "":
-                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
-
-            # Check if name is provided as it's mandatory
-            if not record.get("name"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "Name field is mandatory"}
-                )
-                continue
-
-            # Map category
-            category = None
-            if record.get("category", ""):
-                category_value = str(record.get("category")).strip().lower()
-                category = CATEGORY_MAP.get(category_value)
-
-            # Map function (csf_function)
-            csf_function = None
-            if record.get("function", ""):
-                function_value = str(record.get("function")).strip().lower()
-                csf_function = FUNCTION_MAP.get(function_value)
-
-            # Prepare data for serializer
-            reference_control_data = {
-                "ref_id": record.get("ref_id", ""),
-                "name": record.get("name"),  # Name is mandatory
-                "description": record.get("description", ""),
-                "folder": domain,
-            }
-
-            # Add optional fields if valid
-            if category:
-                reference_control_data["category"] = category
-            if csf_function:
-                reference_control_data["csf_function"] = csf_function
-
-            # Use the serializer for validation and saving
-            serializer = ReferenceControlWriteSerializer(
-                data=reference_control_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(
-                    f"Error creating reference control {record.get('name')}: {str(e)}"
-                )
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-
-        logger.info(
-            f"Reference Control import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
-
     def _process_processings(self, request, records, folders_map, folder_id):
         results = {"successful": 0, "failed": 0, "errors": []}
 
@@ -631,10 +890,10 @@ class LoadFileView(APIView):
                 status_value = status_mapping[status_value]
 
             processing_data = {
-                "ref_id": record.get("ref_id", ""),
                 "name": record.get("name"),
-                "folder": domain_id,
                 "description": record.get("description", ""),
+                "ref_id": record.get("ref_id", ""),
+                "folder": domain_id,
                 "status": status_value,
                 "dpia_required": record.get("dpia_required", False),
                 "dpia_reference": record.get("dpia_reference", ""),
@@ -692,55 +951,6 @@ class LoadFileView(APIView):
                 results["errors"].append({"record": record, "error": str(e)})
         logger.info(
             f"Processing import complete. Success: {results['successful']}, Failed: {results['failed']}"
-        )
-        return results
-
-    def _process_threats(self, request, records, folders_map, folder_id):
-        """Process threats import from Excel"""
-        results = {"successful": 0, "failed": 0, "errors": []}
-
-        for record in records:
-            # Get domain from record or use fallback
-            domain = folder_id
-            if record.get("domain") != "":
-                domain = folders_map.get(str(record.get("domain")).lower(), folder_id)
-
-            # Check if name is provided as it's mandatory
-            if not record.get("name"):
-                results["failed"] += 1
-                results["errors"].append(
-                    {"record": record, "error": "Name field is mandatory"}
-                )
-                continue
-
-            # Prepare data for serializer
-            threat_data = {
-                "ref_id": record.get("ref_id", ""),
-                "name": record.get("name"),  # Name is mandatory
-                "description": record.get("description", ""),
-                "folder": domain,
-            }
-
-            # Use the serializer for validation and saving
-            serializer = ThreatWriteSerializer(
-                data=threat_data, context={"request": request}
-            )
-            try:
-                if serializer.is_valid(raise_exception=True):
-                    serializer.save()
-                    results["successful"] += 1
-                else:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "errors": serializer.errors}
-                    )
-            except Exception as e:
-                logger.warning(f"Error creating threat {record.get('name')}: {str(e)}")
-                results["failed"] += 1
-                results["errors"].append({"record": record, "error": str(e)})
-
-        logger.info(
-            f"Threat import complete. Success: {results['successful']}, Failed: {results['failed']}"
         )
         return results
 
@@ -818,86 +1028,6 @@ class LoadFileView(APIView):
         )
         return results
 
-    def _process_findings_assessment(self, request, records, folder_id, perimeter_id):
-        results = {"successful": 0, "failed": 0, "errors": []}
-        try:
-            perimeter = Perimeter.objects.get(id=perimeter_id)
-            folder_id = perimeter.folder.id
-
-            from datetime import datetime
-
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            assessment_name = f"Followup_{timestamp}"
-            assessment_data = {
-                "name": assessment_name,
-                "perimeter": perimeter_id,
-                "folder": folder_id,
-            }
-
-            # Use the serializer for validation and saving
-            serializer = FindingsAssessmentWriteSerializer(
-                data=assessment_data,
-                context={"request": request},
-            )
-
-            if serializer.is_valid(raise_exception=True):
-                findings_assessment = serializer.save()
-                logger.info(
-                    f"Created follow-up: {assessment_name} with ID {findings_assessment.id}"
-                )
-
-                SEVERITY_MAP = {
-                    "info": 0,
-                    "low": 1,
-                    "medium": 2,
-                    "high": 3,
-                    "critical": 4,
-                }
-
-                for record in records:
-                    try:
-                        if record.get("name") == "":
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {"record": record, "error": "Name field is mandatory"}
-                            )
-                            continue
-                        finding_data = {
-                            "ref_id": record.get("ref_id"),
-                            "name": record.get("name"),
-                            "description": record.get("description"),
-                            "status": record.get("status"),
-                            "findings_assessment": findings_assessment.id,
-                        }
-                        severity = -1
-                        if record.get("severity") != "":
-                            severity = SEVERITY_MAP.get(record.get("severity"), -1)
-                        finding_data.update({"severity": severity})
-
-                        finding_writer = FindingWriteSerializer(
-                            data=finding_data, context={"request": request}
-                        )
-                        if finding_writer.is_valid(raise_exception=True):
-                            finding_writer.save()
-                            results["successful"] += 1
-                        else:
-                            logger.info(f"Data validation failed for finding creation")
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                }
-                            )
-                    except Exception as e:
-                        logger.warning(f"Error creating finding: {str(e)}")
-                        results["failed"] += 1
-                        results["errors"].append({"record": record, "error": str(e)})
-        except Exception as e:
-            logger.error(f"Error in findings assessment processing: {str(e)}")
-            results["failed"] += len(records)
-            results["errors"].append({"error": str(e)})
-        return results
-
     def _process_compliance_assessment(
         self, request, records, folder_id, perimeter_id, framework_id
     ):
@@ -906,9 +1036,6 @@ class LoadFileView(APIView):
             # Get the perimeter object to extract its folder ID
             perimeter = Perimeter.objects.get(id=perimeter_id)
             folder_id = perimeter.folder.id
-
-            # Generate a timestamp-based name if not provided
-            from datetime import datetime
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             assessment_name = f"Assessment_{timestamp}"
@@ -1078,13 +1205,15 @@ class LoadFileView(APIView):
 
         return results
 
-    def _process_tprm_file(self, request, excel_data, folders_map, folder_id):
+    def _process_tprm_file(
+        self, request, excel_file: io.BytesIO, folders_map, folder_id
+    ):
         """
         Process TPRM multi-sheet Excel file with Entities, Solutions, and Contracts
         """
         try:
             # Read all sheets from Excel file
-            excel_file = pd.ExcelFile(excel_data)
+            excel_data = pd.ExcelFile(excel_file)
 
             # Track overall results
             overall_results = {
@@ -1098,9 +1227,9 @@ class LoadFileView(APIView):
             solution_ref_map = {}  # ref_id -> actual UUID
 
             # Process Entities sheet first
-            if "Entities" in excel_file.sheet_names:
+            if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
-                entities_df = pd.read_excel(excel_data, sheet_name="Entities").fillna(
+                entities_df = pd.read_excel(excel_file, sheet_name="Entities").fillna(
                     ""
                 )
                 entities_records = entities_df.to_dict(orient="records")
@@ -1112,9 +1241,9 @@ class LoadFileView(APIView):
                 logger.warning("No 'Entities' sheet found in Excel file")
 
             # Process Solutions sheet second (requires entities to exist)
-            if "Solutions" in excel_file.sheet_names:
+            if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
-                solutions_df = pd.read_excel(excel_data, sheet_name="Solutions").fillna(
+                solutions_df = pd.read_excel(excel_file, sheet_name="Solutions").fillna(
                     ""
                 )
                 solutions_records = solutions_df.to_dict(orient="records")
@@ -1126,9 +1255,9 @@ class LoadFileView(APIView):
                 logger.warning("No 'Solutions' sheet found in Excel file")
 
             # Process Contracts sheet last (requires entities and solutions)
-            if "Contracts" in excel_file.sheet_names:
+            if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
-                contracts_df = pd.read_excel(excel_data, sheet_name="Contracts").fillna(
+                contracts_df = pd.read_excel(excel_file, sheet_name="Contracts").fillna(
                     ""
                 )
                 contracts_records = contracts_df.to_dict(orient="records")
@@ -1503,19 +1632,7 @@ class LoadFileView(APIView):
         )
         return results
 
-    def _process_tprm(self, request, records, folders_map, folder_id):
-        """Legacy handler - TPRM should use _process_tprm_file for multi-sheet support"""
-        return {
-            "successful": 0,
-            "failed": 0,
-            "errors": [
-                {
-                    "error": "TPRM import requires multi-sheet Excel file. Please use the proper TPRM template."
-                }
-            ],
-        }
-
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> Response:
         # if not request.user.has_file_permission:
         #     logger.error("Unauthorized user tried to load a file", user=request.user)
         #     return Response({}, status=status.HTTP_403_FORBIDDEN)
@@ -1526,8 +1643,8 @@ class LoadFileView(APIView):
                 {"error": "fileLoadNoData"}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        file_obj = request.data.get("file")
-        if not file_obj:
+        file_obj: Optional[UploadedFile] = request.data.get("file")
+        if file_obj is None:
             logger.error("No file provided")
             return Response(
                 {"error": "noFileProvided"}, status=status.HTTP_400_BAD_REQUEST
@@ -1535,8 +1652,8 @@ class LoadFileView(APIView):
 
         # Check if the file is an Excel file
         file_extension = file_obj.name.split(".")[-1].lower()
-        if file_extension not in ["xlsx", "xls"]:
-            logger.error(f"Unsupported file format: {file_extension}")
+        if file_extension not in ["xlsx", "xls", "csv"]:
+            logger.error(f"Unsupported file format: {repr(file_extension)}")
             return Response(
                 {"error": "unsupportedFileFormat"}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -1560,9 +1677,6 @@ class LoadFileView(APIView):
 
             # Get the risk matrix
             risk_matrix = RiskMatrix.objects.get(id=matrix_id)
-
-            # Generate a timestamp-based name for the risk assessment
-            from datetime import datetime
 
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             assessment_name = f"Risk_Assessment_{timestamp}"
@@ -1913,7 +2027,9 @@ class LoadFileView(APIView):
             field = getattr(risk_scenario, field_name)
             field.set(control_ids)
 
-    def _process_ebios_rm_study_arm(self, request, excel_data, folder_id, matrix_id):
+    def _process_ebios_rm_study_arm(
+        self, request, excel_file: io.BytesIO, folder_id, matrix_id
+    ):
         """
         Process EBIOS RM Study import from ARM Excel format.
         This creates an EbiosRMStudy with Workshop 1, 2, and 3 objects:
@@ -1921,7 +2037,6 @@ class LoadFileView(APIView):
         - Workshop 2: RoTo Couples
         - Workshop 3: Stakeholders, Strategic Scenarios, Attack Paths
         """
-        from datetime import datetime
 
         results = {
             "successful": 0,
@@ -1945,8 +2060,8 @@ class LoadFileView(APIView):
                 risk_matrix = RiskMatrix.objects.get(id=matrix_id)
 
             # Parse ARM Excel file
-            excel_data.seek(0)
-            arm_data = process_arm_file(excel_data.read())
+            excel_file.seek(0)
+            arm_data = process_arm_file(excel_file.read())
 
             # Generate study name
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -2209,7 +2324,14 @@ class LoadFileView(APIView):
                 # =========================================================
                 results["details"]["roto_couples_created"] = 0
 
-                for roto_data in arm_data.get("roto_couples", []):
+                roto_couples_data = arm_data.get("roto_couples", [])
+                logger.info(
+                    f"[RoTo Import] Received {len(roto_couples_data)} RoTo couples from extraction"
+                )
+                for idx, roto_data in enumerate(roto_couples_data):
+                    logger.info(f"[RoTo Import] Processing #{idx + 1}: {roto_data}")
+
+                for roto_data in roto_couples_data:
                     try:
                         # Find or create the risk origin terminology
                         risk_origin_name = roto_data["risk_origin"]
@@ -2431,6 +2553,10 @@ class LoadFileView(APIView):
                 results["details"]["strategic_scenarios_created"] = 0
                 results["details"]["attack_paths_created"] = 0
 
+                logger.info(
+                    "[Strategic Scenarios Import] Starting strategic scenario creation"
+                )
+
                 # Build a lookup for RoTo couples by risk_origin + target_objective
                 roto_lookup = {}
                 for roto in study.roto_set.all():
@@ -2440,12 +2566,37 @@ class LoadFileView(APIView):
                         roto.target_objective.lower(),
                     )
                     roto_lookup[key] = roto
+                    logger.info(
+                        f"[Strategic Scenarios Import] RoTo lookup entry: "
+                        f"key={key}, roto_id={roto.id}, "
+                        f"risk_origin_name='{roto.risk_origin.name}', "
+                        f"target_objective='{roto.target_objective}'"
+                    )
 
-                for scenario_data in arm_data.get("strategic_scenarios", []):
+                logger.info(
+                    f"[Strategic Scenarios Import] RoTo lookup built with {len(roto_lookup)} entries"
+                )
+                logger.info(
+                    f"[Strategic Scenarios Import] RoTo lookup keys: {list(roto_lookup.keys())}"
+                )
+
+                scenarios_from_arm = arm_data.get("strategic_scenarios", [])
+                logger.info(
+                    f"[Strategic Scenarios Import] Processing {len(scenarios_from_arm)} scenarios from ARM data"
+                )
+
+                for scenario_data in scenarios_from_arm:
                     try:
                         scenario_name = scenario_data["name"]
                         if not scenario_name:
+                            logger.debug(
+                                "[Strategic Scenarios Import] Skipping scenario with no name"
+                            )
                             continue
+
+                        logger.info(
+                            f"[Strategic Scenarios Import] Processing scenario: '{scenario_name}'"
+                        )
 
                         # Find the matching RoTo couple
                         # Normalize the risk origin name the same way we do when creating terminologies
@@ -2455,33 +2606,66 @@ class LoadFileView(APIView):
                             "target_objective", ""
                         ).lower()
 
-                        roto = roto_lookup.get((risk_origin_name, target_objective))
+                        logger.info(
+                            f"[Strategic Scenarios Import] Looking for RoTo match: "
+                            f"risk_origin_raw='{risk_origin_raw}', "
+                            f"risk_origin_normalized='{risk_origin_name}', "
+                            f"target_objective='{target_objective}'"
+                        )
+
+                        # Attempt 1: Exact match with underscore normalization
+                        lookup_key_1 = (risk_origin_name, target_objective)
+                        roto = roto_lookup.get(lookup_key_1)
+                        logger.info(
+                            f"[Strategic Scenarios Import] Attempt 1 (underscore normalized): "
+                            f"key={lookup_key_1}, found={roto is not None}"
+                        )
 
                         if not roto:
-                            # Try without underscore normalization
+                            # Attempt 2: Try without underscore normalization
                             risk_origin_name_alt = risk_origin_raw.lower()
-                            roto = roto_lookup.get(
-                                (risk_origin_name_alt, target_objective)
+                            lookup_key_2 = (risk_origin_name_alt, target_objective)
+                            roto = roto_lookup.get(lookup_key_2)
+                            logger.info(
+                                f"[Strategic Scenarios Import] Attempt 2 (lowercase only): "
+                                f"key={lookup_key_2}, found={roto is not None}"
                             )
 
                         if not roto:
-                            # Try partial matching on target objective
+                            # Attempt 3: Try partial matching on target objective
+                            logger.info(
+                                f"[Strategic Scenarios Import] Attempt 3 (partial match): "
+                                f"searching for risk_origin containing '{risk_origin_name}' "
+                                f"and target_objective containing '{target_objective}'"
+                            )
                             for key, r in roto_lookup.items():
                                 if (
                                     key[0] == risk_origin_name
                                     and target_objective in key[1]
                                 ):
                                     roto = r
+                                    logger.info(
+                                        f"[Strategic Scenarios Import] Attempt 3: Partial match found with key={key}"
+                                    )
                                     break
 
                         if not roto:
+                            error_msg = f"Could not find RoTo couple for '{risk_origin_name}' - '{target_objective}'"
+                            logger.warning(
+                                f"[Strategic Scenarios Import] FAILED to match scenario '{scenario_name}': {error_msg}"
+                            )
                             results["errors"].append(
                                 {
                                     "strategic_scenario": scenario_name,
-                                    "error": f"Could not find RoTo couple for '{risk_origin_name}' - '{target_objective}'",
+                                    "error": error_msg,
                                 }
                             )
                             continue
+
+                        logger.info(
+                            f"[Strategic Scenarios Import] SUCCESS: Matched scenario '{scenario_name}' "
+                            f"to RoTo id={roto.id} ('{roto.risk_origin.name}' - '{roto.target_objective}')"
+                        )
 
                         # Create the strategic scenario
                         strategic_scenario = StrategicScenario.objects.create(
@@ -2491,6 +2675,9 @@ class LoadFileView(APIView):
                             ref_id=scenario_data.get("ref_id", ""),
                         )
                         results["details"]["strategic_scenarios_created"] += 1
+                        logger.info(
+                            f"[Strategic Scenarios Import] Created StrategicScenario id={strategic_scenario.id}, name='{scenario_name}'"
+                        )
 
                         # Create the attack path if provided
                         attack_path_name = scenario_data.get("attack_path_name", "")
@@ -2502,8 +2689,15 @@ class LoadFileView(APIView):
                                 ref_id=scenario_data.get("attack_path_ref_id", ""),
                             )
                             results["details"]["attack_paths_created"] += 1
+                            logger.info(
+                                f"[Strategic Scenarios Import] Created AttackPath id={attack_path.id}, name='{attack_path_name}'"
+                            )
 
                     except Exception as e:
+                        logger.error(
+                            f"[Strategic Scenarios Import] Exception processing scenario '{scenario_data.get('name', 'unknown')}': {str(e)}",
+                            exc_info=True,
+                        )
                         results["errors"].append(
                             {
                                 "strategic_scenario": scenario_data.get(
@@ -2584,6 +2778,342 @@ class LoadFileView(APIView):
             )
         except Exception as e:
             logger.error(f"Error processing EBIOS RM Study: {str(e)}", exc_info=True)
+            results["failed"] = 1
+            results["errors"].append({"error": str(e)})
+
+        return results
+
+    def _process_ebios_rm_study_excel(
+        self, request, excel_file: io.BytesIO, folder_id, matrix_id
+    ):
+        """
+        Process EBIOS RM Study from the Excel export format.
+        This format uses sheet prefixes like "1.1 Study", "1.3 Feared Events", etc.
+        """
+        from ebios_rm.models import OperatingMode
+
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "errors": [],
+            "details": {
+                "study": None,
+                "assets_created": 0,
+                "feared_events_created": 0,
+                "ro_to_couples_created": 0,
+                "stakeholders_created": 0,
+                "strategic_scenarios_created": 0,
+                "attack_paths_created": 0,
+                "elementary_actions_created": 0,
+                "operational_scenarios_created": 0,
+                "operating_modes_created": 0,
+            },
+        }
+
+        try:
+            folder = Folder.objects.get(id=folder_id)
+            risk_matrix = RiskMatrix.objects.get(id=matrix_id) if matrix_id else None
+
+            # Build matrix mappings for looking up likelihood/gravity by display name
+            matrix_mappings = {"probability": {}, "impact": {}}
+            if risk_matrix:
+                matrix_mappings = self._build_matrix_mappings(risk_matrix)
+
+            # Parse the Excel file
+            data = process_ebios_rm_excel(excel_file.read())
+            study_data = data.get("study", {})
+
+            # Create the study
+            study_payload = {
+                "name": study_data.get("name") or f"Imported Study",
+                "description": study_data.get("description", ""),
+                "ref_id": study_data.get("ref_id", ""),
+                "version": study_data.get("version", ""),
+                "folder": str(folder.id),
+            }
+            if risk_matrix:
+                study_payload["risk_matrix"] = str(risk_matrix.id)
+
+            serializer = EbiosRMStudyWriteSerializer(
+                data=study_payload, context={"request": request}
+            )
+
+            if serializer.is_valid():
+                study = serializer.save()
+                results["details"]["study"] = str(study.id)
+
+                # Create assets and build name->id mapping
+                asset_name_to_id = {}
+                for asset_data in data.get("assets", []):
+                    asset, created = Asset.objects.get_or_create(
+                        name=asset_data["name"],
+                        folder=folder,
+                        defaults={
+                            "ref_id": asset_data.get("ref_id", ""),
+                            "description": asset_data.get("description", ""),
+                            "type": asset_data.get("type", ""),
+                        },
+                    )
+                    asset_name_to_id[asset.name] = asset
+                    if created:
+                        results["details"]["assets_created"] += 1
+
+                # Link assets to study
+                study.assets.set(asset_name_to_id.values())
+
+                # Create feared events and build name lookup
+                feared_event_lookup = {}
+                for fe_data in data.get("feared_events", []):
+                    # Map gravity display name to value
+                    gravity_val = self._map_risk_value(
+                        fe_data.get("gravity", ""), matrix_mappings["impact"]
+                    )
+                    fe = FearedEvent.objects.create(
+                        ebios_rm_study=study,
+                        name=fe_data["name"],
+                        ref_id=fe_data.get("ref_id", ""),
+                        description=fe_data.get("description", ""),
+                        gravity=gravity_val,
+                        is_selected=fe_data.get("is_selected", False),
+                        justification=fe_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link assets to feared event
+                    for asset_name in fe_data.get("assets", []):
+                        if asset_name in asset_name_to_id:
+                            fe.assets.add(asset_name_to_id[asset_name])
+                    feared_event_lookup[fe.name] = fe
+                    results["details"]["feared_events_created"] += 1
+
+                # Create RO/TO couples
+                roto_lookup = {}
+                for roto_data in data.get("ro_to_couples", []):
+                    risk_origin_name = roto_data.get("risk_origin", "")
+                    # Find or create risk origin terminology
+                    risk_origin = None
+                    if risk_origin_name:
+                        # Try to find existing terminology by name (case-insensitive)
+                        risk_origin = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                            name__iexact=risk_origin_name,
+                        ).first()
+                        if not risk_origin:
+                            risk_origin = Terminology.objects.create(
+                                name=risk_origin_name,
+                                field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                                folder=Folder.get_root_folder(),
+                                is_visible=True,
+                            )
+
+                    roto = RoTo.objects.create(
+                        ebios_rm_study=study,
+                        risk_origin=risk_origin,
+                        target_objective=roto_data.get("target_objective", ""),
+                        is_selected=roto_data.get("is_selected", False),
+                        justification=roto_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link feared events to RO/TO
+                    for fe_name in roto_data.get("feared_events", []):
+                        if fe_name in feared_event_lookup:
+                            roto.feared_events.add(feared_event_lookup[fe_name])
+                    # Build lookup key
+                    key = (
+                        risk_origin_name.lower() if risk_origin_name else "",
+                        roto_data.get("target_objective", "").lower(),
+                    )
+                    roto_lookup[key] = roto
+                    results["details"]["ro_to_couples_created"] += 1
+
+                # Create stakeholders
+                stakeholder_lookup = {}
+                for sh_data in data.get("stakeholders", []):
+                    entity_name = sh_data.get("entity", "")
+                    entity = None
+                    if entity_name:
+                        entity, _ = Entity.objects.get_or_create(
+                            name=entity_name,
+                            folder=folder,
+                        )
+
+                    category_name = sh_data.get("category", "")
+                    category = None
+                    if category_name:
+                        # Try to find existing terminology by name (case-insensitive)
+                        category = Terminology.objects.filter(
+                            field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                            name__iexact=category_name,
+                        ).first()
+                        if not category:
+                            category = Terminology.objects.create(
+                                name=category_name,
+                                field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                                folder=Folder.get_root_folder(),
+                                is_visible=True,
+                            )
+
+                    stakeholder = Stakeholder.objects.create(
+                        ebios_rm_study=study,
+                        entity=entity,
+                        category=category,
+                        current_dependency=sh_data.get("current_dependency") or 0,
+                        current_penetration=sh_data.get("current_penetration") or 0,
+                        current_maturity=sh_data.get("current_maturity") or 0,
+                        current_trust=sh_data.get("current_trust") or 0,
+                        residual_dependency=sh_data.get("residual_dependency") or 0,
+                        residual_penetration=sh_data.get("residual_penetration") or 0,
+                        residual_maturity=sh_data.get("residual_maturity") or 0,
+                        residual_trust=sh_data.get("residual_trust") or 0,
+                        is_selected=sh_data.get("is_selected", False),
+                        justification=sh_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    stakeholder_lookup[str(stakeholder)] = stakeholder
+                    results["details"]["stakeholders_created"] += 1
+
+                # Create strategic scenarios
+                scenario_lookup = {}
+                for ss_data in data.get("strategic_scenarios", []):
+                    ro_name = ss_data.get("risk_origin", "").lower()
+                    to_name = ss_data.get("target_objective", "").lower()
+                    roto = roto_lookup.get((ro_name, to_name))
+
+                    scenario = StrategicScenario.objects.create(
+                        ebios_rm_study=study,
+                        name=ss_data["name"],
+                        ref_id=ss_data.get("ref_id", ""),
+                        description=ss_data.get("description", ""),
+                        ro_to_couple=roto,
+                        folder=folder,
+                    )
+                    scenario_lookup[scenario.name] = scenario
+                    results["details"]["strategic_scenarios_created"] += 1
+
+                # Create attack paths
+                attack_path_lookup = {}
+                for ap_data in data.get("attack_paths", []):
+                    scenario_name = ap_data.get("strategic_scenario", "")
+                    scenario = scenario_lookup.get(scenario_name)
+
+                    attack_path = AttackPath.objects.create(
+                        ebios_rm_study=study,
+                        name=ap_data["name"],
+                        ref_id=ap_data.get("ref_id", ""),
+                        description=ap_data.get("description", ""),
+                        strategic_scenario=scenario,
+                        is_selected=ap_data.get("is_selected", False),
+                        justification=ap_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    # Link stakeholders
+                    for sh_str in ap_data.get("stakeholders", []):
+                        if sh_str in stakeholder_lookup:
+                            attack_path.stakeholders.add(stakeholder_lookup[sh_str])
+                    attack_path_lookup[attack_path.name] = attack_path
+                    results["details"]["attack_paths_created"] += 1
+
+                # Create elementary actions
+                ea_lookup = {}
+                for ea_data in data.get("elementary_actions", []):
+                    # Map attack_stage display name back to value
+                    attack_stage = 0  # Default to KNOW
+                    stage_name = ea_data.get("attack_stage", "").lower()
+                    if "initial" in stage_name or "enter" in stage_name:
+                        attack_stage = 1
+                    elif "discovery" in stage_name or "discover" in stage_name:
+                        attack_stage = 2
+                    elif "exploit" in stage_name:
+                        attack_stage = 3
+
+                    ea = ElementaryAction.objects.create(
+                        name=ea_data["name"],
+                        ref_id=ea_data.get("ref_id", ""),
+                        description=ea_data.get("description", ""),
+                        attack_stage=attack_stage,
+                        folder=folder,
+                    )
+                    ea_lookup[ea.name] = ea
+                    results["details"]["elementary_actions_created"] += 1
+
+                # Create operational scenarios
+                # Note: OperationalScenario.name is a computed property from attack_path
+                op_scenario_lookup = {}
+                for os_data in data.get("operational_scenarios", []):
+                    from ebios_rm.models import OperationalScenario
+
+                    ap_name = os_data.get("attack_path", "")
+                    attack_path = attack_path_lookup.get(ap_name)
+
+                    if not attack_path:
+                        continue
+
+                    # Map likelihood display name to value
+                    likelihood_val = self._map_risk_value(
+                        os_data.get("likelihood", ""), matrix_mappings["probability"]
+                    )
+
+                    op_scenario = OperationalScenario.objects.create(
+                        ebios_rm_study=study,
+                        attack_path=attack_path,
+                        operating_modes_description=os_data.get(
+                            "operating_modes_description", ""
+                        ),
+                        likelihood=likelihood_val,
+                        is_selected=os_data.get("is_selected", False),
+                        justification=os_data.get("justification", ""),
+                        folder=folder,
+                    )
+                    op_scenario_lookup[op_scenario.name] = op_scenario
+                    results["details"]["operational_scenarios_created"] += 1
+
+                # Create operating modes
+                for om_data in data.get("operating_modes", []):
+                    os_name = om_data.get("operational_scenario", "")
+                    op_scenario = op_scenario_lookup.get(os_name)
+
+                    if op_scenario:
+                        # Map likelihood display name to value
+                        om_likelihood = self._map_risk_value(
+                            om_data.get("likelihood", ""),
+                            matrix_mappings["probability"],
+                        )
+
+                        om = OperatingMode.objects.create(
+                            name=om_data["name"],
+                            ref_id=om_data.get("ref_id", ""),
+                            description=om_data.get("description", ""),
+                            operational_scenario=op_scenario,
+                            likelihood=om_likelihood,
+                            folder=folder,
+                        )
+                        # Link elementary actions
+                        for ea_name in om_data.get("elementary_actions", []):
+                            if ea_name in ea_lookup:
+                                om.elementary_actions.add(ea_lookup[ea_name])
+                        results["details"]["operating_modes_created"] += 1
+
+                results["successful"] = 1
+
+            else:
+                results["failed"] = 1
+                results["errors"].append(
+                    {"error": "Failed to create study", "details": serializer.errors}
+                )
+
+        except Folder.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Folder with ID {folder_id} does not exist"}
+            )
+        except RiskMatrix.DoesNotExist:
+            results["failed"] = 1
+            results["errors"].append(
+                {"error": f"Risk matrix with ID {matrix_id} does not exist"}
+            )
+        except Exception as e:
+            logger.error(
+                f"Error processing EBIOS RM Study Excel: {str(e)}", exc_info=True
+            )
             results["failed"] = 1
             results["errors"].append({"error": str(e)})
 

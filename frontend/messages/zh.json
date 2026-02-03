@@ -173,6 +173,12 @@
 	"providerColon": "供应商：",
 	"domain": "域",
 	"domainSemiColon": "域：",
+	"allDomains": "所有域",
+	"selectDomain": "选择域",
+	"focusMode": "聚焦模式",
+	"focusModeTooltip": "聚焦于特定域",
+	"clearFocus": "清除焦点",
+	"noDomainsAvailable": "没有可用的域",
 	"urn": "URN",
 	"treatmentStatus": "处置决策",
 	"qualification": "定性",
@@ -516,7 +522,7 @@
 	"scopedAsset": "通常是此条目要关注的主要资产/业务流程",
 	"copyright": "版权",
 	"addYourLibrary": "添加您自己的库",
-	"libraryFileInYaml": "YAML格式的库文件",
+	"libraryFileInYamlOrXlsx": "YAML格式的库文件",
 	"importBackup": "导入备份",
 	"exportBackup": "导出备份",
 	"confirmImportBackup": "确定要导入此备份吗？这将覆盖所有现有数据，包括您当前的凭据。",
@@ -695,6 +701,7 @@
 	"mediumSOK": "支持评估的知识可信度中等",
 	"highSOK": "支持评估的知识可信度较高",
 	"libraryLoadingError": "加载库时发生错误",
+	"processingError": "处理错误",
 	"libraryAlreadyLoadedError": "此库已加载",
 	"invalidLibraryFileError": "无效的库文件。请确保格式正确。",
 	"taintedFormMessage": "您要离开此页面吗？所做的更改可能不会保存。",
@@ -2609,6 +2616,8 @@
 	"purposesDescription": "数据处理目的（GDPR）",
 	"rightRequestsDescription": "数据主体权利请求（GDPR）",
 	"dataBreachesDescription": "数据泄露事件和通知",
+	"gdpr": "GDPR / 隐私",
+	"gdprDescription": "数据保护和隐私管理功能（GDPR合规）",
 	"orderedEntryListAddNewEntry": "添加新条目",
 	"orderedEntryListRefIdPlaceholder": "参考ID",
 	"orderedEntryListNamePlaceholder": "名称",
@@ -2777,6 +2786,16 @@
 			"match": {
 				"countPlural=one": "{count} 天",
 				"countPlural=other": "{count} 天"
+			}
+		}
+	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} 个对象不可见。",
+				"countPlural=other": "{count} 个对象不可见。"
 			}
 		}
 	],
@@ -3008,6 +3027,7 @@
 	"stakeholderEntityHelpText": "生态系统中的利益相关者",
 	"stakeholderIsSelectedHelpText": "为研究选择利益相关者",
 	"startDateHelpText": "开始日期（用于时间线）",
+	"expirationDateMustBeOnOrAfterStartDate": "结束日期必须与开始日期相同或晚于开始日期",
 	"step": "步骤 {number}",
 	"strategicScenarioHelpText": "从风险来源到预期目标的攻击路径集合",
 	"studyAssetHelpText": "与研究对象相关的主要（业务资产）和支持资产",
@@ -3082,5 +3102,8 @@
 	"valueMappingForField": "{field} 映射",
 	"valueMappingToField": "映射到：{field}",
 	"widgetCount": "小部件计数",
-	"youCanSetPasswordHere": "您可以在此设置密码"
+	"youCanSetPasswordHere": "您可以在此设置密码",
+	"assignmentSettings": "分配设置",
+	"allowAssignmentsToEntities": "允许将任务分配给实体",
+	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。"
 }

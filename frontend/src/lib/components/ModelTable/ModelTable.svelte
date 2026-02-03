@@ -24,6 +24,7 @@
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields } from '$lib/utils/table';
 	import type { urlModel } from '$lib/utils/types.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
@@ -41,6 +42,14 @@
 	import { canPerformAction } from '$lib/utils/access-control';
 	import { ContextMenu } from 'bits-ui';
 	import { tableHandlers, tableStates } from '$lib/utils/stores';
+	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
+	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalComponent,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
 
 	interface Props {
 		// Props
@@ -84,6 +93,7 @@
 		folderId?: string;
 		forcePreventDelete?: boolean;
 		forcePreventEdit?: boolean;
+		expectedCount?: number;
 		onFilterChange?: (filters: Record<string, any>) => void;
 		quickFilters?: import('svelte').Snippet<[{ [key: string]: any }, typeof _form, () => void]>;
 		optButton?: import('svelte').Snippet;
@@ -140,6 +150,7 @@
 		folderId = '',
 		forcePreventDelete = false,
 		forcePreventEdit = false,
+		expectedCount = undefined,
 		onFilterChange = () => {},
 		quickFilters,
 		optButton,
@@ -151,6 +162,8 @@
 		actionsHead,
 		tail
 	}: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
 
 	let model = $derived(URL_MODEL_MAP[URLModel]);
 	const tableSource: TableSource = $derived(
@@ -205,7 +218,8 @@
 
 	const user = page.data.user;
 
-	// Replace $$props.class with classProp for compatibility
+	const isRelatedField = (fieldName: string): boolean => relatedFieldNames.has(fieldName);
+
 	let classProp = ''; // Replacing $$props.class
 
 	let classesBase = $derived(`${classProp || backgroundColor}`);
@@ -225,12 +239,18 @@
 		{
 			rowsPerPage: pagination
 				? ($tableStates[page.url.pathname]?.rowsPerPage ?? numberRowsPerPage)
-				: 0, // Using 0 as rowsPerPage value when pagination is false disables paging.
+				: 0,
 			totalRows: source?.meta?.count
 		}
 	);
 	const rows = handler.getRows();
 	let invalidateTable = $state(false);
+
+	const relatedFieldNames = $derived(
+		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
+
+	const hiddenRowCount = $derived(typeof expectedCount === 'number' ? expectedCount : 0);
 
 	$tableHandlers[baseEndpoint] = handler;
 
@@ -268,7 +288,8 @@
 	const preventDelete = (row: TableSource) =>
 		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
-		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
+		row?.meta?.builtin ||
+		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments?.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
@@ -397,7 +418,10 @@
 									user.root_folder_id)
 					})
 				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)
+			: false) &&
+			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
+				URLModel === 'terminologies' ||
+				URLModel === 'entities')
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -405,8 +429,91 @@
 			URLModel &&
 			!['frameworks', 'risk-matrices', 'ebios-rm'].includes(URLModel)
 	);
+
+	let contextMenuCanDeleteObject = $derived(
+		!preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] }) &&
+			(model
+				? page.params.id
+					? canPerformAction({
+							user,
+							action: 'delete',
+							model: model.name,
+							domain:
+								model.name === 'folder'
+									? contextMenuOpenRow?.meta.id
+									: (contextMenuOpenRow?.meta.folder?.id ??
+										contextMenuOpenRow?.meta.folder ??
+										user.root_folder_id)
+						})
+					: Object.hasOwn(user.permissions, `delete_${model.name}`)
+				: false)
+	);
+
+	let contextMenuDisplayDelete = $derived(contextMenuCanDeleteObject && deleteForm !== undefined);
+
+	function contextMenuModalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
+		const modalComponent: ModalComponent = {
+			ref: DeleteConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: id,
+				debug: false,
+				URLModel: URLModel
+			}
+		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? row.meta?.str ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name as string })
+				: m.deleteModalMessage({ name: name as string });
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: body
+		};
+		modalStore.trigger(modal);
+	}
+
+	function contextMenuPromptModalConfirmDelete(
+		id: string,
+		row: { [key: string]: string | number | boolean | null }
+	): void {
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				_form: deleteForm,
+				id: id,
+				debug: false,
+				URLModel: URLModel,
+				formAction: '?/delete'
+			}
+		};
+		const name =
+			URLModel === 'users' && row.first_name
+				? `${row.first_name} ${row.last_name} (${row.email})`
+				: (row.name ?? Object.values(row)[0]);
+		const body =
+			URLModel === 'users'
+				? m.deleteUserMessage({ name: name as string })
+				: m.deleteModalMessage({ name: name as string });
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.deleteModalTitle(),
+			body: body
+		};
+		modalStore.trigger(modal);
+	}
+
 	let filterCount = $derived(
-		filteredFields.reduce((acc, field) => acc + filterValues[field].length, 0)
+		filteredFields?.reduce((acc, field) => acc + filterValues?.[field]?.length, 0)
 	);
 
 	let classesHexBackgroundText = $derived((backgroundHexColor: string) => {
@@ -526,6 +633,13 @@
 	{@render quickFilters?.(filterValues, _form, () => {
 		invalidateTable = true;
 	})}
+	{#if hiddenRowCount > 0}
+		<div
+			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
+		>
+			{m.objectsNotVisible({ count: hiddenRowCount })}
+		</div>
+	{/if}
 	<!-- Table -->
 	<table
 		class="table caption-bottom {classesTable}"
@@ -559,20 +673,14 @@
 			{/if}
 		</thead>
 		<ContextMenu.Root>
-			<tbody class="w-full border-b border-b-surface-100-900 {regionBody}">
-				{#each $rows as row, rowIndex}
-					{@const meta = row?.meta ?? row}
-					<ContextMenu.Trigger asChild>
-						{#snippet children({ builder })}
+			<ContextMenu.Trigger>
+				{#snippet child({ props })}
+					<tbody {...props} class="w-full border-b border-b-surface-100-900 {regionBody}">
+						{#each $rows as row, rowIndex}
+							{@const meta = row?.meta ?? row}
 							<tr
-								use:builder.action
-								{...builder}
-								onclick={(e) => {
-									onRowClick(e, rowIndex);
-								}}
-								onkeydown={(e) => {
-									onRowKeydown(e, rowIndex);
-								}}
+								onclick={(e) => onRowClick(e, rowIndex)}
+								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
@@ -597,36 +705,61 @@
 														class="base-font-family whitespace-pre-line break-words"
 													>
 														{#if Array.isArray(value)}
-															<ul class="list-disc pl-4 whitespace-normal">
-																{#each [...value].sort((a, b) => {
-																	if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
-																	return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
-																}) as val}
-																	<li>
-																		{#if key === 'linked_models' && typeof val === 'string'}
-																			{safeTranslate(convertLinkedModelName(val))}
-																		{:else if key === 'security_objectives' || key === 'security_capabilities'}
-																			{@const [securityObjectiveName, securityObjectiveValue] =
-																				Object.entries(val)[0]}
-																			{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																		{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
-																			{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
-																			<Anchor href={itemHref} class="anchor" stopPropagation
-																				>{val.str}</Anchor
-																			>
-																		{:else if val.str}
-																			{safeTranslate(val.str)}
-																		{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
-																			<span class="text"
-																				>{unsafeTranslate(val.split(':')[0] + 'Colon')}
-																				{val.split(':')[1]}</span
-																			>
-																		{:else}
-																			{val ?? '-'}
-																		{/if}
-																	</li>
-																{/each}
-															</ul>
+															{@const hiddenCount = isRelatedField(key) ? countMasked(value) : 0}
+															{@const visibleValues = isRelatedField(key)
+																? value.filter((item) => !isMaskedPlaceholder(item))
+																: value}
+															{#if visibleValues.length > 0}
+																<ul class="list-disc pl-4 whitespace-normal">
+																	{#each [...visibleValues].sort((a, b) => {
+																		if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
+																		return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
+																	}) as val}
+																		<li>
+																			{#if key === 'linked_models' && typeof val === 'string'}
+																				{safeTranslate(convertLinkedModelName(val))}
+																			{:else if key === 'security_objectives' || key === 'security_capabilities'}
+																				{@const [securityObjectiveName, securityObjectiveValue] =
+																					Object.entries(val)[0]}
+																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
+																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
+																				<Anchor href={itemHref} class="anchor" stopPropagation
+																					>{safeTranslate(val.str)}</Anchor
+																				>
+																			{:else if val.str}
+																				{safeTranslate(val.str)}
+																			{:else if typeof val === 'string' && val.includes(':') && unsafeTranslate(val.split(':')[0])}
+																				<span class="text"
+																					>{unsafeTranslate(val.split(':')[0] + 'Colon')}
+																					{val.split(':')[1]}</span
+																				>
+																			{:else}
+																				{val ?? '-'}
+																			{/if}
+																		</li>
+																	{/each}
+																</ul>
+																{#if hiddenCount > 0}
+																	<p class="mt-1 text-xs text-yellow-700">
+																		{m.objectsNotVisible({ count: hiddenCount })}
+																	</p>
+																{/if}
+															{:else if hiddenCount > 0}
+																<p class="text-xs text-yellow-700">
+																	{m.objectsNotVisible({ count: hiddenCount })}
+																</p>
+															{:else}
+																--
+															{/if}
+														{:else if isMaskedPlaceholder(value)}
+															{#if isRelatedField(key)}
+																<p class="text-xs text-yellow-700">
+																	{m.objectsNotVisible({ count: 1 })}
+																</p>
+															{:else}
+																--
+															{/if}
 														{:else if value && value.str}
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
@@ -638,11 +771,11 @@
 																	>
 																{:else}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{value.str}</Anchor
+																		>{safeTranslate(value.str)}</Anchor
 																	>
 																{/if}
 															{:else}
-																{value.str ?? '-'}
+																{safeTranslate(value.str) ?? '-'}
 															{/if}
 														{:else if value && value.hexcolor}
 															<p
@@ -653,7 +786,7 @@
 															>
 																{safeTranslate(value.name ?? value.str) ?? '-'}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
@@ -714,13 +847,14 @@
 												meta: row.meta
 											})}{:else if row.meta[identifierField]}
 											{@const actionsComponent = fieldComponentMap[CUSTOM_ACTIONS_COMPONENT]}
-											{@const actionsURLModel = URLModel}
 											<TableRowActions
 												deleteForm={disableDelete ? null : deleteForm}
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
+												editURL={!(row.meta.builtin || row.meta.urn) ||
+												URLModel === 'terminologies' ||
+												URLModel === 'entities'
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -752,13 +886,13 @@
 									</td>
 								{/if}
 							</tr>
-						{/snippet}
-					</ContextMenu.Trigger>
-				{/each}
-			</tbody>
-			{#if contextMenuDisplayEdit || Object.hasOwn(contextMenuActions, URLModel)}
+						{/each}
+					</tbody>
+				{/snippet}
+			</ContextMenu.Trigger>
+			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 w-full max-w-[229px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default"
+					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
@@ -766,33 +900,52 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
+					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							onclick={() => {
+								goto(
+									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
+									{
+										breadcrumbAction: 'push'
+									}
+								);
+							}}
 						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.edit()}</Anchor
-							>
+							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							onclick={() => {
+								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
+									breadcrumbAction: 'push'
+								});
+							}}
 						>
-							<Anchor
-								href={`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`}
-								class="flex items-cente w-full h-full cursor-default outline-hidden ring-0! ring-transparent!"
-								>{m.view()}</Anchor
-							>
+							{m.view()}
 						</ContextMenu.Item>
 					{/if}
-					<!-- {#if !preventDelete(contextMenuOpenRow ?? { head: [], body: [], meta: [] })} -->
-					<!-- 	<ContextMenu.Item -->
-					<!-- 		class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-surface-50" -->
-					<!-- 	> -->
-					<!-- 		<div class="flex items-center w-full h-full">{m.delete()}</div> -->
-					<!-- 	</ContextMenu.Item> -->
-					<!-- {/if} -->
+					{#if contextMenuDisplayDelete}
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Item
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
+							onclick={() => {
+								if (URLModel === 'folders') {
+									contextMenuPromptModalConfirmDelete(
+										contextMenuOpenRow?.meta[identifierField],
+										contextMenuOpenRow
+									);
+								} else {
+									contextMenuModalConfirmDelete(
+										contextMenuOpenRow?.meta[identifierField],
+										contextMenuOpenRow
+									);
+								}
+							}}
+						>
+							{m.delete()}
+						</ContextMenu.Item>
+					{/if}
 				</ContextMenu.Content>
 			{/if}
 		</ContextMenu.Root>

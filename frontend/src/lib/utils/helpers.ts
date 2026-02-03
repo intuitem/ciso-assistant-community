@@ -52,6 +52,29 @@ export function displayScoreColor(value: number | null, max_score: number, inver
 	}
 }
 
+export function getScoreHexColor(value: number | null, max_score: number, inversedColors = false) {
+	value ??= 0;
+	const percentage = max_score > 0 ? (value * 100) / max_score : 0;
+	// Tailwind color hex equivalents
+	const colors = {
+		red400: '#f87171',
+		orange400: '#fb923c',
+		yellow300: '#fde047',
+		green300: '#86efac'
+	};
+	if (inversedColors) {
+		if (percentage < 25) return colors.green300;
+		if (percentage < 50) return colors.yellow300;
+		if (percentage < 75) return colors.orange400;
+		return colors.red400;
+	} else {
+		if (percentage < 25) return colors.red400;
+		if (percentage < 50) return colors.orange400;
+		if (percentage < 75) return colors.yellow300;
+		return colors.green300;
+	}
+}
+
 export function formatScoreValue(value: number, max_score: number, fullDonut = false) {
 	if (value === null) {
 		return 0;

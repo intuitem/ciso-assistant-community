@@ -117,6 +117,12 @@
 	"providerColon": "Leverandør:",
 	"domain": "Domæne",
 	"domainSemiColon": "Domæne:",
+	"allDomains": "Alle domæner",
+	"selectDomain": "Vælg domæne",
+	"focusMode": "Fokustilstand",
+	"focusModeTooltip": "Fokuser på et specifikt domæne",
+	"clearFocus": "Ryd fokus",
+	"noDomainsAvailable": "Ingen domæner tilgængelige",
 	"urn": "URN",
 	"treatmentStatus": "Behandlingsstatus",
 	"qualification": "Kvalifikation",
@@ -385,7 +391,7 @@
 	"dependencies": "Afhængigheder",
 	"copyright": "Ophavsret",
 	"addYourLibrary": "Tilføj dit eget bibliotek",
-	"libraryFileInYaml": "Biblioteksfil i YAML-format",
+	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML-format",
 	"importBackup": "Importér backup",
 	"exportBackup": "Eksportér backup",
 	"confirmImportBackup": "Er du sikker på, at du vil importere denne backup? Dette vil overskrive alle eksisterende data, inklusive dine nuværende legitimationsoplysninger.",
@@ -554,6 +560,7 @@
 	"mediumSOK": "Styrken af viden der understøtter vurderingen er middel",
 	"highSOK": "Styrken af viden der understøtter vurderingen er høj",
 	"libraryLoadingError": "Der opstod en fejl under indlæsning af biblioteket",
+	"processingError": "Behandlingsfejl",
 	"libraryAlreadyLoadedError": "Dette bibliotek er allerede indlæst",
 	"invalidLibraryFileError": "Ugyldig biblioteksfil. Kontroller at formatet er korrekt",
 	"taintedFormMessage": "Vil du forlade denne side? Ændringer du har lavet gemmes muligvis ikke",
@@ -793,6 +800,7 @@
 	"graph": "Graf",
 	"startDate": "Startdato",
 	"startDateHelpText": "Startdato (nyttig til tidslinje)",
+	"expirationDateMustBeOnOrAfterStartDate": "Udløbsdatoen skal være på samme dag eller efter startdatoen",
 	"backupLoadingError": "Der opstod en fejl under indlæsning af backup",
 	"backupVersionError": "Kan ikke indlæse backup, versionen er ugyldig",
 	"confirmYes": "Bekræft ved at skrive 'yes' nedenfor:",
@@ -1239,6 +1247,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt ikke synligt.",
+				"countPlural=other": "{count} objekter ikke synlige."
+			}
+		}
+	],
 	"matchingScenarios": "Matchende scenarier",
 	"select": "Vælg",
 	"deselect": "Fravælg",
@@ -1343,6 +1361,10 @@
 	"isCustom": "Brugerdefineret",
 	"errorUnloadingLibrary": "Fejl under aflæsning af bibliotek",
 	"librarySuccessfullyUnloaded": "Biblioteket blev afindlæst med succes",
-	"libraryFilteringLabels": "Bibliotek etiketter",
-	"campaignsDescription": "Styring af revisionskampagner"
+	"campaignsDescription": "Styring af revisionskampagner",
+	"libraryFilteringLabels": "Biblioteketiketter",
+	"appliedControlsPlaceholder": "Vælg anvendte kontroller...",
+	"assignmentSettings": "Tildelingsindstillinger",
+	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
+	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere."
 }

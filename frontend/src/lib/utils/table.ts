@@ -472,6 +472,39 @@ export const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+export const ORGANISATION_ISSUE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/origin',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'origin',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 export const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -606,7 +639,7 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'qualification',
-		optionsEndpoint: 'qualifications',
+		optionsEndpoint: 'terminologies?field_path=qualifications',
 		multiple: true
 	}
 };
@@ -636,7 +669,7 @@ export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'solutions/owner',
 		multiple: true
@@ -695,7 +728,7 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'assigned_to',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'task-templates/assigned_to',
 		multiple: true
@@ -765,6 +798,15 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'entity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+
+export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'parentEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
 	}
@@ -1005,7 +1047,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'applied-controls/owner',
 		multiple: true
@@ -1016,7 +1058,7 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'findings/owner',
 		multiple: true
@@ -1161,7 +1203,7 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'evidences/owner',
 		multiple: true
@@ -1535,6 +1577,10 @@ export const listViewFields = {
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
 		}
 	},
+	teams: {
+		head: ['name', 'description', 'teamEmail'],
+		body: ['name', 'description', 'team_email']
+	},
 	'user-groups': {
 		head: ['name'],
 		body: ['localization_dict'],
@@ -1600,8 +1646,8 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'attachment', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
+		body: ['name', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1691,13 +1737,31 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			parent_entity: ENTITY_FILTER,
+			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
-		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
+		head: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'dueDate',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
+		body: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'due_date',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
@@ -1753,8 +1817,8 @@ export const listViewFields = {
 		}
 	},
 	'business-impact-analysis': {
-		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status'],
+		head: ['name', 'perimeter', 'folder', 'status'],
+		body: ['name', 'perimeter', 'folder', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1796,6 +1860,15 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			assigned_to: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/assigned_to',
+					optionsLabelField: 'str',
+					label: 'assignedTo',
+					multiple: true
+				}
+			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1815,6 +1888,15 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/owner',
+					optionsLabelField: 'str',
+					label: 'owner',
+					multiple: true
+				}
+			},
 			request_type: {
 				component: AutocompleteSelect,
 				props: {
@@ -1909,42 +1991,45 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'legalBasis', 'processing'],
-		body: ['name', 'description', 'legal_basis', 'processing'],
+		head: ['legalBasis', 'description', 'customName', 'processing'],
+		body: ['legal_basis', 'description', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
-		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
+		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
+		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER
 		}
 	},
 	'data-subjects': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+		head: ['entity', 'relationshipType', 'country', 'customName', 'documentationLink'],
+		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
 		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'feared-events': {
@@ -2112,8 +2197,8 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter'],
+		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter', 'folder'],
+		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2198,8 +2283,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'due_date', 'assigned_to'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'eta', 'dueDate', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'eta', 'due_date', 'assigned_to'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
@@ -2207,10 +2292,31 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['refId', 'name', 'category', 'origin', 'domain'],
-		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'startDate',
+			'expirationDate',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'start_date',
+			'expiration_date',
+			'folder'
+		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'quantitative-risk-studies': {
@@ -2451,8 +2557,8 @@ export const listViewFields = {
 			owner: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'users',
-					optionsLabelField: 'email',
+					optionsEndpoint: 'actors',
+					optionsLabelField: 'str',
 					label: 'owner',
 					multiple: true
 				}
@@ -2547,6 +2653,10 @@ export const listViewFields = {
 				}
 			}
 		}
+	},
+	actors: {
+		head: ['name', 'type'],
+		body: ['specific', 'type']
 	},
 	extra: {
 		filters: {

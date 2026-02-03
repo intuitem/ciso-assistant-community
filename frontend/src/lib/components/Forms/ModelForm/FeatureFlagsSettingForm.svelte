@@ -2,7 +2,6 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { m } from '$paraglide/messages';
 	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
-
 	import { page } from '$app/state';
 
 	interface Props {
@@ -26,7 +25,7 @@
 					label: m.organisationIssues(),
 					description: m.organisationIssuesDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.operations(),
@@ -57,7 +56,7 @@
 					label: m.metrology(),
 					description: m.metrologyDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.assetClassManagementAndGovernance(),
@@ -88,7 +87,7 @@
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.complianceRiskManagement(),
@@ -98,11 +97,6 @@
 					field: 'compliance',
 					label: m.compliance(),
 					description: m.complianceAssessmentsDescription()
-				},
-				{
-					field: 'privacy',
-					label: m.privacy(),
-					description: m.privacyDescription()
 				},
 				{
 					field: 'risk_acceptances',
@@ -149,12 +143,48 @@
 					label: m.campaigns(),
 					description: m.campaignsDescription()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
+		},
+		{
+			category: m.gdpr(),
+			description: m.gdprDescription(),
+			fields: [
+				{
+					field: 'privacy',
+					label: m.privacy(),
+					description: m.privacyDescription()
+				},
+				{
+					field: 'personal_data',
+					label: m.personalData(),
+					description: m.personalDataDescription()
+				},
+				{
+					field: 'purposes',
+					label: m.purposes(),
+					description: m.purposesDescription()
+				},
+				{
+					field: 'right_requests',
+					label: m.rightRequests(),
+					description: m.rightRequestsDescription()
+				},
+				{
+					field: 'data_breaches',
+					label: m.dataBreaches(),
+					description: m.dataBreachesDescription()
+				}
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
 		{
 			category: m.extra(),
 			description: m.extraDescription(),
 			fields: [
+				{
+					field: 'focus_mode',
+					label: m.focusMode(),
+					description: m.focusModeTooltip()
+				},
 				{
 					field: 'terminologies',
 					label: m.terminologies(),
@@ -170,7 +200,7 @@
 					label: m.experimental(),
 					description: m.experimentalFeatures()
 				}
-			]
+			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		}
 	];
 </script>

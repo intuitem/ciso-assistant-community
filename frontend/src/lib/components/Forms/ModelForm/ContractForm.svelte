@@ -30,11 +30,10 @@
 <AutocompleteSelect
 	{form}
 	field="folder"
-	optionsEndpoint="folders"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <TextField
 	{form}
@@ -129,8 +128,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="owner"
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}

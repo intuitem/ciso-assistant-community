@@ -127,13 +127,16 @@
 		<div class="flex flex-row space-x-2">
 			<div class="card p-2 bg-white shadow-lg w-1/2">
 				<div class="flex justify-between p-2">
-					<div>
-						<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
-						<Anchor
-							class="anchor text-sm font-semibold"
-							href="/perimeters/{data.scenario.perimeter.id}">{data.scenario.perimeter.str}</Anchor
-						>
-					</div>
+					{#if data.scenario.risk_assessment.perimeter}
+						<div>
+							<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+							<Anchor
+								class="anchor text-sm font-semibold"
+								href="/perimeters/{data.scenario.perimeter.id}"
+								>{data.scenario.perimeter.str}</Anchor
+							>
+						</div>
+					{/if}
 					<div>
 						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
 						<Anchor
@@ -160,8 +163,12 @@
 							form={_form}
 							baseClass="flex-1"
 							multiple
-							optionsEndpoint="users?is_third_party=false"
-							optionsLabelField="email"
+							optionsEndpoint="actors"
+							optionsLabelField="str"
+							optionsInfoFields={{
+								fields: [{ field: 'type', translate: true }],
+								position: 'prefix'
+							}}
 							field="owner"
 							label={m.owner()}
 						/>
@@ -203,18 +210,14 @@
 						classes: 'text-blue-500'
 					}}
 					field="assets"
-					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
-					]}
+					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 					label={m.assets()}
 				/>
 				<AutocompleteSelect
 					form={_form}
 					multiple
 					optionsEndpoint="threats"
-					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
-					]}
+					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 					optionsExtraFields={[['folder', 'str']]}
 					optionsLabelField="auto"
 					field="threats"
@@ -224,9 +227,7 @@
 					multiple
 					form={_form}
 					optionsEndpoint="vulnerabilities"
-					optionsDetailedUrlParameters={[
-						['scope_folder_id', page.data.scenario.perimeter.folder.id]
-					]}
+					optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 					optionsExtraFields={[['folder', 'str']]}
 					field="vulnerabilities"
 					label={m.vulnerabilities()}
@@ -329,9 +330,7 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
-									optionsDetailedUrlParameters={[
-										['scope_folder_id', page.data.scenario.perimeter.folder.id]
-									]}
+									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 									field="existing_applied_controls"
 									label={m.existingControls()}
 									helpText={m.existingControlsHelper()}
@@ -405,9 +404,7 @@
 									form={_form}
 									optionsEndpoint="applied-controls"
 									optionsExtraFields={[['folder', 'str']]}
-									optionsDetailedUrlParameters={[
-										['scope_folder_id', page.data.scenario.perimeter.folder.id]
-									]}
+									optionsDetailedUrlParameters={[['scope_folder_id', page.data.scenario.folder.id]]}
 									field="applied_controls"
 									label={m.extraAppliedControls()}
 									helpText={m.extraControlsHelper()}

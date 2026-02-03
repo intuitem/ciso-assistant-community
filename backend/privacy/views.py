@@ -1,4 +1,6 @@
 from core.constants import COUNTRY_CHOICES
+from core.models import Actor
+from core.serializers import ActorReadSerializer
 from core.views import (
     BaseModelViewSet as AbstractBaseModelViewSet,
     ExportMixin,
@@ -7,7 +9,6 @@ from core.views import (
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import filters
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
@@ -25,7 +26,9 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    LEGAL_BASIS_CHOICES,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
 )
 
 EU_COUNTRIES_SET = {
@@ -69,11 +72,15 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
-    filterset_fields = ["processing", "legal_basis"]
+    filterset_fields = ["processing", "legal_basis", "article_9_condition"]
 
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+        return Response(dict(ART6_LAWFUL_BASIS_CHOICES))
+
+    @action(detail=False, name="Get article 9 condition choices")
+    def article_9_condition(self, request):
+        return Response(dict(ART9_SPECIAL_CATEGORY_CONDITION_CHOICES))
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -143,16 +150,16 @@ class DataTransferViewSet(BaseModelViewSet):
     """
 
     model = DataTransfer
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "transfer_mechanism"]
 
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
 
-    @action(detail=False, name="Get legal basis choices")
-    def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+    @action(detail=False, name="Get transfer mechanism choices")
+    def transfer_mechanism(self, request):
+        return Response(dict(TRANSFER_MECHANISM_CHOICES))
 
 
 def agg_countries(viewable_data_transfers, viewable_data_contractors):
@@ -186,7 +193,14 @@ def agg_countries(viewable_data_transfers, viewable_data_contractors):
 class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "nature",
+        "status",
+        "filtering_labels",
+        "assigned_to",
+        "perimeters",
+    ]
 
     export_config = {
         "fields": {
@@ -211,7 +225,7 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                 "source": "assigned_to",
                 "label": "assigned_to",
                 "format": lambda qs: ",".join(
-                    escape_excel_formula(u.email) for u in qs.all()
+                    escape_excel_formula(str(actor)) for actor in qs.all()
                 ),
             },
             "labels": {
@@ -236,6 +250,15 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all processing assigned_to actors")
+    def assigned_to(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @action(detail=False, name="processing metrics")
     def metrics(self, request, pk=None):
@@ -384,15 +407,12 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
                     }
                 )
 
-            # Get legal bases from purposes and data transfers
+            # Get legal bases from purposes (Art. 6 legal bases only)
             legal_bases = set()
             if pd.processing:
                 for purpose in pd.processing.purposes.all():
                     if purpose.legal_basis:
                         legal_bases.add(purpose.legal_basis)
-                for transfer in pd.processing.data_transfers.all():
-                    if transfer.legal_basis:
-                        legal_bases.add(transfer.legal_basis)
 
             # Link processing to legal bases (depth 2)
             for legal_basis in legal_bases:
@@ -469,6 +489,15 @@ class RightRequestViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RightRequest.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all right request owners")
+    def owner(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class DataBreachViewSet(BaseModelViewSet):

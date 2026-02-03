@@ -117,8 +117,8 @@ class EntityAssessmentSerializersTestCase(TestCase):
         self.user = User.objects.create_user(
             email="test@example.com", password="password"
         )
-        self.assessment.authors.add(self.user)
-        self.assessment.reviewers.add(self.user)
+        self.assessment.authors.add(self.user.actor)
+        self.assessment.reviewers.add(self.user.actor)
 
         self.solution = Solution.objects.create(
             name="Test Solution", provider_entity=self.entity

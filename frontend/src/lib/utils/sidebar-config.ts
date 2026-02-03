@@ -23,6 +23,10 @@ type SidebarBackendKeys = {
 	reports: boolean;
 	validation_flows: boolean;
 	metrology: boolean;
+	personal_data: boolean;
+	purposes: boolean;
+	right_requests: boolean;
+	data_breaches: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -50,6 +54,10 @@ type SidebarFrontendKeys = {
 	reports: boolean;
 	validationFlows: boolean;
 	metrology: boolean;
+	personalData: boolean;
+	purposes: boolean;
+	rightRequests: boolean;
+	dataBreaches: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -79,6 +87,10 @@ export function getSidebarVisibleItems(
 		contracts: featureFlags?.contracts ?? false,
 		reports: featureFlags?.reports ?? false,
 		validationFlows: featureFlags?.validation_flows ?? false,
-		metrology: featureFlags?.metrology ?? true
+		metrology: featureFlags?.metrology ?? true,
+		personalData: featureFlags?.personal_data ?? true,
+		purposes: featureFlags?.purposes ?? true,
+		rightRequests: featureFlags?.right_requests ?? true,
+		dataBreaches: featureFlags?.data_breaches ?? true
 	};
 }

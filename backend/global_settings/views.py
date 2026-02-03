@@ -7,7 +7,8 @@ from rest_framework.decorators import action
 from core.serializers import SerializerFactory
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
-
+from core.serializers import SerializerFactory
+from django.conf import settings
 from .serializers import (
     GlobalSettingsSerializer,
     GeneralSettingsSerializer,
@@ -77,6 +78,7 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
             viewset=self,
             module_paths=settings.MODULE_PATHS,
         )
+
         return serializer_class
 
     def retrieve(self, request, *args, **kwargs):
@@ -140,6 +142,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "allow_self_validation": False,
             "show_warning_external_links": True,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
+            "allow_assignments_to_entities": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")

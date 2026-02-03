@@ -1,14 +1,14 @@
+from collections import defaultdict
 from datetime import date, timedelta
 from huey import crontab
-from huey.contrib.djhuey import periodic_task, task, db_periodic_task, db_task
+from huey.contrib.djhuey import periodic_task, task, db_periodic_task
 from core.models import (
     AppliedControl,
     ComplianceAssessment,
     Evidence,
+    OrganisationIssue,
     ValidationFlow,
-    FlowEvent,
 )
-from tprm.models import EntityAssessment
 from iam.models import User
 from django.core.mail import send_mail
 from django.conf import settings
@@ -35,12 +35,11 @@ def check_controls_with_expired_eta():
         .prefetch_related("owner")
     )
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in expired_controls:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_notification_email_expired_eta(owner_email, controls)
@@ -58,12 +57,11 @@ def check_compliance_assessments_due_in_week():
     )
 
     # Group by individual author
-    author_assessments = {}
+    author_assessments = defaultdict(list)
     for assessment in assessments_due_soon:
         for author in assessment.authors.all():
-            if author.email not in author_assessments:
-                author_assessments[author.email] = []
-            author_assessments[author.email].append(assessment)
+            for email in author.get_emails():
+                author_assessments[email].append(assessment)
 
     # Send personalized email to each author
     for author_email, assessments in author_assessments.items():
@@ -84,12 +82,11 @@ def check_compliance_assessments_due_tomorrow():
     )
 
     # Group by individual author
-    author_assessments = {}
+    author_assessments = defaultdict(list)
     for assessment in assessments_due_tomorrow:
         for author in assessment.authors.all():
-            if author.email not in author_assessments:
-                author_assessments[author.email] = []
-            author_assessments[author.email].append(assessment)
+            for email in author.get_emails():
+                author_assessments[email].append(assessment)
 
     # Send personalized email to each author
     for author_email, assessments in author_assessments.items():
@@ -110,12 +107,11 @@ def check_applied_controls_expiring_in_week():
     )
 
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in controls_due_soon:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -134,12 +130,11 @@ def check_applied_controls_expiring_tomorrow():
     )
 
     # Group by individual owner
-    owner_controls = {}
+    owner_controls = defaultdict(list)
     for control in controls_due_tomorrow:
         for owner in control.owner.all():
-            if owner.email not in owner_controls:
-                owner_controls[owner.email] = []
-            owner_controls[owner.email].append(control)
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
 
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
@@ -158,12 +153,11 @@ def check_evidences_expiring_in_week():
     )
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in evidences_expiring_soon:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -182,12 +176,11 @@ def check_evidences_expiring_tomorrow():
     )
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in evidences_expiring_tomorrow:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -203,12 +196,11 @@ def check_evidences_expired():
     ).prefetch_related("owner")
 
     # Group by individual owner
-    owner_evidences = {}
+    owner_evidences = defaultdict(list)
     for evidence in expired_evidences:
         for owner in evidence.owner.all():
-            if owner.email not in owner_evidences:
-                owner_evidences[owner.email] = []
-            owner_evidences[owner.email].append(evidence)
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
 
     # Send personalized email to each owner
     for owner_email, evidences in owner_evidences.items():
@@ -264,6 +256,23 @@ def check_validation_flows_deadline_tomorrow():
     # Send personalized email to each approver
     for approver_email, validations in approver_validations.items():
         send_validation_deadline_notification(approver_email, validations, days=1)
+
+
+@db_periodic_task(crontab(hour="6", minute="50"))
+def check_expired_organisation_issues():
+    expired_issues_query = OrganisationIssue.objects.filter(
+        expiration_date__lt=date.today(), status=OrganisationIssue.Status.ACTIVE
+    )
+    expired_issues = list(expired_issues_query)
+
+    for issue in expired_issues:
+        issue.status = OrganisationIssue.Status.INACTIVE
+
+    OrganisationIssue.objects.bulk_update(
+        expired_issues,
+        ["status"],
+        batch_size=100,
+    )
 
 
 @task()
@@ -406,9 +415,9 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
 
 
 @task()
-def send_task_template_assignment_notification(task_template_id, assigned_user_emails):
+def send_task_template_assignment_notification(task_template_id, emails):
     """Send notification when TaskTemplate is assigned to users"""
-    if not assigned_user_emails:
+    if not emails:
         return
 
     try:
@@ -432,7 +441,7 @@ def send_task_template_assignment_notification(task_template_id, assigned_user_e
         "folder_name": task_template.folder.name if task_template.folder else "Default",
     }
 
-    for email in assigned_user_emails:
+    for email in emails:
         if email and check_email_configuration(email, [task_template]):
             rendered = render_email_template("task_template_assignment", context)
             if rendered:

@@ -223,7 +223,11 @@
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{#if risk_assessment.perimeter}
+						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{:else}
+						{risk_assessment.folder.str}/{risk_assessment.name} - {risk_assessment.version}
+					{/if}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -241,6 +245,14 @@
 							<ul>
 								{#each risk_assessment.authors as author}
 									<li>{author.str}</li>
+								{/each}
+							</ul>
+						</li>
+						<li>
+							<span class="font-semibold">{m.reviewers()}:</span>
+							<ul>
+								{#each risk_assessment.reviewers as reviewer}
+									<li>{reviewer.str}</li>
 								{/each}
 							</ul>
 						</li>

@@ -1,6 +1,7 @@
 # Offline Deployment Guide
 
 This guide explains how to prepare CISO Assistant for production deployment on an air-gapped server (without internet access).
+You need to have a Pro on-premises plan to use this.
 
 ## Overview
 

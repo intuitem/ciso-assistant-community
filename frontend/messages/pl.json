@@ -122,6 +122,12 @@
 	"providerColon": "Dostawca:",
 	"domain": "Domena",
 	"domainSemiColon": "Domena:",
+	"allDomains": "Wszystkie domeny",
+	"selectDomain": "Wybierz domenę",
+	"focusMode": "Tryb skupienia",
+	"focusModeTooltip": "Skup się na konkretnej domenie",
+	"clearFocus": "Wyczyść fokus",
+	"noDomainsAvailable": "Brak dostępnych domen",
 	"urn": "URN",
 	"treatmentStatus": "Status postępowania",
 	"qualification": "Kwalifikacja",
@@ -420,7 +426,7 @@
 	"dependencies": "Zależności",
 	"copyright": "Prawa autorskie",
 	"addYourLibrary": "Dodaj własną bibliotekę",
-	"libraryFileInYaml": "Plik biblioteki w formacie YAML",
+	"libraryFileInYamlOrXlsx": "Plik biblioteki w formacie YAML",
 	"importBackup": "Importuj kopię zapasową",
 	"exportBackup": "Eksportuj kopię zapasową",
 	"confirmImportBackup": "Czy na pewno chcesz zaimportować tę kopię zapasową? Spowoduje to nadpisanie wszystkich istniejących danych.",
@@ -591,6 +597,7 @@
 	"mediumSOK": "Siła wiedzy wspierającej ocenę jest średnia",
 	"highSOK": "Siła wiedzy wspierającej ocenę jest wysoka",
 	"libraryLoadingError": "Wystąpił błąd podczas ładowania biblioteki",
+	"processingError": "Błąd przetwarzania",
 	"libraryAlreadyLoadedError": "Ta biblioteka już została załadowana",
 	"invalidLibraryFileError": "Nieprawidłowy plik biblioteki. Upewnij się, że format jest poprawny.",
 	"taintedFormMessage": "Czy chcesz opuścić tę stronę? Wprowadzone zmiany mogą nie zostać zapisane.",
@@ -831,6 +838,7 @@
 	"graph": "Wykres",
 	"startDate": "Data rozpoczęcia",
 	"startDateHelpText": "Data rozpoczęcia (przydatna dla osi czasu)",
+	"expirationDateMustBeOnOrAfterStartDate": "Data wygaśnięcia musi być równa lub późniejsza niż data rozpoczęcia",
 	"backupLoadingError": "Wystąpił błąd podczas ładowania kopii zapasowej.",
 	"backupVersionError": "Nie można załadować kopii zapasowej, wersja kopii zapasowej jest nieprawidłowa",
 	"confirmYes": "Potwierdź wpisując 'Tak' poniżej:",
@@ -1676,6 +1684,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} obiekt niewidoczny.",
+				"countPlural=other": "{count} obiekty niewidoczne."
+			}
+		}
+	],
 	"matchingScenarios": "Dopasowane scenariusze",
 	"select": "Wybierz",
 	"deselect": "Odznacz",
@@ -1804,5 +1822,9 @@
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
 	"libraryFilteringLabels": "Etykiety biblioteki",
-	"campaignsDescription": "Zarządzanie kampaniami audytowymi"
+	"campaignsDescription": "Zarządzanie kampaniami audytowymi",
+	"appliedControlsPlaceholder": "Wybierz stosowane kontrole...",
+	"assignmentSettings": "Ustawienia przydziałów",
+	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
+	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów."
 }

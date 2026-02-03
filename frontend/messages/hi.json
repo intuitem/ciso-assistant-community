@@ -117,6 +117,12 @@
 	"providerColon": "प्रदाता:",
 	"domain": "डोमेन",
 	"domainSemiColon": "डोमेन:",
+	"allDomains": "सभी डोमेन",
+	"selectDomain": "डोमेन चुनें",
+	"focusMode": "फोकस मोड",
+	"focusModeTooltip": "किसी विशिष्ट डोमेन पर ध्यान केंद्रित करें",
+	"clearFocus": "फोकस साफ़ करें",
+	"noDomainsAvailable": "कोई डोमेन उपलब्ध नहीं",
 	"urn": "URN",
 	"treatmentStatus": "उपचार स्थिति",
 	"qualification": "योग्यता",
@@ -384,7 +390,7 @@
 	"dependencies": "निर्भरता",
 	"copyright": "कॉपीराइट",
 	"addYourLibrary": "अपनी खुद की लाइब्रेरी जोड़ें",
-	"libraryFileInYaml": "YAML प्रारूप में लाइब्रेरी फ़ाइल",
+	"libraryFileInYamlOrXlsx": "YAML प्रारूप में लाइब्रेरी फ़ाइल",
 	"importBackup": "बैकअप आयात करें",
 	"exportBackup": "बैकअप निर्यात करें",
 	"confirmImportBackup": "क्या आप सुनिश्चित हैं कि आप इस बैकअप को आयात करना चाहते हैं? इससे सभी मौजूदा डेटा अधिलेखित हो जाएगा।",
@@ -547,6 +553,7 @@
 	"mediumSOK": "मूल्यांकन का समर्थन करने वाले ज्ञान की ताकत मध्यम है",
 	"highSOK": "मूल्यांकन का समर्थन करने वाले ज्ञान की ताकत उच्च है",
 	"libraryLoadingError": "आपकी लाइब्रेरी लोड करते समय एक त्रुटि उत्पन्न हुई",
+	"processingError": "प्रसंस्करण त्रुटि",
 	"libraryAlreadyLoadedError": "यह लाइब्रेरी पहले ही लोड की जा चुकी है",
 	"invalidLibraryFileError": "अवैध लाइब्रेरी फ़ाइल। कृपया सुनिश्चित करें कि प्रारूप सही है।",
 	"taintedFormMessage": "क्या आप इस पृष्ठ को छोड़ना चाहते हैं? किए गए परिवर्तन सहेजे नहीं जा सकते।",
@@ -779,6 +786,7 @@
 	"graph": "ग्राफ़",
 	"startDate": "आरंभ करने की तिथि",
 	"startDateHelpText": "आरंभ तिथि (समयरेखा के लिए उपयोगी)",
+	"expirationDateMustBeOnOrAfterStartDate": "समाप्ति तिथि आरंभ तिथि के समान या उसके बाद की होनी चाहिए",
 	"backupLoadingError": "बैकअप लोड करते समय एक त्रुटि हुई.",
 	"backupGreaterVersionError": "बैकअप लोड नहीं किया जा सकता, बैकअप का संस्करण आपके एप्लिकेशन के वर्तमान संस्करण से अधिक है.",
 	"backupLowerVersionError": "कोई त्रुटि हुई, बैकअप संस्करण बहुत पुराना हो सकता है, यदि ऐसा है तो पुनः प्रयास करने से पहले उसे अद्यतन करना आवश्यक है।",
@@ -927,6 +935,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} वस्तु दिखाई नहीं देती।",
+				"countPlural=other": "{count} वस्तुएं दिखाई नहीं देतीं।"
+			}
+		}
+	],
 	"matchingScenarios": "मैचिंग परिदृश्य",
 	"select": "चुनें",
 	"deselect": "चयन रद्द करें",
@@ -1033,5 +1051,9 @@
 	],
 	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
 	"libraryFilteringLabels": "लाइब्रेरी लेबल",
-	"campaignsDescription": "ऑडिट अभियानों का प्रबंधन"
+	"campaignsDescription": "ऑडिट अभियानों का प्रबंधन",
+	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें...",
+	"assignmentSettings": "असाइनमेंट सेटिंग्स",
+	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",
+	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।"
 }

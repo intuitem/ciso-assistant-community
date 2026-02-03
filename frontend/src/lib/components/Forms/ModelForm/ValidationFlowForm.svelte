@@ -5,13 +5,13 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -103,13 +103,12 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	onChange={async (e) => {
 		if (e && !object?.id) {
 			await fetchDefaultRefId();

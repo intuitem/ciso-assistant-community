@@ -122,6 +122,12 @@
 	"providerColon": "Πάροχος:",
 	"domain": "Τομέας",
 	"domainSemiColon": "Τομέας:",
+	"allDomains": "Όλοι οι τομείς",
+	"selectDomain": "Επιλογή τομέα",
+	"focusMode": "Λειτουργία εστίασης",
+	"focusModeTooltip": "Εστίαση σε συγκεκριμένο τομέα",
+	"clearFocus": "Εκκαθάριση εστίασης",
+	"noDomainsAvailable": "Δεν υπάρχουν διαθέσιμοι τομείς",
 	"urn": "URN",
 	"treatmentStatus": "Κατάσταση χειρισμού",
 	"qualification": "Προσόν",
@@ -418,7 +424,7 @@
 	"dependencies": "Εξαρτήσεις",
 	"copyright": "Πνευματικά δικαιώματα",
 	"addYourLibrary": "Προσθέστε τη δική σας βιβλιοθήκη",
-	"libraryFileInYaml": "Αρχείο βιβλιοθήκης σε μορφή YAML",
+	"libraryFileInYamlOrXlsx": "Αρχείο βιβλιοθήκης σε μορφή YAML",
 	"importBackup": "Εισαγωγή αντιγράφου ασφαλείας",
 	"exportBackup": "Εξαγωγή αντιγράφου ασφαλείας",
 	"confirmImportBackup": "Είστε σίγουροι ότι θέλετε να εισαγάγετε αυτό το αντίγραφο ασφαλείας; Θα αντικατασταθούν όλα τα υπάρχοντα δεδομένα, συμπεριλαμβανομένων των διαπιστευτηρίων.",
@@ -589,6 +595,7 @@
 	"mediumSOK": "Μεσαία ισχύς γνώσης",
 	"highSOK": "Υψηλή ισχύς γνώσης",
 	"libraryLoadingError": "Σφάλμα κατά τη φόρτωση της βιβλιοθήκης",
+	"processingError": "Σφάλμα επεξεργασίας",
 	"libraryAlreadyLoadedError": "Αυτή η βιβλιοθήκη έχει ήδη φορτωθεί",
 	"invalidLibraryFileError": "Μη έγκυρο αρχείο βιβλιοθήκης. Ελέγξτε τη μορφή.",
 	"taintedFormMessage": "Θέλετε να αφήσετε αυτή τη σελίδα; Οι αλλαγές μπορεί να μην αποθηκευτούν.",
@@ -829,6 +836,7 @@
 	"graph": "Γράφημα",
 	"startDate": "Ημερομηνία έναρξης",
 	"startDateHelpText": "Ημερομηνία έναρξης (χρήσιμη για το χρονοδιάγραμμα)",
+	"expirationDateMustBeOnOrAfterStartDate": "Η ημερομηνία λήξης πρέπει να είναι ίδια ή μεταγενέστερη της ημερομηνίας έναρξης",
 	"backupLoadingError": "Παρουσιάστηκε σφάλμα κατά τη φόρτωση του αντιγράφου ασφαλείας.",
 	"backupVersionError": "Αδυναμία φόρτωσης: μη έγκυρη έκδοση αντιγράφου ασφαλείας",
 	"confirmYes": "Πληκτρολογήστε «yes» για επιβεβαίωση:",
@@ -1761,5 +1769,19 @@
 	],
 	"cascadeAffectedHint": "Τα παρακάτω αντικείμενα παραμένουν στο σύστημα αλλά οι σύνδεσμοι τους με αυτό το αντικείμενο θα αφαιρεθούν.",
 	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης",
-	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου"
+	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου",
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} αντικείμενο δεν είναι ορατό.",
+				"countPlural=other": "{count} αντικείμενα δεν είναι ορατά."
+			}
+		}
+	],
+	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους...",
+	"assignmentSettings": "Ρυθμίσεις αναθέσεων",
+	"allowAssignmentsToEntities": "Να επιτρέπονται οι αναθέσεις σε οντότητες",
+	"allowAssignmentsToEntitiesDescription": "Επιτρέπει στις οντότητες να εμφανίζονται ως φορείς κατά την ανάθεση ιδιοκτητών, συντακτών ή ελεγκτών."
 }

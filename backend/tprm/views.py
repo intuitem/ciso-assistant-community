@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from django.utils.formats import date_format
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.db.models import Sum, F, FloatField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
@@ -743,10 +744,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             object_type=EntityAssessment,
         )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
+            "folder", "entity"
+        ):
+            # Use entity assessment's folder for grouping
+            folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
+                "folder_id": str(folder.id) if folder else None,
+                "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",

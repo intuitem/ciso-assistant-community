@@ -44,6 +44,14 @@ COMPATIBILITY_MODES = {
     # Future modes can be added here with an integer key and description
 }
 
+# --- Logging helpers ----------------------------------------------------------
+
+
+def print_error(message: str) -> None:
+    """Ensure errors are emitted on stderr and consistently prefixed."""
+    print(f"❌ [ERROR] {message}", file=sys.stderr)
+
+
 # --- Translation helpers ------------------------------------------------------
 
 
@@ -1118,7 +1126,7 @@ def create_library(
                         for i in range(len(header))
                         if i < len(row)
                     }
-                    if all(value is None for value in data.values()):
+                    if all(value is None or value == "" for value in data.values()):
                         print(f"empty line {counter}")
                         continue
                     depth = int(data.get("depth", 1))
@@ -1730,25 +1738,25 @@ def main():
 
     input_path = Path(args.input_file)
     if not input_path.exists():
-        print(f"❌ [ERROR] File not found: {input_path}")
+        print_error(f"File not found: {input_path}")
         sys.exit(1)
 
     # Determine compatibility mode (default to 0 if not provided)
     compat_mode = args.compat if args.compat else 0
     if compat_mode not in COMPATIBILITY_MODES:
-        print(
-            f"❌ [ERROR] Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}"
+        print_error(
+            f"Invalid compatibility mode: {compat_mode}. Allowed modes: {list(COMPATIBILITY_MODES.keys())}"
         )
         sys.exit(1)
 
     # --- BULK MODE ------------------------------------------------------------
     if args.bulk:
         if args.output:
-            print('❌ [ERROR] The option "--output" cannot be used with "--bulk" mode.')
+            print_error('The option "--output" cannot be used with "--bulk" mode.')
             sys.exit(1)
 
         if not input_path.is_dir():
-            print("❌ [ERROR] Bulk mode requires a directory as input")
+            print_error("Bulk mode requires a directory as input")
             sys.exit(1)
 
         # Validate output directory and create it if needed
@@ -1757,7 +1765,7 @@ def main():
             try:
                 output_dir.mkdir(parents=True, exist_ok=True)
             except Exception as e:
-                print(f'❌ [ERROR] Cannot create output directory: "{output_dir}": {e}')
+                print_error(f'Cannot create output directory: "{output_dir}": {e}')
                 sys.exit(1)
         else:
             output_dir = Path.cwd()  # Use current working directory as default
@@ -1769,9 +1777,7 @@ def main():
         ]
 
         if not xlsx_files:
-            print(
-                f'❌ [ERROR] No .xlsx files found in directory: "{input_path}". Abort...'
-            )
+            print_error(f'No .xlsx files found in directory: "{input_path}". Abort...')
             sys.exit(1)
 
         for i, file in enumerate(xlsx_files):
@@ -1785,7 +1791,7 @@ def main():
                     verbose=args.verbose,
                 )
             except Exception as e:
-                print(f'❌ [ERROR] Failed to process "{file}": {e}')
+                print_error(f'Failed to process "{file}": {e}')
                 error_files.append(file.name)
 
         # Summary at the end of bulk processing
@@ -1809,8 +1815,8 @@ def main():
     # --- SINGLE FILE MODE -----------------------------------------------------
     else:
         if args.output_dir:
-            print(
-                '❌ [ERROR] The option "--output-dir" can only be used with "--bulk" mode.'
+            print_error(
+                'The option "--output-dir" can only be used with "--bulk" mode.'
             )
             sys.exit(1)
 
@@ -1830,7 +1836,7 @@ def main():
                 verbose=args.verbose,
             )
         except Exception as e:
-            print(f"❌ [ERROR] {e}")
+            print_error(str(e))
             if not args.verbose:
                 print(
                     '💡 Tip: Use "--verbose" to display hidden messages. This can help to understand certain errors.'

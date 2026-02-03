@@ -123,6 +123,12 @@
 	"providerColon": "Sağlayıcı:",
 	"domain": "Etki Alanı",
 	"domainSemiColon": "Etki Alanı:",
+	"allDomains": "Tüm etki alanları",
+	"selectDomain": "Etki alanı seç",
+	"focusMode": "Odak modu",
+	"focusModeTooltip": "Belirli bir etki alanına odaklan",
+	"clearFocus": "Odağı temizle",
+	"noDomainsAvailable": "Mevcut etki alanı yok",
 	"urn": "URN",
 	"treatmentStatus": "İşlem Durumu",
 	"qualification": "Nitelik",
@@ -419,7 +425,7 @@
 	"dependencies": "Bağımlılıklar",
 	"copyright": "Telif Hakkı",
 	"addYourLibrary": "Kendi kütüphanenizi ekleyin",
-	"libraryFileInYaml": "YAML formatında kütüphane dosyası",
+	"libraryFileInYamlOrXlsx": "YAML formatında kütüphane dosyası",
 	"importBackup": "Yedekten içe aktar",
 	"exportBackup": "Yedekten dışa aktar",
 	"confirmImportBackup": "Bu yedeği içe aktarmak istediğinizden emin misiniz? Bu, mevcut kimlik bilgileriniz dahil tüm mevcut verilerin üzerine yazacaktır.",
@@ -590,6 +596,7 @@
 	"mediumSOK": "Değerlendirmeyi destekleyen bilginin gücü orta",
 	"highSOK": "Değerlendirmeyi destekleyen bilginin gücü yüksek",
 	"libraryLoadingError": "Kütüphanenizi yüklerken bir hata oluştu",
+	"processingError": "İşleme hatası",
 	"libraryAlreadyLoadedError": "Bu kütüphane zaten yüklü",
 	"invalidLibraryFileError": "Geçersiz kütüphane dosyası. Lütfen formatın doğru olduğundan emin olun.",
 	"taintedFormMessage": "Bu sayfadan ayrılmak istiyor musunuz? Yaptığınız değişiklikler kaydedilmemiş olabilir.",
@@ -830,6 +837,7 @@
 	"graph": "Grafik",
 	"startDate": "Başlangıç tarihi",
 	"startDateHelpText": "Başlangıç tarihi (zaman çizelgesi için yararlıdır)",
+	"expirationDateMustBeOnOrAfterStartDate": "Bitiş tarihi, başlangıç tarihiyle aynı gün veya sonrasında olmalıdır",
 	"backupLoadingError": "Yedek yüklenirken bir hata oluştu.",
 	"backupVersionError": "Yedek yüklenemiyor, yedeğin sürümü geçersiz",
 	"confirmYes": "Aşağıya 'evet' yazarak onaylayın:",
@@ -1672,6 +1680,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} nesne görünür değil.",
+				"countPlural=other": "{count} nesne görünür değil."
+			}
+		}
+	],
 	"serverURL": "Sunucu URL",
 	"oidcConfiguration": "openid-configuration (OIDC yapilandirmasi)",
 	"tokenAuthMethod": "Token kimlik doğrulama yontemi",
@@ -1797,5 +1815,9 @@
 	],
 	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
 	"libraryFilteringLabels": "Kütüphane etiketleri",
-	"campaignsDescription": "Denetim kampanyaları yönetimi"
+	"campaignsDescription": "Denetim kampanyaları yönetimi",
+	"appliedControlsPlaceholder": "Uygulanan kontrolleri seçin...",
+	"assignmentSettings": "Atama ayarları",
+	"allowAssignmentsToEntities": "Varlıklara atamalara izin ver",
+	"allowAssignmentsToEntitiesDescription": "Sahip, yazar veya inceleyen atarken varlıkların aktör olarak görünmesine izin verir."
 }

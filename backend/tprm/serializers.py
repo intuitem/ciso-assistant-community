@@ -110,7 +110,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -184,7 +184,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 enclave = Folder.objects.create(
                     content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.perimeter.name}/{instance.name}",
+                    name=f"{instance.entity.name}/{instance.name}",
                     parent_folder=instance.folder,
                 )
                 audit.folder = enclave
@@ -192,14 +192,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 audit.create_requirement_assessments()
                 audit.reviewers.set(instance.reviewers.all())
-                audit.authors.set(instance.representatives.all())
+                representatives = instance.representatives.all()
+                audit.authors.set([rep.actor for rep in representatives])
                 instance.compliance_assessment = audit
                 instance.save()
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
                 audit.reviewers.set(instance.reviewers.all())
-                audit.authors.set(instance.representatives.all())
+                representatives = instance.representatives.all()
+                audit.authors.set([rep.actor for rep in representatives])
             instance.save()
 
     def _assign_third_party_respondents(
@@ -248,6 +250,13 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
+
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
+
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)

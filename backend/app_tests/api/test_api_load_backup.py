@@ -13,22 +13,10 @@ from django.db.utils import IntegrityError
 from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from iam.models import Folder, Role, User, UserGroup
 from knox.models import AuthToken
-from core.apps import startup
-
-# NEW imports (test-only, no view changes)
-from auditlog.models import LogEntry
-from auditlog.context import disable_auditlog
-from django.db.models.signals import post_save
-from core.custom_middleware import add_user_info_to_log_entry
 
 
 @pytest.fixture
-def app_config():
-    startup(sender=None, **{})
-
-
-@pytest.fixture
-def authenticated_client(app_config):
+def authenticated_client():
     admin = User.objects.create_superuser("backup_admin@tests.com")
     UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
     client = APIClient()
@@ -43,7 +31,7 @@ def unauthenticated_client():
 
 
 @pytest.fixture
-def non_backup_user_client(app_config):
+def non_backup_user_client():
     user = User.objects.create_user(
         email="regular_user@tests.com", password="testpass123"
     )
@@ -51,18 +39,6 @@ def non_backup_user_client(app_config):
     _auth_token = AuthToken.objects.create(user=user)
     client.credentials(HTTP_AUTHORIZATION=f"Token {_auth_token[1]}")
     return client
-
-
-# Silence auditlog so flush/loaddata can run in tests
-@pytest.fixture(autouse=True)
-def mute_auditlog():
-    # prevent new audit rows and remove existing ones that would FK contenttypes
-    post_save.disconnect(add_user_info_to_log_entry, sender=LogEntry)
-    with disable_auditlog():
-        LogEntry.objects.all().delete()
-        yield
-        LogEntry.objects.all().delete()
-    post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
 
 
 def create_mock_backup_data(
@@ -161,9 +137,7 @@ class TestEnterpriseBackupInCommunityEdition:
 
     # This test can xfail if the restore returns a non-200 in some DB setups
     @pytest.mark.django_db(transaction=True)
-    def test_filters_enterprise_permissions_via_api_in_ce(
-        self, authenticated_client, mute_auditlog
-    ):
+    def test_filters_enterprise_permissions_via_api_in_ce(self, authenticated_client):
         if apps.is_installed("enterprise_core"):
             pytest.skip("Community-edition behavior only")
 

@@ -117,6 +117,12 @@
 	"providerColon": "Poskytovatel:",
 	"domain": "Doména",
 	"domainSemiColon": "Doména:",
+	"allDomains": "Všechny domény",
+	"selectDomain": "Vybrat doménu",
+	"focusMode": "Režim zaměření",
+	"focusModeTooltip": "Zaměřit se na konkrétní doménu",
+	"clearFocus": "Vymazat zaměření",
+	"noDomainsAvailable": "Žádné domény nejsou k dispozici",
 	"urn": "URN",
 	"treatmentStatus": "Stav zpracování",
 	"qualification": "Kvalifikace",
@@ -385,7 +391,7 @@
 	"dependencies": "Závislosti",
 	"copyright": "Autorská práva",
 	"addYourLibrary": "Přidejte svou vlastní knihovnu",
-	"libraryFileInYaml": "Soubor knihovny ve formátu YAML",
+	"libraryFileInYamlOrXlsx": "Soubor knihovny ve formátu YAML",
 	"importBackup": "Importovat zálohu",
 	"exportBackup": "Exportovat zálohu",
 	"confirmImportBackup": "Opravdu chcete importovat tuto zálohu? To přepíše všechna existující data.",
@@ -548,6 +554,7 @@
 	"mediumSOK": "Síla znalostí podporujících hodnocení je střední",
 	"highSOK": "Síla znalostí podporujících hodnocení je vysoká",
 	"libraryLoadingError": "Došlo k chybě během načítání vaší knihovny",
+	"processingError": "Chyba zpracování",
 	"libraryAlreadyLoadedError": "Tato knihovna již byla načtena",
 	"invalidLibraryFileError": "Neplatný soubor knihovny. Ujistěte se, že formát je správný.",
 	"taintedFormMessage": "Chcete opustit tuto stránku? Změny, které jste provedli, nemusí být uloženy.",
@@ -779,6 +786,7 @@
 	"graph": "Graf",
 	"startDate": "Datum začátku",
 	"startDateHelpText": "Datum začátku (užitečné pro časovou osu)",
+	"expirationDateMustBeOnOrAfterStartDate": "Datum ukončení musí být stejné nebo pozdější než datum začátku",
 	"backupLoadingError": "Při načítání zálohy došlo k chybě.",
 	"backupGreaterVersionError": "Nelze načíst zálohu, verze zálohy je vyšší než současná verze vaší aplikace.",
 	"backupLowerVersionError": "Došlo k chybě, verze zálohy může být příliš stará, pokud ano, musí být aktualizována před opětovným pokusem.",
@@ -946,6 +954,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objekt není viditelný.",
+				"countPlural=other": "{count} objekty nejsou viditelné."
+			}
+		}
+	],
 	"matchingScenarios": "Shodné scénáře",
 	"select": "Vybrat",
 	"deselect": "Zrušit výběr",
@@ -1051,6 +1069,10 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
-	"libraryFilteringLabels": "Štítky knihovny",
-	"campaignsDescription": "Správa auditních kampaní"
+	"campaignsDescription": "Správa auditních kampaní",
+	"libraryFilteringLabels": "Knihovnové štítky",
+	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
+	"assignmentSettings": "Nastavení přiřazení",
+	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
+	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů."
 }

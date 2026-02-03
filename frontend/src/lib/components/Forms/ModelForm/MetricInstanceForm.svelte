@@ -49,7 +49,7 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
@@ -84,8 +84,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owner"
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}

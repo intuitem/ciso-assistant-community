@@ -232,8 +232,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="assigned_to"
 	cacheLock={cacheLocks['assigned_to']}
 	bind:cachedValue={formDataCache['assigned_to']}
@@ -285,7 +289,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}

@@ -117,6 +117,12 @@
 	"providerColon": "Fornitore:",
 	"domain": "Dominio",
 	"domainSemiColon": "Dominio:",
+	"allDomains": "Tutti i domini",
+	"selectDomain": "Seleziona dominio",
+	"focusMode": "Modalità focus",
+	"focusModeTooltip": "Concentrati su un dominio specifico",
+	"clearFocus": "Cancella focus",
+	"noDomainsAvailable": "Nessun dominio disponibile",
 	"urn": "URN",
 	"treatmentStatus": "Stato di mitigazione",
 	"qualification": "Qualificazione",
@@ -385,7 +391,7 @@
 	"dependencies": "Dipendenze",
 	"copyright": "Copyright",
 	"addYourLibrary": "Aggiungi la tua libreria",
-	"libraryFileInYaml": "File della libreria in formato YAML",
+	"libraryFileInYamlOrXlsx": "File della libreria in formato YAML",
 	"importBackup": "Importa backup",
 	"exportBackup": "Esporta backup",
 	"confirmImportBackup": "Sei sicuro di voler importare questo backup? Sovrascriverai tutti i dati esistenti, incluse le credenziali attuali.",
@@ -554,6 +560,7 @@
 	"mediumSOK": "La forza della conoscenza a supporto della valutazione è media",
 	"highSOK": "La forza della conoscenza a supporto della valutazione è alta",
 	"libraryLoadingError": "Si è verificato un errore durante il caricamento della libreria",
+	"processingError": "Errore di elaborazione",
 	"libraryAlreadyLoadedError": "Questa libreria è già stata caricata",
 	"invalidLibraryFileError": "File della libreria non valido. Assicurati che il formato sia corretto.",
 	"taintedFormMessage": "Vuoi lasciare questa pagina? Le modifiche apportate potrebbero non essere salvate.",
@@ -796,6 +803,7 @@
 	"graph": "Grafico",
 	"startDate": "Data di inizio",
 	"startDateHelpText": "Data di inizio (utile per la linea temporale)",
+	"expirationDateMustBeOnOrAfterStartDate": "La data di scadenza deve essere uguale o successiva alla data di inizio",
 	"backupLoadingError": "Errore durante il caricamento del backup.",
 	"backupVersionError": "Impossibile caricare il backup: la versione non è valida",
 	"confirmYes": "Conferma digitando 'sì':",
@@ -1336,6 +1344,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} oggetto non visibile.",
+				"countPlural=other": "{count} oggetti non visibili."
+			}
+		}
+	],
 	"matchingScenarios": "Scenari corrispondenti",
 	"select": "Seleziona",
 	"deselect": "Deseleziona",
@@ -1593,6 +1611,8 @@
 	"dataBreachRiskLevel": "Livello di rischio",
 	"dataBreachesByType": "Data breaches per tipologia",
 	"dataBreachesDescription": "Incidenti e notifiche di data breach",
+	"gdpr": "GDPR / Privacy",
+	"gdprDescription": "Funzionalità di protezione dei dati e gestione della privacy (conformità GDPR)",
 	"dataLocationProcessing": "Posizione dei dati duranmte l'elaborazione",
 	"dataLocationStorage": "Posizione dei dati (at rest)",
 	"dataWizardRiskAssessmentDescription": "Importa gli scenari di rischio ed i loro controlli associati",
@@ -1729,7 +1749,7 @@
 	"isIntragroup": "È intra-gruppo",
 	"isLocked": "Bloccato",
 	"isRecurrent": "Periodico",
-	"isRecurrentHelpText": "Xontrolla se l'attività è periodica",
+	"isRecurrentHelpText": "Controlla se l'attività è periodica",
 	"isSuperuser": "È un superuser",
 	"isTemplate": "Periodico",
 	"isThirdParty": "È una terza parte",
@@ -1768,7 +1788,7 @@
 	"metricDefinitions": "Definizione metriche",
 	"metricDefinitionsDescription": "Definisce metriche personalizzate per tracciare e misurare gli indicatori di performance",
 	"metricInstance": "Istanza di una metrica",
-	"metricInstances": "Istanza di metriche",
+	"metricInstances": "Istanze di metriche",
 	"metricInstancesDescription": "Traccia specifici valori delle metriche per gli oggetti nella tua organizzazione",
 	"metricType": "Tipo di metrica",
 	"metrology": "Metriche",
@@ -2055,6 +2075,7 @@
 	"xRaysLoadingData": "Analisi dei dati...",
 	"xRaysView": "Visualizza",
 	"year": "Anno",
+	"appliedControlsPlaceholder": "Seleziona i controlli applicati...",
 	"accreditation": "Accreditamento",
 	"accreditationAdvanced": "Avanzato",
 	"accreditationAuthority": "Autorità di accreditamento",
@@ -2286,5 +2307,8 @@
 	"organisationObjectives": "Obbiettivi (ISO)",
 	"origin": "Origine",
 	"relationship": "Relazione",
-	"relationships": "Relazioni"
+	"relationships": "Relazioni",
+	"assignmentSettings": "Impostazioni assegnazioni",
+	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
 }

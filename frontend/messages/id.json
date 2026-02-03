@@ -117,6 +117,12 @@
 	"providerColon": "Penyedia:",
 	"domain": "Domain",
 	"domainSemiColon": "Domain:",
+	"allDomains": "Semua domain",
+	"selectDomain": "Pilih domain",
+	"focusMode": "Mode fokus",
+	"focusModeTooltip": "Fokus pada domain tertentu",
+	"clearFocus": "Hapus fokus",
+	"noDomainsAvailable": "Tidak ada domain tersedia",
 	"urn": "URN",
 	"treatmentStatus": "Status perlakuan",
 	"qualification": "Kualifikasi",
@@ -385,7 +391,7 @@
 	"dependencies": "Ketergantungan",
 	"copyright": "Hak cipta",
 	"addYourLibrary": "Tambahkan pustaka Anda sendiri",
-	"libraryFileInYaml": "File pustaka dalam format YAML",
+	"libraryFileInYamlOrXlsx": "File pustaka dalam format YAML",
 	"importBackup": "Impor cadangan",
 	"exportBackup": "Ekspor cadangan",
 	"confirmImportBackup": "Apakah Anda yakin ingin mengimpor cadangan ini? Ini akan menimpa semua data yang ada.",
@@ -550,6 +556,7 @@
 	"mediumSOK": "Kekuatan pengetahuan untuk penilaian sedang",
 	"highSOK": "Kekuatan pengetahuan untuk penilaian tinggi",
 	"libraryLoadingError": "Terjadi kesalahan saat memuat pustaka Anda",
+	"processingError": "Kesalahan pemrosesan",
 	"libraryAlreadyLoadedError": "Pustaka ini sudah dimuat",
 	"invalidLibraryFileError": "File pustaka tidak valid. Pastikan formatnya benar.",
 	"taintedFormMessage": "Apakah Anda ingin meninggalkan halaman ini? Perubahan yang Anda buat mungkin tidak akan disimpan.",
@@ -783,6 +790,7 @@
 	"graph": "Grafik",
 	"startDate": "Tanggal mulai",
 	"startDateHelpText": "Tanggal mulai (berguna untuk linimasa)",
+	"expirationDateMustBeOnOrAfterStartDate": "Tanggal kedaluwarsa harus sama atau setelah tanggal mulai",
 	"backupLoadingError": "Terjadi kesalahan saat memuat cadangan.",
 	"backupGreaterVersionError": "Tidak dapat memuat cadangan, versi cadangan lebih tinggi daripada versi aplikasi Anda saat ini.",
 	"backupLowerVersionError": "Terjadi kesalahan, versi cadangan mungkin terlalu lama, jika demikian, cadangan harus diperbarui sebelum mencoba lagi.",
@@ -1144,6 +1152,16 @@
 			}
 		}
 	],
+	"objectsNotVisible": [
+		{
+			"declarations": ["input count", "local countPlural = count: plural"],
+			"selectors": ["countPlural"],
+			"match": {
+				"countPlural=one": "{count} objek tidak terlihat.",
+				"countPlural=other": "{count} objek tidak terlihat."
+			}
+		}
+	],
 	"matchingScenarios": "Skenario yang cocok",
 	"select": "Pilih",
 	"deselect": "Batalkan Pilihan",
@@ -1249,5 +1267,9 @@
 	],
 	"cascadeAffectedHint": "Item-item di bawah ini tetap berada di sistem tetapi tautan mereka ke objek ini akan dihapus.",
 	"libraryFilteringLabels": "Label perpustakaan",
-	"campaignsDescription": "Manajemen kampanye audit"
+	"campaignsDescription": "Manajemen kampanye audit",
+	"appliedControlsPlaceholder": "Pilih kontrol yang diterapkan...",
+	"assignmentSettings": "Pengaturan penugasan",
+	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
+	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau."
 }

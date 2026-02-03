@@ -1,9 +1,33 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import { persisted, type Persisted } from 'svelte-persisted-store';
 import type { Driver } from 'driver.js';
 import { DataHandler } from '@vincjo/datatables/remote';
 import type { TreeViewNode } from '$lib/components/TreeView/types';
+
+// Focus mode
+export interface FocusModeState {
+	id: string | null;
+	name: string | null;
+}
+export const focusMode: Persisted<FocusModeState> = persisted('focusMode', {
+	id: null,
+	name: null
+});
+export function setFocusMode(folderId: string, folderName: string) {
+	focusMode.set({ id: folderId, name: folderName });
+	if (browser) {
+		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+		document.cookie = `focus_folder_id=${folderId}; path=/; SameSite=Lax${secure}`;
+	}
+}
+export function clearFocusMode() {
+	focusMode.set({ id: null, name: null });
+	if (browser) {
+		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+		document.cookie = `focus_folder_id=; path=/; SameSite=Lax${secure}; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+	}
+}
 
 export const showNotification = writable(
 	(browser && localStorage.getItem('showNotification')) || 'false'
