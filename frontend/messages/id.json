@@ -391,7 +391,7 @@
 	"dependencies": "Ketergantungan",
 	"copyright": "Hak cipta",
 	"addYourLibrary": "Tambahkan pustaka Anda sendiri",
-	"libraryFileInYamlOrXlsx": "File pustaka dalam format YAML",
+	"libraryFileInYamlOrXlsx": "File pustaka dalam format YAML atau XLSX",
 	"importBackup": "Impor cadangan",
 	"exportBackup": "Ekspor cadangan",
 	"confirmImportBackup": "Apakah Anda yakin ingin mengimpor cadangan ini? Ini akan menimpa semua data yang ada.",

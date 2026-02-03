@@ -391,7 +391,7 @@
 	"dependencies": "Závislosti",
 	"copyright": "Autorská práva",
 	"addYourLibrary": "Přidejte svou vlastní knihovnu",
-	"libraryFileInYamlOrXlsx": "Soubor knihovny ve formátu YAML",
+	"libraryFileInYamlOrXlsx": "Soubor knihovny ve formátu YAML nebo XLSX",
 	"importBackup": "Importovat zálohu",
 	"exportBackup": "Exportovat zálohu",
 	"confirmImportBackup": "Opravdu chcete importovat tuto zálohu? To přepíše všechna existující data.",
