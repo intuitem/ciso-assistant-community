@@ -77,16 +77,15 @@ export const actions: Actions = {
 
 				const translate_error = safeTranslate(response.error, {}, locale ? { locale } : {});
 
-				let toast_error_message: string;
-				if (!translate_error || translate_error === response.error) {
-					toast_error_message =
-						m.libraryLoadingError({}, locale ? { locale } : {}) + '(' + response.error + ')';
-				} else {
-					toast_error_message = translate_error;
-				}
+				let toast_error_message =
+					translate_error && translate_error !== response.error
+						? translate_error
+						: m.libraryLoadingError({}, locale ? { locale } : {});
 
 				if (response.detail) {
 					toast_error_message += `: ${response.detail}`;
+				} else if (!translate_error || translate_error === response.error) {
+					toast_error_message += ` (${response.error})`;
 				}
 
 				setFlash(
