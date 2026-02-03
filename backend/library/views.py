@@ -466,17 +466,19 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     try:
                         load_error = library.load()
                     except ValueError as load_exc:
+                        validation_detail = load_exc.args[0] if load_exc.args else None
                         logger.error(
                             "Validation error while loading newly uploaded library, removing stored entry",
                             urn=library.urn,
-                            error=str(load_exc),
+                            error=validation_detail,
                         )
                         library.delete()
                         return HttpResponse(
                             json.dumps(
                                 {
                                     "error": "libraryLoadFailed",
-                                    "detail": str(load_exc),
+                                    "detail": validation_detail
+                                    or "Invalid library content.",
                                 }
                             ),
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
