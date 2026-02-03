@@ -1526,6 +1526,8 @@
 	"updateAvailable": "有可用更新",
 	"showGuidedTour": "显示引导教程",
 	"loadDemoData": "加载演示数据",
+	"importingDemoData": "正在导入演示数据...",
+	"demoEnvironmentBeingPrepared": "您的演示环境正在准备中。这可能需要几分钟时间。",
 	"firstTimeLoginModalTitle": "欢迎使用CISO Assistant！",
 	"firstTimeLoginModalDescription": "这是您首次登录。是否需要引导教程来开始使用？",
 	"ebiosRadarParameters": "EBIOS RM雷达参数",

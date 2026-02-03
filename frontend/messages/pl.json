@@ -1390,6 +1390,8 @@
 	"updateAvailable": "Aktualizacja dostępna",
 	"showGuidedTour": "Pokaz z przewodnikiem",
 	"loadDemoData": "Załaduj dane demo",
+	"importingDemoData": "Importowanie danych demo...",
+	"demoEnvironmentBeingPrepared": "Twoje środowisko demo jest w trakcie przygotowania. Może to potrwać kilka minut.",
 	"firstTimeLoginModalTitle": "Witamy w Ciso Assistant!",
 	"firstTimeLoginModalDescription": "To twój pierwszy logowanie. Czy chciałbyś wybrać się na wycieczkę z przewodnikiem?",
 	"ebiosRadarParameters": "Parametry radaru EBIOS RM",
