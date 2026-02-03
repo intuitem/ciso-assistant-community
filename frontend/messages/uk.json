@@ -394,7 +394,7 @@
 	"dependencies": "Залежності",
 	"copyright": "Копірайт",
 	"addYourLibrary": "Додайте власну бібліотеку",
-	"libraryFileInYamlOrXlsx": "Файл бібліотеки у форматі YAML",
+	"libraryFileInYamlOrXlsx": "Файл бібліотеки у форматі YAML або XLSX",
 	"importBackup": "Імпорт резервної копії",
 	"exportBackup": "Експорт резервної копії",
 	"confirmImportBackup": "Ви впевнені, що хочете імпортувати цю резервну копію? Це перезапише всі існуючі дані, включаючи ваші фактичні облікові дані.",
