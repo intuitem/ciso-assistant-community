@@ -425,7 +425,7 @@
 	"dependencies": "Bağımlılıklar",
 	"copyright": "Telif Hakkı",
 	"addYourLibrary": "Kendi kütüphanenizi ekleyin",
-	"libraryFileInYamlOrXlsx": "YAML formatında kütüphane dosyası",
+	"libraryFileInYamlOrXlsx": "YAML veya XLSX formatında kütüphane dosyası",
 	"importBackup": "Yedekten içe aktar",
 	"exportBackup": "Yedekten dışa aktar",
 	"confirmImportBackup": "Bu yedeği içe aktarmak istediğinizden emin misiniz? Bu, mevcut kimlik bilgileriniz dahil tüm mevcut verilerin üzerine yazacaktır.",

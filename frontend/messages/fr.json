@@ -483,7 +483,7 @@
 	"scopedAsset": "Typiquement un actif primaire / fonction métier qui sera le focus de cette entrée",
 	"copyright": "Copyright",
 	"addYourLibrary": "Ajouter votre propre bibliothèque",
-	"libraryFileInYamlOrXlsx": "Fichier de librairie en format YAML",
+	"libraryFileInYamlOrXlsx": "Fichier de librairie en format YAML ou XLSX",
 	"importBackup": "Importer une sauvegarde",
 	"exportBackup": "Exporter une sauvegarde",
 	"confirmImportBackup": "Êtes-vous sûr de vouloir importer cette sauvegarde ? Cela écrasera toutes les données existantes avec tous les utilisateurs et leur mot de passe",
