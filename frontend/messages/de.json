@@ -2001,6 +2001,8 @@
 	"linkedCollection": "Sammlung",
 	"linkedModels": "Verknüpfte Objekte",
 	"loadDemoData": "Demo-Daten laden",
+	"importingDemoData": "Lade Demo-Daten...",
+	"demoEnvironmentBeingPrepared": "Ihr Demo-Milieu wird vorbereitet. Dies kann einige Minuten dauern.",
 	"loadMissingLibraries": "Fehlende Bibliotheken laden",
 	"loadMissingLibrariesHelpText": "Laden Sie fehlende Bibliotheken, um den Import abzuschließen – falls verfügbar.",
 	"loadedLibrary": "Geladene Bibliothek",

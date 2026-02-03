@@ -1388,6 +1388,8 @@
 	"updateAvailable": "Διαθέσιμη ενημέρωση",
 	"showGuidedTour": "Εμφάνιση ξενάγησης",
 	"loadDemoData": "Φόρτωση demo δεδομένων",
+	"importingDemoData": "Εισαγωγή demo δεδομένων...",
+	"demoEnvironmentBeingPrepared": "Το περιβάλλον δειγμάτων ετοιμάζεται. Αυτό μπορεί να διαρκέσει λίγα λεπτά.",
 	"firstTimeLoginModalTitle": "Καλώς ήρθατε στο CISO Assistant!",
 	"firstTimeLoginModalDescription": "Είναι η πρώτη σας είσοδος. Θέλετε μια γρήγορη ξενάγηση;",
 	"ebiosRadarParameters": "Παράμετροι ραντάρ Ebios RM",

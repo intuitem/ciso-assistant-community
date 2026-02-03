@@ -1404,6 +1404,8 @@
 	"updateAvailable": "Ažuriranje dostupno",
 	"showGuidedTour": "Prikaži vođeno razgledavanje",
 	"loadDemoData": "Učitaj demo podatke",
+	"importingDemoData": "Učitavanje demo podataka...",
+	"demoEnvironmentBeingPrepared": "Vaše demo okruženje se priprema. Ovo može potrajati nekoliko minuta.",
 	"firstTimeLoginModalTitle": "Dobrodošli u CISO Assistant!",
 	"firstTimeLoginModalDescription": "Ovo je vaša prva prijava. Želite li proći vođeno razgledavanje kako bi počeli?",
 	"ebiosRadarParameters": "Parametri Ebios RM radara",

@@ -1356,6 +1356,8 @@
 	"updateAvailable": "Доступне оновлення",
 	"showGuidedTour": "Показати навчання",
 	"loadDemoData": "Завантаження демонстраційних даних",
+	"importingDemoData": "Імпорт демонстраційних даних...",
+	"demoEnvironmentBeingPrepared": "Ваш демо-середовище готується. Це може зайняти кілька хвилин.",
 	"firstTimeLoginModalTitle": "Ласкаво просимо до CISO Assistant!",
 	"firstTimeLoginModalDescription": "Ви вперше входите в систему. Бажаєте переглянути навчання, щоб розпочати?",
 	"ebiosRadarParameters": "Параметри радара Ebios RM",
