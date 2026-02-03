@@ -23,14 +23,15 @@ objects:
     description: RBI Master Direction on Information Technology Governance, Risk,
       Controls and Assurance Practices, 2023
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       assessable: false
       depth: 1
-      name: Chapter II - IT Governance
+      ref_id: Chapter II
+      name: IT Governance
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       ref_id: '4'
       name: IT Governance Framework
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:4(a)
@@ -113,7 +114,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       ref_id: '5'
       name: Role of the Board of Directors
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:5(a)
@@ -146,7 +147,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       ref_id: '6'
       name: IT Strategy Committee of the Board
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:6(a)
@@ -315,7 +316,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       ref_id: '7'
       name: Senior Management and IT Steering Committee
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:7(a)
@@ -482,7 +483,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii---it-governance
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-ii
       ref_id: '8'
       name: Head of IT Function
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:8(a)
@@ -561,14 +562,15 @@ objects:
         They must implement strong internal security measures (like secure passwords
         or access controls) to protect the financial institution's data and technology,
         ensuring full compliance with both internal rules and external RBI regulations.
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       assessable: false
       depth: 1
-      name: Chapter III - IT Infrastructure & Services Management
+      ref_id: Chapter III
+      name: IT Infrastructure & Services Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '9'
       name: IT Services Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:9(a)
@@ -641,7 +643,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '10'
       name: Third-Party Arrangements
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:10(a)
@@ -733,7 +735,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '11'
       name: Capacity Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:11(a)
@@ -779,7 +781,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '12'
       name: Project Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:12(a)
@@ -897,7 +899,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '13'
       name: Change and Patch Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:13(a)
@@ -964,7 +966,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:14
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '14'
       name: Data Migration Controls
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:14(a)
@@ -986,7 +988,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '15'
       name: Audit Trails
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:15(a)
@@ -1032,7 +1034,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:16
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '16'
       name: Cryptographic controls
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:16(a)
@@ -1056,7 +1058,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '17'
       name: Straight Through Processing
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:17(a)
@@ -1091,7 +1093,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '18'
       name: Physical and Environmental Controls
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:18(a)
@@ -1135,7 +1137,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '19'
       name: Access Controls
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:19(a)
@@ -1180,7 +1182,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '20'
       name: Controls on Teleworking
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:20(a)
@@ -1236,7 +1238,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii---it-infrastructure-_-services-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iii
       ref_id: '21'
       name: Metrics
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:21(a)
@@ -1278,14 +1280,15 @@ objects:
         IT systems are performing and how mature their IT processes are. This ensures
         IT contributes effectively and securely to the business. For example, metrics
         could track system uptime or how quickly security issues are fixed.
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       assessable: false
       depth: 1
-      name: Chapter IV - IT and Information Security Risk Management
+      ref_id: Chapter IV
+      name: IT and Information Security Risk Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:22
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '22'
       name: Periodic review of IT related risks
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:22(a)
@@ -1305,7 +1308,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '23'
       name: IT and Information Security Risk Management Framework
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:23(a)
@@ -1375,7 +1378,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '24'
       name: Information Security Policy and Cyber Security Policy
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:24(a)
@@ -1633,7 +1636,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '25'
       name: Risk Assessment
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:25(a)
@@ -1677,7 +1680,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '26'
       name: Conduct of Vulnerability Assessment (VA) / Penetration Testing (PT)
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:26(a)
@@ -1770,7 +1773,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv---it-and-information-security-risk-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-iv
       ref_id: '27'
       name: Cyber Incident Response and Recovery Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:27(a)
@@ -1848,14 +1851,15 @@ objects:
         items include mandatory mock incident drills and testing crisis communication
         plans with all relevant parties, including third-party service providers,
         to ensure prompt and coordinated action during a real emergency.
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v
       assessable: false
       depth: 1
-      name: Chapter V - Business Continuity and Disaster Recovery Management
+      ref_id: Chapter V
+      name: Business Continuity and Disaster Recovery Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v
       ref_id: '28'
       name: Business Continuity Plan (BCP) and Disaster Recovery (DR) Policy
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:28(a)
@@ -1890,7 +1894,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v---business-continuity-and-disaster-recovery-management
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-v
       ref_id: '29'
       name: Disaster Recovery Management
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:29(a)
@@ -2026,14 +2030,15 @@ objects:
         can be restored quickly, meeting the Recovery Time Objective (RTO). They must
         regularly test these recovery plans with vendors to prove they work under
         pressure.
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi---information-systems-(is)-audit
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi
       assessable: false
       depth: 1
-      name: Chapter VI - Information Systems (IS) Audit
+      ref_id: Chapter VI
+      name: Information Systems (IS) Audit
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi---information-systems-(is)-audit
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vi
       ref_id: '30'
       name: Information Systems (IS) Audit
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:30(a)
@@ -2120,14 +2125,15 @@ objects:
         on payment systems, they would use automated tools to monitor security settings
         daily. The action is to adopt technology and processes for frequent, automated
         system checks.
-    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+    - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii
       assessable: false
       depth: 1
-      name: "Chapter VII \u2013 Repeal and Other Provisions"
+      ref_id: Chapter VII
+      name: Repeal and Other Provisions
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:31
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii
       ref_id: '31'
       name: Application of other laws not barred
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:31(a)
@@ -2146,7 +2152,7 @@ objects:
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:32
       assessable: false
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii--repeal-and-other-provisions
+      parent_urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:chapter-vii
       ref_id: '32'
       name: Interpretation
     - urn: urn:intuitem:risk:req_node:india-rbi-itgrcap-2023:32(a)
