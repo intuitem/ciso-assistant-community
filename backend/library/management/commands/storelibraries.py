@@ -39,6 +39,8 @@ class Command(BaseCommand):
                         library=library,
                     )
                 elif error:
+                    if error == "libraryAlreadyLoadedError":
+                        continue
                     logger.warning(
                         "Library skipped",
                         filename=fname,
