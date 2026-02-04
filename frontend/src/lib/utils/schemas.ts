@@ -1389,7 +1389,6 @@ export const MetricInstanceSchema = z.object({
 });
 
 export const CustomMetricSampleSchema = z.object({
-	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
 	value: jsonSchema

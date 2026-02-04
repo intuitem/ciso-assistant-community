@@ -42,6 +42,15 @@ class MetricInstanceWriteSerializer(BaseModelSerializer):
         required=False,
     )
 
+    def update(self, instance, validated_data):
+        # Check if folder is being changed
+        new_folder = validated_data.get("folder")
+        if new_folder and new_folder != instance.folder:
+            # Cascade folder change to all child CustomMetricSamples
+            instance.samples.update(folder=new_folder)
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
@@ -97,9 +106,11 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
 
 # CustomMetricSample serializers
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = CustomMetricSample
-        fields = "__all__"
+    def create(self, validated_data):
+        # Set folder from metric_instance before the permission check in parent class
+        if "metric_instance" in validated_data and validated_data["metric_instance"]:
+            validated_data["folder"] = validated_data["metric_instance"].folder
+        return super().create(validated_data)
 
     def validate_timestamp(self, value):
         """Prevent creating samples with future timestamps"""
@@ -110,6 +121,10 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
                 "Cannot create metric samples with future timestamps."
             )
         return value
+
+    class Meta:
+        model = CustomMetricSample
+        exclude = ["folder"]
 
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
