@@ -10,9 +10,11 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-white p-6 w-modal space-y-6';
-	const cHeader = 'text-xl font-medium text-gray-900';
-	const cForm = 'space-y-4';
+	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cHeaderRow = 'flex items-center justify-between';
+	const cHeader = 'text-2xl font-bold whitespace-pre-line';
+
+	const cForm = 'flex flex-col space-y-3';
 
 	interface Props {
 		parent: any;
@@ -93,28 +95,46 @@
 
 {#if $modalStore[0]}
 	<div class="modal-example-form {cBase}" role="dialog" aria-modal="true">
-		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
-		<article>{$modalStore[0].body ?? '(body missing)'}</article>
+		<div class={cHeaderRow}>
+			<header class={cHeader} data-testid="modal-title">
+				{$modalStore[0].title ?? '(title missing)'}
+			</header>
+
+			<div
+				role="button"
+				tabindex="0"
+				class="flex items-center hover:text-primary-500 cursor-pointer"
+				aria-label="Close"
+				onclick={parent.onClose}
+				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && parent.onClose()}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</div>
+		</div>
+
+		<article class="text-sm text-gray-700 whitespace-pre-line">
+			{$modalStore[0].body ?? '(body missing)'}
+		</article>
 
 		{#if loading}
 			<div class="text-sm text-gray-500">Loading...</div>
 		{:else if errorMsg}
-			<div class="p-4 bg-red-50 text-red-900 text-sm">
+			<div class="p-3 rounded-md bg-red-50 text-red-900 text-sm border border-red-200">
 				{errorMsg}
 			</div>
 		{:else if cascadeInfo}
 			{#if cascadeInfo.deleted?.count > 0}
-				<div class="p-4 bg-orange-50 border-l-2 border-orange-400">
-					<div class="text-sm font-medium text-gray-900 mb-3">
+				<div class="p-3 rounded-md bg-orange-50 border border-orange-200 space-y-2">
+					<div class="text-sm font-semibold text-gray-900">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
 					</div>
 
-					<div class="max-h-64 overflow-y-auto space-y-1">
+					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
 									aria-controls={`del-${group.model}`}
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
@@ -126,10 +146,13 @@
 								</button>
 
 								{#if expanded.has(keyFor('deleted', group.model))}
-									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+									<ul
+										id={`del-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+									>
 										{#each group.objects as o (o.id)}
-											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+											<li class="truncate text-gray-700" title={o.name}>
+												{o.name}
 											</li>
 										{/each}
 									</ul>
@@ -141,20 +164,20 @@
 			{/if}
 
 			{#if cascadeInfo.affected?.count > 0}
-				<div class="p-4 bg-blue-50 border-l-2 border-blue-400">
-					<div class="text-sm font-medium text-gray-900 mb-1">
+				<div class="p-3 rounded-md bg-blue-50 border border-blue-200 space-y-2">
+					<div class="text-sm font-semibold text-gray-900">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
-					<p class="text-xs text-gray-600 mb-3">
+					<p class="text-xs text-gray-600">
 						{m.cascadeAffectedHint()}
 					</p>
 
-					<div class="max-h-64 overflow-y-auto space-y-1">
+					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
 									aria-controls={`aff-${group.model}`}
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
@@ -166,10 +189,13 @@
 								</button>
 
 								{#if expanded.has(keyFor('affected', group.model))}
-									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+									<ul
+										id={`aff-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+									>
 										{#each group.objects as o (o.id)}
-											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+											<li class="truncate text-gray-700" title={o.name}>
+												{o.name}
 											</li>
 										{/each}
 									</ul>
@@ -181,62 +207,66 @@
 			{/if}
 		{/if}
 
-		<div>
-			<p class="text-sm font-medium text-red-600 mb-2">{m.confirmYes()}</p>
+		<div class="space-y-2">
+			<p class="text-sm font-medium text-red-600">{m.confirmYes()}</p>
 			<input
 				type="text"
 				data-testid="delete-prompt-confirm-textfield"
 				bind:value={userInput}
 				placeholder={m.confirmYesPlaceHolder()}
-				class="w-full px-3 py-2 text-sm border border-surface-300 focus:outline-none focus:ring"
+				class="input w-full"
 				aria-label={m.confirmYes()}
 			/>
 		</div>
 
 		{#if sf}
-			<form method="POST" action={formAction} use:formEnhance class="modal-form {cForm}">
-				<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+			<form method="POST" action={formAction} use:formEnhance class={cForm}>
+				<input type="hidden" name="urlmodel" value={URLModel} />
+				<input type="hidden" name="id" value={id} />
+
+				<div class="flex flex-row justify-between space-x-4">
 					<button
 						type="button"
-						class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+						class="btn bg-gray-400 text-white font-semibold w-full"
 						onclick={parent.onClose}
 					>
 						{m.cancel()}
 					</button>
-					<input type="hidden" name="urlmodel" value={URLModel} />
-					<input type="hidden" name="id" value={id} />
+
 					<button
-						class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 						type="submit"
 						data-testid="delete-prompt-confirm-button"
+						class="btn bg-red-600 hover:bg-red-700 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
 						onclick={parent.onConfirm}
 						disabled={!canConfirm}
 					>
 						{m.submit()}
 					</button>
-				</footer>
+				</div>
 			</form>
+
 			{#if debug === true}
 				<SuperDebug data={sf?.form} />
 			{/if}
 		{:else}
-			<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+			<div class="flex flex-row justify-between space-x-4">
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+					class="btn bg-gray-400 text-white font-semibold w-full"
 					onclick={parent.onClose}
 				>
 					{m.cancel()}
 				</button>
+
 				<button
-					class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+					class="btn bg-red-600 hover:bg-red-700 text-white font-semibold w-full disabled:opacity-50 disabled:cursor-not-allowed"
 					type="button"
 					onclick={parent.onConfirm}
 					disabled={!canConfirm}
 				>
 					{m.submit()}
 				</button>
-			</footer>
+			</div>
 		{/if}
 	</div>
 {/if}
