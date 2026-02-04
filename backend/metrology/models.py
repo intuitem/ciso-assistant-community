@@ -591,7 +591,7 @@ class BuiltinMetricSample(AbstractBaseModel):
     @classmethod
     def _compute_folder_metrics(cls, folder):
         """Compute metrics for a Folder (domain-level aggregations)."""
-        from core.models import AppliedControl, Incident, Severity
+        from core.models import AppliedControl, Incident
         from django.db.models import Count
 
         # Applied controls in this folder
@@ -619,8 +619,8 @@ class BuiltinMetricSample(AbstractBaseModel):
             .annotate(count=Count("id"))
             .values_list("severity", "count")
         )
-        # Convert severity integers to labels
-        severity_labels = {choice[0]: choice[1] for choice in Severity.choices}
+        # Convert severity integers to labels using Incident.Severity
+        severity_labels = {choice[0]: choice[1] for choice in Incident.Severity.choices}
         incidents_severity_breakdown = {
             severity_labels.get(k, str(k)): v
             for k, v in incidents_severity_breakdown.items()
