@@ -321,6 +321,8 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
+        user.is_third_party = True
+        user.keep_local_login = True
         user.save()
         instance.user = user
         instance.save()
