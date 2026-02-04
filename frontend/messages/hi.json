@@ -390,7 +390,7 @@
 	"dependencies": "निर्भरता",
 	"copyright": "कॉपीराइट",
 	"addYourLibrary": "अपनी खुद की लाइब्रेरी जोड़ें",
-	"libraryFileInYamlOrXlsx": "YAML प्रारूप में लाइब्रेरी फ़ाइल",
+	"libraryFileInYamlOrXlsx": "YAML या XLSX प्रारूप में लाइब्रेरी फ़ाइल",
 	"importBackup": "बैकअप आयात करें",
 	"exportBackup": "बैकअप निर्यात करें",
 	"confirmImportBackup": "क्या आप सुनिश्चित हैं कि आप इस बैकअप को आयात करना चाहते हैं? इससे सभी मौजूदा डेटा अधिलेखित हो जाएगा।",

@@ -300,11 +300,20 @@
 		</nav>
 	</aside>
 	{#if $loading}
-		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-50 z-1000">
-			<div class="flex flex-col items-center space-y-2">
-				<LoadingSpinner></LoadingSpinner>
+		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-60 z-1000">
+			<div class="flex flex-col items-center space-y-4 p-6 rounded-lg bg-white shadow-lg">
+				<LoadingSpinner />
+
+				<p class="text-sm text-gray-700 font-medium text-center">
+					{m.importingDemoData()}
+				</p>
+
+				<p class="text-xs text-gray-500 text-center max-w-xs">
+					{m.demoEnvironmentBeingPrepared()}
+				</p>
 			</div>
 		</div>
 	{/if}
+
 	<SideBarToggle bind:open />
 </div>

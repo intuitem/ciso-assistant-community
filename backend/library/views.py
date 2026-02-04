@@ -298,6 +298,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 json.dumps({"error": "noFileDetected"}), status=HTTP_400_BAD_REQUEST
             )
 
+        library = None
+
         try:
             attachment = request.FILES["file"]
             validate_file_extension(attachment)
@@ -461,7 +463,58 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
                 if library is not None:
                     logger.info("Attempting to load newly uploaded library")
-                    library.load()
+                    try:
+                        load_error = library.load()
+                    except ValueError as load_exc:
+                        validation_detail = load_exc.args[0] if load_exc.args else None
+                        logger.error(
+                            "Validation error while loading newly uploaded library, removing stored entry",
+                            urn=library.urn,
+                            error=validation_detail,
+                        )
+                        library.delete()
+                        return HttpResponse(
+                            json.dumps(
+                                {
+                                    "error": "libraryLoadFailed",
+                                    "detail": validation_detail
+                                    or "Invalid library content.",
+                                }
+                            ),
+                            status=HTTP_422_UNPROCESSABLE_ENTITY,
+                        )
+                    except Exception as load_exc:
+                        logger.exception(
+                            "Unexpected exception while loading newly uploaded library, removing stored entry",
+                            urn=library.urn,
+                        )
+                        library.delete()
+                        return HttpResponse(
+                            json.dumps(
+                                {
+                                    "error": "libraryLoadFailed",
+                                    "detail": "An unexpected error occurred while loading the library.",
+                                }
+                            ),
+                            status=HTTP_422_UNPROCESSABLE_ENTITY,
+                        )
+
+                    if load_error is not None:
+                        logger.error(
+                            "Failed to load newly uploaded library, removing stored entry",
+                            error=load_error,
+                            urn=library.urn,
+                        )
+                        library.delete()
+                        return HttpResponse(
+                            json.dumps(
+                                {
+                                    "error": "libraryLoadFailed",
+                                    "detail": load_error,
+                                }
+                            ),
+                            status=HTTP_422_UNPROCESSABLE_ENTITY,
+                        )
 
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
@@ -469,6 +522,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
+                if library is not None:
+                    library.delete()
                 return HttpResponse(
                     json.dumps({"error": "Failed to store library content."}),
                     status=HTTP_422_UNPROCESSABLE_ENTITY,
@@ -481,6 +536,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
             )
         except Exception:
             logger.exception("Upload library failed")
+            if library is not None:
+                library.delete()
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),
                 status=HTTP_400_BAD_REQUEST,

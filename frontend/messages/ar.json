@@ -389,7 +389,7 @@
 	"dependencies": "التبعيات",
 	"copyright": "حقوق الطبع والنشر",
 	"addYourLibrary": "أضف مكتبتك الخاصة",
-	"libraryFileInYamlOrXlsx": "ملف المكتبة بتنسيق YAML",
+	"libraryFileInYamlOrXlsx": "ملف المكتبة بتنسيق YAML أو XLSX",
 	"importBackup": "استيراد النسخة الاحتياطية",
 	"exportBackup": "تصدير النسخة الاحتياطية",
 	"confirmImportBackup": "هل أنت متأكد أنك تريد استيراد هذه النسخة الاحتياطية؟ سيؤدي ذلك إلى الكتابة فوق جميع البيانات الموجودة.",
