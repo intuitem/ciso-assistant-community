@@ -64,6 +64,7 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
     owner = FieldsRelatedField(many=True)
     organisation_objectives = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    evidences = FieldsRelatedField(["name", "id"])
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
@@ -114,7 +115,10 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    metric_instance = FieldsRelatedField(["name", "ref_id", "id"])
+    metric_instance = FieldsRelatedField(
+        ["name", "ref_id", "id", {"evidences": ["id", "name"]}]
+    )
+    evidence_revision = FieldsRelatedField(["id", "name", "version"])
     display_value = serializers.SerializerMethodField()
     raw_value = serializers.SerializerMethodField()
 

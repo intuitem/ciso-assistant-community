@@ -1385,14 +1385,17 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
 	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
-	value: jsonSchema
+	value: jsonSchema,
+	observation: z.string().optional().nullable(),
+	evidence_revision: z.string().uuid().optional().nullable()
 });
 
 export const DashboardSchema = z.object({
