@@ -1316,12 +1316,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 & Q(requirement_assessments__requirement__assessable=True),
                 distinct=True,
             ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
-            ),
         )
     )
 
@@ -1358,7 +1352,7 @@ def get_compliance_analytics(user: User, folder_id=None):
             {
                 "assessment_id": str(assessment.id),
                 "assessment_name": assessment.name,
-                "progress": assessment.progress,
+                "progress": assessment.get_progress(),
                 "perimeter": perimeter_name,
                 "perimeter_id": perimeter_id,
                 "status": assessment.status,

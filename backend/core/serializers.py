@@ -1843,7 +1843,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.SerializerMethodField()
+    progress = serializers.ReadOnlyField(source="get_progress")
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
@@ -1860,14 +1860,6 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
-
-    def get_progress(self, obj):
-        if obj.selected_implementation_groups:
-            return obj.get_progress()
-
-        if hasattr(obj, "progress"):
-            return obj.progress
-        return obj.get_progress()
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):

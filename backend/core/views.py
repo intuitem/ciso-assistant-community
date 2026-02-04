@@ -8024,6 +8024,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
+                "requirement_assessments",  # To calcul progress
             )
         )
 
@@ -8042,12 +8043,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
 
