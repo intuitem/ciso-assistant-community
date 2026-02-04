@@ -1,7 +1,7 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import Select from '../Select.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import { formFieldProxy } from 'sveltekit-superforms';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
@@ -15,7 +15,6 @@
 		initialData?: Record<string, any>;
 		data?: any;
 		object?: any;
-		debug?: boolean;
 	}
 
 	let {
@@ -25,29 +24,47 @@
 		formDataCache = $bindable({}),
 		initialData = {},
 		data = {},
-		object = {},
-		debug = false
+		object = {}
 	}: Props = $props();
 
 	const { value: valueFieldProxy } = formFieldProxy(form, 'value');
 
-	// Access metric definition from multiple sources:
-	// 1. formDataCache (when selecting in autocomplete with includeAllOptionFields)
-	// 2. data.metric_instance (when editing existing sample)
-	// 3. initialData._metric_definition (when pre-filled from parent metric-instance page)
-	const metricInstanceCache = $derived(
-		Array.isArray(formDataCache['metric_instance'])
-			? formDataCache['metric_instance'][0]
-			: formDataCache['metric_instance']
-	);
+	// Get full metric instance data from autocomplete cache (includes nested fields like metric_definition, evidences)
+	const metricInstanceCache = $derived.by(() => {
+		const options = formDataCache['metric_instance_options'];
+		if (options && Array.isArray(options) && options.length > 0) {
+			return options[0];
+		}
+		return null;
+	});
 
 	const metricDefinition = $derived(
 		metricInstanceCache?.metric_definition ||
+			object?.metric_instance?.metric_definition ||
 			data?.metric_instance?.metric_definition ||
 			initialData?._metric_definition
 	);
 	const isQualitative = $derived(metricDefinition?.category === 'qualitative');
 	const unitName = $derived(metricDefinition?.unit?.name || '');
+
+	// Get evidence ID from metric instance for filtering evidence revisions
+	const evidenceId = $derived.by(() => {
+		if (metricInstanceCache?.evidences?.id) {
+			return metricInstanceCache.evidences.id;
+		}
+		if (object?.metric_instance && typeof object.metric_instance === 'object') {
+			return object.metric_instance?.evidences?.id;
+		}
+		if (data?.metric_instance?.evidences?.id) {
+			return data.metric_instance.evidences.id;
+		}
+		if (initialData?._evidences?.id) {
+			return initialData._evidences.id;
+		}
+		return null;
+	});
+
+	const hasEvidence = $derived(!!evidenceId);
 
 	// Build choices for select dropdown
 	const choiceOptions = $derived.by(() => {
@@ -117,11 +134,13 @@
 	optionsEndpoint="metric-instances"
 	optionsExtraFields={[
 		['folder', 'str'],
-		['metric_definition', 'fk']
+		['metric_definition', 'fk'],
+		['evidences', 'fk']
 	]}
 	field="metric_instance"
 	cacheLock={cacheLocks['metric_instance']}
 	bind:cachedValue={formDataCache['metric_instance']}
+	bind:cachedOptions={formDataCache['metric_instance_options']}
 	includeAllOptionFields={true}
 	label={m.metricInstance()}
 	hidden={!!initialData.metric_instance}
@@ -137,43 +156,6 @@
 	disabled={object.id}
 	max={maxTimestamp()}
 />
-
-{#if debug}
-	<!-- Debug section -->
-	<div class="card bg-yellow-50 p-4 my-4 border-2 border-yellow-300">
-		<h4 class="font-semibold mb-2">Debug Info:</h4>
-		<div class="text-xs space-y-2">
-			<div>
-				<strong>initialData.metric_instance:</strong>
-				{initialData.metric_instance || 'null'}
-			</div>
-			<div>
-				<strong>initialData._metric_definition:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(
-						initialData._metric_definition,
-						null,
-						2
-					)}</pre>
-			</div>
-			<div>
-				<strong>metricInstanceCache:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(metricInstanceCache, null, 2)}</pre>
-			</div>
-			<div>
-				<strong>metricDefinition (resolved):</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(metricDefinition, null, 2)}</pre>
-			</div>
-			<div>
-				<strong>isQualitative:</strong>
-				{isQualitative}
-			</div>
-			<div>
-				<strong>choiceOptions:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(choiceOptions, null, 2)}</pre>
-			</div>
-		</div>
-	</div>
-{/if}
 
 {#if isQualitative}
 	<div class="form-group">
@@ -207,4 +189,26 @@
 			oninput={handleQuantitativeChange}
 		/>
 	</div>
+{/if}
+
+<MarkdownField
+	{form}
+	field="observation"
+	label={m.observation()}
+	cacheLock={cacheLocks['observation']}
+	bind:cachedValue={formDataCache['observation']}
+	rows={4}
+	defaultMode="edit"
+/>
+
+{#if hasEvidence}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint={`evidence-revisions?evidence=${evidenceId}`}
+		optionsLabelField="str"
+		field="evidence_revision"
+		cacheLock={cacheLocks['evidence_revision']}
+		bind:cachedValue={formDataCache['evidence_revision']}
+		label={m.evidenceRevision()}
+	/>
 {/if}
