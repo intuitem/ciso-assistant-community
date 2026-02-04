@@ -1390,6 +1390,8 @@
 	"updateAvailable": "Aktualizacja dostępna",
 	"showGuidedTour": "Pokaz z przewodnikiem",
 	"loadDemoData": "Załaduj dane demo",
+	"createYourFirstAuditToSeeRecapPage": "Utwórz swój pierwszy audyt, aby zobaczyć stronę podsumowania tutaj.",
+	"AuditExistsYoullSeeOverallCompliance": "Gdy audyt istnieje, tutaj zobaczysz ogólną zgodność, wykresy i opcje eksportu.",
 	"firstTimeLoginModalTitle": "Witamy w Ciso Assistant!",
 	"firstTimeLoginModalDescription": "To twój pierwszy logowanie. Czy chciałbyś wybrać się na wycieczkę z przewodnikiem?",
 	"ebiosRadarParameters": "Parametry radaru EBIOS RM",

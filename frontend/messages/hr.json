@@ -1404,6 +1404,8 @@
 	"updateAvailable": "Ažuriranje dostupno",
 	"showGuidedTour": "Prikaži vođeno razgledavanje",
 	"loadDemoData": "Učitaj demo podatke",
+	"createYourFirstAuditToSeeRecapPage": "Stvorite svoj prvi audit da vidite stranicu rekapitulacije.",
+	"AuditExistsYoullSeeOverallCompliance": "Kada postoji audit, ovdje ćete vidjeti ukupnu usklađenost, grafikone i opcije izvoza.",
 	"firstTimeLoginModalTitle": "Dobrodošli u CISO Assistant!",
 	"firstTimeLoginModalDescription": "Ovo je vaša prva prijava. Želite li proći vođeno razgledavanje kako bi počeli?",
 	"ebiosRadarParameters": "Parametri Ebios RM radara",

@@ -3070,6 +3070,8 @@
 	"progressStatusEnabled": "Habilitar estado de progreso",
 	"progressStatusEnabledHelpText": "Muestra el estado de progreso (pendiente, en curso, en revisión, completado) en las evaluaciones de requisitos.",
 	"rawValue": "Valor",
+	"createYourFirstAuditToSeeRecapPage": "Cree su primera auditoría para ver la página de resumen",
+	"AuditExistsYoullSeeOverallCompliance": "Una vez que exista un audit, aquí verá la conformidad general, los gráficos y las opciones de exportación.",
 	"requirementAssessmentResultHelpText": "Resultado de cumplimiento para este requisito",
 	"requirementAssessmentStatusHelpText": "Progreso del auditor en la revisión del requisito",
 	"secretCopiedToClipboard": "Secreto copiado al portapapeles correctamente",

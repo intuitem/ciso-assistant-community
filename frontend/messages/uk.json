@@ -1356,6 +1356,8 @@
 	"updateAvailable": "Доступне оновлення",
 	"showGuidedTour": "Показати навчання",
 	"loadDemoData": "Завантаження демонстраційних даних",
+	"createYourFirstAuditToSeeRecapPage": "Створіть свій перший аудит, щоб побачити сторінку підсумків.",
+	"AuditExistsYoullSeeOverallCompliance": "Після створення аудиту тут буде відображено загальний рівень відповідності, графіки та параметри експорту.",
 	"firstTimeLoginModalTitle": "Ласкаво просимо до CISO Assistant!",
 	"firstTimeLoginModalDescription": "Ви вперше входите в систему. Бажаєте переглянути навчання, щоб розпочати?",
 	"ebiosRadarParameters": "Параметри радара Ebios RM",
