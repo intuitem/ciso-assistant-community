@@ -5760,10 +5760,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
-            [
-                ca.progress
-                for ca in ComplianceAssessment.objects.filter(campaign=self)
-            ]
+            [ca.progress for ca in ComplianceAssessment.objects.filter(campaign=self)]
         )
         days_remaining = "--"
         if self.due_date:
