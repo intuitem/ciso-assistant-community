@@ -1915,16 +1915,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
-    def __str__(self):
-        if self.name:
-            return self.ref_id + " - " + self.name if self.ref_id else self.name
-        else:
-            return (
-                self.ref_id + " - " + self.description
-                if self.ref_id
-                else self.description
-            )
-
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
