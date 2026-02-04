@@ -45,11 +45,11 @@
 	}
 </script>
 
-<div class="px-4 py-6 space-y-6">
+<div class="space-y-6">
 	<!-- Header -->
 
 	<!-- Reports Grid with White Background -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+	<div class="bg-white card border border-gray-200 p-6">
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 			{#each reportTiles as tile}
 				<ReportTile
@@ -66,7 +66,7 @@
 	</div>
 
 	<!-- Info Section -->
-	<div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 p-6">
+	<div class="bg-gradient-to-br from-gray-50 to-gray-100 card border border-gray-200 p-6">
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
 				<i class="fas fa-info-circle text-2xl text-blue-600"></i>
