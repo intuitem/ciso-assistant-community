@@ -3355,5 +3355,13 @@
 	"changeTeam": "Change team",
 	"deleteTeam": "Delete team",
 	"appliedControlsPlaceholder": "Select applied controls...",
-	"jumpTo": "Jump to"
+	"jumpTo": "Jump to",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

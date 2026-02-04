@@ -1820,5 +1820,13 @@
 	"appliedControlsPlaceholder": "Uygulanan kontrolleri seçin...",
 	"assignmentSettings": "Atama ayarları",
 	"allowAssignmentsToEntities": "Varlıklara atamalara izin ver",
-	"allowAssignmentsToEntitiesDescription": "Sahip, yazar veya inceleyen atarken varlıkların aktör olarak görünmesine izin verir."
+	"allowAssignmentsToEntitiesDescription": "Sahip, yazar veya inceleyen atarken varlıkların aktör olarak görünmesine izin verir.",
+	"fileTooLarge": "Dosya çok büyük",
+	"invalidFileFormat": "Geçersiz dosya formatı",
+	"invalidCompatMode": "Geçersiz uyumluluk modu",
+	"invalidExcelFile": "Geçersiz Excel dosyası",
+	"processingTimeout": "İşlem zaman aşımı",
+	"maliciousFileDetected": "Kötü amaçlı dosya algılandı",
+	"serverConfigurationError": "Sunucu yapılandırma hatası",
+	"libraryLoadFailed": "Kütüphane yükleme hatası"
 }

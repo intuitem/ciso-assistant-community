@@ -2954,5 +2954,13 @@
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",
 	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
-	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers.",
+	"fileTooLarge": "Bestand te groot",
+	"invalidFileFormat": "Ongeldig bestandsformaat",
+	"invalidCompatMode": "Ongeldige compatibiliteitsmodus",
+	"invalidExcelFile": "Ongeldig Excel-bestand",
+	"processingTimeout": "Verwerkingstime-out",
+	"maliciousFileDetected": "Schadelijk bestand gedetecteerd",
+	"serverConfigurationError": "Serverconfiguratiefout",
+	"libraryLoadFailed": "Bibliotheek laden mislukt"
 }

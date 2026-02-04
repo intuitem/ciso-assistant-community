@@ -2311,5 +2311,13 @@
 	"relationships": "Relazioni",
 	"assignmentSettings": "Impostazioni assegnazioni",
 	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
-	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori.",
+	"fileTooLarge": "File troppo grande",
+	"invalidFileFormat": "Formato file non valido",
+	"invalidCompatMode": "Modalità di compatibilità non valida",
+	"invalidExcelFile": "File Excel non valido",
+	"processingTimeout": "Timeout elaborazione",
+	"maliciousFileDetected": "File dannoso rilevato",
+	"serverConfigurationError": "Errore configurazione server",
+	"libraryLoadFailed": "Caricamento libreria fallito"
 }

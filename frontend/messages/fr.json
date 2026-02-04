@@ -3325,5 +3325,13 @@
 	"viewTeam": "Voir une équipe",
 	"changeTeam": "Modifier une équipe",
 	"deleteTeam": "Supprimer une équipe",
-	"jumpTo": "Aller vers"
+	"jumpTo": "Aller vers",
+	"fileTooLarge": "Fichier trop volumineux",
+	"invalidFileFormat": "Format de fichier invalide",
+	"invalidCompatMode": "Mode de compatibilité invalide",
+	"invalidExcelFile": "Fichier Excel invalide",
+	"processingTimeout": "Délai de traitement dépassé",
+	"maliciousFileDetected": "Fichier malveillant détecté",
+	"serverConfigurationError": "Erreur de configuration du serveur",
+	"libraryLoadFailed": "Échec du chargement de la bibliothèque"
 }

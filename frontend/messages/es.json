@@ -3094,5 +3094,13 @@
 	"widgetCount": "Número de widgets",
 	"assignmentSettings": "Asignaciones",
 	"allowAssignmentsToEntities": "Permitir asignaciones a entidades",
-	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores."
+	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores.",
+	"fileTooLarge": "Archivo demasiado grande",
+	"invalidFileFormat": "Formato de archivo inválido",
+	"invalidCompatMode": "Modo de compatibilidad inválido",
+	"invalidExcelFile": "Archivo Excel inválido",
+	"processingTimeout": "Tiempo de procesamiento agotado",
+	"maliciousFileDetected": "Archivo malicioso detectado",
+	"serverConfigurationError": "Error de configuración del servidor",
+	"libraryLoadFailed": "Error al cargar la biblioteca"
 }
