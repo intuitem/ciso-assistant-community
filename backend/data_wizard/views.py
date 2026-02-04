@@ -255,7 +255,18 @@ class RecordConsumer[Context](ABC):
 
 
 class AssetRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Asset records.
+    Supports parent_assets linking via ref_id in a second pass.
+    """
+
     SERIALIZER_CLASS = AssetWriteSerializer
+    TYPE_MAP: Final[dict[str, str]] = {
+        "primary": "PR",
+        "pr": "PR",
+        "support": "SP",
+        "sp": "SP",
+    }
 
     def create_context(self):
         return None, None
@@ -271,18 +282,90 @@ class AssetRecordConsumer(RecordConsumer[None]):
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
+
+        # Map type field
+        asset_type = record.get("type", "SP")
+        if isinstance(asset_type, str):
+            asset_type = self.TYPE_MAP.get(
+                asset_type.lower().strip(), asset_type.upper()
+            )
 
         return {
             "ref_id": record.get("ref_id", ""),
             "name": name,
-            "type": record.get("type", "SP"),
+            "type": asset_type,
             "folder": domain,
             "description": record.get("description", ""),
+            "business_value": record.get("business_value", ""),
+            "reference_link": record.get("reference_link", "")
+            or record.get("link", ""),
+            "observation": record.get("observation", ""),
         }, None
+
+    def process_records(self, records: list[dict]) -> Result:
+        """
+        Override to add second pass for parent_assets linking.
+        """
+        # First pass: create all assets
+        results = super().process_records(records)
+
+        # Second pass: link parent_assets by ref_id
+        for record in records:
+            parent_assets_ref = record.get("parent_assets") or record.get(
+                "parent_asset_ref_id"
+            )
+            if not parent_assets_ref:
+                continue
+
+            asset_ref_id = record.get("ref_id")
+            if not asset_ref_id:
+                continue
+
+            # Find the created asset
+            asset = Asset.objects.filter(ref_id=asset_ref_id).first()
+            if not asset:
+                continue
+
+            # Parse parent ref_ids (comma or pipe separated)
+            if isinstance(parent_assets_ref, str):
+                parent_ref_ids = [
+                    ref.strip()
+                    for ref in parent_assets_ref.replace("|", ",").split(",")
+                    if ref.strip()
+                ]
+            else:
+                parent_ref_ids = [str(parent_assets_ref)]
+
+            # Link parent assets
+            for parent_ref_id in parent_ref_ids:
+                parent_asset = Asset.objects.filter(ref_id=parent_ref_id).first()
+                if parent_asset and parent_asset.id != asset.id:
+                    asset.parent_assets.add(parent_asset)
+
+        return results
 
 
 class AppliedControlRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing AppliedControl records.
+    Supports reference_control linking via ref_id.
+    """
+
     SERIALIZER_CLASS = AppliedControlWriteSerializer
+    EFFORT_MAP: Final[dict[str, str]] = {
+        "extra small": "XS",
+        "extrasmall": "XS",
+        "xs": "XS",
+        "small": "S",
+        "s": "S",
+        "medium": "M",
+        "m": "M",
+        "large": "L",
+        "l": "L",
+        "extra large": "XL",
+        "extralarge": "XL",
+        "xl": "XL",
+    }
 
     def create_context(self):
         return None, None
@@ -299,13 +382,42 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
+        # Parse priority
         priority = record.get("priority")
         if isinstance(priority, str) and priority.isdigit():
             priority = int(priority)
-        else:
+        elif not isinstance(priority, int):
             priority = None
 
-        return {
+        # Parse effort
+        effort = record.get("effort")
+        if isinstance(effort, str):
+            effort = self.EFFORT_MAP.get(effort.lower().strip(), effort.upper())
+            if effort not in ("XS", "S", "M", "L", "XL"):
+                effort = None
+
+        # Parse control_impact (1-5 scale)
+        control_impact = record.get("control_impact") or record.get("impact")
+        if isinstance(control_impact, str) and control_impact.isdigit():
+            control_impact = int(control_impact)
+        if isinstance(control_impact, int) and not (1 <= control_impact <= 5):
+            control_impact = None
+
+        # Look up reference_control by ref_id
+        reference_control_id = None
+        reference_control_ref = record.get("reference_control") or record.get(
+            "reference_control_ref_id"
+        )
+        if reference_control_ref:
+            from core.models import ReferenceControl
+
+            ref_control = ReferenceControl.objects.filter(
+                ref_id=reference_control_ref
+            ).first()
+            if ref_control:
+                reference_control_id = ref_control.id
+
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -314,7 +426,18 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             "status": record.get("status", "to_do"),
             "priority": priority,
             "csf_function": record.get("csf_function", "govern"),
-        }, None
+            "effort": effort,
+            "control_impact": control_impact,
+            "link": record.get("link", ""),
+            "eta": record.get("eta"),
+            "expiry_date": record.get("expiry_date"),
+            "start_date": record.get("start_date"),
+        }
+
+        if reference_control_id:
+            data["reference_control"] = reference_control_id
+
+        return data, None
 
 
 class EvidenceRecordConsumer(RecordConsumer[None]):

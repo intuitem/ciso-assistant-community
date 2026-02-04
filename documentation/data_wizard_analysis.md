@@ -41,24 +41,22 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 |-------|----------|-------|
 | `ref_id` | No | Reference ID |
 | `name` | **Yes** | Asset name |
-| `type` | No | Asset type (defaults to "SP") |
+| `type` | No | Mapped: primary/PR, support/SP (defaults to "SP") |
 | `domain` | No | Folder name lookup |
 | `description` | No | |
+| `business_value` | No | Free text |
+| `reference_link` | No | URL (also accepts `link`) |
+| `observation` | No | Free text |
+| `parent_assets` | No | Comma/pipe-separated ref_ids (linked in second pass) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `business_value` | CharField | High |
-| `sensitivity` | CharField | High |
-| `criticality` | CharField | High |
-| `parent_assets` | M2M | Medium |
-| `parent_asset` | FK (deprecated) | Low |
-| `labels` | M2M | Medium |
+| `owner` | M2M Actor | Medium |
+| `asset_class` | FK AssetClass | Medium |
 | `filtering_labels` | M2M | Medium |
-| `security_objectives` | JSONField | Medium |
-| `owner` | FK User | Medium |
-| `disaster_recovery_objectives` | JSONField | Low |
-| `categories` | ArrayField | Low |
+| `security_objectives` | JSONField | Low (complex) |
+| `disaster_recovery_objectives` | JSONField | Low (complex) |
 | DORA-related fields | Various | Low |
 
 ---
@@ -74,20 +72,23 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `category` | No | |
 | `domain` | No | Folder lookup |
 | `status` | No | Defaults to "to_do" |
-| `priority` | No | Integer value |
+| `priority` | No | Integer (1-4) |
 | `csf_function` | No | Defaults to "govern" |
+| `eta` | No | Date (YYYY-MM-DD) |
+| `expiry_date` | No | Date (YYYY-MM-DD) |
+| `start_date` | No | Date (YYYY-MM-DD) |
+| `link` | No | URL |
+| `effort` | No | Mapped: XS, S, M, L, XL (or full names) |
+| `control_impact` | No | Integer (1-5), also accepts `impact` |
+| `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `eta` | DateField | High |
-| `expiry_date` | DateField | Medium |
-| `link` | URLField | Medium |
-| `effort` | CharField | Medium |
-| `cost` | IntegerField | Medium |
-| `owner` | FK User | High |
+| `cost` | JSONField | Medium (complex structure) |
+| `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
-| `reference_control` | FK | Medium |
+| `assets` | M2M | Medium |
 | `filtering_labels` | M2M | Medium |
 
 ---
