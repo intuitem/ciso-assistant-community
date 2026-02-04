@@ -69,7 +69,7 @@
 							if (result.data?.error) {
 								const errorData = result.data.message;
 								toastStore.trigger({
-									message: `Simulation Failed: ${errorData.details || errorData.error || 'Unknown error occurred'}`,
+									message: m.simulationFailed({ errorMessage: errorData.details || errorData.error || 'Unknown error occurred' }),
 									background: 'bg-red-400 text-white',
 									timeout: 5000,
 									autohide: true
@@ -82,20 +82,25 @@
 								if (backendResults?.success === false) {
 									// Backend reported failure
 									toastStore.trigger({
-										message: `Simulation Failed: ${backendResults.message || 'Unknown error occurred'}`,
+										message: m.simulationFailed({ errorMessage: backendResults.message || 'Unknown error occurred' }),
 										background: 'bg-red-400 text-white',
 										timeout: 5000,
 										autohide: true
 									});
 								} else {
 									// Backend reported success
-									let message = 'All simulations completed successfully!';
+									let message = m.allSimulationsCompletedSuccessfully();
 
 									if (summary) {
 										if (summary.failed_simulations > 0) {
-											message = `Simulations completed with ${summary.failed_simulations} failures out of ${summary.total_hypotheses} hypotheses`;
+											message = m.simulationsCompletedWithFailures({
+												failedSimulations: summary.failed_simulations,
+												totalHypotheses: summary.total_hypotheses
+											});
 										} else {
-											message = `All ${summary.successful_simulations} simulations completed successfully!`;
+											message = m.allNSimulationsCompletedSuccessfully({
+												successfulSimulations: summary.successful_simulations
+											});
 										}
 									}
 
