@@ -2271,7 +2271,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'unit', urlModel: 'terminologies' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'organisation_objectives', urlModel: 'organisation-objectives' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
 		detailViewFields: [
@@ -2288,6 +2289,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'collection_frequency' },
 			{ field: 'target_value' },
 			{ field: 'current_value' },
+			{ field: 'evidences' },
 			{ field: 'filtering_labels' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
@@ -2296,7 +2298,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'metric_instance',
 				urlModel: 'custom-metric-samples',
-				fieldForInitialData: ['metric_definition']
+				fieldForInitialData: ['metric_definition', 'evidences']
 			}
 		],
 		filters: [
@@ -2316,7 +2318,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'metrology/custom-metric-samples',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'metric_instance', urlModel: 'metric-instances' }
+			{ field: 'metric_instance', urlModel: 'metric-instances' },
+			{ field: 'evidence_revision', urlModel: 'evidence-revisions' }
 		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	},
