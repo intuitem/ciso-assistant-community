@@ -1085,5 +1085,13 @@
 	"appliedControlsPlaceholder": "Selecione os controles aplicados...",
 	"assignmentSettings": "Configurações de atribuição",
 	"allowAssignmentsToEntities": "Permitir atribuições a entidades",
-	"allowAssignmentsToEntitiesDescription": "Permite que as entidades apareçam como atores ao atribuir proprietários, autores ou revisores."
+	"allowAssignmentsToEntitiesDescription": "Permite que as entidades apareçam como atores ao atribuir proprietários, autores ou revisores.",
+	"fileTooLarge": "Arquivo muito grande",
+	"invalidFileFormat": "Formato de arquivo inválido",
+	"invalidCompatMode": "Modo de compatibilidade inválido",
+	"invalidExcelFile": "Arquivo Excel inválido",
+	"processingTimeout": "Tempo limite de processamento",
+	"maliciousFileDetected": "Arquivo malicioso detectado",
+	"serverConfigurationError": "Erro de configuração do servidor",
+	"libraryLoadFailed": "Falha ao carregar biblioteca"
 }

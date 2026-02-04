@@ -2054,5 +2054,13 @@
 	"appliedControlsPlaceholder": "Odaberi primijenjene kontrole...",
 	"assignmentSettings": "Postavke dodjele",
 	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",
-	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata."
+	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }
