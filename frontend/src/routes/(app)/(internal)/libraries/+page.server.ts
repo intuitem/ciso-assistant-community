@@ -83,7 +83,9 @@ export const actions: Actions = {
 						: m.libraryLoadingError({}, locale ? { locale } : {});
 
 				if (response.detail) {
-					toast_error_message += `: ${response.detail}`;
+					if (response.detail instanceof Object) {
+						toast_error_message += `: ${Object.values(response.detail).flat().join(' ')}`;
+					} else toast_error_message += `: ${response.detail}`;
 				} else if (!translate_error || translate_error === response.error) {
 					toast_error_message += ` (${response.error})`;
 				}
