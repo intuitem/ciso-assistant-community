@@ -5761,7 +5761,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
             [
-                ca.get_progress()
+                ca.progress
                 for ca in ComplianceAssessment.objects.filter(campaign=self)
             ]
         )
@@ -5838,7 +5838,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.get_progress(),
+                "progress_perc": self.progress,
                 "score": self.get_global_score(),
             },
         }
@@ -6638,7 +6638,8 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
-    def get_progress(self) -> int:
+    @property
+    def progress(self) -> int:
         requirement_assessments = list(
             self.get_requirement_assessments(include_non_assessable=False)
         )

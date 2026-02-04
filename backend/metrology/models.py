@@ -487,7 +487,7 @@ class BuiltinMetricSample(AbstractBaseModel):
         ).count()
 
         return {
-            "progress": assessment.get_progress(),
+            "progress": assessment.progress,
             "score": assessment.get_global_score(),
             "total_requirements": total,
             "status_breakdown": status_breakdown,

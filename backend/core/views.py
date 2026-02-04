@@ -6120,7 +6120,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.get_progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
