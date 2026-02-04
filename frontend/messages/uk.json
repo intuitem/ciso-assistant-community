@@ -1356,6 +1356,8 @@
 	"updateAvailable": "Доступне оновлення",
 	"showGuidedTour": "Показати навчання",
 	"loadDemoData": "Завантаження демонстраційних даних",
+	"createYourFirstAuditToSeeRecapPage": "Створіть свій перший аудит, щоб побачити сторінку підсумків.",
+	"AuditExistsYoullSeeOverallCompliance": "Після створення аудиту тут буде відображено загальний рівень відповідності, графіки та параметри експорту.",
 	"importingDemoData": "Імпорт демонстраційних даних...",
 	"demoEnvironmentBeingPrepared": "Ваш демо-середовище готується. Це може зайняти кілька хвилин.",
 	"firstTimeLoginModalTitle": "Ласкаво просимо до CISO Assistant!",
@@ -1603,5 +1605,13 @@
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
 	"assignmentSettings": "Налаштування призначень",
 	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
-	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів."
+	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

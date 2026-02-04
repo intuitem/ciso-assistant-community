@@ -1211,6 +1211,8 @@
 	"updateAvailable": "Aggiornamento disponibile",
 	"showGuidedTour": "Mostra tour guidato",
 	"loadDemoData": "Carica dati demo",
+	"createYourFirstAuditToSeeRecapPage": "Crea il tuo primo audit per vedere la pagina di riepilogo",
+	"AuditExistsYoullSeeOverallCompliance": "Una volta che un audit esiste, qui vedrai la conformità complessiva, i grafici e le opzioni di esportazione.",
 	"importingDemoData": "Importazione dati demo in corso...",
 	"demoEnvironmentBeingPrepared": "Il tuo ambiente demo è in fase di preparazione. Questo può richiedere alcuni secondi.",
 	"firstTimeLoginModalTitle": "Benvenuto in CISO Assistant!",
@@ -2311,5 +2313,13 @@
 	"relationships": "Relazioni",
 	"assignmentSettings": "Impostazioni assegnazioni",
 	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
-	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori.",
+	"fileTooLarge": "File troppo grande",
+	"invalidFileFormat": "Formato file non valido",
+	"invalidCompatMode": "Modalità di compatibilità non valida",
+	"invalidExcelFile": "File Excel non valido",
+	"processingTimeout": "Timeout elaborazione",
+	"maliciousFileDetected": "File dannoso rilevato",
+	"serverConfigurationError": "Errore configurazione server",
+	"libraryLoadFailed": "Caricamento libreria fallito"
 }

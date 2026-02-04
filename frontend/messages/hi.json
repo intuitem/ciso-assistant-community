@@ -1054,5 +1054,13 @@
 	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें...",
 	"assignmentSettings": "असाइनमेंट सेटिंग्स",
 	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",
-	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।"
+	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

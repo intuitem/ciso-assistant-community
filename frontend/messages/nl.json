@@ -1997,6 +1997,8 @@
 	"linkedCollection": "collectie",
 	"linkedModels": "Geassocieerde objecten",
 	"loadDemoData": "Demo-gegevens laden",
+	"createYourFirstAuditToSeeRecapPage": "Maak uw eerste audit aan om de overzichtspagina te zien",
+	"AuditExistsYoullSeeOverallCompliance": "Eenmaal een audit bestaat, ziet u hier de algemene conformiteit, grafieken en exportopties.",
 	"importingDemoData": "Demo-gegevens importeren...",
 	"demoEnvironmentBeingPrepared": "Uw demo-omgeving wordt voorbereid. Dit kan enkele minuten duren.",
 	"loadMissingLibraries": "Ontbrekende bibliotheken laden",
@@ -2954,5 +2956,13 @@
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",
 	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
-	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers.",
+	"fileTooLarge": "Bestand te groot",
+	"invalidFileFormat": "Ongeldig bestandsformaat",
+	"invalidCompatMode": "Ongeldige compatibiliteitsmodus",
+	"invalidExcelFile": "Ongeldig Excel-bestand",
+	"processingTimeout": "Verwerkingstime-out",
+	"maliciousFileDetected": "Schadelijk bestand gedetecteerd",
+	"serverConfigurationError": "Serverconfiguratiefout",
+	"libraryLoadFailed": "Bibliotheek laden mislukt"
 }

@@ -1526,6 +1526,8 @@
 	"updateAvailable": "有可用更新",
 	"showGuidedTour": "显示引导教程",
 	"loadDemoData": "加载演示数据",
+	"createYourFirstAuditToSeeRecapPage": "创建您的第一个审计以查看摘要页面",
+	"AuditExistsYoullSeeOverallCompliance": "一旦审计存在，您将在此处看到整体合规性、图表和导出选项。",
 	"importingDemoData": "正在导入演示数据...",
 	"demoEnvironmentBeingPrepared": "您的演示环境正在准备中。这可能需要几分钟时间。",
 	"firstTimeLoginModalTitle": "欢迎使用CISO Assistant！",
@@ -3106,5 +3108,13 @@
 	"youCanSetPasswordHere": "您可以在此设置密码",
 	"assignmentSettings": "分配设置",
 	"allowAssignmentsToEntities": "允许将任务分配给实体",
-	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。"
+	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。",
+	"fileTooLarge": "文件太大",
+	"invalidFileFormat": "无效的文件格式",
+	"invalidCompatMode": "无效的兼容模式",
+	"invalidExcelFile": "无效的Excel文件",
+	"processingTimeout": "处理超时",
+	"maliciousFileDetected": "检测到恶意文件",
+	"serverConfigurationError": "服务器配置错误",
+	"libraryLoadFailed": "库加载失败"
 }

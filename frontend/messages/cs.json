@@ -1073,5 +1073,13 @@
 	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
 	"assignmentSettings": "Nastavení přiřazení",
 	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
-	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů."
+	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

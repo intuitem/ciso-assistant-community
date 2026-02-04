@@ -1270,5 +1270,13 @@
 	"appliedControlsPlaceholder": "Pilih kontrol yang diterapkan...",
 	"assignmentSettings": "Pengaturan penugasan",
 	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
-	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau."
+	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

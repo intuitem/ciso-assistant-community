@@ -1404,6 +1404,8 @@
 	"updateAvailable": "Ažuriranje dostupno",
 	"showGuidedTour": "Prikaži vođeno razgledavanje",
 	"loadDemoData": "Učitaj demo podatke",
+	"createYourFirstAuditToSeeRecapPage": "Stvorite svoj prvi audit da vidite stranicu rekapitulacije.",
+	"AuditExistsYoullSeeOverallCompliance": "Kada postoji audit, ovdje ćete vidjeti ukupnu usklađenost, grafikone i opcije izvoza.",
 	"importingDemoData": "Učitavanje demo podataka...",
 	"demoEnvironmentBeingPrepared": "Vaše demo okruženje se priprema. Ovo može potrajati nekoliko minuta.",
 	"firstTimeLoginModalTitle": "Dobrodošli u CISO Assistant!",
@@ -2052,5 +2054,13 @@
 	"appliedControlsPlaceholder": "Odaberi primijenjene kontrole...",
 	"assignmentSettings": "Postavke dodjele",
 	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",
-	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata."
+	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }
