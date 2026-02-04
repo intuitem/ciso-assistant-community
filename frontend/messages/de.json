@@ -2955,5 +2955,13 @@
 	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
 	"assignmentSettings": "Zuweisungseinstellungen",
 	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
-	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden."
+	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden.",
+	"fileTooLarge": "Datei zu groß",
+	"invalidFileFormat": "Ungültiges Dateiformat",
+	"invalidCompatMode": "Ungültiger Kompatibilitätsmodus",
+	"invalidExcelFile": "Ungültige Excel-Datei",
+	"processingTimeout": "Verarbeitungszeitüberschreitung",
+	"maliciousFileDetected": "Bösartige Datei erkannt",
+	"serverConfigurationError": "Serverkonfigurationsfehler",
+	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden"
 }

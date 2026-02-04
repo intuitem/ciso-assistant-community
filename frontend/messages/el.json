@@ -1784,5 +1784,13 @@
 	"appliedControlsPlaceholder": "Επιλέξτε εφαρμοσμένους ελέγχους...",
 	"assignmentSettings": "Ρυθμίσεις αναθέσεων",
 	"allowAssignmentsToEntities": "Να επιτρέπονται οι αναθέσεις σε οντότητες",
-	"allowAssignmentsToEntitiesDescription": "Επιτρέπει στις οντότητες να εμφανίζονται ως φορείς κατά την ανάθεση ιδιοκτητών, συντακτών ή ελεγκτών."
+	"allowAssignmentsToEntitiesDescription": "Επιτρέπει στις οντότητες να εμφανίζονται ως φορείς κατά την ανάθεση ιδιοκτητών, συντακτών ή ελεγκτών.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

@@ -1605,5 +1605,13 @@
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
 	"assignmentSettings": "Налаштування призначень",
 	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
-	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів."
+	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

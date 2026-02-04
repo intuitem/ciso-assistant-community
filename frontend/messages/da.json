@@ -1367,5 +1367,13 @@
 	"appliedControlsPlaceholder": "Vælg anvendte kontroller...",
 	"assignmentSettings": "Tildelingsindstillinger",
 	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
-	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere."
+	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

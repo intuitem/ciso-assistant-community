@@ -1085,5 +1085,13 @@
 	"appliedControlsPlaceholder": "Alkalmazott kontrollok kiválasztása...",
 	"assignmentSettings": "Hozzárendelési beállítások",
 	"allowAssignmentsToEntities": "Engedélyezze a hozzárendelést entitásokhoz",
-	"allowAssignmentsToEntitiesDescription": "Lehetővé teszi, hogy az entitások szereplőként jelenjenek meg tulajdonosok, szerzők vagy lektorok kijelölésekor."
+	"allowAssignmentsToEntitiesDescription": "Lehetővé teszi, hogy az entitások szereplőként jelenjenek meg tulajdonosok, szerzők vagy lektorok kijelölésekor.",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }
