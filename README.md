@@ -255,6 +255,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
+24. RBI Master Direction 2023 - india 🏦🇮🇳
 
 <br/>
 
