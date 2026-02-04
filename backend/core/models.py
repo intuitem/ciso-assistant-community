@@ -4081,6 +4081,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
+
 
 class TimelineEntry(AbstractBaseModel, FolderMixin):
     """
@@ -4376,6 +4383,11 @@ class AppliedControl(
                 "Triggering sync for AppliedControl", applied_control_id=self.pk
             )
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
+
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
     def _get_changed_fields(self, old_instance):
         """Detect which fields changed"""
