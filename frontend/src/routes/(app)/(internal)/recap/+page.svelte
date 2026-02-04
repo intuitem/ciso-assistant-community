@@ -34,7 +34,7 @@
 		});
 </script>
 
-<div class="p-4 space-y-6 bg-gray-50 min-h-screen">
+<div class="p-4 space-y-6 bg-gray-50 min-h-screen card">
 	<h2 class="text-2xl font-extrabold text-gray-800 mb-4">{m.overallCompliance()}</h2>
 
 	<div class="space-y-6">
