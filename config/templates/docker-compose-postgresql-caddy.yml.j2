@@ -52,6 +52,7 @@ services:
       {% endif %}
     volumes:
       - ./db:/code/db
+    user: "1001:1001"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
