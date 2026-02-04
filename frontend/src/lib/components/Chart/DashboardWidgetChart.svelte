@@ -394,7 +394,7 @@
 							lineStyle: { width: 2, color: 'rgb(59, 130, 246)' },
 							itemStyle: { color: 'rgb(59, 130, 246)' },
 							data: chartData,
-							...(widget.show_target && targetValue
+							...(widget.show_target && targetValue != null
 								? {
 										markLine: {
 											data: [{ yAxis: targetValue, name: m.target() }],
@@ -429,7 +429,7 @@
 							lineStyle: { width: 2, color: 'rgb(59, 130, 246)' },
 							itemStyle: { color: 'rgb(59, 130, 246)' },
 							data: chartData,
-							...(widget.show_target && targetValue
+							...(widget.show_target && targetValue != null
 								? {
 										markLine: {
 											data: [{ yAxis: targetValue, name: m.target() }],
@@ -467,7 +467,7 @@
 								]),
 								borderRadius: [4, 4, 0, 0]
 							},
-							...(widget.show_target && targetValue
+							...(widget.show_target && targetValue != null
 								? {
 										markLine: {
 											data: [{ yAxis: targetValue, name: m.target() }],
@@ -485,7 +485,8 @@
 				const gaugeMax = unitName === 'percentage' ? 100 : (targetValue ?? 100);
 				const gaugeValue = latestValue || 0;
 				// Calculate target position on the gauge (as a ratio from 0 to 1)
-				const targetRatio = widget.show_target && targetValue ? targetValue / gaugeMax : null;
+				const targetRatio =
+					widget.show_target && targetValue != null ? targetValue / gaugeMax : null;
 				return {
 					series: [
 						{
@@ -548,7 +549,7 @@
 								{
 									value: gaugeValue,
 									name:
-										widget.show_target && targetValue
+										widget.show_target && targetValue != null
 											? `${m.target()}: ${formatValueWithUnit(targetValue)}`
 											: ''
 								}
@@ -580,7 +581,7 @@
 			case 'donut':
 				// For percentage metrics, show as actual vs remaining
 				const donutValue = latestValue || 0;
-				const maxValue = unitName === 'percentage' ? 100 : targetValue || 100;
+				const maxValue = unitName === 'percentage' ? 100 : (targetValue ?? 100);
 				const remaining = Math.max(0, maxValue - donutValue);
 				return {
 					tooltip: {
@@ -686,7 +687,7 @@
 		</div>
 	</div>
 	<!-- Target below, centered -->
-	{#if widget.show_target && targetValue}
+	{#if widget.show_target && targetValue != null}
 		<div class="text-sm text-surface-500 text-center -mt-2">
 			{m.target()}: {formatValue(targetValue)}
 		</div>
