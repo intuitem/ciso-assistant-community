@@ -69,7 +69,9 @@
 							if (result.data?.error) {
 								const errorData = result.data.message;
 								toastStore.trigger({
-									message: m.simulationFailed({ errorMessage: errorData.details || errorData.error || 'Unknown error occurred' }),
+									message: m.simulationFailed({
+										errorMessage: errorData.details || errorData.error || 'Unknown error occurred'
+									}),
 									background: 'bg-red-400 text-white',
 									timeout: 5000,
 									autohide: true
@@ -82,7 +84,9 @@
 								if (backendResults?.success === false) {
 									// Backend reported failure
 									toastStore.trigger({
-										message: m.simulationFailed({ errorMessage: backendResults.message || 'Unknown error occurred' }),
+										message: m.simulationFailed({
+											errorMessage: backendResults.message || 'Unknown error occurred'
+										}),
 										background: 'bg-red-400 text-white',
 										timeout: 5000,
 										autohide: true
