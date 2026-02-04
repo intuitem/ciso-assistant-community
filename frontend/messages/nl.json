@@ -1997,6 +1997,8 @@
 	"linkedCollection": "collectie",
 	"linkedModels": "Geassocieerde objecten",
 	"loadDemoData": "Demo-gegevens laden",
+	"createYourFirstAuditToSeeRecapPage": "Maak uw eerste audit aan om de overzichtspagina te zien",
+	"AuditExistsYoullSeeOverallCompliance": "Eenmaal een audit bestaat, ziet u hier de algemene conformiteit, grafieken en exportopties.",
 	"importingDemoData": "Demo-gegevens importeren...",
 	"demoEnvironmentBeingPrepared": "Uw demo-omgeving wordt voorbereid. Dit kan enkele minuten duren.",
 	"loadMissingLibraries": "Ontbrekende bibliotheken laden",

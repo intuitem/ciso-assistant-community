@@ -1653,6 +1653,8 @@
 	"expirationDate": "Date d'expiration",
 	"filterBy": "Filtrer par",
 	"demoDataAlreadyImported": "Les données de démonstration ont déjà été importées. Effacez ou renommez le domaine DEMO existant.",
+	"createYourFirstAuditToSeeRecapPage": "Créez votre premier audit pour voir la page de récapitulatif",
+	"AuditExistsYoullSeeOverallCompliance": "Une fois qu'un audit existe, vous verrez ici la conformité globale, les graphiques et les options d'exportation.",
 	"finding": "Constat",
 	"findings": "Constats",
 	"findingsExplorer": "Tableau combiné des constats",

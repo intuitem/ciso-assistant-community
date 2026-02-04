@@ -1389,6 +1389,8 @@
 	"updateAvailable": "Güncelleme mevcut",
 	"showGuidedTour": "Rehberli turu göster",
 	"loadDemoData": "Demo verileri yükle",
+	"createYourFirstAuditToSeeRecapPage": "Özet sayfasını görmek için ilk denetiminizi oluşturun",
+	"AuditExistsYoullSeeOverallCompliance": "Bir denetim mevcut olduğunda, burada genel uyumluluğu, grafikleri ve dışa aktarma seçeneklerini göreceksiniz.",
 	"importingDemoData": "Demo verileri içe aktarılıyor...",
 	"demoEnvironmentBeingPrepared": "Demo ortamınız hazırlanıyor. Bu işlem birkaç dakika sürebilir.",
 	"firstTimeLoginModalTitle": "CISO Assistant'a Hoş Geldiniz!",
