@@ -1528,6 +1528,8 @@
 	"loadDemoData": "加载演示数据",
 	"createYourFirstAuditToSeeRecapPage": "创建您的第一个审计以查看摘要页面",
 	"AuditExistsYoullSeeOverallCompliance": "一旦审计存在，您将在此处看到整体合规性、图表和导出选项。",
+	"importingDemoData": "正在导入演示数据...",
+	"demoEnvironmentBeingPrepared": "您的演示环境正在准备中。这可能需要几分钟时间。",
 	"firstTimeLoginModalTitle": "欢迎使用CISO Assistant！",
 	"firstTimeLoginModalDescription": "这是您首次登录。是否需要引导教程来开始使用？",
 	"ebiosRadarParameters": "EBIOS RM雷达参数",

@@ -871,17 +871,26 @@
 									>{m.currentRisk()}</th
 								>
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
 									>{m.residualRisk()}</th
+								>
+								<th
+									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+									>{m.treatment()}</th
 								>
 							</tr>
 						</thead>
 						<tbody class="bg-white divide-y divide-gray-200">
 							{#each riskScenarios as scenario}
 								<tr class="hover:bg-gray-50">
-									<td class="px-4 py-3 text-sm font-medium text-gray-900 border-r"
-										>{scenario.ref_id || '--'}</td
-									>
+									<td class="px-4 py-3 text-sm font-medium border-r">
+										<a
+											href="/risk-scenarios/{scenario.id}"
+											class="text-primary-600 hover:text-primary-800 hover:underline"
+										>
+											{scenario.ref_id || '--'}
+										</a>
+									</td>
 									<td class="px-4 py-3 text-sm text-gray-700 border-r">{scenario.name}</td>
 									{#if inherentRiskEnabled}
 										<td class="px-4 py-3 text-sm border-r">
@@ -909,13 +918,22 @@
 											<span class="text-gray-400">--</span>
 										{/if}
 									</td>
-									<td class="px-4 py-3 text-sm">
+									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.residual_level}
 											<span
 												class="px-2 py-1 rounded text-xs font-medium"
 												style="background-color: {scenario.residual_level.hexcolor}"
 											>
 												{safeTranslate(scenario.residual_level.name)}
+											</span>
+										{:else}
+											<span class="text-gray-400">--</span>
+										{/if}
+									</td>
+									<td class="px-4 py-3 text-sm">
+										{#if scenario.treatment}
+											<span class="px-2 py-1 rounded text-xs font-medium bg-gray-100">
+												{safeTranslate(scenario.treatment)}
 											</span>
 										{:else}
 											<span class="text-gray-400">--</span>

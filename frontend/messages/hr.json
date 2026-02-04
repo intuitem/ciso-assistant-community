@@ -1406,6 +1406,8 @@
 	"loadDemoData": "Učitaj demo podatke",
 	"createYourFirstAuditToSeeRecapPage": "Stvorite svoj prvi audit da vidite stranicu rekapitulacije.",
 	"AuditExistsYoullSeeOverallCompliance": "Kada postoji audit, ovdje ćete vidjeti ukupnu usklađenost, grafikone i opcije izvoza.",
+	"importingDemoData": "Učitavanje demo podataka...",
+	"demoEnvironmentBeingPrepared": "Vaše demo okruženje se priprema. Ovo može potrajati nekoliko minuta.",
 	"firstTimeLoginModalTitle": "Dobrodošli u CISO Assistant!",
 	"firstTimeLoginModalDescription": "Ovo je vaša prva prijava. Želite li proći vođeno razgledavanje kako bi počeli?",
 	"ebiosRadarParameters": "Parametri Ebios RM radara",
