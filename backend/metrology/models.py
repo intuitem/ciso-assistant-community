@@ -6,6 +6,8 @@ from django.utils.translation import gettext_lazy as _
 from core.base_models import AbstractBaseModel, NameDescriptionMixin
 from core.models import (
     Actor,
+    Evidence,
+    EvidenceRevision,
     FilteringLabelMixin,
     I18nObjectMixin,
     LoadedLibrary,
@@ -147,6 +149,13 @@ class MetricInstance(
         help_text=_("Expected frequency for collecting metric samples"),
     )
 
+    evidences = models.ForeignKey(
+        Evidence,
+        on_delete=models.SET_NULL,
+        related_name="metric_instances",
+        blank=True,
+        null=True,
+    )
     fields_to_check = ["ref_id", "name"]
 
     class Meta:
@@ -253,6 +262,15 @@ class CustomMetricSample(AbstractBaseModel, FolderMixin):
         default=dict,
         verbose_name=_("Value"),
         help_text=_("The metric value (format depends on metric definition category)"),
+    )
+
+    observation = models.TextField(null=True, blank=True, verbose_name=_("Observation"))
+    evidence_revision = models.ForeignKey(
+        EvidenceRevision,
+        on_delete=models.SET_NULL,
+        related_name="samples",
+        blank=True,
+        null=True,
     )
 
     class Meta:
