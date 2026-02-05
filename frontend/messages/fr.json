@@ -2319,6 +2319,7 @@
 	"removedAppliedControls": "Mesures supprimées",
 	"residualAle": "ALE résiduel",
 	"residualAleDisplay": "ALE résiduel",
+	"inherentAle": "ALE inhérent",
 	"returnOnControls": "ROSI",
 	"riskToleranceDisplay": "Paramètres de tolérance au risque",
 	"roc": "ROSI",

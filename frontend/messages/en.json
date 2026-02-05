@@ -2318,6 +2318,7 @@
 	"currentAleDisplay": "Current ALE",
 	"residualAle": "Residual ALE",
 	"residualAleDisplay": "Residual ALE",
+	"inherentAle": "Inherent ALE",
 	"inherent": "Inherent",
 	"nextOccurrenceStatus": "Next occurrence status",
 	"displayAle": "Annual Loss Expectancy",

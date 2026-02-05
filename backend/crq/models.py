@@ -186,6 +186,7 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         logger.info(f"Generating portfolio simulation for study {self.id}")
 
         portfolio_data = {
+            "inherent": None,
             "current": None,
             "residual": None,
             "metadata": {
@@ -193,6 +194,70 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 "scenarios_count": self.risk_scenarios.count(),
             },
         }
+
+        # Generate inherent portfolio simulation
+        inherent_scenarios_params = {}
+        inherent_scenarios_info = []
+
+        for scenario in self.risk_scenarios.all():
+            inherent_hypothesis = scenario.hypotheses.filter(
+                risk_stage="inherent"
+            ).first()
+            if inherent_hypothesis and inherent_hypothesis.parameters:
+                params = inherent_hypothesis.parameters
+
+                # Extract and validate parameters
+                probability = params.get("probability")
+                impact = params.get("impact", {})
+                lower_bound = impact.get("lb")
+                upper_bound = impact.get("ub")
+                distribution = impact.get("distribution")
+
+                if (
+                    probability is not None
+                    and lower_bound is not None
+                    and upper_bound is not None
+                    and distribution == "LOGNORMAL-CI90"
+                    and lower_bound > 0
+                    and upper_bound > lower_bound
+                ):
+                    inherent_scenarios_params[scenario.name] = {
+                        "probability": probability,
+                        "lower_bound": lower_bound,
+                        "upper_bound": upper_bound,
+                    }
+                    inherent_scenarios_info.append(
+                        {
+                            "scenario_id": str(scenario.id),
+                            "scenario_name": scenario.name,
+                            "hypothesis_id": str(inherent_hypothesis.id),
+                            "hypothesis_name": inherent_hypothesis.name,
+                        }
+                    )
+
+        if inherent_scenarios_params:
+            try:
+                inherent_results = run_combined_simulation(
+                    scenarios_params=inherent_scenarios_params,
+                    n_simulations=100_000,
+                    random_seed=41,
+                    loss_threshold=self.loss_threshold,
+                )
+                if "Portfolio_Total" in inherent_results:
+                    portfolio_result = inherent_results["Portfolio_Total"]
+                    portfolio_data["inherent"] = {
+                        "loss": portfolio_result["loss"],
+                        "probability": portfolio_result["probability"],
+                        "metrics": portfolio_result.get("metrics", {}),
+                        "scenarios": inherent_scenarios_info,
+                        "total_scenarios": len(inherent_scenarios_info),
+                        "method": "direct_simulation",
+                    }
+            except Exception as e:
+                logger.warning(
+                    f"Failed to generate inherent portfolio simulation for study {self.id}: {str(e)}"
+                )
+                portfolio_data["inherent"] = {"error": str(e)}
 
         # Generate current portfolio simulation
         current_scenarios_params = {}
@@ -447,6 +512,31 @@ class QuantitativeRiskScenario(NameDescriptionMixin, FolderMixin):
         nb_scenarios = len(scenarios_ref_ids) + 1
         candidates = [f"QR.{i:02d}" for i in range(1, nb_scenarios + 1)]
         return next(x for x in candidates if x not in scenarios_ref_ids)
+
+    @property
+    def inherent_ale(self):
+        """
+        Get the inherent Annual Loss Expectancy (ALE) from the inherent stage hypothesis.
+        Returns None if no inherent stage hypothesis exists or has no simulation data.
+        """
+        inherent_hypothesis = self.hypotheses.filter(risk_stage="inherent").first()
+        if not inherent_hypothesis or not inherent_hypothesis.simulation_data:
+            return None
+
+        metrics = inherent_hypothesis.simulation_data.get("metrics", {})
+        return metrics.get("mean_annual_loss")
+
+    @property
+    def inherent_ale_display(self):
+        """
+        Get the inherent Annual Loss Expectancy (ALE) with currency from global settings.
+        Returns "No ALE calculated" if no ALE is available.
+        """
+        ale_value = self.inherent_ale
+        if ale_value is None:
+            return "No ALE calculated"
+
+        return self._format_currency(ale_value)
 
     @property
     def current_ale(self):

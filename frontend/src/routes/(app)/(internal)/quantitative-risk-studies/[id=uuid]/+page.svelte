@@ -206,6 +206,7 @@
 				<!-- Combined LEC Chart Section -->
 				{#if data.combinedLec?.curves && data.combinedLec.curves.length > 0}
 					{@const curves = data.combinedLec.curves}
+					{@const inherentRiskCurve = curves.find((c) => c.type === 'combined_inherent')}
 					{@const currentRiskCurve = curves.find((c) => c.type === 'combined_current')}
 					{@const residualRiskCurve = curves.find((c) => c.type === 'combined_residual')}
 					{@const toleranceCurve = curves.find((c) => c.type === 'tolerance')}
@@ -214,6 +215,10 @@
 						<div class="flex justify-between items-center mb-4">
 							<h3 class="text-lg font-semibold">{m.portfolioOverview()}</h3>
 							<div class="text-sm text-gray-600">
+								{#if data.combinedLec.scenarios_with_inherent_data}
+									Inherent: {data.combinedLec.scenarios_with_inherent_data} / {data.combinedLec
+										.total_scenarios} |
+								{/if}
 								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec
 									.total_scenarios}
 								{#if data.combinedLec.scenarios_with_residual_data}
@@ -227,6 +232,7 @@
 						<div class="w-full">
 							<LossExceedanceCurve
 								data={currentRiskCurve?.data || []}
+								inherentData={inherentRiskCurve?.data || []}
 								residualData={residualRiskCurve?.data || []}
 								toleranceData={toleranceCurve?.data || []}
 								lossThreshold={data.data.loss_threshold}
