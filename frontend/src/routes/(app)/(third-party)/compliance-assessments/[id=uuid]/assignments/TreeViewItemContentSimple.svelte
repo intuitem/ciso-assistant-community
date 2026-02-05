@@ -35,12 +35,10 @@
 	let isChecked = $derived($checkedNodesStore?.has(nodeId) ?? false);
 
 	// For parent nodes: calculate selection state of children
-	let availableChildrenIds = $derived(
-		childrenIds.filter(id => !$assignedNodesStore?.has(id))
-	);
+	let availableChildrenIds = $derived(childrenIds.filter((id) => !$assignedNodesStore?.has(id)));
 
 	let checkedChildrenCount = $derived(
-		availableChildrenIds.filter(id => $checkedNodesStore?.has(id)).length
+		availableChildrenIds.filter((id) => $checkedNodesStore?.has(id)).length
 	);
 
 	let allChildrenChecked = $derived(
@@ -90,12 +88,12 @@
 <div
 	class="flex items-center gap-3 py-1.5 px-2 rounded-md transition-colors -ml-2
 		{assessable
-			? isAssigned
-				? 'bg-gray-100 border border-gray-200'
-				: isChecked
-					? 'bg-violet-50 border border-violet-200'
-					: 'bg-green-50 border border-green-200 hover:bg-green-100 cursor-pointer'
-			: ''}"
+		? isAssigned
+			? 'bg-gray-100 border border-gray-200'
+			: isChecked
+				? 'bg-violet-50 border border-violet-200'
+				: 'bg-green-50 border border-green-200 hover:bg-green-100 cursor-pointer'
+		: ''}"
 	class:pl-2={hasParentNode}
 	onclick={(e) => {
 		// Allow clicking the row to toggle checkbox for available assessable nodes
@@ -152,7 +150,13 @@
 			{/if}
 
 			<!-- Ref ID / Name -->
-			<span class="font-medium text-sm {assessable ? (isAssigned ? 'text-gray-500' : 'text-gray-900') : 'text-gray-600'}">
+			<span
+				class="font-medium text-sm {assessable
+					? isAssigned
+						? 'text-gray-500'
+						: 'text-gray-900'
+					: 'text-gray-600'}"
+			>
 				{#if node_content}
 					{node_content}
 				{:else}
@@ -174,7 +178,8 @@
 			<!-- Children count for parent nodes -->
 			{#if !assessable && childrenIds.length > 0}
 				<span class="text-xs text-gray-400">
-					({availableChildrenIds.length} {safeTranslate('available')})
+					({availableChildrenIds.length}
+					{safeTranslate('available')})
 				</span>
 			{/if}
 		</div>

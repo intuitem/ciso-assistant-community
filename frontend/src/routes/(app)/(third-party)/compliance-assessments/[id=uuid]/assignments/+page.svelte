@@ -58,7 +58,7 @@
 
 	// State for requirements detail modal
 	let showRequirementsModal = $state(false);
-	let selectedAssignmentForModal = $state<typeof assignments[0] | null>(null);
+	let selectedAssignmentForModal = $state<(typeof assignments)[0] | null>(null);
 
 	// Get selected actor ID from form store
 	let selectedActorId = $derived($assignmentFormStore.actor ?? '');
@@ -87,7 +87,9 @@
 	}
 
 	// Build a lookup map from requirement assessment ID to node details
-	function buildRequirementLookup(nodes: Record<string, Node>): Map<string, { node_content: string; name: string; result?: string }> {
+	function buildRequirementLookup(
+		nodes: Record<string, Node>
+	): Map<string, { node_content: string; name: string; result?: string }> {
 		const lookup = new Map<string, { node_content: string; name: string; result?: string }>();
 
 		function traverse(node: Node) {
@@ -115,20 +117,24 @@
 	let requirementLookup = $derived(buildRequirementLookup(data.tree));
 
 	// Get requirement details for an assignment
-	function getRequirementDetails(requirementIds: string[]): Array<{ id: string; node_content: string; name: string; result?: string }> {
-		return requirementIds.map(id => {
-			const details = requirementLookup.get(id);
-			return {
-				id,
-				node_content: details?.node_content ?? '',
-				name: details?.name ?? 'Unknown',
-				result: details?.result
-			};
-		}).sort((a, b) => a.node_content.localeCompare(b.node_content));
+	function getRequirementDetails(
+		requirementIds: string[]
+	): Array<{ id: string; node_content: string; name: string; result?: string }> {
+		return requirementIds
+			.map((id) => {
+				const details = requirementLookup.get(id);
+				return {
+					id,
+					node_content: details?.node_content ?? '',
+					name: details?.name ?? 'Unknown',
+					result: details?.result
+				};
+			})
+			.sort((a, b) => a.node_content.localeCompare(b.node_content));
 	}
 
 	// Open the requirements modal for an assignment
-	function openRequirementsModal(assignment: typeof assignments[0]) {
+	function openRequirementsModal(assignment: (typeof assignments)[0]) {
 		selectedAssignmentForModal = assignment;
 		showRequirementsModal = true;
 	}
@@ -158,7 +164,10 @@
 		return ids;
 	}
 
-	function transformToTreeView(nodes: [string, Node][], hasParentNode: boolean = false): TreeViewNode[] {
+	function transformToTreeView(
+		nodes: [string, Node][],
+		hasParentNode: boolean = false
+	): TreeViewNode[] {
 		return nodes.map(([id, node]) => {
 			const nodeId = node.ra_id || id;
 			const assignmentInfo = node.ra_id ? getAssignmentInfo(node.ra_id) : null;
@@ -343,7 +352,8 @@
 				<div>
 					<h2 class="h4 font-semibold">{m.requirements?.() ?? 'Requirements'}</h2>
 					<p class="text-sm text-gray-500">
-						{m.selectRequirementsToAssign?.() ?? 'Select requirements to include in a new assignment'}
+						{m.selectRequirementsToAssign?.() ??
+							'Select requirements to include in a new assignment'}
 					</p>
 				</div>
 				<div class="flex items-center space-x-2">
@@ -356,17 +366,11 @@
 
 			<!-- Tree controls -->
 			<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
-				<button
-					class="btn btn-sm preset-outlined-primary-500"
-					onclick={handleSelectAll}
-				>
+				<button class="btn btn-sm preset-outlined-primary-500" onclick={handleSelectAll}>
 					<i class="fa-solid fa-check-double mr-1"></i>
 					{m.selectAllAvailable?.() ?? 'Select All Available'}
 				</button>
-				<button
-					class="btn btn-sm preset-outlined-surface-500"
-					onclick={handleClearSelection}
-				>
+				<button class="btn btn-sm preset-outlined-surface-500" onclick={handleClearSelection}>
 					<i class="fa-solid fa-times mr-1"></i>
 					{m.clearSelection?.() ?? 'Clear'}
 				</button>
@@ -459,7 +463,9 @@
 					<!-- Selected Count -->
 					<div class="bg-gray-50 rounded-lg p-3">
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-gray-600">{m.selectedRequirements?.() ?? 'Selected requirements'}:</span>
+							<span class="text-gray-600"
+								>{m.selectedRequirements?.() ?? 'Selected requirements'}:</span
+							>
 							<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
 						</div>
 					</div>
@@ -467,7 +473,10 @@
 					<!-- Create Button -->
 					<button
 						class="btn preset-filled-primary-500 w-full"
-						disabled={!newAssignmentName.trim() || !selectedActorId || availableCheckedNodes.length === 0 || isCreating}
+						disabled={!newAssignmentName.trim() ||
+							!selectedActorId ||
+							availableCheckedNodes.length === 0 ||
+							isCreating}
 						onclick={handleCreateAssignment}
 					>
 						{#if isCreating}
@@ -509,7 +518,11 @@
 									<div class="flex-1">
 										<h3 class="font-medium text-gray-900">{assignment.name}</h3>
 										<div class="flex items-center mt-1 text-sm text-gray-600">
-											<i class="fa-solid fa-{assignment.actor.type === 'user' ? 'user' : 'users'} mr-1"></i>
+											<i
+												class="fa-solid fa-{assignment.actor.type === 'user'
+													? 'user'
+													: 'users'} mr-1"
+											></i>
 											<span>{assignment.actor.str}</span>
 										</div>
 										<div class="mt-2">
@@ -573,7 +586,11 @@
 						{selectedAssignmentForModal.name}
 					</h2>
 					<p class="text-sm text-gray-500 mt-1">
-						<i class="fa-solid fa-{selectedAssignmentForModal.actor.type === 'user' ? 'user' : 'users'} mr-1"></i>
+						<i
+							class="fa-solid fa-{selectedAssignmentForModal.actor.type === 'user'
+								? 'user'
+								: 'users'} mr-1"
+						></i>
 						{m.assignedTo?.() ?? 'Assigned to'}: {selectedAssignmentForModal.actor.str}
 					</p>
 				</div>
@@ -593,13 +610,16 @@
 						{m.requirements?.() ?? 'Requirements'}
 					</span>
 					<span class="badge bg-blue-100 text-blue-700 text-xs">
-						{selectedAssignmentForModal.requirement_assessments.length} {m.items?.() ?? 'items'}
+						{selectedAssignmentForModal.requirement_assessments.length}
+						{m.items?.() ?? 'items'}
 					</span>
 				</div>
 
 				<div class="space-y-2">
 					{#each getRequirementDetails(selectedAssignmentForModal.requirement_assessments) as req}
-						<div class="flex items-center gap-3 p-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+						<div
+							class="flex items-center gap-3 p-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+						>
 							<!-- Result indicator -->
 							{#if req.result}
 								<span
@@ -608,7 +628,8 @@
 									title={req.result}
 								></span>
 							{:else}
-								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title="Not assessed"></span>
+								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title="Not assessed"
+								></span>
 							{/if}
 
 							<!-- Requirement content -->
@@ -626,10 +647,7 @@
 
 			<!-- Footer -->
 			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
-				<button
-					class="btn preset-filled-surface-500 w-full"
-					onclick={closeRequirementsModal}
-				>
+				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
 					{m.close?.() ?? 'Close'}
 				</button>
 			</div>
