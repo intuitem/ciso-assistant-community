@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import List, Type, Set, Dict, Optional, Iterable
 
 import django.apps
 from django.contrib.contenttypes.models import ContentType
@@ -9,7 +9,6 @@ from collections import defaultdict
 
 from iam.models import Folder
 from rest_framework.exceptions import ValidationError
-from typing import List, Type, Set, Dict, Optional
 
 from core.models import (
     Asset,
@@ -364,7 +363,17 @@ def sort_objects_by_self_reference(
     return [object_map[obj_id] for obj_id in reversed(sorted_ids)]
 
 
-def get_domain_export_objects(domain: Folder):
+def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model]]:
+    """
+    Get all objects related to a domain for export.
+
+    Args:
+        domain: The domain Folder instance.
+
+    Returns:
+        A dictionary mapping model names to QuerySets of related objects;
+    """
+    #  folder and its subfolders
     folders = (
         Folder.objects.filter(
             Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])

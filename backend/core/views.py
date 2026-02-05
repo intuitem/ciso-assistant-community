@@ -1693,9 +1693,11 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             {key: Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 objectives.items(),
-                key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
-                if x[0] in Asset.DEFAULT_SECURITY_OBJECTIVES
-                else -1,
+                key=lambda x: (
+                    Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
+                    if x[0] in Asset.DEFAULT_SECURITY_OBJECTIVES
+                    else -1
+                ),
             )
             if content.get("is_enabled", False)
             and content.get("value", -1) in range(0, 5)
@@ -1723,9 +1725,11 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             {"str": f"{key.upper()}: {format_seconds(content.get('value', 0))}"}
             for key, content in sorted(
                 objectives.items(),
-                key=lambda x: Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0])
-                if x[0] in Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES
-                else -1,
+                key=lambda x: (
+                    Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0])
+                    if x[0] in Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES
+                    else -1
+                ),
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
@@ -4006,44 +4010,44 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "cost_build_fixed": {
                 "source": "cost",
                 "label": "cost_build_fixed",
-                "format": lambda cost: cost.get("build", {}).get("fixed_cost", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("build", {}).get("fixed_cost", "") if cost else ""
+                ),
             },
             "cost_build_people_days": {
                 "source": "cost",
                 "label": "cost_build_people_days",
-                "format": lambda cost: cost.get("build", {}).get("people_days", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("build", {}).get("people_days", "") if cost else ""
+                ),
             },
             "cost_run_fixed": {
                 "source": "cost",
                 "label": "cost_run_fixed",
-                "format": lambda cost: cost.get("run", {}).get("fixed_cost", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("run", {}).get("fixed_cost", "") if cost else ""
+                ),
             },
             "cost_run_people_days": {
                 "source": "cost",
                 "label": "cost_run_people_days",
-                "format": lambda cost: cost.get("run", {}).get("people_days", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("run", {}).get("people_days", "") if cost else ""
+                ),
             },
             "cost_amortization_period": {
                 "source": "cost",
                 "label": "cost_amortization_period",
-                "format": lambda cost: cost.get("amortization_period", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("amortization_period", "") if cost else ""
+                ),
             },
             "owner": {
                 "source": "owner",
                 "label": "owner",
-                "format": lambda qs: ",".join(str(o) for o in qs.all())
-                if qs.exists()
-                else "",
+                "format": lambda qs: (
+                    ",".join(str(o) for o in qs.all()) if qs.exists() else ""
+                ),
             },
             "labels": {
                 "source": "filtering_labels",
@@ -6241,6 +6245,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
+        # TODO: Doc
         include_attachments = True
         instance = self.get_object()
 
@@ -6349,6 +6354,7 @@ class FolderViewSet(BaseModelViewSet):
         parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
+        # TODO: Doc
         """Handle file upload and initiate import process."""
         load_missing_libraries = (
             request.query_params.get("load_missing_libraries", "false").lower()
@@ -6710,10 +6716,11 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids):
-        """Create all objects for a model after validation."""
+    def _create_model_objects(self, model, objects, link_dump_database_ids) -> None:
+        # TODO: DOC
         logger.debug("Creating objects for model", model=model)
 
+        # rebuild model name and keep objects only of this model for creation
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
@@ -6764,6 +6771,8 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
+                    #   Handling of m2m happens in a second step (see call to self._set_many_to_many_relations)
+                    #   after the object is created, because it requires the database ID of the created object
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -6771,7 +6780,6 @@ class FolderViewSet(BaseModelViewSet):
                         link_dump_database_ids=link_dump_database_ids,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
-
                     try:
                         # Run clean to validate unique constraints
                         model(**fields).clean()
@@ -6807,6 +6815,7 @@ class FolderViewSet(BaseModelViewSet):
         many_to_many_map_ids,
     ):
         """Process model-specific relationships."""
+        # TODO: DOC
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -6927,6 +6936,9 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
+                many_to_many_map_ids["relationships_ids"] = _fields.pop(
+                    "relationship", []
+                )
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -7038,6 +7050,7 @@ class FolderViewSet(BaseModelViewSet):
 
     def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
         """Set many-to-many relationships after object creation."""
+        # TODO: DOC
         model_name = model._meta.model_name
 
         match model_name:
@@ -7192,6 +7205,38 @@ class FolderViewSet(BaseModelViewSet):
                     uuids, urns = self._split_uuids_urns(threat_ids)
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
+                    )
+
+            case "entity":
+                # TODO: Refactor this part to avoid code duplication with the similar code in Riskscenario and FearedEvent
+                if relationships_ids := many_to_many_map_ids.get("relationships_ids"):
+                    existing_relationships = Terminology.objects.filter(
+                        name__in=relationships_ids
+                    )
+                    existing_names = set(
+                        existing_relationships.values_list("name", flat=True)
+                    )
+
+                    # Find missing names
+                    missing_names = set(relationships_ids) - existing_names
+
+                    # Create missing relationships
+                    if missing_names:
+                        Terminology.objects.bulk_create(
+                            [
+                                Terminology(
+                                    name=name,
+                                    is_visible=True,
+                                    field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                                )
+                                for name in missing_names
+                            ],
+                            ignore_conflicts=True,
+                        )
+
+                    # Now set all relationships
+                    obj.relationship.set(
+                        Terminology.objects.filter(name__in=relationships_ids)
                     )
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
@@ -10962,9 +11007,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             "reported_at": {
                 "source": "reported_at",
                 "label": "reported_at",
-                "format": lambda dt: dt.replace(tzinfo=None)
-                if dt and hasattr(dt, "tzinfo") and dt.tzinfo
-                else dt,
+                "format": lambda dt: (
+                    dt.replace(tzinfo=None)
+                    if dt and hasattr(dt, "tzinfo") and dt.tzinfo
+                    else dt
+                ),
             },
             "owners": {
                 "source": "owners",
@@ -11570,63 +11617,63 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda actors: ", ".join([str(a) for a in actors])
-                if actors
-                else "",
+                "format": lambda actors: (
+                    ", ".join([str(a) for a in actors]) if actors else ""
+                ),
             },
             "assets": {
                 "source": "assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "applied_controls": {
                 "source": "applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "evidences": {
                 "source": "evidences.all",
                 "label": "evidences",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(item.name) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(item.name) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "compliance_assessments": {
                 "source": "compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "risk_assessments": {
                 "source": "risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "findings_assessment": {
                 "source": "findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
         },
@@ -11646,17 +11693,17 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "task_template.assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda actors: ", ".join([str(a) for a in actors])
-                if actors
-                else "",
+                "format": lambda actors: (
+                    ", ".join([str(a) for a in actors]) if actors else ""
+                ),
             },
             "expected_evidence": {
                 "source": "task_template.evidences.all",
                 "label": "expected_evidence",
                 # Note: Formatting with done/pending status is handled specially in export_tasks_xlsx
-                "format": lambda items: ", ".join([item.name for item in items])
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join([item.name for item in items]) if items else ""
+                ),
             },
             # "evidences": {
             #     "source": "evidences.all",
@@ -11668,47 +11715,47 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assets": {
                 "source": "task_template.assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "applied_controls": {
                 "source": "task_template.applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "compliance_assessments": {
                 "source": "task_template.compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "risk_assessments": {
                 "source": "task_template.risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "findings_assessment": {
                 "source": "task_template.findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
         },
     }
