@@ -1,5 +1,6 @@
 from itertools import chain
 import json
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
@@ -465,10 +466,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     logger.info("Attempting to load newly uploaded library")
                     try:
                         load_error = library.load()
-                    except ValueError as load_exc:
+                    except (ValueError, ValidationError) as load_exc:
                         validation_detail = load_exc.args[0] if load_exc.args else None
                         logger.error(
                             "Validation error while loading newly uploaded library, removing stored entry",
+                            name=library.name,
                             urn=library.urn,
                             error=validation_detail,
                         )
@@ -483,10 +485,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                             ),
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
                         )
-                    except Exception as load_exc:
+                    except Exception:
                         logger.exception(
                             "Unexpected exception while loading newly uploaded library, removing stored entry",
                             urn=library.urn,
+                            name=library.name,
                         )
                         library.delete()
                         return HttpResponse(

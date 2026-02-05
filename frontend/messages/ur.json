@@ -1053,5 +1053,13 @@
 	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں...",
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",
 	"allowAssignmentsToEntities": "اینٹیٹیز کو اسائنمنٹ کی اجازت دیں",
-	"allowAssignmentsToEntitiesDescription": "مالکان، مصنفین یا جائزہ کار تعین کرتے وقت اداروں کو کردار کے طور پر ظاہر ہونے دیں۔"
+	"allowAssignmentsToEntitiesDescription": "مالکان، مصنفین یا جائزہ کار تعین کرتے وقت اداروں کو کردار کے طور پر ظاہر ہونے دیں۔",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

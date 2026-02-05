@@ -59,7 +59,7 @@ class AccreditationReadSerializer(BaseModelSerializer):
     def get_checklist_progress(self, obj):
         """Get the progress percentage of the checklist compliance assessment"""
         if obj.checklist:
-            return obj.checklist.get_progress()
+            return obj.checklist.progress
         return None
 
     class Meta:
