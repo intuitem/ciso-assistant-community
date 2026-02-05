@@ -950,13 +950,8 @@ export const quantitativeRiskStudySchema = z.object({
 						})
 						.optional()
 				})
-				.optional(),
-			curve_data: z
-				.object({
-					loss_values: z.array(z.number()).optional(),
-					probability_values: z.array(z.number()).optional()
-				})
 				.optional()
+			// Note: curve_data is computed by the backend and should not be sent from frontend
 		})
 		.optional(),
 	// .default({
