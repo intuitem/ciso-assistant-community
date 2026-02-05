@@ -373,7 +373,7 @@ def get_domain_export_objects(domain: Folder) -> dict[str, Iterable[models.Model
     Returns:
         A dictionary mapping model names to QuerySets of related objects;
     """
-    #  folder and its subfolders
+    # get this current folder and its subfolders
     folders = (
         Folder.objects.filter(
             Q(id=domain.id) | Q(id__in=[f.id for f in domain.get_sub_folders()])

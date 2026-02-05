@@ -6717,6 +6717,7 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
     def _create_model_objects(self, model, objects, link_dump_database_ids) -> None:
+        """Create all objects for a model after validation."""
         # TODO: DOC
         logger.debug("Creating objects for model", model=model)
 
