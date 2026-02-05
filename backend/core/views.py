@@ -12306,3 +12306,32 @@ class TerminologyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+
+class RequirementAssignmentViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows requirement assignments to be viewed or edited.
+    Requirement assignments delegate groups of requirement assessments to specific actors.
+    """
+
+    model = RequirementAssignment
+    filterset_fields = [
+        "folder",
+        "compliance_assessment",
+        "actor",
+    ]
+    search_fields = ["name", "description"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "compliance_assessment",
+                "actor",
+            )
+            .prefetch_related(
+                "requirement_assessments",
+            )
+        )

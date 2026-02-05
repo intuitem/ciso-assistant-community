@@ -86,6 +86,11 @@ router.register(
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
 )
+router.register(
+    r"requirement-assignments",
+    RequirementAssignmentViewSet,
+    basename="requirement-assignments",
+)
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 router.register(
