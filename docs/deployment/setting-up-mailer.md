@@ -22,32 +22,39 @@ When using Docker Compose, **avoid spaces around the `=` sign** in environment v
 
 An issue you may encounter when setting up your mailer is that your local CA certificates might not be included inside your Docker container. This could cause problems when sending emails.
 
-To address this, we need to apply some modifications to the compose file in the **backend** and **huey** services:
+To address this, we need to apply some modifications to the compose file in the <mark style="color:$primary;">**backend**</mark> and <mark style="color:$primary;">**huey**</mark> services:
 
-* **This volumes** (replace /your/ca-certificate/path/example\_CA.crt by the pass and the name of your ca-certificate) **:**
+* **Add a volume to mount the certificate** (replace /your/ca-certificate/path/example\_CA.crt by the path and the name of your ca-certificate)**:**
+
+<pre class="language-yaml"><code class="lang-yaml">backend (or huey):
+  ...
+  volumes:
+    ...
+<strong>    - /your/ca-certificate/path/example_CA.crt:/usr/local/share/ca-certificates/root_CA.crt:ro
+</strong></code></pre>
+
+* **Add a command through the entrypoint:**&#x20;
 
 ```yaml
-- /your/ca-certificate/path/example_CA.crt:/usr/local/share/ca-certificates/root_CA.crt:ro
-```
-
-* **This entrypoint :**&#x20;
-
-```yaml
-entrypoint:
-  - /bin/sh
-  - -c
-  - |
-    update-ca-certificates
-    poetry run bash ./startup.sh
+backend:
+  ...
+  entrypoint:
+    - /bin/sh
+    - -c
+    - |
+      update-ca-certificates
+      poetry run bash ./startup.sh
 ```
 
 > There's already an entrypoint for huey, you can modify it like this:
 >
 > ```yaml
-> entrypoint:  
->   - /bin/sh
->   - -c
->   - |
->     update-ca-certificates
->     poetry run python manage.py run_huey -w 2 --scheduler-interval 60
+> huey:
+>   ...  
+>   entrypoint:  
+>     - /bin/sh
+>     - -c
+>     - |
+>       update-ca-certificates
+>       poetry run python manage.py run_huey -w 2 --scheduler-interval 60
 > ```
