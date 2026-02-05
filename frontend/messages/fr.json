@@ -2405,7 +2405,7 @@
 	"impactDistribution": "Distribution d'impact",
 	"lognormalDistributionWith90ConfidenceInterval": "Distribution lognormale avec intervalle de confiance à 90 % : {lb} - {ub}",
 	"estimatedParametersMuSigma": "Paramètres estimés : μ = {mu}, σ = {sigma}",
-	"over": "Au dessus de",
+	"over": "Au-dessus de",
 	"lossWithPercentageChance": "Perte avec {percentage}% de probabilité",
 	"linear": "Linéaire",
 	"distributionImpactCI": "Distribution d'impact (IC 90%)",
