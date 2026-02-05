@@ -346,11 +346,14 @@ class QuantitativeRiskStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                     # Automatically regenerate the risk tolerance curve
                     if self.risk_tolerance:
                         curve_data = self.generate_risk_tolerance_curve()
+                        updated_risk_tolerance = self.risk_tolerance.copy()
                         if curve_data and "error" not in curve_data:
                             # Update the risk_tolerance with the generated curve data
-                            updated_risk_tolerance = self.risk_tolerance.copy()
                             updated_risk_tolerance["curve_data"] = curve_data
-                            self.risk_tolerance = updated_risk_tolerance
+                        else:
+                            # Clear curve_data when points are invalid or cleared
+                            updated_risk_tolerance.pop("curve_data", None)
+                        self.risk_tolerance = updated_risk_tolerance
             except QuantitativeRiskStudy.DoesNotExist:
                 # This is a new instance, no need to compare with previous state
                 pass
