@@ -16,6 +16,9 @@ from core.models import (
     RiskMatrix,
     AppliedControl,
     FindingsAssessment,
+    Policy,
+    SecurityException,
+    Incident,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -33,6 +36,9 @@ from core.serializers import (
     ThreatWriteSerializer,
     EvidenceWriteSerializer,
     FolderWriteSerializer,
+    PolicyWriteSerializer,
+    SecurityExceptionWriteSerializer,
+    IncidentWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -132,6 +138,9 @@ class ModelType(enum.StrEnum):
     PROCESSING = "Processing"
     FOLDER = "Folder"
     EVIDENCE = "Evidence"
+    POLICY = "Policy"
+    SECURITY_EXCEPTION = "SecurityException"
+    INCIDENT = "Incident"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -246,7 +255,18 @@ class RecordConsumer[Context](ABC):
 
 
 class AssetRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Asset records.
+    Supports parent_assets linking via ref_id in a second pass.
+    """
+
     SERIALIZER_CLASS = AssetWriteSerializer
+    TYPE_MAP: Final[dict[str, str]] = {
+        "primary": "PR",
+        "pr": "PR",
+        "support": "SP",
+        "sp": "SP",
+    }
 
     def create_context(self):
         return None, None
@@ -262,18 +282,90 @@ class AssetRecordConsumer(RecordConsumer[None]):
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
+
+        # Map type field
+        asset_type = record.get("type", "SP")
+        if isinstance(asset_type, str):
+            asset_type = self.TYPE_MAP.get(
+                asset_type.lower().strip(), asset_type.upper()
+            )
 
         return {
             "ref_id": record.get("ref_id", ""),
             "name": name,
-            "type": record.get("type", "SP"),
+            "type": asset_type,
             "folder": domain,
             "description": record.get("description", ""),
+            "business_value": record.get("business_value", ""),
+            "reference_link": record.get("reference_link", "")
+            or record.get("link", ""),
+            "observation": record.get("observation", ""),
         }, None
+
+    def process_records(self, records: list[dict]) -> Result:
+        """
+        Override to add second pass for parent_assets linking.
+        """
+        # First pass: create all assets
+        results = super().process_records(records)
+
+        # Second pass: link parent_assets by ref_id
+        for record in records:
+            parent_assets_ref = record.get("parent_assets") or record.get(
+                "parent_asset_ref_id"
+            )
+            if not parent_assets_ref:
+                continue
+
+            asset_ref_id = record.get("ref_id")
+            if not asset_ref_id:
+                continue
+
+            # Find the created asset
+            asset = Asset.objects.filter(ref_id=asset_ref_id).first()
+            if not asset:
+                continue
+
+            # Parse parent ref_ids (comma or pipe separated)
+            if isinstance(parent_assets_ref, str):
+                parent_ref_ids = [
+                    ref.strip()
+                    for ref in parent_assets_ref.replace("|", ",").split(",")
+                    if ref.strip()
+                ]
+            else:
+                parent_ref_ids = [str(parent_assets_ref)]
+
+            # Link parent assets
+            for parent_ref_id in parent_ref_ids:
+                parent_asset = Asset.objects.filter(ref_id=parent_ref_id).first()
+                if parent_asset and parent_asset.id != asset.id:
+                    asset.parent_assets.add(parent_asset)
+
+        return results
 
 
 class AppliedControlRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing AppliedControl records.
+    Supports reference_control linking via ref_id.
+    """
+
     SERIALIZER_CLASS = AppliedControlWriteSerializer
+    EFFORT_MAP: Final[dict[str, str]] = {
+        "extra small": "XS",
+        "extrasmall": "XS",
+        "xs": "XS",
+        "small": "S",
+        "s": "S",
+        "medium": "M",
+        "m": "M",
+        "large": "L",
+        "l": "L",
+        "extra large": "XL",
+        "extralarge": "XL",
+        "xl": "XL",
+    }
 
     def create_context(self):
         return None, None
@@ -290,13 +382,42 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
+        # Parse priority
         priority = record.get("priority")
         if isinstance(priority, str) and priority.isdigit():
             priority = int(priority)
-        else:
+        elif not isinstance(priority, int):
             priority = None
 
-        return {
+        # Parse effort
+        effort = record.get("effort")
+        if isinstance(effort, str):
+            effort = self.EFFORT_MAP.get(effort.lower().strip(), effort.upper())
+            if effort not in ("XS", "S", "M", "L", "XL"):
+                effort = None
+
+        # Parse control_impact (1-5 scale)
+        control_impact = record.get("control_impact") or record.get("impact")
+        if isinstance(control_impact, str) and control_impact.isdigit():
+            control_impact = int(control_impact)
+        if isinstance(control_impact, int) and not (1 <= control_impact <= 5):
+            control_impact = None
+
+        # Look up reference_control by ref_id
+        reference_control_id = None
+        reference_control_ref = record.get("reference_control") or record.get(
+            "reference_control_ref_id"
+        )
+        if reference_control_ref:
+            from core.models import ReferenceControl
+
+            ref_control = ReferenceControl.objects.filter(
+                ref_id=reference_control_ref
+            ).first()
+            if ref_control:
+                reference_control_id = ref_control.id
+
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -305,7 +426,18 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             "status": record.get("status", "to_do"),
             "priority": priority,
             "csf_function": record.get("csf_function", "govern"),
-        }, None
+            "effort": effort,
+            "control_impact": control_impact,
+            "link": record.get("link", ""),
+            "eta": record.get("eta"),
+            "expiry_date": record.get("expiry_date"),
+            "start_date": record.get("start_date"),
+        }
+
+        if reference_control_id:
+            data["reference_control"] = reference_control_id
+
+        return data, None
 
 
 class EvidenceRecordConsumer(RecordConsumer[None]):
@@ -567,6 +699,207 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         return finding_data, None
 
 
+class PolicyRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Policy records.
+    Policy is a proxy model of AppliedControl with category='policy'.
+    """
+
+    SERIALIZER_CLASS = PolicyWriteSerializer
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        priority = record.get("priority")
+        if isinstance(priority, str) and priority.isdigit():
+            priority = int(priority)
+        else:
+            priority = None
+
+        return {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "folder": domain,
+            "status": record.get("status", "to_do"),
+            "priority": priority,
+            "csf_function": record.get("csf_function", "govern"),
+            "eta": record.get("eta"),
+            "expiry_date": record.get("expiry_date"),
+            "link": record.get("link", ""),
+            "effort": record.get("effort"),
+        }, None
+
+
+class SecurityExceptionRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing SecurityException records.
+    """
+
+    SERIALIZER_CLASS = SecurityExceptionWriteSerializer
+    SEVERITY_MAP: Final[dict[Optional[str], int]] = {
+        None: -1,
+        "undefined": -1,
+        "info": 0,
+        "informational": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "draft": "draft",
+        "in_review": "in_review",
+        "in review": "in_review",
+        "approved": "approved",
+        "resolved": "resolved",
+        "expired": "expired",
+        "deprecated": "deprecated",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        # Map severity
+        record_severity = record.get("severity")
+        if isinstance(record_severity, str):
+            severity = self.SEVERITY_MAP.get(record_severity.lower().strip(), -1)
+        else:
+            severity = -1
+
+        # Map status
+        record_status = record.get("status")
+        if isinstance(record_status, str):
+            status_value = self.STATUS_MAP.get(record_status.lower().strip(), "draft")
+        else:
+            status_value = "draft"
+
+        return {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "folder": domain,
+            "severity": severity,
+            "status": status_value,
+            "expiration_date": record.get("expiration_date"),
+            "observation": record.get("observation", ""),
+        }, None
+
+
+class IncidentRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Incident records.
+    """
+
+    SERIALIZER_CLASS = IncidentWriteSerializer
+    SEVERITY_MAP: Final[dict[Optional[str], int]] = {
+        None: 6,
+        "undefined": 6,
+        "unknown": 6,
+        "critical": 1,
+        "sev1": 1,
+        "major": 2,
+        "sev2": 2,
+        "moderate": 3,
+        "sev3": 3,
+        "minor": 4,
+        "sev4": 4,
+        "low": 5,
+        "sev5": 5,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "new": "new",
+        "ongoing": "ongoing",
+        "in progress": "ongoing",
+        "in_progress": "ongoing",
+        "resolved": "resolved",
+        "closed": "closed",
+        "dismissed": "dismissed",
+    }
+    DETECTION_MAP: Final[dict[str, str]] = {
+        "internal": "internally_detected",
+        "internally_detected": "internally_detected",
+        "external": "externally_detected",
+        "externally_detected": "externally_detected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        domain = self.folder_id
+        domain_name = record.get("domain")
+        if domain_name is not None:
+            domain = self.folders_map.get(domain_name.lower(), self.folder_id)
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        # Map severity
+        record_severity = record.get("severity")
+        if isinstance(record_severity, str):
+            severity = self.SEVERITY_MAP.get(record_severity.lower().strip(), 6)
+        elif isinstance(record_severity, int) and 1 <= record_severity <= 6:
+            severity = record_severity
+        else:
+            severity = 6
+
+        # Map status
+        record_status = record.get("status")
+        if isinstance(record_status, str):
+            status_value = self.STATUS_MAP.get(record_status.lower().strip(), "new")
+        else:
+            status_value = "new"
+
+        # Map detection
+        record_detection = record.get("detection")
+        if isinstance(record_detection, str):
+            detection_value = self.DETECTION_MAP.get(
+                record_detection.lower().strip(), "internally_detected"
+            )
+        else:
+            detection_value = "internally_detected"
+
+        return {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "folder": domain,
+            "severity": severity,
+            "status": status_value,
+            "detection": detection_value,
+            "link": record.get("link", ""),
+            "reported_at": record.get("reported_at"),
+        }, None
+
+
 class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
@@ -679,6 +1012,24 @@ class LoadFileView(APIView):
                         case ModelType.FINDINGS_ASSESSMENT:
                             res = (
                                 FindingsAssessmentRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.POLICY:
+                            res = (
+                                PolicyRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.SECURITY_EXCEPTION:
+                            res = (
+                                SecurityExceptionRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.INCIDENT:
+                            res = (
+                                IncidentRecordConsumer(base_context)
                                 .process_records(records)
                                 .to_dict()
                             )
