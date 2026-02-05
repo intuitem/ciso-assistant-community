@@ -2502,6 +2502,7 @@
 	"residualRiskWithinTolerance": "Residual risk within tolerance",
 	"uniqueControl": "unique control",
 	"uniqueControls": "unique controls",
+	"inherentLabel": "Inherent",
 	"currentLabel": "Current",
 	"residualLabel": "Residual",
 	"noLecDataAvailableForScenario": "No LEC data available for this scenario",

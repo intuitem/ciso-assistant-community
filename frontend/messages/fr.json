@@ -2448,6 +2448,7 @@
 	"lossAmount": "Perte",
 	"residualRiskExceedsTolerance": "Le niveau résiduel dépasse la tolérance",
 	"residualRiskWithinTolerance": "Le niveau résiduel est en dessous de la tolérance",
+	"inherentLabel": "Inhérent",
 	"currentLabel": "Actuel",
 	"noCombinedLecDataAvailable": "Pas de données disponibles. Relancez les simulations pour en avoir.",
 	"residualLabel": "Résiduel",

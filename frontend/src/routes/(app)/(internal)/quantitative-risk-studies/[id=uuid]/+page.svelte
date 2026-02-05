@@ -216,14 +216,14 @@
 							<h3 class="text-lg font-semibold">{m.portfolioOverview()}</h3>
 							<div class="text-sm text-gray-600">
 								{#if data.combinedLec.scenarios_with_inherent_data}
-									Inherent: {data.combinedLec.scenarios_with_inherent_data} / {data.combinedLec
-										.total_scenarios} |
+									{m.inherentLabel()}: {data.combinedLec.scenarios_with_inherent_data} / {data
+										.combinedLec.total_scenarios} |
 								{/if}
-								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec
-									.total_scenarios}
+								{m.currentLabel()}: {data.combinedLec.scenarios_with_current_data} / {data
+									.combinedLec.total_scenarios}
 								{#if data.combinedLec.scenarios_with_residual_data}
-									| Residual: {data.combinedLec.scenarios_with_residual_data} / {data.combinedLec
-										.total_scenarios}
+									| {m.residualLabel()}: {data.combinedLec.scenarios_with_residual_data} / {data
+										.combinedLec.total_scenarios}
 									{m.scenarios()}
 								{/if}
 							</div>
