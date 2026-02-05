@@ -6189,7 +6189,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.get_progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -8098,6 +8098,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
+                "requirement_assessments",  # To calcul progress
             )
         )
 
@@ -8116,12 +8117,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
 
