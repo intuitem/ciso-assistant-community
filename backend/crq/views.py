@@ -138,7 +138,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         current_ale_combined - residual_ale_combined
                     )
                     if current_ale_combined > 0 and residual_ale_combined > 0
-                    else "Cannot calculate",
+                    else "Risk reduction cannot be calculated",
                 },
                 "scenarios": scenarios_data,
                 "total_scenarios": len(scenarios_data),
@@ -1293,7 +1293,7 @@ class QuantitativeRiskHypothesisViewSet(BaseModelViewSet):
                     "metrics": {},
                     "parameters_used": {},
                     "simulation_timestamp": "",
-                    "message": "Parameters have changed. Please run a new simulation to see updated results."
+                    "message": "Parameters have changed please run a new simulation to see updated results"
                     if not hypothesis.is_simulation_fresh
                     else "No simulation data available. Please run a simulation first.",
                     "is_simulation_fresh": hypothesis.is_simulation_fresh,

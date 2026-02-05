@@ -10,6 +10,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
 	import { getToastStore } from '$lib/components/Toast/stores.ts';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -172,7 +173,7 @@
 						<!-- Current ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-blue-600 mb-2">
-								{metrics.current_ale_combined_display}
+								{safeTranslate(metrics.current_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -184,7 +185,7 @@
 						<!-- Residual ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-green-600 mb-2">
-								{metrics.residual_ale_combined_display}
+								{safeTranslate(metrics.residual_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -196,7 +197,7 @@
 						<!-- Risk Reduction -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-purple-600 mb-2">
-								{metrics.risk_reduction_display}
+								{safeTranslate(metrics.risk_reduction_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.riskReduction()}</div>
 							<div class="text-xs text-gray-500 mt-1">{m.currentAle()} - {m.residualAle()}</div>
