@@ -190,6 +190,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `mitigated`
   * `resolved`
   * `deprecated`
+* filtering\_labels
 
 
 
@@ -399,4 +400,60 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
   * FALSE
   * TRUE
 * dpia\_reference
+
+
+
+## Policies
+
+{% file src="../.gitbook/assets/policies_template.xlsx" %}
+
+### Supported fields
+
+* ref\_id
+* name
+* description
+* domain
+* status
+* link
+
+## Exceptions
+
+{% file src="../.gitbook/assets/exceptions_template.xlsx" %}
+
+### Supported fields
+
+* ref\_id
+* name
+* description
+* domain
+* status
+  * draft, in\_review, approved, resolved, expired, deprecated
+* severity
+  * undefined, info, low, medium, high, critical
+* expiration\_date
+  * YYYY-MM-DD
+* observation
+
+## Incidents
+
+{% file src="../.gitbook/assets/incidents_template.xlsx" %}
+
+### Supported fields
+
+* ref\_id
+* name
+* description
+* domain
+* status
+  * new, ongoing, resolved, closed, dismissed
+* severity
+  * critical/sev1(1), major/sev2(2), moderate/sev3(3), minor/sev4(4), low/sev5(5), unknown(6)
+* detection
+  * internal/internally\_detected, external/externally\_detected
+* reported\_at
+  * DateTime
+
+
+
+
 
