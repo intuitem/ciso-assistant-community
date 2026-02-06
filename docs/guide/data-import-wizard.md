@@ -237,6 +237,8 @@ Supported fields:
 * _additional\_controls_
 * residual\_impact
 * residual\_proba
+* treatment
+  * `open, mitigate, accept, avoid, transfer`
 
 {% file src="../.gitbook/assets/risk_assessment_template.xlsx" %}
 
