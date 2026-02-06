@@ -946,7 +946,7 @@ class QuantitativeRiskHypothesis(
         roc_value = self.roc
         if roc_value is None:
             if self.risk_stage != "residual":
-                return "N/A (not residual hypothesis)"
+                return "N/A (no residual hypothesis)"
             else:
                 return "Insufficient data"
 
@@ -975,7 +975,7 @@ class QuantitativeRiskHypothesis(
         Returns a detailed explanation of the ROC calculation with specific values.
         """
         if self.risk_stage != "residual":
-            return "ROSI calculation only available for residual hypotheses."
+            return "ROSI calculation only available for residual hypotheses"
 
         # Find the current hypothesis in the same scenario
         current_hypothesis = self.quantitative_risk_scenario.hypotheses.filter(
