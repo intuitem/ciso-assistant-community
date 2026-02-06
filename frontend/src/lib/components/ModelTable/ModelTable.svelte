@@ -197,9 +197,7 @@
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
 		const preferredLabel =
-			URLModel === 'reference-controls'
-				? rowMetaData.name || rowMetaData.ref_id
-				: undefined;
+			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
 		const label =
 			preferredLabel ||
 			rowMetaData.str ||
