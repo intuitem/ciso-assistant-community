@@ -3252,25 +3252,29 @@ class Asset(
         # Build ordered list of objective keys: defaults first (if present), then any extras
         default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
         extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in so_obj] + extra_keys
+        ordered_keys = default_order + extra_keys
 
         result = []
         for key in ordered_keys:
-            o = so_obj.get(key) or {}
+            objective = so_obj.get(key) or {}
+            capacity = sc_obj.get(key) or {}
             # Only compare enabled and valid (0..4) expectations
-            if not o.get("is_enabled", False):
-                continue
-            exp_value = o.get("value", None)
-            if not isinstance(exp_value, int) or not (0 <= exp_value <= 4):
-                continue
 
-            c = sc_obj.get(key) or {}
-            if not c.get("is_enabled", False):
+            has_objective = objective.get("is_enabled", False)
+            exp_value = None
+            if has_objective:
+                exp_value = objective.get("value", None)
+
+            has_capacity = capacity.get("is_enabled", False)
+            real_value = None
+            if has_capacity:
+                real_value = capacity.get("value", None)
+
+            if not (has_objective or has_capacity):
                 continue
-            real_value = c.get("value", None) if isinstance(c, dict) else None
 
             verdict = None
-            if isinstance(real_value, int):
+            if isinstance(real_value, int) and isinstance(exp_value, int):
                 verdict = real_value >= exp_value
 
             result.append(
@@ -3321,7 +3325,7 @@ class Asset(
 
         default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
         extras = sorted([k for k in objectives.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in objectives] + extras
+        ordered_keys = default_order + extras
 
         result: list[dict] = []
         for key in ordered_keys:
