@@ -687,10 +687,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         email = render_to_string(email_template_name, header)
         try:
             send_mail(
-                subject,
-                email,
-                None,
-                [self.email],
+                subject=subject,
+                message=email,
+                from_email=None,
+                recipient_list=[self.email],
                 fail_silently=False,
                 html_message=email,
             )
@@ -718,10 +718,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
                     ) as new_connection:
                         EmailMessage(
-                            subject,
-                            email,
-                            None,
-                            [self.email],
+                            subject=subject,
+                            body=email,
+                            from_email=None,
+                            to=[self.email],
                             connection=new_connection,
                         ).send()
                     logger.info(
