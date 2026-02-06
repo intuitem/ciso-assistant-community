@@ -217,6 +217,9 @@ class BaseContext:
 
 class RecordConsumer[Context](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
+    # Maps record_data keys to possible source record keys when they differ.
+    # Override in subclasses that use alternative/aliased column names.
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {}
 
     def __init__(self, base_context: BaseContext):
         self.request = base_context.request
@@ -266,6 +269,28 @@ class RecordConsumer[Context](ABC):
             query["folder"] = folder
         return model_class.objects.filter(**query).first()
 
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        """
+        Filter record_data to only include fields that the user actually
+        provided with non-empty values in the source record.
+        Identity fields (used for matching) are always preserved.
+        """
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        identity_fields = set(getattr(model_class, "fields_to_check", []))
+        if hasattr(model_class, "folder"):
+            identity_fields.add("folder")
+
+        update_data = {}
+        for key, value in record_data.items():
+            if key in identity_fields:
+                update_data[key] = value
+                continue
+            source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            if any(record.get(sk) not in (None, "") for sk in source_keys):
+                update_data[key] = value
+
+        return update_data
+
     def process_records(self, records: list[dict]) -> Result:
         results = Result()
 
@@ -282,7 +307,13 @@ class RecordConsumer[Context](ABC):
                     break
                 continue
 
-            existing = self.find_existing(record_data)
+            existing = None
+            internal_id = record.get("internal_id")
+            if internal_id:
+                model_class = self.SERIALIZER_CLASS.Meta.model
+                existing = model_class.objects.filter(pk=internal_id).first()
+            if existing is None:
+                existing = self.find_existing(record_data)
 
             if existing:
                 match self.on_conflict:
@@ -295,9 +326,11 @@ class RecordConsumer[Context](ABC):
                         )
                         break
                     case ConflictMode.UPDATE:
+                        update_data = self._build_update_data(record, record_data)
                         serializer = self.SERIALIZER_CLASS(
                             instance=existing,
-                            data=record_data,
+                            data=update_data,
+                            partial=True,
                             context={"request": self.request},
                         )
                         if serializer.is_valid():
@@ -346,6 +379,9 @@ class AssetRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AssetWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "reference_link": ("reference_link", "link"),
+    }
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
         "pr": "PR",
@@ -437,6 +473,10 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "control_impact": ("control_impact", "impact"),
+        "reference_control": ("reference_control", "reference_control_ref_id"),
+    }
     EFFORT_MAP: Final[dict[str, str]] = {
         "extra small": "XS",
         "extrasmall": "XS",
@@ -632,6 +672,9 @@ class ThreatRecordConsumer(RecordConsumer[None]):
 
 class ReferenceControlRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "csf_function": ("function",),
+    }
     CATEGORY_MAP: Final[dict[str, str]] = {
         "policy": "policy",
         "process": "process",
@@ -1047,10 +1090,10 @@ class LoadFileView(APIView):
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
-                        df = pd.read_excel(record_file).fillna("")
+                        df = pd.read_excel(record_file).astype(object).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        df = pd.read_csv(record_file).astype(object).fillna("")
 
                     base_context = BaseContext(
                         request,
