@@ -128,11 +128,10 @@ export const actions: Actions = {
 		if (!formData) return;
 
 		const schema = modelSchema(formData.get('urlmodel') as string);
-		const urlModel = 'ebios-rm/studies';
 
 		const form = await superValidate(formData, zod(schema));
 
-		const endpoint = `${BASE_API_URL}/${urlModel}/${event.params.id}/duplicate/`;
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/duplicate/`;
 
 		if (!form.valid) {
 			console.log(form.errors);
@@ -147,7 +146,7 @@ export const actions: Actions = {
 
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
-		const modelVerboseName: string = urlParamModelVerboseName(urlModel);
+		const modelVerboseName: string = urlParamModelVerboseName('ebios-rm');
 		setFlash(
 			{
 				type: 'success',
