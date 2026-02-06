@@ -529,6 +529,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'ref_id' },
 			{ field: 'name' },
+			{ field: 'annotation' },
 			{ field: 'description' },
 			{ field: 'category' },
 			{ field: 'csf_function' },
