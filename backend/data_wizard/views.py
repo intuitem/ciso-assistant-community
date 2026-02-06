@@ -16,6 +16,7 @@ from core.models import (
     RiskMatrix,
     AppliedControl,
     FindingsAssessment,
+    RiskScenario,
     Policy,
     SecurityException,
     Incident,
@@ -2487,6 +2488,9 @@ class LoadFileView(APIView):
                 f"residual_proba={residual_proba}, residual_impact={residual_impact}"
             )
 
+            # Get treatment status
+            treatment = record.get("treatment", "").strip().lower()
+
             # Prepare risk scenario data
             # Note: inherent_level, current_level, and residual_level will be computed automatically
             scenario_data = {
@@ -2500,11 +2504,23 @@ class LoadFileView(APIView):
                 "current_proba": current_proba,
                 "residual_impact": residual_impact,
                 "residual_proba": residual_proba,
+                "treatment": next(
+                    (
+                        opt
+                        for opt, _ in RiskScenario.TREATMENT_OPTIONS
+                        if treatment == opt
+                    ),
+                    "open",
+                ),
             }
 
             # Create the risk scenario
             scenario_serializer = RiskScenarioWriteSerializer(
                 data=scenario_data, context={"request": request}
+            )
+
+            logger.debug(
+                f"Validating scenario serializer for '{name}' with data: {scenario_serializer.initial_data}"
             )
 
             if not scenario_serializer.is_valid():
