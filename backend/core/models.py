@@ -7123,6 +7123,41 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["result"])
 
 
+class RequirementAssignment(AbstractBaseModel, FolderMixin):
+    """
+    Represents an assignment of a group of requirement assessments to an actor.
+    Used to delegate audit work within a compliance assessment to specific users or teams.
+    A requirement assessment can only belong to one assignment within a compliance assessment.
+    """
+
+    compliance_assessment = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.CASCADE,
+        related_name="requirement_assignments",
+        verbose_name=_("Compliance Assessment"),
+    )
+    actor = models.ForeignKey(
+        "Actor",
+        on_delete=models.CASCADE,
+        related_name="requirement_assignments",
+        verbose_name=_("Assigned To"),
+    )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        related_name="assignments",
+        verbose_name=_("Requirement Assessments"),
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Requirement Assignment")
+        verbose_name_plural = _("Requirement Assignments")
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.actor} - {self.compliance_assessment}"
+
+
 class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -8092,6 +8127,10 @@ auditlog.register(
 )
 auditlog.register(
     TaskTemplate,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RequirementAssignment,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete
