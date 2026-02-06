@@ -675,7 +675,9 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             filtering_label = FilteringLabel.objects.filter(label=label_name).first()
             if filtering_label is None:
                 try:
-                    filtering_label = FilteringLabel.objects.create(label=label_name)
+                    filtering_label = FilteringLabel(label=label_name)
+                    filtering_label.full_clean()
+                    filtering_label.save()
                 except Exception as e:
                     return {}, Error(
                         record=record,
