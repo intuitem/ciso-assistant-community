@@ -136,6 +136,7 @@
 		{form}
 		multiple
 		optionsEndpoint="actors"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],

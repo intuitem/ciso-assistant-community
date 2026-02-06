@@ -84,6 +84,7 @@
 		multiple
 		optionsEndpoint="actors"
 		optionsLabelField="str"
+		optionsExtraFields={[['folder', 'str']]}
 		optionsInfoFields={{
 			fields: [{ field: 'type', translate: true }],
 			position: 'prefix'

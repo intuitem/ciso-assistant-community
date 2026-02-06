@@ -149,6 +149,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
@@ -163,6 +164,7 @@
 			multiple
 			{form}
 			optionsEndpoint="actors"
+			optionsExtraFields={[['folder', 'str']]}
 			optionsLabelField="str"
 			optionsInfoFields={{
 				fields: [{ field: 'type', translate: true }],
