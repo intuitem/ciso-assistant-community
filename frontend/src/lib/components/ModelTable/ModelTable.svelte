@@ -196,13 +196,20 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
+		const preferredLabel =
+			URLModel === 'reference-controls'
+				? rowMetaData.name || rowMetaData.ref_id
+				: undefined;
+		const label =
+			preferredLabel ||
+			rowMetaData.str ||
+			rowMetaData.name ||
+			rowMetaData.email ||
+			rowMetaData.label ||
+			rowMetaData[identifierField];
+
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
-			label:
-				rowMetaData.str ??
-				rowMetaData.name ??
-				rowMetaData.email ??
-				rowMetaData.label ??
-				rowMetaData[identifierField],
+			label,
 			breadcrumbAction: 'push'
 		});
 	}
