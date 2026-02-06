@@ -73,7 +73,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar
+from typing import Optional, Final, ClassVar, Literal
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -746,7 +746,7 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
-    FILTERING_LABEL_SEPARATOR: Final[str] = "|"
+    FILTERING_LABEL_SEPARATOR: Final[Literal["|"]] = "|"
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -811,21 +811,21 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             filtering_label_names = []
 
         filtering_label_ids: list[UUID] = []
-        unknown_label_names = []
 
         for label_name in filtering_label_names:
             filtering_label = FilteringLabel.objects.filter(label=label_name).first()
             if filtering_label is None:
-                unknown_label_names.append(label_name)
-                continue
+                try:
+                    filtering_label = FilteringLabel(label=label_name)
+                    filtering_label.full_clean()
+                    filtering_label.save()
+                except Exception as e:
+                    return {}, Error(
+                        record=record,
+                        error=f"Error while creating filtering labels {repr(label_name)}: {repr(e)}",
+                    )
 
             filtering_label_ids.append(filtering_label.id)
-
-        if len(unknown_label_names) > 0:
-            return {}, Error(
-                record=record,
-                error=f"Unknown filtering labels: {repr(unknown_label_names)}",
-            )
 
         finding_data = {
             "name": name,
