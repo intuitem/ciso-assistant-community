@@ -3270,9 +3270,6 @@ class Asset(
             if has_capacity:
                 real_value = capacity.get("value", None)
 
-            if not (has_objective or has_capacity):
-                continue
-
             verdict = None
             if isinstance(real_value, int) and isinstance(exp_value, int):
                 verdict = real_value >= exp_value
