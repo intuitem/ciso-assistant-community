@@ -3321,5 +3321,6 @@
 	"addTeam": "Ajouter une équipe",
 	"viewTeam": "Voir une équipe",
 	"changeTeam": "Modifier une équipe",
-	"deleteTeam": "Supprimer une équipe"
+	"deleteTeam": "Supprimer une équipe",
+	"duplicateEbiosRmStudy": "Dupliquer l’étude Ebios RM"
 }

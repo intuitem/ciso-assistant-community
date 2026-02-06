@@ -1076,5 +1076,6 @@
 	"appliedControlsPlaceholder": "Välj tillämpade kontroller...",
 	"assignmentSettings": "Tilldelningsinställningar",
 	"allowAssignmentsToEntities": "Tillåt tilldelningar till enheter",
-	"allowAssignmentsToEntitiesDescription": "Låter enheter visas som aktörer när ägare, författare eller granskare tilldelas."
+	"allowAssignmentsToEntitiesDescription": "Låter enheter visas som aktörer när ägare, författare eller granskare tilldelas.",
+	"duplicateEbiosRmStudy": "Duplicera Ebios RM-studie"
 }

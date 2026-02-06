@@ -2309,5 +2309,6 @@
 	"relationships": "Relazioni",
 	"assignmentSettings": "Impostazioni assegnazioni",
 	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
-	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori."
+	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori.",
+	"duplicateEbiosRmStudy": "Duplica lo studio Ebios RM"
 }

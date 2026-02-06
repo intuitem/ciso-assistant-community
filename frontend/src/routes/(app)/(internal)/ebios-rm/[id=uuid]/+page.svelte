@@ -194,8 +194,27 @@
 		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: safeTranslate('add-' + data.riskModel.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalDuplicateForm(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.ebiosRMDuplicateForm,
+				model: data.model,
+				debug: false,
+				duplicate: true,
+				formAction: '?/duplicate'
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.duplicateEbiosRmStudy()
 		};
 		modalStore.trigger(modal);
 	}
@@ -309,6 +328,14 @@
 							</div>
 						{/if}
 					</div>
+					<button
+						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600 py-3 px-4 rounded-lg flex items-center justify-center gap-2"
+						onclick={(_) => modalDuplicateForm()}
+						data-testid="duplicate-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}
+					</button>
 				</div>
 			{/snippet}
 			{#snippet content()}

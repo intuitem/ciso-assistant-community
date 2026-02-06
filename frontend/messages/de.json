@@ -2953,5 +2953,6 @@
 	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
 	"assignmentSettings": "Zuweisungseinstellungen",
 	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
-	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden."
+	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden.",
+	"duplicateEbiosRmStudy": "Ebios RM-Studie duplizieren"
 }

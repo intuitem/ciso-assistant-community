@@ -1601,5 +1601,6 @@
 	"appliedControlsPlaceholder": "Виберіть застосовані контролі...",
 	"assignmentSettings": "Налаштування призначень",
 	"allowAssignmentsToEntities": "Дозволити призначення для сутностей",
-	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів."
+	"allowAssignmentsToEntitiesDescription": "Дозволяє сутностям відображатися як учасники під час призначення власників, авторів чи рецензентів.",
+	"duplicateEbiosRmStudy": "Дублювати дослідження Ebios RM"
 }

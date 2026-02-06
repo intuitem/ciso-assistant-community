@@ -1270,5 +1270,6 @@
 	"appliedControlsPlaceholder": "Pilih kontrol yang diterapkan...",
 	"assignmentSettings": "Pengaturan penugasan",
 	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
-	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau."
+	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau.",
+	"duplicateEbiosRmStudy": "Duplikasi studi Ebios RM"
 }

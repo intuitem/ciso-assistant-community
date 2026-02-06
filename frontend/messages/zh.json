@@ -3104,5 +3104,6 @@
 	"youCanSetPasswordHere": "您可以在此设置密码",
 	"assignmentSettings": "分配设置",
 	"allowAssignmentsToEntities": "允许将任务分配给实体",
-	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。"
+	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。",
+	"duplicateEbiosRmStudy": "复制 EBIOS RM 研究"
 }

@@ -91,6 +91,108 @@ def transform_questions_to_answers(questions):
     return answers
 
 
+def duplicate_related_objects(
+    source_object: models.Model,
+    duplicate_object: models.Model,
+    target_folder: Folder,
+    field_name: str,
+):
+    """
+    Duplicates related objects from a source object to a duplicate object, avoiding duplicates in the target folder.
+
+    Parameters:
+    - source_object (object): The source object containing related objects to duplicate.
+    - duplicate_object (object): The object where duplicated objects will be linked.
+    - target_folder (Folder): The folder where duplicated objects will be stored.
+    - field_name (str): The field name representing the related objects in the source
+    """
+
+    def process_related_object(
+        obj,
+        duplicate_object,
+        target_folder,
+        target_parent_folders,
+        sub_folders,
+        field_name,
+        model_class,
+    ):
+        """
+        Process a single related object: add, link, or duplicate it based on folder and existence checks.
+        """
+
+        # Check if the object already exists in the target folder
+        existing_obj = get_existing_object(obj, target_folder, model_class)
+
+        if existing_obj:
+            # If the object exists in the target folder, link it to the duplicate object
+            link_existing_object(duplicate_object, existing_obj, field_name)
+
+        elif obj.folder in target_parent_folders and obj.is_published:
+            # If the object's folder is a parent and it's published, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        elif obj.folder in sub_folders:
+            # If the object's folder is a subfolder of the target folder, link it
+            link_existing_object(duplicate_object, obj, field_name)
+
+        else:
+            # Otherwise, duplicate the object and link it
+            duplicate_and_link_object(obj, duplicate_object, target_folder, field_name)
+
+    def get_existing_object(obj, target_folder, model_class):
+        """
+        Check if an object with the same name already exists in the target folder.
+        """
+        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
+
+    def link_existing_object(duplicate_object, existing_obj, field_name):
+        """
+        Link an existing object to the duplicate object by adding it to the related field.
+        """
+        getattr(duplicate_object, field_name).add(existing_obj)
+
+    def duplicate_and_link_object(new_obj, duplicate_object, target_folder, field_name):
+        """
+        Duplicate an object and link it to the duplicate object.
+        """
+        # Get the model of the object
+        model_class = new_obj.__class__
+
+        # Extract all fields except the primary key
+        field_values = {}
+        for field in new_obj._meta.fields:
+            if not field.primary_key and not field.auto_created:
+                field_values[field.name] = getattr(new_obj, field.name)
+
+        # Apply changes
+        field_values["folder"] = target_folder
+
+        # Create the new object
+        new_obj = model_class.objects.create(**field_values)
+        link_existing_object(duplicate_object, new_obj, field_name)
+
+    model_class = getattr(type(source_object), field_name).field.related_model
+
+    # Get parent and sub-folders of the target folder
+    target_parent_folders = list(target_folder.get_parent_folders())
+    sub_folders = list(target_folder.get_sub_folders())
+
+    # Get all related objects for the specified field
+    related_objects = getattr(source_object, field_name).all()
+
+    # Process each related object
+    for obj in related_objects:
+        process_related_object(
+            obj,
+            duplicate_object,
+            target_folder,
+            target_parent_folders,
+            sub_folders,
+            field_name,
+            model_class,
+        )
+
+
 ########################### Referential objects #########################
 
 
@@ -5014,6 +5116,73 @@ class RiskAssessment(Assessment):
                         scenario.save()
 
         self.upsert_daily_metrics()
+
+    def duplicate(
+        self,
+        name: str,
+        description: Optional[str],
+        perimeter: Optional[Perimeter],
+        version: Optional[str],
+        ref_id: Optional[str],
+        ebios_rm_study: Optional["EbiosRMStudy"] = None,
+        folder: Optional[Folder] = None,
+    ) -> "RiskAssessment":
+        duplicate_risk_assessment = RiskAssessment.objects.create(
+            name=name,
+            description=description,
+            perimeter=perimeter,
+            version=version,
+            risk_matrix=self.risk_matrix,
+            ref_id=ref_id,
+            eta=self.eta,
+            due_date=self.due_date,
+            status=self.status,
+            ebios_rm_study=ebios_rm_study,
+            folder=folder or self.folder,
+        )
+
+        duplicate_risk_assessment.authors.set(self.authors.all())
+        duplicate_risk_assessment.reviewers.set(self.reviewers.all())
+
+        for scenario in self.risk_scenarios.all():
+            duplicate_scenario = RiskScenario.objects.create(
+                risk_assessment=duplicate_risk_assessment,
+                name=scenario.name,
+                description=scenario.description,
+                treatment=scenario.treatment,
+                current_proba=scenario.current_proba,
+                current_impact=scenario.current_impact,
+                residual_proba=scenario.residual_proba,
+                residual_impact=scenario.residual_impact,
+                strength_of_knowledge=scenario.strength_of_knowledge,
+                justification=scenario.justification,
+                ref_id=scenario.ref_id,
+            )
+
+            duplicate_scenario.qualifications.set(scenario.qualifications.all())
+
+            for field in [
+                "applied_controls",
+                "threats",
+                "assets",
+                "existing_applied_controls",
+            ]:
+                duplicate_related_objects(
+                    scenario,
+                    duplicate_scenario,
+                    duplicate_risk_assessment.folder,
+                    field,
+                )
+
+            if duplicate_risk_assessment.folder in [self.folder] + [
+                folder for folder in self.folder.get_sub_folders()
+            ]:
+                duplicate_scenario.owner.set(scenario.owner.all())
+
+            duplicate_scenario.save()
+
+        duplicate_risk_assessment.save()
+        return duplicate_risk_assessment
 
     @property
     def path_display(self) -> str:

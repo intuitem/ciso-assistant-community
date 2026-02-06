@@ -2952,5 +2952,6 @@
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",
 	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
-	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers."
+	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers.",
+	"duplicateEbiosRmStudy": "Dupliceer de Ebios RM-studie"
 }

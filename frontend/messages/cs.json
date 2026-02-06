@@ -1073,5 +1073,6 @@
 	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
 	"assignmentSettings": "Nastavení přiřazení",
 	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
-	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů."
+	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů.",
+	"duplicateEbiosRmStudy": "Duplikovat studii Ebios RM"
 }

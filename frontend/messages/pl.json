@@ -1825,5 +1825,6 @@
 	"appliedControlsPlaceholder": "Wybierz stosowane kontrole...",
 	"assignmentSettings": "Ustawienia przydziałów",
 	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
-	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów."
+	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów.",
+	"duplicateEbiosRmStudy": "Powiel badanie Ebios RM"
 }

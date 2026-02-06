@@ -1054,5 +1054,6 @@
 	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें...",
 	"assignmentSettings": "असाइनमेंट सेटिंग्स",
 	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",
-	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।"
+	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।",
+	"duplicateEbiosRmStudy": "Ebios RM अध्ययन की प्रतिलिपि बनाएँ"
 }

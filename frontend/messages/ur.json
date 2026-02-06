@@ -1053,5 +1053,6 @@
 	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں...",
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",
 	"allowAssignmentsToEntities": "اینٹیٹیز کو اسائنمنٹ کی اجازت دیں",
-	"allowAssignmentsToEntitiesDescription": "مالکان، مصنفین یا جائزہ کار تعین کرتے وقت اداروں کو کردار کے طور پر ظاہر ہونے دیں۔"
+	"allowAssignmentsToEntitiesDescription": "مالکان، مصنفین یا جائزہ کار تعین کرتے وقت اداروں کو کردار کے طور پر ظاہر ہونے دیں۔",
+	"duplicateEbiosRmStudy": "Ebios RM مطالعہ کی نقل تیار کریں"
 }

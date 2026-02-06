@@ -3092,5 +3092,6 @@
 	"widgetCount": "Número de widgets",
 	"assignmentSettings": "Asignaciones",
 	"allowAssignmentsToEntities": "Permitir asignaciones a entidades",
-	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores."
+	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores.",
+	"duplicateEbiosRmStudy": "Duplicar el estudio Ebios RM"
 }

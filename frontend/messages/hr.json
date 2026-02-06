@@ -2050,5 +2050,6 @@
 	"appliedControlsPlaceholder": "Odaberi primijenjene kontrole...",
 	"assignmentSettings": "Postavke dodjele",
 	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",
-	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata."
+	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata.",
+	"duplicateEbiosRmStudy": "Dupliciraj Ebios RM istraživanje"
 }

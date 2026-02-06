@@ -1082,5 +1082,6 @@
 	"appliedControlsPlaceholder": "Selectați controalele aplicate...",
 	"assignmentSettings": "Setări atribuiri",
 	"allowAssignmentsToEntities": "Permite atribuiri către entități",
-	"allowAssignmentsToEntitiesDescription": "Permite entităților să apară ca actori atunci când atribui proprietari, autori sau recenzori."
+	"allowAssignmentsToEntitiesDescription": "Permite entităților să apară ca actori atunci când atribui proprietari, autori sau recenzori.",
+	"duplicateEbiosRmStudy": "Duplicarea studiului Ebios RM"
 }
