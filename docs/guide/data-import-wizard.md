@@ -1,9 +1,11 @@
 ---
-description: '[Pro] guidelines on data import format'
+description: Guidelines on data import format
 icon: diagram-previous
 ---
 
 # Data import wizard
+
+Applicable for: Data import wizard (Pro) and CLI (Community and Pro)
 
 ## Overview
 
