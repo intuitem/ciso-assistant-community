@@ -132,6 +132,7 @@
 			<!-- Combined Loss Exceedance Curve -->
 			{#if combinedLecData?.curves && combinedLecData.curves.length > 0}
 				{@const curves = combinedLecData.curves}
+				{@const inherentRiskCurve = curves.find((c) => c.type === 'combined_inherent')}
 				{@const currentRiskCurve = curves.find((c) => c.type === 'combined_current')}
 				{@const residualRiskCurve = curves.find((c) => c.type === 'combined_residual')}
 				{@const toleranceCurve = curves.find((c) => c.type === 'tolerance')}
@@ -152,6 +153,10 @@
 							{/if}
 						</div>
 						<div class="text-sm text-gray-600">
+							{#if combinedLecData.scenarios_with_inherent_data}
+								{m.inherentRisk()}: {combinedLecData.scenarios_with_inherent_data} / {combinedLecData.total_scenarios}
+								|
+							{/if}
 							{m.currentLabel()}: {combinedLecData.scenarios_with_current_data} / {combinedLecData.total_scenarios}
 							{#if combinedLecData.scenarios_with_residual_data}
 								| {m.residualLabel()}: {combinedLecData.scenarios_with_residual_data} / {combinedLecData.total_scenarios}
@@ -164,6 +169,7 @@
 						<LossExceedanceCurve
 							name="combined-study-lec"
 							data={currentRiskCurve?.data || []}
+							inherentData={inherentRiskCurve?.data || []}
 							residualData={residualRiskCurve?.data || []}
 							toleranceData={toleranceCurve?.data || []}
 							lossThreshold={summaryData.loss_threshold}
@@ -429,8 +435,16 @@
 							<div class="px-6 pb-6">
 								<!-- ALE Insights -->
 								<div
-									class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 p-4 bg-gray-50 rounded-lg"
+									class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6 p-4 bg-gray-50 rounded-lg"
 								>
+									{#if scenario.inherent_ale}
+										<div class="text-center">
+											<div class="text-lg font-bold text-orange-600 mb-1">
+												{scenario.inherent_ale_display}
+											</div>
+											<div class="text-sm text-gray-600">{m.inherentAle()}</div>
+										</div>
+									{/if}
 									<div class="text-center">
 										<div class="text-lg font-bold text-red-600 mb-1">
 											{scenario.current_ale_display}
@@ -460,6 +474,7 @@
 
 								<!-- LEC Chart -->
 								{#if scenario.lec_curves && scenario.lec_curves.length > 0}
+									{@const inherentCurve = scenario.lec_curves.find((c) => c.type === 'inherent')}
 									{@const currentCurve = scenario.lec_curves.find((c) => c.type === 'current')}
 									{@const residualCurve = scenario.lec_curves.find((c) => c.type === 'residual')}
 									{@const toleranceCurve = scenario.lec_curves.find((c) => c.type === 'tolerance')}
@@ -472,6 +487,7 @@
 											<LossExceedanceCurve
 												name="scenario-lec-{scenario.id}"
 												data={currentCurve?.data || []}
+												inherentData={inherentCurve?.data || []}
 												residualData={residualCurve?.data || []}
 												toleranceData={toleranceCurve?.data || []}
 												lossThreshold={summaryData.loss_threshold}
