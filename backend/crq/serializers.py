@@ -81,6 +81,15 @@ class QuantitativeRiskStudyWriteSerializer(BaseModelSerializer):
         model = QuantitativeRiskStudy
         exclude = ["created_at", "updated_at"]
 
+    def validate_risk_tolerance(self, value):
+        """
+        Strip curve_data from incoming risk_tolerance since it should always
+        be computed by the backend based on the points values.
+        """
+        if value and isinstance(value, dict):
+            value.pop("curve_data", None)
+        return value
+
     def update(self, instance, validated_data):
         old_folder_id = instance.folder_id
         with transaction.atomic():

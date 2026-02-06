@@ -7957,7 +7957,7 @@ class Actor(AbstractBaseModel):
         constraints = [
             # Ensure exactly one field is set (XOR logic)
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(user__isnull=False, team__isnull=True, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=False, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=True, entity__isnull=False)

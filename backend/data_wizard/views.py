@@ -73,7 +73,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar
+from typing import Optional, Final, ClassVar, Literal
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -121,6 +121,12 @@ class RecordFileType(enum.StrEnum):
                 )
 
 
+class ConflictMode(enum.StrEnum):
+    STOP = "stop"
+    SKIP = "skip"
+    UPDATE = "update"
+
+
 class ModelType(enum.StrEnum):
     TPRM = "TPRM"
     EBIOS_RM_STUDY_ARM = "EbiosRMStudyARM"
@@ -162,13 +168,25 @@ class Error:
 
 @dataclass
 class Result:
-    successful: int = 0
+    created: int = 0
+    updated: int = 0
+    skipped: int = 0
     failed: int = 0
     errors: list[Error] = field(default_factory=list)
     details: dict = field(default_factory=dict)
 
-    def add_success(self):
-        self.successful += 1
+    @property
+    def successful(self) -> int:
+        return self.created + self.updated
+
+    def add_created(self):
+        self.created += 1
+
+    def add_updated(self):
+        self.updated += 1
+
+    def add_skipped(self):
+        self.skipped += 1
 
     def add_error(self, error: Error, fail_count: int = 1):
         self.failed += fail_count
@@ -177,6 +195,9 @@ class Result:
     def to_dict(self) -> dict:
         return {
             "successful": self.successful,
+            "created": self.created,
+            "updated": self.updated,
+            "skipped": self.skipped,
             "failed": self.failed,
             "errors": [error.to_dict() for error in self.errors],
             **({"details": self.details} if self.details else {}),
@@ -191,10 +212,14 @@ class BaseContext:
     perimeter_id: Optional[str] = None
     matrix_id: Optional[str] = None
     framework_id: Optional[str] = None
+    on_conflict: ConflictMode = ConflictMode.STOP
 
 
 class RecordConsumer[Context](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
+    # Maps record_data keys to possible source record keys when they differ.
+    # Override in subclasses that use alternative/aliased column names.
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {}
 
     def __init__(self, base_context: BaseContext):
         self.request = base_context.request
@@ -203,6 +228,7 @@ class RecordConsumer[Context](ABC):
         self.perimeter_id = base_context.perimeter_id
         self.matrix_id = base_context.matrix_id
         self.framework_id = base_context.framework_id
+        self.on_conflict = base_context.on_conflict
 
     def __init_subclass__(cls):
         provided_class = getattr(cls, "SERIALIZER_CLASS", None)
@@ -221,6 +247,50 @@ class RecordConsumer[Context](ABC):
     ) -> tuple[dict, Optional[Error]]:
         pass
 
+    def find_existing(self, record_data: dict):
+        """Find an existing record matching this data based on the model's fields_to_check."""
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        fields_to_check = getattr(model_class, "fields_to_check", [])
+        if not fields_to_check:
+            return None
+        query = {}
+        for f in fields_to_check:
+            value = record_data.get(f)
+            if value is None or value == "":
+                continue
+            if isinstance(value, str):
+                query[f"{f}__iexact"] = value
+            else:
+                query[f] = value
+        if not query:
+            return None
+        folder = record_data.get("folder")
+        if folder and hasattr(model_class, "folder"):
+            query["folder"] = folder
+        return model_class.objects.filter(**query).first()
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        """
+        Filter record_data to only include fields that the user actually
+        provided with non-empty values in the source record.
+        Identity fields (used for matching) are always preserved.
+        """
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        identity_fields = set(getattr(model_class, "fields_to_check", []))
+        if hasattr(model_class, "folder"):
+            identity_fields.add("folder")
+
+        update_data = {}
+        for key, value in record_data.items():
+            if key in identity_fields:
+                update_data[key] = value
+                continue
+            source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            if any(record.get(sk) not in (None, "") for sk in source_keys):
+                update_data[key] = value
+
+        return update_data
+
     def process_records(self, records: list[dict]) -> Result:
         results = Result()
 
@@ -229,11 +299,61 @@ class RecordConsumer[Context](ABC):
             results.add_error(error, fail_count=len(records))
             return results
 
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, model_class
+        )
+        viewable_ids = set(viewable_ids)
+
         for record in records:
             record_data, error = self.prepare_create(record, context)
             if error is not None:
                 results.add_error(error)
+                if self.on_conflict == ConflictMode.STOP:
+                    break
                 continue
+
+            existing = None
+            internal_id = record.get("internal_id")
+            if internal_id:
+                existing = model_class.objects.filter(
+                    pk=internal_id, id__in=viewable_ids
+                ).first()
+            if existing is None:
+                existing = self.find_existing(record_data)
+
+            if existing:
+                match self.on_conflict:
+                    case ConflictMode.SKIP:
+                        results.add_skipped()
+                        continue
+                    case ConflictMode.STOP:
+                        results.add_error(
+                            Error(record=record, error="Record already exists")
+                        )
+                        break
+                    case ConflictMode.UPDATE:
+                        update_data = self._build_update_data(record, record_data)
+                        serializer = self.SERIALIZER_CLASS(
+                            instance=existing,
+                            data=update_data,
+                            partial=True,
+                            context={"request": self.request},
+                        )
+                        if serializer.is_valid():
+                            try:
+                                serializer.save()
+                                results.add_updated()
+                            except Exception as e:
+                                results.add_error(Error(record=record, error=str(e)))
+                        else:
+                            results.add_error(
+                                Error(
+                                    record=record,
+                                    error=str(serializer.errors),
+                                )
+                            )
+                        continue
 
             serializer = self.SERIALIZER_CLASS(
                 data=record_data, context={"request": self.request}
@@ -241,15 +361,20 @@ class RecordConsumer[Context](ABC):
             if serializer.is_valid():
                 try:
                     serializer.save()
-                    results.add_success()
+                    results.add_created()
                 except Exception as e:
                     results.add_error(Error(record=record, error=str(e)))
-                    continue
+                    if self.on_conflict == ConflictMode.STOP:
+                        break
             else:
                 results.add_error(Error(record=record, error=str(serializer.errors)))
+                if self.on_conflict == ConflictMode.STOP:
+                    break
 
         logger.info(
-            f"{self.__class__.__name__} record processing complete. Success: {results.successful}, Failed: {results.failed}"
+            f"{self.__class__.__name__} record processing complete. "
+            f"Created: {results.created}, Updated: {results.updated}, "
+            f"Skipped: {results.skipped}, Failed: {results.failed}"
         )
         return results
 
@@ -261,6 +386,9 @@ class AssetRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AssetWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "reference_link": ("reference_link", "link"),
+    }
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
         "pr": "PR",
@@ -352,6 +480,10 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "control_impact": ("control_impact", "impact"),
+        "reference_control": ("reference_control", "reference_control_ref_id"),
+    }
     EFFORT_MAP: Final[dict[str, str]] = {
         "extra small": "XS",
         "extrasmall": "XS",
@@ -469,6 +601,12 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
 class UserRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = UserWriteSerializer
 
+    def find_existing(self, record_data: dict):
+        email = record_data.get("email")
+        if not email:
+            return None
+        return User.objects.filter(email__iexact=email).first()
+
     def create_context(self):
         return None, None
 
@@ -541,6 +679,9 @@ class ThreatRecordConsumer(RecordConsumer[None]):
 
 class ReferenceControlRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "csf_function": ("function",),
+    }
     CATEGORY_MAP: Final[dict[str, str]] = {
         "policy": "policy",
         "process": "process",
@@ -605,7 +746,7 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
-    FILTERING_LABEL_SEPARATOR: Final[str] = "|"
+    FILTERING_LABEL_SEPARATOR: Final[Literal["|"]] = "|"
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -670,21 +811,21 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             filtering_label_names = []
 
         filtering_label_ids: list[UUID] = []
-        unknown_label_names = []
 
         for label_name in filtering_label_names:
             filtering_label = FilteringLabel.objects.filter(label=label_name).first()
             if filtering_label is None:
-                unknown_label_names.append(label_name)
-                continue
+                try:
+                    filtering_label = FilteringLabel(label=label_name)
+                    filtering_label.full_clean()
+                    filtering_label.save()
+                except Exception as e:
+                    return {}, Error(
+                        record=record,
+                        error=f"Error while creating filtering labels {repr(label_name)}: {repr(e)}",
+                    )
 
             filtering_label_ids.append(filtering_label.id)
-
-        if len(unknown_label_names) > 0:
-            return {}, Error(
-                record=record,
-                error=f"Unknown filtering labels: {repr(unknown_label_names)}",
-            )
 
         finding_data = {
             "name": name,
@@ -913,6 +1054,11 @@ class LoadFileView(APIView):
         perimeter_id = request.META.get("HTTP_X_PERIMETER_ID")
         framework_id = request.META.get("HTTP_X_FRAMEWORK_ID")
         matrix_id = request.META.get("HTTP_X_MATRIX_ID")
+        on_conflict_str = request.META.get("HTTP_X_ON_CONFLICT", "stop")
+        try:
+            on_conflict = ConflictMode(on_conflict_str)
+        except ValueError:
+            on_conflict = ConflictMode.STOP
 
         logger.info(
             f"Processing file with model: {model_type}, folder: {folder_id}, perimeter: {perimeter_id}, framework: {framework_id}, matrix: {matrix_id}"
@@ -951,10 +1097,10 @@ class LoadFileView(APIView):
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
-                        df = pd.read_excel(record_file).fillna("")
+                        df = pd.read_excel(record_file).astype(object).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        df = pd.read_csv(record_file).astype(object).fillna("")
 
                     base_context = BaseContext(
                         request,
@@ -963,6 +1109,7 @@ class LoadFileView(APIView):
                         perimeter_id=perimeter_id,
                         matrix_id=matrix_id,
                         framework_id=framework_id,
+                        on_conflict=on_conflict,
                     )
                     records = df.to_dict(orient="records")
 
