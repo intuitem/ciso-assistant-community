@@ -10,6 +10,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
 	import { getToastStore } from '$lib/components/Toast/stores.ts';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -69,7 +70,9 @@
 							if (result.data?.error) {
 								const errorData = result.data.message;
 								toastStore.trigger({
-									message: `Simulation Failed: ${errorData.details || errorData.error || 'Unknown error occurred'}`,
+									message: m.simulationFailed({
+										errorMessage: errorData.details || errorData.error || 'Unknown error occurred'
+									}),
 									background: 'bg-red-400 text-white',
 									timeout: 5000,
 									autohide: true
@@ -82,20 +85,27 @@
 								if (backendResults?.success === false) {
 									// Backend reported failure
 									toastStore.trigger({
-										message: `Simulation Failed: ${backendResults.message || 'Unknown error occurred'}`,
+										message: m.simulationFailed({
+											errorMessage: backendResults.message || 'Unknown error occurred'
+										}),
 										background: 'bg-red-400 text-white',
 										timeout: 5000,
 										autohide: true
 									});
 								} else {
 									// Backend reported success
-									let message = 'All simulations completed successfully!';
+									let message = m.allSimulationsCompletedSuccessfully();
 
 									if (summary) {
 										if (summary.failed_simulations > 0) {
-											message = `Simulations completed with ${summary.failed_simulations} failures out of ${summary.total_hypotheses} hypotheses`;
+											message = m.simulationsCompletedWithFailures({
+												failedSimulations: summary.failed_simulations,
+												totalHypotheses: summary.total_hypotheses
+											});
 										} else {
-											message = `All ${summary.successful_simulations} simulations completed successfully!`;
+											message = m.allNSimulationsCompletedSuccessfully({
+												successfulSimulations: summary.successful_simulations
+											});
 										}
 									}
 
@@ -163,7 +173,7 @@
 						<!-- Current ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-blue-600 mb-2">
-								{metrics.current_ale_combined_display}
+								{safeTranslate(metrics.current_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -175,7 +185,7 @@
 						<!-- Residual ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-green-600 mb-2">
-								{metrics.residual_ale_combined_display}
+								{safeTranslate(metrics.residual_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -187,7 +197,7 @@
 						<!-- Risk Reduction -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-purple-600 mb-2">
-								{metrics.risk_reduction_display}
+								{safeTranslate(metrics.risk_reduction_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.riskReduction()}</div>
 							<div class="text-xs text-gray-500 mt-1">{m.currentAle()} - {m.residualAle()}</div>

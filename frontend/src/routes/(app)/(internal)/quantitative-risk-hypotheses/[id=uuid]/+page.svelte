@@ -13,6 +13,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
 	import { getToastStore } from '$lib/components/Toast/stores.ts';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -40,7 +41,7 @@
 
 <DetailView {data}>
 	{#snippet actions()}
-		<div class="flex flex-col space-y-2">
+		<div class="flex flex-col space-y-1">
 			<form
 				method="POST"
 				action="?/runSimulation"
@@ -89,17 +90,17 @@
 							<i class="fa-solid fa-play"></i>
 						{/if}
 					</span>
-					Run simulation
+					{m.runSimulation()}
 				</button>
 			</form>
 		</div>
 	{/snippet}
 
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
+		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-2">
 			{#if data.lec?.data && Array.isArray(data.lec.data) && data.lec.data.length > 0}
 				<!-- LEC Chart -->
-				<div class="bg-white rounded-lg p-4 shadow-sm w-full">
+				<div class="bg-white rounded-lg shadow-sm w-full">
 					{#key data.lec.simulation_timestamp}
 						<LossExceedanceCurve
 							data={data.lec.data}
@@ -121,12 +122,12 @@
 					{#if data.lec?.message}
 						<div class="text-orange-600 mb-4">
 							<i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
-							<p class="font-medium">{data.lec.message}</p>
+							<p class="font-medium">{safeTranslate(data.lec.message)}</p>
 						</div>
 					{:else}
 						<div class="text-gray-500">
 							<i class="fa-solid fa-chart-line text-2xl mb-2"></i>
-							<p>No LEC data available. Run a simulation to generate the chart.</p>
+							<p>{m.noLecDataAvailableExecuteSimulation()}</p>
 						</div>
 					{/if}
 				</div>
@@ -135,13 +136,13 @@
 			<!-- Risk Metrics -->
 			<div class="bg-white rounded-lg p-6 shadow-sm">
 				<div class="flex justify-between items-center mb-4">
-					<h3 class="text-lg font-semibold">Risk Insights</h3>
+					<h3 class="text-lg font-semibold">{m.riskInsights()}</h3>
 					{#if data.data.impact?.lb && data.data.impact?.ub}
 						<button
 							onclick={() => (showDistributionModal = true)}
 							class="text-sm text-blue-600 hover:text-blue-800 underline"
 						>
-							View Distribution
+							{m.viewDistribution()}
 						</button>
 					{/if}
 				</div>
@@ -166,14 +167,14 @@
 
 					<!-- Risk Metrics - First Row: VaR Metrics -->
 					<div class="mb-8">
-						<h4 class="text-md font-medium text-gray-700 mb-4">Value at Risk Metrics</h4>
+						<h4 class="text-md font-medium text-gray-700 mb-4">{m.valueAtRiskMetrics()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 							{#if metrics.mean_annual_loss !== undefined}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-blue-600 mb-2">
 										{formatCurrency(metrics.mean_annual_loss)}
 									</div>
-									<div class="text-sm text-gray-600">Mean Annual Loss</div>
+									<div class="text-sm text-gray-600">{m.meanAnnualLoss()}</div>
 								</div>
 							{/if}
 							{#if metrics.var_95 !== undefined}
@@ -205,25 +206,26 @@
 
 					<!-- Loss Probabilities - Second Row -->
 					<div class="mb-8">
-						<h4 class="text-md font-medium text-gray-700 mb-4">Loss Probabilities</h4>
+						<h4 class="text-md font-medium text-gray-700 mb-4">{m.lossProbabilities()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
 							{#if metrics.prob_zero_loss !== undefined}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-green-600 mb-2">
 										{(metrics.prob_zero_loss * 100).toFixed(1)}%
 									</div>
-									<div class="text-sm text-gray-600">Zero Loss</div>
+									<div class="text-sm text-gray-600">{m.zeroLoss()}</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_threshold !== undefined && data.data.loss_threshold}
 								<div
-									class="text-center p-3 bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm"
+									class="text-center bg-purple-50 border-2 border-purple-200 rounded-lg shadow-sm"
 								>
 									<div class="text-2xl font-bold text-purple-600 mb-2">
 										{(metrics.prob_above_threshold * 100).toFixed(2)}%
 									</div>
 									<div class="text-sm text-gray-600">
-										Over {data.data.loss_threshold_display ||
+										{m.over()}
+										{data.data.loss_threshold_display ||
 											`${currency}${data.data.loss_threshold.toLocaleString()}`}
 									</div>
 								</div>
@@ -233,7 +235,7 @@
 									<div class="text-2xl font-bold text-yellow-600 mb-2">
 										{(metrics.prob_above_10k * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">Over {currency}10K</div>
+									<div class="text-sm text-gray-600">{m.over()} {currency}10K</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_100k !== undefined}
@@ -241,7 +243,7 @@
 									<div class="text-2xl font-bold text-orange-600 mb-2">
 										{(metrics.prob_above_100k * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">Over {currency}100K</div>
+									<div class="text-sm text-gray-600">{m.over()} {currency}100K</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_1M !== undefined}
@@ -249,7 +251,7 @@
 									<div class="text-2xl font-bold text-red-600 mb-2">
 										{(metrics.prob_above_1M * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">Over {currency}1M</div>
+									<div class="text-sm text-gray-600">{m.over()} {currency}1M</div>
 								</div>
 							{/if}
 						</div>
@@ -257,14 +259,16 @@
 
 					<!-- Probability-Based Losses - Third Row -->
 					<div>
-						<h4 class="text-md font-medium text-gray-700 mb-4">Scenario-Based Losses</h4>
+						<h4 class="text-md font-medium text-gray-700 mb-4">{m.scenarioBasedLosses()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 							{#each scenarioLosses as { key, value, percentage }}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-purple-600 mb-2">
 										{formatCurrency(value)}
 									</div>
-									<div class="text-sm text-gray-600">Loss with {percentage}% chance</div>
+									<div class="text-sm text-gray-600">
+										{m.lossWithPercentageChance({ percentage })}
+									</div>
 								</div>
 							{/each}
 						</div>
@@ -273,10 +277,10 @@
 					<div class="text-center text-gray-500">
 						{#if data.lec?.message}
 							<i class="fa-solid fa-calculator text-2xl mb-2"></i>
-							<p>No metrics available. {data.lec.message}</p>
+							<p>{m.noMetricsAvailable()} {safeTranslate(data.lec.message)}</p>
 						{:else}
 							<i class="fa-solid fa-calculator text-2xl mb-2"></i>
-							<p>No metrics available. Run a simulation to see risk insights.</p>
+							<p>{m.noMetricsAvailableRunSimulations()}</p>
 						{/if}
 					</div>
 				{/if}
@@ -295,7 +299,7 @@
 	>
 		<div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
 			<div class="flex justify-between items-center mb-4">
-				<h2 class="text-xl font-semibold">Impact Distribution</h2>
+				<h2 class="text-xl font-semibold">{m.impactDistribution()}</h2>
 				<div class="flex items-center space-x-4">
 					<div class="flex items-center space-x-2">
 						<label class="text-sm font-medium">X-axis:</label>
@@ -305,7 +309,7 @@
 								? 'bg-blue-100 border-blue-300 text-blue-700'
 								: 'bg-gray-100 border-gray-300'}"
 						>
-							Linear
+							{m.linear()}
 						</button>
 						<button
 							onclick={() => (xAxisScale = xAxisScale === 'log' ? 'linear' : 'log')}
@@ -341,12 +345,18 @@
 			</div>
 			<div class="text-sm text-gray-600 space-y-2">
 				<p class="text-center">
-					Lognormal distribution with 90% confidence interval: ${data.data.impact?.lb?.toLocaleString()}
-					- ${data.data.impact?.ub?.toLocaleString()}
+					{m.lognormalDistributionWith90ConfidenceInterval({
+						lb: data.data.impact?.lb?.toLocaleString() ?? '--',
+						ub: data.data.impact?.ub?.toLocaleString() ?? '--'
+					})}
 				</p>
+
 				{#if calculatedMu !== undefined && calculatedSigma !== undefined}
 					<p class="text-center font-mono">
-						Estimated parameters: μ = {calculatedMu.toFixed(4)}, σ = {calculatedSigma.toFixed(4)}
+						{m.estimatedParametersMuSigma({
+							mu: calculatedMu.toFixed(4),
+							sigma: calculatedSigma.toFixed(4)
+						})}
 					</p>
 				{/if}
 			</div>
