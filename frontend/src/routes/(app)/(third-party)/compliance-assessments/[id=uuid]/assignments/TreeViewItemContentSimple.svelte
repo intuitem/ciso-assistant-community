@@ -27,12 +27,19 @@
 		childrenIds = []
 	}: Props = $props();
 
-	// Get the checked nodes set and assigned nodes set from context
+	// Get the checked nodes set, assigned nodes set, and editing requirement IDs from context
 	const checkedNodesStore = getContext<Writable<Set<string>>>('checkedNodes');
 	const assignedNodesStore = getContext<Writable<Set<string>>>('assignedNodes');
+	const editingRequirementIdsStore = getContext<Writable<Set<string>>>('editingRequirementIds');
+
+	// Check if this node belongs to the assignment being edited
+	let isBeingEdited = $derived($editingRequirementIdsStore?.has(nodeId) ?? false);
 
 	// For leaf nodes: check if this node is checked
 	let isChecked = $derived($checkedNodesStore?.has(nodeId) ?? false);
+
+	// A node is effectively locked only if assigned AND not being edited
+	let isLocked = $derived(isAssigned && !isBeingEdited);
 
 	// For parent nodes: calculate selection state of children
 	let availableChildrenIds = $derived(childrenIds.filter((id) => !$assignedNodesStore?.has(id)));
@@ -88,7 +95,7 @@
 <div
 	class="flex items-center gap-3 py-1.5 px-2 rounded-md transition-colors -ml-2
 		{assessable
-		? isAssigned
+		? isLocked
 			? 'bg-gray-100 border border-gray-200'
 			: isChecked
 				? 'bg-violet-50 border border-violet-200'
@@ -97,7 +104,7 @@
 	class:pl-2={hasParentNode}
 	onclick={(e) => {
 		// Allow clicking the row to toggle checkbox for available assessable nodes
-		if (assessable && !isAssigned) {
+		if (assessable && !isLocked) {
 			const target = e.target as HTMLElement;
 			// Don't toggle if clicking directly on the checkbox
 			if (target.tagName !== 'INPUT') {
@@ -119,9 +126,9 @@
 		<!-- Leaf node checkbox -->
 		<input
 			type="checkbox"
-			class="checkbox checkbox-sm {isAssigned ? '' : 'border-green-500 checked:bg-violet-500'}"
+			class="checkbox checkbox-sm {isLocked ? '' : 'border-green-500 checked:bg-violet-500'}"
 			checked={isChecked}
-			disabled={isAssigned}
+			disabled={isLocked}
 			onchange={handleLeafCheckboxChange}
 			onclick={(e) => e.stopPropagation()}
 		/>
@@ -142,7 +149,7 @@
 		<div class="flex items-center gap-2">
 			<!-- Status icon for assessable nodes -->
 			{#if assessable}
-				{#if isAssigned}
+				{#if isLocked}
 					<span class="text-gray-400" title="Already assigned">
 						<i class="fa-solid fa-lock text-xs"></i>
 					</span>
@@ -152,7 +159,7 @@
 			<!-- Ref ID / Name -->
 			<span
 				class="font-medium text-sm {assessable
-					? isAssigned
+					? isLocked
 						? 'text-gray-500'
 						: 'text-gray-900'
 					: availableChildrenIds.length === 0 && childrenIds.length > 0
@@ -166,8 +173,8 @@
 				{/if}
 			</span>
 
-			<!-- Assignment badge -->
-			{#if assignmentInfo}
+			<!-- Assignment badge (hidden when node is being edited) -->
+			{#if assignmentInfo && !isBeingEdited}
 				<span
 					class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
 					title="Assigned to {assignmentInfo.actorName}"

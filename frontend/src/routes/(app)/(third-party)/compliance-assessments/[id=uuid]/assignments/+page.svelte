@@ -31,12 +31,23 @@
 	const checkedNodesStore = writable<Set<string>>(new Set());
 	setContext('checkedNodes', checkedNodesStore);
 
+	// Edit mode: track which assignment is being edited
+	let editingAssignmentId = $state<string | null>(null);
+
+	// Store for editing requirement IDs (nodes belonging to the assignment being edited)
+	const editingRequirementIdsStore = writable<Set<string>>(new Set());
+	setContext('editingRequirementIds', editingRequirementIdsStore);
+
 	// Assignments from server data
 	let assignments = $derived(data.assignments);
 
-	// Track which requirement IDs are already assigned (as a derived store for context)
+	// Track which requirement IDs are already assigned (excluding the one being edited)
 	let assignedRequirementIds = $derived(
-		new Set(assignments.flatMap((assignment) => assignment.requirement_assessments))
+		new Set(
+			assignments
+				.filter((a) => a.id !== editingAssignmentId)
+				.flatMap((assignment) => assignment.requirement_assessments)
+		)
 	);
 
 	// Create a writable store for assigned nodes that updates when assignedRequirementIds changes
@@ -51,8 +62,9 @@
 	// State for tree expansion
 	let expandedNodes: string[] = $state([]);
 
-	// State for assignment creation
+	// State for assignment creation/update
 	let isCreating = $state(false);
+	let isUpdating = $state(false);
 	let isDeleting = $state<string | null>(null);
 
 	// State for requirements detail modal
@@ -285,6 +297,56 @@
 		}
 	}
 
+	function startEdit(assignment: (typeof assignments)[0]) {
+		editingAssignmentId = assignment.id;
+		// Populate the form with the assignment's actor
+		$assignmentFormStore.actor = assignment.actor.id;
+		// Populate checked nodes with the assignment's requirements
+		$checkedNodesStore = new Set(assignment.requirement_assessments);
+		// Set the editing requirement IDs for tree styling
+		$editingRequirementIdsStore = new Set(assignment.requirement_assessments);
+	}
+
+	function cancelEdit() {
+		editingAssignmentId = null;
+		$assignmentFormStore.actor = undefined;
+		$checkedNodesStore = new Set();
+		$editingRequirementIdsStore = new Set();
+	}
+
+	async function handleUpdateAssignment() {
+		if (!editingAssignmentId || !selectedActorId || availableCheckedNodes.length === 0) {
+			return;
+		}
+
+		isUpdating = true;
+		try {
+			const formData = new FormData();
+			formData.append('id', editingAssignmentId);
+			formData.append('actor', selectedActorId);
+			formData.append('requirement_assessments', JSON.stringify(availableCheckedNodes));
+
+			const response = await fetch(`?/update`, {
+				method: 'POST',
+				body: formData
+			});
+
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.status === 200) {
+				// Reset edit state
+				cancelEdit();
+				await applyAction(result);
+				await invalidateAll();
+			} else {
+				console.error('Failed to update assignment:', result);
+			}
+		} catch (error) {
+			console.error('Error updating assignment:', error);
+		} finally {
+			isUpdating = false;
+		}
+	}
+
 	function handleSelectAll() {
 		const allIds = getAllAssessableIds(treeViewNodes);
 		$checkedNodesStore = new Set(allIds);
@@ -420,27 +482,36 @@
 
 		<!-- Right Panel: Assignment Creation & List -->
 		<div class="space-y-4">
-			<!-- Create Assignment Card -->
-			<div class="card bg-white shadow-lg p-4">
+			<!-- Create/Edit Assignment Card -->
+			<div
+				class="card bg-white shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
+			>
 				<h2 class="h4 font-semibold mb-4">
-					<i class="fa-solid fa-plus-circle text-primary-500 mr-2"></i>
-					{m.newAssignment?.() ?? 'New Assignment'}
+					{#if editingAssignmentId}
+						<i class="fa-solid fa-pen text-violet-500 mr-2"></i>
+						{m.editAssignment?.() ?? 'Edit Assignment'}
+					{:else}
+						<i class="fa-solid fa-plus-circle text-primary-500 mr-2"></i>
+						{m.newAssignment?.() ?? 'New Assignment'}
+					{/if}
 				</h2>
 
 				<div class="space-y-4">
-					<!-- Actor Selection -->
-					<AutocompleteSelect
-						form={assignmentSuperForm}
-						optionsEndpoint="actors?user__is_third_party=False"
-						optionsLabelField="str"
-						optionsInfoFields={{
-							fields: [{ field: 'type', translate: true }],
-							position: 'prefix'
-						}}
-						field="actor"
-						label={m.assignTo?.() ?? 'Assign To'}
-						placeholder={m.selectActor?.() ?? 'Search for an actor...'}
-					/>
+					<!-- Actor Selection (re-mount on edit mode change so initialValue is captured correctly) -->
+					{#key editingAssignmentId}
+						<AutocompleteSelect
+							form={assignmentSuperForm}
+							optionsEndpoint="actors?user__is_third_party=False"
+							optionsLabelField="str"
+							optionsInfoFields={{
+								fields: [{ field: 'type', translate: true }],
+								position: 'prefix'
+							}}
+							field="actor"
+							label={m.assignTo?.() ?? 'Assign To'}
+							placeholder={m.selectActor?.() ?? 'Search for an actor...'}
+						/>
+					{/key}
 
 					<!-- Selected Count -->
 					<div class="bg-gray-50 rounded-lg p-3">
@@ -452,20 +523,40 @@
 						</div>
 					</div>
 
-					<!-- Create Button -->
-					<button
-						class="btn preset-filled-primary-500 w-full"
-						disabled={!selectedActorId || availableCheckedNodes.length === 0 || isCreating}
-						onclick={handleCreateAssignment}
-					>
-						{#if isCreating}
-							<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-							{m.creating?.() ?? 'Creating...'}
-						{:else}
-							<i class="fa-solid fa-check mr-2"></i>
-							{m.createAssignment?.() ?? 'Create Assignment'}
-						{/if}
-					</button>
+					<!-- Create/Update Button -->
+					{#if editingAssignmentId}
+						<button
+							class="btn preset-filled-primary-500 w-full"
+							disabled={!selectedActorId || availableCheckedNodes.length === 0 || isUpdating}
+							onclick={handleUpdateAssignment}
+						>
+							{#if isUpdating}
+								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+								{m.updating?.() ?? 'Updating...'}
+							{:else}
+								<i class="fa-solid fa-check mr-2"></i>
+								{m.updateAssignment?.() ?? 'Update Assignment'}
+							{/if}
+						</button>
+						<button class="btn preset-outlined-surface-500 w-full" onclick={cancelEdit}>
+							<i class="fa-solid fa-times mr-2"></i>
+							{m.cancel?.() ?? 'Cancel'}
+						</button>
+					{:else}
+						<button
+							class="btn preset-filled-primary-500 w-full"
+							disabled={!selectedActorId || availableCheckedNodes.length === 0 || isCreating}
+							onclick={handleCreateAssignment}
+						>
+							{#if isCreating}
+								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+								{m.creating?.() ?? 'Creating...'}
+							{:else}
+								<i class="fa-solid fa-check mr-2"></i>
+								{m.createAssignment?.() ?? 'Create Assignment'}
+							{/if}
+						</button>
+					{/if}
 
 					{#if !selectedActorId || availableCheckedNodes.length === 0}
 						<p class="text-xs text-gray-500 text-center">
@@ -492,7 +583,12 @@
 				{:else}
 					<div class="space-y-3 max-h-[400px] overflow-y-auto">
 						{#each assignments as assignment}
-							<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
+							<div
+								class="border rounded-lg p-3 transition-colors {editingAssignmentId ===
+								assignment.id
+									? 'bg-violet-50 border-violet-300 ring-2 ring-violet-200'
+									: 'bg-gray-50 hover:bg-gray-100'}"
+							>
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
 										<div class="flex items-center text-sm text-gray-900 font-medium">
@@ -515,18 +611,28 @@
 											</button>
 										</div>
 									</div>
-									<button
-										class="btn btn-sm preset-ghost-error-500"
-										onclick={() => handleDeleteAssignment(assignment.id)}
-										title={m.delete?.() ?? 'Delete'}
-										disabled={isDeleting === assignment.id}
-									>
-										{#if isDeleting === assignment.id}
-											<i class="fa-solid fa-spinner fa-spin"></i>
-										{:else}
-											<i class="fa-solid fa-trash"></i>
-										{/if}
-									</button>
+									<div class="flex items-center gap-1">
+										<button
+											class="btn btn-sm preset-ghost-surface"
+											onclick={() => startEdit(assignment)}
+											title={m.edit?.() ?? 'Edit'}
+											disabled={editingAssignmentId !== null}
+										>
+											<i class="fa-solid fa-pen"></i>
+										</button>
+										<button
+											class="btn btn-sm preset-ghost-error-500"
+											onclick={() => handleDeleteAssignment(assignment.id)}
+											title={m.delete?.() ?? 'Delete'}
+											disabled={isDeleting === assignment.id || editingAssignmentId !== null}
+										>
+											{#if isDeleting === assignment.id}
+												<i class="fa-solid fa-spinner fa-spin"></i>
+											{:else}
+												<i class="fa-solid fa-trash"></i>
+											{/if}
+										</button>
+									</div>
 								</div>
 							</div>
 						{/each}

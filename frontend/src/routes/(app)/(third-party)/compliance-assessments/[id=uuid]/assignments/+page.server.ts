@@ -82,6 +82,29 @@ export const actions: Actions = {
 		const body = await res.json();
 		return { status: res.status, body };
 	},
+	update: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+		const actor = formData.get('actor') as string;
+		const requirement_assessments = JSON.parse(formData.get('requirement_assessments') as string);
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/`;
+
+		const requestInitOptions: RequestInit = {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				actor,
+				requirement_assessments
+			})
+		};
+
+		const res = await event.fetch(endpoint, requestInitOptions);
+		const body = await res.json();
+		return { status: res.status, body };
+	},
 	delete: async (event) => {
 		const formData = await event.request.formData();
 		const id = formData.get('id') as string;
