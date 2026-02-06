@@ -1,4 +1,4 @@
-    import io
+import io
 import logging
 import pandas as pd
 from rest_framework import status
