@@ -294,7 +294,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "eta": assessment.eta,
                     "due_date": assessment.due_date,
                     "status": assessment.status,
-                    "progress": assessment.get_progress(),
+                    "progress": assessment.progress,
                     "result_counts": result_counts,
                 }
             )

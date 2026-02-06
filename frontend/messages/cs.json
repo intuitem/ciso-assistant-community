@@ -391,7 +391,7 @@
 	"dependencies": "Závislosti",
 	"copyright": "Autorská práva",
 	"addYourLibrary": "Přidejte svou vlastní knihovnu",
-	"libraryFileInYamlOrXlsx": "Soubor knihovny ve formátu YAML",
+	"libraryFileInYamlOrXlsx": "Soubor knihovny ve formátu YAML nebo XLSX",
 	"importBackup": "Importovat zálohu",
 	"exportBackup": "Exportovat zálohu",
 	"confirmImportBackup": "Opravdu chcete importovat tuto zálohu? To přepíše všechna existující data.",
@@ -1074,5 +1074,13 @@
 	"assignmentSettings": "Nastavení přiřazení",
 	"allowAssignmentsToEntities": "Povolit přiřazování entitám",
 	"allowAssignmentsToEntitiesDescription": "Umožní, aby se entity zobrazovaly jako aktéři při přiřazování vlastníků, autorů nebo recenzentů.",
-	"duplicateEbiosRmStudy": "Duplikovat studii Ebios RM"
+	"duplicateEbiosRmStudy": "Duplikovat studii Ebios RM",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

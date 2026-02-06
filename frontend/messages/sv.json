@@ -390,7 +390,7 @@
 	"dependencies": "Beroenden",
 	"copyright": "Upphovsrätt",
 	"addYourLibrary": "Lägg till ditt eget bibliotek",
-	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML-format",
+	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML- eller XLSX-format",
 	"importBackup": "Importera säkerhetskopia",
 	"exportBackup": "Exportera säkerhetskopia",
 	"confirmImportBackup": "Är du säker på att du vill importera denna säkerhetskopia? Detta kommer att skriva över all befintlig data.",
@@ -1077,5 +1077,13 @@
 	"assignmentSettings": "Tilldelningsinställningar",
 	"allowAssignmentsToEntities": "Tillåt tilldelningar till enheter",
 	"allowAssignmentsToEntitiesDescription": "Låter enheter visas som aktörer när ägare, författare eller granskare tilldelas.",
-	"duplicateEbiosRmStudy": "Duplicera Ebios RM-studie"
+	"duplicateEbiosRmStudy": "Duplicera Ebios RM-studie",
+	"fileTooLarge": "Filen är för stor",
+	"invalidFileFormat": "Ogiltigt filformat",
+	"invalidCompatMode": "Ogiltigt kompatibilitetsläge",
+	"invalidExcelFile": "Ogiltig Excel-fil",
+	"processingTimeout": "Bearbetningstidsgräns",
+	"maliciousFileDetected": "Skadlig fil upptäckt",
+	"serverConfigurationError": "Serverkonfigurationsfel",
+	"libraryLoadFailed": "Biblioteket kunde inte laddas"
 }

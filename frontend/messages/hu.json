@@ -391,7 +391,7 @@
 	"dependencies": "Függőségek",
 	"copyright": "Szerzői jog",
 	"addYourLibrary": "Saját könyvtár hozzáadása",
-	"libraryFileInYamlOrXlsx": "YAML formátumú könyvtárfájl",
+	"libraryFileInYamlOrXlsx": "YAML vagy XLSX formátumú könyvtárfájl",
 	"importBackup": "Biztonsági mentés importálása",
 	"exportBackup": "Biztonsági mentés exportálása",
 	"confirmImportBackup": "Biztosan importálni szeretné ezt a biztonsági mentést? Ez felülír minden meglévő adatot.",
@@ -1086,5 +1086,13 @@
 	"assignmentSettings": "Hozzárendelési beállítások",
 	"allowAssignmentsToEntities": "Engedélyezze a hozzárendelést entitásokhoz",
 	"allowAssignmentsToEntitiesDescription": "Lehetővé teszi, hogy az entitások szereplőként jelenjenek meg tulajdonosok, szerzők vagy lektorok kijelölésekor.",
-	"duplicateEbiosRmStudy": "Ebios RM tanulmány duplikálása"
+	"duplicateEbiosRmStudy": "Ebios RM tanulmány duplikálása",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

@@ -391,7 +391,7 @@
 	"dependencies": "Ketergantungan",
 	"copyright": "Hak cipta",
 	"addYourLibrary": "Tambahkan pustaka Anda sendiri",
-	"libraryFileInYamlOrXlsx": "File pustaka dalam format YAML",
+	"libraryFileInYamlOrXlsx": "File pustaka dalam format YAML atau XLSX",
 	"importBackup": "Impor cadangan",
 	"exportBackup": "Ekspor cadangan",
 	"confirmImportBackup": "Apakah Anda yakin ingin mengimpor cadangan ini? Ini akan menimpa semua data yang ada.",
@@ -1271,5 +1271,13 @@
 	"assignmentSettings": "Pengaturan penugasan",
 	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
 	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau.",
-	"duplicateEbiosRmStudy": "Duplikasi studi Ebios RM"
+	"duplicateEbiosRmStudy": "Duplikasi studi Ebios RM",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

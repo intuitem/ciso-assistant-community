@@ -390,7 +390,7 @@
 	"dependencies": "निर्भरता",
 	"copyright": "कॉपीराइट",
 	"addYourLibrary": "अपनी खुद की लाइब्रेरी जोड़ें",
-	"libraryFileInYamlOrXlsx": "YAML प्रारूप में लाइब्रेरी फ़ाइल",
+	"libraryFileInYamlOrXlsx": "YAML या XLSX प्रारूप में लाइब्रेरी फ़ाइल",
 	"importBackup": "बैकअप आयात करें",
 	"exportBackup": "बैकअप निर्यात करें",
 	"confirmImportBackup": "क्या आप सुनिश्चित हैं कि आप इस बैकअप को आयात करना चाहते हैं? इससे सभी मौजूदा डेटा अधिलेखित हो जाएगा।",
@@ -1055,5 +1055,13 @@
 	"assignmentSettings": "असाइनमेंट सेटिंग्स",
 	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",
 	"allowAssignmentsToEntitiesDescription": "मालिकों, लेखकों या समीक्षकों को असाइन करते समय इकाइयों को अभिनेताओं के रूप में दिखाई देने दें।",
-	"duplicateEbiosRmStudy": "Ebios RM अध्ययन की प्रतिलिपि बनाएँ"
+	"duplicateEbiosRmStudy": "Ebios RM अध्ययन की प्रतिलिपि बनाएँ",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

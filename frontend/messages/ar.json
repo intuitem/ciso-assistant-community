@@ -389,7 +389,7 @@
 	"dependencies": "التبعيات",
 	"copyright": "حقوق الطبع والنشر",
 	"addYourLibrary": "أضف مكتبتك الخاصة",
-	"libraryFileInYamlOrXlsx": "ملف المكتبة بتنسيق YAML",
+	"libraryFileInYamlOrXlsx": "ملف المكتبة بتنسيق YAML أو XLSX",
 	"importBackup": "استيراد النسخة الاحتياطية",
 	"exportBackup": "تصدير النسخة الاحتياطية",
 	"confirmImportBackup": "هل أنت متأكد أنك تريد استيراد هذه النسخة الاحتياطية؟ سيؤدي ذلك إلى الكتابة فوق جميع البيانات الموجودة.",
@@ -1054,5 +1054,13 @@
 	"assignmentSettings": "التعيينات",
 	"allowAssignmentsToEntities": "السماح بإسناد المهام إلى الكيانات",
 	"allowAssignmentsToEntitiesDescription": "اسمح للكيانات بالظهور كجهات عند تعيين المالكين أو المؤلفين أو المراجعين.",
-	"duplicateEbiosRmStudy": "تكرار دراسة Ebios RM"
+	"duplicateEbiosRmStudy": "تكرار دراسة Ebios RM",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

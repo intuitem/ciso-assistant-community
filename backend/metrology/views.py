@@ -67,6 +67,7 @@ class MetricInstanceViewSet(BaseModelViewSet):
         "owner",
         "filtering_labels",
         "organisation_objectives",
+        "evidences",
     ]
     search_fields = ["name", "description", "ref_id"]
 
@@ -88,8 +89,8 @@ class CustomMetricSampleViewSet(BaseModelViewSet):
 
     model = CustomMetricSample
     serializers_module = "metrology.serializers"
-    filterset_fields = ["folder", "metric_instance"]
-    search_fields = []
+    filterset_fields = ["folder", "metric_instance", "evidence_revision"]
+    search_fields = ["observation"]
     ordering = ["-timestamp"]  # Most recent first
 
 

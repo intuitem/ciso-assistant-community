@@ -391,7 +391,7 @@
 	"dependencies": "Afhængigheder",
 	"copyright": "Ophavsret",
 	"addYourLibrary": "Tilføj dit eget bibliotek",
-	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML-format",
+	"libraryFileInYamlOrXlsx": "Biblioteksfil i YAML- eller XLSX-format",
 	"importBackup": "Importér backup",
 	"exportBackup": "Eksportér backup",
 	"confirmImportBackup": "Er du sikker på, at du vil importere denne backup? Dette vil overskrive alle eksisterende data, inklusive dine nuværende legitimationsoplysninger.",
@@ -1164,6 +1164,8 @@
 	"updateAvailable": "Opdatering tilgængelig",
 	"showGuidedTour": "Vis guidet rundvisning",
 	"loadDemoData": "Indlæs demodata",
+	"importingDemoData": "Importerer demodata...",
+	"demoEnvironmentBeingPrepared": "Dit demo-miljø er i gang med at blive forberedt. Det kan tage et par sekunder.",
 	"firstTimeLoginModalTitle": "Velkommen til CISO Assistant!",
 	"firstTimeLoginModalDescription": "Det er din første gang her. Vil du tage en guidet rundtur for at komme i gang?",
 	"ebiosRadarParameters": "Ebios RM radarparametre",
@@ -1366,5 +1368,13 @@
 	"assignmentSettings": "Tildelingsindstillinger",
 	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
 	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere.",
-	"duplicateEbiosRmStudy": "Duplikér Ebios RM-analysen"
+	"duplicateEbiosRmStudy": "Duplikér Ebios RM-analysen",
+	"fileTooLarge": "File too large",
+	"invalidFileFormat": "Invalid file format",
+	"invalidCompatMode": "Invalid compatibility mode",
+	"invalidExcelFile": "Invalid Excel file",
+	"processingTimeout": "Processing timeout",
+	"maliciousFileDetected": "Malicious file detected",
+	"serverConfigurationError": "Server configuration error",
+	"libraryLoadFailed": "Library load failed"
 }

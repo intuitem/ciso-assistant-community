@@ -564,7 +564,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
