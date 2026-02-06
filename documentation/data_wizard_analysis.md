@@ -275,7 +275,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `treatment` | CharField | High |
 | `strength_of_knowledge` | CharField | Medium |
 | `justification` | TextField | Medium |
 | `owner` | FK User | High |
