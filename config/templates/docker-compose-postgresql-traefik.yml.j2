@@ -15,9 +15,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U {{ postgres.user }} -d {{ postgres.name }}"]
       interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      timeout: 10s
+      retries: 30
+      start_period: 150s
 
   backend:
     container_name: backend
