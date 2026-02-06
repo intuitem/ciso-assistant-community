@@ -9,7 +9,7 @@
 		node_content: string;
 		assessable: boolean;
 		hasParentNode: boolean;
-		assignmentInfo: { assignmentName: string; actorName: string } | null;
+		assignmentInfo: { actorName: string } | null;
 		isAssigned: boolean;
 		nodeId: string;
 		childrenIds: string[]; // IDs of all assessable children (for batch selection)
@@ -155,7 +155,9 @@
 					? isAssigned
 						? 'text-gray-500'
 						: 'text-gray-900'
-					: 'text-gray-600'}"
+					: availableChildrenIds.length === 0 && childrenIds.length > 0
+						? 'text-gray-400'
+						: 'text-gray-600'}"
 			>
 				{#if node_content}
 					{node_content}
@@ -168,7 +170,7 @@
 			{#if assignmentInfo}
 				<span
 					class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
-					title="Assigned to {assignmentInfo.actorName} ({assignmentInfo.assignmentName})"
+					title="Assigned to {assignmentInfo.actorName}"
 				>
 					<i class="fa-solid fa-user text-xs"></i>
 					<span class="max-w-[100px] truncate">{assignmentInfo.actorName}</span>

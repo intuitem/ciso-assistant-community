@@ -12320,7 +12320,6 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "actor",
     ]
-    search_fields = ["name", "description"]
 
     def get_queryset(self):
         return (

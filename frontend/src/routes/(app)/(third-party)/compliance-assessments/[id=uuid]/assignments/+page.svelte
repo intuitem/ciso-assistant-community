@@ -52,7 +52,6 @@
 	let expandedNodes: string[] = $state([]);
 
 	// State for assignment creation
-	let newAssignmentName = $state('');
 	let isCreating = $state(false);
 	let isDeleting = $state<string | null>(null);
 
@@ -64,10 +63,10 @@
 	let selectedActorId = $derived($assignmentFormStore.actor ?? '');
 
 	// Get assignment info for a node
-	function getAssignmentInfo(nodeId: string): { assignmentName: string; actorName: string } | null {
+	function getAssignmentInfo(nodeId: string): { actorName: string } | null {
 		for (const assignment of assignments) {
 			if (assignment.requirement_assessments.includes(nodeId)) {
-				return { assignmentName: assignment.name, actorName: assignment.actor.str };
+				return { actorName: assignment.actor.str };
 			}
 		}
 		return null;
@@ -225,14 +224,13 @@
 	}
 
 	async function handleCreateAssignment() {
-		if (!newAssignmentName.trim() || !selectedActorId || availableCheckedNodes.length === 0) {
+		if (!selectedActorId || availableCheckedNodes.length === 0) {
 			return;
 		}
 
 		isCreating = true;
 		try {
 			const formData = new FormData();
-			formData.append('name', newAssignmentName);
 			formData.append('actor', selectedActorId);
 			formData.append('requirement_assessments', JSON.stringify(availableCheckedNodes));
 			formData.append('compliance_assessment', data.compliance_assessment.id);
@@ -246,7 +244,6 @@
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.status === 201) {
 				// Reset form
-				newAssignmentName = '';
 				$assignmentFormStore.actor = undefined;
 				$checkedNodesStore = new Set();
 				// Apply the action result and refresh page data
@@ -431,21 +428,6 @@
 				</h2>
 
 				<div class="space-y-4">
-					<!-- Assignment Name -->
-					<div>
-						<label for="assignment-name" class="text-sm font-medium text-gray-700">
-							{m.name?.() ?? 'Name'} <span class="text-red-500">*</span>
-						</label>
-						<input
-							id="assignment-name"
-							type="text"
-							class="input mt-1 w-full"
-							placeholder={m.enterAssignmentName?.() ?? 'Enter assignment name...'}
-							bind:value={newAssignmentName}
-							disabled={isCreating}
-						/>
-					</div>
-
 					<!-- Actor Selection -->
 					<AutocompleteSelect
 						form={assignmentSuperForm}
@@ -473,10 +455,7 @@
 					<!-- Create Button -->
 					<button
 						class="btn preset-filled-primary-500 w-full"
-						disabled={!newAssignmentName.trim() ||
-							!selectedActorId ||
-							availableCheckedNodes.length === 0 ||
-							isCreating}
+						disabled={!selectedActorId || availableCheckedNodes.length === 0 || isCreating}
 						onclick={handleCreateAssignment}
 					>
 						{#if isCreating}
@@ -488,10 +467,10 @@
 						{/if}
 					</button>
 
-					{#if !newAssignmentName.trim() || !selectedActorId || availableCheckedNodes.length === 0}
+					{#if !selectedActorId || availableCheckedNodes.length === 0}
 						<p class="text-xs text-gray-500 text-center">
 							{m.fillAllFieldsToCreateAssignment?.() ??
-								'Fill in the name, select an actor, and select at least one requirement'}
+								'Select an actor and at least one requirement'}
 						</p>
 					{/if}
 				</div>
@@ -516,8 +495,7 @@
 							<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition-colors">
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
-										<h3 class="font-medium text-gray-900">{assignment.name}</h3>
-										<div class="flex items-center mt-1 text-sm text-gray-600">
+										<div class="flex items-center text-sm text-gray-900 font-medium">
 											<i
 												class="fa-solid fa-{assignment.actor.type === 'user'
 													? 'user'
@@ -583,16 +561,13 @@
 			<div class="flex items-center justify-between p-4 border-b">
 				<div>
 					<h2 id="modal-title" class="h4 font-semibold">
-						{selectedAssignmentForModal.name}
-					</h2>
-					<p class="text-sm text-gray-500 mt-1">
 						<i
 							class="fa-solid fa-{selectedAssignmentForModal.actor.type === 'user'
 								? 'user'
-								: 'users'} mr-1"
+								: 'users'} mr-2"
 						></i>
-						{m.assignedTo?.() ?? 'Assigned to'}: {selectedAssignmentForModal.actor.str}
-					</p>
+						{selectedAssignmentForModal.actor.str}
+					</h2>
 				</div>
 				<button
 					class="btn btn-sm preset-ghost-surface"

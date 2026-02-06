@@ -7,7 +7,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 
 // Schema for the assignment form
 const assignmentSchema = z.object({
-	name: z.string().min(1),
 	actor: z.string().uuid().optional()
 });
 
@@ -33,12 +32,10 @@ export const load = (async ({ fetch, params }) => {
 	const assignments = assignmentsData.results.map(
 		(assignment: {
 			id: string;
-			name: string;
 			actor: { id: string; str: string; type?: string };
 			requirement_assessments: { id: string }[];
 		}) => ({
 			id: assignment.id,
-			name: assignment.name,
 			actor: {
 				id: assignment.actor.id,
 				str: assignment.actor.str,
@@ -61,7 +58,6 @@ export const load = (async ({ fetch, params }) => {
 export const actions: Actions = {
 	create: async (event) => {
 		const formData = await event.request.formData();
-		const name = formData.get('name') as string;
 		const actor = formData.get('actor') as string;
 		const requirement_assessments = JSON.parse(formData.get('requirement_assessments') as string);
 		const compliance_assessment = formData.get('compliance_assessment') as string;
@@ -75,7 +71,6 @@ export const actions: Actions = {
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
-				name,
 				actor,
 				requirement_assessments,
 				compliance_assessment,

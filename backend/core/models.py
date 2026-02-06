@@ -7122,7 +7122,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["result"])
 
 
-class RequirementAssignment(NameDescriptionMixin, FolderMixin):
+class RequirementAssignment(AbstractBaseModel, FolderMixin):
     """
     Represents an assignment of a group of requirement assessments to an actor.
     Used to delegate audit work within a compliance assessment to specific users or teams.
@@ -7148,15 +7148,13 @@ class RequirementAssignment(NameDescriptionMixin, FolderMixin):
         blank=True,
     )
 
-    fields_to_check = ["name"]
-
     class Meta:
         verbose_name = _("Requirement Assignment")
         verbose_name_plural = _("Requirement Assignments")
-        ordering = ["name"]
+        ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return f"{self.name} ({self.actor})"
+        return f"{self.actor} - {self.compliance_assessment}"
 
 
 class FindingsAssessment(Assessment):
