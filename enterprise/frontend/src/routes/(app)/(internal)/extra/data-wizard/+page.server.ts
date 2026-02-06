@@ -24,6 +24,7 @@ export const actions: Actions = {
 		const perimeter = formData.get('perimeter') as string;
 		const framework = formData.get('framework') as string;
 		const matrix = formData.get('matrix') as string;
+		const onConflict = (formData.get('onConflict') as string) || 'stop';
 
 		if (!file?.name || file?.name === 'undefined') {
 			// Using the fail function from SvelteKit
@@ -46,7 +47,8 @@ export const actions: Actions = {
 					'X-Folder-Id': folder,
 					'X-Perimeter-Id': perimeter,
 					'X-Framework-Id': framework,
-					'X-Matrix-Id': matrix
+					'X-Matrix-Id': matrix,
+					'X-On-Conflict': onConflict
 				},
 				body: file
 			});
