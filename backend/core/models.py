@@ -3251,7 +3251,7 @@ class Asset(
 
         # Build ordered list of objective keys: defaults first (if present), then any extras
         default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
-        extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
+        extra_keys = sorted(k for k in so_obj.keys() if k not in default_order)
         ordered_keys = default_order + extra_keys
 
         result = []
@@ -3321,7 +3321,7 @@ class Asset(
         capabilities = _normalize_seconds(rc_src)
 
         default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
-        extras = sorted([k for k in objectives.keys() if k not in default_order])
+        extras = sorted(k for k in objectives.keys() if k not in default_order)
         ordered_keys = default_order + extras
 
         result: list[dict] = []
