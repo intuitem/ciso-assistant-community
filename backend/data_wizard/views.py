@@ -122,6 +122,26 @@ def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def _parse_date(value) -> Optional[str]:
+    """Normalize a value to a YYYY-MM-DD string for DRF DateField."""
+    if not value or value == "":
+        return None
+    if isinstance(value, datetime):
+        return value.strftime("%Y-%m-%d")
+    if isinstance(value, str) and "T" in value:
+        return value.split("T")[0]
+    return value
+
+
+def _parse_datetime(value) -> Optional[str]:
+    """Normalize a value to an ISO datetime string for DRF DateTimeField."""
+    if not value or value == "":
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return value
+
+
 class RecordFileType(enum.StrEnum):
     XLSX = "Excel"
     CSV = "CSV"
@@ -540,9 +560,11 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         # Parse priority
         priority = record.get("priority")
-        if isinstance(priority, str) and priority.isdigit():
+        if isinstance(priority, (int, float)):
             priority = int(priority)
-        elif not isinstance(priority, int):
+        elif isinstance(priority, str) and priority.isdigit():
+            priority = int(priority)
+        else:
             priority = None
 
         # Parse effort
@@ -554,7 +576,9 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         # Parse control_impact (1-5 scale)
         control_impact = record.get("control_impact") or record.get("impact")
-        if isinstance(control_impact, str):
+        if isinstance(control_impact, (int, float)):
+            control_impact = int(control_impact)
+        elif isinstance(control_impact, str):
             if control_impact.isdigit():
                 control_impact = int(control_impact)
             else:
@@ -588,9 +612,9 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             "effort": effort,
             "control_impact": control_impact,
             "link": record.get("link", ""),
-            "eta": record.get("eta"),
-            "expiry_date": record.get("expiry_date"),
-            "start_date": record.get("start_date"),
+            "eta": _parse_date(record.get("eta")),
+            "expiry_date": _parse_date(record.get("expiry_date")),
+            "start_date": _parse_date(record.get("start_date")),
         }
 
         if reference_control_id:
@@ -891,7 +915,9 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             return {}, Error(record=record, error="Name field is mandatory")
 
         priority = record.get("priority")
-        if isinstance(priority, str) and priority.isdigit():
+        if isinstance(priority, (int, float)):
+            priority = int(priority)
+        elif isinstance(priority, str) and priority.isdigit():
             priority = int(priority)
         else:
             priority = None
@@ -904,8 +930,8 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             "status": record.get("status", "to_do"),
             "priority": priority,
             "csf_function": record.get("csf_function", "govern"),
-            "eta": record.get("eta"),
-            "expiry_date": record.get("expiry_date"),
+            "eta": _parse_date(record.get("eta")),
+            "expiry_date": _parse_date(record.get("expiry_date")),
             "link": record.get("link", ""),
             "effort": record.get("effort"),
         }, None
@@ -973,7 +999,7 @@ class SecurityExceptionRecordConsumer(RecordConsumer[None]):
             "folder": domain,
             "severity": severity,
             "status": status_value,
-            "expiration_date": record.get("expiration_date"),
+            "expiration_date": _parse_date(record.get("expiration_date")),
             "observation": record.get("observation", ""),
         }, None
 
@@ -1064,7 +1090,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             "status": status_value,
             "detection": detection_value,
             "link": record.get("link", ""),
-            "reported_at": record.get("reported_at"),
+            "reported_at": _parse_datetime(record.get("reported_at")),
         }, None
 
 
@@ -1756,9 +1782,9 @@ class LoadFileView(APIView):
             # Process Entities sheet first
             if "Entities" in excel_data.sheet_names:
                 logger.info("Processing Entities sheet")
-                entities_df = pd.read_excel(excel_file, sheet_name="Entities").fillna(
-                    ""
-                )
+                entities_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Entities")
+                ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
                 entities_result, entity_ref_map = self._process_entities(
                     request, entities_records, folders_map, folder_id
@@ -1770,9 +1796,9 @@ class LoadFileView(APIView):
             # Process Solutions sheet second (requires entities to exist)
             if "Solutions" in excel_data.sheet_names:
                 logger.info("Processing Solutions sheet")
-                solutions_df = pd.read_excel(excel_file, sheet_name="Solutions").fillna(
-                    ""
-                )
+                solutions_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Solutions")
+                ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
                     request, solutions_records, folders_map, folder_id, entity_ref_map
@@ -1784,9 +1810,9 @@ class LoadFileView(APIView):
             # Process Contracts sheet last (requires entities and solutions)
             if "Contracts" in excel_data.sheet_names:
                 logger.info("Processing Contracts sheet")
-                contracts_df = pd.read_excel(excel_file, sheet_name="Contracts").fillna(
-                    ""
-                )
+                contracts_df = normalize_datetime_columns(
+                    pd.read_excel(excel_file, sheet_name="Contracts")
+                ).fillna("")
                 contracts_records = contracts_df.to_dict(orient="records")
                 contracts_result = self._process_contracts(
                     request,
@@ -2115,10 +2141,12 @@ class LoadFileView(APIView):
                 # Add optional fields
                 if record.get("status"):
                     contract_data["status"] = record.get("status")
-                if record.get("start_date"):
-                    contract_data["start_date"] = record.get("start_date")
-                if record.get("end_date"):
-                    contract_data["end_date"] = record.get("end_date")
+                start_date = _parse_date(record.get("start_date"))
+                if start_date:
+                    contract_data["start_date"] = start_date
+                end_date = _parse_date(record.get("end_date"))
+                if end_date:
+                    contract_data["end_date"] = end_date
                 if (
                     record.get("annual_expense") != ""
                     and record.get("annual_expense") is not None
