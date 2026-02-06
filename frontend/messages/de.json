@@ -85,6 +85,7 @@
 	"frameworks": "Referenzwerke",
 	"frameworksColon": "Referenzwerke:",
 	"domains": "Bereiche",
+	"userFolderHelpText": "Bereich, in dem der Benutzer für andere mit Zugriff auf diesen Bereich sichtbar ist (beeinträchtigt keine Benutzerberechtigungen)",
 	"perimeters": "Perimeter",
 	"users": "Benutzer",
 	"user": "Benutzer",

@@ -85,6 +85,7 @@
 	"frameworks": "Marcos",
 	"frameworksColon": "Marcos:",
 	"domains": "Dominios",
+	"userFolderHelpText": "Dominio donde el usuario es visible para otros con acceso a ese ámbito (no afecta los permisos del usuario)",
 	"perimeters": "Alcances",
 	"users": "Usuarios",
 	"user": "Usuario",

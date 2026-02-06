@@ -85,6 +85,7 @@
 	"frameworks": "Rammer",
 	"frameworksColon": "Rammer:",
 	"domains": "Domæner",
+	"userFolderHelpText": "Domæne hvor brugeren er synlig for andre med adgang til det område (påvirker ikke brugerrettigheder)",
 	"perimeters": "Afgrænsninger",
 	"users": "Brugere",
 	"user": "Bruger",
