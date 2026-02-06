@@ -270,6 +270,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `residual_proba` | No | |
 | `existing_applied_controls` | No | Newline-separated, creates/finds controls |
 | `additional_controls` | No | Newline-separated |
+| `treatment` | No | Defaults to "open" |
 
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
