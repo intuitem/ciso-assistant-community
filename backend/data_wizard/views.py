@@ -299,6 +299,12 @@ class RecordConsumer[Context](ABC):
             results.add_error(error, fail_count=len(records))
             return results
 
+        model_class = self.SERIALIZER_CLASS.Meta.model
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, model_class
+        )
+        viewable_ids = set(viewable_ids)
+
         for record in records:
             record_data, error = self.prepare_create(record, context)
             if error is not None:
@@ -310,8 +316,9 @@ class RecordConsumer[Context](ABC):
             existing = None
             internal_id = record.get("internal_id")
             if internal_id:
-                model_class = self.SERIALIZER_CLASS.Meta.model
-                existing = model_class.objects.filter(pk=internal_id).first()
+                existing = model_class.objects.filter(
+                    pk=internal_id, id__in=viewable_ids
+                ).first()
             if existing is None:
                 existing = self.find_existing(record_data)
 
