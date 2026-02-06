@@ -105,6 +105,23 @@ def is_excel_file(file: io.BytesIO) -> bool:
     return is_excel
 
 
+def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert datetime columns to ISO format strings.
+    Uses date-only format (YYYY-MM-DD) when there is no time component,
+    full ISO format otherwise. NaT values become empty strings.
+    """
+    for col in df.select_dtypes(include=["datetime64", "datetimetz"]).columns:
+        df[col] = df[col].apply(
+            lambda x: (
+                x.strftime("%Y-%m-%d")
+                if pd.notna(x) and x == x.normalize()
+                else (x.isoformat() if pd.notna(x) else "")
+            )
+        )
+    return df
+
+
 class RecordFileType(enum.StrEnum):
     XLSX = "Excel"
     CSV = "CSV"
@@ -484,6 +501,13 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
     }
+    IMPACT_MAP: Final[dict[str, int]] = {
+        "very low": 1,
+        "low": 2,
+        "medium": 3,
+        "high": 4,
+        "very high": 5,
+    }
     EFFORT_MAP: Final[dict[str, str]] = {
         "extra small": "XS",
         "extrasmall": "XS",
@@ -530,8 +554,11 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
 
         # Parse control_impact (1-5 scale)
         control_impact = record.get("control_impact") or record.get("impact")
-        if isinstance(control_impact, str) and control_impact.isdigit():
-            control_impact = int(control_impact)
+        if isinstance(control_impact, str):
+            if control_impact.isdigit():
+                control_impact = int(control_impact)
+            else:
+                control_impact = self.IMPACT_MAP.get(control_impact.lower().strip())
         if isinstance(control_impact, int) and not (1 <= control_impact <= 5):
             control_impact = None
 
@@ -1097,10 +1124,12 @@ class LoadFileView(APIView):
                 case _:
                     is_excel = is_excel_file(record_file)
                     if is_excel:
-                        df = pd.read_excel(record_file).astype(object).fillna("")
+                        df = normalize_datetime_columns(
+                            pd.read_excel(record_file)
+                        ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).astype(object).fillna("")
+                        df = pd.read_csv(record_file).fillna("")
 
                     base_context = BaseContext(
                         request,
