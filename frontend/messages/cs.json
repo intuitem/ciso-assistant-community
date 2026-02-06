@@ -56,7 +56,7 @@
 	"notConfigured": "Nenakonfigurováno",
 	"noParametersConfigured": "Nejsou nakonfigurovány žádné parametry",
 	"noALECalculated": "Nebyla vypočítána žádná data ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Neexistuje reziduální hypotéza",
+	"NAnoResidualHypothesis": "N/A – Neexistuje reziduální hypotéza",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Výpočet ROSI je dostupný pouze pro reziduální hypotézy.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametry se změnily. Spusťte novou simulaci pro aktualizované výsledky.",
 	"noLecDataAvailableExecuteSimulation": "Nejsou k dispozici data LEC. Spusťte simulaci pro vytvoření grafu.",

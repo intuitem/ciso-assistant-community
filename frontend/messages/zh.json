@@ -57,7 +57,7 @@
 	"notConfigured": "未配置",
 	"noParametersConfigured": "未配置任何参数",
 	"noALECalculated": "未计算 ALE 数据",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "不适用 – 没有残余假设",
+	"NAnoResidualHypothesis": "不适用 – 没有残余假设",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI 计算仅适用于残余假设。",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "参数已更改。请运行新的模拟以查看更新后的结果。",
 	"noLecDataAvailableExecuteSimulation": "没有可用的 LEC 数据。请运行模拟以生成图表。",

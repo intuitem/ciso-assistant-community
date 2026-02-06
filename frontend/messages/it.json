@@ -1990,7 +1990,7 @@
 	"notConfigured": "Non configurato",
 	"noParametersConfigured": "Nessun parametro configurato",
 	"noALECalculated": "Nessun dato ALE calcolato",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/D – Nessuna ipotesi residua",
+	"NAnoResidualHypothesis": "N/D – Nessuna ipotesi residua",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Il calcolo ROSI è disponibile solo per le ipotesi residue.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "I parametri sono cambiati. Esegui una nuova simulazione per vedere i risultati aggiornati.",
 	"noLecDataAvailableExecuteSimulation": "Nessun dato LEC disponibile. Esegui una simulazione per generare il grafico.",

@@ -54,7 +54,7 @@
 	"notConfigured": "Ikke konfigureret",
 	"noParametersConfigured": "Ingen parametre konfigureret",
 	"noALECalculated": "Ingen ALE-data beregnet",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Ingen residual hypotese",
+	"NAnoResidualHypothesis": "N/A – Ingen residual hypotese",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI-beregning er kun tilgængelig for residuale hypoteser.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametrene er ændret. Kør en ny simulering for at se opdaterede resultater.",
 	"noLecDataAvailableExecuteSimulation": "Ingen LEC-data tilgængelige. Kør en simulering for at generere diagrammet.",

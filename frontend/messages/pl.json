@@ -52,7 +52,7 @@
 	"notConfigured": "Nie skonfigurowano",
 	"noParametersConfigured": "Nie skonfigurowano parametrów",
 	"noALECalculated": "Nie obliczono danych ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Brak hipotezy resztkowej",
+	"NAnoResidualHypothesis": "N/A – Brak hipotezy resztkowej",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Obliczanie ROSI jest dostępne tylko dla hipotez resztkowych.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametry uległy zmianie. Uruchom nową symulację, aby zobaczyć zaktualizowane wyniki.",
 	"noLecDataAvailableExecuteSimulation": "Brak danych LEC. Uruchom symulację, aby wygenerować wykres.",

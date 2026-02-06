@@ -55,7 +55,7 @@
 	"notConfigured": "Inte konfigurerad",
 	"noParametersConfigured": "Inga parametrar konfigurerade",
 	"noALECalculated": "Inga ALE-data beräknade",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Ingen residualhypotes",
+	"NAnoResidualHypothesis": "N/A – Ingen residualhypotes",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI-beräkning är endast tillgänglig för residualhypoteser.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametrarna har ändrats. Kör en ny simulering för att se uppdaterade resultat.",
 	"noLecDataAvailableExecuteSimulation": "Inga LEC-data tillgängliga. Kör en simulering för att generera diagrammet.",

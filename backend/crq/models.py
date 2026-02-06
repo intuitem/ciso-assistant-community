@@ -853,7 +853,7 @@ class QuantitativeRiskHypothesis(
         roc_value = self.roc
         if roc_value is None:
             if self.risk_stage != "residual":
-                return "Not applicable because there is no residual hypothesis"
+                return "N/A (no residual hypothesis)"
             else:
                 return "Insufficient data"
 

@@ -48,7 +48,7 @@
 	"notConfigured": "Yapılandırılmamış",
 	"noParametersConfigured": "Hiçbir parametre yapılandırılmadı",
 	"noALECalculated": "ALE verisi hesaplanmadı",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Artık hipotez yok",
+	"NAnoResidualHypothesis": "N/A – Artık hipotez yok",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI hesaplaması yalnızca artık hipotezler için kullanılabilir.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametreler değişti. Güncellenmiş sonuçları görmek için yeni bir simülasyon çalıştırın.",
 	"noLecDataAvailableExecuteSimulation": "LEC verisi yok. Grafiği oluşturmak için simülasyon çalıştırın.",

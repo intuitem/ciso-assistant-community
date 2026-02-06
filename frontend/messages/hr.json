@@ -51,7 +51,7 @@
 	"notConfigured": "Nije konfigurirano",
 	"noParametersConfigured": "Nema konfiguriranih parametara",
 	"noALECalculated": "Nema izračunatih ALE podataka",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Nema rezidualne hipoteze",
+	"NAnoResidualHypothesis": "N/A – Nema rezidualne hipoteze",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI izračun dostupan je samo za rezidualne hipoteze.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametri su se promijenili. Pokrenite novu simulaciju za ažurirane rezultate.",
 	"noLecDataAvailableExecuteSimulation": "Nema dostupnih LEC podataka. Pokrenite simulaciju za generiranje grafikona.",

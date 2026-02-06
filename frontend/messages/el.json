@@ -58,7 +58,7 @@
 	"notConfigured": "Δεν έχει ρυθμιστεί",
 	"noParametersConfigured": "Δεν έχουν ρυθμιστεί παράμετροι",
 	"noALECalculated": "Δεν έχουν υπολογιστεί δεδομένα ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "Μ/Δ – Δεν υπάρχει υπολειμματική υπόθεση",
+	"NAnoResidualHypothesis": "Μ/Δ – Δεν υπάρχει υπολειμματική υπόθεση",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Ο υπολογισμός ROSI είναι διαθέσιμος μόνο για υπολειμματικές υποθέσεις.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Οι παράμετροι άλλαξαν. Εκτελέστε νέα προσομοίωση για ενημερωμένα αποτελέσματα.",
 	"noLecDataAvailableExecuteSimulation": "Δεν υπάρχουν διαθέσιμα δεδομένα LEC. Εκτελέστε προσομοίωση για δημιουργία γραφήματος.",

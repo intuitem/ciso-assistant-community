@@ -2446,7 +2446,7 @@
 	"notConfigured": "Not configured",
 	"noParametersConfigured": "No parameters configured",
 	"noALECalculated": "No ALE data calculated",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – No residual hypothesis",
+	"NAnoResidualHypothesis": "N/A – No residual hypothesis",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI calculation is only available for residual hypotheses.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parameters have changed. Please run a new simulation to see updated results.",
 	"noLecDataAvailableExecuteSimulation": "No LEC data available. Run a simulation to generate the chart.",

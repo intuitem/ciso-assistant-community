@@ -49,7 +49,7 @@
 	"notConfigured": "کنفیگر نہیں کیا گیا",
 	"noParametersConfigured": "کوئی پیرامیٹر کنفیگر نہیں کیے گئے",
 	"noALECalculated": "کوئی ALE ڈیٹا حساب نہیں کیا گیا",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – کوئی باقی ماندہ مفروضہ نہیں",
+	"NAnoResidualHypothesis": "N/A – کوئی باقی ماندہ مفروضہ نہیں",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI کا حساب صرف باقی ماندہ مفروضات کے لیے دستیاب ہے۔",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "پیرامیٹر تبدیل ہو چکے ہیں۔ تازہ نتائج دیکھنے کے لیے نئی سمولیشن چلائیں۔",
 	"noLecDataAvailableExecuteSimulation": "کوئی LEC ڈیٹا دستیاب نہیں۔ چارٹ بنانے کے لیے سمولیشن چلائیں۔",

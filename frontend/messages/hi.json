@@ -55,7 +55,7 @@
 	"notConfigured": "कॉन्फ़िगर नहीं किया गया",
 	"noParametersConfigured": "कोई पैरामीटर कॉन्फ़िगर नहीं किए गए",
 	"noALECalculated": "कोई ALE डेटा गणना नहीं किया गया",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "लागू नहीं – कोई अवशिष्ट परिकल्पना नहीं",
+	"NAnoResidualHypothesis": "लागू नहीं – कोई अवशिष्ट परिकल्पना नहीं",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI गणना केवल अवशिष्ट परिकल्पनाओं के लिए उपलब्ध है।",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "पैरामीटर बदल गए हैं। अद्यतन परिणाम देखने के लिए नई सिमुलेशन चलाएँ।",
 	"noLecDataAvailableExecuteSimulation": "कोई LEC डेटा उपलब्ध नहीं है। चार्ट बनाने के लिए सिमुलेशन चलाएँ।",

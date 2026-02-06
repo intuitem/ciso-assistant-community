@@ -56,7 +56,7 @@
 	"notConfigured": "Neconfigurat",
 	"noParametersConfigured": "Nu sunt configurați parametri",
 	"noALECalculated": "Nu au fost calculate date ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Nu există ipoteză reziduală",
+	"NAnoResidualHypothesis": "N/A – Nu există ipoteză reziduală",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Calculul ROSI este disponibil doar pentru ipoteze reziduale.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametrii s-au schimbat. Rulați o nouă simulare pentru a vedea rezultatele actualizate.",
 	"noLecDataAvailableExecuteSimulation": "Nu există date LEC disponibile. Rulați o simulare pentru a genera graficul.",

@@ -56,7 +56,7 @@
 	"notConfigured": "Nesukonfigūruota",
 	"noParametersConfigured": "Nesukonfigūruoti jokie parametrai",
 	"noALECalculated": "Neapskaičiuoti ALE duomenys",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Nėra likutinės hipotezės",
+	"NAnoResidualHypothesis": "N/A – Nėra likutinės hipotezės",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI skaičiavimas galimas tik likutinėms hipotezėms.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parametrai pasikeitė. Paleiskite naują simuliaciją, kad pamatytumėte atnaujintus rezultatus.",
 	"noLecDataAvailableExecuteSimulation": "Nėra LEC duomenų. Paleiskite simuliaciją grafikui sugeneruoti.",

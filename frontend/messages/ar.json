@@ -56,7 +56,7 @@
 	"notConfigured": "غير مكوَّن",
 	"noParametersConfigured": "لم يتم تكوين أي معلمات",
 	"noALECalculated": "لم يتم حساب بيانات ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "غير متاح – لا توجد فرضية متبقية",
+	"NAnoResidualHypothesis": "غير متاح – لا توجد فرضية متبقية",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "حساب ROSI متاح فقط للفرضيات المتبقية.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "تغيرت المعلمات. يرجى تشغيل محاكاة جديدة لرؤية النتائج المحدثة.",
 	"noLecDataAvailableExecuteSimulation": "لا توجد بيانات LEC متاحة. شغّل محاكاة لإنشاء المخطط.",

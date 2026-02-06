@@ -61,7 +61,7 @@
 	"notConfigured": "Не налаштовано",
 	"noParametersConfigured": "Параметри не налаштовані",
 	"noALECalculated": "Дані ALE не розраховані",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Немає залишкової гіпотези",
+	"NAnoResidualHypothesis": "N/A – Немає залишкової гіпотези",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Розрахунок ROSI доступний лише для залишкових гіпотез.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Параметри змінилися. Запустіть нову симуляцію, щоб побачити оновлені результати.",
 	"noLecDataAvailableExecuteSimulation": "Дані LEC відсутні. Запустіть симуляцію, щоб створити графік.",

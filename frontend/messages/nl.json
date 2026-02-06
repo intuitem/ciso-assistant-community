@@ -2601,7 +2601,7 @@
 	"notConfigured": "Niet geconfigureerd",
 	"noParametersConfigured": "Geen parameters geconfigureerd",
 	"noALECalculated": "Geen ALE-gegevens berekend",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N.v.t. – Geen residuele hypothese",
+	"NAnoResidualHypothesis": "N.v.t. – Geen residuele hypothese",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "ROSI-berekening is alleen beschikbaar voor residuele hypothesen.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parameters zijn gewijzigd. Voer een nieuwe simulatie uit om bijgewerkte resultaten te zien.",
 	"noLecDataAvailableExecuteSimulation": "Geen LEC-gegevens beschikbaar. Voer een simulatie uit om de grafiek te genereren.",

@@ -50,7 +50,7 @@
 	"notConfigured": "Belum dikonfigurasi",
 	"noParametersConfigured": "Tidak ada parameter yang dikonfigurasi",
 	"noALECalculated": "Tidak ada data ALE yang dihitung",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – Tidak ada hipotesis residual",
+	"NAnoResidualHypothesis": "N/A – Tidak ada hipotesis residual",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "Perhitungan ROSI hanya tersedia untuk hipotesis residual.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Parameter telah berubah. Jalankan simulasi baru untuk melihat hasil terbaru.",
 	"noLecDataAvailableExecuteSimulation": "Tidak ada data LEC tersedia. Jalankan simulasi untuk membuat grafik.",

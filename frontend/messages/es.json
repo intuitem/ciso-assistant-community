@@ -2605,7 +2605,7 @@
 	"notConfigured": "No configurado",
 	"noParametersConfigured": "No hay parámetros configurados",
 	"noALECalculated": "No se han calculado datos ALE",
-	"notApplicableBecauseThereIsNoResidualHypothesis": "N/A – No hay hipótesis residual",
+	"NAnoResidualHypothesis": "N/A – No hay hipótesis residual",
 	"rOSICalculationOnlyAvailableForResidualHypotheses": "El cálculo ROSI solo está disponible para hipótesis residuales.",
 	"parametersHaveChangedPleaseRunANewSimulationToSeeUpdatedResults": "Los parámetros han cambiado. Ejecute una nueva simulación para ver los resultados actualizados.",
 	"noLecDataAvailableExecuteSimulation": "No hay datos LEC disponibles. Ejecute una simulación para generar el gráfico.",
