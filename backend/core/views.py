@@ -121,6 +121,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
     AssetClass,
+    Terminology,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -1693,9 +1694,11 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             {key: Asset.SECURITY_OBJECTIVES_SCALES[scale][content.get("value", 0)]}
             for key, content in sorted(
                 objectives.items(),
-                key=lambda x: Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
-                if x[0] in Asset.DEFAULT_SECURITY_OBJECTIVES
-                else -1,
+                key=lambda x: (
+                    Asset.DEFAULT_SECURITY_OBJECTIVES.index(x[0])
+                    if x[0] in Asset.DEFAULT_SECURITY_OBJECTIVES
+                    else -1
+                ),
             )
             if content.get("is_enabled", False)
             and content.get("value", -1) in range(0, 5)
@@ -1723,9 +1726,11 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             {"str": f"{key.upper()}: {format_seconds(content.get('value', 0))}"}
             for key, content in sorted(
                 objectives.items(),
-                key=lambda x: Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0])
-                if x[0] in Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES
-                else -1,
+                key=lambda x: (
+                    Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES.index(x[0])
+                    if x[0] in Asset.DEFAULT_DISASTER_RECOVERY_OBJECTIVES
+                    else -1
+                ),
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
@@ -4006,44 +4011,44 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "cost_build_fixed": {
                 "source": "cost",
                 "label": "cost_build_fixed",
-                "format": lambda cost: cost.get("build", {}).get("fixed_cost", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("build", {}).get("fixed_cost", "") if cost else ""
+                ),
             },
             "cost_build_people_days": {
                 "source": "cost",
                 "label": "cost_build_people_days",
-                "format": lambda cost: cost.get("build", {}).get("people_days", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("build", {}).get("people_days", "") if cost else ""
+                ),
             },
             "cost_run_fixed": {
                 "source": "cost",
                 "label": "cost_run_fixed",
-                "format": lambda cost: cost.get("run", {}).get("fixed_cost", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("run", {}).get("fixed_cost", "") if cost else ""
+                ),
             },
             "cost_run_people_days": {
                 "source": "cost",
                 "label": "cost_run_people_days",
-                "format": lambda cost: cost.get("run", {}).get("people_days", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("run", {}).get("people_days", "") if cost else ""
+                ),
             },
             "cost_amortization_period": {
                 "source": "cost",
                 "label": "cost_amortization_period",
-                "format": lambda cost: cost.get("amortization_period", "")
-                if cost
-                else "",
+                "format": lambda cost: (
+                    cost.get("amortization_period", "") if cost else ""
+                ),
             },
             "owner": {
                 "source": "owner",
                 "label": "owner",
-                "format": lambda qs: ",".join(str(o) for o in qs.all())
-                if qs.exists()
-                else "",
+                "format": lambda qs: (
+                    ",".join(str(o) for o in qs.all()) if qs.exists() else ""
+                ),
             },
             "labels": {
                 "source": "filtering_labels",
@@ -6241,6 +6246,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
+        # TODO: Doc + TESTS
         include_attachments = True
         instance = self.get_object()
 
@@ -6315,6 +6321,11 @@ class FolderViewSet(BaseModelViewSet):
                 f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
             )
             dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+            print("=" * 5, "exported data", "=" * 5)
+            from pprint import pprint
+
+            pprint(dump_data)
+            print("=" * 35)
 
             logger.debug(
                 "Adding JSON dump to zip",
@@ -6349,6 +6360,7 @@ class FolderViewSet(BaseModelViewSet):
         parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
+        # TODO: Doc + TESTS
         """Handle file upload and initiate import process."""
         load_missing_libraries = (
             request.query_params.get("load_missing_libraries", "false").lower()
@@ -6516,6 +6528,84 @@ class FolderViewSet(BaseModelViewSet):
         except ValueError as e:
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
+
+    # def _import_terminology(
+    #     self,
+    #     name: str,
+    #     field_path: Terminology.FieldPath,
+    # ) -> Terminology | None:
+    #     """
+    #     Method that creates a missing terminlogy if needed.
+    #     Set is_visible to True if the terminology already exists but is not visible.
+    #     """
+    #     if not name:
+    #         return None
+    #     print("@" * 5, "importing terminology:", name)
+    #     obj, c = Terminology.objects.get_or_create(
+    #         name=name,
+    #         field_path=field_path,
+    #         defaults={"is_visible": True},
+    #     )
+    #     if c:
+    #         print("*" * 3, name, "didnt exist, has been created")
+    #     if not obj.is_visible:
+    #         obj.is_visible = True
+    #         obj.save()
+    #
+    #     return obj
+
+    def _ensure_terminologies(
+        self,
+        names: str | List[str] | None,
+        field_path: Terminology.FieldPath,
+    ) -> QuerySet[Terminology] | Terminology | None:
+        """
+        Ensure terminologies exist and are visible.
+
+        Args:
+            names: single name (str) or list of names
+            field_path: which Terminology.FieldPath to assign
+
+        Returns:
+            - For list input: QuerySet of Terminology objects
+            - For single input: Terminology object
+            - For None or empty list: None
+        """
+        if names is None:
+            return None
+
+        print("@" * 5, "importing terminology(ies):", names)
+        # Convert single value to list
+        single_value = False
+        if isinstance(names, str):  # Foreign key case
+            names = [names]
+            single_value = True
+
+        # Fetch existing
+        existing = Terminology.objects.filter(name__in=names)
+        existing_names = set(existing.values_list("name", flat=True))
+
+        # Create missing
+        missing_names = set(names) - existing_names
+        if missing_names:
+            Terminology.objects.bulk_create(
+                [
+                    Terminology(name=name, field_path=field_path, is_visible=True)
+                    for name in missing_names
+                ],
+                ignore_conflicts=True,
+            )
+
+        # Ensure visibility
+        Terminology.objects.filter(
+            name__in=names, field_path=field_path, is_visible=False
+        ).update(is_visible=True)
+
+        result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
+
+        if single_value:
+            return result_qs.first()
+        return result_qs
 
     def _import_objects(
         self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
@@ -6710,10 +6800,12 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids):
+    def _create_model_objects(self, model, objects, link_dump_database_ids) -> None:
         """Create all objects for a model after validation."""
+        # TODO: DOC
         logger.debug("Creating objects for model", model=model)
 
+        # rebuild model name and keep objects only of this model for creation
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
@@ -6764,6 +6856,8 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
+                    #   Handling of m2m happens in a second step (see call to self._set_many_to_many_relations)
+                    #   after the object is created, because it requires the database ID of the created object
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -6771,7 +6865,6 @@ class FolderViewSet(BaseModelViewSet):
                         link_dump_database_ids=link_dump_database_ids,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
-
                     try:
                         # Run clean to validate unique constraints
                         model(**fields).clean()
@@ -6781,6 +6874,11 @@ class FolderViewSet(BaseModelViewSet):
 
                     logger.debug("Creating object", fields=fields)
 
+                    print("CREATION:", model)
+                    from pprint import pprint
+
+                    pprint(fields)
+                    print("-" * 10)
                     # Create the object
                     obj_created = model.objects.create(**fields)
                     link_dump_database_ids[obj_id] = obj_created.id
@@ -6806,7 +6904,12 @@ class FolderViewSet(BaseModelViewSet):
         link_dump_database_ids,
         many_to_many_map_ids,
     ):
-        """Process model-specific relationships."""
+        """
+        Process model-specific relationships.
+        M2M relationships are stored in a separate map to be processed after the object is created (see _set_many_to_many_relations).
+        Other relationships are directly converted to their database IDs or instances.
+        """
+        # TODO: DOC
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -6829,9 +6932,9 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["perimeter"] = Perimeter.objects.get(
+                _fields["perimeter"] = Perimeter.objects.filter(
                     id=link_dump_database_ids.get(_fields["perimeter"])
-                )
+                ).first()  # filter.first to handle when no perimeter on the riskassessment (since it's optional)
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
                 )
@@ -6903,6 +7006,10 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_assessment"] = RiskAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
+                _fields["risk_origin"] = self._ensure_terminologies(
+                    _fields["risk_origin"], Terminology.FieldPath.ROTO_RISK_ORIGIN
+                )
+                # TODO: feels complicated, may be simplified
                 # Process all related _fields at once
                 related__fields = [
                     "threats",
@@ -6927,6 +7034,10 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
+                many_to_many_map_ids["relationships_ids"] = self._ensure_terminologies(
+                    _fields.pop("relationship", []),
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                )  # relationships_ids are in fact names of the relationships
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -6971,10 +7082,9 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
-                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
-                    name=_fields["risk_origin"],
-                    is_visible=True,
-                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                _fields["risk_origin"] = self._ensure_terminologies(
+                    _fields["risk_origin"],
+                    Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -7038,6 +7148,7 @@ class FolderViewSet(BaseModelViewSet):
 
     def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
         """Set many-to-many relationships after object creation."""
+        # TODO: DOC
         model_name = model._meta.model_name
 
         match model_name:
@@ -7193,6 +7304,9 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
+
+            case "entity":
+                obj.relationship.set(many_to_many_map_ids["relationships_ids"])
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
@@ -10957,9 +11071,11 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
             "reported_at": {
                 "source": "reported_at",
                 "label": "reported_at",
-                "format": lambda dt: dt.replace(tzinfo=None)
-                if dt and hasattr(dt, "tzinfo") and dt.tzinfo
-                else dt,
+                "format": lambda dt: (
+                    dt.replace(tzinfo=None)
+                    if dt and hasattr(dt, "tzinfo") and dt.tzinfo
+                    else dt
+                ),
             },
             "owners": {
                 "source": "owners",
@@ -11565,63 +11681,63 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda actors: ", ".join([str(a) for a in actors])
-                if actors
-                else "",
+                "format": lambda actors: (
+                    ", ".join([str(a) for a in actors]) if actors else ""
+                ),
             },
             "assets": {
                 "source": "assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "applied_controls": {
                 "source": "applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "evidences": {
                 "source": "evidences.all",
                 "label": "evidences",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(item.name) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(item.name) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "compliance_assessments": {
                 "source": "compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "risk_assessments": {
                 "source": "risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "findings_assessment": {
                 "source": "findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
         },
@@ -11641,17 +11757,17 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assigned_to": {
                 "source": "task_template.assigned_to.all",
                 "label": "assigned_to",
-                "format": lambda actors: ", ".join([str(a) for a in actors])
-                if actors
-                else "",
+                "format": lambda actors: (
+                    ", ".join([str(a) for a in actors]) if actors else ""
+                ),
             },
             "expected_evidence": {
                 "source": "task_template.evidences.all",
                 "label": "expected_evidence",
                 # Note: Formatting with done/pending status is handled specially in export_tasks_xlsx
-                "format": lambda items: ", ".join([item.name for item in items])
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join([item.name for item in items]) if items else ""
+                ),
             },
             # "evidences": {
             #     "source": "evidences.all",
@@ -11663,47 +11779,47 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             "assets": {
                 "source": "task_template.assets.all",
                 "label": "assets",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "applied_controls": {
                 "source": "task_template.applied_controls.all",
                 "label": "applied_controls",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "compliance_assessments": {
                 "source": "task_template.compliance_assessments.all",
                 "label": "compliance_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "risk_assessments": {
                 "source": "task_template.risk_assessments.all",
                 "label": "risk_assessments",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
             "findings_assessment": {
                 "source": "task_template.findings_assessment.all",
                 "label": "findings_assessment",
-                "format": lambda items: ", ".join(
-                    escape_excel_formula(str(item)) for item in items
-                )
-                if items
-                else "",
+                "format": lambda items: (
+                    ", ".join(escape_excel_formula(str(item)) for item in items)
+                    if items
+                    else ""
+                ),
             },
         },
     }
