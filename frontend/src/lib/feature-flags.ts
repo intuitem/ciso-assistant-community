@@ -19,6 +19,7 @@ export function loadFeatureFlags() {
 		scoringAssistant: {},
 		vulnerabilities: {},
 		compliance: {},
+		campaigns: {},
 		tprm: {},
 		privacy: {},
 		experimental: {},
