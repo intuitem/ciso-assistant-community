@@ -31,7 +31,7 @@ objects:
         name: Défini
         description:
       - score: 4
-        name: Maitrisé
+        name: Maîtrisé
         description:
       - score: 5
         name: Optimisé
@@ -100,7 +100,7 @@ objects:
           – « Crise cybernétique » : l'état résultant de l'occurrence d'un ou plusieurs événements de cybersécurité pouvant avoir un impact grave sur la vie des populations, l'exercice de l'autorité de l'Etat, le fonctionnement de l'économie, ou sur le maintien des capacités de sécurité et de défense du pays ;
           – « Gestion des incidents de cybersécurité » : le processus de détection, de signalement et d'évaluation des incidents de cybersécurité, ainsi que les mesures d'intervention et de traitement y afférentes.
 
-             # ===== CHAPITRE II - DISPOSITIF DE SÉCURITÉ DES SYSTÈMES D'INFORMATION =====
+      # ===== CHAPITRE II - DISPOSITIF DE SÉCURITÉ DES SYSTÈMES D'INFORMATION =====
       - urn: urn:intuitem:risk:req_node:loi-05-20:chapitre2
         assessable: false
         depth: 1
