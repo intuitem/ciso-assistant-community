@@ -4,6 +4,7 @@
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
@@ -57,5 +58,11 @@
 		label={m.labels()}
 		translateOptions={false}
 		allowUserOptions="append"
+	/>
+	<Checkbox
+		{form}
+		field="create_iam_groups"
+		label={m.createIamGroups()}
+		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
 	/>
 {/if}
