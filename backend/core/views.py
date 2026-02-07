@@ -121,6 +121,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
     AssetClass,
+    Terminology,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -6245,7 +6246,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
-        # TODO: Doc
+        # TODO: Doc + TESTS
         include_attachments = True
         instance = self.get_object()
 
@@ -6320,6 +6321,11 @@ class FolderViewSet(BaseModelViewSet):
                 f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
             )
             dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
+            print("=" * 5, "exported data", "=" * 5)
+            from pprint import pprint
+
+            pprint(dump_data)
+            print("=" * 35)
 
             logger.debug(
                 "Adding JSON dump to zip",
@@ -6354,7 +6360,7 @@ class FolderViewSet(BaseModelViewSet):
         parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
-        # TODO: Doc
+        # TODO: Doc + TESTS
         """Handle file upload and initiate import process."""
         load_missing_libraries = (
             request.query_params.get("load_missing_libraries", "false").lower()
@@ -6522,6 +6528,84 @@ class FolderViewSet(BaseModelViewSet):
         except ValueError as e:
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
+
+    # def _import_terminology(
+    #     self,
+    #     name: str,
+    #     field_path: Terminology.FieldPath,
+    # ) -> Terminology | None:
+    #     """
+    #     Method that creates a missing terminlogy if needed.
+    #     Set is_visible to True if the terminology already exists but is not visible.
+    #     """
+    #     if not name:
+    #         return None
+    #     print("@" * 5, "importing terminology:", name)
+    #     obj, c = Terminology.objects.get_or_create(
+    #         name=name,
+    #         field_path=field_path,
+    #         defaults={"is_visible": True},
+    #     )
+    #     if c:
+    #         print("*" * 3, name, "didnt exist, has been created")
+    #     if not obj.is_visible:
+    #         obj.is_visible = True
+    #         obj.save()
+    #
+    #     return obj
+
+    def _ensure_terminologies(
+        self,
+        names: str | List[str] | None,
+        field_path: Terminology.FieldPath,
+    ) -> QuerySet[Terminology] | Terminology | None:
+        """
+        Ensure terminologies exist and are visible.
+
+        Args:
+            names: single name (str) or list of names
+            field_path: which Terminology.FieldPath to assign
+
+        Returns:
+            - For list input: QuerySet of Terminology objects
+            - For single input: Terminology object
+            - For None or empty list: None
+        """
+        if names is None:
+            return None
+
+        print("@" * 5, "importing terminology(ies):", names)
+        # Convert single value to list
+        single_value = False
+        if isinstance(names, str):  # Foreign key case
+            names = [names]
+            single_value = True
+
+        # Fetch existing
+        existing = Terminology.objects.filter(name__in=names)
+        existing_names = set(existing.values_list("name", flat=True))
+
+        # Create missing
+        missing_names = set(names) - existing_names
+        if missing_names:
+            Terminology.objects.bulk_create(
+                [
+                    Terminology(name=name, field_path=field_path, is_visible=True)
+                    for name in missing_names
+                ],
+                ignore_conflicts=True,
+            )
+
+        # Ensure visibility
+        Terminology.objects.filter(
+            name__in=names, field_path=field_path, is_visible=False
+        ).update(is_visible=True)
+
+        result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
+
+        if single_value:
+            return result_qs.first()
+        return result_qs
 
     def _import_objects(
         self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
@@ -6790,6 +6874,11 @@ class FolderViewSet(BaseModelViewSet):
 
                     logger.debug("Creating object", fields=fields)
 
+                    print("CREATION:", model)
+                    from pprint import pprint
+
+                    pprint(fields)
+                    print("-" * 10)
                     # Create the object
                     obj_created = model.objects.create(**fields)
                     link_dump_database_ids[obj_id] = obj_created.id
@@ -6815,7 +6904,11 @@ class FolderViewSet(BaseModelViewSet):
         link_dump_database_ids,
         many_to_many_map_ids,
     ):
-        """Process model-specific relationships."""
+        """
+        Process model-specific relationships.
+        M2M relationships are stored in a separate map to be processed after the object is created (see _set_many_to_many_relations).
+        Other relationships are directly converted to their database IDs or instances.
+        """
         # TODO: DOC
 
         def get_mapped_ids(
@@ -6839,9 +6932,9 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["perimeter"] = Perimeter.objects.get(
+                _fields["perimeter"] = Perimeter.objects.filter(
                     id=link_dump_database_ids.get(_fields["perimeter"])
-                )
+                ).first()  # filter.first to handle when no perimeter on the riskassessment (since it's optional)
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
                 )
@@ -6913,6 +7006,10 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_assessment"] = RiskAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
+                _fields["risk_origin"] = self._ensure_terminologies(
+                    _fields["risk_origin"], Terminology.FieldPath.ROTO_RISK_ORIGIN
+                )
+                # TODO: feels complicated, may be simplified
                 # Process all related _fields at once
                 related__fields = [
                     "threats",
@@ -6937,9 +7034,10 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
-                many_to_many_map_ids["relationships_ids"] = _fields.pop(
-                    "relationship", []
-                )
+                many_to_many_map_ids["relationships_ids"] = self._ensure_terminologies(
+                    _fields.pop("relationship", []),
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                )  # relationships_ids are in fact names of the relationships
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -6984,10 +7082,9 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
-                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
-                    name=_fields["risk_origin"],
-                    is_visible=True,
-                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                _fields["risk_origin"] = self._ensure_terminologies(
+                    _fields["risk_origin"],
+                    Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -7209,36 +7306,7 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "entity":
-                # TODO: Refactor this part to avoid code duplication with the similar code in Riskscenario and FearedEvent
-                if relationships_ids := many_to_many_map_ids.get("relationships_ids"):
-                    existing_relationships = Terminology.objects.filter(
-                        name__in=relationships_ids
-                    )
-                    existing_names = set(
-                        existing_relationships.values_list("name", flat=True)
-                    )
-
-                    # Find missing names
-                    missing_names = set(relationships_ids) - existing_names
-
-                    # Create missing relationships
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.ENTITY_RELATIONSHIP,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all relationships
-                    obj.relationship.set(
-                        Terminology.objects.filter(name__in=relationships_ids)
-                    )
+                obj.relationship.set(many_to_many_map_ids["relationships_ids"])
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""

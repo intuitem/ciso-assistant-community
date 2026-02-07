@@ -843,6 +843,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
+    risk_origin = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=False
+    )
 
     class Meta:
         model = RiskScenario
@@ -866,6 +869,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "qualifications",
+            "risk_origin",
         ]
 
 
