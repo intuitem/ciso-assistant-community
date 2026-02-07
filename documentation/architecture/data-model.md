@@ -2114,3 +2114,79 @@ The new model is a superset of the current model, so it is possible to migrate p
 - Reports are in XLSX
 - the format of reports is well described by the xlsx template: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
 - Missing fields shall be added in the incident data model to generate the various reports
+
+## Forms and workflows
+
+```mermaid
+erDiagram
+  WORKFLOW_PROCESS   ||--o{ WORKFLOW_DEFINITION : has_versions
+  WORKFLOW_DEFINITION||--o{ WORKFLOW_NODE       : defines
+  WORKFLOW_DEFINITION||--o{ WORKFLOW_EDGE       : defines
+  WORKFLOW_DEFINITION||--o{ WORKFLOW_VARIABLE   : defines
+  WORKFLOW_DEFINITION||--o{ WORKFLOW_INSTANCE   : defines
+  WORKFLOW_EDGE      }o--|| WORKFLOW_NODE       : starts_from
+  WORKFLOW_EDGE      }o--|| WORKFLOW_NODE       : goes_to
+
+  WORKFLOW_TOKEN     ||--o| TASK_INSTANCE       : spawns
+  WORKFLOW_TOKEN     }o--|| WORKFLOW_NODE       : at_node
+  WORKFLOW_INSTANCE  ||--o{ TASK_INSTANCE       : has_tasks
+
+
+  WORKFLOW_INSTANCE  ||--o{ WORKFLOW_TOKEN      : contains
+
+
+  WORKFLOW_NODE      }o--o| ACTOR               : assigned_nodes
+  TASK_INSTANCE      }o--|| ACTOR               : assigned_tasks
+
+  WORKFLOW_PROCESS {
+    string ref_id
+    string name
+    string description
+  }
+
+  WORKFLOW_DEFINITION {
+    string name
+    string description
+    string status
+    int version
+    uuid parent_id
+    datetime created_at
+  }
+
+  WORKFLOW_NODE {
+    string name
+    string type
+    json config
+  }
+
+  WORKFLOW_EDGE {
+    string condition
+    bool is_default
+    int priority
+  }
+
+  WORKFLOW_VARIABLE {
+    string name
+    string type
+    json default_value
+  }
+
+  WORKFLOW_INSTANCE {
+    string status
+    json vars
+    string ref_id
+    bool is_dirty
+    datetime next_wakeup_at
+  }
+
+  WORKFLOW_TOKEN {
+    string status
+    uuid fork_id
+  }
+
+  TASK_INSTANCE {
+    string status
+    json captured_data
+    datetime timeout_at
+  }
+```
