@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
-	import { safeTranslate } from '$lib/utils/i18n';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 
 	// Props unused but referenced to avoid browser warnings because they're needed for enterprise Folderform
@@ -29,6 +29,16 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	run(() => {
+		const isEdit = Boolean(object?.id);
+		if (!isEdit && form.data?.create_iam_groups !== true) {
+			form.form.update((currentData) => ({
+				...currentData,
+				create_iam_groups: true
+			}));
+		}
+	});
 </script>
 
 {#if importFolder}

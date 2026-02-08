@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
@@ -25,6 +26,26 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	const setCreateIamGroups = (value: boolean) => {
+		form.form.update((currentData) => ({
+			...currentData,
+			create_iam_groups: value
+		}));
+	};
+
+	const normalizeParentSelection = (selection: string | string[] | undefined) =>
+		Array.isArray(selection) ? selection.at(-1) : selection;
+
+	function handleParentFolderChange(value: string | string[] | undefined) {
+		const selectedId = normalizeParentSelection(value);
+		const rootFolderId = $page.data.user?.root_folder_id;
+		if (!selectedId) {
+			setCreateIamGroups(false);
+			return;
+		}
+		setCreateIamGroups(selectedId === rootFolderId);
+	}
 </script>
 
 {#if importFolder}
@@ -53,6 +74,7 @@
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
 		hide={initialData.parent_folder}
+		onChange={handleParentFolderChange}
 	/>
 	<AutocompleteSelect
 		multiple
