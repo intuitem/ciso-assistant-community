@@ -66,4 +66,10 @@
 		translateOptions={false}
 		allowUserOptions="append"
 	/>
+	<Checkbox
+		{form}
+		field="create_iam_groups"
+		label={m.createIamGroups()}
+		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
+	/>
 {/if}
