@@ -71,7 +71,8 @@
 
 ## ✨ Customization
 
-* [Getting your custom framework](customization/getting-your-custom-framework.md)
+* [Designing your own Libraries](customization/designing-your-own-libraries.md)
+* [Getting your custom framework (v1)](customization/getting-your-custom-framework.md)
 * [CIS Controls / Cloud Controls Matrix (CCM)](customization/cis-controls.md)
 * [Changing the language](customization/changing-the-language.md)
 

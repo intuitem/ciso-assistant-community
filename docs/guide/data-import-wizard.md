@@ -9,9 +9,22 @@ Applicable for: Data import wizard (Pro) and CLI (Community and Pro)
 
 ## Overview
 
+The **Data Import Wizard** and the **CLI** both support batch creation and updates of fields. They provide the same capabilities; the only difference lies in how the import is initiated:
 
+* through the user interface for the Data Import Wizard
+* through the command line for the CLI
 
-If the object supports the domain column, the wizard will attempt to add the object to it, given you have the permission to do so. If the domain is not set, the wizard will default to the  fallback domain set on the wizard form.
+When an object already exists during an import, one of the following conflict-resolution strategies can be applied:
+
+* **Stop the import** (default): the import is aborted as soon as a conflict is detected
+* **Skip the field**: the existing field is left unchanged and the import continues
+* **Update the field**: the existing field is updated with the imported data
+
+The **Update** strategy enables batch updates of existing fields and is particularly useful for changes that could technically be performed through the graphical interface, but become tedious or error-prone when repeated across many objects. In such cases, downloading the existing objects, applying the required transformations in an Excel file, and re-importing the updated data can be significantly faster and more reliable than performing the same actions manually in the UI. This approach reduces repetitive interactions, minimizes the risk of manual mistakes, and provides a clear, auditable workflow for large-scale updates.
+
+In this workflow, it is strongly recommended to retain the **field IDs (UUIDs)** in the import schema. Doing so ensures reliable object matching during re-import, even if other attributes (such as names or labels) have changed, making the update process fail-safe.
+
+If the imported object supports the **domain** attribute, the wizard will attempt to assign it to the specified domain, provided you have the required permissions. If no domain is specified, the wizard will automatically fall back to the default domain configured in the wizard form.
 
 
 

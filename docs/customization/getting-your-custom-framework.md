@@ -1,4 +1,8 @@
-# Getting your custom framework
+---
+hidden: true
+---
+
+# Getting your custom framework (v1)
 
 {% hint style="danger" %}
 **IMPORTANT NOTICE:** This section is _**NOT**_ up to date and will be reworked. In the meantime, you can refer to the [**dedicated README on GitHub**](https://github.com/intuitem/ciso-assistant-community/blob/main/tools/README.md) for more up-to-date information.
@@ -12,7 +16,7 @@ CISO Assistant allows you to manage your custom frameworks. The format is a text
 
 ### Structure
 
-<figure><img src="../.gitbook/assets/image (11).png" alt=""><figcaption><p>Hierarchy-based file</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/Framework Structure.png" alt=""><figcaption><p>Hierarchy-based file</p></figcaption></figure>
 
 The first thing to consider is structuring your requirements into a hierarchy, as illustrated in the example above. Most standards, frameworks, and law documents are already organized this way. This is the depth concept and CISO Assistant has been tested with nodes up to the 8th level depth (documents beyond 6 are mostly hard to read anyway)
 
