@@ -17,8 +17,8 @@ The **Data Import Wizard** and the **CLI** both support batch creation and updat
 When an object already exists during an import, one of the following conflict-resolution strategies can be applied:
 
 * **Stop the import** (default): the import is aborted as soon as a conflict is detected
-* **Skip the field**: the existing field is left unchanged and the import continues
-* **Update the field**: the existing field is updated with the imported data
+* **Skip the row**: the existing field is left unchanged and the import continues
+* **Update the row**: the existing field is updated with the imported data
 
 The **Update** strategy enables batch updates of existing fields and is particularly useful for changes that could technically be performed through the graphical interface, but become tedious or error-prone when repeated across many objects. In such cases, downloading the existing objects, applying the required transformations in an Excel file, and re-importing the updated data can be significantly faster and more reliable than performing the same actions manually in the UI. This approach reduces repetitive interactions, minimizes the risk of manual mistakes, and provides a clear, auditable workflow for large-scale updates.
 
