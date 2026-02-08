@@ -22,6 +22,7 @@ objects:
   reference_controls:
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-01.1
     ref_id: GV.OC-01.1
+    name: Organisational mission for cybersecurity
     description: The organisation's mission shall be established, communicated and
       shall form the basis for information and cybersecurity risk management.
     annotation: "The goal of this control is to ensure that the organisation\u2019\
@@ -42,6 +43,7 @@ objects:
       \ and continue to support effective risk management."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-02.1
     ref_id: GV.OC-02.1
+    name: Stakeholder needs and expectations
     description: The organisation shall demonstrate it understands and considers the
       needs and expectations of both internal and external stakeholders regarding
       information and cybersecurity risk management.
@@ -67,6 +69,7 @@ objects:
       \ in business operations, legal requirements, or risk exposure."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-03.1
     ref_id: GV.OC-03.1
+    name: Legal and regulatory requirements identification
     description: Legal and regulatory requirements regarding information and cybersecurity
       shall be identified and implemented.
     annotation: "The goal of this control is to ensure that legal, regulatory, and\
@@ -87,6 +90,7 @@ objects:
       \ disclosure"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-03.2
     ref_id: GV.OC-03.2
+    name: Legal obligations continuous management
     description: Legal, regulatory, and contractual obligations related to information
       and cybersecurity shall be continuously managed to ensure they remain accurate,
       up to date, and effectively applied.
@@ -106,6 +110,7 @@ objects:
       \ and demonstrate due diligence."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-04.1
     ref_id: GV.OC-04.1
+    name: Critical services identification and prioritisation
     description: The organisation shall identify, document, and communicate the critical
       objectives, capabilities, and services relied upon by external stakeholders,
       prioritise them based on criticality, and integrate this prioritisation into
@@ -127,6 +132,7 @@ objects:
       \ be established and communicated."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-04.2
     ref_id: GV.OC-04.2
+    name: Cybersecurity requirements for essential operations
     description: The organisation shall define and document cybersecurity requirements
       for essential operations, validate them through testing and audits, maintain
       records of results and corrective actions, and regularly update requirements
@@ -156,6 +162,7 @@ objects:
       \ maintain long-term cyber resilience."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-04.3
     ref_id: GV.OC-04.3
+    name: Redundancy for availability
     description: Redundancy shall be implemented to meet availability requirements
       as defined by the organisation, legislation and/or regulations
     annotation: "The goal of this control is to ensure that critical systems and services\
@@ -174,6 +181,7 @@ objects:
       \ and maintenance contracts to ensure reliability"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-04.4
     ref_id: GV.OC-04.4
+    name: Recovery time and point objectives
     description: Recovery time and recovery point objectives for the resumption of
       essential ICT/OT system processes shall be defined and monitored.
     annotation: "The goal of this control is to ensure that the organisation defines\
@@ -209,6 +217,7 @@ objects:
       \ and audits."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.oc-05.1
     ref_id: GV.OC-05.1
+    name: Supply chain role and dependencies
     description: The organisation shall identify, document, and communicate its role
       in the supply chain, including the external capabilities, services, and dependencies
       it relies on (upstream), as well as its interactions with downstream stakeholders.
@@ -236,6 +245,7 @@ objects:
       \ understood across the organization and with key partners."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-01.1
     ref_id: GV.RM-01.1
+    name: Cybersecurity objectives approval
     description: Information/cybersecurity objectives shall be identified, agreed
       to by organisational stakeholders and approved by senior management
     annotation: "To support this objective, organisations should: \n\u0387  Follow\
@@ -253,6 +263,7 @@ objects:
       \ to measure and manage risk and performance across the organisation."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-02.1
     ref_id: GV.RM-02.1
+    name: Risk appetite and tolerance statements
     description: Risk appetite and risk tolerance statements shall be defined, documented,
       approved by senior management, communicated, and maintained.
     annotation: "The goal of GV.RM-02.1 is to ensure that an organisation has a clear\
@@ -275,6 +286,7 @@ objects:
       \ ENISA- Do-It-Yourself Toolbox contains a C-level guide."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-03.1
     ref_id: GV.RM-03.1
+    name: Cybersecurity risk management strategy
     description: As part of the organisation-wide risk management strategy, a comprehensive
       strategy to manage information and cybersecurity risks shall be developed and
       updated when changes occur.
@@ -295,6 +307,7 @@ objects:
       \ implementation of the broader vision defined in GV.RM-04.1"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-03.2
     ref_id: GV.RM-03.2
+    name: Cybersecurity risk documentation
     description: Information and Cybersecurity risks shall be documented, as part
       of the enterprise risk management processes, formally approved by senior management,
       and updated when changes occur.
@@ -354,6 +367,7 @@ objects:
       \ and ensuring governance and accountability."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-04.1
     ref_id: GV.RM-04.1
+    name: Risk treatment plan communication
     description: A high-level plan or vision shall be formally established and clearly
       communicated to everyone involved on how to manage risks, including the different
       strategies the organisation can employ to deal with identified risks based on
@@ -372,6 +386,7 @@ objects:
       \ tolerance, which guides all other activities."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rm-05.1
     ref_id: GV.RM-05.1
+    name: Risk communication channels
     description: To support the high-level risk management vision, the organisation
       shall establish clear lines of communication for cybersecurity risks, including
       those arising from suppliers and third parties.
@@ -398,6 +413,7 @@ objects:
       \ timely response and coordination."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-01.1
     ref_id: GV.RR-01.1
+    name: Top management cybersecurity accountability
     description: Organisation's top management shall be responsible and accountable
       for cybersecurity risk and shall foster a culture that is risk-aware, ethical,
       and continually improving.
@@ -417,6 +433,7 @@ objects:
       \ managing cybersecurity risk."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-02.1
     ref_id: GV.RR-02.1
+    name: Cybersecurity roles and responsibilities
     description: Information security and cybersecurity roles, responsibilities and
       authorities for employees, suppliers, customers, and partners shall be documented,
       reviewed, authorised, kept up to date, communicated, and coordinated internally
@@ -463,6 +480,7 @@ objects:
       \ providers)."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-02.2
     ref_id: GV.RR-02.2
+    name: Senior information security officer appointment
     description: The organisation shall appoint a senior-level executive information
       security officer.
     annotation: "The goal of this control is to establish clear executive accountability\
@@ -477,6 +495,7 @@ objects:
       \ information assets and technologies are adequately protected."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-03-1
     ref_id: GV.RR-03-1
+    name: Cybersecurity resource allocation
     description: Sufficient resources shall be allocated in line with the cybersecurity
       risk strategy, roles, responsibilities and policies.
     annotation: "The goal of this control is to ensure that cybersecurity is effectively\
@@ -492,6 +511,7 @@ objects:
       \ interpreted accurately and threats are responded to effectively."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-03-2
     ref_id: GV.RR-03-2
+    name: Response and recovery plan maintenance roles
     description: The organisation shall assign roles and responsibilities for reviewing
       and updating response and recovery plans, ensuring they reflect changes in the
       risk environment and remain effective.
@@ -521,6 +541,7 @@ objects:
       \ broader risk management and governance processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-04.1
     ref_id: GV.RR-04.1
+    name: Critical personnel authentication
     description: "Personnel with access to the organisation\u2019s most critical information\
       \ or technology shall be authenticated."
     annotation: "The goal of this control is protecting critical assets by ensuring\
@@ -540,6 +561,7 @@ objects:
       \ and retention decisions."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-04.2
     ref_id: GV.RR-04.2
+    name: HR cybersecurity process
     description: A cybersecurity process for human resources shall be developed and
       maintained applicable at recruitment, during employment and at termination of
       employment.
@@ -555,6 +577,7 @@ objects:
       \ policies in relation to their role should be defined and enforced."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.po-01.1
     ref_id: GV.PO-01.1
+    name: Cybersecurity policies and procedures
     description: Policies and procedures for managing information and cybersecurity
       shall be established, documented, reviewed, approved, updated when changes occur,
       communicated and enforced.
@@ -582,6 +605,7 @@ objects:
       \ aligned with the organisation\u2019s overall strategy and risk appetite."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.po-01.2
     ref_id: GV.PO-01.2
+    name: Cryptography and encryption policy
     description: Organisational-wide information and cybersecurity policies and procedures
       shall include the use of cryptography and, where appropriate, encryption, reflect
       changes in requirements, threats, technology and organisational roles, and be
@@ -607,6 +631,7 @@ objects:
       \xB7 Use technical controls and audits to ensure compliance."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.ov-02.1
     ref_id: GV.OV-02.1
+    name: Risk management strategy review
     description: The information and cybersecurity risk management strategy shall
       be reviewed and adjusted to ensure coverage of organisational requirements and
       risks.
@@ -629,6 +654,7 @@ objects:
       \ should be documented and reported to relevant management."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.ov-03.1
     ref_id: GV.OV-03.1
+    name: Cybersecurity performance evaluation
     description: The organisation's cybersecurity risk management performance shall
       be evaluated, reviewed and adjusted when necessary
     annotation: "The goal of this control is to ensure that an organisation's cybersecurity\
@@ -649,6 +675,7 @@ objects:
       \ should be collected and shared with senior leadership."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-01.1
     ref_id: GV.SC-01.1
+    name: Supply chain risk management programme
     description: A cybersecurity supply chain risk management program, strategy, objectives,
       policies, and processes shall be documented, reviewed, updated when changes
       occur, and approved by organisational stakeholders.
@@ -696,6 +723,7 @@ objects:
       \ incidents that occur."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-02.1
     ref_id: GV.SC-02.1
+    name: Third-party personnel change notification
     description: Third-party providers shall notify any transfer, termination or transition
       of personnel with physical or logical access to business-critical system elements
       of the organisation.
@@ -709,6 +737,7 @@ objects:
       \ and sub-tier suppliers should be defined in contractual agreements."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-03.1
     ref_id: GV.SC-03.1
+    name: Supply chain risk integration
     description: Information- and Cybersecurity supply chain risk management shall
       be integrated into information/cybersecurity and enterprise risk management,
       risk assessment, and improvement processes.
@@ -746,6 +775,7 @@ objects:
       \ and crisis management planning"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-05.1
     ref_id: GV.SC-05.1
+    name: Supply chain cybersecurity contractual requirements
     description: Requirements for addressing cybersecurity risks and the sharing of
       sensitive information in supply chains shall be established, prioritised, integrated
       into contracts and other types of formal agreements, and enforced.
@@ -780,6 +810,7 @@ objects:
       \ framework."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-05.2
     ref_id: GV.SC-05.2
+    name: Supplier flaw resolution requirements
     description: Contractual information/cybersecurity requirements for suppliers
       and external partners shall be implemented to ensure a verifiable flaw resolution
       process and to ensure that deficiencies identified during information/cybersecurity
@@ -804,6 +835,7 @@ objects:
       \ software or hardware bill of materials) for critical products."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-05.3
     ref_id: GV.SC-05.3
+    name: Supplier security programme review rights
     description: The organisation shall establish contractual requirements permitting
       the organisation to review the information/cybersecurity programs implemented
       by suppliers and third-party partners.
@@ -826,6 +858,7 @@ objects:
       \ such as penalties or contract termination."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-06.1
     ref_id: GV.SC-06.1
+    name: Supplier due diligence
     description: Planning and due diligence shall be carried out to reduce risks before
       entering into formal relationships with suppliers or other third parties.
     annotation: "The goal of this control is to reduce cybersecurity and operational\
@@ -845,6 +878,7 @@ objects:
       \ where vulnerabilities can impact safety and operations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-07.1
     ref_id: GV.SC-07.1
+    name: Supplier risk assessment
     description: The risks posed by a supplier, its products and services and other
       third parties shall be identified, documented, prioritised, mitigated and assessed
       at least annually and when changes occur during the relationship.
@@ -870,6 +904,7 @@ objects:
       \ operational continuity."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-07.2
     ref_id: GV.SC-07.2
+    name: Critical supplier registry
     description: A documented list of all critical suppliers, vendors and partners
       of the organisation that may be involved in a major incident shall be established,
       kept up-to-date and made available online and off-line with due regard to confidentiality
@@ -894,6 +929,7 @@ objects:
       \ ensure availability during cyber incidents or outages"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-07.3
     ref_id: GV.SC-07.3
+    name: Third-party security compliance audits
     description: The organisation shall audit business-critical third-party service
       providers for security compliance.
     annotation: "The goal of this control is to ensure that business-critical third-party\
@@ -909,6 +945,7 @@ objects:
       \ providers to verify that they meet contractual and policy-based security obligations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-07.4
     ref_id: GV.SC-07.4
+    name: Supplier contractual conformity verification
     description: The organisation shall ensure conformity with information/cybersecurity
       contractual obligations by suppliers and third-party partners through regular
       reviews of independent audits, assessments, and third party evaluations.
@@ -928,6 +965,7 @@ objects:
       \ or services. More critical suppliers should undergo more thorough evaluations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-08.1
     ref_id: GV.SC-08.1
+    name: Supplier incident planning contacts
     description: The organisation shall identify and document key personnel from relevant
       suppliers and other third parties to include them in incident planning, response,
       and recovery activities.
@@ -946,6 +984,7 @@ objects:
       \ and resilience."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-09.1
     ref_id: GV.SC-09.1
+    name: Supply chain security monitoring
     description: Supply chain security practices shall be integrated into information/cybersecurity
       and enterprise risk management programs, and their performance shall be monitored
       throughout the product and service life cycle.
@@ -976,6 +1015,7 @@ objects:
       \ especially for OT systems and components."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.sc-10.1
     ref_id: GV.SC-10.1
+    name: Post-termination supply chain risk management
     description: Cybersecurity supply chain risk management plans shall include actions
       and responsibilities for managing risks that may arise after a supplier relationship
       or service agreement has ended.
@@ -1002,6 +1042,7 @@ objects:
       \ be tracked within the enterprise risk management process."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-01.1
     ref_id: ID.AM-01.1
+    name: Hardware asset inventory
     description: "An inventory of physical and virtual infrastructure assets\u2014\
       such as hardware, network devices, and cloud-hosted environments\u2014that support\
       \ information processing shall be documented, reviewed, and updated as changes\
@@ -1025,6 +1066,7 @@ objects:
       \ and should be integrated with risk management and incident response processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-01.2
     ref_id: ID.AM-01.2
+    name: Asset inventory accuracy and completeness
     description: "The inventory of enterprise assets associated with information and\
       \ information processing facilities shall reflect changes in the organisation\u2019\
       s context and include all information necessary for effective accountability."
@@ -1042,6 +1084,7 @@ objects:
       \ those affecting OT environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-01.3
     ref_id: ID.AM-01.3
+    name: Unauthorised hardware handling
     description: When unauthorised hardware is detected, it shall be quarantined for
       possible exception handling, removed, or replaced, and the inventory shall be
       updated accordingly.
@@ -1065,6 +1108,7 @@ objects:
       \ potentially bypassing network security controls."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-01.4
     ref_id: ID.AM-01.4
+    name: Unauthorised hardware detection mechanisms
     description: "Mechanisms for detecting the presence of unauthorised hardware and\
       \ firmware components within the organisation\u2019s ICT/OT environment shall\
       \ be identified."
@@ -1084,6 +1128,7 @@ objects:
       \ and vendor-specific constraints when identifying unauthorised components."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-02.1
     ref_id: ID.AM-02.1
+    name: Software and services inventory
     description: An inventory of software, digital services, and business systems
       used within the organisation shall be documented, reviewed, and updated as changes
       occur.
@@ -1113,6 +1158,7 @@ objects:
       \ they run on to provide a complete view of the technology environment."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-02.2
     ref_id: ID.AM-02.2
+    name: Software inventory accuracy and completeness
     description: "The inventory reflecting which software, services and systems are\
       \ used in the organisation shall reflect changes in the  organisation\u2019\
       s context and include all information necessary for effective accountability."
@@ -1131,6 +1177,7 @@ objects:
       \ removals, including those affecting OT systems and embedded software components."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-02.3
     ref_id: ID.AM-02.3
+    name: Software management accountability
     description: The people responsible and accountable for managing software platforms
       and applications within the organisation shall be formally identified.
     annotation: "The goal of this control is to ensure that software platforms and\
@@ -1147,6 +1194,7 @@ objects:
       \ that software used in industrial systems is also properly governed."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-02.4
     ref_id: ID.AM-02.4
+    name: Unauthorised software handling
     description: When unauthorised software is detected, it shall be quarantined for
       possible exception handling, removed, or replaced, and the inventory shall be
       updated accordingly.
@@ -1170,6 +1218,7 @@ objects:
       \ OT and embedded systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-02.5
     ref_id: ID.AM-02.5
+    name: Unauthorised software detection mechanisms
     description: "Mechanisms for detecting the presence of unauthorised software within\
       \ the organisation\u2019s ICT/OT environment shall be identified."
     annotation: "The goal of this control is to ensure that mechanisms are in place\
@@ -1189,6 +1238,7 @@ objects:
       \ should be considered to ensure safety and system availability."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-03-2
     ref_id: ID.AM-03-2
+    name: Internal network and data flow mapping
     description: The organisation's network communication and internal data flows
       shall be mapped, documented, authorised, and updated when changes occur.
     annotation: "The goal of this control is to ensure that internal network communications\
@@ -1208,6 +1258,7 @@ objects:
       \ or incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-03-3
     ref_id: ID.AM-03-3
+    name: External network and data flow mapping
     description: The organisation's network communication and external data flows
       shall be mapped, documented, authorised, and updated when changes occur.
     annotation: "The goal of this control is to ensure that external network communications\
@@ -1234,6 +1285,7 @@ objects:
       \ perimeter, regardless of whether it involves a specific external system."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-04.1
     ref_id: ID.AM-04.1
+    name: External services inventory and approval
     description: Organisations shall keep a clear and up-to-date list of all external
       services it uses, including how they connect to their systems. These services
       shall be reviewed and approved before use, and the list shall be updated whenever
@@ -1261,6 +1313,7 @@ objects:
       \ controls."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-04.2
     ref_id: ID.AM-04.2
+    name: External system data flow documentation
     description: The organisation shall map, document and authorise the flow of information
       to/from external systems and update the flow when changes occur.
     annotation: "The goal of this control is to ensure that the flow of information\
@@ -1288,6 +1341,7 @@ objects:
       \ database synchronisation with external systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-05.1
     ref_id: ID.AM-05.1
+    name: Asset classification and prioritisation
     description: "The organisation\u2019s assets shall be prioritised based on classification,\
       \ criticality, and business value."
     annotation: "The goal of this control is to ensure that all organisational assets,\
@@ -1318,6 +1372,7 @@ objects:
       \ assets should be clearly documented."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-07.1
     ref_id: ID.AM-07.1
+    name: Data identification
     description: Data that the organisation stores and uses shall be identified..
     annotation: "The goal of this control is to ensure that all data stored and used\
       \ by the organisation is clearly identified. This supports proper data management,\
@@ -1334,6 +1389,7 @@ objects:
       \ updated to reflect changes in the environment."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-07.2
     ref_id: ID.AM-07.2
+    name: Data inventory and metadata management
     description: Inventories of data and associated metadata shall be maintained for
       designated data types.
     annotation: "The goal of this control is to ensure that inventories of data and\
@@ -1367,6 +1423,7 @@ objects:
       \ and threat intelligence contexts."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.2
     ref_id: ID.AM-08.2
+    name: Patch and security update installation
     description: Patches and security updates for operating systems and critical system
       components shall be installed.
     annotation: "The goal of this control is to ensure that operating systems and\
@@ -1397,6 +1454,7 @@ objects:
       \ about available updates should be configured to monitor all installed applications."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.3
     ref_id: ID.AM-08.3
+    name: Asset lifecycle accountability
     description: The organisation shall enforce accountability for all its business-critical
       assets throughout the system lifecycle, including removal, transfers, and disposal.
     annotation: "The goal of this control is to ensure accountability for all business-critical\
@@ -1420,6 +1478,7 @@ objects:
       \ or decommissioned."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.4
     ref_id: ID.AM-08.4
+    name: Asset loss and damage protection
     description: The organisation shall ensure that the necessary measures are taken
       to deal with loss, misuse, damage, or theft of assets.
     annotation: "The goal of this control is to ensure that appropriate measures are\
@@ -1446,6 +1505,7 @@ objects:
       \ financial losses resulting from asset theft, damage, or other incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.5
     ref_id: ID.AM-08.5
+    name: Asset disposal approval and tracking
     description: The organisation shall ensure that disposal actions are approved,
       tracked, documented, and verified.
     annotation: "The goal of this control is to ensure that all disposal actions involving\
@@ -1466,6 +1526,7 @@ objects:
       \ where improper disposal can lead to operational disruptions or safety risks."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.6
     ref_id: ID.AM-08.6
+    name: Preventive maintenance planning
     description: The organisation shall plan, perform and document preventive maintenance
       and repairs on its critical system components according to approved processes
       and tools.
@@ -1492,6 +1553,7 @@ objects:
       \ vendors."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.7
     ref_id: ID.AM-08.7
+    name: Maintenance equipment removal prevention
     description: The organisation should prevent unauthorised removal of maintenance
       equipment containing critical system information of the organisation.
     annotation: "The goal of this control is to prevent unauthorised removal of maintenance\
@@ -1510,6 +1572,7 @@ objects:
       \ under control ID.AM-08.9."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.8
     ref_id: ID.AM-08.8
+    name: Maintenance tools approval and monitoring
     description: The organisation should pre-approve, monitor and enforce maintenance
       tools for use on its critical systems.
     annotation: "The goal of this control is to ensure that maintenance tools used\
@@ -1531,6 +1594,7 @@ objects:
       \ and compliance with applicable laws and regulations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.9
     ref_id: ID.AM-08.9
+    name: Maintenance tools malware inspection
     description: Maintenance tools and portable storage devices shall be inspected
       as they enter the facility and shall be protected by anti-malware solutions
       that scan them for malicious code before they are used on the organisation's
@@ -1555,6 +1619,7 @@ objects:
       \ regulations and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:d.am-08.10
     ref_id: D.AM-08.10
+    name: Post-maintenance security verification
     description: The organisation shall verify security controls following maintenance
       or repairs/patching, and take action as appropriate.
     annotation: "The goal of this control is to ensure that security controls remain\
@@ -1577,6 +1642,7 @@ objects:
       \ standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.11
     ref_id: ID.AM-08.11
+    name: Remote maintenance pre-approval and logging
     description: Remote maintenance and diagnostic activities of organisational assets
       shall be pre-approved and the performance logged.
     annotation: "The goal of this control is to ensure that remote maintenance and\
@@ -1596,6 +1662,7 @@ objects:
       \ policies and comply with applicable laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.12
     ref_id: ID.AM-08.12
+    name: Remote maintenance strong authentication
     description: Setting up non-local maintenance and diagnostic sessions over remote
       network connections shall require strong authenticators and these connections
       shall be terminated when non-local maintenance is completed.
@@ -1617,6 +1684,7 @@ objects:
       \ and comply with applicable laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.13
     ref_id: ID.AM-08.13
+    name: Remote maintenance system security equivalence
     description: The organisation shall require remote maintenance diagnostic services
       to be performed from a system that implements security features similar to the
       security features implemented on the equivalent organisation's critical system.
@@ -1640,6 +1708,7 @@ objects:
       \ laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.1
     ref_id: ID.RA-01.1
+    name: Threat and vulnerability identification
     description: Threats and vulnerabilities shall be identified in all relevant assets,
       including software, network and system architectures, and facilities that house
       critical computing assets.
@@ -1661,6 +1730,7 @@ objects:
       \ phishing, ransomware"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.2
     ref_id: ID.RA-01.2
+    name: Continuous vulnerability monitoring
     description: A process shall be established to continuously monitor, identify,
       and document vulnerabilities of the organisation's business critical systems.
     annotation: "The goal of this control is to ensure that vulnerabilities in business-critical\
@@ -1686,6 +1756,7 @@ objects:
       \ could impact OT system integrity."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.3
     ref_id: ID.RA-01.3
+    name: Vulnerability review and remediation process
     description: The organisation shall establish and maintain a documented process
       that enables continuous review, analysis and remediation of vulnerabilities
       and provides for information sharing where applicable.
@@ -1710,6 +1781,7 @@ objects:
       \ with OT and engineering teams to avoid unplanned downtime or safety risks."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.4
     ref_id: ID.RA-01.4
+    name: Penetration and load testing
     description: "To ensure that organisation's operations are not adversely affected\
       \ by the testing process, performance/load testing and penetration testing on\
       \ the organisation\u2019s systems shall be carried out with care."
@@ -1735,6 +1807,7 @@ objects:
       \ in live OT systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.5
     ref_id: ID.RA-01.5
+    name: Non-disruptive vulnerability scanning
     description: Vulnerability scanning shall not adversely impact system functions.
     annotation: "The goal of this control is to ensure that vulnerability scanning\
       \ does not disrupt or degrade the performance of business-critical systems,\
@@ -1759,6 +1832,7 @@ objects:
       \ live OT systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-01.6
     ref_id: ID.RA-01.6
+    name: Comprehensive vulnerability management
     description: Vulnerabilities shall be identified and managed in all relevant assets,
       including software, network and system architectures, and facilities.
     annotation: "The goal of this control is to ensure that vulnerabilities are systematically\
@@ -1783,6 +1857,7 @@ objects:
       \ that may limit patching or scanning options."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-02.1
     ref_id: ID.RA-02.1
+    name: Threat and vulnerability awareness programme
     description: A threat and vulnerability awareness programme that includes a cross-organisation
       information-sharing capability shall be implemented.
     annotation: "The goal of this control is to strengthen the organisation\u2019\
@@ -1807,6 +1882,7 @@ objects:
       \ by focusing on external threat developments and strategic insights."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-02.2
     ref_id: ID.RA-02.2
+    name: Automated security alert dissemination
     description: Automated mechanisms shall be implemented to disseminate security
       alerts and advisories to relevant organisation stakeholders.
     annotation: "The goal of this control is to ensure that security alerts and advisories\
@@ -1830,6 +1906,7 @@ objects:
       \ broader threat context, including OT-specific advisories."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-03.1
     ref_id: ID.RA-03.1
+    name: Threat assessment for assets
     description: Threats shall be identified and assessed in relation to all relevant
       assets, including software, network and system architectures, and facilities.
     annotation: "The goal of this control is to ensure that threats are systematically\
@@ -1855,6 +1932,7 @@ objects:
       \ access, and exploitation of legacy systems or proprietary protocols."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-05.1
     ref_id: ID.RA-05.1
+    name: Risk assessment execution
     description: The organisation shall conduct risk assessments in which risk is
       determined by threats, vulnerabilities and the impact on business processes
       and assets.
@@ -1873,6 +1951,7 @@ objects:
       \ and updated to reflect changes in systems, operations, or the threat landscape."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-05.2
     ref_id: ID.RA-05.2
+    name: Documented risk assessment with likelihood
     description: The organisation shall conduct and document risk assessments in which
       risk is determined by threats, vulnerabilities, impact on business processes
       and assets, and likelihood of their occurrence.
@@ -1894,6 +1973,7 @@ objects:
       \ legacy technologies, and operational constraints."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-05.3
     ref_id: ID.RA-05.3
+    name: Risk assessment results dissemination
     description: Risk assessment results shall be disseminated to relevant stakeholders.
     annotation: "The goal of this control is to ensure that risk assessment results\
       \ are communicated effectively to relevant stakeholders, enabling informed decisions\
@@ -1912,6 +1992,7 @@ objects:
       \ to system availability, safety, and continuity."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-06.1
     ref_id: ID.RA-06.1
+    name: Risk response planning and tracking
     description: Risk responses shall be identified, prioritised, planned, tracked
       and communicated.
     annotation: "The goal of this control is to ensure that risk responses are clearly\
@@ -1935,6 +2016,7 @@ objects:
       \ availability, especially when planning mitigation or compensating controls."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-08.1
     ref_id: ID.RA-08.1
+    name: Vulnerability management plan
     description: The organisation shall establish and implement a vulnerability management
       plan to identify, analyse, assess, mitigate and communicate all types of vulnerabilities
       including in the form of a Coordinated Vulnerability Disclosure (CVD) according
@@ -1960,6 +2042,7 @@ objects:
       \ where patching or mitigation may require coordination with engineering teams."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.ra-08.2
     ref_id: ID.RA-08.2
+    name: Automated vulnerability remediation tracking
     description: The organisation shall implement automated mechanisms for disseminating
       and tracking remedial measures related to vulnerability information that automatically
       handles vulnerability data collection, disseminates information, tracks remedial
@@ -1992,6 +2075,7 @@ objects:
       \ engineering teams may be required for remediation in these environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-02.1
     ref_id: ID.IM-02.1
+    name: Security testing and exercises
     description: Security tests and exercises, including those conducted with suppliers
       and relevant third parties, shall be used to identify areas for improvement.
     annotation: "The goal of this control is to identify opportunities for improving\
@@ -2017,6 +2101,7 @@ objects:
       \ and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.1
     ref_id: ID.IM-03.1
+    name: Post-incident lessons learned
     description: The organisation shall conduct post-incident evaluations to analyse
       lessons learned from incident response and recovery, and consequently improve
       processes / procedures / technologies to enhance its cyber resilience.
@@ -2037,6 +2122,7 @@ objects:
       \ be adapted or upgraded based on insights from the incident."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.2
     ref_id: ID.IM-03.2
+    name: Incident handling process improvement
     description: The organisation shall incorporate lessons learned from incident
       handling activities into updated or new incident handling processes and/or procedures
       that are framed by appropriate training after review, approval and testing.
@@ -2060,6 +2146,7 @@ objects:
       \ and comply with applicable laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.3
     ref_id: ID.IM-03.3
+    name: Continuous improvement from assessments
     description: The organisation shall identify improvements derived from the monitoring,
       measurements, assessments, and lessons learned and consequently translate this
       into improved processes / procedures / technologies to enhance its cyber resilience
@@ -2088,6 +2175,7 @@ objects:
       \ industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.4
     ref_id: ID.IM-03.4
+    name: Incident information sharing with partners
     description: The organisation shall collaborate and share information about its
       critical system's related security incidents and mitigation measures with designated
       partners.
@@ -2112,6 +2200,7 @@ objects:
       \ laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.5
     ref_id: ID.IM-03.5
+    name: Protection technology effectiveness sharing
     description: Communication of effectiveness of protection technologies shall be
       shared with relevant stakeholders.
     annotation: "The goal of this control is to ensure that the effectiveness of protection\
@@ -2137,6 +2226,7 @@ objects:
       \ with applicable laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.6
     ref_id: ID.IM-03.6
+    name: Automated information sharing mechanisms
     description: The organisation shall implement, where feasible, automated mechanisms
       to facilitate the process of information sharing and collaboration.
     annotation: "The goal of this control is to improve the efficiency, accuracy,\
@@ -2163,6 +2253,7 @@ objects:
       \ applicable laws, regulations, and industry standards."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.7
     ref_id: ID.IM-03.7
+    name: Independent security assessments
     description: The organisation shall implement independent teams to assess its
       processes, best practices, and technology solutions to safeguard critical systems
       and assets.
@@ -2186,6 +2277,7 @@ objects:
       \ be periodically reviewed to maintain objectivity and relevance."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.8
     ref_id: ID.IM-03.8
+    name: Security plan continual improvement
     description: The organisation shall ensure that the security plan for its critical
       systems facilitates the review, testing, and continual improvement of the security
       protection processes.
@@ -2211,6 +2303,7 @@ objects:
       \ system changes, new threats, and evolving operational needs."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-03.9
     ref_id: ID.IM-03.9
+    name: Specialised security assessments
     description: The organisation shall conduct specialised assessments including
       in-depth monitoring, vulnerability scanning, malicious user testing, insider
       threat assessment, performance/load testing, and verification and validation
@@ -2238,6 +2331,7 @@ objects:
       \ levels (e.g. CyFun\xAE maturity), guiding targeted improvements."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-04.1
     ref_id: ID.IM-04.1
+    name: Contingency and continuity plans
     description: Contingency and continuity plans shall be established, communicated,
       maintained, tested, validated, and improved.
     annotation: "The goal of this control is to ensure organisational resilience by\
@@ -2266,6 +2360,7 @@ objects:
       \ See also: Policy templates available on www.cyfun.eu"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.im-04.2
     ref_id: ID.IM-04.2
+    name: Incident response plan coordination
     description: The organisation shall coordinate the development and the testing
       of Incident Response Plans and other cybersecurity plans that affect operations
       with stakeholders to ensure that these plans align with overall organisational
@@ -2285,6 +2380,7 @@ objects:
       \ clarify roles, and strengthen collaborative response capabilities."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-01.1
     ref_id: PR.AA-01.1
+    name: Identity and credential management
     description: Identities and credentials for authorised users, services, and hardware
       shall be managed.
     annotation: "The goal of this control is to ensure that identities and credentials\
@@ -2316,6 +2412,7 @@ objects:
       \ used.\n    \xB7 Remote access should be monitored and logged."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-01.2
     ref_id: PR.AA-01.2
+    name: Automated identity and credential management
     description: Identities and credentials for authorised users, services and hardware
       shall be managed through automated mechanisms whenever feasible.
     annotation: "The goal of this control is to reduce the risk of credential misuse\
@@ -2343,6 +2440,7 @@ objects:
       \ time-limited (Just-In-Time), and be fully monitored."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-01.3
     ref_id: PR.AA-01.3
+    name: Inactive credential deactivation
     description: System credentials shall be deactivated after a specified period
       of inactivity unless it would compromise the safe operation of (critical) processes.
     annotation: "The goal of this control is to ensure that system credentials are\
@@ -2373,6 +2471,7 @@ objects:
       \ disruptions."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-01.4
     ref_id: PR.AA-01.4
+    name: Multi-factor authentication for critical systems
     description: 'For transactions within the organisation''s critical systems, the
       organisation shall
 
@@ -2403,6 +2502,7 @@ objects:
       \ solutions."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-01.5
     ref_id: PR.AA-01.5
+    name: Atypical credential usage monitoring
     description: "The organisation\u2019s critical systems shall be monitored for\
       \ atypical use of system credentials. Credentials associated with significant\
       \ risk shall be disabled."
@@ -2432,6 +2532,7 @@ objects:
       \ activity or anomalies in access behaviour."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-02.1
     ref_id: PR.AA-02.1
+    name: Identity verification before credential issuance
     description: The organisation shall implement documented procedures for verifying
       the identity of individuals before issuing credentials that provide access to
       the organisation's systems.
@@ -2454,6 +2555,7 @@ objects:
       \ systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-02.2
     ref_id: PR.AA-02.2
+    name: Unique credential enforcement
     description: The organisation shall ensure that unique credentials are used for
       each authenticated user, device, and process interacting with the organisation's
       critical systems. These credentials shall be verified, and the unique identifiers
@@ -2492,6 +2594,7 @@ objects:
       \ be required."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-03.1
     ref_id: PR.AA-03.1
+    name: Wireless access point security
     description: All wireless access points used by the organisation, including those
       providing guest access, shall be securely configured, managed, and monitored
       to prevent unauthorised  access and ensure network integrity.
@@ -2518,6 +2621,7 @@ objects:
       \ password policies that enforce complexity and regular updates."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-03.2
     ref_id: PR.AA-03.2
+    name: MFA for remote network access
     description: Multi-Factor Authentication (MFA) shall be required to access the
       organisation's networks remotely.
     annotation: "The goal of this control is to protect the organisation\u2019s networks\
@@ -2557,6 +2661,7 @@ objects:
       \ secure intermediary platforms (e.g. jump servers) should be used."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-03.3
     ref_id: PR.AA-03.3
+    name: Remote access restrictions and authorisation
     description: The organisation shall define, document, and implement usage restrictions,
       connection requirements, and authorisation procedures for remote access to its
       critical systems. These controls shall ensure that only approved users can connect,
@@ -2591,6 +2696,7 @@ objects:
       \ risk management for critical systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-03.4
     ref_id: PR.AA-03.4
+    name: Remote access monitoring and encryption
     description: "Remote access to the organisation\u2019s critical systems shall\
       \ be monitored and cryptographic mechanisms shall be implemented where determined\
       \ necessary."
@@ -2623,6 +2729,7 @@ objects:
       \ cybersecurity risk management for critical systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-03.5
     ref_id: PR.AA-03.5
+    name: External system connection security
     description: The security for connections with external systems shall be verified
       and framed by documented agreements.
     annotation: "The goal of this control is to ensure that all connections with external\
@@ -2657,6 +2764,7 @@ objects:
       \ continuously monitoring external dependencies."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-04.1
     ref_id: PR.AA-04.1
+    name: Identity assertion protection
     description: Identity assertions are protected, conveyed, and verified
     annotation: "The goal of this control is to ensure that identity assertions \u2014\
       \ claims about the identity of a user, device, or process \u2014 are protected\
@@ -2690,6 +2798,7 @@ objects:
       \ and European Digital Identity regulations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.1
     ref_id: PR.AA-05.1
+    name: Access permissions management
     description: Access permissions, rights, and authorisations shall be defined,
       managed, enforced and reviewed.
     annotation: "The goal of this control is to ensure that access permissions, rights,\
@@ -2720,6 +2829,7 @@ objects:
       \ where possible."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.2
     ref_id: PR.AA-05.2
+    name: Access needs determination
     description: It shall be determined who needs access to the organisation's business-critical
       information and technology and the means to gain access.
     annotation: "The goal of this control is to determine who requires access to the\
@@ -2745,6 +2855,7 @@ objects:
       \ template in the CyFun\xAE Toolbox on www.cyfun.eu"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.3
     ref_id: PR.AA-05.3
+    name: Least privilege enforcement
     description: Access rights, privileges and authorisations shall be restricted
       to the systems and specific information needed to perform the tasks (the principle
       of Least Privilege).
@@ -2776,6 +2887,7 @@ objects:
       \ access."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.4
     ref_id: PR.AA-05.4
+    name: Administrative privilege restriction
     description: No-one shall have administrative privileges for routine day-to-day
       tasks.
     annotation: "The goal of this control is to prevent the use of administrative\
@@ -2795,6 +2907,7 @@ objects:
       \ logging) should be used to enforce accountability and reduce risk."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.5
     ref_id: PR.AA-05.5
+    name: Automated user account management
     description: "Where technically, operationally, and economically feasible\u2014\
       without compromising system integrity, safety, or compliance\u2014automated\
       \ mechanisms shall be implemented to manage user accounts on critical ICT and\
@@ -2835,6 +2948,7 @@ objects:
       \ work on secure access management in critical infrastructure environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.6
     ref_id: PR.AA-05.6
+    name: Separation of duties
     description: Separation of duties (SoD) shall be ensured in the management of
       access rights.
     annotation: "The goal of this control is to ensure that no single individual has\
@@ -2868,6 +2982,7 @@ objects:
       \ access-related risks across ICT and OT environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.7
     ref_id: PR.AA-05.7
+    name: Privileged user management and monitoring
     description: Privileged users shall be managed and monitored.
     annotation: "The goal of this control is to reduce the risk of unauthorised access,\
       \ data breaches, and operational disruption by ensuring that privileged users,\
@@ -2895,6 +3010,7 @@ objects:
       \ monitoring in securing essential services and critical infrastructure."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.8
     ref_id: PR.AA-05.8
+    name: Time and location based access restrictions
     description: 'Account usage restrictions for specific time periods and locations
       shall be taken
 
@@ -2929,6 +3045,7 @@ objects:
       \ of effective cybersecurity risk management."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-05.9
     ref_id: PR.AA-05.9
+    name: Privileged user audit
     description: Privileged users shall be managed, monitored and audited.
     annotation: "The goal of this control is to ensure that privileged user accounts,\
       \ those with elevated access to critical systems, are tightly controlled, continuously\
@@ -2962,6 +3079,7 @@ objects:
       \ services and critical infrastructure."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-06.1
     ref_id: PR.AA-06.1
+    name: Physical access management and monitoring
     description: Physical access to all organisational assets, including critical
       zones, should be managed, monitored, and enforced based on risk.
     annotation: "The goal of this control is to ensure that physical access to all\
@@ -2988,6 +3106,7 @@ objects:
       \ www.cyfun.eu."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-06.2
     ref_id: PR.AA-06.2
+    name: Emergency physical access procedures
     description: Physical access controls should include specific procedures for emergency
       situations, ensuring continued protection of critical and non-critical assets
       during such events.
@@ -3029,6 +3148,7 @@ objects:
       \ and logical access controls in maintaining resilience during emergencies."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-06.3
     ref_id: PR.AA-06.3
+    name: Critical zone additional access controls
     description: Critical zones should have additional physical access controls beyond
       those applied to general facilities.
     annotation: "The goal of this control is to reduce the risk of unauthorised physical\
@@ -3053,6 +3173,7 @@ objects:
       \ security strategy."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.aa-06.4
     ref_id: PR.AA-06.4
+    name: Critical zone asset physical protection
     description: Assets located within critical zones should be physically protected
       against unauthorised access, damage, or interference.
     annotation: "The goal of this control is to safeguard essential assets located\
@@ -3080,6 +3201,7 @@ objects:
       \ security strategy."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-01.1
     ref_id: PR.AT-01.1
+    name: Cybersecurity awareness and training programme
     description: The organisation shall establish and maintain a cybersecurity awareness
       and training programme to ensure that all personnel understand how to perform
       their tasks securely and responsibly.
@@ -3110,6 +3232,7 @@ objects:
       \ new threats and lessons learned from incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-01.2
     ref_id: PR.AT-01.2
+    name: Insider threat awareness training
     description: The organisation shall include insider threat awareness and reporting
       in its cybersecurity training to help personnel recognise and respond to potential
       internal risks.
@@ -3135,6 +3258,7 @@ objects:
       \ without fear of retaliation."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-01.3
     ref_id: PR.AT-01.3
+    name: Incident role-specific training
     description: Personnel shall receive training to understand their specific roles,
       responsibilities, and priorities during a cybersecurity or information security
       incident, including the steps they need to follow to respond effectively.
@@ -3158,6 +3282,7 @@ objects:
       \ reinforce readiness."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-01.4
     ref_id: PR.AT-01.4
+    name: Training effectiveness evaluation
     description: The organisation shall evaluate whether its cybersecurity awareness
       training is effective in improving knowledge, behaviour, and readiness across
       the organisation.
@@ -3182,6 +3307,7 @@ objects:
       \ document lessons learned and use the results to improve future training efforts."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-02.1
     ref_id: PR.AT-02.1
+    name: Management cybersecurity training
     description: Members of management bodies shall be able to demonstrate that they
       have completed training that gives them a solid understanding of information
       and cybersecurity and risk management so that they can assess information and
@@ -3207,6 +3333,7 @@ objects:
       \ in cybersecurity and risk management."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-02.2
     ref_id: PR.AT-02.2
+    name: Specialised role training
     description: Individuals in specialised roles shall be provided with awareness
       and training before privileges are granted, so that they possess the knowledge
       and skills to perform relevant tasks with cybersecurity risks in mind.
@@ -3230,6 +3357,7 @@ objects:
       \ with industrial systems or critical infrastructure."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.at-02.3
     ref_id: PR.AT-02.3
+    name: Privileged user qualification
     description: Privileged users shall be qualified before privileges are granted,
       and these users shall be able to demonstrate the understanding of their roles,
       responsibilities, and authorities.
@@ -3262,6 +3390,7 @@ objects:
       \ practices and introduce new practices."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.1
     ref_id: PR.DS-01.1
+    name: Software and firmware integrity checks
     description: The organisation shall implement software, firmware, and information
       integrity checks to detect unauthorised changes to its critical system components
       during storage, transport, start-up and when determined necessary.
@@ -3296,6 +3425,7 @@ objects:
       \ usability of backup data."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.2
     ref_id: PR.DS-01.2
+    name: Automated integrity violation notification
     description: The organisation shall implement automated tools where feasible to
       provide notification upon discovering discrepancies during integrity verification.
     annotation: "The goal of this control is to ensure that discrepancies in system\
@@ -3314,6 +3444,7 @@ objects:
       \ best practices for automated integrity monitoring and incident response."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.3
     ref_id: PR.DS-01.3
+    name: Automated integrity violation response
     description: The organisation shall define and implement automated responses to
       detected integrity violations, using predefined safeguards that are proportionate
       to the severity and impact of the violation.
@@ -3341,6 +3472,7 @@ objects:
       \ should be consulted."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.4
     ref_id: PR.DS-01.4
+    name: Portable storage media policy
     description: The organisation shall define and enforce clear policies and practical
       safeguards to manage and restrict the use of portable storage media, in order
       to reduce the risk of data leakage, unauthorised access, and malware introduction.
@@ -3373,6 +3505,7 @@ objects:
       \ copied back onto the device."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.5
     ref_id: PR.DS-01.5
+    name: Removable media restriction
     description: The organisation shall only allow the use of removable media when
       absolutely necessary, and shall put technical measures in place to block automatic
       execution of files from these devices.
@@ -3405,6 +3538,7 @@ objects:
       \ systems should be configured to reduce risk."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.6
     ref_id: PR.DS-01.6
+    name: Data at rest confidentiality
     description: The organisation shall protect the confidentiality of its critical
       assets while at rest.
     annotation: "The goal of this control is to ensure that sensitive operational\
@@ -3427,6 +3561,7 @@ objects:
       \ test environment without randomisation to prevent unauthorised access to data)."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-01.9
     ref_id: PR.DS-01.9
+    name: Secure asset disposal
     description: Enterprise assets shall be disposed of safely.
     annotation: "The goal of this control is to ensure that all enterprise assets\
       \ are disposed of in a secure and controlled manner, to prevent unauthorised\
@@ -3456,6 +3591,7 @@ objects:
       \ removed before decommissioning."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-02.1
     ref_id: PR.DS-02.1
+    name: Portable storage device protection in transit
     description: Portable storage devices containing system data shall be controlled
       and protected while in transit and in storage.
     annotation: "The goal of this control is to prevent unauthorised access, tampering,\
@@ -3475,6 +3611,7 @@ objects:
       \ properly secured."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-02.2
     ref_id: PR.DS-02.2
+    name: Data in transit protection
     description: The organisation shall protect its critical and sensitive information
       while in transit.
     annotation: "The goal of this control is to ensure that critical and sensitive\
@@ -3501,6 +3638,7 @@ objects:
       \ address vulnerabilities in your data transmission processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-10.1
     ref_id: PR.DS-10.1
+    name: Denial-of-service protection
     description: "The organisation\u2019s critical systems shall be protected against\
       \ denial-of-service attacks or at least the effect of such attacks shall be\
       \ limited."
@@ -3524,6 +3662,7 @@ objects:
       \ real-time operations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-11.1
     ref_id: PR.DS-11.1
+    name: Critical data backup
     description: Backups for the organisation's business critical data shall be performed
       and stored on a different system from the device on which the original data
       resides.
@@ -3554,6 +3693,7 @@ objects:
       \ operational data, and device settings critical to industrial operations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-11.2
     ref_id: PR.DS-11.2
+    name: Backup reliability and integrity verification
     description: The reliability and integrity of backups shall be verified and tested
       regularly.
     annotation: "The goal of this control is to ensure that backup data can be trusted\
@@ -3571,6 +3711,7 @@ objects:
       \ recovery strategies."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-11.3
     ref_id: PR.DS-11.3
+    name: Secure offsite backup storage
     description: The organisation shall maintain secure backups of business-critical
       data in a separate storage location to ensure data availability in case of system
       failure or data loss. Backup storage shall apply equivalent security controls
@@ -3610,6 +3751,7 @@ objects:
       \ to ensure data integrity and operational readiness."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-11.4
     ref_id: PR.DS-11.4
+    name: Backup recoverability testing
     description: The organisation shall regularly verify the integrity and recoverability
       of backups through coordinated testing with all relevant continuity and incident
       response functions. Backup testing shall be integrated into broader resilience
@@ -3639,6 +3781,7 @@ objects:
       \ and improve procedures."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ds-11.5
     ref_id: PR.DS-11.5
+    name: System and data backup separation
     description: Backups of critical systems (such as operating systems, configurations,
       and applications) shall be kept separate from backups of critical information
       (such as business data, documents, and databases) to support faster and more
@@ -3675,6 +3818,7 @@ objects:
       \ more targeted recovery."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-01.1
     ref_id: PR.PS-01.1
+    name: Baseline configuration management
     description: The organisation shall develop, document, and maintain a baseline
       configuration for its business-critical systems.
     annotation: "This control ensures that all business-critical systems operate in\
@@ -3706,6 +3850,7 @@ objects:
       \ and that suppliers provide visibility into configuration and change management."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-01.2
     ref_id: PR.PS-01.2
+    name: Essential functions configuration
     description: The organisation shall configure its business-critical systems to
       operate with only the essential functions needed for their intended purpose.
       This includes reviewing and updating baseline configurations to disable any
@@ -3723,6 +3868,7 @@ objects:
       \ system performance."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-01.3
     ref_id: PR.PS-01.3
+    name: Unnecessary services and ports disabling
     description: The organisation shall identify and disable specific functions, ports,
       protocols, and services within its critical systems that are not required for
       business operations.
@@ -3738,6 +3884,7 @@ objects:
       \ networking\n    \xB7 Other unused or legacy services"
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-01.4
     ref_id: PR.PS-01.4
+    name: Software execution whitelisting
     description: "The organisation shall implement technical safeguards to enforce\
       \ a policy of \u2018deny-all\u2019 and \u2018permit-by-exception\u2019 so that\
       \ only authorised software programmes are executed."
@@ -3755,6 +3902,7 @@ objects:
       \ to maintain consistent enforcement of authorised software across all systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-01.5
     ref_id: PR.PS-01.5
+    name: Configuration change monitoring
     description: Unauthorised configuration changes to organisation's systems shall
       be monitored and addressed with the appropriate mitigation actions.
     annotation: "The goal of this control is to detect and respond to unauthorised\
@@ -3770,6 +3918,7 @@ objects:
       \ system resilience and compliance."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-02.1
     ref_id: PR.PS-02.1
+    name: Software usage and installation restrictions
     description: The organisation shall enforce restrictions on software usage and
       installation, and ensure that software is maintained, replaced, or removed based
       on its associated risk.
@@ -3792,6 +3941,7 @@ objects:
       \xB7 Define procedures for software approval, patching, replacement, and removal."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-03.1
     ref_id: PR.PS-03.1
+    name: Hardware lifecycle risk management
     description: Hardware used in business-critical environments shall be maintained,
       replaced, or removed based on its associated security and operational risk.
     annotation: "The goal of this control is to ensure that hardware used in business-critical\
@@ -3808,6 +3958,7 @@ objects:
       \ secure, up-to-date software; address any limitations that prevent this."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-04.1
     ref_id: PR.PS-04.1
+    name: Log maintenance and monitoring
     description: Logs shall be maintained, documented, and monitored.
     annotation: "The goal of this control is to ensure that logs are consistently\
       \ maintained, documented, and monitored to support visibility, accountability,\
@@ -3832,6 +3983,7 @@ objects:
       \ where logs can help detect operational anomalies or unauthorised access attempts."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-04.2
     ref_id: PR.PS-04.2
+    name: Log time synchronisation
     description: The organisation shall ensure that logbook records contain an authoritative
       time source or internal clock time stamp that is compared and synchronised with
       an authoritative time source.
@@ -3847,6 +3999,7 @@ objects:
       \ intervals, and monitoring processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-04.3
     ref_id: PR.PS-04.3
+    name: Audit data offloading
     description: Audit data from the organisation's critical systems shall be moved
       to an alternative system.
     annotation: "The goal of this control is to protect the integrity of audit records\
@@ -3860,6 +4013,7 @@ objects:
       \ slowing down or disrupting system operations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-04.4
     ref_id: PR.PS-04.4
+    name: Audit processing failure alerts
     description: The organisation shall ensure that audit processing failures on the
       organisation's systems generate alerts and trigger defined responses.
     annotation: "The goal of this control is to ensure that any failure in audit logging,\
@@ -3878,6 +4032,7 @@ objects:
       \ storage capacity."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-04.5
     ref_id: PR.PS-04.5
+    name: Enhanced audit logging capabilities
     description: The organisation shall ensure that authorised personnel can extend
       or enhance audit logging and monitoring capabilities when needed to support
       investigations or incident response.
@@ -3895,6 +4050,7 @@ objects:
       \ to support timely activation."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-05.1
     ref_id: PR.PS-05.1
+    name: Web and email filtering
     description: Web and e-mail filters shall be installed and used.
     annotation: "The goal of this control is to reduce the risk of malware infections,\
       \ phishing attacks, and data breaches by implementing and maintaining effective\
@@ -3918,6 +4074,7 @@ objects:
       \ threats."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-05.2
     ref_id: PR.PS-05.2
+    name: Unauthorised software execution prevention
     description: Installation and execution of unauthorised software shall be prevented.
     annotation: "The goal of this control is to reduce the risk of compromise by ensuring\
       \ only trusted and approved software is installed and executed on systems.\n\
@@ -3932,6 +4089,7 @@ objects:
       \ only."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-06.1
     ref_id: PR.PS-06.1
+    name: Secure system development lifecycle
     description: Security shall be considered throughout the lifecycle of systems
       and applications, whether developed internally or acquired externally.
     annotation: "The goal of this control is to make sure that security is built into\
@@ -3952,6 +4110,7 @@ objects:
       \ data removed, and lessons learned documented to strengthen future processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-06.2
     ref_id: PR.PS-06.2
+    name: Change testing and validation
     description: Changes and exceptions shall be tested and validated before being
       implemented into operational systems.
     annotation: "The goal of this control is to reduce the risk of disruptions or\
@@ -3970,6 +4129,7 @@ objects:
       \ systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-06.3
     ref_id: PR.PS-06.3
+    name: Secure software development practices
     description: Secure software development practices shall be integrated into all
       phases of the software development lifecycle, and their effectiveness should
       be regularly monitored and improved.
@@ -3996,6 +4156,7 @@ objects:
       \ incidents or audits.\n    \xB7 Industry standards and best practices."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ps-06.4
     ref_id: PR.PS-06.4
+    name: Security impact analysis for changes
     description: For planned changes to the organisation's critical systems, a security
       impact analysis shall be performed in a separate test environment before implementation
       in an operational environment.
@@ -4019,6 +4180,7 @@ objects:
       \ access restrictions should be implemented in the test environment."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.1
     ref_id: PR.IR-01.1
+    name: Firewall installation and configuration
     description: Firewalls shall be installed, configured, and actively maintained
       on all networks used by the organisation to protect against unauthorised  access
       and cyber threats.
@@ -4054,6 +4216,7 @@ objects:
       \ traffic for suspicious activity and enhance overall protection."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.2
     ref_id: PR.IR-01.2
+    name: Network segmentation and segregation
     description: To safeguard critical systems, organisations shall implement network
       segmentation and segregation aligned with trust boundaries and asset criticality,
       thereby limiting threat propagation and enforcing strict access control.
@@ -4087,6 +4250,7 @@ objects:
       \ explicitly permitted."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.3
     ref_id: PR.IR-01.3
+    name: Critical system connection control
     description: To ensure operational stability and security, the organisation shall,
       without exception, identify, document, and control connections between components
       of its critical systems.
@@ -4113,6 +4277,7 @@ objects:
       s cybersecurity architecture."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.4
     ref_id: PR.IR-01.4
+    name: Boundary protection measures
     description: The organisation shall implement appropriate boundary protection
       measures to monitor and control communications at external and key internal
       boundaries of its critical systems, across both IT and OT environments, to ensure
@@ -4150,6 +4315,7 @@ objects:
       \ and patched to address known vulnerabilities."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.5
     ref_id: PR.IR-01.5
+    name: Authenticated proxy and URL filtering
     description: The organisation shall implement, where feasible, authenticated proxy
       servers or firewalls with URL filtering and threat intelligence capabilities
       for defined communications traffic between its critical systems and external
@@ -4189,6 +4355,7 @@ objects:
       \ and degradation."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.6
     ref_id: PR.IR-01.6
+    name: Secure failure of boundary devices
     description: The organisation shall ensure that its critical systems are designed
       to fail securely and remain protected in the event of an operational failure
       of a border protection device.
@@ -4219,6 +4386,7 @@ objects:
       \ which emphasise secure failure and resilience in critical infrastructure systems."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.7
     ref_id: PR.IR-01.7
+    name: Environment separation (dev/test/prod)
     description: The organisation shall ensure that development and test environments
       are strictly separated from the production environment, particularly in ICS/OT
       systems where any crossover could compromise safety, endanger health, or disrupt
@@ -4246,6 +4414,7 @@ objects:
       \ principles."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.8
     ref_id: PR.IR-01.8
+    name: Information flow control
     description: The organisation shall define, monitor, and control the flow of information
       and data within and between its critical systems to ensure that only authorised
       and secure exchanges occur, regardless of network boundaries or system architecture.
@@ -4285,6 +4454,7 @@ objects:
       \ attacks."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-01.9
     ref_id: PR.IR-01.9
+    name: External telecommunications security
     description: The organisation shall manage interfaces with external telecommunications
       services as part of its broader network security policy, by defining how traffic
       is controlled, ensuring the confidentiality and integrity of transmitted information,
@@ -4313,6 +4483,7 @@ objects:
       \ access control, VPN usage, patch management, and incident response."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-02.1
     ref_id: PR.IR-02.1
+    name: Environmental and safety controls
     description: The organisation shall define, implement and maintain policies and
       procedures related to emergency and safety systems, fire protection systems
       and environmental controls for its critical systems.
@@ -4334,6 +4505,7 @@ objects:
       \ drills at least annually."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-02.2
     ref_id: PR.IR-02.2
+    name: Fire detection and notification
     description: The organisation shall implement fire detection devices that activate
       and notify key personnel automatically in the event of a fire.
     annotation: "The goal of this control is to ensure that fire incidents are detected\
@@ -4350,6 +4522,7 @@ objects:
       \ in sensitive or classified environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-03.1
     ref_id: PR.IR-03.1
+    name: System resilience and recovery mechanisms
     description: The organisation shall implement mechanisms to ensure that critical
       systems and services remain operational or can be quickly restored during both
       normal operations and adverse conditions.
@@ -4381,6 +4554,7 @@ objects:
       \ and testing."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:pr.ir-04.1
     ref_id: PR.IR-04.1
+    name: Resource capacity planning
     description: Adequate resource capacity planning shall ensure that availability
       of organisation's critical system information processing, networking, telecommunications,
       and data storage is maintained.
@@ -4404,6 +4578,7 @@ objects:
       \ based on changes in business strategy, technology, or external risk factors."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-01.1
     ref_id: DE.CM-01.1
+    name: Network boundary firewall operation
     description: Firewalls shall be installed and operated at the network boundaries,
       including endpoint firewalls.
     annotation: "The goal of this control is to enhance visibility and detection of\
@@ -4429,6 +4604,7 @@ objects:
       \ simplify monitoring."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-01.2
     ref_id: DE.CM-01.2
+    name: Anti-malware installation and updates
     description: Anti-virus, -spyware, and other -malware programs shall be installed
       and updated.
     annotation: "The goal of this control is to ensure that all organisational devices\
@@ -4460,6 +4636,7 @@ objects:
       \ on emerging threats and lessons learned from incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-01.3
     ref_id: DE.CM-01.3
+    name: Unauthorised system usage detection
     description: The organisation shall monitor and identify unauthorised use of its
       business-critical systems through the detection of unauthorised local connections,
       network connections and remote connections.
@@ -4481,6 +4658,7 @@ objects:
       \ methods, such as an Identity Provider (IdP) to control access."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-01.4
     ref_id: DE.CM-01.4
+    name: Continuous network threat monitoring
     description: The organisation shall continuously monitor its network to spot signs
       of cyber threats or unusual activity, using clearly defined rules for what counts
       as a potential security incident.
@@ -4504,6 +4682,7 @@ objects:
       \ false alarms should be filtered out to avoid overwhelming staff."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-02.1
     ref_id: DE.CM-02.1
+    name: Physical environment monitoring
     description: The physical environment shall be monitored to find potentially adverse
       events.
     annotation: "The purpose of this control is to ensure that the physical spaces\
@@ -4520,6 +4699,7 @@ objects:
       \ of tampering or damage that could indicate an attempted breach."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-02.2
     ref_id: DE.CM-02.2
+    name: Physical intrusion detection for critical systems
     description: Physical access to the organisation's critical systems and devices,
       in addition to physical access monitoring to the facility, shall be supplemented
       by physical intrusion alarms, surveillance equipment, and independent monitoring
@@ -4546,6 +4726,7 @@ objects:
       \ be correlated with other physical and digital indicators of compromise."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-03-1
     ref_id: DE.CM-03-1
+    name: Endpoint and network behaviour monitoring
     description: End point and network protection tools to monitor end-user behaviour
       for dangerous activity shall be implemented.
     annotation: "The goal of this control is to ensure that the organisation can detect\
@@ -4575,6 +4756,7 @@ objects:
       \ Visibility Triad introduced by Gartner."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-03-2
     ref_id: DE.CM-03-2
+    name: Endpoint and network protection management
     description: End point and network protection tools that monitor end-user behaviour
       for dangerous activity shall be managed.
     annotation: "This control builds on DE.CM-03.1 by shifting the focus from implementation\
@@ -4604,6 +4786,7 @@ objects:
       \ effectively and respond appropriately to incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-06.1
     ref_id: DE.CM-06.1
+    name: External service provider monitoring
     description: External service provider activities and services shall be secured
       and monitored to find potentially adverse events.
     annotation: "The goal of this control is to ensure that activities performed by\
@@ -4627,6 +4810,7 @@ objects:
       \ \u2014 should be detected early, reported quickly, and addressed effectively."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-06.2
     ref_id: DE.CM-06.2
+    name: External provider personnel security monitoring
     description: External service providers' conformance with personnel security policies
       and procedures and contract security requirements shall be monitored relative
       to their cybersecurity risks.
@@ -4652,6 +4836,7 @@ objects:
       \ and addressed through corrective actions and follow-up reviews."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-09.1
     ref_id: DE.CM-09.1
+    name: Computing environment adverse event detection
     description: The organisation shall monitor computing hardware, software, runtime
       environments, and their data to detect potentially adverse events.
     annotation: "This control aims to ensure that organisations continuously monitor\
@@ -4668,6 +4853,7 @@ objects:
       \ role."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-09.2
     ref_id: DE.CM-09.2
+    name: Hardware integrity tampering detection
     description: "The organisation shall implement hardware integrity checks to detect\
       \ unauthorised tampering of critical system hardware. Controls shall be proportionate\
       \ to the organisation\u2019s risk profile and operational capacity."
@@ -4701,6 +4887,7 @@ objects:
       \ tools correctly, and follow reporting procedures."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-09.3
     ref_id: DE.CM-09.3
+    name: Hardware tampering incident response
     description: The organisation's incident response plan shall include measures
       to detect unauthorised tampering with the hardware of critical systems.
     annotation: "The goal of this control is to ensure that the organisation\u2019\
@@ -4726,6 +4913,7 @@ objects:
       \ with support contracts."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-09.4
     ref_id: DE.CM-09.4
+    name: Alert accuracy and false positive management
     description: The organisation shall establish a system to accurately distinguish
       between legitimate alerts and false positives, ensuring effective detection
       and removal of malicious code.
@@ -4755,6 +4943,7 @@ objects:
       \ in both IT and OT contexts."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-02.1
     ref_id: DE.AE-02.1
+    name: Security event analysis
     description: Cybersecurity and information security events must be reviewed and
       analysed to identify potential attack targets and methods, in accordance with
       applicable laws, regulations, standards, and policies.
@@ -4776,6 +4965,7 @@ objects:
       \ monitoring and analysis."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-02.2
     ref_id: DE.AE-02.2
+    name: Automated event analysis
     description: The organisation shall implement automated mechanisms where feasible
       to review and analyse detected events.
     annotation: "The goal of this control is to ensure that the organisation uses\
@@ -4803,6 +4993,7 @@ objects:
       \ new or subtle attack techniques."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-03.1
     ref_id: DE.AE-03.1
+    name: Detection tool logging and review
     description: The logging functionality of protection and detection tools shall
       be enabled. Logs shall be backed up and retained for a predefined period, and
       regularly reviewed to identify unusual or potentially harmful activity.
@@ -4824,6 +5015,7 @@ objects:
       \ awareness training."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-03.2
     ref_id: DE.AE-03.2
+    name: Event data correlation from multiple sources
     description: The organisation shall ensure that event data from critical systems
       is collected and correlated using information from multiple relevant sources.
     annotation: "The goal of this control is to enable the organisation to detect\
@@ -4846,6 +5038,7 @@ objects:
       \ more accurate and timely identification of threats."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-03.3
     ref_id: DE.AE-03.3
+    name: Event and vulnerability data correlation
     description: The organisation shall combine event analysis with information from
       vulnerability scans, system performance data, monitoring of critical systems,
       and facility monitoring, where feasible.
@@ -4862,6 +5055,7 @@ objects:
       \ detection and response when something unusual is found."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-04.1
     ref_id: DE.AE-04.1
+    name: Adverse event impact assessment
     description: The organisation shall assess the negative impacts of detected events
       on its operations, assets, and individuals, and shall link these impacts to
       the results of its risk assessments.
@@ -4879,6 +5073,7 @@ objects:
       \ actions, allocate resources, and improve response planning."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-06.1
     ref_id: DE.AE-06.1
+    name: Adverse event notification
     description: Information about adverse events must be promptly delivered to authorised
       personnel and systems to enable timely detection, investigation, and response.
     annotation: "The goal of this control is to ensure that information about adverse\
@@ -4908,6 +5103,7 @@ objects:
       \ them."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.ae-08.1
     ref_id: DE.AE-08.1
+    name: Incident reporting criteria
     description: Incidents shall be reported when adverse events meet defined and
       documented incident criteria.
     annotation: "This control ensures that adverse events are identified and reported\
@@ -4929,6 +5125,7 @@ objects:
       \ complex environments."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-01.1
     ref_id: RS.MA-01.1
+    name: Incident response plan execution
     description: An incident response plan, including defined roles, responsibilities,
       and authorities, shall be executed during or after a cybersecurity event affecting
       the organisation's critical systems.
@@ -4955,6 +5152,7 @@ objects:
       \ of operational processes."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-01.2
     ref_id: RS.MA-01.2
+    name: Incident response stakeholder coordination
     description: The organisation shall coordinate information/cybersecurity incident
       response actions with all predefined stakeholders.
     annotation: "The goal of this control is to ensure that all relevant internal\
@@ -4976,6 +5174,7 @@ objects:
       \ response procedures to protect safety and operations."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-02.1
     ref_id: RS.MA-02.1
+    name: Incident triage and validation
     description: "Information/cybersecurity incident reports shall be triaged and\
       \ validated in accordance with the organisation\u2019s incident response procedures."
     annotation: "The goal of this control is to ensure that all reported incidents\
@@ -4996,6 +5195,7 @@ objects:
       \ and supports better coordination across teams."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-02.2
     ref_id: RS.MA-02.2
+    name: Automated incident investigation tools
     description: Automated tools shall be used to support the investigation and impact
       assessment of validated cybersecurity incidents.
     annotation: "The goal of this control is to ensure that organisations are equipped\
@@ -5024,6 +5224,7 @@ objects:
       \ appropriately, in line with the organisation\u2019s incident response plan."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-03.1
     ref_id: RS.MA-03.1
+    name: Incident categorisation and escalation
     description: Information/cybersecurity incidents shall be categorised, prioritised
       and escalated as specified in the incident response plan.
     annotation: "This control is an evolution of RS.MA-02.1 and is to ensure that\
@@ -5046,6 +5247,7 @@ objects:
       \ ensure timely and appropriate response."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.ma-05.1
     ref_id: RS.MA-05.1
+    name: Recovery initiation criteria
     description: Clear criteria shall be defined and applied to determine when incident
       recovery processes need to be initiated.
     annotation: "The goal of this control is to ensure that organisations have a clear,\
@@ -5061,6 +5263,7 @@ objects:
       \ continuity requirements and acceptable downtime or data loss thresholds."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.an-03.1
     ref_id: RS.AN-03.1
+    name: Incident root cause analysis
     description: 'Each incident shall be analysed to determine what occurred and to
       identify its
 
@@ -5078,6 +5281,7 @@ objects:
       \ be reviewed for additional insights into attacker behaviour."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.an-06.1
     ref_id: RS.AN-06.1
+    name: Investigation record integrity
     description: Actions performed during an investigation shall be recorded, and
       the records' integrity and provenance shall be preserved.
     annotation: "The goal of this control is to ensure that all actions taken during\
@@ -5091,6 +5295,7 @@ objects:
       \ traceable to their original source."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.an-07.1
     ref_id: RS.AN-07.1
+    name: Incident data collection and protection
     description: Incident data and metadata should be collected and protected to ensure
       their accuracy, authenticity, and traceability.
     annotation: "The goal of this control is to ensure that all relevant information\
@@ -5111,6 +5316,7 @@ objects:
       \ the data can be used as evidence if required."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.an-08.1
     ref_id: RS.AN-08.1
+    name: Incident magnitude estimation
     description: "An incident\u2019s magnitude shall be estimated and validated."
     annotation: "The goal of this control is to ensure that organisations have a clear\
       \ understanding of the full scope and impact of a cybersecurity incident, so\
@@ -5130,6 +5336,7 @@ objects:
       \ actions are aligned with the actual risk and business impact."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.co-02.1
     ref_id: RS.CO-02.1
+    name: Internal incident communication
     description: Information about cybersecurity incidents shall be communicated to
       employees in a way that is clear and easy to understand.
     annotation: "he goal of this control is to ensure that all employees are informed\
@@ -5152,6 +5359,7 @@ objects:
       \ the steps being taken to resolve it."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.co-02.2
     ref_id: RS.CO-02.2
+    name: External incident reporting
     description: Cybersecurity incidents shall be shared with relevant external stakeholders
       within the timeframes defined in the Incident Response Plan, including reporting
       significant incidents to authorities as required by law.
@@ -5178,6 +5386,7 @@ objects:
       \ about incidents are addressed under a separate control (RC.CO-04.1)."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.mi-01.1
     ref_id: RS.MI-01.1
+    name: Incident containment and elimination
     description: Cybersecurity incidents shall be contained and eliminated. Any decision
       to accept and retain certain cybersecurity risks shall be formally documented.
     annotation: "The goal of this control is to stop cybersecurity incidents from\
@@ -5196,6 +5405,7 @@ objects:
       \ is part of the organisation\u2019s response plan."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rs.mi-01.2
     ref_id: RS.MI-01.2
+    name: Unauthorised access and data leakage mitigation
     description: The organisation shall detect unauthorised access or data leakage
       and take appropriate mitigation actions, including monitoring of critical systems
       at external boundaries and key internal points.
@@ -5230,6 +5440,7 @@ objects:
       \ unauthorised access."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.rp-01.1
     ref_id: RC.RP-01.1
+    name: Recovery process execution
     description: A recovery process for disasters and information/cybersecurity incidents
       shall be developed and executed.
     annotation: "The goal of this control is to ensure the organisation can respond\
@@ -5258,6 +5469,7 @@ objects:
       \ as further developed in control RC.RP-06.1."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.rp-02.1
     ref_id: RC.RP-02.1
+    name: Operational continuity maintenance
     description: The organisation's essential functions and services shall be continued
       with little or no loss of operational continuity, and continuity shall be maintained
       until full system recovery.
@@ -5285,6 +5497,7 @@ objects:
       \ reviewed to improve readiness over time."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.rp-05.1
     ref_id: RC.RP-05.1
+    name: Restored system integrity verification
     description: The integrity of restored systems and assets shall be verified before
       they are returned to service. Systems and services shall be fully restored,
       and normal operations shall be confirmed.
@@ -5300,6 +5513,7 @@ objects:
       \ and ready for normal use."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.rp-06.1
     ref_id: RC.RP-06.1
+    name: Incident recovery closure
     description: The end of incident recovery shall be formally declared based on
       predefined criteria, and all incident-related documentation shall be completed
       and reviewed.
@@ -5320,6 +5534,7 @@ objects:
       \ that the incident has been resolved."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.co-03.1
     ref_id: RC.CO-03.1
+    name: Recovery progress communication
     description: Recovery activities and progress in restoring operational capabilities
       shall be communicated to designated internal and external stakeholders in accordance
       with established communication procedures.
@@ -5341,6 +5556,7 @@ objects:
       \ coordination."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.co-04.1
     ref_id: RC.CO-04.1
+    name: Public incident recovery updates
     description: Public updates on incident recovery shall be shared using approved
       communication methods and messaging, in accordance with established procedures.
     annotation: "The goal of this control is to ensure that public communication during\
@@ -5362,6 +5578,7 @@ objects:
       \ procedures and ensure readiness."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.co-04.2
     ref_id: RC.CO-04.2
+    name: Public relations officer for incident recovery
     description: The organisation shall assign a Public Relations Officer (PRO) to
       manage public communications during information/cybersecurity incident recovery,
       ensuring that public updates are shared while maintaining the confidentiality,
@@ -5390,6 +5607,7 @@ objects:
       \ and update communication protocols to adapt to new challenges and ensure effectiveness."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:rc.co-04.3
     ref_id: RC.CO-04.3
+    name: Crisis communication strategy
     description: The organisation shall implement a crisis communication strategy
       to mitigate negative impacts during a crisis and help restore its reputation
       afterward.
