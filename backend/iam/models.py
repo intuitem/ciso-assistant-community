@@ -336,11 +336,15 @@ class Folder(NameDescriptionMixin):
         ]
 
         for ug_codename, role_codename in builtin_pairs:
-            ug, _ = UserGroup.objects.get_or_create(
+            ug, created = UserGroup.objects.get_or_create(
                 name=str(ug_codename),
                 folder=folder,
                 defaults={"builtin": True},
             )
+            if not created or not ug.builtin:
+                if not ug.builtin:
+                    ug.builtin = True
+                ug.save(update_fields=["builtin"])
             role = Role.objects.get(name=str(role_codename))
             ra, _ = RoleAssignment.objects.get_or_create(
                 user_group=ug,
@@ -353,11 +357,15 @@ class Folder(NameDescriptionMixin):
 
         with transaction.atomic():
             for role in Role.objects.filter(builtin=False):
-                ug, _ = UserGroup.objects.get_or_create(
+                ug, created = UserGroup.objects.get_or_create(
                     name=role.name,
                     folder=folder,
                     defaults={"builtin": True},
                 )
+                if not created or not ug.builtin:
+                    if not ug.builtin:
+                        ug.builtin = True
+                    ug.save(update_fields=["builtin"])
                 ra, _ = RoleAssignment.objects.get_or_create(
                     user_group=ug,
                     role=role,

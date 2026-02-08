@@ -1498,19 +1498,26 @@ class FolderWriteSerializer(BaseModelSerializer):
         if create_flag_changed:
             new_value = validated_data["create_iam_groups"]
             if new_value:
-                updated_instance = super().update(instance, validated_data)
-                Folder.create_default_ug_and_ra(updated_instance)
+                with transaction.atomic():
+                    updated_instance = super().update(instance, validated_data)
+                    Folder.create_default_ug_and_ra(updated_instance)
                 return updated_instance
 
             auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
-            if auto_groups.exists():
-                if User.objects.filter(user_groups__in=auto_groups).exists():
-                    raise serializers.ValidationError(
-                        {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
-                    )
-                with transaction.atomic():
+            auto_groups_exist = auto_groups.exists()
+            if (
+                auto_groups_exist
+                and User.objects.filter(user_groups__in=auto_groups).exists()
+            ):
+                raise serializers.ValidationError(
+                    {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
+                )
+            with transaction.atomic():
+                updated_instance = super().update(instance, validated_data)
+                if auto_groups_exist:
                     RoleAssignment.objects.filter(user_group__in=auto_groups).delete()
                     auto_groups.delete()
+            return updated_instance
 
         return super().update(instance, validated_data)
 
