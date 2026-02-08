@@ -1,6 +1,6 @@
 # Jira
 
-### Overview
+## Overview
 
 The Jira integration allows you to synchronize applied controls from CISO Assistant with issues in your Jira projects. This helps you track the implementation and status of your controls directly in Jira, leveraging your existing workflows.
 
@@ -50,18 +50,7 @@ To configure the integration, you will need to perform steps on both the Jira an
 1. In Jira, go to the project you want to integrate with CISO Assistant.
 2. The project key is a short identifier for your project (e.g., 'PROJ', 'CIS'). You can find it in the project details or in the URL.
 
-<figure><img src="../../.gitbook/assets/image (41).png" alt=""><figcaption></figcaption></figure>
-
-### **Incoming sync**
-
-{% hint style="info" %}
-This is only useful if you wish to enable incoming sync on CISO Assistant. Incoming sync requires outgoing ones.
-{% endhint %}
-
-* Log in to your Jira account
-* Go to **System settings > WebHooks**
-* Click the **+ Create WebHook** button on the top-right corner
-* You might need to filter the associated JQL to only send events on you specific project.
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
 #### 2. Configure CISO Assistant
 
@@ -75,7 +64,27 @@ This is only useful if you wish to enable incoming sync on CISO Assistant. Incom
       * **Jira Username/Email:** The email address you use to log in to Jira.
       * **Jira API Token:** The API token you created in the previous step.
       * **Jira Project Key:** The key of the Jira project you want to synchronize with.
-4. Configure incoming sync
+
+
+
+
+
+## **Incoming sync**
+
+{% hint style="info" %}
+This is only useful if you wish to enable incoming sync on CISO Assistant. Incoming sync requires outgoing ones.
+{% endhint %}
+
+* Log in to your Jira account
+* Go to **System settings > WebHooks**
+* Click the **+ Create WebHook** button on the top-right corner
+* You might need to filter the associated JQL to only send events on you specific project.
+
+
+
+1. Configure outgoing sync
+   1. Make sure you have completed [Outgoing sync configuration](jira.md#outgoing-sync)
+2. Configure incoming sync
    1.  Enter the following information:
 
        *   **Webhook secret:** The webhook secret you have generated when configuring your outgoing webhook on Jira.<br>
@@ -88,11 +97,9 @@ This is only useful if you wish to enable incoming sync on CISO Assistant. Incom
            <figure><img src="../../.gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
 
        <figure><img src="../../.gitbook/assets/image (42).png" alt=""><figcaption></figcaption></figure>
-5. Save the configuration
+3. Save the configuration
 
 <figure><img src="../../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
-
-## Usage
 
 Once the integration is configured and enabled, CISO Assistant will start synchronizing applied controls with Jira issues.
 

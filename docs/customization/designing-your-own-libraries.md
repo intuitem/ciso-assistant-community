@@ -708,7 +708,7 @@ Governance → Libraries
 {% endstep %}
 
 {% step %}
-### Click on the <img src="../.gitbook/assets/image (11).png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button
+### Click on the <img src="../.gitbook/assets/image (11) (1).png" alt="Purple button with a white file in it and a &#x22;+&#x22; sign" data-size="line"> button
 
 
 {% endstep %}
