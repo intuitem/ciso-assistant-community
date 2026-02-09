@@ -182,7 +182,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 {% file src="../.gitbook/assets/sample004.xlsx" %}
 
-#### Supported fields
+### Supported fields
 
 
 
@@ -206,7 +206,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * filtering\_labels\
   you can add multiple labels for one finding separating them with `|` ( e.g. interna&#x6C;**|**&#x70;entes&#x74;**|**...)
 
-### 👥 Users
+## 👥 Users
 
 ### Template
 
