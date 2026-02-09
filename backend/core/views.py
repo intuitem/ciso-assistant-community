@@ -6529,46 +6529,21 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
-    # def _import_terminology(
-    #     self,
-    #     name: str,
-    #     field_path: Terminology.FieldPath,
-    # ) -> Terminology | None:
-    #     """
-    #     Method that creates a missing terminlogy if needed.
-    #     Set is_visible to True if the terminology already exists but is not visible.
-    #     """
-    #     if not name:
-    #         return None
-    #     print("@" * 5, "importing terminology:", name)
-    #     obj, c = Terminology.objects.get_or_create(
-    #         name=name,
-    #         field_path=field_path,
-    #         defaults={"is_visible": True},
-    #     )
-    #     if c:
-    #         print("*" * 3, name, "didnt exist, has been created")
-    #     if not obj.is_visible:
-    #         obj.is_visible = True
-    #         obj.save()
-    #
-    #     return obj
-
-    def _ensure_terminologies(
+    def _import_terminologies(
         self,
         names: str | List[str] | None,
         field_path: Terminology.FieldPath,
     ) -> QuerySet[Terminology] | Terminology | None:
         """
-        Ensure terminologies exist and are visible.
+        Ensure that requested terminologies exist and are visible. If not, create them. If they exist but are not visible, make them visible.
 
         Args:
-            names: single name (str) or list of names
+            names: name of the Terminology (str) to import, or list of names for multiple Terminologies.
             field_path: which Terminology.FieldPath to assign
 
         Returns:
-            - For list input: QuerySet of Terminology objects
             - For single input: Terminology object
+            - For list input: QuerySet of Terminology objects
             - For None or empty list: None
         """
         if names is None:
@@ -6856,8 +6831,8 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
-                    #   Handling of m2m happens in a second step (see call to self._set_many_to_many_relations)
-                    #   after the object is created, because it requires the database ID of the created object
+                    #   Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
+                    #   after the object is created because it requires the database ID of the created object
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -7006,8 +6981,8 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_assessment"] = RiskAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
-                _fields["risk_origin"] = self._ensure_terminologies(
-                    _fields["risk_origin"], Terminology.FieldPath.ROTO_RISK_ORIGIN
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields.get("risk_origin"), Terminology.FieldPath.ROTO_RISK_ORIGIN
                 )
                 # TODO: feels complicated, may be simplified
                 # Process all related _fields at once
@@ -7034,7 +7009,7 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
-                many_to_many_map_ids["relationships_ids"] = self._ensure_terminologies(
+                many_to_many_map_ids["relationships_ids"] = self._import_terminologies(
                     _fields.pop("relationship", []),
                     Terminology.FieldPath.ENTITY_RELATIONSHIP,
                 )  # relationships_ids are in fact names of the relationships
@@ -7082,8 +7057,8 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
-                _fields["risk_origin"] = self._ensure_terminologies(
-                    _fields["risk_origin"],
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields["risk_origin"],  # risk origin is a mandatory field on RoTo
                     Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
