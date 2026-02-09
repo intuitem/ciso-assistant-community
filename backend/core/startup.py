@@ -1106,6 +1106,24 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
 ]
 
+AUDITEE_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
+    "view_evidencerevision",
+    "add_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
+    "view_folder",
+    "view_requirementassignment",
+    "view_appliedcontrol",
+    "view_framework",
+]
+
 
 def startup(sender: AppConfig, **kwargs):
     """
@@ -1240,6 +1258,34 @@ def startup(sender: AppConfig, **kwargs):
         name=RoleCodename.THIRD_PARTY_RESPONDENT.value, builtin=True
     )
     third_party_respondent.permissions.set(third_party_respondent_permissions)
+
+    auditee_permissions = Permission.objects.filter(
+        codename__in=AUDITEE_PERMISSIONS_LIST
+    )
+    auditee, created = Role.objects.get_or_create(
+        name=RoleCodename.AUDITEE.value, builtin=True
+    )
+    auditee.permissions.set(auditee_permissions)
+
+    # Backfill auditee user groups for existing domain folders
+    auditee_role = Role.objects.get(name=RoleCodename.AUDITEE.value)
+    for domain_folder in Folder.objects.filter(content_type=Folder.ContentType.DOMAIN):
+        if not UserGroup.objects.filter(
+            name=str(UserGroupCodename.AUDITEE), folder=domain_folder
+        ).exists():
+            ug = UserGroup.objects.create(
+                name=str(UserGroupCodename.AUDITEE),
+                folder=domain_folder,
+                builtin=True,
+            )
+            ra = RoleAssignment.objects.create(
+                user_group=ug,
+                role=auditee_role,
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra.perimeter_folders.add(domain_folder)
 
     # Create default Qualifications
     try:

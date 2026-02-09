@@ -125,6 +125,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     compare_schema_versions,
+    get_auditee_filtered_folder_ids,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -8120,6 +8121,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ),
         )
 
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
         return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -8902,6 +8911,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments = [
+                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+            ]
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -8941,6 +8963,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments_objects = [
+                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+            ]
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -9511,7 +9546,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries for table view and serializer - high-impact due to many nested relationships"""
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related(
@@ -9528,6 +9563,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
             )
         )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(assignments__actor__in=user_actors)
+            ).distinct()
+        return qs
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
@@ -12322,7 +12365,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     ]
 
     def get_queryset(self):
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related(
@@ -12334,3 +12377,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 "requirement_assessments",
             )
         )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+            ).distinct()
+        return qs
