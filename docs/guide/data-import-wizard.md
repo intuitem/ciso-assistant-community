@@ -36,8 +36,6 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ## 📦 Assets
 
-
-
 ### Template
 
 {% file src="../.gitbook/assets/sample001.xlsx" %}
@@ -60,11 +58,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 
 
-
-
 ## ⚙️ Applied controls
-
-
 
 ### Template
 
@@ -107,8 +101,6 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ## 📦 Perimeters
 
-
-
 ### Template
 
 {% file src="../.gitbook/assets/sample003.xlsx" %}
@@ -130,10 +122,6 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 
 ## 📃 Audits
-
-
-
-
 
 ### Template
 
@@ -174,9 +162,9 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * Assessable will fallback to false
 * Unassessable rows are skipped.
 
+
+
 ## 🐞 Findings followup (eg. pentest)
-
-
 
 ### Template
 
@@ -206,6 +194,8 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * filtering\_labels\
   you can add multiple labels for one finding separating them with `|` ( e.g. interna&#x6C;**|**&#x70;entes&#x74;**|**...)
 
+
+
 ## 👥 Users
 
 ### Template
@@ -220,9 +210,9 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * first\_name
 * last\_name
 
+
+
 ## ☣️ Risk assessment&#x20;
-
-
 
 The risk assessment is an advanced object that needs special considerations. Make sure to pick the matrix that will be used to map your labels to the values on CISO Assistant. If you have a specific matrix, you should start by including it as a custom library.
 
@@ -235,8 +225,6 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 {% file src="../.gitbook/assets/risk_assessment_template.xlsx" %}
 
 ### Supported fields:
-
-
 
 * ref\_id
 * name\*
@@ -256,15 +244,13 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
   * avoid
   * transfer
 
+
+
 ## ⚙️  Elementary actions
-
-
 
 Elementary actions are useful to model a killchain during the 4th workshop of an EBIOS RM study.&#x20;
 
 ### Supported fields:
-
-
 
 * ref\_id
 * name\*
@@ -305,14 +291,12 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 
 
 
-
-
 ## Reference controls
 
 \
-Reference controls are templates of the controls to apply. The supported  fields are:
+Reference controls are templates of the controls to apply.&#x20;
 
-
+### Supported fields:
 
 * ref\_id
 * name
