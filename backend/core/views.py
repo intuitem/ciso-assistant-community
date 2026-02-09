@@ -6546,7 +6546,7 @@ class FolderViewSet(BaseModelViewSet):
             - For list input: QuerySet of Terminology objects
             - For None or empty list: None
         """
-        if names is None:
+        if not names:
             return None
 
         print("@" * 5, "importing terminology(ies):", names)
@@ -6880,9 +6880,9 @@ class FolderViewSet(BaseModelViewSet):
         many_to_many_map_ids,
     ):
         """
-        Process model-specific relationships.
-        M2M relationships are stored in a separate map to be processed after the object is created (see _set_many_to_many_relations).
-        Other relationships are directly converted to their database IDs or instances.
+        Process model-specific relationships:
+         - M2M relationships are removed from `fields` and stored in a separate map to be processed after the object is created (see `_set_many_to_many_relations`).
+         - Other relationships are directly converted to their database IDs or instances.
         """
         # TODO: DOC
 
@@ -7001,7 +7001,9 @@ class FolderViewSet(BaseModelViewSet):
                         else f"{field}_ids"
                     )
                     if field == "qualifications":
-                        many_to_many_map_ids[map_key] = _fields.pop(field, [])
+                        many_to_many_map_ids[map_key] = self._import_terminologies(
+                            _fields.pop(field, []), Terminology.FieldPath.QUALIFICATIONS
+                        )
                     else:
                         many_to_many_map_ids[map_key] = get_mapped_ids(
                             _fields.pop(field, []), link_dump_database_ids
@@ -7009,10 +7011,10 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
-                many_to_many_map_ids["relationships_ids"] = self._import_terminologies(
+                many_to_many_map_ids["relationship_ids"] = self._import_terminologies(
                     _fields.pop("relationship", []),
                     Terminology.FieldPath.ENTITY_RELATIONSHIP,
-                )  # relationships_ids are in fact names of the relationships
+                )  # relationship_ids are in fact names of the relationships
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -7058,7 +7060,9 @@ class FolderViewSet(BaseModelViewSet):
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
                 _fields["risk_origin"] = self._import_terminologies(
-                    _fields["risk_origin"],  # risk origin is a mandatory field on RoTo
+                    _fields[
+                        "risk_origin"
+                    ],  # risk origin must exist, it's a mandatory field on RoTo
                     Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
@@ -7072,6 +7076,10 @@ class FolderViewSet(BaseModelViewSet):
                             id=link_dump_database_ids.get(_fields["entity"])
                         ),
                     }
+                )
+                _fields["category"] = self._import_terminologies(
+                    _fields["category"],
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,  # category must exist, it's a mandatory field on Stakeholder
                 )
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
                     _fields.pop("applied_controls", []), link_dump_database_ids
@@ -7163,37 +7171,8 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
-
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
-
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
                 for field, model_class in {
                     "vulnerability_ids": (Vulnerability, "vulnerabilities"),
@@ -7281,7 +7260,8 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "entity":
-                obj.relationship.set(many_to_many_map_ids["relationships_ids"])
+                if relationship_ids := many_to_many_map_ids["relationship_ids"]:
+                    obj.relationship.set(relationship_ids)
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
