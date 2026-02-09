@@ -13,16 +13,14 @@ prepare_meta_file() {
   cp .meta ./backend/.meta
 }
 
-get_uid() {
-  stat -c '%u' "$1" 2>/dev/null || stat -f '%u' "$1"
+# On macOS, GNU stat (-c) is not available by default. We use this as a simple
+# Linux detector and skip chown on macOS (Docker Desktop emulates ownership).
+is_linux_gnu_stat() {
+  stat -c '%u:%g' . >/dev/null 2>&1
 }
 
-get_gid() {
-  stat -c '%g' "$1" 2>/dev/null || stat -f '%g' "$1"
-}
-
-get_owner_uid_gid() {
-  echo "$(get_uid "$1"):$(get_gid "$1")"
+get_owner_linux() {
+  stat -c '%u:%g' "$1"
 }
 
 # Enable BuildKit for faster builds
@@ -36,22 +34,24 @@ if [ -f db/ciso-assistant.sqlite3 ]; then
 else
   prepare_meta_file
 
-  # Build and start the containers
   echo "Building containers..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" build --pull
 
   mkdir -p ./db
-  DB_OWNER="$(get_owner_uid_gid ./db)"
 
-  if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
-    echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
-    sudo chown -R "$EXPECTED_OWNER" ./db
+  if is_linux_gnu_stat; then
+    DB_OWNER="$(get_owner_linux ./db)"
+    if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
+      echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
+      sudo chown -R "$EXPECTED_OWNER" ./db
+    fi
+  else
+    echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
   fi
 
   echo "Starting services..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" up
 
-  # Simple wait for database migrations
   echo "Giving some time for the database to be ready, please wait ..."
   sleep 50
 

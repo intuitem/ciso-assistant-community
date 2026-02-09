@@ -4,16 +4,12 @@ set -euo pipefail
 DOCKER_COMPOSE_FILE=docker-compose.yml
 EXPECTED_OWNER="1001:1001"
 
-get_uid() {
-  stat -c '%u' "$1" 2>/dev/null || stat -f '%u' "$1"
+is_linux_gnu_stat() {
+  stat -c '%u:%g' . >/dev/null 2>&1
 }
 
-get_gid() {
-  stat -c '%g' "$1" 2>/dev/null || stat -f '%g' "$1"
-}
-
-get_owner_uid_gid() {
-  echo "$(get_uid "$1"):$(get_gid "$1")"
+get_owner_linux() {
+  stat -c '%u:%g' "$1"
 }
 
 if [ -d ./db ]; then
@@ -23,11 +19,15 @@ if [ -d ./db ]; then
 fi
 
 mkdir -p ./db
-DB_OWNER="$(get_owner_uid_gid ./db)"
 
-if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
-  echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
-  sudo chown -R "$EXPECTED_OWNER" ./db
+if is_linux_gnu_stat; then
+  DB_OWNER="$(get_owner_linux ./db)"
+  if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
+    echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
+    sudo chown -R "$EXPECTED_OWNER" ./db
+  fi
+else
+  echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
 fi
 
 echo "Starting CISO Assistant services..."
