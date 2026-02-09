@@ -27,8 +27,16 @@ else
   echo "Building containers..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" build --pull
 
+  mkdir -p ./db
+  DB_OWNER="$(stat -c '%u:%g' ./db)"
+
+  if [ "$DB_OWNER" != "1001:1001" ]; then
+    echo "Fixing ownership of ./db (was $DB_OWNER, expected 1001:1001)"
+    sudo chown -R 1001:1001 ./db
+  fi
+
   echo "Starting services..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
+  docker compose -f "${DOCKER_COMPOSE_FILE}" up
 
   # Simple wait for database migrations
   echo "Giving some time for the database to be ready, please wait ..."

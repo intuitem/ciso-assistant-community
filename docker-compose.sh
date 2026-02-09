@@ -2,14 +2,25 @@
 set -euo pipefail
 
 DOCKER_COMPOSE_FILE=docker-compose.yml
+
 if [ -d ./db ]; then
   echo "The database seems already created. You should launch 'docker compose up -d' instead."
   echo "For a clean start, you can remove the db folder, and then run 'docker compose rm -fs' and start over"
   exit 1
 fi
+
+mkdir -p ./db
+DB_OWNER="$(stat -c '%u:%g' ./db)"
+
+if [ "$DB_OWNER" != "1001:1001" ]; then
+  echo "Fixing ownership of ./db (was $DB_OWNER, expected 1001:1001)"
+  sudo chown -R 1001:1001 ./db
+fi
+
 echo "Starting CISO Assistant services..."
 docker compose pull
 echo "Initializing the database. This can take up to 2 minutes, please wait.."
+
 docker compose up -d
 
 echo "Waiting for CISO Assistant backend to be ready..."
