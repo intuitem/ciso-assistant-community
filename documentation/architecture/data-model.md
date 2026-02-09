@@ -2115,26 +2115,32 @@ The new model is a superset of the current model, so it is possible to migrate p
 - the format of reports is well described by the xlsx template: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
 - Missing fields shall be added in the incident data model to generate the various reports
 
-## Forms and workflows
+## Workflow Engine
+
+> Status: MVP spec. Sections marked **TBD** are under active design.
+
+## Principles
+
+Every object is scoped to a domain (IAM boundary). Domain scoping is implicit throughout this document.
+
+Only published workflow definitions are executable, and published definitions are immutable. Execution is deterministic: parallelism is explicit (fork/join), multi-actor work is modeled as multiple task nodes. The runtime is strict — missing variables, invalid CEL expressions, or type mismatches are execution errors, never silently coerced to false.
+
+The MVP engine uses a single worker to advance execution. Separate workers execute tasks and actions.
+
+## Data model
 
 ```mermaid
 erDiagram
   WORKFLOW_PROCESS   ||--o{ WORKFLOW_DEFINITION : has_versions
   WORKFLOW_DEFINITION||--o{ WORKFLOW_NODE       : defines
   WORKFLOW_DEFINITION||--o{ WORKFLOW_EDGE       : defines
-  WORKFLOW_DEFINITION||--o{ WORKFLOW_VARIABLE   : defines
   WORKFLOW_DEFINITION||--o{ WORKFLOW_INSTANCE   : defines
   WORKFLOW_EDGE      }o--|| WORKFLOW_NODE       : starts_from
   WORKFLOW_EDGE      }o--|| WORKFLOW_NODE       : goes_to
-
   WORKFLOW_TOKEN     ||--o| TASK_INSTANCE       : spawns
   WORKFLOW_TOKEN     }o--|| WORKFLOW_NODE       : at_node
   WORKFLOW_INSTANCE  ||--o{ TASK_INSTANCE       : has_tasks
-
-
   WORKFLOW_INSTANCE  ||--o{ WORKFLOW_TOKEN      : contains
-
-
   WORKFLOW_NODE      }o--o| ACTOR               : assigned_nodes
   TASK_INSTANCE      }o--|| ACTOR               : assigned_tasks
 
@@ -2143,34 +2149,26 @@ erDiagram
     string name
     string description
   }
-
   WORKFLOW_DEFINITION {
     string name
     string description
     string status
     int version
     uuid parent_id
-    datetime created_at
+    json vars
   }
-
   WORKFLOW_NODE {
-    string name
+    string ref_id
+    string annotation
     string type
     json config
   }
-
   WORKFLOW_EDGE {
+    string annotation
     string condition
     bool is_default
     int priority
   }
-
-  WORKFLOW_VARIABLE {
-    string name
-    string type
-    json default_value
-  }
-
   WORKFLOW_INSTANCE {
     string status
     json vars
@@ -2178,15 +2176,213 @@ erDiagram
     bool is_dirty
     datetime next_wakeup_at
   }
-
   WORKFLOW_TOKEN {
     string status
     uuid fork_id
   }
-
   TASK_INSTANCE {
     string status
-    json captured_data
-    datetime timeout_at
+    datetime due_date
   }
 ```
+
+### Workflow process
+
+A workflow process is a logical family of workflows representing a business process (e.g. "Vendor Security Assessment"). It groups published versions over time.
+
+A process has a ref_id (stable external identifier) and a name (unique per domain).
+
+### Workflow definition
+
+A workflow definition is a concrete version of a workflow process. Definitions go through two lifecycle stages:
+
+- draft: mutable, can be created and deleted freely.
+- published: immutable and executable. Publishing assigns a monotonically increasing version number, unique within the parent process.
+
+The parent_id field provides documentary lineage between definitions (e.g. "this draft was cloned from version 3"). It has no runtime effect.
+
+The vars field contains the variable schema for the workflow — see [Variables](#variables).
+
+### Workflow node
+
+A workflow node is a vertex in the execution graph. Each node has a type that determines its runtime behavior: start/end/gateway/task/action.
+
+The ref_id field is a machine identifier, unique within the definition and immutable after creation. It is used for API references, logging, and stable canvas-to-engine mapping. The annotation field is the human-readable label displayed on the canvas.
+
+The config field carries type-specific configuration as JSON — see [Node types](#node-types).
+
+### Workflow edge
+
+An edge is a directed connection between two nodes. It carries routing logic for XOR gateways.
+
+The condition field is an optional CEL expression evaluated against `instance.vars`. For XOR forks, outgoing edges are evaluated by priority (ascending); the first satisfied condition wins. If no condition matches, the edge marked is_default is taken. If no default exists, it is an execution error.
+
+The annotation field is a human-readable label (e.g. "approved", "score too low").
+
+Note: parallel fork edges are taken unconditionally — conditions on them are ignored. Join edges are also unconditional; synchronization semantics live on the gateway node, not on edges.
+
+### Workflow instance
+
+A workflow instance is a running execution of a published definition. It has the following statuses: --/running/completed/failed/cancelled.
+
+The vars field holds runtime variable values. It conforms to the schema declared in `definition.vars` — see [Variables](#variables).
+
+The ref_id field is an optional external reference (e.g. a ticket ID or business object identifier).
+
+The is_dirty flag is set to true whenever external state changes require the engine to re-evaluate the instance (task completion, action completion, variable update, admin intervention). The next_wakeup_at field holds the earliest pending timeout, enabling time-based polling without scanning all task instances — see [Runtime engine](#runtime_engine).
+
+Business object attachments: instances reference business objects using explicit typed ManyToMany fields (no ContentType polymorphism).
+
+### Workflow token
+
+Tokens are runtime execution pointers. A workflow instance can have multiple active tokens simultaneously — this is how parallel execution works.
+
+Token statuses are: active/waiting/done/cancelled/errored.
+
+The fork_id field (UUID) groups sibling tokens created by the same parallel fork. It is used by AND-join gateways to determine when all branches have completed.
+
+### Task instance
+
+A task instance is created when a token arrives at a task node. It represents a concrete unit of work assigned to an actor.
+
+Task instance statuses are: pending/done/cancelled/timed_out/failed.
+
+The actor field references the actor assigned to this task. It is copied from the node's design-time assignment, or resolved from instance variables if the assignment was parameterized (mechanism **TBD**).
+
+The due_date is computed at creation from the task node's timeout_duration config. When due_date passes, the engine marks the task as timed_out and applies the timeout_action from the node config — see [Timeout handling](#timeout-handling).
+
+### Actor
+
+Actor is an existing model. It is an exclusive arc between User, Team, and Entity — an actor is exactly one of the three. It is used for both design-time node assignment and runtime task assignment.
+
+Design-time assignment links the workflow node to an actor. Runtime assignment can differ if the actor is passed as a variable at instance creation (mechanism **TBD**).
+
+## Node types
+
+### Start
+
+Entry point. Exactly one per definition. No config. The engine creates an initial token at this node on instance creation.
+
+### End
+
+Terminal node. When a token reaches an end node, the token is marked done. When all tokens in an instance are done or cancelled, the instance status becomes completed.
+
+### Task
+
+A task is work assigned to a single actor (human, team, entity, or AI agent). It blocks execution until resolved.
+
+The node config supports:
+
+- timeout_duration (optional): ISO 8601 duration (e.g. `PT72H`). Used to compute `TaskInstance.due_date` at creation.
+- timeout_action: error/skip. Determines what happens when due_date passes. Default: error. When skip is used, the token advances past the task node and output mapping is skipped.
+- output_mapping (**TBD**): maps task output fields to `instance.vars` keys.
+
+One task node targets one actor. If multiple actors are needed, model multiple task nodes (optionally in parallel via a fork gateway). Auto-completion is valid — for example, an AI agent task may resolve immediately, but it is still modeled as a task.
+
+### Action
+
+An action is a system-side automatic effect: send email, webhook call, computation, etc. Actions have no assigned actor. They are dispatched to dedicated workers and report completion back to the engine via the is_dirty flag.
+
+The node config supports:
+
+- action_type: identifies the executor (e.g. `send_email`, `http_request`).
+- params: action-type-specific parameters.
+- output_mapping (**TBD**): maps action result to `instance.vars` keys.
+
+Action failures are execution errors on the token.
+
+### Gateway
+
+Gateways control flow structure. They carry no business logic. The config has two fields:
+
+- kind: xor/parallel
+- mode: fork/join
+
+Gateway behavior:
+
+- **XOR fork**: evaluate outgoing edges by priority (ascending). Take the first edge whose condition is satisfied. If none match, take the is_default edge. No default and no match is an execution error.
+- **XOR join**: pass-through. The token advances immediately.
+- **Parallel fork**: take all outgoing edges. One new token per edge, each sharing the same fork_id.
+- **Parallel join (AND)**: the arriving token waits. When all sibling tokens (same fork_id) have reached the join, they are consumed and one outgoing token is produced.
+
+Note: OR-join (race semantics, sibling cancellation) is excluded from MVP.
+
+## Variables
+
+### Schema
+
+`WorkflowDefinition.vars` declares the variable schema for the workflow: names, types, and default values.
+
+```json
+{
+  "risk_level": { "type": "string", "default": "low" },
+  "score": { "type": "int" },
+  "is_critical": { "type": "bool", "default": false },
+  "metadata": { "type": "json" },
+  "review_deadline": { "type": "datetime" }
+}
+```
+
+Supported types: string/int/float/bool/json/datetime. Datetime values are timezone-aware, stored in UTC, and serialized as ISO 8601.
+
+### Initialization
+
+When a workflow instance is created:
+
+1. All defaults from `definition.vars` are deep-copied into `instance.vars`.
+2. Caller-provided overrides are merged in (e.g. business object context, assignee references).
+3. Any override key not present in the schema is rejected.
+4. Type mismatches are rejected.
+
+### Runtime writes
+
+Nodes write to `instance.vars` via their output_mapping config (**TBD**). The engine validates that the target key exists in the definition schema and the value matches the declared type. Invalid writes are execution errors.
+
+### CEL evaluation context
+
+All CEL expressions (edge conditions, output mappings) evaluate against `vars.*` — the current `instance.vars` values. Additional evaluation context (e.g. task result fields, action response) is **TBD**.
+
+## Runtime engine
+
+A single engine worker polls for instances that need processing. Separate workers handle task execution and action execution. Task and action workers do not advance tokens — they set `is_dirty = True` on the instance and the engine picks it up on the next cycle.
+
+### Polling loop
+
+The engine selects instances where `is_dirty = True` or `next_wakeup_at <= now()`.
+
+For each selected instance:
+
+1. Lock the instance row within a transaction.
+2. Set `is_dirty = False` optimistically.
+3. Advance all active tokens until each reaches a blocking point (pending task, waiting join) or the graph terminates.
+4. Recompute next_wakeup_at as the earliest due_date among pending task instances, or null if none.
+5. Commit.
+
+### Dirty flag triggers
+
+External events set `is_dirty = True` on the relevant instance:
+
+- Task completion
+- Action completion
+- Variable update via API
+- Admin intervention (retry, skip)
+
+### Timeout handling
+
+On each poll cycle, the engine processes instances where `next_wakeup_at <= now()`. For each task instance where due_date has passed:
+
+1. Mark the task instance as timed_out.
+2. Apply the timeout_action from the task node config:
+    - error: mark the token as errored.
+    - skip: advance the token past the task node. Output mapping is skipped, vars are unchanged.
+
+## MVP non-goals
+
+The following capabilities are explicitly excluded from MVP. The data model preserves extension points for them.
+
+- OR-join (race semantics, sibling cancellation)
+- Runtime workflow composition (call-subprocess)
+- Quorum / first-wins semantics within a single task
+- Event-driven engine wake-up (replaced by is_dirty / next_wakeup_at polling)
+- Publish-time graph validation (structural correctness checks)
+- Output mapping specification (currently **TBD**)
