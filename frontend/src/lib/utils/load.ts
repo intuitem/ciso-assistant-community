@@ -218,9 +218,15 @@ export const loadDetail = async ({ event, model, id }) => {
 				})
 		);
 	}
+	let title = data.str || data.name || data.email || data.label || data.id;
+	if (model.urlModel === 'reference-controls') {
+		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+		title = hasName ? data.name : data.ref_id || title;
+	}
+
 	return {
 		data,
-		title: data.str || data.name || data.email || data.label || data.id,
+		title,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
