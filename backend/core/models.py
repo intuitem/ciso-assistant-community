@@ -7155,7 +7155,7 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return f"{self.actor} - {self.compliance_assessment}"
+        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{self.actor}"
 
 
 class FindingsAssessment(Assessment):
