@@ -1,12 +1,12 @@
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 
-import type { PageServerLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 import { loadDetail } from '$lib/utils/load';
 import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 
-export const load: PageServerLoad = async (event) => {
+export const load: LayoutServerLoad = async (event) => {
 	const EbiosRMSchema = modelSchema('ebios-rm');
 	const loadData = await loadDetail({
 		event,

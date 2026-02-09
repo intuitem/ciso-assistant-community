@@ -23,7 +23,7 @@ from core.models import (
 from core.validators import (
     JSONSchemaInstanceValidator,
 )
-from iam.models import FolderMixin, Folder
+from iam.models import FolderMixin, Folder, RoleAssignment, Permission
 from tprm.models import Entity
 
 from typing import TYPE_CHECKING
@@ -398,7 +398,10 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
         except Exception as e:
             error = str(e)
-            return None, error
+            return (
+                None,
+                error,
+            )
 
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
@@ -653,7 +656,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
             justification=self.justification,
             risk_origin=self.risk_origin,
         )
-        duplicated_roto.feared_events.set(ebios_rm_study.feared_events.all())
+        duplicated_roto.feared_events.set(self.feared_events.all())
 
         return duplicated_roto, None
 
@@ -915,12 +918,13 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
             duplicated_feared_event = FearedEvent.objects.filter(
                 ebios_rm_study=ebios_rm_study,
                 name=feared_event.name,
+                ref_id=feared_event.ref_id,
             ).first()
 
             if duplicated_feared_event is None:
                 return None, f"Duplicated feared event not found."
 
-        duplicated_roto = StrategicScenario.objects.create(
+        duplicated_strategic_scenario = StrategicScenario.objects.create(
             ebios_rm_study=ebios_rm_study,
             name=self.name,
             description=self.description,
@@ -928,7 +932,7 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
             ro_to_couple=duplicated_roto,
             focused_feared_event=duplicated_feared_event,
         )
-        return duplicated_roto, None
+        return duplicated_strategic_scenario, None
 
     def get_gravity_display(self):
         if self.focused_feared_event:
@@ -995,7 +999,9 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
         self, ebios_rm_study: EbiosRMStudy
     ) -> tuple["AttackPath", None] | tuple[None, str]:
         duplicated_strategic_scenario = StrategicScenario.objects.filter(
-            ebios_rm_study=ebios_rm_study
+            ebios_rm_study=ebios_rm_study,
+            name=self.strategic_scenario.name,
+            ref_id=self.strategic_scenario.ref_id,
         ).first()
         if duplicated_strategic_scenario is None:
             return None, f"Duplicated strategic scenario not found."
@@ -1008,7 +1014,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
             is_selected=self.is_selected,
             justification=self.justification,
         )
-        duplicated_attack_path.stakeholders.set(ebios_rm_study.stakeholders.all())
+        duplicated_attack_path.stakeholders.set(self.stakeholders.all())
         return duplicated_attack_path, None
 
     @classmethod

@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
-from iam.models import RoleAssignment, Folder
+from iam.models import RoleAssignment, Folder, Permission
 from openpyxl.styles import Alignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -151,6 +151,18 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         if new_folder is None:
             return Response(
                 {"error": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_ebiosrmstudy"),
+            folder=new_folder,
+        ):
+            return Response(
+                {
+                    "error": "You don't have permission to create an EBIOS RM Study in this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
             )
 
         new_name = data.get("name", ebios_rm_study.name)
