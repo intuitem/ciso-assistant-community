@@ -250,7 +250,11 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 * residual\_impact
 * residual\_proba
 * treatment
-  * `open, mitigate, accept, avoid, transfer`
+  * open
+  * mitigate
+  * accept
+  * avoid
+  * transfer
 
 ## ⚙️  Elementary actions
 
