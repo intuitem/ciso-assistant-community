@@ -180,8 +180,6 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 
 ### Template
 
-
-
 {% file src="../.gitbook/assets/sample004.xlsx" %}
 
 #### Supported fields
@@ -205,9 +203,8 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `mitigated`
   * `resolved`
   * `deprecated`
-* filtering\_labels
-
-
+* filtering\_labels\
+  you can add multiple labels for one finding separating them with `|` ( e.g. interna&#x6C;**|**&#x70;entes&#x74;**|**...)
 
 ### 👥 Users
 
@@ -223,7 +220,7 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
 * first\_name
 * last\_name
 
-### ☣️ Risk assessment&#x20;
+## ☣️ Risk assessment&#x20;
 
 
 
@@ -233,9 +230,11 @@ inherent\_level, current\_level and residual\_level are kept on the excel sample
 
 Controls are created on picked based on the perimeter's domain. Line breaks are used as seperator.
 
+### Template:
 
+{% file src="../.gitbook/assets/risk_assessment_template.xlsx" %}
 
-Supported fields:
+### Supported fields:
 
 
 
@@ -253,15 +252,13 @@ Supported fields:
 * treatment
   * `open, mitigate, accept, avoid, transfer`
 
-{% file src="../.gitbook/assets/risk_assessment_template.xlsx" %}
-
-### ⚙️  Elementary actions
+## ⚙️  Elementary actions
 
 
 
 Elementary actions are useful to model a killchain during the 4th workshop of an EBIOS RM study.&#x20;
 
-&#x20;Supported fields:
+### Supported fields:
 
 
 
@@ -306,7 +303,7 @@ Elementary actions are useful to model a killchain during the 4th workshop of an
 
 
 
-### Reference controls
+## Reference controls
 
 \
 Reference controls are templates of the controls to apply. The supported  fields are:
@@ -326,7 +323,7 @@ Reference controls can be bundled also as a library.
 
 
 
-### Threats
+## Threats
 
 
 
@@ -339,7 +336,7 @@ Reference controls can be bundled also as a library.
 
 
 
-### Third parties ecosystems
+## Third parties ecosystems
 
 Adding entities, solutions and contracts go through the same file to be able to keep consistent relationships. Each concept needs to be on a separate tab of the excel sheet.<br>
 
@@ -347,7 +344,7 @@ Adding entities, solutions and contracts go through the same file to be able to 
 
 The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Contracts"
 
-#### Supported fields
+### Supported fields
 
 <mark style="color:$danger;">\*</mark><mark style="color:$info;">:  Required fields</mark>
 
