@@ -409,7 +409,14 @@
 			}
 		} catch (error) {
 			console.error('Unable to fetch suggested controls preview', error);
-			previewItems = data.compliance_assessment.framework.reference_controls;
+			previewItems = data.compliance_assessment.framework.reference_controls.map(
+				(control) =>
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					''
+			);
 		}
 
 		const modalComponent: ModalComponent = {
