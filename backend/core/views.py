@@ -9368,10 +9368,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return Response(comparison_data)
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
@@ -9382,7 +9387,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         controls = []
         for requirement_assessment in requirement_assessments:
             controls.append(
-                requirement_assessment.create_applied_controls_from_suggestions()
+                requirement_assessment.create_applied_controls_from_suggestions(
+                    dry_run=dry_run
+                )
             )
         return Response(
             AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
@@ -9615,17 +9622,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return Response(dict(RequirementAssessment.ExtendedResult.choices))
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         requirement_assessment = RequirementAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        controls = requirement_assessment.create_applied_controls_from_suggestions(
+            dry_run=dry_run
+        )
         return Response(
             AppliedControlReadSerializer(controls, many=True).data,
             status=status.HTTP_200_OK,

@@ -6180,6 +6180,28 @@ class ComplianceAssessment(Assessment):
             if group.get("ref_id") in self.selected_implementation_groups
         ]
 
+    def requirement_matches_selected_groups(
+        self, requirement: RequirementNode | None
+    ) -> bool:
+        """
+        Return True when the requirement is within the selected implementation groups.
+        """
+        if requirement is None:
+            return True
+
+        if not self.selected_implementation_groups:
+            return True
+
+        selected_groups = set(self.selected_implementation_groups)
+        if not selected_groups:
+            return True
+
+        requirement_groups = set(requirement.implementation_groups or [])
+        if not requirement_groups:
+            return False
+
+        return bool(selected_groups & requirement_groups)
+
     def get_requirement_assessments(self, include_non_assessable: bool):
         """
         Returns sorted assessable requirement assessments based on the selected implementation groups.
@@ -6965,39 +6987,54 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
 
-    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+    def create_applied_controls_from_suggestions(
+        self, *, dry_run: bool = False
+    ) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return applied_controls
         for reference_control in self.requirement.reference_controls.all():
             try:
-                applied_control, created = AppliedControl.objects.get_or_create(
+                applied_control = AppliedControl.objects.filter(
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
-                    defaults={
-                        "name": reference_control.get_name_translated
-                        or reference_control.ref_id,
-                        "ref_id": reference_control.ref_id,
-                    },
-                )
+                    requirement_assessments=self,
+                ).first()
 
-                if (
-                    reference_control.description
-                    and applied_control.description is None
-                ):
-                    applied_control.description = reference_control.description
-                    applied_control.save()
-                if created:
-                    logger.info(
-                        "Successfully created applied control from reference_control",
-                        applied_control=applied_control,
-                        reference_control=reference_control,
-                    )
+                if applied_control:
+                    # Already linked to this requirement assessment, skip entirely so
+                    # dry-run mirrors the actual creation.
+                    continue
+
+                existing_control = AppliedControl.objects.filter(
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                ).first()
+
+                if existing_control:
+                    applied_control = existing_control
                 else:
-                    logger.info(
-                        "Applied control already exists, skipping creation and using existing one",
-                        applied_control=applied_control,
+                    applied_control = AppliedControl(
+                        folder=self.folder,
                         reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
                     )
+                    if not dry_run:
+                        applied_control.save()
+                        logger.info(
+                            "Successfully created applied control from reference_control",
+                            applied_control=applied_control,
+                            reference_control=reference_control,
+                        )
+
                 applied_controls.append(applied_control)
             except Exception as e:
                 logger.error(
@@ -7006,8 +7043,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     exc_info=e,
                 )
                 continue
-        if applied_controls:
-            self.applied_controls.add(*applied_controls)
+
+        if not dry_run and applied_controls:
+            saved_controls = [ac for ac in applied_controls if ac.pk]
+            if saved_controls:
+                self.applied_controls.add(*saved_controls)
+
         return applied_controls
 
     class Meta:
