@@ -7080,7 +7080,10 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualification_ids": _fields.pop("qualifications", []),
+                        "qualification_ids": self._import_terminologies(
+                            _fields.pop("qualifications", []),
+                            Terminology.FieldPath.QUALIFICATIONS,
+                        ),
                         "asset_ids": get_mapped_ids(
                             _fields.pop("assets", []), link_dump_database_ids
                         ),
@@ -7249,35 +7252,8 @@ class FolderViewSet(BaseModelViewSet):
 
             case "fearedevent":
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))
 
