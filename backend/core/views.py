@@ -6246,7 +6246,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
-        # TODO: Doc + TESTS
+        """Export the domain as a zip file containing a JSON dump of all objects and their relationships"""
         include_attachments = True
         instance = self.get_object()
 
@@ -6321,11 +6321,6 @@ class FolderViewSet(BaseModelViewSet):
                 f"ciso-assistant-{slugify(instance.name)}-domain-{timezone.now()}"
             )
             dump_data = ExportSerializer.dump_data(scope=[*objects.values()])
-            print("=" * 5, "exported data", "=" * 5)
-            from pprint import pprint
-
-            pprint(dump_data)
-            print("=" * 35)
 
             logger.debug(
                 "Adding JSON dump to zip",
@@ -6360,7 +6355,6 @@ class FolderViewSet(BaseModelViewSet):
         parser_classes=(FileUploadParser,),
     )
     def import_domain(self, request):
-        # TODO: Doc + TESTS
         """Handle file upload and initiate import process."""
         load_missing_libraries = (
             request.query_params.get("load_missing_libraries", "false").lower()
@@ -6549,7 +6543,6 @@ class FolderViewSet(BaseModelViewSet):
         if not names:
             return None
 
-        print("@" * 5, "importing terminology(ies):", names)
         # Convert single value to list
         single_value = False
         if isinstance(names, str):  # Foreign key case
@@ -6583,11 +6576,24 @@ class FolderViewSet(BaseModelViewSet):
         return result_qs
 
     def _import_objects(
-        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
-    ):
+        self,
+        parsed_data: dict,
+        domain_name: str,
+        load_missing_libraries: bool,
+        user: User,
+    ) -> dict[str, str]:
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
+
+        Args:
+            parsed_data: The data parsed from the uploaded JSON dump.
+            domain_name: The name choosen by the user for the new domain being created.
+            load_missing_libraries: Whether to automatically load missing libraries from stored ones.
+            user: The user performing the import, for permission checks.
+
+        Returns:
+            A dict with success message if no error was encountered.
         """
         validation_errors = []
         required_libraries = []
@@ -6775,9 +6781,20 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids) -> None:
-        """Create all objects for a model after validation."""
-        # TODO: DOC
+    def _create_model_objects(
+        self,
+        model: models.Model,
+        objects: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create all objects for a model after validation. Creation happens in batch of size `self.batch_size`.
+
+        Args:
+            model: Current model for which objects are being created.
+            objects: List of all objects from the dump, used to filter only those relevant for the current model.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         logger.debug("Creating objects for model", model=model)
 
         # rebuild model name and keep objects only of this model for creation
@@ -6811,8 +6828,24 @@ class FolderViewSet(BaseModelViewSet):
                 link_dump_database_ids=link_dump_database_ids,
             )
 
-    def _create_batch(self, model, batch, link_dump_database_ids):
-        """Create a batch of objects with proper relationship handling."""
+    def _create_batch(
+        self,
+        model: models.Model,
+        batch: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create a batch of objects with proper relationship handling in 4 main steps:
+        1. Handle special cases (e.g. library objects, folder reference)
+        2. Process model-specific relationships, separating m2m relationships to be handled in the fourth step, after the object is created (because it requires the database ID of the created object to be set)
+        3. Create the object
+        4. Handle many-to-many relationships
+
+        Args:
+            model: Current model for which objects are being created.
+            batch: Sublist of all objects from the dump to create in this batch.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
             for obj in batch:
@@ -6831,8 +6864,7 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
-                    #   Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
-                    #   after the object is created because it requires the database ID of the created object
+                    # Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -6840,21 +6872,16 @@ class FolderViewSet(BaseModelViewSet):
                         link_dump_database_ids=link_dump_database_ids,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
+
+                    # Run clean to validate unique constraints
                     try:
-                        # Run clean to validate unique constraints
                         model(**fields).clean()
                     except ValidationError as e:
                         for field, error in e.error_dict.items():
                             fields[field] = f"{fields[field]} {uuid.uuid4()}"
 
-                    logger.debug("Creating object", fields=fields)
-
-                    print("CREATION:", model)
-                    from pprint import pprint
-
-                    pprint(fields)
-                    print("-" * 10)
                     # Create the object
+                    logger.debug("Creating object", fields=fields)
                     obj_created = model.objects.create(**fields)
                     link_dump_database_ids[obj_id] = obj_created.id
 
@@ -6874,17 +6901,25 @@ class FolderViewSet(BaseModelViewSet):
 
     def _process_model_relationships(
         self,
-        model,
-        fields,
-        link_dump_database_ids,
-        many_to_many_map_ids,
+        model: models.Model,
+        fields: dict[str, Any],
+        link_dump_database_ids: dict[str, Any],
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
     ):
         """
         Process model-specific relationships:
-         - M2M relationships are removed from `fields` and stored in a separate map to be processed after the object is created (see `_set_many_to_many_relations`).
+         - M2M relationships are removed from `fields` and stored in a separate map to be processed later (see `_set_many_to_many_relations`).
          - Other relationships are directly converted to their database IDs or instances.
+
+        Args:
+            model: Current model for which the object is being created
+            fields: The fields of the object being created.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+            many_to_many_map_ids: A map to store the IDs, names or QuerySet of related objects for m2m relationships.
+
+        Returns:
+            The updated fields with relationships processed (except for m2m which are removed).
         """
-        # TODO: DOC
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -7129,9 +7164,21 @@ class FolderViewSet(BaseModelViewSet):
 
         return _fields
 
-    def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
-        """Set many-to-many relationships after object creation."""
-        # TODO: DOC
+    def _set_many_to_many_relations(
+        self,
+        model: models.Model,
+        obj: models.Model,
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
+    ) -> None:
+        """
+        Set many-to-many relationships after object creation.
+
+        Args:
+            model: Current model for which the object was created.
+            obj: The created object for which to set the m2m relationships.
+            many_to_many_map_ids: A map containing the IDs, names or QuerySet of related objects for m2m relationships.
+
+        """
         model_name = model._meta.model_name
 
         match model_name:

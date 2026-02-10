@@ -313,6 +313,7 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def create_default_ug_and_ra(folder: "Folder"):
+        """Create default user groups and role assignments for a folder."""
         if folder.content_type == Folder.ContentType.DOMAIN:
             readers = UserGroup.objects.create(
                 name=str(UserGroupCodename.READER), folder=folder, builtin=True
