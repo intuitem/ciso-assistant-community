@@ -834,7 +834,7 @@
 						</div>
 					</button>
 				{/if}
-				{#if !page.data.user.is_third_party && canEditObject}
+				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode}
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/assignments`}

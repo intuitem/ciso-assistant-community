@@ -1121,6 +1121,9 @@ AUDITEE_PERMISSIONS_LIST = [
     "view_folder",
     "view_requirementassignment",
     "view_appliedcontrol",
+    "add_appliedcontrol",
+    "change_appliedcontrol",
+    "delete_appliedcontrol",
     "view_framework",
 ]
 

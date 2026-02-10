@@ -6081,7 +6081,7 @@ class ComplianceAssessment(Assessment):
         if dry_run:
             return changes
 
-    def get_global_score(self):
+    def get_global_score(self, ra_ids: set | None = None):
         """
         Calculate the global score based on the score_calculation_method.
 
@@ -6097,6 +6097,10 @@ class ComplianceAssessment(Assessment):
             .exclude(is_scored=False)
             .exclude(requirement__assessable=False)
         )
+        if ra_ids is not None:
+            requirement_assessments_scored = requirement_assessments_scored.filter(
+                id__in=ra_ids
+            )
         ig = (
             set(self.selected_implementation_groups)
             if self.selected_implementation_groups
@@ -6126,7 +6130,7 @@ class ComplianceAssessment(Assessment):
             # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
             return int(global_score * 10) / 10
 
-    def get_total_max_score(self):
+    def get_total_max_score(self, ra_ids: set | None = None):
         """
         Calculate the theoretical total maximum score based on the score_calculation_method.
 
@@ -6140,6 +6144,10 @@ class ComplianceAssessment(Assessment):
                 .exclude(is_scored=False)
                 .exclude(requirement__assessable=False)
             )
+            if ra_ids is not None:
+                requirement_assessments_scored = requirement_assessments_scored.filter(
+                    id__in=ra_ids
+                )
             ig = (
                 set(self.selected_implementation_groups)
                 if self.selected_implementation_groups
@@ -6362,7 +6370,7 @@ class ComplianceAssessment(Assessment):
             )
         return measures_status_count
 
-    def donut_render(self) -> dict:
+    def donut_render(self, ra_ids: set | None = None) -> dict:
         def union_queries(base_query, groups, field_name):
             queries = [
                 base_query.filter(**{f"{field_name}__icontains": group}).distinct()
@@ -6397,6 +6405,8 @@ class ComplianceAssessment(Assessment):
             base_query = RequirementAssessment.objects.filter(
                 result=result, **assessable_requirements_filter
             ).distinct()
+            if ra_ids is not None:
+                base_query = base_query.filter(id__in=ra_ids)
 
             if self.selected_implementation_groups:
                 union_query = union_queries(
@@ -6428,6 +6438,8 @@ class ComplianceAssessment(Assessment):
             base_query = RequirementAssessment.objects.filter(
                 status=status, **assessable_requirements_filter
             ).distinct()
+            if ra_ids is not None:
+                base_query = base_query.filter(id__in=ra_ids)
 
             if self.selected_implementation_groups:
                 union_query = union_queries(
@@ -6462,6 +6474,8 @@ class ComplianceAssessment(Assessment):
                 .filter(Q(extended_result__isnull=True) | Q(extended_result=""))
                 .distinct()
             )
+            if ra_ids is not None:
+                base_query_not_set = base_query_not_set.filter(id__in=ra_ids)
 
             if self.selected_implementation_groups:
                 union_query_not_set = union_queries(
@@ -6488,6 +6502,8 @@ class ComplianceAssessment(Assessment):
                 base_query = RequirementAssessment.objects.filter(
                     extended_result=extended_result, **assessable_requirements_filter
                 ).distinct()
+                if ra_ids is not None:
+                    base_query = base_query.filter(id__in=ra_ids)
 
                 if self.selected_implementation_groups:
                     union_query = union_queries(

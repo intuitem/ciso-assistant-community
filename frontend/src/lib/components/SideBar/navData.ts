@@ -46,8 +46,15 @@ export const navData = {
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
-						'view_riskassessment'
+						'view_riskassessment',
+						'view_requirementassignment'
 					]
+				},
+				{
+					name: 'auditDashboard',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/auditee-dashboard',
+					permissions: ['view_requirementassignment']
 				}
 			]
 		},
