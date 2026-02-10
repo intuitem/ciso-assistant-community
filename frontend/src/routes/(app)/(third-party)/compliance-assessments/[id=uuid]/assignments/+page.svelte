@@ -529,9 +529,7 @@
 					<!-- Selected Count -->
 					<div class="bg-gray-50 rounded-lg p-3">
 						<div class="flex items-center justify-between text-sm">
-							<span class="text-gray-600"
-								>{m.selectedRequirements()}:</span
-							>
+							<span class="text-gray-600">{m.selectedRequirements()}:</span>
 							<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
 						</div>
 					</div>
