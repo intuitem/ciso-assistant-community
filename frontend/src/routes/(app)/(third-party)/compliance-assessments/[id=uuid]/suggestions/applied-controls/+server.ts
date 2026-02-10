@@ -1,13 +1,9 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { RequestHandler } from './$types';
 
-export const POST: RequestHandler = async (event) => {
-	const requestInitOptions: RequestInit = {
-		method: 'POST'
-	};
-
-	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/suggestions/applied-controls/`;
-	const res = await event.fetch(endpoint, requestInitOptions);
+async function proxyRequest(event: Parameters<RequestHandler>[0], init: RequestInit, query = '') {
+	const endpoint = `${BASE_API_URL}/compliance-assessments/${event.params.id}/suggestions/applied-controls/${query}`;
+	const res = await event.fetch(endpoint, init);
 
 	if (!res.ok) {
 		const response = await res.json();
@@ -20,9 +16,18 @@ export const POST: RequestHandler = async (event) => {
 		});
 	}
 
-	return new Response(null, {
+	return new Response(await res.text(), {
+		status: res.status,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
 		}
 	});
+}
+
+export const GET: RequestHandler = async (event) => {
+	return proxyRequest(event, { method: 'GET' }, '?dry_run=true');
+};
+
+export const POST: RequestHandler = async (event) => {
+	return proxyRequest(event, { method: 'POST' });
 };

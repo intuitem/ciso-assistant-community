@@ -141,7 +141,30 @@
 
 	let createAppliedControlsLoading = $state(false);
 
-	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
+		let previewItems: string[] = [];
+		try {
+			const previewResponse = await fetch(
+				`/requirement-assessments/${id}/suggestions/applied-controls?dry_run=true`
+			);
+			if (previewResponse.ok) {
+				const previewData: any[] = await previewResponse.json();
+				previewItems = previewData.map(
+					(control) =>
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				);
+			} else {
+				throw new Error(await previewResponse.text());
+			}
+		} catch (error) {
+			console.error('Unable to fetch suggested controls preview', error);
+			previewItems = reference_controls;
+		}
+
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -152,7 +175,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: reference_controls,
+					items: previewItems,
 					message: m.theFollowingControlsWillBeAddedColon()
 				}
 			}
@@ -163,7 +186,7 @@
 			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: reference_controls.length,
+				count: previewItems.length,
 				message: m.theFollowingControlsWillBeAddedColon()
 			}),
 			response: (r: boolean) => {
