@@ -296,30 +296,33 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             user=request.user,
             object_type=PersonalData,
         )
-        processings_count = Processing.objects.filter(
-            id__in=viewable_processings
-        ).count()
+        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataRecipient,
+        )
+        processings_count = len(viewable_processings)
 
         pd_categories = PersonalData.get_categories_count(
             filters={"id__in": viewable_personal_data}
         )
         total_categories = len(pd_categories)
-        # Count distinct entities from data contractors and data transfers
-        contractor_entities = (
-            DataContractor.objects.filter(
-                id__in=viewable_data_contractors, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        transfer_entities = (
-            DataTransfer.objects.filter(
-                id__in=viewable_data_transfers, entity__isnull=False
-            )
-            .values_list("entity", flat=True)
-            .distinct()
-        )
-        recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
+        # Recipients count was previously the sum of distinct entities from data contractors and data transfers
+        # contractor_entities = (
+        #     DataContractor.objects.filter(
+        #         id__in=viewable_data_contractors, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        # transfer_entities = (
+        #     DataTransfer.objects.filter(
+        #         id__in=viewable_data_transfers, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        recipients_count = len(viewable_data_recipients)
 
         open_right_requests_count = (
             RightRequest.objects.filter(id__in=viewable_right_requests)
