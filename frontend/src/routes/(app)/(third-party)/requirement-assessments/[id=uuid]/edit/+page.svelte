@@ -69,7 +69,7 @@
 		var currentUrl = window.location.href;
 		var url = new URL(currentUrl);
 		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		if (nextValue) window.location.href = nextValue;
+		window.location.href = nextValue || complianceAssessmentURL;
 	}
 
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
@@ -614,6 +614,7 @@
 				<HiddenInput {form} field="folder" />
 				<HiddenInput {form} field="requirement" />
 				<HiddenInput {form} field="compliance_assessment" />
+				<HiddenInput {form} field="nextRequirementAssessmentId" />
 				<div class="flex flex-col my-8 space-y-6">
 					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
 						<Question
@@ -738,7 +739,8 @@
 						<button
 							class="btn preset-filled-primary-500 font-semibold w-full"
 							data-testid="save-button"
-							type="submit">{m.save()}</button
+							type="submit"
+							>{page.data.nextRequirementAssessmentId ? m.saveAndNext() : m.save()}</button
 						>
 					</div>
 				</div>
