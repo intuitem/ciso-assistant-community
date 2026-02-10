@@ -11,7 +11,9 @@ test('my profile settings page loads correctly', async ({ logedPage, page }) => 
 	});
 
 	await test.step('multi-factor authentication section is visible', async () => {
-		await expect(page.locator('dt').filter({ hasText: 'Multi-factor authentication' })).toBeVisible();
+		await expect(
+			page.locator('dt').filter({ hasText: 'Multi-factor authentication' })
+		).toBeVisible();
 		await expect(page.locator('h6').filter({ hasText: 'Authenticator app' })).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Enable 2FA' })).toBeVisible();
 	});
