@@ -6040,7 +6040,16 @@ class ComplianceAssessment(Assessment):
         def infer_result(applied_controls):
             if not applied_controls:
                 return RequirementAssessment.Result.NOT_ASSESSED
+
+            if len(applied_controls) == 1:
+                ac_status = applied_controls[0].status
+                if ac_status == AppliedControl.Status.ACTIVE:
+                    return RequirementAssessment.Result.COMPLIANT
+                else:
+                    return RequirementAssessment.Result.NON_COMPLIANT
+
             statuses = [ac.status for ac in applied_controls]
+
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
             elif AppliedControl.Status.ACTIVE in statuses:
@@ -6049,16 +6058,13 @@ class ComplianceAssessment(Assessment):
                 return RequirementAssessment.Result.NON_COMPLIANT
 
         changes = dict()
-        requirement_assessments_with_ac = (
-            RequirementAssessment.objects.filter(
-                compliance_assessment=self, applied_controls__isnull=False
-            )
-            .select_related("requirement")
-            .distinct()
-        )
+        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
+            compliance_assessment=self, applied_controls__isnull=False
+        ).distinct()
         with transaction.atomic():
             for ra in requirement_assessments_with_ac:
                 ac = AppliedControl.objects.filter(requirement_assessments=ra)
+                ic(ac)
                 new_result = infer_result(ac)
                 if ra.result != new_result:
                     changes[str(ra.id)] = {
@@ -6068,9 +6074,9 @@ class ComplianceAssessment(Assessment):
                     }
                     if not dry_run:
                         ra.result = new_result
-                        RequirementAssessment.objects.filter(pk=ra.pk).update(
-                            result=new_result
-                        )
+                        ra.save(update_fields=["result"])
+
+        ic(changes)
 
         if dry_run:
             return changes
