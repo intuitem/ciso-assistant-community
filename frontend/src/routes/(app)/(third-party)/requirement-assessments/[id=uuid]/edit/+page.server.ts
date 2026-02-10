@@ -1,6 +1,7 @@
 import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
@@ -219,7 +220,7 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		const object = await response.json();
-		const model: string = urlParamModelVerboseName(URLModel);
+		const model: string = safeTranslate(urlParamModelVerboseName(URLModel));
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		if (formData.noRedirect) return;
 
