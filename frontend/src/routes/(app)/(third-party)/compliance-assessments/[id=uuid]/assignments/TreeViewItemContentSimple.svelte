@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { safeTranslate } from '$lib/utils/i18n';
+	import { m } from '$paraglide/messages';
 	import { getContext } from 'svelte';
 	import type { Writable } from 'svelte/store';
 
@@ -13,6 +13,7 @@
 		isAssigned: boolean;
 		nodeId: string;
 		childrenIds: string[]; // IDs of all assessable children (for batch selection)
+		sectionAssignments: Array<{ actorName: string }>; // Aggregated assignments for section nodes
 	}
 
 	let {
@@ -24,7 +25,8 @@
 		assignmentInfo,
 		isAssigned,
 		nodeId,
-		childrenIds = []
+		childrenIds = [],
+		sectionAssignments = []
 	}: Props = $props();
 
 	// Get the checked nodes set, assigned nodes set, and editing requirement IDs from context
@@ -150,7 +152,7 @@
 			<!-- Status icon for assessable nodes -->
 			{#if assessable}
 				{#if isLocked}
-					<span class="text-gray-400" title="Already assigned">
+					<span class="text-gray-400" title={m.alreadyAssigned()}>
 						<i class="fa-solid fa-lock text-xs"></i>
 					</span>
 				{/if}
@@ -177,18 +179,31 @@
 			{#if assignmentInfo && !isBeingEdited}
 				<span
 					class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
-					title="Assigned to {assignmentInfo.actorName}"
+					title="{m.assignedTo()} {assignmentInfo.actorName}"
 				>
 					<i class="fa-solid fa-user text-xs"></i>
 					<span class="max-w-[100px] truncate">{assignmentInfo.actorName}</span>
 				</span>
 			{/if}
 
+			<!-- Section-level assignment badges -->
+			{#if !assessable && sectionAssignments.length > 0}
+				{#each sectionAssignments as sa}
+					<span
+						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-600 border border-blue-100"
+						title="{m.assignedTo()} {sa.actorName}"
+					>
+						<i class="fa-solid fa-user text-xs"></i>
+						<span class="max-w-[80px] truncate">{sa.actorName}</span>
+					</span>
+				{/each}
+			{/if}
+
 			<!-- Children count for parent nodes -->
 			{#if !assessable && childrenIds.length > 0}
 				<span class="text-xs text-gray-400">
 					({availableChildrenIds.length}
-					{safeTranslate('available')})
+					{m.available()})
 				</span>
 			{/if}
 		</div>
@@ -196,7 +211,7 @@
 		<!-- Non-assessable indicator -->
 		{#if !assessable && childrenIds.length === 0}
 			<span class="text-xs text-gray-400 italic">
-				({safeTranslate('section')})
+				({m.section()})
 			</span>
 		{/if}
 	</div>

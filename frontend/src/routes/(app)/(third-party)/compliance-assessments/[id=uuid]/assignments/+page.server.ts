@@ -51,7 +51,7 @@ export const load = (async ({ fetch, params }) => {
 		tree,
 		assignmentForm,
 		assignments,
-		title: `${compliance_assessment.name} - Assignments`
+		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;
 

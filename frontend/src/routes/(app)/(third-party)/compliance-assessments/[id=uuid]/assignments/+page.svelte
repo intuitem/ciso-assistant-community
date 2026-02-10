@@ -156,6 +156,17 @@
 		selectedAssignmentForModal = null;
 	}
 
+	// Get unique actor assignments for all assessable descendants of a section node
+	function getSectionAssignments(node: Node): Array<{ actorName: string }> {
+		const actorNames = new Set<string>();
+		const descendantIds = getAssessableDescendantIds(node);
+		for (const raId of descendantIds) {
+			const info = getAssignmentInfo(raId);
+			if (info) actorNames.add(info.actorName);
+		}
+		return [...actorNames].map((name) => ({ actorName: name }));
+	}
+
 	// Helper function to get all assessable descendant IDs from a node
 	function getAssessableDescendantIds(node: Node): string[] {
 		const ids: string[] = [];
@@ -187,6 +198,9 @@
 			// Get all assessable descendant IDs for batch selection
 			const childrenIds = node.assessable ? [] : getAssessableDescendantIds(node);
 
+			// For section nodes, get aggregated assignment info
+			const sectionAssignments = node.assessable ? [] : getSectionAssignments(node);
+
 			return {
 				id: nodeId,
 				content: TreeViewItemContentSimple,
@@ -199,7 +213,8 @@
 					assignmentInfo,
 					isAssigned,
 					nodeId: nodeId,
-					childrenIds: childrenIds
+					childrenIds: childrenIds,
+					sectionAssignments
 				},
 				lead: TreeViewItemLeadSimple,
 				leadProps: {
@@ -386,7 +401,7 @@
 				<i class="fa-solid fa-arrow-left mr-2"></i>
 				{m.back()}
 			</Anchor>
-			<h1 class="h3 font-bold">{m.assignments?.() ?? 'Assignments'}</h1>
+			<h1 class="h3 font-bold">{m.assignments()}</h1>
 		</div>
 	</div>
 
@@ -395,10 +410,9 @@
 		<div class="flex items-start">
 			<i class="fa-solid fa-info-circle text-blue-600 mr-3 mt-0.5"></i>
 			<div class="text-sm">
-				<p class="font-medium">{m.aboutAssignments?.() ?? 'About Assignments'}</p>
+				<p class="font-medium">{m.aboutAssignments()}</p>
 				<p class="mt-1">
-					{m.assignmentsDescription?.() ??
-						'Create assignments to delegate groups of requirements to specific actors (users or teams). Once assigned, requirements can only be viewed and managed by the assigned actor.'}
+					{m.assignmentsDescription()}
 				</p>
 			</div>
 		</div>
@@ -409,16 +423,15 @@
 		<div class="lg:col-span-2 card bg-white shadow-lg p-4">
 			<div class="flex items-center justify-between mb-4">
 				<div>
-					<h2 class="h4 font-semibold">{m.requirements?.() ?? 'Requirements'}</h2>
+					<h2 class="h4 font-semibold">{m.requirements()}</h2>
 					<p class="text-sm text-gray-500">
-						{m.selectRequirementsToAssign?.() ??
-							'Select requirements to include in a new assignment'}
+						{m.selectRequirementsToAssign()}
 					</p>
 				</div>
 				<div class="flex items-center space-x-2">
 					<span class="badge bg-violet-100 text-violet-700 px-2 py-1 text-xs">
 						{availableCheckedNodes.length}
-						{m.selected?.() ?? 'selected'}
+						{m.selected()}
 					</span>
 				</div>
 			</div>
@@ -427,20 +440,20 @@
 			<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
 				<button class="btn btn-sm preset-outlined-primary-500" onclick={handleSelectAll}>
 					<i class="fa-solid fa-check-double mr-1"></i>
-					{m.selectAllAvailable?.() ?? 'Select All Available'}
+					{m.selectAllAvailable()}
 				</button>
 				<button class="btn btn-sm preset-outlined-surface-500" onclick={handleClearSelection}>
 					<i class="fa-solid fa-times mr-1"></i>
-					{m.clearSelection?.() ?? 'Clear'}
+					{m.clearSelection()}
 				</button>
 				<div class="flex-1"></div>
 				<button class="btn btn-sm preset-ghost-surface" onclick={expandAll}>
 					<i class="fa-solid fa-expand mr-1"></i>
-					{m.expandAll?.() ?? 'Expand All'}
+					{m.expandAll()}
 				</button>
 				<button class="btn btn-sm preset-ghost-surface" onclick={collapseAll}>
 					<i class="fa-solid fa-compress mr-1"></i>
-					{m.collapseAll?.() ?? 'Collapse All'}
+					{m.collapseAll()}
 				</button>
 			</div>
 
@@ -449,20 +462,20 @@
 				<div class="flex items-center gap-2">
 					<span class="px-2 py-1 rounded-md bg-green-50 border border-green-200 text-green-700">
 						<i class="fa-solid fa-square-check mr-1"></i>
-						{m.available?.() ?? 'Available'}
+						{m.available()}
 					</span>
-					<span class="text-gray-400">({m.clickToSelect?.() ?? 'click to select'})</span>
+					<span class="text-gray-400">({m.clickToSelect()})</span>
 				</div>
 				<div class="flex items-center gap-1">
 					<span class="px-2 py-1 rounded-md bg-violet-50 border border-violet-200 text-violet-700">
 						<i class="fa-solid fa-check mr-1"></i>
-						{m.selected?.() ?? 'Selected'}
+						{m.selected()}
 					</span>
 				</div>
 				<div class="flex items-center gap-1">
 					<span class="px-2 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-500">
 						<i class="fa-solid fa-lock mr-1"></i>
-						{m.alreadyAssigned?.() ?? 'Already assigned'}
+						{m.alreadyAssigned()}
 					</span>
 				</div>
 			</div>
@@ -489,10 +502,10 @@
 				<h2 class="h4 font-semibold mb-4">
 					{#if editingAssignmentId}
 						<i class="fa-solid fa-pen text-violet-500 mr-2"></i>
-						{m.editAssignment?.() ?? 'Edit Assignment'}
+						{m.editAssignment()}
 					{:else}
 						<i class="fa-solid fa-plus-circle text-primary-500 mr-2"></i>
-						{m.newAssignment?.() ?? 'New Assignment'}
+						{m.newAssignment()}
 					{/if}
 				</h2>
 
@@ -508,8 +521,8 @@
 								position: 'prefix'
 							}}
 							field="actor"
-							label={m.assignTo?.() ?? 'Assign To'}
-							placeholder={m.selectActor?.() ?? 'Search for an actor...'}
+							label={m.assignTo()}
+							placeholder={m.selectActor()}
 						/>
 					{/key}
 
@@ -517,7 +530,7 @@
 					<div class="bg-gray-50 rounded-lg p-3">
 						<div class="flex items-center justify-between text-sm">
 							<span class="text-gray-600"
-								>{m.selectedRequirements?.() ?? 'Selected requirements'}:</span
+								>{m.selectedRequirements()}:</span
 							>
 							<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
 						</div>
@@ -532,15 +545,15 @@
 						>
 							{#if isUpdating}
 								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-								{m.updating?.() ?? 'Updating...'}
+								{m.updating()}
 							{:else}
 								<i class="fa-solid fa-check mr-2"></i>
-								{m.updateAssignment?.() ?? 'Update Assignment'}
+								{m.updateAssignment()}
 							{/if}
 						</button>
 						<button class="btn preset-outlined-surface-500 w-full" onclick={cancelEdit}>
 							<i class="fa-solid fa-times mr-2"></i>
-							{m.cancel?.() ?? 'Cancel'}
+							{m.cancel()}
 						</button>
 					{:else}
 						<button
@@ -550,18 +563,17 @@
 						>
 							{#if isCreating}
 								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-								{m.creating?.() ?? 'Creating...'}
+								{m.creating()}
 							{:else}
 								<i class="fa-solid fa-check mr-2"></i>
-								{m.createAssignment?.() ?? 'Create Assignment'}
+								{m.createAssignment()}
 							{/if}
 						</button>
 					{/if}
 
 					{#if !selectedActorId || availableCheckedNodes.length === 0}
 						<p class="text-xs text-gray-500 text-center">
-							{m.fillAllFieldsToCreateAssignment?.() ??
-								'Select an actor and at least one requirement'}
+							{m.fillAllFieldsToCreateAssignment()}
 						</p>
 					{/if}
 				</div>
@@ -571,14 +583,14 @@
 			<div class="card bg-white shadow-lg p-4">
 				<h2 class="h4 font-semibold mb-4">
 					<i class="fa-solid fa-list text-primary-500 mr-2"></i>
-					{m.existingAssignments?.() ?? 'Existing Assignments'}
+					{m.existingAssignments()}
 					<span class="badge bg-gray-200 text-gray-700 ml-2">{assignments.length}</span>
 				</h2>
 
 				{#if assignments.length === 0}
 					<div class="text-center py-8 text-gray-500">
 						<i class="fa-solid fa-folder-open text-4xl mb-2 opacity-30"></i>
-						<p class="text-sm">{m.noAssignmentsYet?.() ?? 'No assignments created yet'}</p>
+						<p class="text-sm">{m.noAssignmentsYet()}</p>
 					</div>
 				{:else}
 					<div class="space-y-3 max-h-[400px] overflow-y-auto">
@@ -603,11 +615,11 @@
 											<button
 												class="badge bg-blue-100 text-blue-700 text-xs hover:bg-blue-200 cursor-pointer transition-colors"
 												onclick={() => openRequirementsModal(assignment)}
-												title={m.clickToViewRequirements?.() ?? 'Click to view requirements'}
+												title={m.clickToViewRequirements()}
 											>
 												<i class="fa-solid fa-list-ul mr-1"></i>
 												{assignment.requirement_assessments.length}
-												{m.requirements?.() ?? 'requirements'}
+												{m.requirements()}
 											</button>
 										</div>
 									</div>
@@ -615,7 +627,7 @@
 										<button
 											class="btn btn-sm preset-ghost-surface"
 											onclick={() => startEdit(assignment)}
-											title={m.edit?.() ?? 'Edit'}
+											title={m.edit()}
 											disabled={editingAssignmentId !== null}
 										>
 											<i class="fa-solid fa-pen"></i>
@@ -623,7 +635,7 @@
 										<button
 											class="btn btn-sm preset-ghost-error-500"
 											onclick={() => handleDeleteAssignment(assignment.id)}
-											title={m.delete?.() ?? 'Delete'}
+											title={m.delete()}
 											disabled={isDeleting === assignment.id || editingAssignmentId !== null}
 										>
 											{#if isDeleting === assignment.id}
@@ -678,7 +690,7 @@
 				<button
 					class="btn btn-sm preset-ghost-surface"
 					onclick={closeRequirementsModal}
-					aria-label={m.close?.() ?? 'Close'}
+					aria-label={m.close()}
 				>
 					<i class="fa-solid fa-times"></i>
 				</button>
@@ -688,11 +700,11 @@
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3 flex items-center justify-between">
 					<span class="text-sm text-gray-600">
-						{m.requirements?.() ?? 'Requirements'}
+						{m.requirements()}
 					</span>
 					<span class="badge bg-blue-100 text-blue-700 text-xs">
 						{selectedAssignmentForModal.requirement_assessments.length}
-						{m.items?.() ?? 'items'}
+						{m.items()}
 					</span>
 				</div>
 
@@ -709,7 +721,7 @@
 									title={req.result}
 								></span>
 							{:else}
-								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title="Not assessed"
+								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title={m.notAssessed()}
 								></span>
 							{/if}
 
@@ -729,7 +741,7 @@
 			<!-- Footer -->
 			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
-					{m.close?.() ?? 'Close'}
+					{m.close()}
 				</button>
 			</div>
 		</div>
