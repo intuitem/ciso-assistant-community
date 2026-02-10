@@ -6040,16 +6040,7 @@ class ComplianceAssessment(Assessment):
         def infer_result(applied_controls):
             if not applied_controls:
                 return RequirementAssessment.Result.NOT_ASSESSED
-
-            if len(applied_controls) == 1:
-                ac_status = applied_controls[0].status
-                if ac_status == AppliedControl.Status.ACTIVE:
-                    return RequirementAssessment.Result.COMPLIANT
-                else:
-                    return RequirementAssessment.Result.NON_COMPLIANT
-
             statuses = [ac.status for ac in applied_controls]
-
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
             elif AppliedControl.Status.ACTIVE in statuses:
@@ -6057,29 +6048,43 @@ class ComplianceAssessment(Assessment):
             else:
                 return RequirementAssessment.Result.NON_COMPLIANT
 
-        changes = dict()
-        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
-            compliance_assessment=self, applied_controls__isnull=False
-        ).distinct()
-        with transaction.atomic():
-            for ra in requirement_assessments_with_ac:
-                ac = AppliedControl.objects.filter(requirement_assessments=ra)
-                ic(ac)
-                new_result = infer_result(ac)
-                if ra.result != new_result:
-                    changes[str(ra.id)] = {
-                        "str": str(ra.requirement.safe_display_str),
-                        "current": ra.result,
-                        "new": new_result,
-                    }
-                    if not dry_run:
-                        ra.result = new_result
-                        ra.save(update_fields=["result"])
+        changes: dict[str, dict[str, RequirementAssessment.Result]] = {}
+        requirement_assessments_with_ac = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self, applied_controls__isnull=False
+            )
+            .select_related("requirement")
+            .prefetch_related("applied_controls")
+            .distinct()
+        )
 
-        ic(changes)
+        to_update: list[RequirementAssessment] = []
+        for ra in requirement_assessments_with_ac:
+            applied_controls = list(ra.applied_controls.all())
+            new_result = infer_result(applied_controls)
+            if ra.result != new_result:
+                changes[str(ra.id)] = {
+                    "str": str(ra.requirement.safe_display_str),
+                    "current": ra.result,
+                    "new": new_result,
+                }
+                if not dry_run:
+                    ra.result = new_result
+                    to_update.append(ra)
 
-        if dry_run:
+        if dry_run or not to_update:
             return changes
+
+        with transaction.atomic():
+            RequirementAssessment.objects.bulk_update(to_update, ["result"])
+            ComplianceAssessment.objects.filter(pk=self.pk).update(
+                updated_at=timezone.now()
+            )
+            # Ensure metrics are refreshed once after the bulk update.
+            self.refresh_from_db(fields=["updated_at"])
+            self.upsert_daily_metrics()
+
+        return changes
 
     def get_global_score(self):
         """
