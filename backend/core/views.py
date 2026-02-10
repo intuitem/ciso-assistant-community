@@ -9377,6 +9377,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             "1",
             "yes",
         }
+        if request.method == "GET":
+            dry_run = True
+        if request.method == "GET":
+            dry_run = True
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
