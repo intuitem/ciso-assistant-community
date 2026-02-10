@@ -6550,7 +6550,7 @@ class FolderViewSet(BaseModelViewSet):
             single_value = True
 
         # Fetch existing
-        existing = Terminology.objects.filter(name__in=names)
+        existing = Terminology.objects.filter(name__in=names, field_path=field_path)
         existing_names = set(existing.values_list("name", flat=True))
 
         # Create missing
