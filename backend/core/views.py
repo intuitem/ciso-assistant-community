@@ -8573,6 +8573,10 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                             object="compliance-assessments",
                             object_id=instance.id,
                         )
+                    else:
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
                 except Exception as primary_exception:
                     logger.error(
                         f"Failed to send email to {author}: {primary_exception}"
