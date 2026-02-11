@@ -1,15 +1,14 @@
 ---
 description: >-
   This guide covers how to keep sensitive configuration (database credentials,
-  mailer passwords, API keys) out of your `docker-compose.yml` and version
-  control.
+  mailer passwords, API keys) out of your docker-compose.yml.
 ---
 
 # Managing Secrets
 
 ### 1. The `.env` File
 
-Docker Compose automatically loads variables from a `.env` file located next to `docker-compose.yml`. This is the recommended approach for all secrets in this project.
+Docker Compose automatically loads variables from a `.env` file located next to `docker-compose.yml`. This is the recommended approach for all secrets.
 
 #### Create the `.env` file
 
