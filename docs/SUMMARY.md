@@ -60,6 +60,7 @@
 * [Remote/Virtualization](deployment/remote-virtualization.md)
 * [Deploy on a VPS](deployment/deploy-on-a-vps.md)
 * [Custom certificates](deployment/custom-certificates.md)
+* [Managing Secrets](deployment/managing-secrets.md)
 * [Frequent questions](deployment/frequent-questions.md)
 * [Setting up S3](deployment/setting-up-s3.md)
 * [Setting up mailer](deployment/setting-up-mailer.md)
