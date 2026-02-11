@@ -295,7 +295,6 @@ def send_notification_email_expired_eta(owner_email, controls):
             f"Failed to render expired_controls email template for {owner_email}"
         )
 
-
 @task()
 def send_notification_email(subject, message, owner_email):
     try:
@@ -413,7 +412,6 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
 
-
 @task()
 def send_task_template_assignment_notification(task_template_id, emails):
     """Send notification when TaskTemplate is assigned to users"""
@@ -431,6 +429,7 @@ def send_task_template_assignment_notification(task_template_id, emails):
     from .email_utils import render_email_template
 
     context = {
+        "task_id": task_template.id,
         "task_name": task_template.name,
         "task_description": task_template.description or "No description provided",
         "task_ref_id": task_template.ref_id or "N/A",
