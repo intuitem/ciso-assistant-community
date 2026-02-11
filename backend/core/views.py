@@ -3417,19 +3417,16 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         if not data.get("risk_matrix"):
             data["risk_matrix"] = str(risk_assessment.risk_matrix.id)
 
-        duplicated_risk_assessment_serializer = RiskAssessmentWriteSerializer(data=data, context={"request": request})
+        duplicated_risk_assessment_serializer = RiskAssessmentWriteSerializer(
+            data=data, context={"request": request}
+        )
         if not duplicated_risk_assessment_serializer.is_valid():
             error = str(duplicated_risk_assessment_serializer.errors)
             return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
 
         duplicated_risk_assessment = duplicated_risk_assessment_serializer.save()
 
-        FIELDS_TO_COPY: Final[list[str]] = [
-            "risk_matrix",
-            "eta",
-            "due_date",
-            "status"
-        ]
+        FIELDS_TO_COPY: Final[list[str]] = ["risk_matrix", "eta", "due_date", "status"]
         for field_name in FIELDS_TO_COPY:
             field_value = getattr(risk_assessment, field_name)
             setattr(duplicated_risk_assessment, field_name, field_value)
@@ -4553,7 +4550,9 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         data = request.data
         new_folder = Folder.objects.get(id=data["folder"])
 
-        duplicated_applied_control_serializer = AppliedControlWriteSerializer(data=data, context={"request": request})
+        duplicated_applied_control_serializer = AppliedControlWriteSerializer(
+            data=data, context={"request": request}
+        )
         if not duplicated_applied_control_serializer.is_valid():
             error = str(duplicated_applied_control_serializer.errors)
             return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
@@ -4574,7 +4573,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             "link",
             "effort",
             "cost",
-            "progress_field"
+            "progress_field",
         ]
         for field_name in FIELDS_TO_COPY:
             field_value = getattr(applied_control, field_name)
