@@ -360,6 +360,7 @@
 			</div>
 			<!-- Progress bar -->
 			<div class="flex items-center space-x-3">
+        due_date
 				<div class="flex-1 bg-gray-200 rounded-full h-2">
 					<div
 						class="bg-indigo-500 h-2 rounded-full transition-all duration-300"
