@@ -1,8 +1,9 @@
 import { nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
+import { loadValidationFlowFormData } from '$lib/utils/load';
 import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
-import { json, type Actions } from '@sveltejs/kit';
+import { type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
@@ -13,7 +14,7 @@ import { m } from '$paraglide/messages';
 export const load = (async ({ fetch, params }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const objectEndpoint = `${endpoint}object`;
+	const objectEndpoint = `${endpoint}object/`;
 
 	const res = await fetch(endpoint);
 	const compliance_assessment = await res.json();
@@ -38,9 +39,22 @@ export const load = (async ({ fetch, params }) => {
 		errors: false
 	});
 
+	const cloneInitialData = {
+		baseline: compliance_assessment.id,
+		framework: compliance_assessment.framework.id,
+		perimeter: compliance_assessment.perimeter?.id
+	};
+	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {
+		errors: false
+	});
+
 	const auditModel = getModelInfo('compliance-assessments');
 
 	const selectOptions: Record<string, any> = {};
+
+	const frameworksMappings = await fetch(`/compliance-assessments/${params.id}/frameworks`).then(
+		(res) => res.json()
+	);
 
 	if (auditModel.selectFields) {
 		for (const selectField of auditModel.selectFields) {
@@ -63,10 +77,18 @@ export const load = (async ({ fetch, params }) => {
 
 	const form = await superValidate(zod(z.object({ id: z.string().uuid() })));
 
+	const { validationFlowForm } = await loadValidationFlowFormData({
+		event: { fetch },
+		folderId: compliance_assessment.folder.id,
+		targetField: 'compliance_assessments',
+		targetIds: [params.id]
+	});
+
 	return {
 		URLModel,
 		compliance_assessment,
 		auditCreateForm,
+		auditCloneForm,
 		auditModel,
 		object,
 		tree,
@@ -74,6 +96,8 @@ export const load = (async ({ fetch, params }) => {
 		global_score,
 		threats,
 		form,
+		frameworksMappings,
+		validationFlowForm,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

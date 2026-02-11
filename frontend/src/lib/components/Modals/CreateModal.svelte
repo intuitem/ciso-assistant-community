@@ -8,12 +8,13 @@
 
 	// Base Classes
 	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
+	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { AnyZodObject } from 'zod';
 	import { getModalStore } from './stores';
+	import { onMount, tick } from 'svelte';
 	interface Props {
 		/** Exposes parent props to this component. */
 		parent: any;
@@ -25,6 +26,7 @@
 		invalidateAll?: boolean; // set to false to keep form data using muliple forms on a page
 		formAction?: string;
 		context?: string;
+		origin?: string | null;
 		additionalInitialData?: any;
 		suggestions?: { [key: string]: any };
 		taintedMessage?: string | boolean;
@@ -35,19 +37,31 @@
 	let {
 		parent,
 		form,
-		customNameDescription = false,
 		importFolder = false,
 		model,
+		customNameDescription = model.customNameDescription ??
+			model.info?.customNameDescription ??
+			false,
 		duplicate = false,
 		invalidateAll = true,
 		formAction = '?/create',
 		context = 'create',
+		origin = null,
 		additionalInitialData = {},
 		suggestions = {},
 		taintedMessage = false,
 		debug = false,
 		...rest
 	}: Props = $props();
+
+	// Focus the first field when modal opens
+	onMount(async () => {
+		await tick(); // Wait for DOM to render
+		const firstField = document.querySelector('input[data-focusindex="0"]');
+		if (firstField instanceof HTMLElement) {
+			firstField.focus();
+		}
+	});
 </script>
 
 {#if $modalStore[0]}
@@ -77,6 +91,7 @@
 			{model}
 			{closeModal}
 			{context}
+			{origin}
 			{duplicate}
 			{taintedMessage}
 			caching={true}

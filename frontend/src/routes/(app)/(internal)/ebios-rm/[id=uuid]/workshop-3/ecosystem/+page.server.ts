@@ -9,6 +9,7 @@ import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -36,8 +37,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
 				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}`;
+					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
@@ -70,11 +71,25 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	};
 
 	const radarEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/ecosystem_chart_data/`;
+	const circularRadarEndpoint = `${BASE_API_URL}/ebios-rm/studies/${params.id}/ecosystem_circular_chart_data/`;
 
 	const radarRes = await fetch(radarEndpoint);
 	const radar = await radarRes.json();
 
-	return { createForm, deleteForm, model, URLModel, table, radar };
+	const circularRadarRes = await fetch(circularRadarEndpoint);
+	const circularRadar = await circularRadarRes.json();
+
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		radar,
+		circularRadar,
+		title: m.studyTheEcosystem(),
+		modelVerboseName: m.ebiosRmEcosystemSubtitle()
+	};
 };
 
 export const actions: Actions = {

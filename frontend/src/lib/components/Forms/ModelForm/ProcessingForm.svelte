@@ -25,13 +25,13 @@
 	}: Props = $props();
 </script>
 
-<!-- <TextField -->
-<!-- 	{form} -->
-<!-- 	field="ref_id" -->
-<!-- 	label={m.refId()} -->
-<!-- 	cacheLock={cacheLocks['ref_id']} -->
-<!-- 	bind:cachedValue={formDataCache['ref_id']} -->
-<!-- /> -->
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
 
 <AutocompleteSelect
 	{form}
@@ -42,6 +42,20 @@
 	label={m.status()}
 />
 <AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors?user__is_third_party=False"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="assigned_to"
+	cacheLock={cacheLocks['assigned_to']}
+	bind:cachedValue={formDataCache['assigned_to']}
+	label={m.assignedTo()}
+/>
+<AutocompleteSelect
 	multiple
 	{form}
 	optionsEndpoint="processing-natures"
@@ -50,20 +64,12 @@
 />
 <AutocompleteSelect
 	{form}
-	field="legal_basis"
-	options={model.selectOptions['legal_basis']}
-	cacheLock={cacheLocks['legal_basis']}
-	bind:cachedValue={formDataCache['legal_basis']}
-	label={m.legalBasis()}
-/>
-<AutocompleteSelect
-	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <AutocompleteSelect
 	multiple
@@ -89,7 +95,7 @@
 	{form}
 	field="dpia_reference"
 	label={m.dpiaReference()}
-	helpText={m.linkHelpText()}
+	helpText={m.dpiaReferenceHelpText()}
 	cacheLock={cacheLocks['dpia_reference']}
 	bind:cachedValue={formDataCache['dpia_reference']}
 />
@@ -102,6 +108,26 @@
 	cacheLock={cacheLocks['associated_controls']}
 	bind:cachedValue={formDataCache['associated_controls']}
 	label={m.associatedAppliedControls()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="evidences"
+	optionsExtraFields={[['folder', 'str']]}
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidences()}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
+	field="perimeters"
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
 />
 <!-- author = models.ForeignKey( -->
 <!--     User, on_delete=models.SET_NULL, null=True, related_name="authored_processings" -->

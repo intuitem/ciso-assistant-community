@@ -1,0 +1,126 @@
+name: Build RPM Package
+
+permissions:
+  contents: write
+  packages: read
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+# Cancel older in-progress runs for the same PR or the same ref (branch)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-rpm:
+    runs-on: ubuntu-24.04
+    container:
+      image: rockylinux:9
+      options: --privileged
+
+    steps:
+      - name: Install Git (required for checkout)
+        run: |
+          dnf install -y git
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Build Dependencies
+        run: |
+          dnf install -y \
+            rpm-build \
+            rpmdevtools \
+            rsync \
+            curl \
+            wget \
+            gcc \
+            gcc-c++ \
+            make \
+            openssl-devel \
+            bzip2-devel \
+            libffi-devel \
+            zlib-devel \
+            readline-devel \
+            sqlite-devel \
+            xz-devel \
+            tk-devel \
+            ncurses-devel \
+            gdbm-devel
+
+      - name: Install Node.js and pnpm
+        run: |
+          curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
+          dnf install -y nodejs
+          npm install -g pnpm
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "/root/.local/bin" >> $GITHUB_PATH
+
+      - name: Generate Version
+        id: version
+        run: |
+          VERSION=$(git describe --tags --always 2>/dev/null || echo 'dev')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
+      - name: Build RPM
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          cd packaging/rhel
+          bash build-rpm.sh
+
+      - name: Find Built RPM
+        id: rpm
+        run: |
+          RPM_PATH=$(find packaging/rhel/RPMS -name "*.rpm" -type f | head -n 1)
+          RPM_NAME=$(basename "$RPM_PATH")
+          echo "path=$RPM_PATH" >> $GITHUB_OUTPUT
+          echo "name=$RPM_NAME" >> $GITHUB_OUTPUT
+
+          # Get file size for summary
+          RPM_SIZE=$(du -h "$RPM_PATH" | cut -f1)
+          echo "size=$RPM_SIZE" >> $GITHUB_OUTPUT
+
+          echo "Built RPM: $RPM_NAME ($RPM_SIZE)"
+
+      - name: Upload RPM as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ciso-assistant-rpm-${{ steps.version.outputs.version }}
+          path: ${{ steps.rpm.outputs.path }}
+          retention-days: 90
+          if-no-files-found: error
+
+      - name: Create Release and Upload RPM
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.rpm.outputs.path }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Job Summary
+        run: |
+          echo "## RPM Build Complete 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** \`${{ steps.rpm.outputs.name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Size:** ${{ steps.rpm.outputs.size }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Installation" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "sudo rpm -ivh ${{ steps.rpm.outputs.name }}" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

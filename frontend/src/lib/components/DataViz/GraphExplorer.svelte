@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type * as echarts from 'echarts';
+	import { getFlash } from 'sveltekit-flash-message';
+	import { page } from '$app/stores';
+	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
+
+	const flash = getFlash(page);
 
 	interface Props {
 		data: any;
@@ -15,7 +21,9 @@
 		zoom?: number;
 		color?: any;
 		maxLegendItems?: number; // New prop to control legend items
+		showNodeLabels?: boolean;
 		legendPosition?: 'top' | 'bottom' | 'left' | 'right'; // New prop for legend position
+		onNodeDoubleClick?: (params: any) => void;
 	}
 
 	let {
@@ -41,14 +49,22 @@
 			'#ea7ccc'
 		],
 		maxLegendItems = 20, // Default max legend items
-		legendPosition = 'left' // Default legend position
+		showNodeLabels = false,
+		legendPosition = 'left', // Default legend position
+		onNodeDoubleClick = () => {}
 	}: Props = $props();
 
+	let errorMessage = $state('');
 	let searchQuery = $state('');
 	let chart: echarts.ECharts;
-	let currentEmphasisNodeId: number | null = null;
+	let currentEmphasisNodeIds: number[] = []; // Track multiple emphasized nodes
 	const chart_id = `${name}_div`;
 	let resizeTimeout: ReturnType<typeof setTimeout>;
+	let categories = $state(
+		data.categories.map((c) => {
+			return { ...c, name: safeTranslate(c.name) };
+		})
+	);
 
 	// Add custom formatter for tooltip to show custom edge label format
 	// Rename to reflect that it now handles both edges and nodes
@@ -95,14 +111,11 @@
 
 	// Function to get legend configuration based on number of categories
 	const getLegendConfig = () => {
-		const categories = data.categories || [];
 		const hasMany = categories.length > maxLegendItems;
 
 		// Base legend configuration
 		const legendConfig = {
-			data: categories.map(function (a) {
-				return a.name;
-			}),
+			data: categories.map((a) => a.name),
 			type: hasMany ? 'scroll' : 'plain', // Use scroll type for many items
 			orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
 			...getLegendPositioning()
@@ -227,7 +240,7 @@
 					label: {
 						position: 'right',
 						formatter: '{b}',
-						show: false
+						show: showNodeLabels
 					},
 					draggable: true,
 					roam: true,
@@ -257,7 +270,7 @@
 							show: true
 						}
 					},
-					categories: data.categories,
+					categories: categories,
 					force: {
 						edgeLength: edgeLength,
 						repulsion: 200,
@@ -283,41 +296,69 @@
 		};
 	};
 
-	const handleNodeEmphasis = (nodeId: number | null) => {
+	/**
+	 * Emphasizes (highlights) specific nodes in the chart by their IDs.
+	 * Downplays previously emphasized nodes before applying new emphasis.
+	 *
+	 * @param nodeIds - A single node ID, an array of node IDs, or null to clear emphasis.
+	 */
+	const handleNodesEmphasis = (nodeIds: number[] | number | null) => {
 		if (!chart) return;
 
-		if (currentEmphasisNodeId !== null) {
+		// Convert single ID to array for uniform handling
+		const newNodeIds = Array.isArray(nodeIds) ? nodeIds : nodeIds !== null ? [nodeIds] : [];
+
+		if (currentEmphasisNodeIds.length > 0) {
 			chart.dispatchAction({
 				type: 'downplay',
-				dataIndex: currentEmphasisNodeId
+				dataIndex: currentEmphasisNodeIds
 			});
 		}
 
-		if (nodeId !== null && nodeId !== currentEmphasisNodeId) {
+		if (newNodeIds.length > 0) {
 			chart.dispatchAction({
 				type: 'highlight',
-				dataIndex: nodeId
+				dataIndex: newNodeIds
 			});
 		}
-
-		currentEmphasisNodeId = nodeId !== currentEmphasisNodeId ? nodeId : null;
+		if (
+			currentEmphasisNodeIds.length > 0 && // avoid infinite loop when both are empty, which shouldn't happen
+			JSON.stringify(currentEmphasisNodeIds) === JSON.stringify(newNodeIds)
+		) {
+			// Same nodes, clear emphasis
+			handleNodesEmphasis(null);
+			currentEmphasisNodeIds = []; // this goes after to avoid
+		} else if (newNodeIds.length !== 0) {
+			// Not same nodes and not empty, set new emphasis
+			currentEmphasisNodeIds = newNodeIds;
+		}
 	};
 
+	/**
+	 * Searches nodes by name and emphasizes those that match the query.
+	 * Shows an alert if no nodes are found.
+	 *
+	 * @param query - The search string used to match node names.
+	 */
 	// Search function, maybe we can improve it later for fuzzy search?
-	const searchNode = (query: string) => {
+	const searchNodes = (query: string) => {
 		if (!query.trim()) return;
 
 		const normalizedQuery = query.toLowerCase().trim();
-		const node = data.nodes.find((n) => n.name.toLowerCase().includes(normalizedQuery));
+		const nodes = data.nodes.filter((n) => n.name.toLowerCase().includes(normalizedQuery));
 
-		if (node && node.id !== undefined) {
-			handleNodeEmphasis(node.id);
-			chart?.dispatchAction({
-				type: 'focusNodeAdjacency',
-				dataIndex: node.id
+		const nodeIds = nodes.map((node) => node.id).filter((id) => id != null);
+
+		if (nodeIds.length > 0) {
+			handleNodesEmphasis(nodeIds);
+			nodeIds.forEach((id) => {
+				chart?.dispatchAction({
+					type: 'focusNodeAdjacency',
+					dataIndex: id
+				});
 			});
 		} else {
-			alert('No matching nodes found');
+			$flash = { type: 'error', message: m.noMatchingNodesFound() };
 		}
 	};
 
@@ -336,11 +377,13 @@
 
 		chart.on('click', (params) => {
 			if (params.dataType === 'node') {
-				handleNodeEmphasis(params.data.id);
+				handleNodesEmphasis(params.data.id);
 			} else {
-				handleNodeEmphasis(null);
+				handleNodesEmphasis(null);
 			}
 		});
+
+		chart.on('dblclick', onNodeDoubleClick);
 
 		const handleResize = () => {
 			clearTimeout(resizeTimeout);
@@ -360,43 +403,45 @@
 
 	const handleKeyDown = (event: KeyboardEvent) => {
 		if (event.key === 'Enter') {
-			searchNode(searchQuery);
+			searchNodes(searchQuery);
 		}
 	};
 </script>
 
-<div class="relative p-2">
-	<label for="graph-search" class="sr-only">Search</label>
-	<input
-		id="graph-search"
-		type="text"
-		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
-		bind:value={searchQuery}
-		onkeydown={handleKeyDown}
-		placeholder="Find a node ..."
-	/>
-	<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
-		<button
-			type="button"
-			class="text-gray-600 hover:text-gray-700"
-			onclick={() => searchNode(searchQuery)}
-			aria-label="Search"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				fill="none"
-				viewBox="0 0 24 24"
-				stroke-width="1.5"
-				stroke="currentColor"
-				class="size-4"
+<div class="flex flex-col h-screen bg-white shadow-sm">
+	<div class="relative p-2">
+		<label for="graph-search" class="sr-only">Search</label>
+		<input
+			id="graph-search"
+			type="text"
+			class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
+			bind:value={searchQuery}
+			onkeydown={handleKeyDown}
+			placeholder={m.findANode()}
+		/>
+		<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
+			<button
+				type="button"
+				class="text-gray-600 hover:text-gray-700"
+				onclick={() => searchNodes(searchQuery)}
+				aria-label="Search"
 			>
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-				/>
-			</svg>
-		</button>
-	</span>
+				<svg
+					xmlns="http://www.w3.org/2000/svg"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke-width="1.5"
+					stroke="currentColor"
+					class="size-4"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+					/>
+				</svg>
+			</button>
+		</span>
+	</div>
+	<div id={chart_id} class="{width} {height} {classesContainer} p-4" role="presentation"></div>
 </div>
-<div id={chart_id} class="{width} {height} {classesContainer} p-8" role="presentation"></div>

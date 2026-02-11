@@ -1,4 +1,5 @@
 from core.serializers import BaseModelSerializer, ReferentialSerializer
+from django.db import transaction
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     ProcessingNature,
@@ -9,6 +10,8 @@ from .models import (
     DataContractor,
     DataTransfer,
     Processing,
+    RightRequest,
+    DataBreach,
 )
 
 
@@ -38,6 +41,7 @@ class PersonalDataWriteSerializer(BaseModelSerializer):
 class PersonalDataReadSerializer(BaseModelSerializer):
     processing = FieldsRelatedField()
     folder = FieldsRelatedField()
+    assets = FieldsRelatedField(["id", "name", "type", "folder"], many=True)
 
     class Meta:
         model = PersonalData
@@ -116,12 +120,34 @@ class ProcessingWriteSerializer(BaseModelSerializer):
         model = Processing
         fields = "__all__"
 
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                related_models = [
+                    Purpose,
+                    PersonalData,
+                    DataSubject,
+                    DataRecipient,
+                    DataContractor,
+                    DataTransfer,
+                ]
+                for model in related_models:
+                    model.objects.filter(processing=updated_instance).update(
+                        folder=updated_instance.folder
+                    )
+        return updated_instance
+
 
 class ProcessingReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
-    nature = FieldsRelatedField(["name"], many=True)
-    associated_controls = FieldsRelatedField(["name"], many=True)
+    nature = FieldsRelatedField(["id", "name"], many=True)
+    associated_controls = FieldsRelatedField(["id", "name"], many=True)
+    assigned_to = FieldsRelatedField(many=True)
+    purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
+    perimeters = FieldsRelatedField(many=True)
 
     class Meta:
         model = Processing
@@ -136,3 +162,41 @@ class ProcessingNatureReadSerializer(ReferentialSerializer):
 
 class ProcessingNatureWriteSerializer(ProcessingNatureReadSerializer):
     pass
+
+
+# RightRequest Serializers
+class RightRequestWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
+
+
+class RightRequestReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    owner = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RightRequest
+        fields = "__all__"
+
+
+# DataBreach Serializers
+class DataBreachWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = DataBreach
+        fields = "__all__"
+
+
+class DataBreachReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    assigned_to = FieldsRelatedField(many=True)
+    authorities = FieldsRelatedField(many=True)
+    affected_processings = FieldsRelatedField(many=True)
+    affected_personal_data = FieldsRelatedField(many=True)
+    remediation_measures = FieldsRelatedField(["id", "name"], many=True)
+    incident = FieldsRelatedField()
+
+    class Meta:
+        model = DataBreach
+        fields = "__all__"

@@ -61,7 +61,7 @@ erDiagram
     ROOT_FOLDER           ||--o{ USER_GROUP                  : contains
     ROOT_FOLDER           ||--o{ ROLE                        : contains
     ROOT_FOLDER           ||--o{ ROLE_ASSIGNMENT             : contains
-    ROOT_FOLDER           ||--o{ LABEL                       : contains
+    ROOT_FOLDER           ||--o{ FILTERING_LABEL             : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ EVIDENCE                    : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ REFERENCE_CONTROL           : contains
     ROOT_FOLDER_OR_DOMAIN ||--o{ APPLIED_CONTROL             : contains
@@ -97,7 +97,7 @@ erDiagram
 
 ```
 
-### Project management model
+* [ ] Project management model
 
 ```mermaid
 erDiagram
@@ -150,6 +150,7 @@ erDiagram
     USER                         }o--o{ ASSET                 : owns
     USER                         }o--o{ INCIDENT              : owns
     ASSET                        ||--o{ SECURITY_OBJECTIVE    : has
+    ASSET                        }o--o{ ASSET                 : has_parent
     SECURITY_OBJECTIVE           }o--|| QUALIFICATION         : implements
     PERIMETER                    |o--o{ COMPLIANCE_ASSESSMENT : contains
     PERIMETER                    |o--o{ RISK_ASSESSMENT       : contains
@@ -198,8 +199,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string[]    selected_implementation_groups
@@ -217,8 +218,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
     }
 
@@ -254,7 +255,9 @@ erDiagram
         int     order_id
         json    implementation_groups
         boolean assessable
-        json    question
+        json    questions
+        int     weight
+        string  importance
     }
 
     REFERENCE_CONTROL {
@@ -317,7 +320,7 @@ erDiagram
         bool   selected
         string review_conclusion
         string review_observation
-        json   answer
+        json   answers
     }
 
     EVIDENCE {
@@ -338,7 +341,7 @@ erDiagram
         string  provider
         json    translations
 
-        json    definition
+        json    json_definition
     }
 
     ASSET {
@@ -346,11 +349,10 @@ erDiagram
         string description
         string business_value
         string type
-        asset  parent_asset
         url    reference_link
-        int    rto
-        int    rpo
-        int    mtd
+        json   security_objectives
+        json   disaster_recovery_objectives
+               %% contains rto, rpo, mtd, ...
     }
 
     RISK_SCENARIO {
@@ -418,8 +420,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      category
@@ -473,24 +475,24 @@ erDiagram
 
 ```
 
-### Labels
+### Filtering labels
 
-All objects can be linked to user-defined labels. Labels are simple strings with no blank, regex r"\w{0:36}".
+All objects can be linked to user-defined filtering labels. Labels are simple strings with no blank, regex r"\w{0:36}".
 
 Labels are attached to the root folder. They can be read by everyone, added by any contributor, and modified or deleted only by global administrators.
 
 ```mermaid
 erDiagram
-    ANY_USER_DEFINED_OBJECT   }o--o{ LABEL : has_label
- 
-    LABEL {
+    ANY_USER_DEFINED_OBJECT   }o--o{ FILTERING_LABEL : has_label
+
+    FILTERING_LABEL {
         string  label
     }
 ```
 
 In all views and analytics, a filter on label shall be displayed.
 
-Note: For now, labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
+Note: For now, filtering labels are attached to the following objects: vulnerabilities, assets, findings, threats, reference controls, applied controls.
 
 ## Global fields
 
@@ -650,13 +652,40 @@ The implementation_groups field contains a comma-separated list of implementatio
 {
   "ref_id": "1",
   "name": "Foundational",
-  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause"
+  "description": "Practices that correspond to the basic safeguarding requirements specified in 48 CFR 52.204-21 commonly referred to as the FAR Clause",
+  "default_selected": true
 }
 ```
 
 A requirement node can be covered by typical reference controls. A requirement node can cover typical threats. This information is provided in the form of optional links between requirement nodes and reference controls/threats. This is only informative, but is an important added value of CISO Assistant.
 
+A requirement node can have a positive integer weight, that is used for score weighting. The default weight (if undefined) is 1.
+
+A requirement node has an "importance" field that can take the following values: mandatory/recommended/nice to have/undefined. The default value is "undefined".
+
+Combining importance=mandatory with result=non-compliant/partially conpliant can be used to generate a list of attention points in an audit.
+
 The order_id variable allows to sort the requirements nodes, it starts at 0 and is incremented automatically in a given group at import.
+
+```yaml
+{
+  - urn: urn:intuitem:risk:req_node:example-questionnaire:1_governance-1
+        assessable: true
+        weight: 1
+        importance: mandatory
+        depth: 2
+        ref_id: Governance-1
+        name: Access and governance policy
+        description: >
+          The company implements an access control and governance policy tailored to its needs.
+        annotation: >
+          A well-defined access policy ensures the protection of sensitive systems and data.
+        typical_evidence: >
+          Copy of the access management policy, description of roles and responsibilities.
+        implementation_groups:
+          - "base"
+}
+```
 
 A framework always has a numerical score scale from min_score to max_score. If not explicit, the default values are 0 and 100 (percentage). It is also possible to have a scores_definition json, that contains a list of score levels objects. Each score level is an object containing the following fields (example from TISAX):
 
@@ -680,7 +709,7 @@ Threats are referential objects used to clarify the aim of a requirement node or
 
 Vulnerabilities are used to clarify a risk scenario and to follow remediations, e.g. after a pentest. They are informative, risk assessments can be realised without using them. Reference to CVE, CISA KEV or any other catalog can be done in the references field, but this is not mandatory. Therefore, custom vulnerabilities can also be defined, e.g. to point a weakness in an internal process.
 
-Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed.
+Vulnerabilities have a status among the following values: --/potential/exploitable/mitigated/fixed/not_exploitable/unaffected.
 
 The format of the references field is list of the following objects (* for mandatory):
 
@@ -734,8 +763,10 @@ Both types of assessments have common fields:
 - a status: (--/planned/in progress/in review/done/deprecated) that facilitates reporting.
 - a list of authors
 - a list of reviewers
+- an observation
+- an is_locked boolean
 
-An assessment review can be asked. When at least one principal is defined, the _done_ status can only be set if a representant of each principal has reviewed and validated the assessment.
+An assessment review can be asked. When at least one reviewer is defined, the _done_ status can only be set if a representant of each reviewer has reviewed and validated the assessment.
 
 When the assessment status goes from _in progress_ to _in review_, each defined reviewer is notified of the review request.
 A review is deprecated if the assessment is changed. A warning shall be displayed to avoid doing that by error.
@@ -752,16 +783,19 @@ Here are the specific fields for requirement assessments:
 - score: --/`<integer value from min_score to max_score>`.
 - a status: (todo/in progress/in review/done) that facilitates reporting.
 
-The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requriement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
+The compliance assessment score is a read-only field which is calculated when at least one requirement assessment is scored. We calculate the average of scored requirement assessments (ignoring requirement assessments with an undefined score or with status not-applicable).
 
 Requirement assessments can have attached evidences. An evidence contains a name, a description, an attached file, a url link.
 
 The auditor is free to use the result field (qualitative assessment), the score field (quantitative assessment), or both of them.
 
 Compliance assessments have a selected_implementation_groups field that contains the selected implementation groups. The None default value consists in selecting all groups, which makes sense also for the case no implementation groups are defined.
+
 For the sake of performance, when a change is done on the selected implementation groups, the "selected" field of corresponding requirement assessments is updated. When changing the selection, no data shall be lost, so auditors can easily test the effect of various selections.
 
 Note: the selection is persistent, and used in particular for reporting and analytics. The UX could provide dynamic capacity to show or hide implementation groups independently of the selection (e.g. a button "show unselected requirements").
+
+If the framework used by the compliance assessment has default_selected implementation groups, then the corresponding IGs are selected initialy.
 
 Compliance assessments have a score scale (min_score, max_score, score definition) that is inherited from the corresponding framework. But it is possible during the creation of the assessment to specify another score scale. The following hardcoded score scales are proposed as an alternative:
 
@@ -770,9 +804,164 @@ Compliance assessments have a score scale (min_score, max_score, score definitio
 - 0-5 (0-5, no score definition)
 - 0-10 (0-10, no score definition)
 
+Note: for now, the score scale is not selectable, it is defined by the framework.
+
+### Question and answer format
+
+The format for questions and answers json fields will evolve over time. The initial format is the following:
+
+- questions:
+
+```json
+{
+  "urn:intuitem:risk:req_node:example:a.1:question:1": {
+    "type": "unique_choice",
+    "text": "Do you maintain an access control policy?",
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
+        "value": "yes",
+        "add_score": 20,
+        "compute_result": true,
+        "select_implementation_groups": ["1"],
+        "description": "Indicates that a formal access control policy is in place", // (optional, to add context if needed without overloading the interface),
+        "color": "#28a745" // to be retrieved with the excel cell
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_result": false,
+        "description": "No policy exists or is documented",
+        "color": "#dc3545"
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:2": {
+    "type": "unique_choice",
+    "text": "Is the policy reviewed annually?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any"
+    },
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:1",
+        "value": "yes",
+        "add_score": 10,
+        "compute_result": true,
+        "select_implementation_groups": ["2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer02:choice:2",
+        "value": "no",
+        "add_score": 0,
+        "compute_result": false
+      }
+    ]
+  },
+
+  "urn:intuitem:risk:req_node:example:a.1:question:3": {
+    "type": "multiple_choice",
+    "text": "Which access controls are implemented?",
+    "depends_on": {
+      "question": "urn:intuitem:risk:req_node:example:a.1:question:1",
+      "answers": [
+        "urn:intuitem:risk:framework:example:answer01:choice:1"
+      ],
+      "condition": "any" // or "all" (optional, defaults to "any")
+    },
+    "choices": [
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "value": "Role-based access control",
+        "add_score": 5,
+        "compute_result": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:2",
+        "value": "MFA for privileged accounts",
+        "add_score": 5,
+        "compute_result": true,
+        "select_implementation_groups": ["1", "2"]
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:3",
+        "value": "Audit logging",
+        "add_score": 5,
+        "compute_result": true
+      },
+      {
+        "urn": "urn:intuitem:risk:framework:example:answer03:choice:4",
+        "value": "None of the above", // or N/A
+        "add_score": 0,
+        "compute_result": false
+      }
+    ]
+  }
+}
+```
+
+- answers:
+
+```json
+{
+    "urn:intuitem:risk:req_node:example:a.1:question:1": "urn:intuitem:risk:framework:example:answer01:choice:1",
+    "urn:intuitem:risk:req_node:example:a.1:question:2": "urn:intuitem:risk:framework:example:answer02:choice:2",
+    "urn:intuitem:risk:req_node:example:a.1:question:3": [
+        "urn:intuitem:risk:framework:example:answer03:choice:1",
+        "urn:intuitem:risk:framework:example:answer03:choice:2"
+    ]
+    ...
+}
+```
+
+The schema variable follows JSON Schema standard (WIP).
+
+### Automation based on questions
+
+Questions can have additional fieds for automation.
+
+#### Score computing
+
+- add_score: `<integer-value>`
+
+The score is calculated based on this choice. The integer value can be positive or negative. All values selected within a requirement assessment are summed, and the sum is clipped by the scale.
+
+The score cannot be changed manually as long as one choice with add_score is selected.
+
+#### Result computing
+
+- compute_result: `<boolean-value>`
+
+If true, this choice contributes to compliance. If false, this choice contributes to non-compliance.
+
+When compute_result is defined for one or several answered questions, the result is calculated based on the following rules:
+
+- if all answered questions with compute_result have true values, the result is "compliant"
+- else if at least one answered question with compute_result has a true value, the result is "partially compliant"
+- else, the result is "non compliant".
+
+To select "not-applicable" result, the user shall not answer any of the questions with compute_result flag.
+
+#### IG piloted selection
+
+- select_implementation_groups: <IG1, IG2, ...>
+
+This choice provokes the selection of the indicated IG to the selected_implementation_groups of the compliance assessment.
+
+If there is at least one select_implementation_groups field, then the selection of IGs is deemded to be in piloted mode:
+
+- The user cannot select IGs
+- The list of selected IGs is computed as the union of the initial implementation_groups with the IGs that are selected via the select_implementation_groups choices. This is done at each saving of a requirement assessment.
+
 ### Requirement Mapping set
 
-Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see <https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf>).
+Requirement mapping sets are referential objects that describe relations between requirements from a source framework to a target framework. The definition of requirement mapping sets is based on NIST OLIR program (see [https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf](https://nvlpubs.nist.gov/nistpubs/ir/2022/NIST.IR.8278r1.ipd.pdf)).
 
 A requirement mapping set contains a unique specific attribute in json format called mapping_rules.
 
@@ -884,7 +1073,7 @@ Once a risk acceptance is active, the correponding risk assessments are frozen. 
 
 Security exceptions are used to trace assumed non-compliances, whether for assets, requirement assessments, risk scenarios, applied controls, vulnerabilities, or even something not linked to an existing object.
 
-Security exceptions can have zero, one or several owners.
+Security exceptions can have zero, one or several owners (actors).
 Security exceptions can have zero, or one approver.
 
 Security exceptions can be mitigated by applied controls.
@@ -907,16 +1096,18 @@ The performance of the UX shall be optimized, by avoiding to preload all possibl
 ## Incidents
 
 Significant security incidents can be traced in CISO Assistant. An incident object has the following fields:
+
 - ref_id/name/description
 - qualifications
 - severity (like security exceptions)
 - status: new/in progress/solved/closed/rejected
 
-Incidents can be linked to threats, assets, owners.
+Incidents can be linked to threats, assets, owners (actors).
 
 Incidents contain a table of timeline_entry objects.
 
 Timeline_entry objects have the following fields:
+
 - entry (a string to describe the entry)
 - entry_type within detection/mitigation/observation/status_changed/severity_changed
 - observation
@@ -956,6 +1147,10 @@ Libraries can depend on other libraries, thanks to the "dependencies" section, t
 When a library is loaded, this loading is stored in the database, and the corresponding objects keep a link to the library. This allows removing all objects from a library in a single action.
 
 Deleting a library is possible only if none of its objects is currently used. Removing individual elements of a library is not possible. Dependencies are not concerned by the deletion, they should be deleted individually.
+
+There is a hidden boolean flag "autoload" on stored libraries that indicates if this library should be auto-loaded at startup. The default value is false by default, except for requirement mapping sets. When unloading a library, the flag is set to false.
+
+Loaded requirement mapping sets are cached in memory. As an exception, their dependencies are not loaded automatically.
 
 ## Referential objects
 
@@ -1045,7 +1240,9 @@ Example:
 
 The general approach is to translate everything in the frontend. We use paraglide to faciliate this process.
 
-The only exception is that referential objects are translated by the backend. The ACCEPT_LANGUAGE header in the request is used to indicate which language is used on the frontend side. The backend selects the most appropriate language to use (either the requested language, or the default language of the library).
+One notable exception is that referential objects are translated by the backend. The Accept-Language header in the request is used to indicate which language is used on the frontend side. The backend selects the most appropriate language to use (either the requested language, or the default language of the library).
+
+Other user-defined, non-referential objects can also be localized in the same way, by supporting the "translations" field. A dedicated mixin "CustomTranslations" will be used. The UX shall be non-intrusive, and propose localization only as an option.
 
 Note: generated documents (pdf, excel, word) are currently translated in the backend, but this should be migrated in the frontend.
 
@@ -1144,7 +1341,8 @@ A user can be authenticated either locally or with SSO.
 When SSO is activated, all users can use SSO.
 
 When the force_sso global flag is set, all users without keep_local_login:
-- have their password disabled, 
+
+- have their password disabled,
 - cannot ask for a password reset,
 - cannot have their password changed by an administrator.
 
@@ -1216,8 +1414,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
 
         string      conclusion
@@ -1235,12 +1433,6 @@ erDiagram
         string      phone
         string      role
         string      description
-    }
-
-    COMPLIANCE_ASSESSMENT {
-        string      review_conclusion
-        string      review_observation
-        json        implementation_groups_selector
     }
 
 ```
@@ -1299,83 +1491,6 @@ This represents a person that is linked to an entity (typically an employee), an
 
 There is no link between representatives (modeling of the ecosystem) and users of the solution (access control mechanism).
 
-### Evolution of existing models
-
-## Assessments (risk/compliance/entity)
-
-- add field observation
-
-### Requirement assessment
-
-- add the following fields:
-  - answers: a json corresponding to the answers of the requirement node questions.
-
-### Compliance assessment
-
-- add the following fields:
-  - implementation_group_selector: a json describing a form that allows the selection of relevant implementation groups by answering simple questions.
-
-### Requirement node
-
-- Add the following fields:
-  - questions: a json corresponding to the optional questions of the requirement node.
-
-### Applied control
-
-- Add a "contract" category
-- Add a foreign key "contract" to point to a contract
-
-The foreign key contract shall be non-null only if the category is set to "contract". The UX shall reflect this constraint.
-
-Note: in the future, we will use the same approach for policies.
-
-### Question and answer format
-
-The format for questions and answers json fields will evolve over time. The initial format is the following:
-
-- questions:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": {
-        "type": "unique_choice",
-        "choices": [
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:1",
-                "value": "yes"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:2",
-                "value": "no"
-            },
-            {
-                "urn": "urn:intuitem:risk:framework:example:answer01:choice:3",
-                "value": "n/a"
-            }
-        ],
-        "text": "Question title",
-    },
-    "urn:intuitem:risk:req_node:example:a.1:question:2": {
-    ...
-    }
-}
-```
-
-- answers:
-
-```json
-{
-    "urn:intuitem:risk:req_node:example:a.1:question:1": [
-        "urn:intuitem:risk:framework:example:answer01:choice:1",
-        "urn:intuitem:risk:framework:example:answer01:choice:2"
-    ],
-    "urn:intuitem:risk:req_node:example:a.1:question:2": "yes",
-    ...
-}
-```
-
-The schema variable follows JSON Schema standard (WIP).
-
 ### Enclave security approach
 
 The objects manipulated by the third party (compliance assessment and evidences) are put in a dedicated folder called an "enclave". This folder is a subfolder of the domain. Enclaves are not shown in the UI, they are only used for security implementation.
@@ -1385,9 +1500,6 @@ The objects manipulated by the third party (compliance assessment and evidences)
 - The main entity is automatically created and owns the global domain. The name is set to "Main", and can be changed.
 - Other entities own no domain.
 - Solutions are automatically provided to the main entity.
-- The change in applied control is not retained.
-- implementation_group_selector is not retained.
-- ebios-RM parameters are not retained.
 
 ## EBIOS-RM evolution
 
@@ -1437,7 +1549,7 @@ The object feared events (workshop 1) contains the following fields:
 - description
 - list of impact qualifications
 - gravity (from the risk matrix impact scale)
-- selected
+- is_selected
 - justification
 
 The object risk_origin_target_objective (workshop 2) contains the following fields:
@@ -1448,7 +1560,7 @@ The object risk_origin_target_objective (workshop 2) contains the following fiel
 - resources (--/1 limited/2 significant/3 important/4 unlimited) (--/limitées/significatives/importantes/illimitées)
 - pertinence (--/1 Irrelevant/2 partially relevant/3 fairly relevant/4 highly relevant) (--/peu pertinent/moyennement pertient/plutôt pertinent/très pertinent) -> calculated
 - activity (--/1/2/3/4)
-- selected
+- is_selected
 - justification
 
 The object ecosystem entity (workshop 3) links to a TPRM entity, and contains the following fields:
@@ -1459,7 +1571,7 @@ The object ecosystem entity (workshop 3) links to a TPRM entity, and contains th
 - Penetration
 - Cyber maturity
 - trust
-- selected
+- is_selected
 - justification
 
 The object strategic attack path (workshop 3) contains the following fields:
@@ -1470,7 +1582,7 @@ The object strategic attack path (workshop 3) contains the following fields:
 - intial threat level
 - Controls
 - residual threat level
-- selected
+- is_selected
 - justification
 
 THe object operational scenario (workshop 4) contains the following fields:
@@ -1479,7 +1591,7 @@ THe object operational scenario (workshop 4) contains the following fields:
 - list of techniques/threats (typically from Mitre Att@ck)
 - description
 - likelihood
-- selected
+- is_selected
 - justification
 
 The frontend for risk study shall propose the following steps:
@@ -1549,8 +1661,8 @@ erDiagram
         date        eta
         date        due_date
         string      status
-        principal[] author
-        principal[] reviewer
+        actor[]     author
+        actor[]     reviewer
         string      observation
     }
 
@@ -1559,7 +1671,7 @@ erDiagram
         string name
         string description
         int    gravity
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1569,7 +1681,7 @@ erDiagram
         int    motivation
         int    resources
         int    activity
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1583,7 +1695,7 @@ erDiagram
         int    residual_penetration
         int    residual_maturity
         int    residual_trust
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1597,14 +1709,14 @@ erDiagram
         string ref_id
         string name
         string description
-        bool   selected
+        bool   is_selected
         string justification
     }
 
     OPERATIONAL_SCENARIO {
         string operating_modes_description
         int    likelihood
-        bool   selected
+        bool   is_selected
         string justification
     }
 
@@ -1641,9 +1753,11 @@ erDiagram
 This new type of assessments is intended to gather and manage findings. The section is present in governance with the name "follow-up"/"Suivi".
 
 A findings assessment has the following specific fields:
+
 - category: --/pentest/audit/internal
 
 A finding ("constat") has the following fields:
+
 - ref_id/name/description
 - severity, like for vulnerabilities
 - a status among: --/draft/Identified/Confirmed/Dismissed/Assigned/In Progress/Mitigated/Resolved/Deprecated
@@ -1753,6 +1867,7 @@ The task_date is copied in the due_date of the task_node for a non-recurring tas
 When enabled is set to False, the schedule is suspended (for recurring task), and generated tasks are hidden (past and future).
 
 The following concepts will not be included in the MVP:
+
 - subtasks
 - exceptions
 - overdue_behavior (will be NO_IMPACT)
@@ -1760,6 +1875,7 @@ The following concepts will not be included in the MVP:
 ### Implementation
 
 Future task_nodes are generated partially in advance at creation/update of a task_template and with a daily refresh done with huey. This shall take in account end_date, and the following limits:
+
 - 5 years for yearly frequency
 - 24 months for monthly frequency
 - 53 weeks for weekly frequency
@@ -1787,8 +1903,8 @@ CAMPAIGN {
     date        eta
     date        due_date
     string      status
-    principal[] author
-    principal[] reviewer
+    actor[]     author
+    actor[]     reviewer
     string      observation
 }
 
@@ -1807,3 +1923,194 @@ If a non-empty list of frameworks is set for TPRM scope, an entity assessment is
 If a non-empty list of frameworks is set for internal scope, a compliance assessment is generated for each (framework, perimeter) couple. Frameworks can be added or removed at any time. If a framework is removed, the corresponding assessments are either deleted or detached, as decided by the user. A detached assessment cannot be reattached.
 
 If a matrix is set for a campaign, a risk analysis is generated for each perimeter. This can be added or removed at any time. If a matrix is removed, the corresponding risk assessments are either deleted or detached, as decided by the user. A detached risk assessment cannot be reattached.
+
+## Quantitative Risk Analysis
+
+```mermaid
+erDiagram
+
+ROOT_FOLDER_OR_DOMAIN ||--o{ QUANT_STUDY           : contains
+QUANT_STUDY           ||--o{ QUANT_SCENARIO        : contains
+QUANT_STUDY           ||--o{ QUANT_HYPOTHESIS      : contains
+QUANT_STUDY           ||--o{ QUANT_AGGREGATION     : contains
+QUANT_SCENARIO        }o--o{ ASSET                 : concerns
+QUANT_SCENARIO        }o--o{ THREAT                : concerns
+QUANT_SCENARIO        }o--o{ VULNERABILITY         : concerns
+QUANT_SCENARIO        }o--o{ QUALIFICATION         : concerns
+QUANT_HYPOTHESIS      }o--|| QUANT_SCENARIO        : applies_to
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : removes
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : adds
+QUANT_HYPOTHESIS      }o--o{ APPLIED_CONTROL       : already_contains
+QUANT_HYPOTHESIS      }o--o{ FILTERING_LABEL       : contains
+QUANT_AGGREGATION     }o--o{ QUANT_HYPOTHESIS      : contains
+
+QUANT_STUDY {
+    string      ref_id
+    string      name
+    string      description
+
+    date        eta
+    date        due_date
+    string      status
+    actor[]     author
+    actor[]     reviewer
+    string      observation
+}
+
+QUANT_SCENARIO {
+    string      ref_id
+    string      name
+    string      description
+}
+
+QUANT_HYPOTHESIS {
+    string      ref_id
+    string      name
+    string      description
+    json        estimated_parameters
+    string      justification
+    json        simulation_data
+}
+
+QUANT_AGGREGATION {
+    string      ref_id
+    string      name
+    string      description
+    json        simulation_data
+}
+
+```
+
+### Approach for basic Cybersecurity Risk Quantification
+
+1. Define a study to establish the context, selecting the relevant assets.
+2. Identify risk scenarios relevant for the context, e.g. by decomposing by asset and by qualfification (CIA).
+3. For each risk scenario, explore one or several hypotheses corresponding to various applied control setups (removing, highlighting, adding applied controls).
+4. For each hypothesis, provide estimation of probability and 90% confidence interval for impact.
+5. For each hypothesis, press "Simulate" button to generate a Loss Exceedence Curve (Monte Carlo).
+6. Define relavant aggregations of compatible hypotheses, and simulate them (Monte Carlo) to get the corresponding LEC.
+7. All the LEC generated for the study are available in a reporting section.
+
+The json field `estimated_parameters` contains:
+
+- the reference period as a drop-down value (hour/day/week/month/year)
+- the reference period in seconds (for calculations)
+- the probability if a real that can be entered directly as percentage, or cacluated from:
+  - a frequency in the form X per Y, with X a decimal number and Y = hour/day/week/month/year
+  - a proportion in the form X in Y, with X and Y integers
+- the impact expressed as:
+  - the reference distribution (LOGNORMAL for the moment)
+  - the LB value for the 90% CI
+  - the UB value for the 90% CI
+
+The json field `simulation_data` contains the MC simulation parameters (or a sampling, tbd), and the LEC points.
+
+An aggregation can only be simulated if it contains compatible hypotheses. Two hypotheses are compatible if and only if the don't contain any control that is added in one and removed from the other.
+
+Notes for MVP:
+
+- the proability is entered as a percentage
+- the reference period is hardcoded to year
+- aggregations are not implemented
+
+## Asset / Actors evolution
+
+```mermaid
+erDiagram
+
+ACTOR          }o--o| USER       : is
+ACTOR          }o--o| ENTITY     : is
+ACTOR          }o--o| TEAM       : is
+
+TEAM {
+    string      ref_id
+    string      name
+    string      description
+    user        leader
+    user[]      deputy
+    user[]      member
+ }
+
+
+ACTOR {
+    string      actor_type
+ }
+
+ENTITY {
+    string  name
+    string  description
+    string  missions
+    url     reference_link
+    string  entity_type
+}
+
+ASSET {
+    string  name
+    string  description
+    string  business_value
+    string  type
+    url     reference_link
+    json    security_objectives
+    json    disaster_recovery_objectives
+    json    security_capabilities
+    json    disaster_recovery_capabilities
+    boolean inherit_objectives
+    boolean intherit_capabilities
+}
+
+ASSET_RELATION {
+    string  description
+    asset   source
+    asset   destination
+    string  relation_type
+    string  asset_type
+    json    security_objectives_propagation
+    json    disaster_recovery_objectives_propagation
+}
+
+```
+
+- Actors are used for ownership of objects, instead of using users directly.
+- actor_type is a string among USER | USER_GROUP | ENTITY | TEAM
+- entity_type indicates if this is a legal entity, a natural person or none of this (e.g. a division/branch of another entity).
+- relation_type can be DEPENDS_ON | HAS_ACCESS | LOCATED_IN
+- asset_type can be PRIMARY | SUPPORT | LOCATION | IDENTITY
+- if inherit_objectives is true, then the objectives are calculated from the ascendant assets, and local objectives are ignored.
+- if inherit_capabilities is true, then the capabilities are calculated from the descendant assets, and local capabilities are ignored.
+- Teams are created and updated by domain managers.
+
+### Migration
+
+The new model is a superset of the current model, so it is possible to migrate properly.
+- parent relations are transformed in explicit asset relations
+- overridden_children_capabilities are mapped to security_objectives_propagation and disaster_recovery_objectives_propagation
+- inherit_objectives = true for supporting assets, false for primary assets
+- intherit_capabilities = true for primary assets, false for supporting assets (TBC)
+
+
+## DORA support
+
+### Objective
+
+- generate ROI report following https://www.eba.europa.eu/activities/direct-supervision-and-oversight/digital-operational-resilience-act/preparation-dora-application
+- generate Incident reports: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
+- Generate threat reports (not in MVP)
+
+### ROI
+
+- The ROI shall be based on the following objects:
+  - critical functions -> assets with a boolean flag "critical function"
+  - entities: add required parameters in entities:
+    - LEI (if available)
+    - EU ID (if relevant, LEI not available)
+    - ...
+  - contracts between entities (new object)
+- The ROI is a zip file with simple content, mainly CSV files
+- Good description of the zip content here: https://www.centralbank.ie/docs/default-source/regulation/dora-templates/guide-to-submitting-dora-registers-on-the-central-bank-of-ireland-portal.pdf
+- The content of the CSV files is well described in the XLS template, which provides all the possible values for dropdown menus: https://github.com/lesleyxyz/dora-register-of-information/blob/main/unprotected_XLS%20Master%20Template%20DORA%20RoI%20dryrun.xlsx
+
+### Incident reports
+
+- Reports are in XLSX
+- the format of reports is well described by the xlsx template: https://www.bafin.de/SharedDocs/Downloads/EN/Anlage/dl_DORA_Incident_reporting_Template.html
+- Missing fields shall be added in the incident data model to generate the various reports

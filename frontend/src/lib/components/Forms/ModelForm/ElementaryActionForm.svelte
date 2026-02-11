@@ -27,10 +27,10 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <Select
 	{form}
@@ -52,6 +52,7 @@
 	{form}
 	optionsEndpoint="threats"
 	field="threat"
+	optionsLabelField="auto"
 	cacheLock={cacheLocks['threat']}
 	bind:cachedValue={formDataCache['threat']}
 	label={m.threat()}

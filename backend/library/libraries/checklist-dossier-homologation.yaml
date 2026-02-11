@@ -1,0 +1,198 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:checklist-dossier-homologation
+locale: fr
+ref_id: Checklist de dossier d'homologation
+name: Checklist de dossier d'homologation
+description: "Guide synth\xE9tique des livrables requis pour g\xE9rer un dossier d'homologation"
+copyright: _
+version: 1
+publication_date: 2025-10-01
+provider: intuitem
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:checklist-dossier-homologation
+    ref_id: Checklist de dossier d'homologation
+    name: Checklist de dossier d'homologation
+    description: "Guide synth\xE9tique des livrables requis pour g\xE9rer un dossier\
+      \ d'homologation"
+    implementation_groups_definition:
+    - ref_id: SI-OB
+      name: "Simplifi\xE9e - Obligatoire"
+      description: null
+    - ref_id: EL-OB
+      name: "\xC9labor\xE9e - Obligatoire"
+      description: null
+    - ref_id: AV-OB
+      name: "Avanc\xE9e - Obligatoire"
+      description: null
+    - ref_id: SI-OP
+      name: "Simplifi\xE9e - Optionnel"
+      description: null
+    - ref_id: EL-OP
+      name: "\xC9labor\xE9e - Optionnel"
+      description: null
+    - ref_id: AV-OP
+      name: "Avanc\xE9e - Optionnel"
+      description: null
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      assessable: false
+      depth: 1
+      name: "Pr\xE9requis - documents existants"
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Cartographie du syst\xE8me d'information"
+      implementation_groups:
+      - SI-OB
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: Dossier d'architecture technique et fonctionnel + tout documents pertinents
+      implementation_groups:
+      - SI-OP
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Proc\xE9dure d'exploitation s\xE9curis\xE9e"
+      implementation_groups:
+      - SI-OP
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Proc\xE9dure d'installation (Pour les SI type d\xE9ploiement)"
+      implementation_groups:
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Plan d'assurance s\xE9curit\xE9 des prestataires"
+      implementation_groups:
+      - SI-OB
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Tableau de bord des incidents (r\xE9-homologation)"
+      implementation_groups:
+      - EL-OP
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:prerequis---documents-existants
+      name: "Plan de continuit\xE9 / reprise informatique"
+      implementation_groups:
+      - EL-OP
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      assessable: false
+      depth: 1
+      name: Production relative au dossier d'homologation
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: "Strat\xE9gie d'homologation"
+      implementation_groups:
+      - SI-OB
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: "Mesures de s\xE9curit\xE9 standards + mesures sp\xE9cifiques mises en\
+        \ oeuvre + RACI incidents (d\xE9p\xF4t de plainte)"
+      implementation_groups:
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: "Etat des d\xE9rogations relatives aux mesures obligatoires non appliqu\xE9\
+        es"
+      implementation_groups:
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: "Analyse des risques de s\xE9curit\xE9 et risques r\xE9siduels (dont analyse\
+        \ de confomit\xE9)"
+      annotation: "Simplifi\xE9e : Atelier 1 et 5 de l'EBIOS RM\nElabor\xE9e : Atelier\
+        \ 1 et 5 de l'EBIOS RM\nAvanc\xE9e : EBIOS RM compl\xE8te"
+      implementation_groups:
+      - SI-OB
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: Rapport d'audits
+      description: "Tests d'intrusion, audits conformit\xE9s, homologation"
+      implementation_groups:
+      - SI-OP
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: Plan d'action relatif au maintien de l'homologation
+      description: "Contruction \xE0 partir des r\xE9sultats de l'analyse de risques\
+        \ et des audits"
+      implementation_groups:
+      - SI-OP
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: Supports de la commission d'homologation
+      implementation_groups:
+      - SI-OP
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation:8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:production-relative-au-dossier-d_homologation
+      name: "D\xE9cision d'homologation"
+      implementation_groups:
+      - SI-OB
+      - EL-OB
+      - AV-OB
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:complements
+      assessable: false
+      depth: 1
+      name: "Compl\xE9ments"
+    - urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:complements:1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:checklist-dossier-homologation:complements
+      name: "Analyse d'impact \xE0 la protection des donn\xE9es \xE0 caract\xE8re\
+        \ personnel (AIPD)"
+      implementation_groups:
+      - EL-OP
+      - AV-OP

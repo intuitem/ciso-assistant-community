@@ -119,20 +119,25 @@
 				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
 				openDelay={0}
 				closeDelay={100}
+				zIndex="9999"
 			>
 				{#snippet content()}
 					<div
-						class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
-						style="color: {xHeader.hexcolor ?? '#FFFFFF'}"
+						class="card bg-black p-4 shadow-lg rounded-sm w-max"
+						style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
 					>
-						<p data-testid="x-header-description" class="font-semibold">
+						<p
+							data-testid="x-header-description"
+							class="font-semibold whitespace-pre-line break-words"
+						>
 							{xHeader.description}
 						</p>
 						<div class="arrow bg-black"></div>
 					</div>
 				{/snippet}
 				{#snippet trigger()}
-					<span class="font-semibold p-1" data-testid="x-header-name">{xHeader.name}</span>
+					<span class="font-semibold p-1 break-all" data-testid="x-header-name">{xHeader.name}</span
+					>
 					{#if xHeader.description}
 						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 					{/if}
@@ -143,13 +148,19 @@
 {/snippet}
 
 <div class="flex flex-row items-center">
-	<div class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto">
+	<div
+		class="flex font-semibold text-xl -rotate-90 whitespace-nowrap mx-auto"
+		data-testid="y-label"
+	>
 		{yAxisLabel}
 	</div>
 
 	<div class="flex flex-col w-full">
 		{#if flipVertical}
-			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+			<div
+				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
+				data-testid="x-label-flipped"
+			>
 				{xAxisLabel}
 			</div>
 		{/if}
@@ -177,13 +188,17 @@
 						openDelay={0}
 						closeDelay={100}
 						positioning={{ placement: 'bottom-end' }}
+						zIndex="9999"
 					>
 						{#snippet content()}
 							<div
-								class="card bg-black p-4 z-20 shadow-lg rounded-sm max-w-xl"
-								style="color: {yHeader.hexcolor ?? '#FFFFFF'}"
+								class="card bg-black p-4 shadow-lg rounded-sm w-max"
+								style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
 							>
-								<p data-testid="y-header-description" class="font-semibold">
+								<p
+									data-testid="y-header-description"
+									class="font-semibold whitespace-pre-line break-words"
+								>
 									{yHeader.description}
 								</p>
 								<div class="arrow bg-black"></div>
@@ -214,7 +229,10 @@
 			{/if}
 		</div>
 		{#if !flipVertical}
-			<div class="flex font-semibold text-xl items-center justify-center p-2 mt-1">
+			<div
+				class="flex font-semibold text-xl items-center justify-center p-2 mt-1"
+				data-testid="x-label"
+			>
 				{xAxisLabel}
 			</div>
 		{/if}

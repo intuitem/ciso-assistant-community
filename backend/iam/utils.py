@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 import structlog
-from allauth.headless.tokens.sessions import SessionTokenStrategy
+from allauth.headless.tokens.strategies.sessions import SessionTokenStrategy
 from django.http import HttpRequest
 from knox.models import AuthToken
 
