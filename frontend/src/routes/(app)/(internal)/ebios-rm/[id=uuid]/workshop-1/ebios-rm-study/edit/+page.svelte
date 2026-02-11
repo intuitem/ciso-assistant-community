@@ -16,5 +16,6 @@
 		selectOptions={data.selectOptions}
 		model={data.model}
 		context="ebiosRmStudy"
+		scopeFolder={data.data.folder}
 	/>
 </div>

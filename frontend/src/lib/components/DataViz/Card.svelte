@@ -32,7 +32,7 @@
 	<Anchor
 		{href}
 		{label}
-		class="flex flex-col shadow-lg text-purple-800 p-2 h-28 bg-white hover:bg-violet-50 {cEmphasis} {customClass}"
+		class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white hover:bg-violet-50 {cEmphasis} {customClass}"
 	>
 		<div class="text-xs">
 			{#if icon}
@@ -43,12 +43,12 @@
 			{/if}
 		</div>
 		<div class="mt-auto">
-			<p class="text-4xl font-bold text-left">{count}</p>
-			<div class="text-sm capitalize">{label}</div>
+			<p class="text-2xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
+			<div class="text-xs">{label}</div>
 		</div>
 	</Anchor>
 {:else}
-	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-28 bg-white {cEmphasis} {customClass}">
+	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white {cEmphasis} {customClass}">
 		<div class="text-xs">
 			{#if icon}
 				<span><i class={icon}></i></span>
@@ -58,8 +58,8 @@
 			{/if}
 		</div>
 		<div class="mt-auto">
-			<p class="text-4xl font-bold text-left">{count}</p>
-			<div class="text-sm capitalize">{label}</div>
+			<p class="text-2xl font-bold text-left" data-testid="card-{section}-{label}">{count}</p>
+			<div class="text-xs">{label}</div>
 		</div>
 	</div>
 {/if}

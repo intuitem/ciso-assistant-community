@@ -1,9 +1,10 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
 	import Checkbox from '../Checkbox.svelte';
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages.js';
@@ -23,17 +24,8 @@
 		formDataCache = $bindable({}),
 		initialData = {}
 	}: Props = $props();
-
-	console.log(model);
 </script>
 
-<TextField
-	{form}
-	field="ref_id"
-	label={m.refId()}
-	cacheLock={cacheLocks['ref_id']}
-	bind:cachedValue={formDataCache['ref_id']}
-/>
 <AutocompleteSelect
 	{form}
 	field="category"
@@ -75,8 +67,41 @@
 	cacheLock={cacheLocks['is_sensitive']}
 	bind:cachedValue={formDataCache['is_sensitive']}
 />
-<!-- retention = models.CharField(max_length=255, blank=True) -->
-<!-- deletion_policy = models.CharField( -->
-<!--     max_length=50, choices=DELETION_POLICY_CHOICES, blank=True -->
-<!-- ) -->
-<!-- is_sensitive = models.BooleanField(default=False) -->
+
+<AutocompleteSelect
+	{form}
+	field="assets"
+	optionsEndpoint="assets"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	optionsInfoFields={{
+		fields: [
+			{
+				field: 'type',
+				translate: true
+			}
+		],
+		classes: 'text-blue-500'
+	}}
+	cacheLock={cacheLocks['assets']}
+	bind:cachedValue={formDataCache['assets']}
+	label={m.assets()}
+	multiple={true}
+/>
+
+<Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<TextField
+		{form}
+		field="name"
+		label={m.name()}
+		cacheLock={cacheLocks['name']}
+		bind:cachedValue={formDataCache['name']}
+	/>
+	<MarkdownField
+		{form}
+		field="description"
+		label={m.description()}
+		cacheLock={cacheLocks['description']}
+		bind:cachedValue={formDataCache['description']}
+	/>
+</Dropdown>

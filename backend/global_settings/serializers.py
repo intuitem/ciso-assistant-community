@@ -13,6 +13,13 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_swap_axes",
     "risk_matrix_flip_vertical",
     "risk_matrix_labels",
+    "currency",
+    "daily_rate",
+    "mapping_max_depth",
+    "allow_self_validation",
+    "show_warning_external_links",
+    "builtin_metrics_retention_days",
+    "allow_assignments_to_entities",
 ]
 
 
@@ -33,17 +40,104 @@ class GlobalSettingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        fields = "__all__"
+        fields = ["id", "name", "created_at", "updated_at"]
 
 
 class GeneralSettingsSerializer(serializers.ModelSerializer):
+    conversion_rate = serializers.FloatField(
+        write_only=True, required=False, default=1.0
+    )
+
     def update(self, instance, validated_data):
+        # Track old currency value for potential propagation
+        old_currency = instance.value.get("currency") if instance.value else None
+
+        # Extract conversion_rate before validation (it's not stored in settings, just used for conversion)
+        conversion_rate = 1.0
+        if "value" in validated_data and "conversion_rate" in validated_data["value"]:
+            conversion_rate = validated_data["value"].pop("conversion_rate")
+        elif "conversion_rate" in validated_data:
+            conversion_rate = validated_data.pop("conversion_rate")
+
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            # Validate builtin_metrics_retention_days minimum value
+            if key == "builtin_metrics_retention_days":
+                if not isinstance(value, int) or value < 1:
+                    raise serializers.ValidationError(
+                        {
+                            "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
             setattr(instance, "value", validated_data["value"])
+
+        # Get new currency value
+        new_currency = validated_data["value"].get("currency")
+
         instance.save()
+
+        # If currency has changed, propagate to AppliedControl records
+        if old_currency != new_currency and new_currency:
+            self._update_applied_control_currencies(
+                old_currency, new_currency, conversion_rate
+            )
+
         return instance
+
+    def _update_applied_control_currencies(
+        self, old_currency, new_currency, conversion_rate=1.0
+    ):
+        """Update currency in all AppliedControl cost structures and apply conversion rate"""
+        from core.models import AppliedControl
+        from decimal import Decimal
+
+        updated_count = 0
+
+        # Get all AppliedControl records that have cost data
+        for control in AppliedControl.objects.filter(cost__isnull=False):
+            if isinstance(control.cost, dict):
+                current_currency = control.cost.get("currency")
+
+                # Update if:
+                # 1. Control's currency matches the old global currency, OR
+                # 2. Old global currency was None (first time setting global currency), OR
+                # 3. Control has no currency set
+                should_update = (
+                    current_currency == old_currency
+                    or old_currency is None
+                    or current_currency is None
+                )
+
+                if should_update:
+                    # Update currency
+                    control.cost["currency"] = new_currency
+
+                    # Apply conversion rate to cost amounts
+                    if conversion_rate != 1.0:
+                        # Convert build costs
+                        if "build" in control.cost:
+                            if "fixed_cost" in control.cost["build"]:
+                                control.cost["build"]["fixed_cost"] = float(
+                                    Decimal(str(control.cost["build"]["fixed_cost"]))
+                                    * Decimal(str(conversion_rate))
+                                )
+
+                        # Convert run costs
+                        if "run" in control.cost:
+                            if "fixed_cost" in control.cost["run"]:
+                                control.cost["run"]["fixed_cost"] = float(
+                                    Decimal(str(control.cost["run"]["fixed_cost"]))
+                                    * Decimal(str(conversion_rate))
+                                )
+
+                    control.save(update_fields=["cost"])
+                    updated_count += 1
+
+        print(
+            f"Updated currency from '{old_currency}' to '{new_currency}' "
+            f"with conversion rate {conversion_rate} in {updated_count} AppliedControl records"
+        )
 
     class Meta:
         model = GlobalSettings
@@ -94,6 +188,49 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     inherent_risk = serializers.BooleanField(
         source="value.inherent_risk", required=False, default=False
     )
+    organisation_objectives = serializers.BooleanField(
+        source="value.organisation_objectives", required=False, default=True
+    )
+    organisation_issues = serializers.BooleanField(
+        source="value.organisation_issues", required=False, default=True
+    )
+    quantitative_risk_studies = serializers.BooleanField(
+        source="value.quantitative_risk_studies", required=False, default=True
+    )
+    terminologies = serializers.BooleanField(
+        source="value.terminologies", required=False, default=True
+    )
+    bia = serializers.BooleanField(source="value.bia", required=False, default=True)
+    project_management = serializers.BooleanField(
+        source="value.project_management", required=False, default=False
+    )
+    contracts = serializers.BooleanField(
+        source="value.contracts", required=False, default=False
+    )
+    reports = serializers.BooleanField(
+        source="value.reports", required=False, default=False
+    )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
+    outgoing_webhooks = serializers.BooleanField(
+        source="value.outgoing_webhooks", required=False, default=False
+    )
+    metrology = serializers.BooleanField(
+        source="value.metrology", required=False, default=True
+    )
+    personal_data = serializers.BooleanField(
+        source="value.personal_data", required=False, default=True
+    )
+    purposes = serializers.BooleanField(
+        source="value.purposes", required=False, default=True
+    )
+    right_requests = serializers.BooleanField(
+        source="value.right_requests", required=False, default=True
+    )
+    data_breaches = serializers.BooleanField(
+        source="value.data_breaches", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
@@ -112,6 +249,21 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "privacy",
             "experimental",
             "inherent_risk",
+            "organisation_objectives",
+            "organisation_issues",
+            "quantitative_risk_studies",
+            "terminologies",
+            "bia",
+            "project_management",
+            "contracts",
+            "reports",
+            "validation_flows",
+            "outgoing_webhooks",
+            "metrology",
+            "personal_data",
+            "purposes",
+            "right_requests",
+            "data_breaches",
         ]
         read_only_fields = ["name"]
 

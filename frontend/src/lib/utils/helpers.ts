@@ -52,6 +52,29 @@ export function displayScoreColor(value: number | null, max_score: number, inver
 	}
 }
 
+export function getScoreHexColor(value: number | null, max_score: number, inversedColors = false) {
+	value ??= 0;
+	const percentage = max_score > 0 ? (value * 100) / max_score : 0;
+	// Tailwind color hex equivalents
+	const colors = {
+		red400: '#f87171',
+		orange400: '#fb923c',
+		yellow300: '#fde047',
+		green300: '#86efac'
+	};
+	if (inversedColors) {
+		if (percentage < 25) return colors.green300;
+		if (percentage < 50) return colors.yellow300;
+		if (percentage < 75) return colors.orange400;
+		return colors.red400;
+	} else {
+		if (percentage < 25) return colors.red400;
+		if (percentage < 50) return colors.orange400;
+		if (percentage < 75) return colors.yellow300;
+		return colors.green300;
+	}
+}
+
 export function formatScoreValue(value: number, max_score: number, fullDonut = false) {
 	if (value === null) {
 		return 0;
@@ -178,4 +201,136 @@ export function normalizeSearchString(str: string): string {
 		.replace(/[^\w\s-]/g, ' ') // Replace special chars with spaces
 		.replace(/\s+/g, ' ') // Collapse multiple spaces
 		.trim();
+}
+
+export function isQuestionVisible(question: any, answers: any): boolean {
+	if (!question.depends_on) return true;
+
+	const dependency = question.depends_on;
+	const targetAnswer = answers[dependency.question];
+	if (targetAnswer === undefined || targetAnswer === null) return false;
+
+	if (dependency.condition === 'any') {
+		// If targetAnswer is an array (multiple choice)
+		if (Array.isArray(targetAnswer)) {
+			return targetAnswer.some((a) => dependency.answers.includes(a));
+		}
+		// Single value
+		return dependency.answers.includes(targetAnswer);
+	}
+
+	if (dependency.condition === 'all') {
+		if (Array.isArray(targetAnswer)) {
+			return dependency.answers.every((a) => targetAnswer.includes(a));
+		}
+		// Single value (must match all, so only true if exactly one)
+		return dependency.answers.length === 1 && dependency.answers[0] === targetAnswer;
+	}
+
+	return true; // fallback
+}
+
+export function computeRequirementScoreAndResult(requirementAssessment: any, answers: any) {
+	const questions = requirementAssessment.requirement.questions;
+
+	if (!questions) return { score: null, result: null };
+
+	let totalScore: number | null = 0;
+	const min_score = requirementAssessment.compliance_assessment.min_score || 0;
+	const max_score = requirementAssessment.compliance_assessment.max_score || 100;
+	let results: boolean[] | null = [];
+	let visibleCount = 0;
+	let answeredVisibleCount = 0;
+	let hasAnyScorableQuestions = false;
+	let hasAnyResultQuestions = false;
+
+	// First pass: check if ANY question (visible or not) has scoring/result capability
+	for (const [q_urn, question] of Object.entries(questions)) {
+		if (question.choices && Array.isArray(question.choices)) {
+			for (const choice of question.choices) {
+				if (choice.add_score) {
+					hasAnyScorableQuestions = true;
+				}
+				if (choice.compute_result) {
+					hasAnyResultQuestions = true;
+				}
+			}
+		}
+	}
+
+	// If there are no scorable questions at all, return early
+	if (!hasAnyScorableQuestions) {
+		totalScore = null;
+	}
+
+	// Second pass: compute actual scores and results from visible, answered questions
+	for (const [q_urn, question] of Object.entries(questions)) {
+		if (!isQuestionVisible(question, answers)) continue;
+
+		visibleCount++;
+
+		const selectedChoiceURNs = answers?.[q_urn];
+
+		// Determine if the question is actually answered:
+		// - not answered if undefined or null
+		// - not answered if string and empty after trim
+		// - not answered if array and empty (important for multiple_choice)
+		const hasAnswer =
+			selectedChoiceURNs !== undefined &&
+			selectedChoiceURNs !== null &&
+			!(typeof selectedChoiceURNs === 'string' && selectedChoiceURNs.trim() === '') &&
+			!(Array.isArray(selectedChoiceURNs) && selectedChoiceURNs.length === 0);
+
+		if (!hasAnswer) {
+			// visible but unanswered -> will lead to 'not_assessed' overall
+			continue;
+		}
+
+		answeredVisibleCount++;
+
+		const choiceURNs = Array.isArray(selectedChoiceURNs)
+			? selectedChoiceURNs
+			: [selectedChoiceURNs];
+
+		// Validate that choices array exists before iterating
+		if (!question.choices || !Array.isArray(question.choices)) continue;
+
+		for (const urn of choiceURNs) {
+			const selectedChoice = question.choices.find((choice: any) => choice.urn === urn);
+			if (!selectedChoice) continue;
+
+			if (selectedChoice.add_score !== undefined && selectedChoice.add_score !== null) {
+				totalScore += selectedChoice.add_score;
+			}
+
+			if (selectedChoice.compute_result !== undefined && selectedChoice.compute_result !== null) {
+				results.push(!!selectedChoice.compute_result);
+			}
+		}
+	}
+
+	// No visible questions → not applicable
+	if (visibleCount === 0) {
+		return { score: null, result: 'not_applicable' };
+	}
+
+	// Ensure totalScore stays within boundaries
+	if (totalScore !== null) {
+		totalScore = Math.max(min_score, Math.min(max_score, totalScore));
+	}
+
+	// Not all visible questions are answered → not assessed
+	if (answeredVisibleCount < visibleCount && hasAnyResultQuestions) {
+		return { score: totalScore, result: 'not_assessed' };
+	}
+
+	// Compute overall result
+	let result = hasAnyResultQuestions ? 'not_assessed' : null;
+	if (results?.length > 0) {
+		if (results.every((r) => r === true)) result = 'compliant';
+		else if (results.some((r) => r === true)) result = 'partially_compliant';
+		else result = 'non_compliant';
+	}
+
+	return { score: totalScore, result };
 }

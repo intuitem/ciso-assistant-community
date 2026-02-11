@@ -1,0 +1,548 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:vendor-due-diligence
+locale: fr
+ref_id: vendor-due-diligence
+name: Vendor Due Diligence - simple
+description: Simple framework for rapid due diligence review of vendors
+copyright: intuitem
+version: 1
+publication_date: 2025-10-30
+provider: intuitem
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:vendor-due-diligence
+    ref_id: vendor-due-diligence
+    name: Vendor Due Diligence - simple
+    description: Simple framework for rapid due diligence review of vendors
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      assessable: false
+      depth: 1
+      ref_id: GOV
+      name: Gouvernance et organisation
+      translations:
+        en:
+          name: Governance and organization
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.01
+      description: "L\u2019organisation est certifi\xE9e ISO 27001 ou SOC 2."
+      translations:
+        en:
+          description: The organization is certified ISO 27001 or SOC 2.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.02
+      description: "Une personne est d\xE9sign\xE9e comme responsable de la cybers\xE9\
+        curit\xE9."
+      translations:
+        en:
+          description: A person is designated as responsible for cybersecurity.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.03
+      description: "Une politique de cybers\xE9curit\xE9 document\xE9e, maintenue\
+        \ et appliqu\xE9e est en place."
+      translations:
+        en:
+          description: A documented, maintained, and enforced cybersecurity policy
+            is in place.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.04
+      description: "Une d\xE9marche d\u2019analyse et de gestion des risques cyber\
+        \ est en place."
+      translations:
+        en:
+          description: A cyber risk analysis and management process is in place.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.05
+      description: "Le personnel est sensibilis\xE9 et form\xE9 aux enjeux de cybers\xE9\
+        curit\xE9."
+      translations:
+        en:
+          description: Staff are aware of and trained in cybersecurity matters.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.06
+      description: "La s\xE9curit\xE9 de l\u2019information est g\xE9r\xE9e avec les\
+        \ fournisseurs."
+      translations:
+        en:
+          description: Information security is managed with suppliers.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.07
+      description: "L\u2019organisation est conforme au RGPD (GDPR)."
+      translations:
+        en:
+          description: The organization is compliant with GDPR.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:gov
+      ref_id: GOV.08
+      description: "L'organisation dispose d'une assurance cybers\xE9curit\xE9."
+      translations:
+        en:
+          description: The organisation is covered by a cyber insurance.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      assessable: false
+      depth: 1
+      ref_id: IAM
+      name: "Gestion des acc\xE8s et des identit\xE9s"
+      translations:
+        en:
+          name: Access and identity management
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      ref_id: IAM.01
+      description: "Les acc\xE8s sont contr\xF4l\xE9s et revus r\xE9guli\xE8rement."
+      translations:
+        en:
+          description: Accesses are controlled and regularly reviewed.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      ref_id: IAM.02
+      description: "Un MFA est activ\xE9 pour les op\xE9rations sensibles."
+      translations:
+        en:
+          description: MFA is enabled for sensitive operations.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      ref_id: IAM.03
+      description: "Les op\xE9rations sensibles sont trac\xE9es et audit\xE9es."
+      translations:
+        en:
+          description: Sensitive operations are logged and audited.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      ref_id: IAM.04
+      description: "Les acc\xE8s privil\xE9gi\xE9s sont r\xE9serv\xE9s \xE0 une population\
+        \ restreinte."
+      translations:
+        en:
+          description: Privileged accesses are restricted to a limited population.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:iam
+      ref_id: IAM.05
+      description: "Une revue p\xE9riodique des droits d\u2019acc\xE8s est effectu\xE9\
+        e."
+      translations:
+        en:
+          description: A periodic review of access rights is conducted.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf
+      assessable: false
+      depth: 1
+      ref_id: INF
+      name: "S\xE9curit\xE9 physique et infrastructure"
+      translations:
+        en:
+          name: Physical and infrastructure security
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf
+      ref_id: INF.01
+      description: "La s\xE9curit\xE9 physique des locaux et datacenters est g\xE9\
+        r\xE9e (contr\xF4le d\u2019acc\xE8s, surveillance, etc.)."
+      translations:
+        en:
+          description: Physical security of premises and datacenters is managed (access
+            control, monitoring, etc.).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf
+      ref_id: INF.02
+      description: "Un filtrage r\xE9seau, une protection DDoS et un WAF sont d\xE9\
+        ploy\xE9s."
+      translations:
+        en:
+          description: Network filtering, DDoS protection, and a WAF are implemented.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf
+      ref_id: INF.03
+      description: "Une protection anti-malware est d\xE9ploy\xE9e sur tous les workloads\
+        \ (endpoints, e-mails, cloud, etc.)."
+      translations:
+        en:
+          description: Anti-malware protection is deployed across all workloads (endpoints,
+            emails, cloud, etc.).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inf
+      ref_id: INF.04
+      description: "Les logs sont collect\xE9s et analys\xE9s pour la d\xE9tection\
+        \ d\u2019incidents."
+      translations:
+        en:
+          description: Logs are collected and analyzed for incident detection.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      assessable: false
+      depth: 1
+      ref_id: SDLC
+      name: "S\xE9curit\xE9 du d\xE9veloppement"
+      translations:
+        en:
+          name: Development security
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.01
+      description: "Un processus de s\xE9curit\xE9 est int\xE9gr\xE9 au cycle de d\xE9\
+        veloppement (SDLC)."
+      translations:
+        en:
+          description: A security process is integrated into the development lifecycle
+            (SDLC).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.02
+      description: "Des analyses de vuln\xE9rabilit\xE9s (code, d\xE9pendances, infrastructure)\
+        \ sont r\xE9alis\xE9es r\xE9guli\xE8rement."
+      translations:
+        en:
+          description: Vulnerability scans (code, dependencies, infrastructure) are
+            performed regularly.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.03
+      description: "Des mises \xE0 jour de s\xE9curit\xE9 sont appliqu\xE9es r\xE9\
+        guli\xE8rement."
+      translations:
+        en:
+          description: Security updates are applied regularly.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.04
+      description: "Les d\xE9veloppeurs sont form\xE9s au d\xE9veloppement s\xE9curis\xE9\
+        ."
+      translations:
+        en:
+          description: Developers are trained in secure coding practices.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.05
+      description: "Les environnements de production et de test sont s\xE9par\xE9\
+        s."
+      translations:
+        en:
+          description: Production and test environments are separated.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.06
+      description: "Les donn\xE9es de production sont exclusivement utilis\xE9es en\
+        \ production."
+      translations:
+        en:
+          description: Production data are used exclusively in production.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:sdlc
+      ref_id: SDLC.07
+      description: "Les donn\xE9es applicatives de production ne sont pas exploit\xE9\
+        es pour des finalit\xE9s non d\xE9clar\xE9es (analyse de contenu, entra\xEE\
+        nement IA, etc.)."
+      translations:
+        en:
+          description: Production application data are not used for undeclared purposes
+            (content analysis, AI training, etc.).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud
+      assessable: false
+      depth: 1
+      ref_id: AUD
+      name: Audit, tests et assurance
+      translations:
+        en:
+          name: Audit, testing and assurance
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud
+      ref_id: AUD.01
+      description: "Un audit de l\u2019application ou de l\u2019organisation peut\
+        \ \xEAtre r\xE9alis\xE9."
+      translations:
+        en:
+          description: An audit of the application or organization can be performed.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud
+      ref_id: AUD.02
+      description: "Des tests de p\xE9n\xE9tration sont conduits r\xE9guli\xE8rement\
+        \ par une entit\xE9 ind\xE9pendante."
+      translations:
+        en:
+          description: Penetration tests (pentests) are conducted regularly by an
+            independent entity.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:aud
+      ref_id: AUD.03
+      description: "Des tests qualit\xE9 et s\xE9curit\xE9 (QA) sont en place."
+      translations:
+        en:
+          description: Quality and security tests (QA) are implemented.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inc
+      assessable: false
+      depth: 1
+      ref_id: INC
+      name: Gestion des incidents
+      translations:
+        en:
+          name: Incident management
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inc.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inc
+      ref_id: INC.01
+      description: Un processus de gestion des incidents (IRP) est en place.
+      translations:
+        en:
+          description: An incident response process (IRP) is in place.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:inc.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:inc
+      ref_id: INC.02
+      description: "Les clients sont notifi\xE9s en cas d\u2019incident affectant\
+        \ leurs donn\xE9es."
+      translations:
+        en:
+          description: Clients are notified in case of an incident affecting their
+            data.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      assessable: false
+      depth: 1
+      ref_id: BAK
+      name: "Plan de continuit\xE9"
+      translations:
+        en:
+          name: Business continuity
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.01
+      description: Des sauvegardes (backups) sont en place.
+      translations:
+        en:
+          description: Backups are implemented.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.02
+      description: "Les sauvegardes sont effectu\xE9es \xE0 une fr\xE9quence d\xE9\
+        finie."
+      translations:
+        en:
+          description: Backups are performed at a defined frequency.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.03
+      description: "Les sauvegardes sont prot\xE9g\xE9es contre les acc\xE8s ou modifications\
+        \ non autoris\xE9s."
+      translations:
+        en:
+          description: Backups are protected against unauthorized access.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.04
+      description: "Les restaurations de sauvegardes sont test\xE9es r\xE9guli\xE8\
+        rement."
+      translations:
+        en:
+          description: Backup restorations are regularly tested.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.05
+      description: "Les RTO et RPO des fonctions essentielles sont identifi\xE9s et\
+        \ communiqu\xE9e."
+      translations:
+        en:
+          description: RTO and RPO of essential functions are identified and communicated.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:bak
+      ref_id: BAK.06
+      description: "Des proc\xE9dures sont document\xE9s pour assurer le PCA et PRA\
+        \ et revues r\xE9guli\xE8rement."
+      translations:
+        en:
+          description: BCP and DRP are defined, documented and regularly reviewed.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:data
+      assessable: false
+      depth: 1
+      ref_id: DATA
+      name: "Gestion et cycle de vie des donn\xE9es"
+      translations:
+        en:
+          name: Data management and lifecycle
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:data.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:data
+      ref_id: DATA.01
+      description: "Un processus de destruction s\xE9curis\xE9e des donn\xE9es est\
+        \ en place."
+      translations:
+        en:
+          description: A secure data destruction process is in place.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:data.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:data
+      ref_id: DATA.02
+      description: "La portabilit\xE9 des donn\xE9es est assur\xE9e sur demande du\
+        \ client."
+      translations:
+        en:
+          description: Data portability is provided upon client request.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:data.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:data
+      ref_id: DATA.03
+      description: "Les donn\xE9es clients sont clairement s\xE9par\xE9es entre locataires\
+        \ (multi-tenant isolation)."
+      translations:
+        en:
+          description: Customer data are clearly separated between tenants (multi-tenant
+            isolation).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      assessable: false
+      depth: 1
+      ref_id: APP
+      name: "S\xE9curit\xE9 applicative"
+      translations:
+        en:
+          name: Application security
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.01
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.01
+      description: "L\u2019application est compatible avec le SSO (Single Sign-On)."
+      translations:
+        en:
+          description: The application is compatible with SSO (Single Sign-On).
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.02
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.02
+      description: "Le MFA peut \xEAtre activ\xE9 localement."
+      translations:
+        en:
+          description: MFA can be enabled locally.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.03
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.03
+      description: "Les donn\xE9es sont chiffr\xE9es au repos (at rest)."
+      translations:
+        en:
+          description: Data are encrypted at rest.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.04
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.04
+      description: "Les communications sont chiffr\xE9es en transit."
+      translations:
+        en:
+          description: Communications are encrypted in transit.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.05
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.05
+      description: "Un contr\xF4le d\u2019acc\xE8s bas\xE9 sur les r\xF4les (RBAC)\
+        \ est impl\xE9ment\xE9 dans l\u2019application."
+      translations:
+        en:
+          description: A role-based access control (RBAC) system is implemented in
+            the application.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.06
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.06
+      description: "Un journal d\u2019audit (Audit Log) assure la tra\xE7abilit\xE9\
+        \ des op\xE9rations."
+      translations:
+        en:
+          description: An audit log ensures traceability of operations.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.07
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.07
+      description: Le code source est accessible et auditable.
+      translations:
+        en:
+          description: The source code is accessible and auditable.
+    - urn: urn:intuitem:risk:req_node:vendor-due-diligence:app.08
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:vendor-due-diligence:app
+      ref_id: APP.08
+      description: "Des r\xE8gles de complexit\xE9 et de force des mots de passe sont\
+        \ impos\xE9es aux utilisateurs."
+      translations:
+        en:
+          description: Password strength and complexity rules are enforced for users.

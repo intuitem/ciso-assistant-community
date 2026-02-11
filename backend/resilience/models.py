@@ -6,7 +6,7 @@ from core.models import (
     Evidence,
     RiskMatrix,
     AbstractBaseModel,
-    Qualification,
+    Terminology,
 )
 from django.db.models import (
     BooleanField,
@@ -20,6 +20,8 @@ from django.db.models import (
 from iam.models import FolderMixin
 from django.db.models import Count, Q
 from django.utils.functional import cached_property
+
+from auditlog.registry import auditlog
 
 
 class BusinessImpactAnalysis(Assessment):
@@ -185,7 +187,13 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     point_in_time = IntegerField()  # seconds and manage the display and units on front
     quali_impact = IntegerField(default=-1)  # based on the matrix
     qualifications = models.ManyToManyField(
-        Qualification,
+        Terminology,
+        verbose_name="Qualifications",
+        related_name="escalation_thresholds_qualifications",
+        limit_choices_to={
+            "field_path": Terminology.FieldPath.QUALIFICATIONS,
+            "is_visible": True,
+        },
         blank=True,
     )
     quanti_impact = FloatField(default=0)
@@ -244,4 +252,24 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
     @property
     def get_impact_compact_display(self):
         raw = self.get_impact_display
-        return {"value": raw["value"], "name": raw["name"], "hexcolor": raw["hexcolor"]}
+        return {
+            "value": raw["value"],
+            "name": raw["name"],
+            "description": raw["description"],
+            "hexcolor": raw["hexcolor"],
+        }
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    AssetAssessment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    BusinessImpactAnalysis,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EscalationThreshold,
+    exclude_fields=common_exclude,
+)

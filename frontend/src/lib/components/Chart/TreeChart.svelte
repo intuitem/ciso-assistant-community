@@ -32,7 +32,16 @@
 		var option = {
 			tooltip: {
 				trigger: 'item',
-				triggerOn: 'mousemove'
+				triggerOn: 'mousemove',
+				formatter: function (params: any) {
+					if (params.treeAncestors && params.treeAncestors.length > 0) {
+						return params.treeAncestors
+							.map((node: any) => node.name)
+							.filter((name: string) => name)
+							.join('/');
+					}
+					return params.name;
+				}
 			},
 			title: { text: title },
 			series: [
@@ -44,12 +53,14 @@
 					left: '5%',
 					bottom: '10%',
 					right: '20%',
-					symbolSize: 10,
+					symbolSize: 14,
+					symbol: 'roundRect',
 					label: {
 						backgroundColor: '#fff',
 						position: 'left',
 						verticalAlign: 'middle',
-						align: 'right'
+						align: 'right',
+						fontSize: 14
 					},
 					leaves: {
 						label: {

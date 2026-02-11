@@ -1,12 +1,7 @@
 from django.core.exceptions import ValidationError
-from core.models import *
-from core.models import *
-from iam.models import *
-from library.utils import *
 import pytest
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
+from iam.models import Folder
 
 
 @pytest.mark.django_db

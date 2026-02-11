@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from iam.models import User
 
+
 from test_vars import USERS_ENDPOINT as API_ENDPOINT
 from test_utils import EndpointTestsQueries
+from test_vars import GROUPS_PERMISSIONS
 
 # Generic user data for tests
 USER_FIRSTNAME = "John"
@@ -78,12 +80,16 @@ class TestUsersAuthenticated:
     def test_get_users(self, test):
         """test to get users from the API with authentication"""
 
+        # Users with Global folder access can see all users (admin + test user)
+        # Users with domain folder access can only see themselves
+        expected_count = 2
+
         EndpointTestsQueries.Auth.get_object(
             test.client,
             "Users",
             User,
             {"email": USER_EMAIL, "first_name": USER_FIRSTNAME, "last_name": USER_NAME},
-            base_count=2,
+            base_count=expected_count,
             item_search_field="email",
             user_group=test.user_group,
             scope="Global",
@@ -118,6 +124,7 @@ class TestUsersAuthenticated:
             },
             user_group=test.user_group,
             scope="Global",
+            #  scope=GROUPS_PERMISSIONS[test.user_group]["folder"],
         )
 
     def test_delete_users(self, test):
@@ -188,3 +195,57 @@ class TestUsersAuthenticated:
             assert response.json() == {"email": ["Enter a valid email address."]}, (
                 f"users can be created with an invalid email ({email})"
             )
+
+    def test_update_only_if_admin(self, test):
+        is_admin = test.user_group == "BI-UG-ADM"
+
+        # Ensure the user exists with is_published=true (since Users are now IAM-filtered)
+        user, created = User.objects.get_or_create(
+            email=USER_EMAIL,
+            defaults={
+                "first_name": USER_FIRSTNAME,
+                "last_name": USER_NAME,
+                "password": USER_PASSWORD,
+                "is_active": True,
+                "is_published": True,  # Users are now published and IAM-filtered
+            },
+        )
+
+        detail_url = reverse("users-detail", args=[user.id])
+
+        # Attempt to update another user (requires admin privileges)
+        response = test.client.patch(
+            detail_url, {"first_name": "Updated"}, format="json"
+        )
+
+        # Non-admin users may get 404 if they don't have IAM visibility to this user
+        if is_admin:
+            assert response.status_code == status.HTTP_200_OK
+            user.refresh_from_db()
+            assert user.first_name == "Updated"
+        else:
+            # Non-admin users either can't see the user (404) or don't have permission (403)
+            assert response.status_code in (
+                status.HTTP_401_UNAUTHORIZED,
+                status.HTTP_403_FORBIDDEN,
+                status.HTTP_404_NOT_FOUND,  # User not visible due to IAM filtering
+            )
+
+    def test_superuser_cannot_be_deactivated(self, test):
+        superuser, _ = User.objects.get_or_create(
+            email="admin.tests@example.com",
+            defaults={
+                "first_name": "Admin",
+                "last_name": "User",
+                "password": USER_PASSWORD,
+                "is_superuser": True,
+                "is_active": True,
+            },
+        )
+
+        url = reverse("users-detail", args=[superuser.id])
+        response = test.client.patch(url, {"is_active": False}, format="json")
+
+        superuser.refresh_from_db()
+
+        assert superuser.is_active is True

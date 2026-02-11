@@ -2,15 +2,17 @@
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
-	import TextArea from '$lib/components/Forms/TextArea.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
-	import { m } from '$paraglide/messages';
+	import * as m from '$paraglide/messages';
 	import Checkbox from '../Checkbox.svelte';
-
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+	import { page } from '$app/state';
+	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
+
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -33,23 +35,84 @@
 
 	let implementationGroupsChoices = $state<{ label: string; value: string }[]>([]);
 
+	let defaultImplementationGroups: string[] = $state([]);
+
+	let is_dynamic = $state(false);
+
+	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
+
 	async function handleFrameworkChange(id: string) {
 		if (id) {
 			await fetch(`/frameworks/${id}`)
 				.then((r) => r.json())
 				.then((r) => {
+					is_dynamic = r['is_dynamic'] || false;
 					const implementation_groups = r['implementation_groups_definition'] || [];
 					implementationGroupsChoices = implementation_groups.map((group) => ({
 						label: group.name,
 						value: group.ref_id
 					}));
 					suggestions = r['reference_controls'].length > 0;
+
+					defaultImplementationGroups = implementation_groups
+						.filter((group) => group.default_selected)
+						.map((group) => group.ref_id);
+
+					// Only apply defaults when creating a new assessment, not when editing
+					if (!object.id) {
+						form.form.update((currentData) => {
+							return {
+								...currentData,
+								selected_implementation_groups: defaultImplementationGroups
+							};
+						});
+					}
 				});
 		}
 	}
 </script>
 
-{#if context === 'fromBaseline' && initialData.baseline}
+{#if (context === 'fromBaseline' || context === 'clone') && initialData.baseline}
 	<AutocompleteSelect
 		{form}
 		field="baseline"
@@ -57,7 +120,7 @@
 		bind:cachedValue={formDataCache['baseline']}
 		label={m.baseline()}
 		optionsEndpoint="compliance-assessments"
-		disabled="true"
+		hidden
 	/>
 {/if}
 {#if initialData.ebios_rm_studies}
@@ -71,45 +134,101 @@
 		hidden
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-	hidden={initialData.perimeter}
-/>
-<AutocompleteSelect
-	{form}
-	disabled={object.id}
-	optionsEndpoint="frameworks"
-	optionsDetailedUrlParameters={[['baseline', initialData.baseline]]}
-	field="framework"
-	cacheLock={cacheLocks['framework']}
-	bind:cachedValue={formDataCache['framework']}
-	label={m.targetFramework()}
-	onChange={async (e) => handleFrameworkChange(e)}
-	mount={async (e) => handleFrameworkChange(e)}
-/>
-{#if implementationGroupsChoices.length > 0}
+{#key folderKey}
 	<AutocompleteSelect
-		multiple
-		translateOptions={false}
 		{form}
-		options={implementationGroupsChoices}
-		field="selected_implementation_groups"
-		cacheLock={cacheLocks['selected_implementation_groups']}
-		bind:cachedValue={formDataCache['selected_implementation_groups']}
-		label={m.selectedImplementationGroups()}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		nullable
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
+{#if context === 'fromBaseline' && initialData.baseline}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id}
+		optionsEndpoint="compliance-assessments/{page.params.id}/frameworks"
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		optionsLabelField="str"
+		optionsValueField="id"
+		bind:cachedValue={formDataCache['framework']}
+		label={m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
+		additionalMultiselectOptions={{
+			liOptionClass: 'flex items-center w-full border-t-8 border-b-8 border-transparent'
+		}}
+		includeAllOptionFields
+	>
+		{#snippet optionSnippet(option: Record)}
+			<FrameworkResultSnippet {option} />
+		{/snippet}
+	</AutocompleteSelect>
+{:else}
+	<AutocompleteSelect
+		{form}
+		disabled={object.id || context === 'clone'}
+		optionsEndpoint="frameworks"
+		optionsDetailedUrlParameters={context === 'fromBaseline'
+			? [['baseline', initialData.baseline]]
+			: []}
+		field="framework"
+		cacheLock={cacheLocks['framework']}
+		bind:cachedValue={formDataCache['framework']}
+		label={context === 'clone' ? m.framework() : m.targetFramework()}
+		onChange={async (e) => handleFrameworkChange(e)}
+		mount={async (e) => handleFrameworkChange(e)}
 	/>
 {/if}
+{#if implementationGroupsChoices.length > 0 && !is_dynamic}
+	{#key implementationGroupsChoices}
+		<AutocompleteSelect
+			multiple
+			translateOptions={false}
+			{form}
+			options={implementationGroupsChoices}
+			field="selected_implementation_groups"
+			cacheLock={cacheLocks['selected_implementation_groups']}
+			bind:cachedValue={formDataCache['selected_implementation_groups']}
+			label={m.selectedImplementationGroups()}
+		/>
+	{/key}
+{/if}
+<TextField
+	{form}
+	field="version"
+	label={m.version()}
+	helpText={m.versionHelpText()}
+	cacheLock={cacheLocks['version']}
+	bind:cachedValue={formDataCache['version']}
+/>
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="authors"
 	cacheLock={cacheLocks['authors']}
 	bind:cachedValue={formDataCache['authors']}
@@ -125,24 +244,52 @@
 	bind:cachedValue={formDataCache['eta']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	{#if context === 'create' && suggestions}
+	<div class="space-y-4">
+		{#if context === 'create' && suggestions}
+			<Checkbox
+				{form}
+				field="create_applied_controls_from_suggestions"
+				label={m.suggestControls()}
+				helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+				cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			/>
+		{/if}
 		<Checkbox
 			{form}
-			field="create_applied_controls_from_suggestions"
-			label={m.suggestControls()}
-			helpText={m.createAppliedControlsFromSuggestionsHelpText()}
-			cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
-			bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			field="show_documentation_score"
+			label={m.useDocumentationScore()}
+			helpText={m.useDocumentationScoreHelpText()}
+			cacheLock={cacheLocks['show_documentation_score']}
+			bind:cachedValue={formDataCache['show_documentation_score']}
 		/>
-	{/if}
-	<Checkbox
-		{form}
-		field="show_documentation_score"
-		label={m.useDocumentationScore()}
-		helpText={m.useDocumentationScoreHelpText()}
-		cacheLock={cacheLocks['show_documentation_score']}
-		bind:cachedValue={formDataCache['show_documentation_score']}
-	/>
+		<Checkbox
+			{form}
+			field="extended_result_enabled"
+			label={m.extendedResultEnabled()}
+			helpText={m.extendedResultEnabledHelpText()}
+			cacheLock={cacheLocks['extended_result_enabled']}
+			bind:cachedValue={formDataCache['extended_result_enabled']}
+		/>
+		<Checkbox
+			{form}
+			field="progress_status_enabled"
+			label={m.progressStatusEnabled()}
+			helpText={m.progressStatusEnabledHelpText()}
+			cacheLock={cacheLocks['progress_status_enabled']}
+			bind:cachedValue={formDataCache['progress_status_enabled']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['score_calculation_method']}
+			field="score_calculation_method"
+			label={m.scoreCalculationMethod()}
+			helpText={m.scoreCalculationMethodHelpText()}
+			cacheLock={cacheLocks['score_calculation_method']}
+			bind:cachedValue={formDataCache['score_calculation_method']}
+			disableDoubleDash
+		/>
+	</div>
 	<TextField
 		{form}
 		field="ref_id"
@@ -176,13 +323,6 @@
 		field="evidences"
 		label={m.evidences()}
 	/>
-	<TextField
-		{form}
-		field="version"
-		label={m.version()}
-		cacheLock={cacheLocks['version']}
-		bind:cachedValue={formDataCache['version']}
-	/>
 	<Select
 		{form}
 		options={model.selectOptions['status']}
@@ -194,8 +334,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}
@@ -210,11 +354,21 @@
 		cacheLock={cacheLocks['due_date']}
 		bind:cachedValue={formDataCache['due_date']}
 	/>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
+	{#if !page.data.user.is_third_party}
+		<Checkbox
+			{form}
+			field="is_locked"
+			label={m.isLocked()}
+			helpText={m.isLockedHelpText()}
+			cacheLock={cacheLocks['is_locked']}
+			bind:cachedValue={formDataCache['is_locked']}
+		/>
+	{/if}
 </Dropdown>
