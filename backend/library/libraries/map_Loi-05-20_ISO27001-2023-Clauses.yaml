@@ -1,0 +1,797 @@
+---
+urn: urn:intuitem:risk:library:map-loi-05-20-iso27001-clauses
+locale: fr
+ref_id: map-loi-05-20-iso27001-clauses-2022
+name: Mapping de la Loi 05-20 vers les clauses ISO 27001:2022
+description: Mapping des exigences de la Loi marocaine 05-20 vers les clauses 4-10 de la norme ISO 27001:2022
+version: 1
+publication_date: 2024-06-24
+copyright: Royaume du Maroc et ISO/IEC
+provider: Royaume du Maroc et ISO/IEC
+packager: QOUDHADH Nadia
+dependencies:
+  - urn:intuitem:risk:library:iso27001-2022
+  - urn:intuitem:risk:library:loi-05-20
+
+objects:
+  requirement_mapping_set:
+    urn: urn:intuitem:risk:req_mapping_set:loi-05-20-to-iso27001-clauses
+    ref_id: mapping-loi-05-20-iso27001-clauses
+    name: Mapping Loi 05-20 vers clauses ISO 27001:2022
+    source_framework_urn: urn:intuitem:risk:framework:loi-05-20
+    target_framework_urn: urn:intuitem:risk:framework:iso27001-2022
+    requirement_mappings:
+      # Article 3
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art3
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension de l'organisation et de son contexte"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art3
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des exigences des parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art3
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Système de management de la sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art3
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership et engagement"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art3
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance, mesurages, analyse et évaluation"
+
+      # Article 4
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des exigences des parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Politique de sécurité de l'information"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Généralités - Actions face aux risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques de sécurité"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques de sécurité"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art4
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+
+      # Article 6
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art6
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles, responsabilités et autorités"
+
+      # Article 8
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art8
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des exigences des parties intéressées"
+
+      # Article 9
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art9
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des exigences des parties intéressées"
+
+      # Article 11
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art11
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des exigences des parties intéressées"
+
+      # Article 13
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art13
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension de l'organisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art13
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compréhension des besoins des parties intéressées"
+
+      # Article 14
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art14
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Détermination du périmètre du SMSI"
+
+      # Article 15
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art15
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contexte de l'organisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art15
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art15
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Périmètre du SMSI"
+
+      # Article 16
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art16
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contexte de l'organisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art16
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art16
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Périmètre du SMSI"
+
+      # Article 17
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art17
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles, responsabilités et autorités"
+
+      # Article 18
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art18
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contexte de l'organisation"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art18
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art18
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Rôles et responsabilités"
+
+      # Article 19
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art19
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contexte de l'organisation"
+
+      # Article 20
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art20
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art20
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+
+      # Article 21
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art21
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art21
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+
+      # Article 22
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art22
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art22
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+
+      # Article 24
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art24
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Non-conformité et actions correctives"
+
+      # Article 25
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art25
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art25
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compétence"
+
+      # Article 26
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art26
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art26
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art26
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification et contrôle opérationnels"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art26
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance et mesure"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art26
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Contrôle des informations documentées"
+
+      # Article 27
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art27
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art27
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Communication"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art27
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 28
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art28
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art28
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 29
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art29
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art29
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 30
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art30
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art30
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance et mesure"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art30
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 31
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art31
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art31
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 32
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art32
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art32
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art32
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art32
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance et mesure"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art32
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Amélioration continue"
+
+      # Article 33
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art33
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art33
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance et mesure"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art33
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 34
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art34
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art34
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Revue de direction"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art34
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 35
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art35
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership et engagement"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art35
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art35
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Revue de direction"
+
+      # Article 36
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art36
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art36
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 37
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art37
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art37
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+
+      # Article 38
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art38
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art38
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art38
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art38
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Revue de direction"
+
+      # Article 39
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art39
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.5
+        relationship: intersect
+        rationale: semantic
+        annotation: "Informations documentées"
+
+      # Article 40
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Périmètre du SMSI"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Politique"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Revue de direction"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Amélioration continue"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art40
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 41
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art41
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art41
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art41
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art41
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Amélioration continue"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art41
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 42
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art42
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art42
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art42
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art42
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art42
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 43
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art43
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art43
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compétence"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art43
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sensibilisation"
+
+      # Article 44
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art44
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art44
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Compétence"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art44
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Sensibilisation"
+
+      # Article 45
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art45
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art45
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art45
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Politique"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art45
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art45
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Communication"
+
+      # Article 46
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art46
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art46
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art46
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Communication"
+
+      # Article 47
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art47
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art47
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art47
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Surveillance et mesure"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art47
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:7.4
+        relationship: intersect
+        rationale: semantic
+        annotation: "Communication"
+
+      # Article 48
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art48
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art48
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art48
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 49
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art49
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:4.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Parties intéressées"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art49
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art49
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art49
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 50
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art50
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art50
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art50
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art50
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:9.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Audit interne"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art50
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 51
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art51
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art51
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:8.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Planification opérationnelle"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art51
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
+
+      # Article 52
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art52
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:5.1
+        relationship: intersect
+        rationale: semantic
+        annotation: "Leadership"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art52
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Appréciation des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art52
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:6.1.3
+        relationship: intersect
+        rationale: semantic
+        annotation: "Traitement des risques"
+      - source_requirement_urn: urn:intuitem:risk:req_node:loi-05-20:art52
+        target_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:10.2
+        relationship: intersect
+        rationale: semantic
+        annotation: "Actions correctives"
