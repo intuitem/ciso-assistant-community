@@ -20,6 +20,7 @@ export const load: LayoutServerLoad = async (event) => {
 		name: ebiosRMStudy.name,
 		description: ebiosRMStudy.description,
 		version: ebiosRMStudy.version,
+		folder: ebiosRMStudy.folder.id,
 		risk_matrix: ebiosRMStudy.risk_matrix.id
 	};
 
