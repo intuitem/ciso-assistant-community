@@ -53,7 +53,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -151,18 +151,24 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.frontend-directory }}
         run: |
-          response=$(curl -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login\?/login -k)
-          server_reponse='{"type":"redirect","status":302,"location":"/"}'
-          echo "[SERVER_RESPONSE] $response"
-          echo "[EXPECTED_RESPONSE] $server_reponse"
-          if [[ "$response" == "$server_reponse" ]]; then
-            echo "Success"
-            exit 0
-          else
-            echo "Failure"
-            echo "Check if migrations are not too long"
-            exit 1
-          fi
+          server_response='{"type":"redirect","status":302,"location":"/"}'
+          for attempt in {1..10}; do
+            echo "Login attempt ${attempt}"
+            response=$(curl -s -d "username=admin@tests.com&password=1234" -H "Origin: https://localhost:8443" https://localhost:8443/login\?/login -k)
+            echo "[SERVER_RESPONSE] $response"
+            echo "[EXPECTED_RESPONSE] $server_response"
+            if [[ "$response" == "$server_response" ]]; then
+              echo "Success"
+              exit 0
+            fi
+            if [[ "$attempt" -lt 10 ]]; then
+              echo "Login failed, retrying in 30 seconds..."
+              sleep 30
+            fi
+          done
+          echo "Failure"
+          echo "Check if migrations are not too long"
+          exit 1
 
   enterprise-startup-functional-test:
     runs-on: ubuntu-24.04
@@ -194,7 +200,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
 
     steps:
       - uses: actions/checkout@v4

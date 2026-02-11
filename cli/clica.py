@@ -6,19 +6,20 @@ import tempfile
 import hashlib
 import struct
 import click
-import pandas as pd
 import requests
 import os
 from dotenv import load_dotenv
 import json
 from rich import print as rprint
+from typing import Optional, Callable, Dict
+import uuid
 
 from icecream import ic
 
 cli_cfg = dict()
 auth_data = dict()
 
-GLOBAL_FOLDER_ID = None
+GLOBAL_FOLDER_ID: Optional[str] = None
 
 CLICA_CONFG_PATH = ".clica_config.yaml"
 
@@ -57,63 +58,151 @@ def ids_map(model, folder=None):
     if res.status_code != 200:
         print("something went wrong. check authentication.")
         sys.exit(1)
-    if folder:
-        my_map = res.json().get(folder)
+    data = res.json()
+    if folder and isinstance(data, dict):
+        my_map = data.get(folder)
     else:
-        my_map = res.json()
+        my_map = data
     return my_map
 
 
-def _get_folders():
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
+def get_global_folder_id() -> Optional[str]:
+    global GLOBAL_FOLDER_ID
+    if GLOBAL_FOLDER_ID:
+        return GLOBAL_FOLDER_ID
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
+
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
             if folder["content_type"] == "GLOBAL":
                 GLOBAL_FOLDER_ID = folder["id"]
-                return GLOBAL_FOLDER_ID, output.get("results")
+                return GLOBAL_FOLDER_ID
+    else:
+        print(
+            f"The server didn't reply as expected: {res.status_code} {res.reason}: {res.text}",
+            file=sys.stderr,
+        )
 
 
-@click.command()
+@cli.command(name="get-folders")
 def get_folders():
     """Get folders."""
     print(json.dumps(ids_map("folders"), ensure_ascii=False))
 
 
-@click.command()
+@cli.command(name="get-perimeters")
 def get_perimeters():
     """getting perimeters as a json"""
     print(json.dumps(ids_map("perimeters"), ensure_ascii=False))
 
 
-@click.command()
+@cli.command(name="get-matrices")
 def get_matrices():
     """getting loaded matrix as a json"""
     print(json.dumps(ids_map("risk-matrices", folder="Global"), ensure_ascii=False))
 
 
-def get_unique_parsed_values(df, column_name):
-    unique_values = df[column_name].dropna().unique()
-    parsed_values = []
-
-    for value in unique_values:
-        value_str = str(value)
-        split_values = [v.strip() for v in value_str.split(",")]
-        parsed_values.extend(split_values)
-
-    return set(parsed_values)
+def is_uuid(value: Optional[str]) -> bool:
+    if not value:
+        return False
+    try:
+        uuid.UUID(str(value))
+        return True
+    except ValueError:
+        return False
 
 
-def batch_create(model, items, folder_id):
+def flatten_mapping(mapping) -> Dict[str, str]:
+    flat: Dict[str, str] = {}
+    if isinstance(mapping, dict):
+        for key, value in mapping.items():
+            if isinstance(value, dict):
+                flat.update(flatten_mapping(value))
+            elif isinstance(value, str):
+                flat[key] = value
+    return flat
+
+
+def resolve_named_id(
+    model: str, name: Optional[str], *, folder: Optional[str] = None
+) -> Optional[str]:
+    if not name:
+        return None
+    if is_uuid(name):
+        return name
+    mapping = ids_map(model, folder=folder)
+    if not isinstance(mapping, dict):
+        return None
+    flat = flatten_mapping(mapping)
+    value = flat.get(name)
+    if value:
+        return value
+    return None
+
+
+def ensure_identifier(
+    name: Optional[str],
+    model: str,
+    description: str,
+    *,
+    folder: Optional[str] = None,
+    required: bool = False,
+) -> Optional[str]:
+    if not name:
+        if required:
+            click.echo(f"❌ Missing required {description}.", err=True)
+            sys.exit(1)
+        return None
+    identifier = resolve_named_id(model, name, folder=folder)
+    if not identifier:
+        if is_uuid(name):
+            return name
+        click.echo(f"❌ Unable to resolve {description} '{name}'.", err=True)
+        sys.exit(1)
+    return identifier
+
+
+def resolve_folder_id(
+    folder_name: Optional[str], *, required: bool = False
+) -> Optional[str]:
+    if folder_name:
+        if is_uuid(folder_name):
+            return folder_name
+        folder_map = ids_map("folders")
+        if isinstance(folder_map, dict):
+            folder_id = folder_map.get(folder_name)
+            if folder_id:
+                return folder_id
+        click.echo(f"❌ Unable to resolve folder '{folder_name}'.", err=True)
+        sys.exit(1)
+    if required:
+        folder_id = get_global_folder_id()
+        if folder_id:
+            return folder_id
+        click.echo(
+            "❌ Unable to determine a folder. Please provide --folder.", err=True
+        )
+        sys.exit(1)
+    return None
+
+
+def upload_data_wizard_file(
+    *,
+    model_type: str,
+    file_path: str,
+    folder: Optional[str],
+    perimeter: Optional[str],
+    framework: Optional[str],
+    matrix: Optional[str],
+    on_conflict: str = "stop",
+    requires_folder: bool,
+    requires_perimeter: bool,
+    requires_framework: bool,
+    requires_matrix: bool,
+):
     if not TOKEN:
         print(
             "No authentication token available. Please set PAT token in .clica.env.",
@@ -121,291 +210,323 @@ def batch_create(model, items, folder_id):
         )
         sys.exit(1)
 
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    output = dict()
-    url = f"{API_URL}/{model}/"
-    for item in items:
-        data = {
-            "folder": folder_id,
-            "name": item,
-        }
-        res = requests.post(url, json=data, headers=headers)
-        if res.status_code != 201:
-            print("something went wrong")
-            print(res.json())
-        else:
-            output.update({item: res.json()["id"]})
-    return output
-
-
-@click.command()
-@click.option("--file", required=True, help="")
-@click.option("--folder", required=True, help="")
-@click.option("--perimeter", required=True, help="")
-@click.option("--matrix", required=True, help="")
-@click.option("--name", required=True, help="")
-@click.option(
-    "--create_all",
-    required=False,
-    is_flag=True,
-    default=False,
-    help="Create all associated objects (threats, assets)",
-)
-def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
-    """crawl a risk assessment (see template) and create the assoicated objects"""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    df = pd.read_csv(file, delimiter=";")
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    folder_id = ids_map("folders").get(folder)
-    perimeter_id = ids_map("perimeters", folder=folder).get(perimeter)
-    matrix_id = ids_map("risk-matrices", folder="Global").get(matrix)
-
-    # post to create risk assessment
-    data = {
-        "name": name,
-        "folder": folder_id,
-        "perimeter": perimeter_id,
-        "risk_matrix": matrix_id,
-    }
-    res = requests.post(
-        f"{API_URL}/risk-assessments/",
-        json=data,
-        headers=headers,
-        verify=VERIFY_CERTIFICATE,
+    folder_id = resolve_folder_id(folder, required=requires_folder)
+    perimeter_id = ensure_identifier(
+        perimeter, "perimeters", "perimeter", required=requires_perimeter
     )
-    ra_id = None
-    if res.status_code == 201:
-        ra_id = res.json().get("id")
-        print("ok")
-    else:
-        print("something went wrong.")
-        print(res.json())
+    framework_id = ensure_identifier(
+        framework, "frameworks", "framework", required=requires_framework
+    )
+    matrix_id = ensure_identifier(
+        matrix, "risk-matrices", "matrix", required=requires_matrix
+    )
 
-    if create_all:
-        threats = get_unique_parsed_values(df, "threats")
-        batch_create("threats", threats, folder_id)
-        assets = get_unique_parsed_values(df, "assets")
-        batch_create("assets", assets, folder_id)
-        existing_controls = get_unique_parsed_values(df, "existing_controls")
-        batch_create("applied-controls", existing_controls, folder_id)
-        additional_controls = get_unique_parsed_values(df, "additional_controls")
-        batch_create("applied-controls", additional_controls, folder_id)
-
-    res = requests.get(f"{API_URL}/risk-matrices/{matrix_id}", headers=headers)
-    if res.status_code == 200:
-        matrix_def = res.json().get("json_definition")
-        matrix_def = json.loads(matrix_def)
-        # ic(matrix_def)
-        impact_map = dict()
-        proba_map = dict()
-        # this can be factored as one map probably
-        for item in matrix_def["impact"]:
-            impact_map[item["name"]] = item["id"]
-            if item.get("translations"):
-                langs = item.get("translations")
-                for lang in langs:
-                    impact_map[langs[lang]["name"]] = item["id"]
-        for item in matrix_def["probability"]:
-            proba_map[item["name"]] = item["id"]
-            if item.get("translations"):
-                langs = item.get("translations")
-                for lang in langs:
-                    proba_map[langs[lang]["name"]] = item["id"]
-
-        ic(impact_map)
-        ic(proba_map)
-
-    df = df.fillna("--")
-
-    threats = ids_map("threats", folder)
-    assets = ids_map("assets", folder)
-    controls = ids_map("applied-controls", folder)
-
-    for scenario in df.itertuples():
-        data = {
-            "ref_id": scenario.ref_id,
-            "name": scenario.name,
-            "description": scenario.description,
-            "justification": scenario.justification,
-            "risk_assessment": ra_id,
-            "treatment": str(scenario.treatment).lower(),
-        }
-        if None in [
-            impact_map.get(scenario.current_impact),
-            proba_map.get(scenario.current_proba),
-            impact_map.get(scenario.residual_impact),
-            proba_map.get(scenario.residual_proba),
-        ]:
-            print("Matrix doesn't match the labels used on your input file")
-
-        if scenario.current_impact != "--":
-            data.update({"current_impact": impact_map.get(scenario.current_impact)})
-        if scenario.current_proba != "--":
-            data.update({"current_proba": proba_map.get(scenario.current_proba)})
-
-        if scenario.residual_impact != "--":
-            data.update({"residual_impact": impact_map.get(scenario.residual_impact)})
-        if scenario.residual_proba != "--":
-            data.update({"residual_proba": proba_map.get(scenario.residual_proba)})
-
-        if scenario.existing_controls != "--":
-            items = str(scenario.existing_controls).split(",")
-            data.update(
-                {"existing_applied_controls": [controls[item] for item in items]}
-            )
-
-        if scenario.additional_controls != "--":
-            items = str(scenario.additional_controls).split(",")
-            data.update({"applied_controls": [controls[item] for item in items]})
-
-        if scenario.assets != "--":
-            items = str(scenario.assets).split(",")
-            data.update({"assets": [assets[item] for item in items]})
-
-        if scenario.threats != "--":
-            items = str(scenario.threats).split(",")
-            data.update({"threats": [threats[item] for item in items]})
-
-        res = requests.post(f"{API_URL}/risk-scenarios/", json=data, headers=headers)
-        if res.status_code != 201:
-            rprint(res.json())
-            rprint(data)
-
-
-@click.command()
-@click.option("--file", required=True, help="Path of the csv file with assets")
-def import_assets(file):
-    """import assets from a csv. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
-        )
-        sys.exit(1)
-
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    df = pd.read_csv(file)
-    url = f"{API_URL}/assets/"
+    filename = Path(file_path).name
     headers = {
         "Authorization": f"Token {TOKEN}",
+        "X-Model-Type": model_type,
+        "Content-Disposition": f'attachment; filename="{filename}"',
     }
-    if click.confirm(f"I'm about to create {len(df)} assets. Are you sure?"):
-        for _, row in df.iterrows():
-            asset_type = "SP"
-            name = row["name"]
-            if row["type"].lower() == "primary":
-                asset_type = "PR"
-            else:
-                asset_type = "SP"
+    if folder_id:
+        headers["X-Folder-Id"] = folder_id
+    if perimeter_id:
+        headers["X-Perimeter-Id"] = perimeter_id
+    if framework_id:
+        headers["X-Framework-Id"] = framework_id
+    if matrix_id:
+        headers["X-Matrix-Id"] = matrix_id
+    if on_conflict and on_conflict != "stop":
+        headers["X-On-Conflict"] = on_conflict
 
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "type": asset_type,
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
-
-
-@click.command()
-@click.option(
-    "--file", required=True, help="Path of the csv file with applied controls"
-)
-def import_controls(file):
-    """import applied controls. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
+    url = f"{API_URL}/data-wizard/load-file/"
+    with open(file_path, "rb") as payload:
+        response = requests.post(
+            url, headers=headers, data=payload.read(), verify=VERIFY_CERTIFICATE
         )
+    try:
+        body = response.json()
+        pretty_body = json.dumps(body, indent=2)
+    except Exception:
+        body = None
+        pretty_body = response.text
+
+    rprint(f"{response.status_code} {response.reason} {response.url}")
+    rprint(pretty_body)
+    if body and response.status_code >= 400:
         sys.exit(1)
 
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    url = f"{API_URL}/applied-controls/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} applied controls. Are you sure?"):
-        for _, row in df.iterrows():
-            name = row["name"]
-            description = row["description"]
-            csf_function = row["csf_function"]
-            category = row["category"]
 
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "description": description,
-                "csf_function": csf_function.lower(),
-                "category": category.lower(),
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
+DATA_WIZARD_COMMANDS = [
+    {
+        "command": "import_assets",
+        "model_type": "Asset",
+        "help": "Import assets using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_applied_controls",
+        "model_type": "AppliedControl",
+        "help": "Import applied controls using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_evidences",
+        "model_type": "Evidence",
+        "help": "Import evidences using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_users",
+        "model_type": "User",
+        "help": "Import users using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_folders",
+        "model_type": "Folder",
+        "help": "Import folders using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_perimeters",
+        "model_type": "Perimeter",
+        "help": "Import perimeters using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_compliance_assessments",
+        "model_type": "ComplianceAssessment",
+        "help": "Import compliance assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": True,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_findings_assessments",
+        "model_type": "FindingsAssessment",
+        "help": "Import findings assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_risk_assessment",
+        "model_type": "RiskAssessment",
+        "help": "Import risk assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
+        "command": "import_elementary_actions",
+        "model_type": "ElementaryAction",
+        "help": "Import elementary actions using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_reference_controls",
+        "model_type": "ReferenceControl",
+        "help": "Import reference controls using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_threats",
+        "model_type": "Threat",
+        "help": "Import threats using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_processings",
+        "model_type": "Processing",
+        "help": "Import processings using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_policies",
+        "model_type": "Policy",
+        "help": "Import policies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_security_exceptions",
+        "model_type": "SecurityException",
+        "help": "Import security exceptions using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_incidents",
+        "model_type": "Incident",
+        "help": "Import incidents using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_tprm",
+        "model_type": "TPRM",
+        "help": "Import third-party records using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_ebios_rm_study_arm",
+        "model_type": "EbiosRMStudyARM",
+        "help": "Import EBIOS RM ARM studies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
+        "command": "import_ebios_rm_study",
+        "model_type": "EbiosRMStudyExcel",
+        "help": "Import EBIOS RM Excel studies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+]
 
 
-@click.command()
-@click.option(
-    "--file", required=True, help="Path of the csv file with the list of evidences"
-)
-def import_evidences(file):
-    """Import evidences. Check the samples for format."""
-    if not TOKEN:
-        print(
-            "No authentication token available. Please set PAT token in .clica.env.",
-            file=sys.stderr,
+def register_data_wizard_command(config: Dict[str, object]) -> None:
+    command_name = str(config["command"])
+    cli_name = command_name.replace("_", "-")
+    model_type = str(config["model_type"])
+    help_text = str(config["help"])
+    requires_folder = bool(config.get("requires_folder", False))
+    requires_perimeter = bool(config.get("requires_perimeter", False))
+    requires_framework = bool(config.get("requires_framework", False))
+    requires_matrix = bool(config.get("requires_matrix", False))
+    show_folder_option = config.get(
+        "show_folder_option",
+        model_type
+        not in {
+            "ComplianceAssessment",
+            "FindingsAssessment",
+            "RiskAssessment",
+            "User",
+            "Folder",
+        },
+    )
+    show_perimeter_option = config.get("show_perimeter_option", requires_perimeter)
+    show_framework_option = config.get("show_framework_option", requires_framework)
+    show_matrix_option = config.get("show_matrix_option", requires_matrix)
+
+    @cli.command(name=cli_name, help=help_text)
+    @click.option(
+        "--file",
+        required=True,
+        type=click.Path(exists=True, dir_okay=False, path_type=str),
+        help="Path to the source file.",
+    )
+    @click.option(
+        "--folder",
+        required=requires_folder,
+        help="Folder name or UUID.",
+        hidden=not show_folder_option,
+    )
+    @click.option(
+        "--perimeter",
+        required=requires_perimeter,
+        help="Perimeter name or UUID.",
+        hidden=not show_perimeter_option,
+    )
+    @click.option(
+        "--framework",
+        required=requires_framework,
+        help="Framework name or UUID.",
+        hidden=not show_framework_option,
+    )
+    @click.option(
+        "--matrix",
+        required=requires_matrix,
+        help="Risk matrix name or UUID.",
+        hidden=not show_matrix_option,
+    )
+    @click.option(
+        "--on-conflict",
+        type=click.Choice(["stop", "skip", "update"], case_sensitive=False),
+        default="stop",
+        help="How to handle existing records: stop (default), skip, or update.",
+    )
+    def command(
+        file,
+        folder,
+        perimeter,
+        framework,
+        matrix,
+        on_conflict,
+        _model=model_type,
+        _requires_folder=requires_folder,
+        _requires_perimeter=requires_perimeter,
+        _requires_framework=requires_framework,
+        _requires_matrix=requires_matrix,
+    ):
+        upload_data_wizard_file(
+            model_type=_model,
+            file_path=file,
+            folder=folder,
+            perimeter=perimeter,
+            framework=framework,
+            matrix=matrix,
+            on_conflict=on_conflict,
+            requires_folder=_requires_folder,
+            requires_perimeter=_requires_perimeter,
+            requires_framework=_requires_framework,
+            requires_matrix=_requires_matrix,
         )
-        sys.exit(1)
 
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-
-    url = f"{API_URL}/evidences/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} evidences. Are you sure?"):
-        for _, row in df.iterrows():
-            data = {
-                "name": row["name"],
-                "description": row["description"],
-                "folder": GLOBAL_FOLDER_ID,
-                "applied_controls": [],
-                "requirement_assessments": [],
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {row['name']} created", file=sys.stderr)
+    globals()[command_name] = command
 
 
-@click.command()
+for cfg in DATA_WIZARD_COMMANDS:
+    register_data_wizard_command(cfg)
+
+
+@cli.command(name="upload-attachment")
 @click.option("--file", required=True, help="Path to the attachment to upload")
 @click.option("--name", required=True, help="Name of the evidence")
 def upload_attachment(file, name):
@@ -450,7 +571,7 @@ def upload_attachment(file, name):
     rprint(res.text)
 
 
-@click.command()
+@cli.command(name="backup-full")
 @click.option(
     "--dest-dir",
     default="./db_backup",
@@ -693,7 +814,7 @@ def backup_full(dest_dir, batch_size, resume):
     rprint(f"[dim]Location: {dest_path}[/dim]")
 
 
-@click.command()
+@cli.command(name="restore-full")
 @click.option(
     "--src-dir",
     default="./db_backup",
@@ -891,15 +1012,5 @@ def restore_full(src_dir, verify_hashes):
     rprint("[dim]Note: You will need to regenerate your Personal Access Token[/dim]")
 
 
-cli.add_command(get_folders)
-cli.add_command(get_perimeters)
-cli.add_command(import_assets)
-cli.add_command(import_controls)
-cli.add_command(import_evidences)
-cli.add_command(upload_attachment)
-cli.add_command(import_risk_assessment)
-cli.add_command(get_matrices)
-cli.add_command(backup_full)
-cli.add_command(restore_full)
 if __name__ == "__main__":
     cli()

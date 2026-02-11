@@ -6,7 +6,7 @@
 	$pageTitle = 'Experimental';
 </script>
 
-<div class="bg-white grid grid-cols-2 p-4 gap-4">
+<div class="bg-white grid grid-cols-2 p-4 gap-4 card">
 	<Article
 		title={m.requirementsExplorer()}
 		desc={m.visualizeRequirements()}

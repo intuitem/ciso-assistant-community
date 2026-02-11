@@ -107,12 +107,6 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					if (
-						e.urlModel === 'perimeters' &&
-						model.urlModel === 'folders' &&
-						data.content_type === 'GLOBAL'
-					)
-						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {
 						head: [...tableFieldsRef.head],
@@ -224,9 +218,15 @@ export const loadDetail = async ({ event, model, id }) => {
 				})
 		);
 	}
+	let title = data.str || data.name || data.email || data.label || data.id;
+	if (model.urlModel === 'reference-controls') {
+		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+		title = hasName ? data.name : data.ref_id || title;
+	}
+
 	return {
 		data,
-		title: data.str || data.name || data.email || data.label || data.id,
+		title,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,

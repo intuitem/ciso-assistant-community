@@ -196,13 +196,18 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
+		const preferredLabel =
+			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
+		const label =
+			preferredLabel ||
+			rowMetaData.str ||
+			rowMetaData.name ||
+			rowMetaData.email ||
+			rowMetaData.label ||
+			rowMetaData[identifierField];
+
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
-			label:
-				rowMetaData.str ??
-				rowMetaData.name ??
-				rowMetaData.email ??
-				rowMetaData.label ??
-				rowMetaData[identifierField],
+			label,
 			breadcrumbAction: 'push'
 		});
 	}
@@ -288,7 +293,8 @@
 	const preventDelete = (row: TableSource) =>
 		(actionsURLModel === 'stored-libraries' && (row?.meta?.builtin || row?.meta?.is_loaded)) ||
 		(!URLModel?.includes('libraries') && Object.hasOwn(row?.meta, 'urn') && row?.meta?.urn) ||
-		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments.length > 0) ||
+		row?.meta?.builtin ||
+		(URLModel?.includes('campaigns') && row?.meta?.compliance_assessments?.length > 0) ||
 		(Object.hasOwn(row?.meta, 'reference_count') && row?.meta?.reference_count > 0) ||
 		['severity_changed', 'status_changed'].includes(row?.meta?.entry_type) ||
 		forcePreventDelete;
@@ -417,7 +423,10 @@
 									user.root_folder_id)
 					})
 				: Object.hasOwn(user.permissions, `change_${model.name}`)
-			: false) && !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)
+			: false) &&
+			(!(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) ||
+				URLModel === 'terminologies' ||
+				URLModel === 'entities')
 	);
 
 	let contextMenuDisplayEdit = $derived(
@@ -560,7 +569,7 @@
 	let openState = $state(false);
 </script>
 
-<div class="table-wrap {classesBase}">
+<div class="card table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
 		{#if !hideFilters}
 			<Popover
@@ -718,10 +727,10 @@
 																				{@const [securityObjectiveName, securityObjectiveValue] =
 																					Object.entries(val)[0]}
 																				{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																			{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																				{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel || key.replace(/_/g, '-')}/${val.id}`}
 																				<Anchor href={itemHref} class="anchor" stopPropagation
-																					>{val.str}</Anchor
+																					>{safeTranslate(val.str)}</Anchor
 																				>
 																			{:else if val.str}
 																				{safeTranslate(val.str)}
@@ -767,11 +776,11 @@
 																	>
 																{:else}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{value.str}</Anchor
+																		>{safeTranslate(value.str)}</Anchor
 																	>
 																{/if}
 															{:else}
-																{value.str ?? '-'}
+																{safeTranslate(value.str) ?? '-'}
 															{/if}
 														{:else if value && value.hexcolor}
 															<p
@@ -782,7 +791,7 @@
 															>
 																{safeTranslate(value.name ?? value.str) ?? '-'}
 															</p>
-														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'expiry_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
+														{:else if ISO_8601_REGEX.test(value) && (key === 'created_at' || key === 'updated_at' || key === 'start_date' || key === 'expiry_date' || key === 'expiration_date' || key === 'accepted_at' || key === 'rejected_at' || key === 'revoked_at' || key === 'eta' || key === 'due_date' || key === 'timestamp' || key === 'reported_at' || key === 'discovered_on')}
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
@@ -848,7 +857,9 @@
 												{model}
 												URLModel={actionsURLModel}
 												detailURL={`/${actionsURLModel}/${row.meta[identifierField]}${detailQueryParameter}`}
-												editURL={!(row.meta.builtin || row.meta.urn) || URLModel === 'terminologies'
+												editURL={!(row.meta.builtin || row.meta.urn) ||
+												URLModel === 'terminologies' ||
+												URLModel === 'entities'
 													? `/${actionsURLModel}/${row.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`
 													: undefined}
 												{row}
@@ -894,7 +905,7 @@
 						{/each}
 						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
 					{/if}
-					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn)}
+					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
 							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
 							onclick={() => {

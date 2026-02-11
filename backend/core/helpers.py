@@ -293,6 +293,7 @@ def get_sorted_requirement_nodes(
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
+                "weight": node.weight if node.weight else 1,
                 "questions": node.questions,
                 "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
@@ -335,6 +336,7 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": max_score if child_req_as else None,
+                    "weight": child.weight if child.weight else 1,
                     "questions": child.questions,
                     "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
@@ -1205,7 +1207,7 @@ def get_metrics(user: User, folder_id):
     viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
     progress_avg = math.ceil(
-        mean([x.get_progress() for x in viewable_compliance_assessments] or [0])
+        mean([x.progress for x in viewable_compliance_assessments] or [0])
     )
     missed_eta_count = (
         viewable_controls.filter(
@@ -1315,12 +1317,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 )
                 & Q(requirement_assessments__requirement__assessable=True),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
     )

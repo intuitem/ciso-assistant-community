@@ -13,7 +13,9 @@ overrides:
   js-yaml: ^4.1.1
   '@eslint/plugin-kit': ^0.5.1
   cookie: ^1.1.1
-  tar: ^7.5.3
+  tar: 7.5.7
+  lodash: ^4.17.23
+  lodash-es: ^4.17.23
 
 importers:
 
@@ -35,11 +37,11 @@ importers:
         specifier: ^8.53.0
         version: 8.53.0(eslint@9.39.2(jiti@2.4.2))(typescript@5.8.3)
       '@unovis/svelte':
-        specifier: 1.5.2
-        version: 1.5.2(@unovis/ts@1.5.2)(svelte@5.34.8)
+        specifier: 1.6.2
+        version: 1.6.2(@unovis/ts@1.6.2)(svelte@5.34.8)
       '@unovis/ts':
-        specifier: 1.5.2
-        version: 1.5.2
+        specifier: 1.6.2
+        version: 1.6.2
       bits-ui:
         specifier: ^2.15.4
         version: 2.15.4(@internationalized/date@3.8.2)(@sveltejs/kit@2.49.5(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.34.8)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.34.8)(typescript@5.8.3)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.34.8)
@@ -1448,14 +1450,14 @@ packages:
   '@unovis/graphlibrary@2.2.0-2':
     resolution: {integrity: sha512-HeEzpd/vDyWiIJt0rnh+2ICXUIuF2N0+Z9OJJiKg0DB+eFUcD+bk+9QPhYHwkFwfxdjDA9fHi1DZ/O/bbV58Nw==}
 
-  '@unovis/svelte@1.5.2':
-    resolution: {integrity: sha512-TSqJFvbBnkHAZ4Wjt6qBcsza+bGGAjlXORCQJ1nN1PuVNAxlnnwJsx80fd9jpK6lHsp/IovqPt6fcUHBQwpLkw==}
+  '@unovis/svelte@1.6.2':
+    resolution: {integrity: sha512-chHE5nILVNBBEgsix2FhVYSP5BQSTMhJiW/6h3OmGM1+JkXF68VIThbr7O9B+BJtzsSqkgqO0k7iciZlAr6zug==}
     peerDependencies:
-      '@unovis/ts': 1.5.2
+      '@unovis/ts': 1.6.2
       svelte: '^3.48.0 || ^4.0.0 '
 
-  '@unovis/ts@1.5.2':
-    resolution: {integrity: sha512-gpg81cr1z/Q9N45wFUkYCGN8o3GbW9U1qx2iQr+xTgyPFoKR9y9+b/savitxzaMGulHAF7cKlm0Nz/pBbQsFoA==}
+  '@unovis/ts@1.6.2':
+    resolution: {integrity: sha512-kSOWRiZsU4Kk1yuJSSaJs+zJCKNg3+2A0/6/7/y1Cu5uHggwGPeE3CzKaNOal/Hpc46bnZw2VLI23mY+gDFbeQ==}
 
   '@valibot/to-json-schema@1.5.0':
     resolution: {integrity: sha512-GE7DmSr1C2UCWPiV0upRH6mv0cCPsqYGs819fb6srCS1tWhyXrkGGe+zxUiwzn/L1BOfADH4sNjY/YHCuP8phQ==}
@@ -2642,8 +2644,8 @@ packages:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
 
-  lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+  lodash-es@4.17.23:
+    resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
 
   lodash.castarray@4.4.0:
     resolution: {integrity: sha512-aVx8ztPv7/2ULbArGJ2Y42bG1mEQ5mGjpdvrbJcJFU3TbYybe+QlLS4pst9zV52ymy2in1KpFPiZnAOATxD4+Q==}
@@ -2654,8 +2656,8 @@ packages:
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -3217,8 +3219,8 @@ packages:
     resolution: {integrity: sha512-Re10+NauLTMCudc7T5WLFLAwDhQ0JWdrMK+9B2M8zR5hRExKmsRDCBA7/aV/pNJFltmBFO5BAMlQFi/vq3nKOg==}
     engines: {node: '>=6'}
 
-  tar@7.5.3:
-    resolution: {integrity: sha512-ENg5JUHUm2rDD7IvKNFGzyElLXNjachNLp6RaGf4+JOgxXHkqA+gq81ZAMCUmtMtqBsoU62lcp6S27g1LCYGGQ==}
+  tar@7.5.7:
+    resolution: {integrity: sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==}
     engines: {node: '>=18'}
 
   test-exclude@7.0.1:
@@ -3624,7 +3626,7 @@ snapshots:
       '@babel/parser': 7.27.5
       '@babel/template': 7.27.2
       '@babel/types': 7.27.6
-      debug: 4.4.1
+      debug: 4.4.3
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -4381,7 +4383,7 @@ snapshots:
   '@tailwindcss/oxide@4.1.11':
     dependencies:
       detect-libc: 2.0.4
-      tar: 7.5.3
+      tar: 7.5.7
     optionalDependencies:
       '@tailwindcss/oxide-android-arm64': 4.1.11
       '@tailwindcss/oxide-darwin-arm64': 4.1.11
@@ -4429,7 +4431,7 @@ snapshots:
       chalk: 3.0.0
       css.escape: 1.5.1
       dom-accessibility-api: 0.6.3
-      lodash: 4.17.21
+      lodash: 4.17.23
       redent: 3.0.0
 
   '@testing-library/svelte@5.2.8(svelte@5.34.8)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1))(vitest@3.2.4(@types/node@20.19.1)(@vitest/ui@3.2.4)(jsdom@26.1.0)(lightningcss@1.30.1))':
@@ -4758,18 +4760,18 @@ snapshots:
   '@unovis/dagre-layout@0.8.8-2':
     dependencies:
       '@unovis/graphlibrary': 2.2.0-2
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
   '@unovis/graphlibrary@2.2.0-2':
     dependencies:
-      lodash-es: 4.17.21
+      lodash-es: 4.17.23
 
-  '@unovis/svelte@1.5.2(@unovis/ts@1.5.2)(svelte@5.34.8)':
+  '@unovis/svelte@1.6.2(@unovis/ts@1.6.2)(svelte@5.34.8)':
     dependencies:
-      '@unovis/ts': 1.5.2
+      '@unovis/ts': 1.6.2
       svelte: 5.34.8
 
-  '@unovis/ts@1.5.2':
+  '@unovis/ts@1.6.2':
     dependencies:
       '@emotion/css': 11.13.5
       '@juggle/resize-observer': 3.4.0
@@ -6138,7 +6140,7 @@ snapshots:
     dependencies:
       p-locate: 5.0.0
 
-  lodash-es@4.17.21: {}
+  lodash-es@4.17.23: {}
 
   lodash.castarray@4.4.0: {}
 
@@ -6146,7 +6148,7 @@ snapshots:
 
   lodash.merge@4.6.2: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   loose-envify@1.4.0:
     dependencies:
@@ -6748,7 +6750,7 @@ snapshots:
 
   tapable@2.2.2: {}
 
-  tar@7.5.3:
+  tar@7.5.7:
     dependencies:
       '@isaacs/fs-minipass': 4.0.1
       chownr: 3.0.0

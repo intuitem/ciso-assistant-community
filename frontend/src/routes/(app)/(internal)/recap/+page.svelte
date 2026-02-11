@@ -24,45 +24,62 @@
 	}
 
 	let { data }: Props = $props();
-	const model = URL_MODEL_MAP['perimeters'];
-	const canEditObject = (perimeter): boolean =>
+
+	const foldersWithAssessments = $derived(
+		(data?.folders ?? []).filter((f) => (f?.compliance_assessments?.length ?? 0) > 0)
+	);
+
+	const model = URL_MODEL_MAP['folders'];
+	const canEditObject = (folder): boolean =>
 		canPerformAction({
 			user,
 			action: 'change',
 			model: model.name,
-			domain: perimeter.folder?.id
+			domain: folder.id
 		});
 </script>
 
-<div class="p-4 space-y-6 bg-gray-50 min-h-screen">
+<div class="p-4 space-y-6 bg-gray-50 min-h-screen card">
 	<h2 class="text-2xl font-extrabold text-gray-800 mb-4">{m.overallCompliance()}</h2>
 
 	<div class="space-y-6">
-		{#each data.perimeters as perimeter}
-			{#if perimeter.compliance_assessments.length > 0}
+		{#if foldersWithAssessments.length === 0}
+			<div class="flex items-center justify-center min-h-[60vh]">
+				<div class="text-center max-w-lg">
+					<p class="text-xl font-bold text-gray-800">
+						{m.createYourFirstAuditToSeeRecapPage()}
+					</p>
+					<p class="mt-2 text-sm text-gray-600">
+						{m.AuditExistsYoullSeeOverallCompliance()}
+					</p>
+				</div>
+			</div>
+		{:else}
+			{#each foldersWithAssessments as folder}
 				<div
 					class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden transition hover:shadow-xl transform w-full"
 				>
 					<div
 						class="p-4 bg-gradient-to-r from-primary-400 to-primary-500 text-white flex justify-between items-center"
 					>
-						<a class="text-lg font-bold hover:underline" href="/perimeters/{perimeter.id}">
-							{perimeter.folder.str}/{perimeter.name}
+						<a class="text-lg font-bold hover:underline" href="/folders/{folder.id}">
+							{folder.name}
 						</a>
 					</div>
-					{#if perimeter.overallCompliance?.values?.length > 0}
+
+					{#if folder.overallCompliance?.values?.length > 0}
 						<div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-b-lg">
 							<p class="text-sm font-semibold text-primary-700 mb-2">{m.globalOverall()}</p>
 							<div class="flex h-6 rounded-lg overflow-hidden shadow-inner">
-								{#each perimeter.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
+								{#each folder.overallCompliance.values.sort((a, b) => REQUIREMENT_ASSESSMENT_STATUS.indexOf(a.name) - REQUIREMENT_ASSESSMENT_STATUS.indexOf(b.name)) as sp}
 									<div
 										class="flex justify-center items-center text-xs font-semibold"
 										style="
-						width: {sp.percentage}%;
-						background-color: {sp.itemStyle.color};
-						color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
-						box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
-					"
+										width: {sp.percentage}%;
+										background-color: {sp.itemStyle.color};
+										color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
+										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
+									"
 									>
 										{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
 									</div>
@@ -72,7 +89,7 @@
 					{/if}
 
 					<div class="p-4 space-y-4">
-						{#each perimeter.compliance_assessments as assessment}
+						{#each folder.compliance_assessments as assessment}
 							<div class="bg-gray-50 rounded-lg p-4 shadow-inner transition hover:bg-gray-100">
 								<div class="flex justify-between items-center mb-4">
 									<div>
@@ -121,7 +138,7 @@
 									<div
 										class="flex flex-row lg:flex-col space-x-2 lg:space-x-0 lg:space-y-2 lg:order-3"
 									>
-										{#if canEditObject(perimeter)}
+										{#if canEditObject(folder)}
 											<Anchor
 												href="/compliance-assessments/{assessment.id}/edit?next=/recap"
 												class="btn preset-filled-primary-500 w-1/2 lg:w-full"
@@ -143,7 +160,7 @@
 						{/each}
 					</div>
 				</div>
-			{/if}
-		{/each}
+			{/each}
+		{/if}
 	</div>
 </div>

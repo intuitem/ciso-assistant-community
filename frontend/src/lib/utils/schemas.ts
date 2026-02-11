@@ -108,7 +108,8 @@ export const LibraryUploadSchema = z.object({
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -357,7 +358,8 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	noRedirect: z.boolean().default(false)
+	noRedirect: z.boolean().default(false),
+	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
@@ -426,13 +428,15 @@ export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
 	show_documentation_score: z.boolean().optional().default(false),
 	extended_result_enabled: z.boolean().optional().default(false),
 	progress_status_enabled: z.boolean().optional().default(true),
+	score_calculation_method: z.string().optional().default('average'),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -540,8 +544,13 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
+	focus_mode: z.boolean().optional(),
 	outgoing_webhooks: z.boolean().optional(),
-	metrology: z.boolean().optional()
+	metrology: z.boolean().optional(),
+	personal_data: z.boolean().optional(),
+	purposes: z.boolean().optional(),
+	right_requests: z.boolean().optional(),
+	data_breaches: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -637,7 +646,8 @@ export const EntityAssessmentSchema = z.object({
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -730,7 +740,8 @@ export const vulnerabilitySchema = z.object({
 export const BusinessImpactAnalysisSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -774,7 +785,8 @@ export const processingSchema = z.object({
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
 	evidences: z.string().optional().array().optional(),
-	assigned_to: z.string().uuid().optional().array().optional()
+	assigned_to: z.string().uuid().optional().array().optional(),
+	perimeters: z.string().uuid().optional().array().optional()
 });
 
 export const rightRequestSchema = z.object({
@@ -822,24 +834,29 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
+	article_9_condition: z.string().optional().nullable(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -854,6 +871,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -862,7 +880,7 @@ export const dataTransferSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	legal_basis: z.string(),
+	transfer_mechanism: z.string().optional(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
 	entity: z.string().optional()
@@ -870,9 +888,10 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	category: z.string(),
-	retention: z.string(),
-	deletion_policy: z.string(),
+	retention: z.string().optional(),
+	deletion_policy: z.string().optional(),
 	is_sensitive: z.boolean().optional(),
 	processing: z.string(),
 	assets: z.string().uuid().optional().array().optional()
@@ -899,8 +918,11 @@ export const organisationIssueSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	observation: z.string().optional().nullable(),
 	category: z.string().optional(),
+	status: z.string().optional().default('draft'),
 	origin: z.string().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
 export const quantitativeRiskStudySchema = z.object({
@@ -917,25 +939,20 @@ export const quantitativeRiskStudySchema = z.object({
 				.object({
 					point1: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.default({ probability: 0.99 })
 						.optional(),
 					point2: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.optional()
 				})
-				.optional(),
-			curve_data: z
-				.object({
-					loss_values: z.array(z.number()).optional(),
-					probability_values: z.array(z.number()).optional()
-				})
 				.optional()
+			// Note: curve_data is computed by the backend and should not be sent from frontend
 		})
 		.optional(),
 	// .default({
@@ -1110,14 +1127,14 @@ export const FindingSchema = z.object({
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
@@ -1364,14 +1381,16 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
-	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
-	value: jsonSchema
+	value: jsonSchema,
+	observation: z.string().optional().nullable(),
+	evidence_revision: z.string().uuid().optional().nullable()
 });
 
 export const DashboardSchema = z.object({

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { handlers } from 'svelte/legacy';
+	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -166,11 +167,18 @@
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/"
+										href="{URLModel}/flash-mode/{page.url.search}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
 										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
+									>
+									<a
+										href="{URLModel}/kanban-mode/{page.url.search}"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
+										title={m.kanbanMode()}
+										aria-label={m.kanbanMode()}
+										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
 									>
 								{/if}
 								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}

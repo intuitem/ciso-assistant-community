@@ -21,18 +21,20 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	let formElement: HTMLFormElement = $state();
+	let formElement: HTMLFormElement | null = $state(null);
 	let files: FileList | null = $state(null); // Fixed: Changed from HTMLInputElement to FileList
 	let selectedModel = $state('Asset'); // Default selection
 	let searchQuery = $state('');
 	let showModelDropdown = $state(false);
 	let searchInputRef: HTMLInputElement | null = $state(null);
+	let onConflict = $state('stop');
 
 	// Model configuration
 	const modelOptions = [
 		{ id: 'Asset', label: m.assets(), description: '' },
 		{ id: 'User', label: m.users(), description: '' },
 		{ id: 'AppliedControl', label: m.appliedControls(), description: '' },
+		{ id: 'Policy', label: m.policies(), description: '' },
 		{ id: 'Folder', label: m.domains(), description: '' },
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
@@ -54,6 +56,8 @@
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
 		{ id: 'Processing', label: m.processings(), description: '' },
+		{ id: 'SecurityException', label: m.securityExceptions(), description: '' },
+		{ id: 'Incident', label: m.incidents(), description: '' },
 		{
 			id: 'TPRM',
 			label: m.thirdPartyCategory(),
@@ -82,7 +86,7 @@
 			title: 'Caution',
 			body: 'The following will create multiple objects in batch mode and possibly on different domains. This operation cannot be undone and you will need to do the clean up in case of an issue.',
 			response: (r: boolean) => {
-				if (r) formElement.requestSubmit();
+				if (r) formElement?.requestSubmit();
 			}
 		};
 
@@ -115,11 +119,14 @@
 		'User',
 		'Asset',
 		'AppliedControl',
+		'Policy',
 		'Perimeter',
 		'ElementaryAction',
 		'ReferenceControl',
 		'Threat',
 		'Processing',
+		'SecurityException',
+		'Incident',
 		'TPRM',
 		'EbiosRMStudyARM',
 		'EbiosRMStudyExcel'
@@ -362,21 +369,79 @@
 				{/if}
 			</div>
 
+			<!-- On-Conflict Handling -->
+			<div
+				class="rounded-lg p-6 mt-6 border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white"
+			>
+				<label class="block text-sm font-semibold text-gray-900 mb-3"
+					>{m.dataWizardOnConflict()}</label
+				>
+				<div class="flex gap-2">
+					<label
+						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
+						'stop'
+							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
+							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+					>
+						<input
+							type="radio"
+							name="onConflictRadio"
+							value="stop"
+							bind:group={onConflict}
+							class="sr-only"
+						/>
+						<div class="font-medium">{m.dataWizardOnConflictStop()}</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							{m.dataWizardOnConflictStopDescription()}
+						</div>
+					</label>
+					<label
+						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
+						'skip'
+							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
+							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+					>
+						<input
+							type="radio"
+							name="onConflictRadio"
+							value="skip"
+							bind:group={onConflict}
+							class="sr-only"
+						/>
+						<div class="font-medium">{m.dataWizardOnConflictSkip()}</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							{m.dataWizardOnConflictSkipDescription()}
+						</div>
+					</label>
+					<label
+						class="flex-1 cursor-pointer rounded-lg border-2 px-3 py-2 text-center text-sm transition-colors {onConflict ===
+						'update'
+							? 'border-amber-500 bg-amber-100 font-semibold text-amber-800'
+							: 'border-gray-200 bg-white text-gray-700 hover:border-amber-300'}"
+					>
+						<input
+							type="radio"
+							name="onConflictRadio"
+							value="update"
+							bind:group={onConflict}
+							class="sr-only"
+						/>
+						<div class="font-medium">{m.dataWizardOnConflictUpdate()}</div>
+						<div class="text-xs text-gray-500 mt-0.5">
+							{m.dataWizardOnConflictUpdateDescription()}
+						</div>
+					</label>
+				</div>
+				<input type="hidden" name="onConflict" value={onConflict} />
+			</div>
+
 			<div
 				class="rounded-lg p-6 mt-6 border-2 border-rose-200 bg-gradient-to-br from-rose-50 to-white space-y-4"
 			>
 				<!-- Targets Section -->
 				<div>
 					<h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-						<svg class="h-5 w-5 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" clip-rule="evenodd"
-							></path>
-							<path
-								fill-rule="evenodd"
-								d="M4 5a2 2 0 012-2 1 1 0 000 2h1a1 1 0 100-2h-1a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a1 1 0 100-2h-1a1 1 0 000 2h1v10H4V5z"
-								clip-rule="evenodd"
-							></path>
-						</svg>
+						<i class="fa-regular fa-circle-dot mr-2"></i>
 						{m.dataWizardSelectScope()}
 					</h3>
 				</div>
@@ -507,7 +572,9 @@
 					<div class="alert alert-success preset-filled-success-500">
 						<div>{form.message || 'File uploaded successfully'}</div>
 					</div>
-					<div class="text-xs font-mono p-2">{JSON.stringify(form?.results, null, 2)}</div>
+					<p class="wrap-break-word break-all whitespace-pre-wrap font-mono p-2">
+						{JSON.stringify(form?.results, null, 2)}
+					</p>
 				{:else}
 					<div class="alert alert-error preset-filled-error-500">
 						<p>

@@ -192,13 +192,12 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <AutocompleteSelect
 	{form}
@@ -241,7 +240,7 @@
 					: {
 							fields: [
 								{ field: 'version', translate: true },
-								{ field: 'perimeter', path: 'str', translate: false },
+								{ field: 'folder', path: 'str', translate: false },
 								{ field: 'status', translate: true }
 							],
 							position: 'suffix',

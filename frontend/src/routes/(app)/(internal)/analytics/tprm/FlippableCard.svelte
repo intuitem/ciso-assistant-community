@@ -91,7 +91,12 @@
 			<!-- Card header with provider name and conclusion -->
 			<div class="flex justify-between items-center pb-3 border-b border-gray-200 mb-3">
 				<h3 class="font-bold text-lg text-gray-900" data-testid="provider">
-					{entity_assessment.provider}
+					<a
+						href="/entity-assessments/{entity_assessment.entity_assessment_id}"
+						class="hover:text-primary-600 hover:underline"
+					>
+						{entity_assessment.provider}
+					</a>
 				</h3>
 				<span
 					data-testid="conclusion-badge"
@@ -221,7 +226,14 @@
 
 		<!-- Card content (back) -->
 		<div class="p-4 h-full flex flex-col">
-			<h3 class="font-bold text-lg text-gray-900 mb-3 pr-10">{entity_assessment.provider}</h3>
+			<h3 class="font-bold text-lg text-gray-900 mb-3 pr-10">
+				<a
+					href="/entity-assessments/{entity_assessment.entity_assessment_id}"
+					class="hover:text-primary-600 hover:underline"
+				>
+					{entity_assessment.provider}
+				</a>
+			</h3>
 
 			<!-- Additional details could go here -->
 			<div class="mb-4">

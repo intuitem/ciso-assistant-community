@@ -43,7 +43,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 
 <AutocompleteSelect
@@ -74,7 +73,7 @@
 	{form}
 	optionsEndpoint="compliance-assessments"
 	optionsLabelField="auto"
-	optionsExtraFields={[['perimeter', 'str']]}
+	optionsExtraFields={[['folder', 'str']]}
 	field="checklist"
 	cacheLock={cacheLocks['checklist']}
 	bind:cachedValue={formDataCache['checklist']}

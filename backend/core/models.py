@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal
+from typing import Self, Union, List, Optional, Literal, Tuple
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -305,12 +305,12 @@ class StoredLibrary(LibraryMixin):
 
     @classmethod
     def store_library_content(
-        cls, library_content: bytes, builtin: bool = False
-    ) -> "StoredLibrary | None":
+        cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
+    ) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
         hash_checksum = sha256(library_content)
-        if hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
+        if not dry_run and hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
-            return None
+            return None, "libraryAlreadyLoadedError"
         try:
             library_data = yaml.safe_load(library_content)
             if not isinstance(library_data, dict):
@@ -331,12 +331,38 @@ class StoredLibrary(LibraryMixin):
 
         urn = library_data["urn"].lower()
         if not match_urn(urn):
+            logger.error("Library URN is badly formatted", urn=urn)
             raise ValueError("Library URN is badly formatted")
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
             urn=urn, locale=locale
         ).exists()
+
+        if dry_run:
+            objects_meta = {
+                key: (1 if key == "framework" else len(value))
+                for key, value in library_data["objects"].items()
+            }
+            return (
+                {
+                    "name": library_data["name"],
+                    "urn": urn,
+                    "locale": locale,
+                    "version": version,
+                    "ref_id": library_data.get("ref_id"),
+                    "description": library_data.get("description"),
+                    "provider": library_data.get("provider"),
+                    "packager": library_data.get("packager"),
+                    "publication_date": library_data.get("publication_date"),
+                    "objects_meta": objects_meta,
+                    "is_loaded": is_loaded,
+                    "builtin": builtin,
+                    "copyright": library_data.get("copyright"),
+                },
+                None,
+            )
+
         same_version_lib = StoredLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).first()
@@ -345,10 +371,13 @@ class StoredLibrary(LibraryMixin):
             logger.info("update hash", urn=urn)
             same_version_lib.hash_checksum = hash_checksum
             same_version_lib.save()
-            return None
+            return None, "libraryAlreadyLoadedError"
 
         if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return None  # We do not accept to store outdated libraries
+            return (
+                None,
+                "libraryOutdatedError",
+            )  # We do not accept to store outdated libraries
 
         with transaction.atomic():
             # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
@@ -402,16 +431,16 @@ class StoredLibrary(LibraryMixin):
                 ),  # autoload is true if the library contains requirement mapping sets
             )
             new_library.filtering_labels.set(filtering_labels)
-            return new_library
+            return new_library, None
 
     @classmethod
     def store_library_file(
         cls, fname: Path, builtin: bool = False
-    ) -> "StoredLibrary | None":
+    ) -> Tuple[Optional["StoredLibrary"], Optional[str]]:
         with open(fname, "rb") as f:
             library_content = f.read()
 
-        return StoredLibrary.store_library_content(library_content, builtin)
+        return StoredLibrary.store_library_content(library_content, builtin=builtin)
 
     def get_loaded_library(self) -> Optional["LoadedLibrary"]:
         if not self.is_loaded:
@@ -1886,16 +1915,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
-    def __str__(self):
-        if self.name:
-            return self.ref_id + " - " + self.name if self.ref_id else self.name
-        else:
-            return (
-                self.ref_id + " - " + self.description
-                if self.ref_id
-                else self.description
-            )
-
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
@@ -3232,26 +3251,27 @@ class Asset(
 
         # Build ordered list of objective keys: defaults first (if present), then any extras
         default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
-        extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in so_obj] + extra_keys
+        extra_keys = sorted(k for k in so_obj.keys() if k not in default_order)
+        ordered_keys = default_order + extra_keys
 
         result = []
         for key in ordered_keys:
-            o = so_obj.get(key) or {}
+            objective = so_obj.get(key) or {}
+            capacity = sc_obj.get(key) or {}
             # Only compare enabled and valid (0..4) expectations
-            if not o.get("is_enabled", False):
-                continue
-            exp_value = o.get("value", None)
-            if not isinstance(exp_value, int) or not (0 <= exp_value <= 4):
-                continue
 
-            c = sc_obj.get(key) or {}
-            if not c.get("is_enabled", False):
-                continue
-            real_value = c.get("value", None) if isinstance(c, dict) else None
+            has_objective = objective.get("is_enabled", False)
+            exp_value = None
+            if has_objective:
+                exp_value = objective.get("value", None)
+
+            has_capacity = capacity.get("is_enabled", False)
+            real_value = None
+            if has_capacity:
+                real_value = capacity.get("value", None)
 
             verdict = None
-            if isinstance(real_value, int):
+            if isinstance(real_value, int) and isinstance(exp_value, int):
                 verdict = real_value >= exp_value
 
             result.append(
@@ -3301,8 +3321,8 @@ class Asset(
         capabilities = _normalize_seconds(rc_src)
 
         default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
-        extras = sorted([k for k in objectives.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in objectives] + extras
+        extras = sorted(k for k in objectives.keys() if k not in default_order)
+        ordered_keys = default_order + extras
 
         result: list[dict] = []
         for key in ordered_keys:
@@ -3310,7 +3330,12 @@ class Asset(
             real_value = capabilities.get(key)
 
             verdict = None
-            if isinstance(exp_value, int) and isinstance(real_value, int):
+            if (
+                isinstance(exp_value, int)
+                and isinstance(real_value, int)
+                and exp_value > 0
+                and real_value > 0
+            ):
                 verdict = real_value <= exp_value
 
             result.append(
@@ -4041,11 +4066,18 @@ class Incident(NameDescriptionMixin, FolderMixin):
 
     is_published = models.BooleanField(_("published"), default=True)
 
-    fields_to_check = ["name"]
+    fields_to_check = ["name", "ref_id"]
 
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
 
 class TimelineEntry(AbstractBaseModel, FolderMixin):
@@ -4343,6 +4375,11 @@ class AppliedControl(
             )
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
 
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
+
     def _get_changed_fields(self, old_instance):
         """Detect which fields changed"""
         changed = []
@@ -4589,6 +4626,11 @@ class OrganisationIssue(
         INTERNAL = "internal", "Internal"
         EXTERNAL = "external", "External"
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        ACTIVE = "active", _("Active")
+        INACTIVE = "inactive", _("Inactive")
+
     ref_id = models.CharField(
         max_length=100, blank=True, verbose_name=_("Reference ID")
     )
@@ -4611,6 +4653,22 @@ class OrganisationIssue(
         Asset,
         blank=True,
         verbose_name="asset",
+    )
+    start_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Start date"),
+    )
+    expiration_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Expiration date"),
+    )
+    status = models.CharField(
+        max_length=100,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
     )
     fields_to_check = ["name"]
 
@@ -4802,9 +4860,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     perimeter = models.ForeignKey(
         Perimeter,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         verbose_name=_("Perimeter"),
         null=True,
+        blank=True,
     )
     version = models.CharField(
         max_length=100,
@@ -4847,7 +4906,9 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         abstract = True
 
     def save(self, *args, **kwargs) -> None:
-        if not self.folder or self.folder == Folder.get_root_folder():
+        if self.perimeter and (
+            not self.folder or self.folder == Folder.get_root_folder()
+        ):
             self.folder = self.perimeter.folder
         return super().save(*args, **kwargs)
 
@@ -4968,7 +5029,12 @@ class RiskAssessment(Assessment):
 
     @property
     def path_display(self) -> str:
-        return f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+        if self.perimeter:
+            return (
+                f"{self.perimeter.folder}/{self.perimeter}/{self.name} - {self.version}"
+            )
+        else:
+            return f"{self.folder}/{self.name} - {self.version}"
 
     def get_scenario_count(self) -> int:
         count = RiskScenario.objects.filter(risk_assessment=self.id).count()
@@ -5310,7 +5376,7 @@ def risk_scoring(probability, impact, risk_matrix: RiskMatrix) -> int:
     return risk_index
 
 
-class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
+class RiskScenario(NameDescriptionMixin, FilteringLabelMixin, FolderMixin):
     TREATMENT_OPTIONS = [
         ("open", _("Open")),
         ("mitigate", _("Mitigate")),
@@ -5680,7 +5746,7 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return extra_controls
 
     def __str__(self):
-        return str(self.parent_perimeter()) + _(": ") + str(self.name)
+        return f"{self.folder}/{self.risk_assessment}/{self.name}"
 
     def delete(self, *args, **kwargs):
         risk_assessment_id = self.risk_assessment.id
@@ -5692,6 +5758,8 @@ class RiskScenario(NameDescriptionMixin, FilteringLabelMixin):
         return result
 
     def save(self, *args, **kwargs):
+        self.folder = self.risk_assessment.folder
+
         if self.inherent_proba >= 0 and self.inherent_impact >= 0:
             self.inherent_level = risk_scoring(
                 self.inherent_proba,
@@ -5760,10 +5828,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
-            [
-                ca.get_progress()
-                for ca in ComplianceAssessment.objects.filter(campaign=self)
-            ]
+            [ca.progress for ca in ComplianceAssessment.objects.filter(campaign=self)]
         )
         days_remaining = "--"
         if self.due_date:
@@ -5774,6 +5839,10 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
 
 class ComplianceAssessment(Assessment):
+    class CalculationMethod(models.TextChoices):
+        AVG = "average", "Average"
+        SUM = "sum", "Sum"
+
     framework = models.ForeignKey(
         Framework, on_delete=models.CASCADE, verbose_name=_("Framework")
     )
@@ -5818,6 +5887,13 @@ class ComplianceAssessment(Assessment):
     extended_result_enabled = models.BooleanField(default=False)
     progress_status_enabled = models.BooleanField(default=True)
 
+    score_calculation_method = models.CharField(
+        max_length=100,
+        choices=CalculationMethod.choices,
+        default=CalculationMethod.AVG,
+        verbose_name=_("Score Calculation Method"),
+    )
+
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -5838,7 +5914,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.get_progress(),
+                "progress_perc": self.progress,
                 "score": self.get_global_score(),
             },
         }
@@ -5964,16 +6040,7 @@ class ComplianceAssessment(Assessment):
         def infer_result(applied_controls):
             if not applied_controls:
                 return RequirementAssessment.Result.NOT_ASSESSED
-
-            if len(applied_controls) == 1:
-                ac_status = applied_controls[0].status
-                if ac_status == AppliedControl.Status.ACTIVE:
-                    return RequirementAssessment.Result.COMPLIANT
-                else:
-                    return RequirementAssessment.Result.NON_COMPLIANT
-
             statuses = [ac.status for ac in applied_controls]
-
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
             elif AppliedControl.Status.ACTIVE in statuses:
@@ -5981,31 +6048,54 @@ class ComplianceAssessment(Assessment):
             else:
                 return RequirementAssessment.Result.NON_COMPLIANT
 
-        changes = dict()
-        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
-            compliance_assessment=self, applied_controls__isnull=False
-        ).distinct()
-        with transaction.atomic():
-            for ra in requirement_assessments_with_ac:
-                ac = AppliedControl.objects.filter(requirement_assessments=ra)
-                ic(ac)
-                new_result = infer_result(ac)
-                if ra.result != new_result:
-                    changes[str(ra.id)] = {
-                        "str": str(ra.requirement.safe_display_str),
-                        "current": ra.result,
-                        "new": new_result,
-                    }
-                    if not dry_run:
-                        ra.result = new_result
-                        ra.save(update_fields=["result"])
+        changes: dict[str, dict[str, RequirementAssessment.Result]] = {}
+        requirement_assessments_with_ac = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self, applied_controls__isnull=False
+            )
+            .select_related("requirement")
+            .prefetch_related("applied_controls")
+            .distinct()
+        )
 
-        ic(changes)
+        to_update: list[RequirementAssessment] = []
+        for ra in requirement_assessments_with_ac:
+            applied_controls = list(ra.applied_controls.all())
+            new_result = infer_result(applied_controls)
+            if ra.result != new_result:
+                changes[str(ra.id)] = {
+                    "str": str(ra.requirement.safe_display_str),
+                    "current": ra.result,
+                    "new": new_result,
+                }
+                if not dry_run:
+                    ra.result = new_result
+                    to_update.append(ra)
 
-        if dry_run:
+        if dry_run or not to_update:
             return changes
 
+        with transaction.atomic():
+            RequirementAssessment.objects.bulk_update(to_update, ["result"])
+            ComplianceAssessment.objects.filter(pk=self.pk).update(
+                updated_at=timezone.now()
+            )
+            # Ensure metrics are refreshed once after the bulk update.
+            self.refresh_from_db(fields=["updated_at"])
+            self.upsert_daily_metrics()
+
+        return changes
+
     def get_global_score(self):
+        """
+        Calculate the global score based on the score_calculation_method.
+
+        For AVG (average): Returns weighted average = Σ(score × weight) / Σ(weight)
+        For SUM: Returns weighted sum = Σ(score × weight)
+
+        When show_documentation_score is enabled, documentation scores are included
+        in the calculation with the same weight as the main score.
+        """
         requirement_assessments_scored = (
             RequirementAssessment.objects.filter(compliance_assessment=self)
             .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
@@ -6029,12 +6119,52 @@ class ComplianceAssessment(Assessment):
                     weighted_score += (ras.documentation_score or 0) * weight
                     total_weight += weight
 
-        if total_weight > 0:
+        if total_weight == 0:
+            return -1
+
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            # For SUM, return the weighted sum directly
+            return int(weighted_score * 10) / 10
+        else:
+            # For AVG (default), return weighted average
             global_score = weighted_score / total_weight
             # We use this instead of using the python round function so that the python backend outputs the same result as the javascript frontend.
             return int(global_score * 10) / 10
+
+    def get_total_max_score(self):
+        """
+        Calculate the theoretical total maximum score based on the score_calculation_method.
+
+        For AVG: Returns the framework's max_score (e.g., 100) since the average is bounded by it
+        For SUM: Returns max_score × Σ(weight) of all scored requirements
+        """
+        if self.score_calculation_method == self.CalculationMethod.SUM:
+            requirement_assessments_scored = (
+                RequirementAssessment.objects.filter(compliance_assessment=self)
+                .exclude(result=RequirementAssessment.Result.NOT_APPLICABLE)
+                .exclude(is_scored=False)
+                .exclude(requirement__assessable=False)
+            )
+            ig = (
+                set(self.selected_implementation_groups)
+                if self.selected_implementation_groups
+                else None
+            )
+            total_weight = 0
+            for ras in requirement_assessments_scored:
+                if not (ig) or (ig & set(ras.requirement.implementation_groups or [])):
+                    weight = ras.requirement.weight if ras.requirement.weight else 1
+                    total_weight += weight
+                    if self.show_documentation_score:
+                        total_weight += weight
+
+            return (
+                (self.max_score or 100) * total_weight
+                if total_weight > 0
+                else self.max_score
+            )
         else:
-            return -1
+            return self.max_score
 
     def get_selected_implementation_groups(self):
         framework = self.framework
@@ -6049,6 +6179,28 @@ class ComplianceAssessment(Assessment):
             for group in framework.implementation_groups_definition
             if group.get("ref_id") in self.selected_implementation_groups
         ]
+
+    def requirement_matches_selected_groups(
+        self, requirement: RequirementNode | None
+    ) -> bool:
+        """
+        Return True when the requirement is within the selected implementation groups.
+        """
+        if requirement is None:
+            return True
+
+        if not self.selected_implementation_groups:
+            return True
+
+        selected_groups = set(self.selected_implementation_groups)
+        if not selected_groups:
+            return True
+
+        requirement_groups = set(requirement.implementation_groups or [])
+        if not requirement_groups:
+            return False
+
+        return bool(selected_groups & requirement_groups)
 
     def get_requirement_assessments(self, include_non_assessable: bool):
         """
@@ -6638,7 +6790,8 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
-    def get_progress(self) -> int:
+    @property
+    def progress(self) -> int:
         requirement_assessments = list(
             self.get_requirement_assessments(include_non_assessable=False)
         )
@@ -6834,39 +6987,54 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
 
-    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+    def create_applied_controls_from_suggestions(
+        self, *, dry_run: bool = False
+    ) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return applied_controls
         for reference_control in self.requirement.reference_controls.all():
             try:
-                applied_control, created = AppliedControl.objects.get_or_create(
+                applied_control = AppliedControl.objects.filter(
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
-                    defaults={
-                        "name": reference_control.get_name_translated
-                        or reference_control.ref_id,
-                        "ref_id": reference_control.ref_id,
-                    },
-                )
+                    requirement_assessments=self,
+                ).first()
 
-                if (
-                    reference_control.description
-                    and applied_control.description is None
-                ):
-                    applied_control.description = reference_control.description
-                    applied_control.save()
-                if created:
-                    logger.info(
-                        "Successfully created applied control from reference_control",
-                        applied_control=applied_control,
-                        reference_control=reference_control,
-                    )
+                if applied_control:
+                    # Already linked to this requirement assessment, skip entirely so
+                    # dry-run mirrors the actual creation.
+                    continue
+
+                existing_control = AppliedControl.objects.filter(
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                ).first()
+
+                if existing_control:
+                    applied_control = existing_control
                 else:
-                    logger.info(
-                        "Applied control already exists, skipping creation and using existing one",
-                        applied_control=applied_control,
+                    applied_control = AppliedControl(
+                        folder=self.folder,
                         reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
                     )
+                    if not dry_run:
+                        applied_control.save()
+                        logger.info(
+                            "Successfully created applied control from reference_control",
+                            applied_control=applied_control,
+                            reference_control=reference_control,
+                        )
+
                 applied_controls.append(applied_control)
             except Exception as e:
                 logger.error(
@@ -6875,8 +7043,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     exc_info=e,
                 )
                 continue
-        if applied_controls:
-            self.applied_controls.add(*applied_controls)
+
+        if not dry_run and applied_controls:
+            saved_controls = [ac for ac in applied_controls if ac.pk]
+            if saved_controls:
+                self.applied_controls.add(*saved_controls)
+
         return applied_controls
 
     class Meta:
@@ -7003,13 +7175,6 @@ class FindingsAssessment(Assessment):
         PENTEST = "pentest", "Pentest"
         AUDIT = "audit", "Audit"
         SELF_IDENTIFIED = "self_identified", "Self-identified"
-
-    owner = models.ManyToManyField(
-        "core.Actor",
-        blank=True,
-        verbose_name=_("Owner"),
-        related_name="findings_assessments",
-    )
 
     category = models.CharField(
         verbose_name=_("Category"),
@@ -7802,7 +7967,7 @@ class Actor(AbstractBaseModel):
         constraints = [
             # Ensure exactly one field is set (XOR logic)
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(user__isnull=False, team__isnull=True, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=False, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=True, entity__isnull=False)
@@ -7839,6 +8004,26 @@ class Actor(AbstractBaseModel):
 
     def get_emails(self) -> list[str]:
         return self.specific.get_emails()
+
+    @classmethod
+    def get_all_for_user(cls, user) -> list["Actor"]:
+        """
+        Get all actors related to a user.
+        Includes:
+        - The user's own actor
+        - Actors of teams where the user is leader, deputy, or member
+        """
+        actors = []
+        if hasattr(user, "actor") and user.actor:
+            actors.append(user.actor)
+
+        team_actors = cls.objects.filter(
+            team__in=Team.objects.filter(
+                Q(leader=user) | Q(deputies=user) | Q(members=user)
+            )
+        ).distinct()
+
+        return actors + list(team_actors)
 
     def __str__(self):
         return str(self.specific)

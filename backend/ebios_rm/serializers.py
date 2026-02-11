@@ -1,6 +1,7 @@
 from core.serializers import (
     BaseModelSerializer,
 )
+from django.db import transaction
 from core.serializer_fields import FieldsRelatedField, HashSlugRelatedField
 from core.models import RiskMatrix
 from .models import (
@@ -26,6 +27,25 @@ class EbiosRMStudyWriteSerializer(BaseModelSerializer):
     class Meta:
         model = EbiosRMStudy
         exclude = ["created_at", "updated_at"]
+
+    def update(self, instance, validated_data):
+        old_folder_id = instance.folder_id
+        with transaction.atomic():
+            updated_instance = super().update(instance, validated_data)
+            if old_folder_id != updated_instance.folder_id:
+                child_models = [
+                    FearedEvent,
+                    RoTo,
+                    Stakeholder,
+                    StrategicScenario,
+                    AttackPath,
+                    OperationalScenario,
+                ]
+                for model in child_models:
+                    model.objects.filter(ebios_rm_study=updated_instance).update(
+                        folder=updated_instance.folder
+                    )
+        return updated_instance
 
 
 class EbiosRMStudyReadSerializer(BaseModelSerializer):
@@ -368,7 +388,7 @@ class AttackPathReadSerializer(BaseModelSerializer):
     )
     target_objective = serializers.CharField(source="ro_to_couple.target_objective")
 
-    strategic_scenario = FieldsRelatedField()
+    strategic_scenario = FieldsRelatedField(["id", "name", "description"])
 
     class Meta:
         model = AttackPath
@@ -410,7 +430,9 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     str = serializers.CharField(source="__str__")
     ebios_rm_study = FieldsRelatedField()
     folder = FieldsRelatedField()
-    attack_path = FieldsRelatedField(["id", "name", "description", "form_display_name"])
+    attack_path = FieldsRelatedField(
+        ["id", "name", "description", "strategic_scenario", "form_display_name"]
+    )
     stakeholders = FieldsRelatedField(many=True)
     ro_to = FieldsRelatedField(["id", "risk_origin", "target_objective"])
     threats = FieldsRelatedField(many=True)
@@ -425,7 +447,8 @@ class OperationalScenarioReadSerializer(BaseModelSerializer):
     def get_strategic_scenario(self, obj):
         if obj.attack_path and obj.attack_path.strategic_scenario:
             return FieldsRelatedField().to_representation(
-                obj.attack_path.strategic_scenario
+                obj.attack_path.strategic_scenario,
+                fields=["id", "name", "description"],
             )
         return None
 

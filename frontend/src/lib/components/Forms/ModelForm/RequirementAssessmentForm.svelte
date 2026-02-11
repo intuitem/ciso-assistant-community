@@ -81,6 +81,14 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	<HiddenInput {form} field="folder" />
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folder"
+		pathField="path"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.domain()}
+	/>
 	<HiddenInput {form} field="compliance_assessment" />
 {/if}

@@ -228,6 +228,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 88. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
 89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
 90. Microsoft cloud security benchmark v1 - ☁️🌐
+91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
 
 ### Community contributions
 
@@ -254,11 +255,12 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
+24. RBI Master Direction 2023 - india 🏦🇮🇳
 
 <br/>
 
 > [!NOTE]
-> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. You can load the Excel sheet directly as a library.
 
 <br/>
 
@@ -271,19 +273,32 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺
-- Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-## Add your own library
+## Add your own custom library
 
-A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
+A library can represent a framework, a threat catalog, a set of reference controls, or even a custom risk matrix.
 
-Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library_v2.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting YAML file.
+Libraries can now be loaded **directly from Excel files**. There is no need to manually convert them to YAML beforehand—the conversion is handled internally when an Excel file is uploaded.
 
-You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+Take a look at the `tools` directory and its [dedicated README](tools/README.md), which describes the expected format of library source files in Excel. The `excel` subdirectory contains example XLSX files used as sources for the existing libraries and can be used as templates for creating your own.
 
-There is also a tool to facilitate the creation of mappings, called `prepare_mapping_v2.py` that will create an Excel file based on two framework libraries in YAML. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
+To load a library from an Excel file, go to the **Governance → Library** page, click **Load**, and select your Excel source file. Any validation or parsing errors will be reported during the import process.
+
+### Optional: converting libraries to YAML
+
+While Excel files can be loaded directly, it is still possible to convert library source files to YAML using external Python scripts:
+
+- `convert_library_v2.py` helps you generate a library from a simple Excel file. Once your items are structured in the expected format, run the script to produce the corresponding YAML file.
+- The `tools` directory also contains specialized converters for specific frameworks (for example, CIS or CCM Controls).
+
+### Creating mapping libraries
+
+To facilitate the creation of mappings between frameworks, you can use the `prepare_mapping_v2.py` tool. It generates an Excel file based on two existing framework libraries in YAML format. After filling in the mappings, the resulting Excel file can be:
+
+- loaded directly into the application, or
+- converted to YAML using `convert_library_v2.py`.
 
 ## Community
 
@@ -405,6 +420,10 @@ export CISO_SUPERUSER_EMAIL=<XXX>
 # this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information).
 # To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 export DJANGO_SECRET_KEY=...
+
+# Sandbox mode for running untrusted code (e.g. library excel files)
+# WARNING: Sandboxing must be enabled in production environments.
+export ENABLE_SANDBOX=True  # optional, default value is True in production enfironments (DJANGO_DEBUG=False) and False in development environments (DJANGO_DEBUG=True).
 
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
