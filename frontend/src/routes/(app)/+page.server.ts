@@ -1,7 +1,10 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
+	if (locals.user?.is_auditee) {
+		redirect(302, '/auditee-dashboard');
+	}
 	const queryParams = url.searchParams.has('refresh') ? '?refresh=1' : '';
 	redirect(301, `/analytics${queryParams}`);
 };

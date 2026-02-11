@@ -358,9 +358,19 @@
 					{currentIndex + 1} / {totalAssessable}
 				</div>
 			</div>
+			<!-- ETA / Due date -->
+			{#if complianceAssessment.eta || complianceAssessment.due_date}
+				<div class="flex items-center space-x-4 text-sm text-gray-500">
+					{#if complianceAssessment.eta}
+						<span><i class="fa-solid fa-calendar mr-1"></i>{m.eta()}: {complianceAssessment.eta}</span>
+					{/if}
+					{#if complianceAssessment.due_date}
+						<span><i class="fa-solid fa-calendar-check mr-1"></i>{m.dueDate()}: {complianceAssessment.due_date}</span>
+					{/if}
+				</div>
+			{/if}
 			<!-- Progress bar -->
 			<div class="flex items-center space-x-3">
-        due_date
 				<div class="flex-1 bg-gray-200 rounded-full h-2">
 					<div
 						class="bg-indigo-500 h-2 rounded-full transition-all duration-300"

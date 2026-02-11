@@ -65,7 +65,7 @@ export const navData = {
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders',
-					exclude: ['BI-RL-TPR']
+					exclude: ['BI-RL-TPR', 'BI-RL-ADE']
 				},
 				{
 					name: 'perimeters',
