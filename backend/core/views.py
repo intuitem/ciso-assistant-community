@@ -8563,14 +8563,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             for author in instance.authors.all():
                 try:
-                    author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="compliance-assessments",
-                        object_id=instance.id,
-                    )
+                    specific = author.specific
+                    if hasattr(specific, "mailing"):
+                        specific.mailing(
+                            email_template_name="tprm/third_party_email.html",
+                            subject=_(
+                                "CISO Assistant: A questionnaire has been assigned to you"
+                            ),
+                            object="compliance-assessments",
+                            object_id=instance.id,
+                        )
                 except Exception as primary_exception:
                     logger.error(
                         f"Failed to send email to {author}: {primary_exception}"
