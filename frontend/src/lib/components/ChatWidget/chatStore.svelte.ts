@@ -5,7 +5,8 @@ let messages = $state<ChatMessage[]>([
 	{
 		id: 'welcome',
 		role: 'assistant',
-		content: 'Hello! I\'m your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?',
+		content:
+			"Hello! I'm your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?",
 		timestamp: new Date()
 	}
 ]);

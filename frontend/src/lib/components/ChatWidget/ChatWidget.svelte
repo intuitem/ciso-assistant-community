@@ -81,9 +81,7 @@
 	>
 		<i class="fa-solid fa-comments text-lg"></i>
 		<!-- Pulse dot -->
-		<span
-			class="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5"
-		>
+		<span class="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
 			<span
 				class="absolute inline-flex h-full w-full animate-ping rounded-full bg-pink-400 opacity-75"
 			></span>
@@ -104,9 +102,7 @@
 			class="flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-700 px-4 py-3"
 		>
 			<div class="flex items-center gap-2.5">
-				<div
-					class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20"
-				>
+				<div class="flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
 					<i class="fa-solid fa-robot text-sm text-white"></i>
 				</div>
 				<div>
@@ -135,10 +131,7 @@
 		</div>
 
 		<!-- Messages -->
-		<div
-			bind:this={messagesContainer}
-			class="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3"
-		>
+		<div bind:this={messagesContainer} class="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
 			{#each messages as message (message.id)}
 				{#if message.role === 'assistant'}
 					<div class="flex gap-2.5">
@@ -193,9 +186,18 @@
 						<i class="fa-solid fa-robot text-xs"></i>
 					</div>
 					<div class="flex items-center gap-1 rounded-2xl bg-gray-100 px-4 py-3">
-						<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"></span>
-						<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 150ms"></span>
-						<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 300ms"></span>
+						<span
+							class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+							style="animation-delay: 0ms"
+						></span>
+						<span
+							class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+							style="animation-delay: 150ms"
+						></span>
+						<span
+							class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+							style="animation-delay: 300ms"
+						></span>
 					</div>
 				</div>
 			{/if}
@@ -273,9 +275,7 @@
 				class="flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-700 px-5 py-4"
 			>
 				<div class="flex items-center gap-3">
-					<div
-						class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20"
-					>
+					<div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
 						<i class="fa-solid fa-robot text-white"></i>
 					</div>
 					<div>
@@ -362,9 +362,18 @@
 							<i class="fa-solid fa-robot text-sm"></i>
 						</div>
 						<div class="flex items-center gap-1 rounded-2xl bg-gray-100 px-5 py-3">
-							<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 0ms"></span>
-							<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 150ms"></span>
-							<span class="h-2 w-2 animate-bounce rounded-full bg-gray-400" style="animation-delay: 300ms"></span>
+							<span
+								class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+								style="animation-delay: 0ms"
+							></span>
+							<span
+								class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+								style="animation-delay: 150ms"
+							></span>
+							<span
+								class="h-2 w-2 animate-bounce rounded-full bg-gray-400"
+								style="animation-delay: 300ms"
+							></span>
 						</div>
 					</div>
 				{/if}
