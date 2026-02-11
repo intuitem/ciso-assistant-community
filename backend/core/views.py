@@ -8874,24 +8874,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def global_score(self, request, pk):
         """Returns the global score of the compliance assessment"""
         compliance_assessment = self.get_object()
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
-            user_actors = Actor.get_all_for_user(request.user)
-            ra_ids = set(
-                RequirementAssignment.objects.filter(
-                    compliance_assessment=compliance_assessment,
-                    actor__in=user_actors,
-                ).values_list("requirement_assessments__id", flat=True)
-            )
         return Response(
             {
-                "score": compliance_assessment.get_global_score(ra_ids=ra_ids),
+                "score": compliance_assessment.get_global_score(),
                 "max_score": compliance_assessment.max_score,
                 "min_score": compliance_assessment.min_score,
-                "total_max_score": compliance_assessment.get_total_max_score(
-                    ra_ids=ra_ids
-                ),
+                "total_max_score": compliance_assessment.get_total_max_score(),
                 "scores_definition": get_referential_translation(
                     compliance_assessment.framework, "scores_definition", get_language()
                 ),
@@ -9076,17 +9064,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
         compliance_assessment = self.get_object()
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        ra_ids = None
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
-            user_actors = Actor.get_all_for_user(request.user)
-            ra_ids = set(
-                RequirementAssignment.objects.filter(
-                    compliance_assessment=compliance_assessment,
-                    actor__in=user_actors,
-                ).values_list("requirement_assessments__id", flat=True)
-            )
-        return Response(compliance_assessment.donut_render(ra_ids=ra_ids))
+        return Response(compliance_assessment.donut_render())
 
     @action(detail=True, methods=["get"], url_path="is-auditee")
     def is_auditee(self, request, pk):
