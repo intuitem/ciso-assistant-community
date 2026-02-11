@@ -39,6 +39,7 @@ class BusinessImpactAnalysis(Assessment):
 
     def save(self, *args, **kwargs):
         if not self.pk:
+            super().save(*args, **kwargs)
             return
 
         old_matrix_id = (
