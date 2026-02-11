@@ -1757,6 +1757,7 @@
 	"new": "Nouveau",
 	"ongoing": "En cours",
 	"closed": "Fermé",
+	"close": "Fermer",
 	"mitigation": "Atténuation",
 	"detection": "Détection",
 	"severityChanged": "Changement de gravité",

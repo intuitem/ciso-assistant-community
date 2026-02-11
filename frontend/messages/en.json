@@ -1845,6 +1845,7 @@
 	"new": "New",
 	"ongoing": "Ongoing",
 	"closed": "Closed",
+	"close": "Close",
 	"mitigation": "Mitigation",
 	"detection": "Detection",
 	"severityChanged": "Severity changed",
