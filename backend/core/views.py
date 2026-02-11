@@ -3412,7 +3412,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             )
 
         risk_assessment = self.get_object()
-        data = request.data
+        data = request.data.copy()
 
         if not data.get("risk_matrix"):
             data["risk_matrix"] = str(risk_assessment.risk_matrix.id)
@@ -3437,7 +3437,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         duplicated_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
 
         for scenario in risk_assessment.risk_scenarios.all():
-            duplicate_scenario = RiskScenario.objects.create(
+            duplicated_scenario = RiskScenario.objects.create(
                 risk_assessment=duplicated_risk_assessment,
                 name=scenario.name,
                 description=scenario.description,
@@ -3446,12 +3446,15 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 current_impact=scenario.current_impact,
                 residual_proba=scenario.residual_proba,
                 residual_impact=scenario.residual_impact,
+                inherent_proba=scenario.inherent_proba,
+                inherent_impact=scenario.inherent_impact,
+                inherent_level=scenario.inherent_level,
                 strength_of_knowledge=scenario.strength_of_knowledge,
                 justification=scenario.justification,
                 ref_id=scenario.ref_id,
             )
 
-            duplicate_scenario.qualifications.set(scenario.qualifications.all())
+            duplicated_scenario.qualifications.set(scenario.qualifications.all())
 
             for field in [
                 "applied_controls",
@@ -3461,7 +3464,7 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             ]:
                 duplicate_related_objects(
                     scenario,
-                    duplicate_scenario,
+                    duplicated_scenario,
                     duplicated_risk_assessment.folder,
                     field,
                 )
@@ -3469,9 +3472,9 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             if duplicated_risk_assessment.folder in [risk_assessment.folder] + [
                 folder for folder in risk_assessment.folder.get_sub_folders()
             ]:
-                duplicate_scenario.owner.set(scenario.owner.all())
+                duplicated_scenario.owner.set(scenario.owner.all())
 
-            duplicate_scenario.save()
+            duplicated_scenario.save()
 
         duplicated_risk_assessment.save()
         return Response({"results": "risk assessment duplicated"})
