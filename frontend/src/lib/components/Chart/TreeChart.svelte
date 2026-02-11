@@ -25,11 +25,7 @@
 		minHeight = $bindable('100vh')
 	}: Props = $props();
 
-	function countVisibleNodes(
-		node: treeType,
-		maxDepth: number,
-		depth: number = 0
-	): number {
+	function countVisibleNodes(node: treeType, maxDepth: number, depth: number = 0): number {
 		if (depth >= maxDepth || !node.children || node.children.length === 0) return 1;
 		let count = 1;
 		for (const child of node.children) {
