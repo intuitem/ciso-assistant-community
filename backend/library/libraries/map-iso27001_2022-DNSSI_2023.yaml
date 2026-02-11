@@ -522,7 +522,7 @@ objects:
         rationale: semantic
         annotation: "Gestion des comptes nominatifs/génériques"
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.2
-        target_requirement_urn: urn:intuitem:req_node:dnssi-2023-2:acc-sys/app-privil
+        target_requirement_urn: urn:intuitem:risk:req_node:dnssi-2023-2:acc-sys/app-privil
         relationship: intersect
         rationale: semantic
         annotation: "Gestion formelle des comptes à privilège"
