@@ -80,7 +80,9 @@ test('compliance assessments scoring is working properly', async ({
 		IDAM1Score.value.toString()
 	);
 
-	await complianceAssessmentsPage.form.saveButton.click();
+	await page.getByTestId('save-no-continue-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+	await page.goBack();
 	await page.waitForURL(complianceAssessmentsPage.url + '/**');
 	await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
 		'aria-valuenow',
@@ -114,7 +116,9 @@ test('compliance assessments scoring is working properly', async ({
 		IDAM2Score.value.toString()
 	);
 
-	await complianceAssessmentsPage.form.saveButton.click();
+	await page.getByTestId('save-no-continue-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+	await page.goBack();
 	await page.waitForURL(complianceAssessmentsPage.url + '/**');
 	await expect(IDAM2TreeViewItem.progressRadial).toHaveAttribute(
 		'aria-valuenow',
@@ -148,7 +152,9 @@ test('compliance assessments scoring is working properly', async ({
 		IDBE1Score.value.toString()
 	);
 
-	await complianceAssessmentsPage.form.saveButton.click();
+	await page.getByTestId('save-no-continue-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+	await page.goBack();
 	await page.waitForURL(complianceAssessmentsPage.url + '/**');
 	await expect(IDBE1TreeViewItem.progressRadial).toHaveAttribute(
 		'aria-valuenow',
@@ -182,7 +188,9 @@ test('compliance assessments scoring is working properly', async ({
 		PRAC1Score.value.toString()
 	);
 
-	await complianceAssessmentsPage.form.saveButton.click();
+	await page.getByTestId('save-no-continue-button').click();
+	await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+	await page.goBack();
 	await page.waitForURL(complianceAssessmentsPage.url + '/**');
 	await expect(PRAC1TreeViewItem.progressRadial).toHaveAttribute(
 		'aria-valuenow',
