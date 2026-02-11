@@ -362,10 +362,14 @@
 			{#if complianceAssessment.eta || complianceAssessment.due_date}
 				<div class="flex items-center space-x-4 text-sm text-gray-500">
 					{#if complianceAssessment.eta}
-						<span><i class="fa-solid fa-calendar mr-1"></i>{m.eta()}: {complianceAssessment.eta}</span>
+						<span
+							><i class="fa-solid fa-calendar mr-1"></i>{m.eta()}: {complianceAssessment.eta}</span
+						>
 					{/if}
 					{#if complianceAssessment.due_date}
-						<span><i class="fa-solid fa-calendar-check mr-1"></i>{m.dueDate()}: {complianceAssessment.due_date}</span>
+						<span
+							><i class="fa-solid fa-calendar-check mr-1"></i>{m.dueDate()}: {complianceAssessment.due_date}</span
+						>
 					{/if}
 				</div>
 			{/if}

@@ -271,7 +271,8 @@ export const navData = {
 				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
-					href: '/compliance-assessments'
+					href: '/compliance-assessments',
+					exclude: ['BI-RL-ADE']
 				},
 				{
 					name: 'evidences',

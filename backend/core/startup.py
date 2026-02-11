@@ -1108,7 +1108,6 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
 
 AUDITEE_PERMISSIONS_LIST = [
     "view_complianceassessment",
-    "view_threat",
     "view_requirementassessment",
     "change_requirementassessment",
     "view_evidence",
