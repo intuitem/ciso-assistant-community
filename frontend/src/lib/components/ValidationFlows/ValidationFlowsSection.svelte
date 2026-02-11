@@ -37,7 +37,7 @@
 			case 'submitted':
 				return 'fa-paper-plane text-blue-600';
 			case 'dropped':
-				return 'fa-trash text-gray-600';
+				return 'fa-circle-stop text-gray-600';
 			default:
 				return 'fa-question-circle text-gray-600';
 		}

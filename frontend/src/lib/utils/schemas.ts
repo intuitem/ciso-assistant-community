@@ -74,7 +74,7 @@ const NameDescriptionMixin = {
 export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
-	parent_folder: z.string().optional(),
+	parent_folder: z.string(),
 	filtering_labels: z.array(z.string()).optional()
 });
 
@@ -108,7 +108,8 @@ export const LibraryUploadSchema = z.object({
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -151,6 +152,9 @@ export const RiskScenarioSchema = z.object({
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	owner: z.string().uuid().optional().array().optional(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
+	risk_origin: z.string().uuid().optional().nullable(),
+	antecedent_scenarios: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	ref_id: z.string().max(100).optional()
 });
 
@@ -163,6 +167,7 @@ export const AppliedControlSchema = z.object({
 	status: z.string().optional().default('--'),
 	evidences: z.string().optional().array().optional(),
 	objectives: z.string().optional().array().optional(),
+	requirement_assessments: z.string().optional().array().optional(),
 	assets: z.string().optional().array().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -177,7 +182,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -326,6 +331,7 @@ export const AssetSchema = z.object({
 	observation: z.string().optional().nullable(),
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
 	solutions: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -341,6 +347,7 @@ export const RequirementAssessmentSchema = z.object({
 	answers: jsonSchema,
 	status: z.string(),
 	result: z.string(),
+	extended_result: z.string().optional().nullable(),
 	is_scored: z.boolean().optional(),
 	score: z.number().optional().nullable(),
 	documentation_score: z.number().optional().nullable(),
@@ -351,7 +358,8 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	noRedirect: z.boolean().default(false)
+	noRedirect: z.boolean().default(false),
+	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
@@ -420,11 +428,15 @@ export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
 	show_documentation_score: z.boolean().optional().default(false),
+	extended_result_enabled: z.boolean().optional().default(false),
+	progress_status_enabled: z.boolean().optional().default(true),
+	score_calculation_method: z.string().optional().default('average'),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
@@ -478,6 +490,7 @@ export const EvidenceSchema = z.object({
 export const EvidenceRevisionSchema = z.object({
 	folder: z.string().uuid(),
 	evidence: z.string().uuid(),
+	task_node: z.string().uuid().nullable(),
 	version: z.number().optional(),
 	attachment: z.any().optional().nullable(),
 	link: z
@@ -499,9 +512,12 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$']).default('€'),
+	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
 	daily_rate: z.number().default(500).optional(),
-	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional()
+	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
+	allow_self_validation: z.boolean().default(false).optional(),
+	show_warning_external_links: z.boolean().default(true).optional(),
+	allow_assignments_to_entities: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -528,7 +544,13 @@ export const FeatureFlagsSchema = z.object({
 	contracts: z.boolean().optional(),
 	reports: z.boolean().optional(),
 	validation_flows: z.boolean().optional(),
-	outgoing_webhooks: z.boolean().optional()
+	focus_mode: z.boolean().optional(),
+	outgoing_webhooks: z.boolean().optional(),
+	metrology: z.boolean().optional(),
+	personal_data: z.boolean().optional(),
+	purposes: z.boolean().optional(),
+	right_requests: z.boolean().optional(),
+	data_breaches: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -624,7 +646,8 @@ export const EntityAssessmentSchema = z.object({
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -686,7 +709,7 @@ export const contractSchema = z.object({
 	provider_entity: z.string().optional(),
 	beneficiary_entity: z.string().optional(),
 	evidences: z.array(z.string().optional()).optional(),
-	solution: z.string().optional(),
+	solutions: z.array(z.string().optional()).optional(),
 	status: z.string().optional().default('draft'),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	end_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -717,7 +740,8 @@ export const vulnerabilitySchema = z.object({
 export const BusinessImpactAnalysisSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -756,10 +780,13 @@ export const processingSchema = z.object({
 	filtering_labels: z.string().optional().array().optional(),
 	status: z.string().optional(),
 	dpia_required: z.boolean().optional(),
+	dpia_reference: z.string().optional(),
 	has_sensitive_personal_data: z.boolean().optional(),
 	nature: z.string().optional().array().optional(),
 	associated_controls: z.array(z.string().optional()).optional(),
-	assigned_to: z.string().uuid().optional().array().optional()
+	evidences: z.string().optional().array().optional(),
+	assigned_to: z.string().uuid().optional().array().optional(),
+	perimeters: z.string().uuid().optional().array().optional()
 });
 
 export const rightRequestSchema = z.object({
@@ -807,24 +834,29 @@ export const dataBreachSchema = z.object({
 
 export const purposeSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	legal_basis: z.string(),
+	article_9_condition: z.string().optional().nullable(),
 	processing: z.string()
 });
 export const dataSubjectSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataRecipientSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	category: z.string(),
 	processing: z.string()
 });
 export const dataContractorSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	relationship_type: z.string(),
 	country: z.string(),
@@ -839,6 +871,7 @@ export const dataContractorSchema = z.object({
 });
 export const dataTransferSchema = z.object({
 	...NameDescriptionMixin,
+	name: z.string().optional(),
 	ref_id: z.string().optional().default(''),
 	country: z.string(),
 	documentation_link: z
@@ -847,7 +880,7 @@ export const dataTransferSchema = z.object({
 			message: "Link must be either empty or a valid URL starting with 'http'"
 		})
 		.optional(),
-	legal_basis: z.string(),
+	transfer_mechanism: z.string().optional(),
 	guarantees: z.string().optional(),
 	processing: z.string(),
 	entity: z.string().optional()
@@ -855,10 +888,10 @@ export const dataTransferSchema = z.object({
 
 export const personalDataSchema = z.object({
 	...NameDescriptionMixin,
-	ref_id: z.string().optional().default(''),
+	name: z.string().optional(),
 	category: z.string(),
-	retention: z.string(),
-	deletion_policy: z.string(),
+	retention: z.string().optional(),
+	deletion_policy: z.string().optional(),
 	is_sensitive: z.boolean().optional(),
 	processing: z.string(),
 	assets: z.string().uuid().optional().array().optional()
@@ -874,6 +907,7 @@ export const organisationObjectiveSchema = z.object({
 	issues: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
+	metrics: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -884,8 +918,11 @@ export const organisationIssueSchema = z.object({
 	ref_id: z.string().optional().default(''),
 	observation: z.string().optional().nullable(),
 	category: z.string().optional(),
+	status: z.string().optional().default('draft'),
 	origin: z.string().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
 
 export const quantitativeRiskStudySchema = z.object({
@@ -902,25 +939,20 @@ export const quantitativeRiskStudySchema = z.object({
 				.object({
 					point1: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.default({ probability: 0.99 })
 						.optional(),
 					point2: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.optional()
 				})
-				.optional(),
-			curve_data: z
-				.object({
-					loss_values: z.array(z.number()).optional(),
-					probability_values: z.array(z.number()).optional()
-				})
 				.optional()
+			// Note: curve_data is computed by the backend and should not be sent from frontend
 		})
 		.optional(),
 	// .default({
@@ -1031,6 +1063,7 @@ export const StrategicScenarioSchema = z.object({
 	...NameDescriptionMixin,
 	ebios_rm_study: z.string(),
 	ro_to_couple: z.string().uuid(),
+	focused_feared_event: z.string().uuid().nullable().optional(),
 	ref_id: z.string().optional(),
 	folder: z.string()
 });
@@ -1069,7 +1102,8 @@ export const SecurityExceptionSchema = z.object({
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	requirement_assessments: z.string().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
-	assets: z.string().uuid().optional().array().optional()
+	assets: z.string().uuid().optional().array().optional(),
+	observation: z.string().optional()
 });
 
 export const FindingSchema = z.object({
@@ -1093,14 +1127,14 @@ export const FindingSchema = z.object({
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	authors: z.array(z.string().optional()).optional(),
 	reviewers: z.array(z.string().optional()).optional(),
-	owner: z.string().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	category: z.string().default('--'),
 	evidences: z.string().uuid().optional().array().optional(),
@@ -1173,7 +1207,7 @@ export const TaskTemplateSchema = z.object({
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
-	evidences: z.string().uuid().optional().array().optional(),
+	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
 		.object({
 			interval: z.number().min(1).positive().optional(),
@@ -1323,6 +1357,84 @@ export const AccreditationSchema = z.object({
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
 
+// Metrology
+export const MetricDefinitionSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	category: z.string().default('quantitative'),
+	unit: z.string().optional().nullable(),
+	choices_definition: jsonSchema.optional().nullable(),
+	provider: z.string().optional().nullable(),
+	higher_is_better: z.boolean().default(true),
+	default_target: z.number().optional().nullable(),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const MetricInstanceSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	metric_definition: z.string().uuid(),
+	status: z.string().default('draft'),
+	owner: z.array(z.string().uuid().optional()).optional(),
+	target_value: z.coerce.number().optional().nullable(),
+	collection_frequency: z.string().optional().nullable(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().nullable()
+});
+
+export const CustomMetricSampleSchema = z.object({
+	metric_instance: z.string().uuid(),
+	timestamp: z.string().datetime(),
+	value: jsonSchema,
+	observation: z.string().optional().nullable(),
+	evidence_revision: z.string().uuid().optional().nullable()
+});
+
+export const DashboardSchema = z.object({
+	...NameDescriptionMixin,
+	folder: z.string(),
+	ref_id: z.string().optional(),
+	dashboard_definition: jsonSchema.default({}),
+	filtering_labels: z.string().optional().array().optional()
+});
+
+export const DashboardWidgetSchema = z.object({
+	folder: z.string(),
+	dashboard: z.string().uuid(),
+	// Custom metric (optional - either this or builtin fields)
+	metric_instance: z.string().uuid().optional().nullable(),
+	// Builtin metric fields (optional - either this or metric_instance)
+	target_model: z.string().optional().nullable(),
+	target_object_id: z.string().uuid().optional().nullable(),
+	metric_key: z.string().optional().nullable(),
+	// Text widget content (for chart_type='text')
+	text_content: z.string().optional().nullable(),
+	// Common fields
+	title: z.string().optional().nullable(),
+	position_x: z.coerce.number().min(0).max(11).default(0),
+	position_y: z.coerce.number().min(0).default(0),
+	width: z.coerce.number().min(1).max(12).default(6),
+	height: z.coerce.number().min(1).default(2),
+	chart_type: z.string().default('kpi_card'),
+	time_range: z.string().default('last_30_days'),
+	aggregation: z.string().default('none'),
+	show_target: z.boolean().default(true),
+	show_legend: z.boolean().default(true),
+	widget_config: jsonSchema.default({})
+});
+
+export const teamSchema = z.object({
+	...NameDescriptionMixin,
+	team_email: z.string().email().optional(),
+	folder: z.string(),
+	members: z.array(z.string().uuid().optional()).optional(),
+	leader: z.string().uuid(),
+	deputies: z.array(z.string().uuid().optional()).optional()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1391,7 +1503,15 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	terminologies: TerminologySchema,
 	roles: RoleSchema,
 	'generic-collections': GenericCollectionSchema,
-	accreditations: AccreditationSchema
+	accreditations: AccreditationSchema,
+	'metric-definitions': MetricDefinitionSchema,
+	'metric-instances': MetricInstanceSchema,
+	'custom-metric-samples': CustomMetricSampleSchema,
+	dashboards: DashboardSchema,
+	'dashboard-widgets': DashboardWidgetSchema,
+	'dashboard-text-widgets': DashboardWidgetSchema,
+	'dashboard-builtin-widgets': DashboardWidgetSchema,
+	teams: teamSchema
 };
 
 export const modelSchema = (model: string) => {

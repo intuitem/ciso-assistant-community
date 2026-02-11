@@ -113,6 +113,11 @@ export const navData = {
 					href: '/users'
 				},
 				{
+					name: 'teams',
+					fa_icon: 'fa-solid fa-people-group',
+					href: '/teams'
+				},
+				{
 					name: 'userGroups',
 					fa_icon: 'fa-solid fa-users',
 					href: '/user-groups'
@@ -322,7 +327,29 @@ export const navData = {
 				}
 			]
 		},
-
+		{
+			name: 'metrology',
+			items: [
+				{
+					name: 'metricDefinitions',
+					fa_icon: 'fa-solid fa-ruler',
+					href: '/metric-definitions',
+					permissions: ['view_metricdefinition']
+				},
+				{
+					name: 'metricInstances',
+					fa_icon: 'fa-solid fa-chart-line',
+					href: '/metric-instances',
+					permissions: ['view_metricinstance']
+				},
+				{
+					name: 'dashboards',
+					fa_icon: 'fa-solid fa-chart-bar',
+					href: '/dashboards',
+					permissions: ['view_dashboard']
+				}
+			]
+		},
 		{
 			name: 'thirdPartyCategory',
 			items: [

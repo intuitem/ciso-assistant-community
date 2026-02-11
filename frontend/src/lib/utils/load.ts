@@ -11,6 +11,60 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
 
+interface LoadValidationFlowFormDataParams {
+	event: { fetch: typeof fetch };
+	folderId: string;
+	targetField: string;
+	targetIds: string[];
+}
+
+/**
+ * Load validation flow form data with preset values and select options.
+ * This utility extracts the common pattern used across detail pages that support validation flows.
+ */
+export const loadValidationFlowFormData = async ({
+	event,
+	folderId,
+	targetField,
+	targetIds
+}: LoadValidationFlowFormDataParams) => {
+	const validationFlowSchema = modelSchema('validation-flows');
+	const validationFlowInitialData = {
+		folder: folderId,
+		[targetField]: targetIds,
+		ref_id: ''
+	};
+	const validationFlowForm = await superValidate(
+		validationFlowInitialData,
+		zod(validationFlowSchema),
+		{ errors: false }
+	);
+	const validationFlowModel = getModelInfo('validation-flows');
+
+	const validationFlowSelectOptions: Record<string, any> = {};
+	if (validationFlowModel.selectFields) {
+		await Promise.all(
+			validationFlowModel.selectFields.map(async (selectField) => {
+				const url = `${BASE_API_URL}/validation-flows/${selectField.field}/`;
+				const response = await event.fetch(url);
+				if (response.ok) {
+					validationFlowSelectOptions[selectField.field] = await response.json().then((data) =>
+						Object.entries(data).map(([key, value]) => ({
+							label: value,
+							value: selectField.valueType === 'number' ? parseInt(key) : key
+						}))
+					);
+				} else {
+					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
+				}
+			})
+		);
+	}
+	validationFlowModel.selectOptions = validationFlowSelectOptions;
+
+	return { validationFlowForm, validationFlowModel };
+};
+
 export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 
@@ -53,12 +107,6 @@ export const loadDetail = async ({ event, model, id }) => {
 						})
 				)
 				.map(async (e) => {
-					if (
-						e.urlModel === 'perimeters' &&
-						model.urlModel === 'folders' &&
-						data.content_type === 'GLOBAL'
-					)
-						return;
 					const tableFieldsRef = listViewFields[e.urlModel];
 					const tableFields = {
 						head: [...tableFieldsRef.head],
@@ -111,6 +159,23 @@ export const loadDetail = async ({ event, model, id }) => {
 							initialData['folder'] = data?.folder?.id ?? data.folder;
 						}
 					}
+
+					// Pass additional nested data for specific models
+					if (e.fieldForInitialData) {
+						e.fieldForInitialData.forEach((fieldPath) => {
+							const parts = fieldPath.split('.');
+							let value = data;
+							for (const part of parts) {
+								value = value?.[part];
+								if (!value) break;
+							}
+							if (value) {
+								// Store nested data under a special key that won't interfere with form fields
+								initialData[`_${fieldPath.replace('.', '_')}`] = value;
+							}
+						});
+					}
+
 					const createForm = await superValidate(initialData, zod(createSchema), { errors: false });
 
 					const selectOptions: Record<string, any> = {};
@@ -147,14 +212,21 @@ export const loadDetail = async ({ event, model, id }) => {
 						selectOptions,
 						initialData,
 						disableCreate: e.disableCreate,
-						disableDelete: e.disableDelete
+						disableDelete: e.disableDelete,
+						disableEdit: e.disableEdit
 					};
 				})
 		);
 	}
+	let title = data.str || data.name || data.email || data.label || data.id;
+	if (model.urlModel === 'reference-controls') {
+		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
+		title = hasName ? data.name : data.ref_id || title;
+	}
+
 	return {
 		data,
-		title: data.str || data.name || data.email || data.label || data.id,
+		title,
 		form,
 		relatedModels,
 		urlModel: model.urlModel as urlModel,

@@ -30,11 +30,10 @@
 <AutocompleteSelect
 	{form}
 	field="folder"
-	optionsEndpoint="folders"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <TextField
 	{form}
@@ -94,12 +93,13 @@
 />
 <AutocompleteSelect
 	{form}
+	multiple
 	optionsEndpoint="solutions"
 	optionsExtraFields={[['provider_entity', 'str']]}
-	field="solution"
-	cacheLock={cacheLocks['solution']}
-	bind:cachedValue={formDataCache['solution']}
-	label={m.solution()}
+	field="solutions"
+	cacheLock={cacheLocks['solutions']}
+	bind:cachedValue={formDataCache['solutions']}
+	label={m.solutions()}
 />
 <AutocompleteSelect
 	{form}
@@ -112,21 +112,28 @@
 	label={m.documents()}
 />
 <AutocompleteSelect
-	{form}
 	multiple
-	field="filtering_labels"
+	{form}
+	createFromSelection={true}
 	optionsEndpoint="filtering-labels"
-	cacheLock={cacheLocks['filtering_labels']}
-	bind:cachedValue={formDataCache['filtering_labels']}
-	label={m.filteringLabels()}
+	optionsLabelField="label"
+	field="filtering_labels"
+	helpText={m.labelsHelpText()}
+	label={m.labels()}
+	translateOptions={false}
+	allowUserOptions="append"
 />
 
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-ellipsis" header={m.more()}>
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="owner"
 		cacheLock={cacheLocks['owner']}
 		bind:cachedValue={formDataCache['owner']}

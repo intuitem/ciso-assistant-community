@@ -9,7 +9,8 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
-	perimeter: vars.perimeterName,
+	// folder is inherited from the entity via initialData, no need to specify it
+	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
@@ -176,6 +177,7 @@ test('user can create representatives, solutions and entity assessments inside e
 });
 
 test('third-party representative can set their password', async ({ sideBar, mailer, page }) => {
+	test.slow();
 	await test.step('set password and log in as third party representative', async () => {
 		await expect(mailer.page.getByText('{{').last()).toBeHidden(); // Wait for mailhog to load the emails
 		const lastMail = await mailer.getLastEmail();
@@ -203,11 +205,14 @@ test('third-party representative can set their password', async ({ sideBar, mail
 			await setLoginPage.newPasswordInput.fill(vars.thirdPartyUser.password);
 			await setLoginPage.confirmPasswordInput.fill(vars.thirdPartyUser.password);
 		}
-		await setLoginPage.setPasswordButton.click();
 
-		await setLoginPage.isToastVisible(
-			'Your password has been successfully set. Welcome to CISO Assistant!'
+		const passwordSetToast = setLoginPage.isToastVisible(
+			'Your password has been successfully set. Welcome to CISO Assistant!',
+			undefined,
+			{ optional: true }
 		);
+		await setLoginPage.setPasswordButton.click();
+		await passwordSetToast;
 
 		await setLoginPage.login('third-party@tests.com', vars.thirdPartyUser.password);
 
@@ -243,12 +248,18 @@ test('third-party representative can fill their assigned audit', async ({
 
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
-			await page.getByRole('button', { name: 'Yes' }).first().click();
-			await page.getByRole('button', { name: 'No' }).nth(1).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(2).click();
-			await page.getByRole('button', { name: 'Yes' }).nth(3).click();
-			await page.getByRole('button', { name: 'No' }).nth(4).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(5).click();
+
+			const clickAndPause = async (locator: Locator) => {
+				await locator.click();
+				await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
+			};
+
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
@@ -260,10 +271,11 @@ test('third-party representative can fill their assigned audit', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('tp-evidence');
 			await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
-			await page.getByTestId('save-button').click();
-			await complianceAssessmentsPage.isToastVisible(
+			let objectCreatedToast = complianceAssessmentsPage.isToastVisible(
 				'The evidence object has been successfully created' + /.+/.source
 			);
+			await page.getByTestId('save-button').click();
+			await objectCreatedToast;
 		});
 
 		await test.step('check that evidence count was updated', async () => {

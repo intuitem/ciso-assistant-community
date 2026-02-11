@@ -72,7 +72,12 @@
 				zIndex="1000"
 			>
 				{#snippet trigger()}
-					<button class="btn bg-initial" data-testid="sidebar-more-btn" id="sidebar-more-btn">
+					<button
+						class="btn bg-initial"
+						data-testid="sidebar-more-btn"
+						aria-label="More options"
+						id="sidebar-more-btn"
+					>
 						<i class="fa-solid fa-ellipsis-vertical"></i>
 					</button>
 				{/snippet}
@@ -138,6 +143,7 @@
 			<button
 				class="btn bg-initial"
 				data-testid="sidebar-more-btn-disabled"
+				aria-label="More options"
 				id="sidebar-more-btn-disabled"><i class="fa-solid fa-ellipsis-vertical"></i></button
 			>
 		{/if}

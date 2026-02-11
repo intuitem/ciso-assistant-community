@@ -117,8 +117,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owner"
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
@@ -132,7 +136,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <Select
 	{form}
@@ -298,6 +301,17 @@
 		bind:cachedValue={formDataCache['reference_link']}
 	/>
 	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="applied-controls"
+		optionsLabelField="auto"
+		field="applied_controls"
+		cacheLock={cacheLocks['applied_controls']}
+		bind:cachedValue={formDataCache['applied_controls']}
+		label={m.appliedControls()}
+		helpText={m.appliedControlsLinkedToAssetHelpText()}
+	/>
+	<AutocompleteSelect
 		multiple
 		{form}
 		optionsEndpoint="security-exceptions"
@@ -306,18 +320,6 @@
 		cacheLock={cacheLocks['security_exceptions']}
 		bind:cachedValue={formDataCache['security_exceptions']}
 		label={m.securityExceptions()}
-	/>
-	<AutocompleteSelect
-		multiple
-		{form}
-		createFromSelection={true}
-		optionsEndpoint="filtering-labels"
-		optionsLabelField="label"
-		field="filtering_labels"
-		helpText={m.labelsHelpText()}
-		label={m.labels()}
-		translateOptions={false}
-		allowUserOptions="append"
 	/>
 	{#if data.type === 'SP'}
 		<AutocompleteSelect
@@ -331,14 +333,6 @@
 			helpText={m.overriddenChildrenCapabilitiesHelpText()}
 		/>
 	{/if}
-	<MarkdownField
-		{form}
-		field="observation"
-		label={m.observation()}
-		helpText={m.observationHelpText()}
-		cacheLock={cacheLocks['observation']}
-		bind:cachedValue={formDataCache['observation']}
-	/>
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -350,6 +344,26 @@
 		bind:cachedValue={formDataCache['solutions']}
 		label={m.solutions()}
 		helpText={m.solutionsLinkedToAssetHelpText()}
+	/>
+	<MarkdownField
+		{form}
+		field="observation"
+		label={m.observation()}
+		helpText={m.observationHelpText()}
+		cacheLock={cacheLocks['observation']}
+		bind:cachedValue={formDataCache['observation']}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
 	/>
 </Dropdown>
 {#if initialData.ebios_rm_studies}

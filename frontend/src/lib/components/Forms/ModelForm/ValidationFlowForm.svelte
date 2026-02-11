@@ -5,12 +5,13 @@
 	import Select from '$lib/components/Forms/Select.svelte';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/state';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -39,6 +40,12 @@
 		initialData.entity_assessments ||
 		initialData.findings_assessments;
 
+	// Determine the approver endpoint based on allow_self_validation setting
+	const allowSelfValidation = $derived(page.data?.settings?.allow_self_validation ?? false);
+	const approverEndpoint = $derived(
+		allowSelfValidation ? 'users?is_approver=true' : 'users?is_approver=true&exclude_current=true'
+	);
+
 	async function fetchDefaultRefId() {
 		try {
 			const response = await fetch(`/validation-flows/default-ref-id/`);
@@ -59,7 +66,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="users?is_approver=true&exclude_current=true"
+	optionsEndpoint={approverEndpoint}
 	optionsLabelField="email"
 	field="approver"
 	cacheLock={cacheLocks['approver']}
@@ -70,7 +77,7 @@
 />
 {#if object?.id}
 	<div class="space-y-2">
-		<label class="text-sm font-medium text-gray-700">{m.requestNotes()}</label>
+		<span class="text-sm font-medium text-gray-700">{m.requestNotes()}</span>
 		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
 	</div>
 {:else}
@@ -96,13 +103,12 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	onChange={async (e) => {
 		if (e && !object?.id) {
 			await fetchDefaultRefId();
@@ -123,7 +129,7 @@
 {#if object?.id}
 	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<label class="text-sm font-medium text-gray-700">{m.validationDeadline()}</label>
+			<span class="text-sm font-medium text-gray-700">{m.validationDeadline()}</span>
 			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}

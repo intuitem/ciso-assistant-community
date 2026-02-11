@@ -22,9 +22,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 100s
+      timeout: 10s
+      retries: 30
+      start_period: 150s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`{{ fqdn }}`) && PathPrefix(`/api`)"

@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from django.utils.formats import date_format
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.db.models import Sum, F, FloatField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
@@ -205,7 +206,7 @@ class EntityViewSet(BaseModelViewSet):
         # (b_02.02, b_07.01, b_99.01)
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
-            solution__id__in=related_solution_ids
+            solutions__id__in=related_solution_ids
         )
 
         # Calculate folder name for the ZIP structure (without .zip extension)
@@ -347,8 +348,10 @@ class EntityViewSet(BaseModelViewSet):
         solutions = Solution.objects.filter(id__in=viewable_solutions).select_related(
             "provider_entity"
         )
-        contracts = Contract.objects.filter(id__in=viewable_contracts).select_related(
-            "provider_entity", "beneficiary_entity", "solution"
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .select_related("provider_entity", "beneficiary_entity")
+            .prefetch_related("solutions")
         )
         assets = Asset.objects.filter(id__in=viewable_assets)
 
@@ -454,15 +457,16 @@ class EntityViewSet(BaseModelViewSet):
                     }
                 )
 
-            # Link contract to solution
-            if contract.solution and contract.solution.id in solution_node_map:
-                links.append(
-                    {
-                        "source": node_index,
-                        "target": solution_node_map[contract.solution.id],
-                        "value": "frames",
-                    }
-                )
+            # Link contract to solutions
+            for solution in contract.solutions.all():
+                if solution.id in solution_node_map:
+                    links.append(
+                        {
+                            "source": node_index,
+                            "target": solution_node_map[solution.id],
+                            "value": "frames",
+                        }
+                    )
 
             node_index += 1
 
@@ -707,11 +711,18 @@ class EntityAssessmentViewSet(BaseModelViewSet):
         instance = self.get_object()
         if instance.compliance_assessment:
             folder = instance.compliance_assessment.folder
-            instance.compliance_assessment.delete()
             if folder.content_type == Folder.ContentType.ENCLAVE:
+                logger.info(
+                    "deleting_compliance_assessment_folder",
+                    folder_id=str(folder.id),
+                    content_type=str(folder.content_type),
+                )
                 folder.delete()
             else:
-                logger.warning("Compliance assessment folder is not an Enclave", folder)
+                logger.warning(
+                    "Compliance assessment folder is not an Enclave, skipping deletion",
+                    folder=folder,
+                )
 
         return super().destroy(request, *args, **kwargs)
 
@@ -733,10 +744,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             object_type=EntityAssessment,
         )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
+            "folder", "entity"
+        ):
+            # Use entity assessment's folder for grouping
+            folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
+                "folder_id": str(folder.id) if folder else None,
+                "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
@@ -768,9 +785,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             entry.update({"completion": completion})
 
             review_progress = (
-                ea.compliance_assessment.get_progress()
-                if ea.compliance_assessment
-                else 0
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
             )
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
@@ -782,13 +797,6 @@ class RepresentativeViewSet(BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user:
-            instance.user.delete()
-
-        return super().destroy(request, *args, **kwargs)
 
     model = Representative
     filterset_fields = ["entity", "ref_id", "filtering_labels"]
@@ -887,7 +895,7 @@ class ContractViewSet(BaseModelViewSet):
         "folder",
         "provider_entity",
         "beneficiary_entity",
-        "solution",
+        "solutions",
         "status",
         "owner",
         "dora_contractual_arrangement",

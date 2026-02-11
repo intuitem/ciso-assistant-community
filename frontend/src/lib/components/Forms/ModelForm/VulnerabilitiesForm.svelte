@@ -31,7 +31,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 
 <Select
@@ -55,6 +54,7 @@
 	multiple
 	{form}
 	optionsEndpoint="assets"
+	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{
 		fields: [
