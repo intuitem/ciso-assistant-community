@@ -431,6 +431,7 @@ def send_task_template_assignment_notification(task_template_id, emails):
     from .email_utils import render_email_template
 
     context = {
+        "task_id": task_template.id,
         "task_name": task_template.name,
         "task_description": task_template.description or "No description provided",
         "task_ref_id": task_template.ref_id or "N/A",
