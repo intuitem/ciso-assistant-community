@@ -19,7 +19,8 @@ export const load: LayoutServerLoad = async (event) => {
 	const initialDataDuplicate = {
 		name: ebiosRMStudy.name,
 		description: ebiosRMStudy.description,
-		version: ebiosRMStudy.version
+		version: ebiosRMStudy.version,
+		risk_matrix: ebiosRMStudy.risk_matrix.id
 	};
 
 	const ebiosRMDuplicateForm = await superValidate(initialDataDuplicate, zod(EbiosRMSchema), {
@@ -27,5 +28,6 @@ export const load: LayoutServerLoad = async (event) => {
 	});
 
 	loadData.ebiosRMDuplicateForm = ebiosRMDuplicateForm;
+
 	return loadData;
 };
