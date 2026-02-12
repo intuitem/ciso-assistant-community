@@ -86,10 +86,10 @@ def get_config():
         }
     
     config["license_seats"] = questionary.text(
-        "Number of license seats (default 10): ", default="5" ).ask()
+        "Number of license seats: ", default="5" ).ask()
     
     config["license_expiration"] = questionary.text(
-        "License expiration date (YYYY-MM-DD, default 2030-01-01): ", default="2030-01-01" ).ask()
+        "License expiration date (YYYY-MM-DD): ", default="2030-01-01" ).ask()
 
     # Debug mode for local development
     config["enable_debug"] = questionary.confirm(
