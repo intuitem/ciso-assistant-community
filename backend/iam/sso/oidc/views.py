@@ -2,6 +2,7 @@ import structlog
 from allauth.socialaccount.helpers import render_authentication_error  # type: ignore[import-untyped]
 from django.conf import settings
 from django.http import Http404, HttpResponseRedirect
+from urllib.parse import urlparse
 
 from allauth.account.internal.decorators import login_not_required  # type: ignore[import-untyped]
 from allauth.socialaccount.models import SocialApp  # type: ignore[import-untyped]
@@ -58,7 +59,6 @@ def callback(request, provider_id):
             status_code=response.status_code,
             has_location_header=bool(response.get("Location")),
             user_authenticated=not request.user.is_anonymous,
-            user_id=request.user.id if not request.user.is_anonymous else None,
         )
 
         if response.status_code != 302:
@@ -74,7 +74,6 @@ def callback(request, provider_id):
             logger.error(
                 "SSO authentication failed - user is anonymous after callback",
                 provider=provider_id,
-                session_key=request.session.session_key,
                 has_socialaccount_state=bool(
                     request.session.get("socialaccount_state")
                 ),
@@ -86,7 +85,6 @@ def callback(request, provider_id):
         logger.info(
             "Generating authentication token for user",
             provider=provider_id,
-            user_id=request.user.id,
         )
 
         token = generate_token(request.user)
@@ -95,9 +93,6 @@ def callback(request, provider_id):
         logger.info(
             "SSO authentication successful - redirecting to frontend",
             provider=provider_id,
-            user_id=request.user.id,
-            redirect_url=next.split("/authenticate/")[0]
-            + "/authenticate/***",  # Mask token
         )
 
         return HttpResponseRedirect(next)
@@ -116,7 +111,6 @@ def callback(request, provider_id):
             error_type=type(e).__name__,
             error_message=str(e),
             user_authenticated=not request.user.is_anonymous,
-            user_id=request.user.id if not request.user.is_anonymous else None,
             has_code=bool(request.GET.get("code")),
             has_state=bool(request.GET.get("state")),
             exc_info=True,
@@ -126,14 +120,24 @@ def callback(request, provider_id):
 
 @login_not_required
 def login(request, provider_id):
+    # Sanitize referer to only log origin (domain), removing paths and query params
+    referer = request.META.get("HTTP_REFERER")
+    referer_origin = None
+    if referer:
+        try:
+            parsed = urlparse(referer)
+            referer_origin = (
+                f"{parsed.scheme}://{parsed.netloc}" if parsed.netloc else None
+            )
+        except Exception:
+            referer_origin = None
+
     logger.info(
         "OIDC login initiated",
         provider=provider_id,
         method=request.method,
         user_authenticated=not request.user.is_anonymous,
-        user_id=request.user.id if not request.user.is_anonymous else None,
-        referer=request.META.get("HTTP_REFERER"),
-        next_url=request.GET.get("next"),
+        referer_origin=referer_origin,
     )
 
     try:
