@@ -580,6 +580,8 @@
 	"submit": "Soumettre",
 	"requirementAssessment": "Évaluation d'exigence",
 	"requirementAssessments": "Évaluations des exigences",
+	"requirementAssignment": "Assignation d'exigences",
+	"requirementAssignments": "Assignations d'exigences",
 	"deleteModalTitle": "Supprimer",
 	"deleteModalMessage": "Êtes-vous sûr de vouloir supprimer l'objet suivant : {name} ?",
 	"deleteUserMessage": "Êtes-vous sûr de vouloir supprimer l'utilisateur suivant : {name} ?",
