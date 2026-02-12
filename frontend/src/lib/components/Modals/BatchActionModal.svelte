@@ -32,8 +32,10 @@
 	let selectedValues: string[] = $state([]);
 	let loading = $state(false);
 	let searchQuery: string = $state('');
+	let deleteConfirmInput: string = $state('');
 
 	const isValueAction = actionType !== 'delete';
+	const yes = m.yes().toLowerCase();
 
 	const filteredOptions = $derived(
 		searchQuery.trim()
@@ -95,7 +97,11 @@
 	}
 
 	const canConfirm = $derived(
-		actionType === 'delete' || (multiSelect ? selectedValues.length > 0 : selectedValue !== '')
+		actionType === 'delete'
+			? !!deleteConfirmInput && deleteConfirmInput.trim().toLowerCase() === yes
+			: multiSelect
+				? selectedValues.length > 0
+				: selectedValue !== ''
 	);
 </script>
 
@@ -112,6 +118,17 @@
 
 		{#if actionType === 'delete'}
 			<article>{m.batchActionConfirmDelete({ count })}</article>
+			<div class="space-y-2">
+				<p class="text-sm font-medium text-red-600">{m.confirmYes()}</p>
+				<input
+					type="text"
+					data-testid="batch-delete-confirm-textfield"
+					bind:value={deleteConfirmInput}
+					placeholder={m.confirmYesPlaceHolder()}
+					class="input w-full"
+					aria-label={m.confirmYes()}
+				/>
+			</div>
 		{:else}
 			<article>{m.batchActionConfirmChange({ count })}</article>
 
