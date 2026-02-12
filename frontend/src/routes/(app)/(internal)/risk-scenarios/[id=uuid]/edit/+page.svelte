@@ -498,7 +498,7 @@
 			/>
 		</div>
 		<div
-			class="flex flex-row justify-between space-x-4 sticky bottom-0 bg-transparent/40 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
 		>
 			<button
 				class="btn bg-gray-400 text-white font-semibold w-full"
