@@ -887,32 +887,35 @@ def aggregate_risks_per_field(
     parsed_matrices: list = get_parsed_matrices(
         user=user, risk_assessments=risk_assessments, folder_id=folder_id
     )
-
-    # Determine which level field to aggregate on
-    if residual:
-        level_field = "residual_level"
-    elif inherent:
-        level_field = "inherent_level"
-    else:
-        level_field = "current_level"
-
-    # Single query: count scenarios per level value
-    level_counts_qs = (
-        RiskScenario.objects.filter(id__in=object_ids_view)
-        .values(level_field)
-        .annotate(count=Count("id"))
-    )
-    level_counts = {row[level_field]: row["count"] for row in level_counts_qs}
-
-    # Map level indices back to matrix risk metadata
     values = dict()
     for m in parsed_matrices:
         for i in range(len(m["risk"])):
             k = get_referential_translation(m["risk"][i], field)
-            count = level_counts.get(i, 0)
-
             if k not in values:
-                values[k] = {"count": count, "color": m["risk"][i]["hexcolor"]}
+                values[k] = dict()
+
+            if residual:
+                count = (
+                    RiskScenario.objects.filter(id__in=object_ids_view)
+                    .filter(residual_level=i)
+                    .count()
+                )
+            elif inherent:
+                count = (
+                    RiskScenario.objects.filter(id__in=object_ids_view)
+                    .filter(inherent_level=i)
+                    .count()
+                )
+            else:
+                count = (
+                    RiskScenario.objects.filter(id__in=object_ids_view)
+                    .filter(current_level=i)
+                    .count()
+                )
+
+            if "count" not in values[k]:
+                values[k]["count"] = count
+                values[k]["color"] = m["risk"][i]["hexcolor"]
             else:
                 values[k]["count"] += count
     return values
@@ -1094,15 +1097,18 @@ def build_audits_tree_metrics(user):
             block_prj = {"name": perimeter.name, "domain": domain.name, "children": []}
             children = []
             for audit in ComplianceAssessment.objects.filter(perimeter=perimeter):
-                requirement_assessments = audit.get_requirement_assessments(
-                    include_non_assessable=False
-                )
-                cnt_res = {
-                    result[0]: 0 for result in RequirementAssessment.Result.choices
-                }
-                for ra in requirement_assessments:
-                    if ra.result in cnt_res:
-                        cnt_res[ra.result] += 1
+                cnt_res = {}
+                for result in RequirementAssessment.Result.choices:
+                    requirement_assessments = audit.get_requirement_assessments(
+                        include_non_assessable=False
+                    )
+                    cnt_res[result[0]] = len(
+                        [
+                            requirement
+                            for requirement in requirement_assessments
+                            if requirement.result == result[0]
+                        ]
+                    )
                 blk_audit = {
                     "name": audit.name,
                     "children": [
@@ -1199,12 +1205,7 @@ def get_metrics(user: User, folder_id):
     viewable_risk_acceptances = viewable_items(RiskAcceptance, folder_id)
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
-
-    # Single aggregation for control status counts (replaces 6 separate queries)
-    control_status_qs = viewable_controls.values("status").annotate(count=Count("id"))
-    control_status_map = {row["status"]: row["count"] for row in control_status_qs}
-    controls_count = sum(control_status_map.values())
-
+    controls_count = viewable_controls.count()
     progress_avg = math.ceil(
         mean([x.progress for x in viewable_compliance_assessments] or [0])
     )
@@ -1219,11 +1220,11 @@ def get_metrics(user: User, folder_id):
     data = {
         "controls": {
             "total": controls_count,
-            "to_do": control_status_map.get("to_do", 0),
-            "in_progress": control_status_map.get("in_progress", 0),
-            "on_hold": control_status_map.get("on_hold", 0),
-            "active": control_status_map.get("active", 0),
-            "deprecated": control_status_map.get("deprecated", 0),
+            "to_do": viewable_controls.filter(status="to_do").count(),
+            "in_progress": viewable_controls.filter(status="in_progress").count(),
+            "on_hold": viewable_controls.filter(status="on_hold").count(),
+            "active": viewable_controls.filter(status="active").count(),
+            "deprecated": viewable_controls.filter(status="deprecated").count(),
             "p1": viewable_controls.filter(priority=1).exclude(status="active").count(),
             "eta_missed": missed_eta_count,
         },
@@ -1448,8 +1449,6 @@ def get_instance_metrics():
 
 
 def risk_status(user: User, risk_assessment_list):
-    from collections import defaultdict
-
     risk_color_map = get_risk_color_map(user)
     names = list()
     risk_abbreviations: list = get_risk_field(user, "abbreviation")
@@ -1472,97 +1471,50 @@ def risk_status(user: User, risk_assessment_list):
         "deprecated": list(),
     }
 
+    max_tmp = list()
     abbreviations = [x[0] for x in get_rating_options_abbr(user)]
-    rating_options = get_rating_options(user)
-
-    # Batch query: count scenarios per (risk_assessment, current_level) and (risk_assessment, residual_level)
-    scenario_level_counts = (
-        RiskScenario.objects.filter(risk_assessment__in=risk_assessment_list)
-        .values("risk_assessment_id", "current_level", "residual_level")
-        .order_by()
-    )
-
-    # Build lookup: {(ra_id, level): current_count} and {(ra_id, level): residual_count}
-    current_counts = defaultdict(int)
-    residual_counts = defaultdict(int)
-    total_per_ra = defaultdict(int)
-    for scenario in scenario_level_counts:
-        ra_id = scenario["risk_assessment_id"]
-        total_per_ra[ra_id] += 1
-        current_counts[(ra_id, scenario["current_level"])] += 1
-        residual_counts[(ra_id, scenario["residual_level"])] += 1
-
-    # Batch query: count scenarios per (risk_assessment, treatment)
-    treatment_counts_qs = (
-        RiskScenario.objects.filter(risk_assessment__in=risk_assessment_list)
-        .values("risk_assessment_id", "treatment")
-        .annotate(count=Count("id"))
-    )
-    treatment_counts = defaultdict(lambda: defaultdict(int))
-    for row in treatment_counts_qs:
-        treatment_counts[row["risk_assessment_id"]][row["treatment"]] = row["count"]
-
-    # Batch query: count applied controls per (risk_assessment, status)
-    control_counts_qs = (
-        AppliedControl.objects.filter(
-            risk_scenarios__risk_assessment__in=risk_assessment_list
-        )
-        .values("risk_scenarios__risk_assessment_id", "status")
-        .annotate(count=Count("id", distinct=True))
-    )
-    control_counts = defaultdict(lambda: defaultdict(int))
-    for row in control_counts_qs:
-        control_counts[row["risk_scenarios__risk_assessment_id"]][row["status"]] = row[
-            "count"
-        ]
-
-    # Pivot batch results into the per-assessment output structure
-    max_total = 0
     for risk_assessment in risk_assessment_list:
-        ra_id = (
-            risk_assessment.id if hasattr(risk_assessment, "id") else risk_assessment
-        )
-
-        ra_total = total_per_ra[ra_id]
-        if ra_total > max_total:
-            max_total = ra_total
-
-        for lvl in rating_options:
+        for lvl in get_rating_options(user):
             abbr = abbreviations[lvl[0]]
+            cnt = RiskScenario.objects.filter(
+                risk_assessment=risk_assessment, current_level=lvl[0]
+            ).count()
             current_out[abbr].append(
-                {
-                    "value": current_counts[(ra_id, lvl[0])],
-                    "itemStyle": {"color": risk_color_map[abbr]},
-                }
+                {"value": cnt, "itemStyle": {"color": risk_color_map[abbr]}}
             )
+
+            cnt = RiskScenario.objects.filter(
+                risk_assessment=risk_assessment, residual_level=lvl[0]
+            ).count()
             residual_out[abbr].append(
-                {
-                    "value": residual_counts[(ra_id, lvl[0])],
-                    "itemStyle": {"color": risk_color_map[abbr]},
-                }
+                {"value": cnt, "itemStyle": {"color": risk_color_map[abbr]}}
+            )
+
+            max_tmp.append(
+                RiskScenario.objects.filter(risk_assessment=risk_assessment).count()
             )
 
         for option in RiskScenario.TREATMENT_OPTIONS:
+            cnt = RiskScenario.objects.filter(
+                risk_assessment=risk_assessment, treatment=option[0]
+            ).count()
             rsk_status_out[option[0]].append(
-                {
-                    "value": treatment_counts[ra_id][option[0]],
-                    "itemStyle": {"color": STATUS_COLOR_MAP[option[0]]},
-                }
+                {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[option[0]]}}
             )
 
         for status in AppliedControl.Status.choices:
+            cnt = AppliedControl.objects.filter(
+                risk_scenarios__risk_assessment=risk_assessment, status=status[0]
+            ).count()
             mtg_status_out[status[0]].append(
-                {
-                    "value": control_counts[ra_id][status[0]],
-                    "itemStyle": {"color": STATUS_COLOR_MAP[status[0]]},
-                }
+                {"value": cnt, "itemStyle": {"color": STATUS_COLOR_MAP[status[0]]}}
             )
 
         names.append(
             str(risk_assessment.perimeter) + " " + str(risk_assessment.version)
         )
 
-    y_max_rsk = max_total + 1
+    y_max_rsk = max(max_tmp, default=0) + 1
 
     return {
         "names": names,
@@ -1628,8 +1580,6 @@ def build_scenario_clusters(risk_assessment: RiskAssessment, include_inherent=Fa
 
 
 def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
-    from collections import defaultdict
-
     rc = risks_count_per_level(user, risk_assessment_list)
     current_level = rc["current"]
     residual_level = rc["residual"]
@@ -1646,74 +1596,42 @@ def compile_risk_assessment_for_composer(user, risk_assessment_list: list):
         risk_assessment__in=risk_assessment_list
     ).filter(treatment="accept")
 
-    # Batch query: count controls per status (1 query instead of 6)
-    control_status_qs = (
-        AppliedControl.objects.filter(
-            risk_scenarios__risk_assessment__in=risk_assessment_list
-        )
-        .values("status")
-        .annotate(count=Count("id", distinct=True))
-    )
-    control_status_counts = {row["status"]: row["count"] for row in control_status_qs}
-
     values = list()
     labels = list()
+    # WARNING: this is wrong - FIX ME because we compute the controls multiple times if used accross multiple scenarios
     for st in AppliedControl.Status.choices:
-        count = control_status_counts.get(st[0], 0)
+        count = (
+            AppliedControl.objects.filter(status=st[0])
+            .filter(risk_scenarios__risk_assessment__in=risk_assessment_list)
+            .count()
+        )
         v = {"value": count, "itemStyle": {"color": STATUS_COLOR_MAP[st[0]]}}
         values.append(v)
         labels.append(st[1])
     local_lables = [camel_case(str(l)) for l in labels]
 
-    # Batch query: fetch all scenario level data for per-RA synth tables (1 query)
-    per_ra_level_counts = defaultdict(
-        lambda: {"current": defaultdict(int), "residual": defaultdict(int)}
-    )
-    scenario_rows = RiskScenario.objects.filter(
-        risk_assessment__in=risk_assessment_list
-    ).values("risk_assessment_id", "current_level", "residual_level")
-    for row in scenario_rows:
-        ra_id = row["risk_assessment_id"]
-        per_ra_level_counts[ra_id]["current"][row["current_level"]] += 1
-        per_ra_level_counts[ra_id]["residual"][row["residual_level"]] += 1
-
-    # Get the level metadata (names, colors) from the global aggregation
-    level_meta = current_level  # [{name, value, color}, ...]
-
-    # Batch fetch high/very-high risks per RA (1 query)
-    hvh_risks_all = RiskScenario.objects.filter(
-        risk_assessment__in=risk_assessment_list, current_level__gte=2
-    )
-    hvh_per_ra = defaultdict(list)
-    for scenario in hvh_risks_all:
-        hvh_per_ra[scenario.risk_assessment_id].append(scenario)
-
-    # Batch fetch RiskAssessment objects (1 query instead of N get_object_or_404)
-    ra_objects = {
-        ra.id: ra for ra in RiskAssessment.objects.filter(pk__in=risk_assessment_list)
-    }
-
     risk_assessment_objects = list()
+
     for _ra in risk_assessment_list:
-        ra_id = _ra if not hasattr(_ra, "id") else _ra.id
         synth_table = list()
-        ra_current = per_ra_level_counts[ra_id]["current"]
-        ra_residual = per_ra_level_counts[ra_id]["residual"]
-        for i, meta in enumerate(level_meta):
+        _rc = risks_count_per_level(user=user, risk_assessments=[_ra])
+        length = len(_rc["current"])
+        for i in range(length):
+            count_c = _rc["current"][i]["value"]
+            count_r = _rc["residual"][i]["value"]
+            lvl = _rc["current"][i]["name"]
+            color = _rc["current"][i]["color"]
             synth_table.append(
-                {
-                    "lvl": meta["name"],
-                    "current": ra_current[i],
-                    "residual": ra_residual[i],
-                    "color": meta["color"],
-                }
+                {"lvl": lvl, "current": count_c, "residual": count_r, "color": color}
             )
+        hvh_risks = RiskScenario.objects.filter(risk_assessment__id=_ra).filter(
+            current_level__gte=2
+        )
         risk_assessment_objects.append(
             {
-                "risk_assessment": ra_objects.get(ra_id)
-                or get_object_or_404(RiskAssessment, pk=_ra),
+                "risk_assessment": get_object_or_404(RiskAssessment, pk=_ra),
                 "synth_table": synth_table,
-                "hvh_risks": hvh_per_ra[ra_id],
+                "hvh_risks": hvh_risks,
             }
         )
 
