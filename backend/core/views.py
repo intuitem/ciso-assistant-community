@@ -1053,6 +1053,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         "status",
         "priority",
         "treatment",
+        "result",
     }
     # Fields allowed for batch change_m2m action (ManyToMany to Actor)
     BATCH_ALLOWED_M2M_FIELDS = {

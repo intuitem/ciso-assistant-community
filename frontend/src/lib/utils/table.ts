@@ -2866,6 +2866,25 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
+	'requirement-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeResult',
+			icon: 'fa-solid fa-clipboard-check',
+			field: 'result',
+			optionsEndpoint: 'requirement-assessments/result'
+		}
+	],
+	'organisation-objectives': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
 	'task-templates': [
 		{
 			type: 'change_m2m',

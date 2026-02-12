@@ -1946,6 +1946,7 @@
 	"changePriority": "Change priority",
 	"changeTreatment": "Change treatment",
 	"changeAssignee": "Change assignee",
+	"changeResult": "Change result",
 	"selectAll": "Select all",
 	"clearSelection": "Clear selection",
 	"itemsSelected": "{count} item(s) selected",
