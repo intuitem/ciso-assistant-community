@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MarkdownRenderer from '../MarkdownRenderer.svelte';
+	import MarkdownRenderer from '../../MarkdownRenderer.svelte';
 
 	interface Props {
 		cell: string;
