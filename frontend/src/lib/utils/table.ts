@@ -2715,7 +2715,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 		},
 		{
 			type: 'change_field',
-			label: 'changePriority',
+			label: 'batchChangePriority',
 			icon: 'fa-solid fa-arrow-up-wide-short',
 			field: 'priority',
 			optionsEndpoint: 'applied-controls/priority'
