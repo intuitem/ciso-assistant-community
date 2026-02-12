@@ -2994,7 +2994,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 };
 
 export function getBatchActions(model: urlModel): BatchActionConfig[] {
-	return batchActions[model] ?? [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }];
+	return batchActions[model] ?? [];
 }
 
 export function getListViewFields({
