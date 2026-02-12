@@ -712,15 +712,24 @@
 		<thead class="table-head {regionHead}">
 			<tr>
 				{#if hasBatchActions}
-					<th class="{regionHeadCell} w-10 text-center">
-						<input
-							type="checkbox"
-							class="checkbox"
-							checked={selectAllChecked}
-							title={m.selectAll()}
-							onchange={toggleSelectAll}
-							onclick={(e) => e.stopPropagation()}
-						/>
+					<th
+						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
+						title={m.selectAll()}
+						onclick={(e) => {
+							e.stopPropagation();
+							toggleSelectAll();
+						}}
+					>
+						<span
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+						>
+							<input
+								type="checkbox"
+								class="checkbox pointer-events-none"
+								checked={selectAllChecked}
+								tabindex={-1}
+							/>
+						</span>
 					</th>
 				{/if}
 				{#each Object.entries(tableSource.head) as [key, heading]}
@@ -763,16 +772,24 @@
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
 							>
 								{#if hasBatchActions}
-									<td class="w-10 text-center" role="gridcell">
-										<input
-											type="checkbox"
-											class="checkbox"
-											checked={selectedIds.has(meta?.id)}
-											onclick={(e) => {
-												e.stopPropagation();
-												if (meta?.id) toggleRowSelection(meta.id);
-											}}
-										/>
+									<td
+										class="group/check w-10 text-center cursor-pointer"
+										role="gridcell"
+										onclick={(e) => {
+											e.stopPropagation();
+											if (meta?.id) toggleRowSelection(meta.id);
+										}}
+									>
+										<span
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+										>
+											<input
+												type="checkbox"
+												class="checkbox pointer-events-none"
+												checked={selectedIds.has(meta?.id)}
+												tabindex={-1}
+											/>
+										</span>
 									</td>
 								{/if}
 								{#each Object.entries(row) as [key, value]}
