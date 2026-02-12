@@ -1048,17 +1048,33 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
+    # Fields allowed for batch change_field action (simple value fields)
+    BATCH_ALLOWED_VALUE_FIELDS = {
+        "status",
+        "priority",
+        "treatment",
+    }
+    # Fields allowed for batch change_m2m action (ManyToMany to Actor)
+    BATCH_ALLOWED_M2M_FIELDS = {
+        "owner",
+        "owners",
+        "assigned_to",
+    }
+
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
         """
         Perform a batch action on multiple objects.
-        Payload: { "action": "delete"|"change_status"|"change_owner", "ids": [...], "value": ... }
+        Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
+                   "ids": [...], "field": "<field_name>", "value": ... }
         """
         action_type = request.data.get("action")
         ids = request.data.get("ids", [])
         value = request.data.get("value")
+        field_name = request.data.get("field")
 
-        if action_type not in ("delete", "change_status", "change_owner"):
+        valid_actions = ("delete", "change_field", "change_m2m", "change_folder")
+        if action_type not in valid_actions:
             return Response(
                 {"error": "Invalid action type"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -1069,6 +1085,21 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 {"error": "No ids provided"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+        if action_type == "change_field":
+            if field_name not in self.BATCH_ALLOWED_VALUE_FIELDS:
+                return Response(
+                    {"error": f"Field '{field_name}' is not allowed for batch change"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        elif action_type == "change_m2m":
+            if field_name not in self.BATCH_ALLOWED_M2M_FIELDS:
+                return Response(
+                    {
+                        "error": f"Field '{field_name}' is not allowed for batch M2M change"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         model_name = self.model._meta.model_name
         if action_type == "delete":
@@ -1123,41 +1154,58 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                             "Webhook dispatch failed on batch delete", exc_info=True
                         )
                     obj.delete()
-                elif action_type == "change_status":
-                    if not hasattr(obj, "status"):
+
+                elif action_type == "change_field":
+                    if not hasattr(obj, field_name):
                         failed.append(
                             {
                                 "id": str(obj_id),
                                 "name": str(obj),
-                                "error": "Object has no status field",
+                                "error": f"Object has no '{field_name}' field",
                             }
                         )
                         continue
-                    obj.status = value
+                    setattr(obj, field_name, value)
                     obj.save()
-                elif action_type == "change_owner":
-                    owner_field = None
-                    for field_name in ("owner", "owners"):
-                        if hasattr(obj, field_name):
-                            field = self.model._meta.get_field(field_name)
-                            if field.many_to_many:
-                                owner_field = field_name
-                                break
-                    if not owner_field:
+
+                elif action_type == "change_m2m":
+                    if not hasattr(obj, field_name):
                         failed.append(
                             {
                                 "id": str(obj_id),
                                 "name": str(obj),
-                                "error": "Object has no owner field",
+                                "error": f"Object has no '{field_name}' field",
                             }
                         )
                         continue
                     from core.models import Actor
 
                     actor_ids = value if isinstance(value, list) else [value]
-                    getattr(obj, owner_field).set(
-                        Actor.objects.filter(id__in=actor_ids)
-                    )
+                    getattr(obj, field_name).set(Actor.objects.filter(id__in=actor_ids))
+
+                elif action_type == "change_folder":
+                    if not hasattr(obj, "folder"):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Object has no folder field",
+                            }
+                        )
+                        continue
+                    try:
+                        new_folder = Folder.objects.get(id=value)
+                    except Folder.DoesNotExist:
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Target folder not found",
+                            }
+                        )
+                        continue
+                    obj.folder = new_folder
+                    obj.save()
 
                 succeeded.append({"id": str(obj_id), "name": str(obj)})
             except Exception as e:

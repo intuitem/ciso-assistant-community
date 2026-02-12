@@ -11,21 +11,52 @@
 
 	interface Props {
 		parent: any;
-		actionType: 'delete' | 'change_status' | 'change_owner';
+		actionType: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
 		count: number;
 		optionsEndpoint?: string;
+		multiSelect?: boolean;
 		onConfirm: (value?: string | string[]) => void;
 	}
 
-	let { parent, actionType, count, optionsEndpoint, onConfirm }: Props = $props();
+	let {
+		parent,
+		actionType,
+		count,
+		optionsEndpoint,
+		multiSelect = false,
+		onConfirm
+	}: Props = $props();
 
 	let options: { label: string; value: string }[] = $state([]);
 	let selectedValue: string = $state('');
 	let selectedValues: string[] = $state([]);
 	let loading = $state(false);
+	let searchQuery: string = $state('');
 
-	const isValueAction = actionType === 'change_status' || actionType === 'change_owner';
-	const isMultiSelect = actionType === 'change_owner';
+	const isValueAction = actionType !== 'delete';
+
+	const filteredOptions = $derived(
+		searchQuery.trim()
+			? options.filter((o) => o.label.toLowerCase().includes(searchQuery.trim().toLowerCase()))
+			: options
+	);
+
+	function parseOptions(data: any): { label: string; value: string }[] {
+		// Handle paginated responses (e.g. { results: [...], count: N })
+		const items = data?.results ?? data;
+
+		if (Array.isArray(items)) {
+			return items.map((item: any) => ({
+				label: item.label || item.str || item.name || String(item.value ?? item.id),
+				value: String(item.value ?? item.id)
+			}));
+		}
+		// Handle dict responses (e.g. { "open": "Open", "closed": "Closed" })
+		return Object.entries(items).map(([key, val]) => ({
+			label: String(val),
+			value: key
+		}));
+	}
 
 	onMount(async () => {
 		if (isValueAction && optionsEndpoint) {
@@ -34,15 +65,7 @@
 				const res = await fetch(`/${optionsEndpoint}`);
 				if (res.ok) {
 					const data = await res.json();
-					options = Array.isArray(data)
-						? data.map((item: any) => ({
-								label: item.label || item.str || item.name || String(item.value),
-								value: String(item.value || item.id)
-							}))
-						: Object.entries(data).map(([key, val]) => ({
-								label: String(val),
-								value: key
-							}));
+					options = parseOptions(data);
 				}
 			} catch (e) {
 				console.error('Failed to fetch options', e);
@@ -55,7 +78,7 @@
 	function handleConfirm() {
 		if (actionType === 'delete') {
 			onConfirm();
-		} else if (isMultiSelect) {
+		} else if (multiSelect) {
 			onConfirm(selectedValues);
 		} else {
 			onConfirm(selectedValue);
@@ -63,7 +86,7 @@
 		parent.onClose();
 	}
 
-	function toggleOwnerValue(value: string) {
+	function toggleValue(value: string) {
 		if (selectedValues.includes(value)) {
 			selectedValues = selectedValues.filter((v) => v !== value);
 		} else {
@@ -72,7 +95,7 @@
 	}
 
 	const canConfirm = $derived(
-		actionType === 'delete' || (isMultiSelect ? selectedValues.length > 0 : selectedValue !== '')
+		actionType === 'delete' || (multiSelect ? selectedValues.length > 0 : selectedValue !== '')
 	);
 </script>
 
@@ -94,19 +117,55 @@
 
 			{#if loading}
 				<div class="text-sm text-gray-500">Loading...</div>
-			{:else if isMultiSelect}
-				<div class="max-h-64 overflow-y-auto space-y-1">
-					{#each options as option}
-						<label class="flex items-center gap-2 px-2 py-1 hover:bg-gray-50 cursor-pointer">
-							<input
-								type="checkbox"
-								checked={selectedValues.includes(option.value)}
-								onchange={() => toggleOwnerValue(option.value)}
-								class="checkbox"
-							/>
-							<span class="text-sm">{safeTranslate(option.label)}</span>
-						</label>
-					{/each}
+			{:else if multiSelect}
+				<div class="space-y-2">
+					<input
+						type="text"
+						class="input w-full border border-gray-300 rounded px-3 py-2 text-sm"
+						placeholder={m.searchPlaceholder()}
+						bind:value={searchQuery}
+					/>
+					{#if selectedValues.length > 0}
+						<div class="flex flex-wrap gap-1">
+							{#each selectedValues as val}
+								{@const opt = options.find((o) => o.value === val)}
+								{#if opt}
+									<span
+										class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-100 text-primary-800 text-xs"
+									>
+										{safeTranslate(opt.label)}
+										<button
+											type="button"
+											class="hover:text-primary-600"
+											onclick={() => toggleValue(val)}
+										>
+											<i class="fa-solid fa-xmark text-xs"></i>
+										</button>
+									</span>
+								{/if}
+							{/each}
+						</div>
+					{/if}
+					<div class="max-h-48 overflow-y-auto border border-gray-200 rounded">
+						{#each filteredOptions as option}
+							<label
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+							>
+								<input
+									type="checkbox"
+									checked={selectedValues.includes(option.value)}
+									onchange={() => toggleValue(option.value)}
+									class="checkbox"
+								/>
+								<span class="text-sm">{safeTranslate(option.label)}</span>
+							</label>
+						{/each}
+						{#if filteredOptions.length === 0}
+							<div class="px-3 py-2 text-sm text-gray-400">
+								{m.noResultsFound()}
+							</div>
+						{/if}
+					</div>
 				</div>
 			{:else}
 				<select

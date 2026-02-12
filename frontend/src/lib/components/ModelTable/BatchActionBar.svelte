@@ -36,6 +36,7 @@
 				actionType: action.type,
 				count,
 				optionsEndpoint: action.optionsEndpoint,
+				multiSelect: action.multiSelect ?? false,
 				onConfirm: async (value?: string | string[]) => {
 					try {
 						const res = await fetch(`/${URLModel}/batch-action`, {
@@ -44,6 +45,7 @@
 							body: JSON.stringify({
 								action: action.type,
 								ids,
+								field: action.field ?? null,
 								value: value ?? null
 							})
 						});
