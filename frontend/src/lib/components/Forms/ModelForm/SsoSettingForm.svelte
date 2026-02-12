@@ -9,9 +9,13 @@
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import { Accordion } from '@skeletonlabs/skeleton-svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
+	import { enhance } from '$app/forms';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { invalidateAll } from '$app/navigation';
+
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -37,6 +41,27 @@
 
 	let openAccordionItems = $state(['saml', 'idp', 'sp']);
 	let showSecretField = $state(!page.data?.ssoSettings.oidc_has_secret);
+	let showPrivateKeyField = $state(!page.data?.ssoSettings.saml_has_sp_private_key);
+
+	const handleGenerateKeys = ({ cancel }) => {
+		if (!data.is_enabled || !data.authn_request_signed) {
+			cancel();
+			return;
+		}
+
+		// NOTE: This is a kludge to avoid backend throwing if SSOSettings have not been saved yet.
+		if (!page.data?.ssoSettings?.settings?.idp?.entity_id) {
+			form.submit();
+			invalidateAll();
+		}
+
+		return async ({ result, update }) => {
+			if (result.type === 'success' && result.data?.generatedKeys?.cert) {
+				$formStore.sp_x509cert = result.data.generatedKeys.cert;
+			}
+			await update({ invalidateAll: false });
+		};
+	};
 </script>
 
 <Accordion
@@ -70,58 +95,62 @@
 				<span class="font-semibold">{m.IdPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<HiddenInput
-					{form}
-					field="provider_name"
-					label={m.name()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['provider_name']}
-				/>
-				<HiddenInput
-					{form}
-					field="provider_id"
-					label={m.providerID()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['provider_id']}
-				/>
-				<TextField
-					{form}
-					field="client_id"
-					label={m.clientID()}
-					helpText={m.clientIDHelpText()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['client_id']}
-				/>
-				{#if showSecretField}
+				<div class="p-4 space-y-4">
+					<HiddenInput
+						{form}
+						field="provider_name"
+						label={m.name()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['provider_name']}
+					/>
+					<HiddenInput
+						{form}
+						field="provider_id"
+						label={m.providerID()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['provider_id']}
+					/>
 					<TextField
 						{form}
-						type="password"
-						field="secret"
-						label={m.secret()}
-						helpText={m.secretHelpText()}
+						field="client_id"
+						label={m.clientID()}
+						helpText={m.clientIDHelpText()}
 						disabled={!data.is_enabled}
-						cacheLock={cacheLocks['secret']}
+						cacheLock={cacheLocks['client_id']}
 					/>
-				{:else}
-					<div class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary">
-						<p>{m.clientSecretAlreadySetHelpText()}</p>
-						<button
-							class="btn preset-filled"
-							onclick={() => {
-								showSecretField = true;
-								$formStore.secret = '';
-							}}>{m.resetClientSecret()}</button
+					{#if showSecretField}
+						<TextField
+							{form}
+							type="password"
+							field="secret"
+							label={m.secret()}
+							helpText={m.secretHelpText()}
+							disabled={!data.is_enabled}
+							cacheLock={cacheLocks['secret']}
+						/>
+					{:else}
+						<div
+							class="w-full p-4 flex flex-row justify-evenly items-center preset-tonal-secondary"
 						>
-					</div>
-				{/if}
-				<TextField
-					{form}
-					field="server_url"
-					label={m.serverURL()}
-					helpText={m.oidcConfiguration()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['server_url']}
-				/>
+							<p>{m.clientSecretAlreadySetHelpText()}</p>
+							<button
+								class="btn preset-filled"
+								onclick={() => {
+									showSecretField = true;
+									$formStore.secret = '';
+								}}>{m.resetClientSecret()}</button
+							>
+						</div>
+					{/if}
+					<TextField
+						{form}
+						field="server_url"
+						label={m.serverURL()}
+						helpText={m.oidcConfiguration()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['server_url']}
+					/>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 		<Accordion.Item value="oidcAdvanced">
@@ -129,23 +158,25 @@
 				<span class="font-semibold">{m.advancedSettings()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<Select
-					{form}
-					field="token_auth_method"
-					label={m.tokenAuthMethod()}
-					disabled={!data.is_enabled}
-					options={oidcAuthMethodOptions}
-					cacheLock={cacheLocks['token_auth_method']}
-					helpText={m.oidcTokenAuthMethodHelpText()}
-				/>
-				<Checkbox
-					{form}
-					field="oauth_pkce_enabled"
-					label={m.oauthPKCEEnabled()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['oauth_pkce_enabled']}
-					helpText={m.oidcPKCEEnabledHelpText()}
-				/>
+				<div class="p-4 space-y-4">
+					<Select
+						{form}
+						field="token_auth_method"
+						label={m.tokenAuthMethod()}
+						disabled={!data.is_enabled}
+						options={oidcAuthMethodOptions}
+						cacheLock={cacheLocks['token_auth_method']}
+						helpText={m.oidcTokenAuthMethodHelpText()}
+					/>
+					<Checkbox
+						{form}
+						field="oauth_pkce_enabled"
+						label={m.oauthPKCEEnabled()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['oauth_pkce_enabled']}
+						helpText={m.oidcPKCEEnabledHelpText()}
+					/>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 	{/if}
@@ -155,49 +186,51 @@
 				<span class="font-semibold">{m.SAMLIdPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<TextField
-					{form}
-					field="idp_entity_id"
-					label={m.IdPEntityID()}
-					required={data.provider === 'saml'}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['idp_entity_id']}
-				/>
-				<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
-				<TextField
-					{form}
-					field="metadata_url"
-					label={m.metadataURL()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['metadata_url']}
-				/>
-				<div class="flex items-center justify-center w-full space-x-2">
-					<hr class="w-1/2 items-center bg-gray-200 border-0" />
-					<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-					<hr class="w-1/2 items-center bg-gray-200 border-0" />
+				<div class="p-4 space-y-4">
+					<TextField
+						{form}
+						field="idp_entity_id"
+						label={m.IdPEntityID()}
+						required={data.provider === 'saml'}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['idp_entity_id']}
+					/>
+					<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
+					<TextField
+						{form}
+						field="metadata_url"
+						label={m.metadataURL()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['metadata_url']}
+					/>
+					<div class="flex items-center justify-center w-full space-x-2">
+						<hr class="w-1/2 items-center bg-gray-200 border-0" />
+						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
+						<hr class="w-1/2 items-center bg-gray-200 border-0" />
+					</div>
+					<p class="text-gray-600 text-sm">{m.fillSSOSLOURLx509cert()}</p>
+					<TextField
+						{form}
+						field="sso_url"
+						label={m.SSOURL()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['sso_url']}
+					/>
+					<TextField
+						{form}
+						field="slo_url"
+						label={m.SLOURL()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['slo_url']}
+					/>
+					<TextArea
+						{form}
+						field="x509cert"
+						label={m.x509Cert()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['x509cert']}
+					/>
 				</div>
-				<p class="text-gray-600 text-sm">{m.fillSSOSLOURLx509cert()}</p>
-				<TextField
-					{form}
-					field="sso_url"
-					label={m.SSOURL()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['sso_url']}
-				/>
-				<TextField
-					{form}
-					field="slo_url"
-					label={m.SLOURL()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['slo_url']}
-				/>
-				<TextArea
-					{form}
-					field="x509cert"
-					label={m.x509Cert()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['x509cert']}
-				/>
 			{/snippet}
 		</Accordion.Item>
 
@@ -206,14 +239,16 @@
 				<span class="font-semibold">{m.SPConfiguration()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<TextField
-					{form}
-					field="sp_entity_id"
-					label={m.SPEntityID()}
-					required={data.provider === 'saml'}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['sp_entity_id']}
-				/>
+				<div class="p-4">
+					<TextField
+						{form}
+						field="sp_entity_id"
+						label={m.SPEntityID()}
+						required={data.provider === 'saml'}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['sp_entity_id']}
+					/>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 
@@ -222,139 +257,201 @@
 				<span class="font-semibold">{m.advancedSettings()}</span>
 			{/snippet}
 			{#snippet panel()}
-				<TextField
-					{form}
-					field="attribute_mapping_uid"
-					label={m.attributeMappingUID()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['attribute_mapping_uid']}
-				/>
-				<TextField
-					{form}
-					field="attribute_mapping_email_verified"
-					label={m.attributeMappingEmailVerified()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['attribute_mapping_email_verified']}
-				/>
-				<TextField
-					{form}
-					field="attribute_mapping_email"
-					label={m.attributeMappingEmail()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['attribute_mapping_email']}
-				/>
+				<div class="p-4 space-y-4">
+					<TextField
+						{form}
+						field="attribute_mapping_uid"
+						label={m.attributeMappingUID()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['attribute_mapping_uid']}
+					/>
+					<TextField
+						{form}
+						field="attribute_mapping_email_verified"
+						label={m.attributeMappingEmailVerified()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['attribute_mapping_email_verified']}
+					/>
+					<TextField
+						{form}
+						field="attribute_mapping_email"
+						label={m.attributeMappingEmail()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['attribute_mapping_email']}
+					/>
 
-				<Checkbox
-					{form}
-					field="allow_repeat_attribute_name"
-					label={m.allowRepeatAttributeName()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="allow_single_label_domains"
-					label={m.allowSingleLabelDomains()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="authn_request_signed"
-					hidden
-					label={m.authnRequestSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<TextField
-					{form}
-					field="digest_algorithm"
-					hidden
-					label={m.digestAlgorithm()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['digest_algorithm']}
-				/>
-				<Checkbox
-					{form}
-					field="logout_request_signed"
-					hidden
-					label={m.logoutRequestSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="logout_response_signed"
-					hidden
-					label={m.logoutResponseSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="metadata_signed"
-					hidden
-					label={m.metadataSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="name_id_encrypted"
-					hidden
-					label={m.nameIDEncrypted()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					hidden
-					field="reject_deprecated_algorithm"
-					label={m.rejectDeprecatedAlgorithm()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="reject_idp_initiated_sso"
-					label={m.rejectIdPInitiatedSSO()}
-					disabled={!data.is_enabled}
-				/>
-				<TextField
-					{form}
-					field="signature_algorithm"
-					hidden
-					label={m.signatureAlgorithm()}
-					disabled={!data.is_enabled}
-					cacheLock={cacheLocks['signature_algorithm']}
-				/>
-				<Checkbox
-					{form}
-					field="want_assertion_encrypted"
-					hidden
-					label={m.wantAssertionEncrypted()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="want_assertion_signed"
-					hidden
-					label={m.wantAssertionSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="want_attribute_statement"
-					label={m.wantAttributeStatement()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox
-					{form}
-					field="want_message_signed"
-					hidden
-					label={m.wantMessageSigned()}
-					disabled={!data.is_enabled}
-				/>
-				<Checkbox {form} field="want_name_id" label={m.wantNameID()} disabled={!data.is_enabled} />
-				<Checkbox
-					{form}
-					field="want_name_id_encrypted"
-					hidden
-					label={m.wantNameIDEncrypted()}
-					disabled={!data.is_enabled}
-				/>
+					<Checkbox
+						{form}
+						field="allow_repeat_attribute_name"
+						label={m.allowRepeatAttributeName()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="allow_single_label_domains"
+						label={m.allowSingleLabelDomains()}
+						disabled={!data.is_enabled}
+					/>
+					<TextField
+						{form}
+						field="digest_algorithm"
+						hidden
+						label={m.digestAlgorithm()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['digest_algorithm']}
+					/>
+					<Checkbox
+						{form}
+						field="logout_request_signed"
+						hidden
+						label={m.logoutRequestSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="logout_response_signed"
+						hidden
+						label={m.logoutResponseSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="metadata_signed"
+						hidden
+						label={m.metadataSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="name_id_encrypted"
+						hidden
+						label={m.nameIDEncrypted()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						hidden
+						field="reject_deprecated_algorithm"
+						label={m.rejectDeprecatedAlgorithm()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="reject_idp_initiated_sso"
+						label={m.rejectIdPInitiatedSSO()}
+						disabled={!data.is_enabled}
+					/>
+					<TextField
+						{form}
+						field="signature_algorithm"
+						hidden
+						label={m.signatureAlgorithm()}
+						disabled={!data.is_enabled}
+						cacheLock={cacheLocks['signature_algorithm']}
+					/>
+					<Checkbox
+						{form}
+						field="want_assertion_encrypted"
+						hidden
+						label={m.wantAssertionEncrypted()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="want_assertion_signed"
+						hidden
+						label={m.wantAssertionSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="want_attribute_statement"
+						label={m.wantAttributeStatement()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="want_message_signed"
+						hidden
+						label={m.wantMessageSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="want_name_id"
+						label={m.wantNameID()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="want_name_id_encrypted"
+						hidden
+						label={m.wantNameIDEncrypted()}
+						disabled={!data.is_enabled}
+					/>
+					<Checkbox
+						{form}
+						field="authn_request_signed"
+						helpText={m.samlAuthnRequestSignedHelpText()}
+						label={m.authnRequestSigned()}
+						disabled={!data.is_enabled}
+					/>
+					<div class="w-full p-4 flex flex-col gap-4 border rounded-md mt-1">
+						<div class="flex flex-row gap-4 items-center">
+							<form method="post" action="?/generateSamlKeys" use:enhance={handleGenerateKeys}>
+								<button
+									type="submit"
+									disabled={!data.is_enabled || !data.authn_request_signed}
+									class="btn preset-filled-secondary-500">{m.generate()}</button
+								>
+							</form>
+							{#if data.is_enabled && data.authn_request_signed}
+								<Anchor
+									href="settings/saml/download-cert"
+									class="anchor text-secondary-500"
+									disabled={!data.is_enabled || !data.authn_request_signed}
+								>
+									{m.downloadCertificate()}
+								</Anchor>
+							{/if}
+						</div>
+						<div class="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+							<TextArea
+								{form}
+								field="sp_x509cert"
+								label={m.x509Cert()}
+								helpText={m.samlCertificateHelpText()}
+								disabled={!data.is_enabled || !data.authn_request_signed}
+								cacheLock={cacheLocks['sp_x509cert']}
+								bind:cachedValue={formDataCache['sp_x509cert']}
+							/>
+							{#if showPrivateKeyField}
+								<TextArea
+									{form}
+									field="sp_private_key"
+									label={m.privateKey()}
+									helpText={m.samlPrivateKeyHelpText()}
+									disabled={!data.is_enabled || !data.authn_request_signed}
+									cacheLock={cacheLocks['sp_private_key']}
+									bind:cachedValue={formDataCache['sp_private_key']}
+								/>
+							{:else}
+								<div
+									class="w-full p-4 flex flex-col text-center items-center justify-center preset-tonal-secondary gap-2"
+								>
+									<p>{m.spPrivateKeyAlreadySetHelpText()}</p>
+									<button
+										class="btn preset-filled"
+										onclick={() => {
+											showPrivateKeyField = true;
+											$formStore.sp_private_key = '';
+										}}>{m.resetSpPrivateKey()}</button
+									>
+								</div>
+							{/if}
+						</div>
+					</div>
+				</div>
 			{/snippet}
 		</Accordion.Item>
 	{/if}

@@ -7,6 +7,7 @@
 	import TextArea from '../TextArea.svelte';
 	import Select from '../Select.svelte';
 	import { page } from '$app/state';
+	import TextField from '../TextField.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -70,15 +71,16 @@
 	>
 		{m.activityOne()}
 	</p>
-	<TextArea
-		{form}
-		field="operating_modes_description"
-		label={m.operatingModesDescription()}
-		cacheLock={cacheLocks['operating_modes_description']}
-		bind:cachedValue={formDataCache['operating_modes_description']}
-		data-focusindex="1"
-		helpText={m.operatingModesDescriptionHelpText()}
-	/>
+	{#if context !== 'edit'}
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="attack-paths?is_selected=true&used=false"
+			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
+			optionsLabelField="form_display_name"
+			field="attack_path"
+			label={m.attackPath() + ` (${m.strategicScenario()})`}
+		/>
+	{/if}
 	<AutocompleteSelect
 		{form}
 		multiple
@@ -91,15 +93,15 @@
 		label={m.elementaryActionsTechniques()}
 		helpText={m.operationalScenarioThreatsHelpText()}
 	/>
-	{#if context !== 'edit'}
-		<AutocompleteSelect
-			{form}
-			optionsEndpoint="attack-paths?is_selected=true&used=false"
-			optionsDetailedUrlParameters={[['ebios_rm_study', initialData.ebios_rm_study]]}
-			field="attack_path"
-			label={m.attackPath() + ` (${m.strategicScenario()})`}
-		/>
-	{/if}
+	<TextArea
+		{form}
+		field="operating_modes_description"
+		label={m.operatingModesDescription()}
+		cacheLock={cacheLocks['operating_modes_description']}
+		bind:cachedValue={formDataCache['operating_modes_description']}
+		data-focusindex="1"
+		helpText={m.operatingModesDescriptionHelpText()}
+	/>
 </div>
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'

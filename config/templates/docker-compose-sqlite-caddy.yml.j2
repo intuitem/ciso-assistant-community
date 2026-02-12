@@ -20,11 +20,11 @@ services:
     volumes:
       - ./db:/code/db
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://backend:8000/api/build || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://backend:8000/api/health/ || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 20
-      start_period: 100s
+      timeout: 10s
+      retries: 30
+      start_period: 150s
 
   huey:
     container_name: huey

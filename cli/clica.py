@@ -1,26 +1,29 @@
 #! python3
+from datetime import datetime
 import sys
 from pathlib import Path
-
+import tempfile
+import hashlib
+import struct
 import click
-import pandas as pd
 import requests
-import yaml
+import os
+from dotenv import load_dotenv
 import json
 from rich import print as rprint
+from typing import Optional, Callable, Dict
+import uuid
 
 from icecream import ic
 
 cli_cfg = dict()
 auth_data = dict()
 
-API_URL = ""
-GLOBAL_FOLDER_ID = None
-TOKEN = ""
-EMAIL = ""
-PASSWORD = ""
+GLOBAL_FOLDER_ID: Optional[str] = None
 
 CLICA_CONFG_PATH = ".clica_config.yaml"
+
+load_dotenv(".clica.env")
 
 
 @click.group()
@@ -29,103 +32,25 @@ def cli():
     pass
 
 
-@click.command()
-def init_config():
-    """Create/Reset the config file."""
-    template_data = {
-        "rest": {
-            "url": "https://localhost:8443/api",
-            "verify_certificate": True,
-        },
-        "credentials": {"email": "user@company.org", "password": ""},
-    }
-    if click.confirm(
-        f"This will create {CLICA_CONFG_PATH} for you to fill and will RESET any exisiting one. Do you wish to continue?"
-    ):
-        with open(CLICA_CONFG_PATH, "w") as yfile:
-            yaml.safe_dump(
-                template_data, yfile, default_flow_style=False, sort_keys=False
-            )
-            print(
-                f"Config file is available at {CLICA_CONFG_PATH}. Please update it with your credentials."
-            )
-
-
-try:
-    with open(CLICA_CONFG_PATH, "r") as yfile:
-        cli_cfg = yaml.safe_load(yfile)
-except FileNotFoundError:
-    print(
-        "Config file not found. Running the init command to create it but you need to fill it.",
-        file=sys.stderr,
-    )
-    init_config()
-
-try:
-    API_URL = cli_cfg["rest"]["url"]
-except KeyError:
-    print(
-        "Missing API URL. Check that the config.yaml file is properly set or trigger init command to create a new one.",
-        file=sys.stderr,
-    )
-    sys.exit(1)
-
-try:
-    EMAIL = cli_cfg["credentials"]["email"]
-    PASSWORD = cli_cfg["credentials"]["password"]
-except KeyError:
-    print(
-        "Missing credentials in the config file. You need to pass them to the CLI in this case.",
-        file=sys.stderr,
-    )
-
-VERIFY_CERTIFICATE = cli_cfg["rest"].get("verify_certificate", True)
-
-
-def check_auth():
-    if Path(".tmp.yaml").exists():
-        with open(".tmp.yaml", "r") as yfile:
-            auth_data = yaml.safe_load(yfile)
-            return auth_data["token"]
-    else:
-        click.echo("Could not find authentication data.", err=True)
-
-
-TOKEN = check_auth()
-
-
-@click.command()
-@click.option("--email", required=False)
-@click.option("--password", required=False)
-def auth(email, password):
-    """Authenticate to get a temp token (config file or params). Pass the email and password or set them on the config file"""
-    url = f"{API_URL}/iam/login/"
-    if email and password:
-        data = {"username": email, "password": password}
-    else:
-        print("trying credentials from the config file", file=sys.stderr)
-        if EMAIL and PASSWORD:
-            data = {"username": EMAIL, "password": PASSWORD}
-        else:
-            print("Could not find any usable credentials.", file=sys.stderr)
-            sys.exit(1)
-    headers = {"accept": "application/json", "Content-Type": "application/json"}
-
-    res = requests.post(url, data, headers, verify=VERIFY_CERTIFICATE)
-    print(res.status_code)
-    if res.status_code == 200:
-        with open(".tmp.yaml", "w") as yfile:
-            yaml.safe_dump(res.json(), yfile)
-            print("Looks good, you can move to other commands.", file=sys.stderr)
-    else:
-        print(
-            "Check your credentials again. You can set them on the config file or on the command line.",
-            file=sys.stderr,
-        )
-        print(res.json())
+# Read TOKEN, API_URL and VERIFY_CERTIFICATE from environment variables
+API_URL = os.getenv("API_URL", "")
+TOKEN = os.getenv("TOKEN", "")
+VERIFY_CERTIFICATE = os.getenv("VERIFY_CERTIFICATE", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+    "on",
+)
 
 
 def ids_map(model, folder=None):
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     my_map = dict()
     url = f"{API_URL}/{model}/ids/"
     headers = {"Authorization": f"Token {TOKEN}"}
@@ -133,315 +58,485 @@ def ids_map(model, folder=None):
     if res.status_code != 200:
         print("something went wrong. check authentication.")
         sys.exit(1)
-    if folder:
-        my_map = res.json().get(folder)
+    data = res.json()
+    if folder and isinstance(data, dict):
+        my_map = data.get(folder)
     else:
-        my_map = res.json()
+        my_map = data
     return my_map
 
 
-def _get_folders():
+def get_global_folder_id() -> Optional[str]:
+    global GLOBAL_FOLDER_ID
+    if GLOBAL_FOLDER_ID:
+        return GLOBAL_FOLDER_ID
     url = f"{API_URL}/folders/"
     headers = {"Authorization": f"Token {TOKEN}"}
+
     res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
     if res.status_code == 200:
         output = res.json()
         for folder in output["results"]:
             if folder["content_type"] == "GLOBAL":
                 GLOBAL_FOLDER_ID = folder["id"]
-                return GLOBAL_FOLDER_ID, output.get("results")
+                return GLOBAL_FOLDER_ID
+    else:
+        print(
+            f"The server didn't reply as expected: {res.status_code} {res.reason}: {res.text}",
+            file=sys.stderr,
+        )
 
 
-@click.command()
+@cli.command(name="get-folders")
 def get_folders():
     """Get folders."""
     print(json.dumps(ids_map("folders"), ensure_ascii=False))
 
 
-@click.command()
+@cli.command(name="get-perimeters")
 def get_perimeters():
     """getting perimeters as a json"""
     print(json.dumps(ids_map("perimeters"), ensure_ascii=False))
 
 
-@click.command()
+@cli.command(name="get-matrices")
 def get_matrices():
     """getting loaded matrix as a json"""
     print(json.dumps(ids_map("risk-matrices", folder="Global"), ensure_ascii=False))
 
 
-def get_unique_parsed_values(df, column_name):
-    unique_values = df[column_name].dropna().unique()
-    parsed_values = []
-
-    for value in unique_values:
-        value_str = str(value)
-        split_values = [v.strip() for v in value_str.split(",")]
-        parsed_values.extend(split_values)
-
-    return set(parsed_values)
+def is_uuid(value: Optional[str]) -> bool:
+    if not value:
+        return False
+    try:
+        uuid.UUID(str(value))
+        return True
+    except ValueError:
+        return False
 
 
-def batch_create(model, items, folder_id):
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    output = dict()
-    url = f"{API_URL}/{model}/"
-    for item in items:
-        data = {
-            "folder": folder_id,
-            "name": item,
-        }
-        res = requests.post(url, json=data, headers=headers)
-        if res.status_code != 201:
-            print("something went wrong")
-            print(res.json())
-        else:
-            output.update({item: res.json()["id"]})
-    return output
+def flatten_mapping(mapping) -> Dict[str, str]:
+    flat: Dict[str, str] = {}
+    if isinstance(mapping, dict):
+        for key, value in mapping.items():
+            if isinstance(value, dict):
+                flat.update(flatten_mapping(value))
+            elif isinstance(value, str):
+                flat[key] = value
+    return flat
 
 
-@click.command()
-@click.option("--file", required=True, help="")
-@click.option("--folder", required=True, help="")
-@click.option("--perimeter", required=True, help="")
-@click.option("--matrix", required=True, help="")
-@click.option("--name", required=True, help="")
-@click.option(
-    "--create_all",
-    required=False,
-    is_flag=True,
-    default=True,
-    help="Create all associated objects (threats, assets)",
-)
-def import_risk_assessment(file, folder, perimeter, name, matrix, create_all):
-    """crawl a risk assessment (see template) and create the assoicated objects"""
-    df = pd.read_csv(file, delimiter=";")
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    folder_id = ids_map("folders").get(folder)
-    perimeter_id = ids_map("perimeters", folder=folder).get(perimeter)
-    matrix_id = ids_map("risk-matrices", folder="Global").get(matrix)
+def resolve_named_id(
+    model: str, name: Optional[str], *, folder: Optional[str] = None
+) -> Optional[str]:
+    if not name:
+        return None
+    if is_uuid(name):
+        return name
+    mapping = ids_map(model, folder=folder)
+    if not isinstance(mapping, dict):
+        return None
+    flat = flatten_mapping(mapping)
+    value = flat.get(name)
+    if value:
+        return value
+    return None
 
-    # post to create risk assessment
-    data = {
-        "name": name,
-        "folder": folder_id,
-        "perimeter": perimeter_id,
-        "risk_matrix": matrix_id,
-    }
-    res = requests.post(
-        f"{API_URL}/risk-assessments/",
-        json=data,
-        headers=headers,
-        verify=VERIFY_CERTIFICATE,
+
+def ensure_identifier(
+    name: Optional[str],
+    model: str,
+    description: str,
+    *,
+    folder: Optional[str] = None,
+    required: bool = False,
+) -> Optional[str]:
+    if not name:
+        if required:
+            click.echo(f"❌ Missing required {description}.", err=True)
+            sys.exit(1)
+        return None
+    identifier = resolve_named_id(model, name, folder=folder)
+    if not identifier:
+        if is_uuid(name):
+            return name
+        click.echo(f"❌ Unable to resolve {description} '{name}'.", err=True)
+        sys.exit(1)
+    return identifier
+
+
+def resolve_folder_id(
+    folder_name: Optional[str], *, required: bool = False
+) -> Optional[str]:
+    if folder_name:
+        if is_uuid(folder_name):
+            return folder_name
+        folder_map = ids_map("folders")
+        if isinstance(folder_map, dict):
+            folder_id = folder_map.get(folder_name)
+            if folder_id:
+                return folder_id
+        click.echo(f"❌ Unable to resolve folder '{folder_name}'.", err=True)
+        sys.exit(1)
+    if required:
+        folder_id = get_global_folder_id()
+        if folder_id:
+            return folder_id
+        click.echo(
+            "❌ Unable to determine a folder. Please provide --folder.", err=True
+        )
+        sys.exit(1)
+    return None
+
+
+def upload_data_wizard_file(
+    *,
+    model_type: str,
+    file_path: str,
+    folder: Optional[str],
+    perimeter: Optional[str],
+    framework: Optional[str],
+    matrix: Optional[str],
+    on_conflict: str = "stop",
+    requires_folder: bool,
+    requires_perimeter: bool,
+    requires_framework: bool,
+    requires_matrix: bool,
+):
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    folder_id = resolve_folder_id(folder, required=requires_folder)
+    perimeter_id = ensure_identifier(
+        perimeter, "perimeters", "perimeter", required=requires_perimeter
     )
-    ra_id = None
-    if res.status_code == 201:
-        ra_id = res.json().get("id")
-        print("ok")
-    else:
-        print("something went wrong.")
-        print(res.json())
+    framework_id = ensure_identifier(
+        framework, "frameworks", "framework", required=requires_framework
+    )
+    matrix_id = ensure_identifier(
+        matrix, "risk-matrices", "matrix", required=requires_matrix
+    )
 
-    if create_all:
-        threats = get_unique_parsed_values(df, "threats")
-        batch_create("threats", threats, folder_id)
-        assets = get_unique_parsed_values(df, "assets")
-        batch_create("assets", assets, folder_id)
-        existing_controls = get_unique_parsed_values(df, "existing_controls")
-        batch_create("applied-controls", existing_controls, folder_id)
-        additional_controls = get_unique_parsed_values(df, "additional_controls")
-        batch_create("applied-controls", additional_controls, folder_id)
-
-    res = requests.get(f"{API_URL}/risk-matrices/{matrix_id}", headers=headers)
-    if res.status_code == 200:
-        matrix_def = res.json().get("json_definition")
-        matrix_def = json.loads(matrix_def)
-        # ic(matrix_def)
-        impact_map = dict()
-        proba_map = dict()
-        # this can be factored as one map probably
-        for item in matrix_def["impact"]:
-            impact_map[item["name"]] = item["id"]
-            if item.get("translations"):
-                langs = item.get("translations")
-                for lang in langs:
-                    impact_map[langs[lang]["name"]] = item["id"]
-        for item in matrix_def["probability"]:
-            proba_map[item["name"]] = item["id"]
-            if item.get("translations"):
-                langs = item.get("translations")
-                for lang in langs:
-                    proba_map[langs[lang]["name"]] = item["id"]
-
-        ic(impact_map)
-        ic(proba_map)
-
-    df = df.fillna("--")
-
-    threats = ids_map("threats", folder)
-    assets = ids_map("assets", folder)
-    controls = ids_map("applied-controls", folder)
-
-    for scenario in df.itertuples():
-        data = {
-            "ref_id": scenario.ref_id,
-            "name": scenario.name,
-            "risk_assessment": ra_id,
-            "treatment": str(scenario.treatment).lower(),
-        }
-        if None in [
-            impact_map.get(scenario.current_impact),
-            proba_map.get(scenario.current_proba),
-            impact_map.get(scenario.residual_impact),
-            proba_map.get(scenario.residual_proba),
-        ]:
-            print("Matrix doesn't match the labels used on your input file")
-
-        if scenario.current_impact != "--":
-            data.update({"current_impact": impact_map.get(scenario.current_impact)})
-        if scenario.current_proba != "--":
-            data.update({"current_proba": proba_map.get(scenario.current_proba)})
-
-        if scenario.residual_impact != "--":
-            data.update({"residual_impact": impact_map.get(scenario.residual_impact)})
-        if scenario.residual_proba != "--":
-            data.update({"residual_proba": proba_map.get(scenario.residual_proba)})
-
-        if scenario.existing_controls != "--":
-            items = str(scenario.existing_controls).split(",")
-            data.update(
-                {"existing_applied_controls": [controls[item] for item in items]}
-            )
-
-        if scenario.additional_controls != "--":
-            items = str(scenario.additional_controls).split(",")
-            data.update({"applied_controls": [controls[item] for item in items]})
-
-        if scenario.assets != "--":
-            items = str(scenario.assets).split(",")
-            data.update({"assets": [assets[item] for item in items]})
-
-        if scenario.threats != "--":
-            items = str(scenario.threats).split(",")
-            data.update({"threats": [threats[item] for item in items]})
-
-        res = requests.post(f"{API_URL}/risk-scenarios/", json=data, headers=headers)
-        if res.status_code != 201:
-            rprint(res.json())
-            rprint(data)
-
-
-@click.command()
-@click.option("--file", required=True, help="Path of the csv file with assets")
-def import_assets(file):
-    """import assets from a csv. Check the samples for format."""
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    df = pd.read_csv(file)
-    url = f"{API_URL}/assets/"
+    filename = Path(file_path).name
     headers = {
         "Authorization": f"Token {TOKEN}",
+        "X-Model-Type": model_type,
+        "Content-Disposition": f'attachment; filename="{filename}"',
     }
-    if click.confirm(f"I'm about to create {len(df)} assets. Are you sure?"):
-        for _, row in df.iterrows():
-            asset_type = "SP"
-            name = row["name"]
-            if row["type"].lower() == "primary":
-                asset_type = "PR"
-            else:
-                asset_type = "SP"
+    if folder_id:
+        headers["X-Folder-Id"] = folder_id
+    if perimeter_id:
+        headers["X-Perimeter-Id"] = perimeter_id
+    if framework_id:
+        headers["X-Framework-Id"] = framework_id
+    if matrix_id:
+        headers["X-Matrix-Id"] = matrix_id
+    if on_conflict and on_conflict != "stop":
+        headers["X-On-Conflict"] = on_conflict
 
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "type": asset_type,
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
+    url = f"{API_URL}/data-wizard/load-file/"
+    with open(file_path, "rb") as payload:
+        response = requests.post(
+            url, headers=headers, data=payload.read(), verify=VERIFY_CERTIFICATE
+        )
+    try:
+        body = response.json()
+        pretty_body = json.dumps(body, indent=2)
+    except Exception:
+        body = None
+        pretty_body = response.text
 
-
-@click.command()
-@click.option(
-    "--file", required=True, help="Path of the csv file with applied controls"
-)
-def import_controls(file):
-    """import applied controls. Check the samples for format."""
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
-    url = f"{API_URL}/applied-controls/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} applied controls. Are you sure?"):
-        for _, row in df.iterrows():
-            name = row["name"]
-            description = row["description"]
-            csf_function = row["csf_function"]
-            category = row["category"]
-
-            data = {
-                "name": name,
-                "folder": GLOBAL_FOLDER_ID,
-                "description": description,
-                "csf_function": csf_function.lower(),
-                "category": category.lower(),
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {name} created", file=sys.stderr)
+    rprint(f"{response.status_code} {response.reason} {response.url}")
+    rprint(pretty_body)
+    if body and response.status_code >= 400:
+        sys.exit(1)
 
 
-@click.command()
-@click.option(
-    "--file", required=True, help="Path of the csv file with the list of evidences"
-)
-def import_evidences(file):
-    """Import evidences. Check the samples for format."""
-    df = pd.read_csv(file)
-    GLOBAL_FOLDER_ID, _ = _get_folders()
+DATA_WIZARD_COMMANDS = [
+    {
+        "command": "import_assets",
+        "model_type": "Asset",
+        "help": "Import assets using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_applied_controls",
+        "model_type": "AppliedControl",
+        "help": "Import applied controls using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_evidences",
+        "model_type": "Evidence",
+        "help": "Import evidences using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_users",
+        "model_type": "User",
+        "help": "Import users using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_folders",
+        "model_type": "Folder",
+        "help": "Import folders using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_perimeters",
+        "model_type": "Perimeter",
+        "help": "Import perimeters using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_compliance_assessments",
+        "model_type": "ComplianceAssessment",
+        "help": "Import compliance assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": True,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_findings_assessments",
+        "model_type": "FindingsAssessment",
+        "help": "Import findings assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_risk_assessment",
+        "model_type": "RiskAssessment",
+        "help": "Import risk assessments using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": True,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
+        "command": "import_elementary_actions",
+        "model_type": "ElementaryAction",
+        "help": "Import elementary actions using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_reference_controls",
+        "model_type": "ReferenceControl",
+        "help": "Import reference controls using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_threats",
+        "model_type": "Threat",
+        "help": "Import threats using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_processings",
+        "model_type": "Processing",
+        "help": "Import processings using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_policies",
+        "model_type": "Policy",
+        "help": "Import policies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_security_exceptions",
+        "model_type": "SecurityException",
+        "help": "Import security exceptions using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_incidents",
+        "model_type": "Incident",
+        "help": "Import incidents using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_tprm",
+        "model_type": "TPRM",
+        "help": "Import third-party records using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+    },
+    {
+        "command": "import_ebios_rm_study_arm",
+        "model_type": "EbiosRMStudyARM",
+        "help": "Import EBIOS RM ARM studies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+    {
+        "command": "import_ebios_rm_study",
+        "model_type": "EbiosRMStudyExcel",
+        "help": "Import EBIOS RM Excel studies using the Data Wizard backend.",
+        "requires_folder": True,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": True,
+    },
+]
 
-    url = f"{API_URL}/evidences/"
-    headers = {
-        "Authorization": f"Token {TOKEN}",
-    }
-    if click.confirm(f"I'm about to create {len(df)} evidences. Are you sure?"):
-        for _, row in df.iterrows():
-            data = {
-                "name": row["name"],
-                "description": row["description"],
-                "folder": GLOBAL_FOLDER_ID,
-                "applied_controls": [],
-                "requirement_assessments": [],
-            }
-            res = requests.post(
-                url, json=data, headers=headers, verify=VERIFY_CERTIFICATE
-            )
-            if res.status_code != 201:
-                click.echo("❌ something went wrong", err=True)
-                rprint(res.json())
-            else:
-                rprint(f"✅ {row['name']} created", file=sys.stderr)
+
+def register_data_wizard_command(config: Dict[str, object]) -> None:
+    command_name = str(config["command"])
+    cli_name = command_name.replace("_", "-")
+    model_type = str(config["model_type"])
+    help_text = str(config["help"])
+    requires_folder = bool(config.get("requires_folder", False))
+    requires_perimeter = bool(config.get("requires_perimeter", False))
+    requires_framework = bool(config.get("requires_framework", False))
+    requires_matrix = bool(config.get("requires_matrix", False))
+    show_folder_option = config.get(
+        "show_folder_option",
+        model_type
+        not in {
+            "ComplianceAssessment",
+            "FindingsAssessment",
+            "RiskAssessment",
+            "User",
+            "Folder",
+        },
+    )
+    show_perimeter_option = config.get("show_perimeter_option", requires_perimeter)
+    show_framework_option = config.get("show_framework_option", requires_framework)
+    show_matrix_option = config.get("show_matrix_option", requires_matrix)
+
+    @cli.command(name=cli_name, help=help_text)
+    @click.option(
+        "--file",
+        required=True,
+        type=click.Path(exists=True, dir_okay=False, path_type=str),
+        help="Path to the source file.",
+    )
+    @click.option(
+        "--folder",
+        required=requires_folder,
+        help="Folder name or UUID.",
+        hidden=not show_folder_option,
+    )
+    @click.option(
+        "--perimeter",
+        required=requires_perimeter,
+        help="Perimeter name or UUID.",
+        hidden=not show_perimeter_option,
+    )
+    @click.option(
+        "--framework",
+        required=requires_framework,
+        help="Framework name or UUID.",
+        hidden=not show_framework_option,
+    )
+    @click.option(
+        "--matrix",
+        required=requires_matrix,
+        help="Risk matrix name or UUID.",
+        hidden=not show_matrix_option,
+    )
+    @click.option(
+        "--on-conflict",
+        type=click.Choice(["stop", "skip", "update"], case_sensitive=False),
+        default="stop",
+        help="How to handle existing records: stop (default), skip, or update.",
+    )
+    def command(
+        file,
+        folder,
+        perimeter,
+        framework,
+        matrix,
+        on_conflict,
+        _model=model_type,
+        _requires_folder=requires_folder,
+        _requires_perimeter=requires_perimeter,
+        _requires_framework=requires_framework,
+        _requires_matrix=requires_matrix,
+    ):
+        upload_data_wizard_file(
+            model_type=_model,
+            file_path=file,
+            folder=folder,
+            perimeter=perimeter,
+            framework=framework,
+            matrix=matrix,
+            on_conflict=on_conflict,
+            requires_folder=_requires_folder,
+            requires_perimeter=_requires_perimeter,
+            requires_framework=_requires_framework,
+            requires_matrix=_requires_matrix,
+        )
+
+    globals()[command_name] = command
 
 
-@click.command()
+for cfg in DATA_WIZARD_COMMANDS:
+    register_data_wizard_command(cfg)
+
+
+@cli.command(name="upload-attachment")
 @click.option("--file", required=True, help="Path to the attachment to upload")
 @click.option("--name", required=True, help="Name of the evidence")
 def upload_attachment(file, name):
     """Upload attachment as evidence"""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
     headers = {
         "Authorization": f"Token {TOKEN}",
@@ -476,15 +571,446 @@ def upload_attachment(file, name):
     rprint(res.text)
 
 
-cli.add_command(get_folders)
-cli.add_command(get_perimeters)
-cli.add_command(auth)
-cli.add_command(import_assets)
-cli.add_command(import_controls)
-cli.add_command(import_evidences)
-cli.add_command(init_config)
-cli.add_command(upload_attachment)
-cli.add_command(import_risk_assessment)
-cli.add_command(get_matrices)
+@cli.command(name="backup-full")
+@click.option(
+    "--dest-dir",
+    default="./db_backup",
+    help="Destination directory to save backup files (default: ./db_backup)",
+    type=click.Path(file_okay=False, dir_okay=True),
+)
+@click.option(
+    "--batch-size",
+    default=200,
+    help="Number of files to download per batch (default: 200)",
+    type=int,
+)
+@click.option(
+    "--resume/--no-resume",
+    default=True,
+    help="Resume from existing manifest (default: True)",
+)
+def backup_full(dest_dir, batch_size, resume):
+    """Create a full backup including database and attachments using streaming"""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    headers = {"Authorization": f"Token {TOKEN}"}
+    dest_path = Path(dest_dir)
+    dest_path.mkdir(parents=True, exist_ok=True)
+
+    manifest_file = dest_path / "backup-manifest.jsonl"
+    attachments_dir = dest_path / "attachments" / "evidence-revisions"
+    attachments_dir.mkdir(parents=True, exist_ok=True)
+
+    # Step 1: Backup database
+    rprint("[bold blue]Step 1/2: Exporting database backup...[/bold blue]")
+    url = f"{API_URL}/serdes/dump-db/"
+    res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error exporting database: {res.status_code}[/bold red]",
+            file=sys.stderr,
+        )
+        rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    backup_file = dest_path / "backup.json.gz"
+    with open(backup_file, "wb") as f:
+        f.write(res.content)
+    rprint(f"[green]✓ Database backup saved to {backup_file}[/green]")
+
+    # Step 2: Backup attachments using streaming approach
+    rprint("[bold blue]Step 2/2: Backing up attachments...[/bold blue]")
+
+    # Load existing manifest if resuming
+    existing_manifest = {}
+    if resume and manifest_file.exists():
+        rprint("[dim]Loading existing manifest for resume...[/dim]")
+        with open(manifest_file, "r") as f:  # FIX: "r" not "a"
+            for line in f:
+                if line.strip():
+                    entry = json.loads(line)
+                    if entry.get("downloaded"):
+                        # Verify file actually exists on disk before adding to manifest
+                        evidence_id = entry.get("evidence_id")
+                        version = entry.get("version")
+                        filename = entry.get("filename")
+                        file_path = (
+                            attachments_dir / f"{evidence_id}_v{version}_{filename}"
+                        )
+
+                        if file_path.exists():
+                            existing_manifest[entry["id"]] = entry
+                        # If file doesn't exist, simply don't add it to existing_manifest
+                        # (it will be re-downloaded)
+
+        rprint(f"[dim]Found {len(existing_manifest)} already downloaded files[/dim]")
+    # Fetch all attachment metadata from API (paginated)
+    rprint("[dim]Fetching attachment metadata from server...[/dim]")
+    all_metadata = []
+    url = f"{API_URL}/serdes/attachment-metadata/"
+
+    while url:
+        res = requests.get(url, headers=headers, verify=VERIFY_CERTIFICATE)
+
+        if res.status_code != 200:
+            rprint(
+                f"[bold red]Error fetching metadata: {res.status_code}[/bold red]",
+                file=sys.stderr,
+            )
+            rprint(res.text, file=sys.stderr)
+            sys.exit(1)
+
+        data = res.json()
+        all_metadata.extend(data["results"])
+        url = data.get("next")
+        if url and not url.startswith("http"):
+            # Convert relative URL to absolute
+            url = f"{API_URL}/serdes/attachment-metadata/{url}"
+
+    rprint(f"[cyan]Found {len(all_metadata)} total attachments[/cyan]")
+
+    # Determine which files need to be downloaded
+    to_download = []
+    for meta in all_metadata:
+        revision_id = meta["id"]
+        file_hash = meta["attachment_hash"]
+
+        # Skip if already downloaded with matching hash AND file exists on disk
+        if revision_id in existing_manifest:
+            manifest_entry = existing_manifest[revision_id]
+            if manifest_entry.get("hash") == file_hash:
+                # Verify file actually exists on disk
+                evidence_id = meta["evidence_id"]
+                version = meta["version"]
+                filename = meta["filename"]
+                file_path = attachments_dir / f"{evidence_id}_v{version}_{filename}"
+
+                if file_path.exists():
+                    continue
+
+        to_download.append(meta)
+
+    total_downloaded = 0
+    total_bytes = 0
+
+    if not to_download:
+        rprint("[green]✓ All attachments already downloaded[/green]")
+    else:
+        rprint(
+            f"[cyan]Downloading {len(to_download)} attachments in batches of {batch_size}...[/cyan]"
+        )
+
+        # Download in batches
+        for i in range(0, len(to_download), batch_size):
+            batch = to_download[i : i + batch_size]
+            batch_ids = [meta["id"] for meta in batch]
+
+            rprint(
+                f"[dim]Downloading batch {i // batch_size + 1}/{(len(to_download) + batch_size - 1) // batch_size}...[/dim]"
+            )
+
+            # Request batch download
+            url = f"{API_URL}/serdes/batch-download-attachments/"
+            res = requests.post(
+                url,
+                headers=headers,
+                json={"revision_ids": batch_ids},
+                verify=VERIFY_CERTIFICATE,
+                stream=True,
+            )
+
+            if res.status_code != 200:
+                rprint(
+                    f"[bold red]Error downloading batch: {res.status_code}[/bold red]",
+                    file=sys.stderr,
+                )
+                rprint(res.text, file=sys.stderr)
+                continue
+
+            # Parse streaming response
+            buffer = b""
+            for chunk in res.iter_content(chunk_size=10240 * 1024):  # NOTE: 10MB chunks
+                buffer += chunk
+
+                while len(buffer) >= 4:
+                    # Read 4-byte length prefix
+                    total_size = struct.unpack(">I", buffer[:4])[0]
+
+                    if len(buffer) < 4 + total_size:
+                        # Not enough data yet
+                        break
+
+                    # Extract block
+                    block_data = buffer[4 : 4 + total_size]
+                    buffer = buffer[4 + total_size :]
+
+                    # Parse JSON header (try up to 1KB)
+                    header = None
+                    header_end = 0
+                    for j in range(1, min(1024, len(block_data))):
+                        try:
+                            header = json.loads(block_data[:j].decode("utf-8"))
+                            header_end = j
+                            break
+                        except (json.JSONDecodeError, UnicodeDecodeError):
+                            continue
+
+                    if not header:
+                        rprint(
+                            "[yellow]Warning: Could not parse header in block[/yellow]"
+                        )
+                        continue
+
+                    file_bytes = block_data[header_end:]
+
+                    # Save file
+                    evidence_id = header["evidence_id"]
+                    version = header["version"]
+                    filename = header["filename"]
+                    file_hash = header["hash"]
+
+                    file_path = attachments_dir / f"{evidence_id}_v{version}_{filename}"
+                    with open(file_path, "wb") as f:
+                        f.write(file_bytes)
+
+                    total_downloaded += 1
+                    total_bytes += len(file_bytes)
+
+                    # Add to manifest
+                    manifest_entry = {
+                        "id": header["id"],
+                        "evidence_id": evidence_id,
+                        "version": version,
+                        "filename": filename,
+                        "hash": file_hash,
+                        "size": len(file_bytes),
+                        "downloaded": True,
+                        "timestamp": datetime.now().isoformat(),
+                    }
+
+                    existing_manifest[header["id"]] = manifest_entry
+
+            rprint(
+                f"[green]✓ Batch {i // batch_size + 1} completed ({total_downloaded} files, {total_bytes / 1024 / 1024:.1f} MB)[/green]"
+            )
+
+        rprint(
+            f"[bold green]✓ Downloaded {total_downloaded} attachments ({total_bytes / 1024 / 1024:.1f} MB total)[/bold green]"
+        )
+
+    # Rebuild manifest removing duplicates and missing files
+    if existing_manifest or total_downloaded > 0:
+        rprint("[dim]Cleaning up manifest...[/dim]")
+        with open(manifest_file, "w") as f:
+            for entry in existing_manifest.values():
+                f.write(json.dumps(entry) + "\n")
+    rprint("[bold green]Full backup completed successfully![/bold green]")
+    rprint(f"[dim]Location: {dest_path}[/dim]")
+
+
+@cli.command(name="restore-full")
+@click.option(
+    "--src-dir",
+    default="./db_backup",
+    help="Source directory containing backup files (default: ./db_backup)",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+)
+@click.option(
+    "--verify-hashes/--no-verify-hashes",
+    default=True,
+    help="Verify file hashes before upload (default: True)",
+)
+def restore_full(src_dir, verify_hashes):
+    """Restore a full backup using atomic combo endpoint (avoids token invalidation)"""
+    if not TOKEN:
+        print(
+            "No authentication token available. Please set PAT token in .clica.env.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    headers = {"Authorization": f"Token {TOKEN}"}
+    src_path = Path(src_dir)
+
+    # Check for required backup file
+    backup_file = src_path / "backup.json.gz"
+    if not backup_file.exists():
+        rprint(
+            f"[bold red]Error: backup.json.gz not found in {src_dir}[/bold red]",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    manifest_file = src_path / "backup-manifest.jsonl"
+    attachments_dir = src_path / "attachments" / "evidence-revisions"
+
+    rprint("[bold blue]Starting atomic restore (database + attachments)...[/bold blue]")
+
+    # Prepare attachments data if available
+    attachments_data = None
+    if attachments_dir.exists() and manifest_file.exists():
+        rprint("[dim]Loading manifest and preparing attachments...[/dim]")
+
+        # Load manifest
+        manifest = {}
+        with open(manifest_file, "r") as f:
+            for line in f:
+                if line.strip():
+                    entry = json.loads(line)
+                    manifest[entry["id"]] = entry
+
+        # Scan attachments directory and match with manifest
+
+        to_upload = []
+        for manifest_id, entry in manifest.items():
+            evidence_id = entry["evidence_id"]
+            version = entry["version"]
+            filename = entry["filename"]
+            expected_hash = entry.get("hash")
+
+            file_path = attachments_dir / f"{evidence_id}_v{version}_{filename}"
+
+            if not file_path.exists():
+                continue
+
+            # Verify hash if requested
+            if verify_hashes and expected_hash:
+                hash_obj = hashlib.sha256()
+                with open(file_path, "rb") as f:
+                    for chunk in iter(lambda: f.read(10240 * 1024), b""):
+                        hash_obj.update(chunk)
+                actual_hash = hash_obj.hexdigest()
+
+                if actual_hash != expected_hash:
+                    rprint(
+                        f"[yellow]Warning: Hash mismatch for {filename}, skipping[/yellow]"
+                    )
+                    continue
+
+            to_upload.append(
+                {
+                    "id": manifest_id,
+                    "evidence_id": evidence_id,
+                    "version": version,
+                    "filename": filename,
+                    "hash": expected_hash or "",
+                    "path": file_path,
+                }
+            )
+
+        if to_upload:
+            rprint(f"[cyan]Found {len(to_upload)} attachments to restore[/cyan]")
+
+            # Stream to temp file with reasonable buffering
+            temp_attachments = tempfile.NamedTemporaryFile(
+                suffix=".dat", delete=False, buffering=8 * 1024 * 1024
+            )  # 8MB buffer
+
+            for file_info in to_upload:
+                with open(file_info["path"], "rb") as f:
+                    file_bytes = f.read()
+
+                # Build header
+                header = {
+                    "id": file_info["id"],
+                    "evidence_id": file_info["evidence_id"],
+                    "version": file_info["version"],
+                    "filename": file_info["filename"],
+                    "hash": file_info["hash"],
+                    "size": len(file_bytes),
+                }
+                header_bytes = json.dumps(header).encode("utf-8")
+                total_size = len(header_bytes) + len(file_bytes)
+
+                # Write directly (OS will buffer intelligently)
+                temp_attachments.write(struct.pack(">I", total_size))
+                temp_attachments.write(header_bytes)
+                temp_attachments.write(file_bytes)
+            temp_attachments.close()
+            attachments_data = temp_attachments.name
+
+            total_size_mb = Path(attachments_data).stat().st_size / 1024 / 1024
+            rprint(
+                f"[dim]Prepared {len(to_upload)} attachments for upload ({total_size_mb:.1f} MB)[/dim]"
+            )
+
+    # Send SINGLE request with both database and attachments
+    url = f"{API_URL}/serdes/full-restore/"
+
+    files = {
+        "backup": ("backup.json.gz", open(backup_file, "rb"), "application/gzip"),
+    }
+
+    if attachments_data:
+        files["attachments"] = (
+            "attachments.dat",
+            open(attachments_data, "rb"),
+            "application/octet-stream",
+        )
+        rprint(
+            "[dim]Sending restore request (database + attachments in single request)...[/dim]"
+        )
+    else:
+        rprint("[dim]Sending restore request (database only)...[/dim]")
+
+    try:
+        res = requests.post(
+            url,
+            headers=headers,
+            files=files,
+            verify=VERIFY_CERTIFICATE,
+        )
+    finally:
+        # Close file handles
+        for file_tuple in files.values():
+            file_tuple[1].close()
+
+        # Clean up temp file
+        if attachments_data:
+            Path(attachments_data).unlink()
+
+    if res.status_code != 200:
+        rprint(
+            f"[bold red]Error during restore: {res.status_code}[/bold red]",
+            file=sys.stderr,
+        )
+        try:
+            error_data = res.json()
+            rprint(f"[red]{error_data}[/red]", file=sys.stderr)
+        except:
+            rprint(res.text, file=sys.stderr)
+        sys.exit(1)
+
+    result = res.json()
+
+    rprint(f"[green]✓ Database restored successfully[/green]")
+
+    if "attachments_restored" in result:
+        restored = result["attachments_restored"]
+        processed = result.get("attachments_processed", restored)
+        skipped = result.get("attachments_skipped", 0)
+        rprint(
+            f"[green]✓ Attachments restored: {restored} restored, {skipped} skipped, {processed} total processed[/green]"
+        )
+
+        if result.get("attachment_errors_count"):
+            rprint(
+                f"[yellow]Warning: {result['attachment_errors_count']} errors encountered[/yellow]"
+            )
+
+    if result.get("status") == "partial_success":
+        rprint("[bold yellow]Restore completed with warnings[/bold yellow]")
+    else:
+        rprint("[bold green]Full restore completed successfully![/bold green]")
+
+    rprint("[dim]Note: You will need to regenerate your Personal Access Token[/dim]")
+
+
 if __name__ == "__main__":
     cli()

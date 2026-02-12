@@ -5,6 +5,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
+	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import { page } from '$app/state';
 
@@ -15,6 +16,7 @@
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
 		context: string;
+		[key: string]: any;
 	}
 
 	let {
@@ -23,7 +25,8 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context
+		context,
+		...rest
 	}: Props = $props();
 
 	let activeActivity: string | null = $state(null);
@@ -62,14 +65,23 @@
 		cacheLock={cacheLocks['ref_id']}
 		bind:cachedValue={formDataCache['ref_id']}
 	/>
+	<Select
+		{form}
+		options={model.selectOptions['quotation_method']}
+		field="quotation_method"
+		disableDoubleDash
+		label={m.quotationMethod()}
+		cacheLock={cacheLocks['quotation_method']}
+		bind:cachedValue={formDataCache['quotation_method']}
+	/>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO"
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
+		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
-		hidden={initialData.folder}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -93,7 +105,16 @@
 		>
 			{m.activityOne()}
 		</p>
-		<TextArea
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="risk-matrices"
+			field="risk_matrix"
+			cacheLock={cacheLocks['risk_matrix']}
+			bind:cachedValue={formDataCache['risk_matrix']}
+			label={m.riskMatrix()}
+			helpText={m.ebiosRmMatrixHelpText() + '\n' + m.riskAssessmentMatrixHelpText()}
+		/>
+		<MarkdownField
 			{form}
 			field="description"
 			label={m.description()}
@@ -127,8 +148,12 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="authors"
 			cacheLock={cacheLocks['authors']}
 			bind:cachedValue={formDataCache['authors']}
@@ -137,8 +162,12 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
@@ -163,6 +192,9 @@
 			optionsEndpoint="assets"
 			optionsLabelField="auto"
 			optionsExtraFields={[['folder', 'str']]}
+			optionsDetailedUrlParameters={[
+				rest?.scopeFolder?.id ? ['scope_folder_id', rest.scopeFolder.id] : ['', undefined]
+			]}
 			optionsInfoFields={{
 				fields: [
 					{
@@ -176,7 +208,7 @@
 			helpText={m.studyAssetHelpText()}
 		/>
 	</div>
-	<TextArea
+	<MarkdownField
 		{form}
 		field="observation"
 		label={m.observation()}
@@ -188,7 +220,7 @@
 		multiple
 		{form}
 		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}
@@ -201,6 +233,9 @@
 		{form}
 		optionsEndpoint="assets"
 		optionsExtraFields={[['folder', 'str']]}
+		optionsDetailedUrlParameters={[
+			rest?.scopeFolder?.id ? ['scope_folder_id', rest.scopeFolder.id] : ['', undefined]
+		]}
 		optionsInfoFields={{
 			fields: [
 				{

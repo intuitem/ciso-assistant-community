@@ -26,7 +26,6 @@
 			page.data.name ??
 			getBreadcrumbTitle() ??
 			getUrlModelTitle();
-
 		return safeTranslate(title);
 	}
 
@@ -53,8 +52,9 @@
 	{#each $breadcrumbs as c, i}
 		{#if i == $breadcrumbs.length - 1}
 			<span
-				class="max-w-[64ch] overflow-hidden text-sm text-gray-500 font-semibold antialiased"
+				class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-gray-500 font-semibold antialiased"
 				data-testid="crumb-item"
+				title={safeTranslate(c.label)}
 			>
 				{#if c.icon}
 					<i class={c.icon}></i>
@@ -65,9 +65,10 @@
 			<li>
 				{#if c.href}
 					<a
-						class="max-w-[64ch] overflow-hidden unstyled text-sm hover:text-primary-500 font-semibold antialiased whitespace-nowrap"
+						class="max-w-[64ch] block overflow-hidden whitespace-nowrap text-ellipsis text-sm font-semibold antialiased hover:text-primary-500"
 						data-testid="crumb-item"
 						href={c.href}
+						title={safeTranslate(c.label)}
 						onclick={() => breadcrumbs.slice(i)}
 					>
 						{#if c.icon}
@@ -77,8 +78,9 @@
 					</a>
 				{:else}
 					<span
-						class="max-w-[64ch] overflow-hidden text-sm text-gray-500 font-semibold antialiased"
+						class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-gray-500 font-semibold antialiased"
 						data-testid="crumb-item"
+						title={safeTranslate(c.label)}
 					>
 						{#if c.icon}
 							<i class={c.icon}></i>

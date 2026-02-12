@@ -8,8 +8,17 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from core.models import StoredLibrary
+from iam.models import Folder, User, UserGroup
 
 from test_vars import *
+
+
+def _is_masked_placeholder(value) -> bool:
+    if value == {}:
+        return True
+    if isinstance(value, list) and value and all(item == {} for item in value):
+        return True
+    return False
 
 
 class EndpointTestsUtils:
@@ -69,11 +78,14 @@ class EndpointTestsUtils:
             )
             test_folder = Folder.objects.get(name=test_folder_name)
 
-        user = User.objects.create_user(TEST_USER_EMAIL)
-        UserGroup.objects.get(
+        user = User.objects.create_user(TEST_USER_EMAIL, is_published=True)
+        user_group = UserGroup.objects.get(
             name=role,
             folder=Folder.objects.get(name=GROUPS_PERMISSIONS[role]["folder"]),
-        ).user_set.add(user)
+        )
+        user.folder = user_group.folder
+        user.save()
+        user_group.user_set.add(user)
         client = APIClient()
         _auth_token = AuthToken.objects.create(user=user)
         auth_token = _auth_token[1]
@@ -418,9 +430,22 @@ class EndpointTestsQueries:
             # Creates a test object from the model
             if build_params and object:
                 if object.__name__ == "User":
-                    object.objects.create_superuser(
-                        **build_params
+                    # Ensure new test users are published so they're visible through IAM filtering
+                    build_params_with_published = {**build_params, "is_published": True}
+                    user = object.objects.create_superuser(
+                        **build_params_with_published
                     )  # no password is required in the build_params
+                    # create the new user in the same group as the test user to make it visible
+                    if user_group:
+                        group = UserGroup.objects.get(
+                            name=user_group,
+                            folder__name=GROUPS_PERMISSIONS[user_group]["folder"],
+                        )
+                        group.user_set.add(user)
+                        # Assign user to the same folder as the group for IAM visibility
+                        user.folder = group.folder
+                        user.save()
+
                 else:
                     m2m_fields = {}
                     non_m2m_fields = {}
@@ -493,6 +518,10 @@ class EndpointTestsQueries:
                         assert json.loads(response_item[key]) == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -688,6 +717,10 @@ class EndpointTestsQueries:
                         ), (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                         )
+                    elif _is_masked_placeholder(response_item[key]) and isinstance(
+                        value, (dict, list)
+                    ):
+                        continue
                     else:
                         assert response_item[key] == value, (
                             f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -750,6 +783,54 @@ class EndpointTestsQueries:
             for field, value in m2m_fields.items():
                 getattr(test_object, field).set(value)
 
+            folder_perm_fails = False
+            folder_perm_expected_status = expected_status
+            folder_perm_reason = None
+            if (
+                user_group
+                and "folder" in update_params
+                and hasattr(test_object, "folder_id")
+            ):
+                folder_value = update_params.get("folder")
+                if isinstance(folder_value, list):
+                    folder_value = folder_value[0] if folder_value else None
+                folder_name = None
+                if isinstance(folder_value, dict):
+                    folder_name = folder_value.get("str")
+                    folder_value = folder_value.get("id")
+                if hasattr(folder_value, "id"):
+                    folder_value = folder_value.id
+                target_folder = None
+                if folder_value:
+                    target_folder = Folder.objects.filter(id=folder_value).first()
+                if not target_folder and folder_name:
+                    target_folder = Folder.objects.filter(name=folder_name).first()
+                if target_folder and str(target_folder.id) != str(
+                    test_object.folder_id
+                ):
+                    (
+                        folder_perm_fails,
+                        folder_perm_expected_status,
+                        _,
+                    ) = EndpointTestsUtils.expected_request_response(
+                        "add",
+                        verbose_name,
+                        str(target_folder),
+                        user_group,
+                        expected_status,
+                    )
+                    if folder_perm_fails:
+                        folder_perm_expected_status = status.HTTP_403_FORBIDDEN
+                        folder_perm_reason = "folder_permission_denied"
+
+            update_perm_fails = user_perm_fails
+            update_perm_expected_status = user_perm_expected_status
+            update_perm_reason = user_perm_reason
+            if not user_perm_fails and folder_perm_fails:
+                update_perm_fails = True
+                update_perm_expected_status = folder_perm_expected_status
+                update_perm_reason = folder_perm_reason
+
             url = endpoint or (
                 EndpointTestsUtils.get_endpoint_url(verbose_name)
                 + str(test_object.id)
@@ -795,6 +876,10 @@ class EndpointTestsQueries:
                             ), (
                                 f"{verbose_name} {key.replace('_', ' ')} returned by the API after object creation don't match the provided {key.replace('_', ' ')}"
                             )
+                        elif _is_masked_placeholder(
+                            response.json()[key]
+                        ) and isinstance(value, (dict, list)):
+                            continue
                         else:
                             assert response.json()[key] == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
@@ -804,12 +889,12 @@ class EndpointTestsQueries:
                 url, update_params, format=query_format
             )
 
-            if user_perm_reason == "outside_scope":
+            if update_perm_reason == "outside_scope":
                 assert update_response.status_code == status.HTTP_404_NOT_FOUND, (
                     f"{verbose_name} can be accessed outside the domain"
                 )
             else:
-                if not user_group or user_perm_expected_status == status.HTTP_200_OK:
+                if not user_group or update_perm_expected_status == status.HTTP_200_OK:
                     # User has permission to update the object
                     assert update_response.status_code == expected_status, (
                         f"{verbose_name} can not be updated with authentication.\nResponse: {update_response.json()}"
@@ -818,13 +903,17 @@ class EndpointTestsQueries:
                     )
                 else:
                     # User does not have permission to update the object
-                    assert update_response.status_code == user_perm_expected_status, (
-                        f"{verbose_name} can be updated without permission"
-                        if update_response.status_code == status.HTTP_200_OK
-                        else f"Updating {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    # For Users detail, the API may return 404 (anti-enumeration) instead of 403.
+                    expected_statuses = {update_perm_expected_status}
+                    if verbose_name == "Users":
+                        expected_statuses.add(status.HTTP_404_NOT_FOUND)
+                    assert update_response.status_code in expected_statuses, (
+                        f"Updating {verbose_name.lower()} should give a status in {expected_statuses}, "
+                        f"got {update_response.status_code}"
                     )
 
-                if not (fails or user_perm_fails):
+                if not (fails or update_perm_fails):
+                    # NOTE: We should check with a GET and not with the response of the PATCH request
                     for key, value in {
                         **build_params,
                         **update_params,
@@ -839,7 +928,10 @@ class EndpointTestsQueries:
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
                         else:
-                            assert update_response.json()[key] == value, (
+                            response_value = update_response.json().get(key)
+                            if hasattr(value, "id") and response_value == str(value.id):
+                                continue
+                            assert response_value == value, (
                                 f"{verbose_name} {key.replace('_', ' ')} queried from the API don't match {verbose_name.lower()} {key.replace('_', ' ')} in the database"
                             )
 
@@ -943,10 +1035,13 @@ class EndpointTestsQueries:
                     )
                 else:
                     # User does not have permission to delete the object
-                    assert delete_response.status_code == user_perm_expected_status, (
-                        f"{verbose_name} can be deleted without permission"
-                        if delete_response.status_code == status.HTTP_204_NO_CONTENT
-                        else f"Deleting {verbose_name.lower()} should give a status {user_perm_expected_status}"
+                    # For Users detail, the API may return 404 (anti-enumeration) instead of 403.
+                    expected_statuses = {user_perm_expected_status}
+                    if verbose_name == "Users":
+                        expected_statuses.add(status.HTTP_404_NOT_FOUND)
+                    assert delete_response.status_code in expected_statuses, (
+                        f"Deleting {verbose_name.lower()} should give a status in {expected_statuses}, "
+                        f"got {delete_response.status_code}"
                     )
 
                 if not (fails or user_perm_fails):

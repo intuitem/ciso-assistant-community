@@ -7,11 +7,21 @@
 	import '../../app.css';
 
 	import { browser } from '$app/environment';
+	import { invalidateAll } from '$app/navigation';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
+	import FocusModeSelector from '$lib/components/FocusMode/FocusModeSelector.svelte';
 	import { deleteCookie, getCookie } from '$lib/utils/cookies';
-	import { clientSideToast, pageTitle } from '$lib/utils/stores';
-	import * as m from '$paraglide/messages';
+	import {
+		clientSideToast,
+		pageTitle,
+		modelName,
+		modelDescription,
+		clearFocusMode,
+		focusMode
+	} from '$lib/utils/stores';
+	import { m } from '$paraglide/messages';
+	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
 	import {
 		getModalStore,
@@ -37,6 +47,58 @@
 	let sidebarOpen = $state(true);
 
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
+
+	// Display title, model name, and description from either page data or manual store setting
+	const displayTitle = $derived($page.data?.title || $pageTitle);
+
+	// Auto-detect model from URL for list pages
+	// Match pattern: /model-name or /model-name/ (but not /model-name/uuid or /model-name/something)
+	const urlModel = $derived(() => {
+		const path = $page.url.pathname;
+		const match = path.match(/^\/([a-z-]+)\/?$/);
+		return match ? match[1] : null;
+	});
+
+	// Generate description key from URL model: "risk-matrices" → "riskMatricesDescription"
+	const urlDescriptionKey = $derived(() => {
+		const model = urlModel();
+		if (!model) return null;
+
+		const camelCase = model
+			.split('-')
+			.map((word, index) => (index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+			.join('');
+		return `${camelCase}Description`;
+	});
+
+	// Determine if we're on a list page vs detail page
+	// List page: URL matches /model-name pattern (e.g., /risk-assessments)
+	// Detail page: has an object title from loadDetail (e.g., /risk-assessments/uuid)
+	const matchesListUrl = $derived(!!urlModel());
+	const hasObjectTitle = $derived(!!$page.data?.title);
+
+	// For list pages: show description subtitle
+	// For detail pages: show model name subtitle
+	const displayModelName = $derived(
+		hasObjectTitle ? $page.data?.modelVerboseName || $modelName : ''
+	);
+
+	const displayModelDescription = $derived(
+		(() => {
+			// Only show description on list pages (not on detail pages with object titles)
+			if (hasObjectTitle) return '';
+			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
+
+			// List pages: get description from i18n
+			const descKey = $page.data?.modelDescriptionKey || urlDescriptionKey();
+			if (descKey && m[descKey]) {
+				return m[descKey]();
+			}
+
+			// Fallback to manual store
+			return $modelDescription;
+		})()
+	);
 
 	run(() => {
 		if (browser) {
@@ -69,6 +131,7 @@
 	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
 
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
+	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
 
 	const modalStore: ModalStore = getModalStore();
 	function modalQuickStart(): void {
@@ -84,6 +147,21 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	// Initialize external link interceptor
+	$effect(() => {
+		if (browser) {
+			setGlobalModalStore(modalStore);
+			interceptExternalLinks();
+		}
+	});
+
+	$effect(() => {
+		if (browser && !data?.featureflags?.focus_mode && $focusMode.id) {
+			clearFocusMode();
+			invalidateAll();
+		}
+	});
 </script>
 
 <!-- App Shell -->
@@ -101,26 +179,41 @@
 	<AppBar
 		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
 		background="bg-white"
-		padding="py-2 px-4"
+		padding="pb-2 px-4"
 	>
 		{#snippet headline()}
-			<span
+			<div
 				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 				id="page-title"
 			>
-				{safeTranslate($pageTitle)}
-			</span>
-			{#if data?.user?.is_admin}
-				<button
-					onclick={modalQuickStart}
-					class="absolute top-7 right-9 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-        ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-        hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-        focus:outline-hidden focus:ring-violet-500"
-				>
-					{m.quickStart()}
-				</button>
+				{safeTranslate(displayTitle)}
+			</div>
+			{#if displayModelName}
+				<div class="text-sm text-slate-500 font-medium">
+					{safeTranslate(displayModelName)}
+				</div>
 			{/if}
+			{#if displayModelDescription}
+				<div class="text-xs text-slate-400 italic">
+					{safeTranslate(displayModelDescription)}
+				</div>
+			{/if}
+			<div class="absolute top-6 right-4 flex items-center gap-3">
+				{#if data?.featureflags?.focus_mode}
+					<FocusModeSelector folders={data?.folders ?? []} />
+				{/if}
+				{#if data?.user?.is_admin}
+					<button
+						onclick={modalQuickStart}
+						class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+		ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+		hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+		focus:outline-hidden focus:ring-violet-500"
+					>
+						{m.quickStart()}
+					</button>
+				{/if}
+			</div>
 			<hr class="w-screen my-1" />
 			<Breadcrumbs />
 		{/snippet}

@@ -9,6 +9,7 @@ import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
+import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, fetch }) => {
@@ -36,8 +37,8 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		await Promise.all(
 			model.selectFields.map(async (selectField) => {
 				const url = model.endpointUrl
-					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}`
-					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}`;
+					? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
+					: `${BASE_API_URL}/${model.urlModel}/${selectField.field}/`;
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.error(`Failed to fetch data from ${url}: ${response.statusText}`);
@@ -56,7 +57,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	model.selectOptions = selectOptions;
 
 	const missingAttackPathResponse = await fetch(
-		`${BASE_API_URL}/ebios-rm/strategic-scenarios?ebios_rm_study=${params.id}&attack_paths__isnull=true`
+		`${BASE_API_URL}/ebios-rm/strategic-scenarios/?ebios_rm_study=${params.id}&attack_paths__isnull=true`
 	);
 	const scenariosWithoutAttackPath = missingAttackPathResponse.ok
 		? await missingAttackPathResponse.json()
@@ -76,7 +77,16 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		meta: []
 	};
 
-	return { createForm, deleteForm, model, URLModel, table, scenariosWithoutAttackPath };
+	return {
+		createForm,
+		deleteForm,
+		model,
+		URLModel,
+		table,
+		scenariosWithoutAttackPath,
+		title: m.strategicScenarios(),
+		modelVerboseName: m.ebiosRmStrategicScenariosSubtitle()
+	};
 };
 
 export const actions: Actions = {

@@ -7,6 +7,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -135,13 +136,45 @@
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
 			<div class="flex flex-col space-y-2 items-center">
-				<div class="flex flex-col items-center space-x-2">
-					<span class="font-semibold text-lg text-gray-700"
-						><i class="fa-solid fa-shuffle"></i> {m.attackPath()}</span
-					>
-					<p class="text-gray-600">{operationalScenario.attack_path.name}</p>
-					{#if operationalScenario.attack_path.description}
-						<p class="text-gray-600">{operationalScenario.attack_path.description}</p>
+				<div class="flex items-center gap-4">
+					{#if operationalScenario.strategic_scenario}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.strategicScenario()}</h4>
+							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
+							<a
+								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
+								class="badge text-white bg-amber-500 hover:bg-amber-600"
+								>{operationalScenario.strategic_scenario.name}</a
+							>
+							{#if operationalScenario.strategic_scenario.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.strategic_scenario.description}
+								</p>
+							{/if}
+						</div>
+					{/if}
+					{#if operationalScenario.strategic_scenario && operationalScenario.attack_path}
+						<i class="fa-solid fa-arrow-right text-2xl text-gray-400"></i>
+					{/if}
+					{#if operationalScenario.attack_path}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.attackPath()}</h4>
+							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
+							<a
+								href="/attack-paths/{operationalScenario.attack_path.id}"
+								class="badge text-white bg-teal-500 hover:bg-teal-600"
+								>{operationalScenario.attack_path.name}</a
+							>
+							{#if operationalScenario.attack_path.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.attack_path.description}
+								</p>
+							{/if}
+						</div>
 					{/if}
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
@@ -151,7 +184,7 @@
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
 						<p class="badge text-white bg-red-500 capitalize">
-							{safeTranslate(operationalScenario.ro_to.risk_origin)}
+							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
 					<div
@@ -183,10 +216,18 @@
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
 				</h3>
+				{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
+					<div class="alert variant-soft-warning mb-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
+					</div>
+				{/if}
 				<ul class="list-disc list-inside text-gray-600">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
-							<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{#if threat.id && threat.str}
+								<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{/if}
 						{/each}
 					{:else}
 						<li>{m.noThreat()}</li>
@@ -277,14 +318,17 @@
 				>
 					<Popover
 						open={likelihoodPopupOpen}
-						onOpenChange={(e) => (likelihoodPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(likelihoodPopupOpen = operationalScenario.likelihood.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-dice text-black opacity-75"></i>
+								{#if operationalScenario.likelihood.description}
+									<i class="fa-solid fa-dice text-black opacity-75"></i>
+								{/if}
 								<span>{m.likelihood()}</span>
 							</h3>
 							<span>{operationalScenario.likelihood.name}</span>
@@ -310,14 +354,17 @@
 				>
 					<Popover
 						open={gravityPopupOpen}
-						onOpenChange={(e) => (gravityPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(gravityPopupOpen = operationalScenario.gravity.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								{#if operationalScenario.gravity.description}
+									<i class="fa-solid fa-bomb text-black opacity-75"></i>
+								{/if}
 								<span>{m.gravity()}</span>
 							</h3>
 							<span>{operationalScenario.gravity.name}</span>
@@ -343,14 +390,17 @@
 				>
 					<Popover
 						open={riskLevelPopupOpen}
-						onOpenChange={(e) => (riskLevelPopupOpen = e.open)}
+						onOpenChange={(e) =>
+							(riskLevelPopupOpen = operationalScenario.risk_level.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
 						zIndex="100"
 						contentBase="max-w-sm"
 					>
 						{#snippet trigger()}
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
-								<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								{#if operationalScenario.risk_level.description}
+									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
+								{/if}
 								<span>{m.riskLevel()}</span>
 							</h3>
 							<span>{operationalScenario.risk_level.name}</span>

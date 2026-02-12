@@ -2,7 +2,6 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
-	import Select from '$lib/components/Forms/Select.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -36,7 +35,6 @@
 
 	function modalMeasureCreateForm(): void {
 		const measureModel = page.data.measureModel;
-		console.log('measureModel', measureModel);
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -85,6 +83,24 @@
 			$formData.residual_trust
 		)
 	);
+
+	// Track selected entity option from autocomplete (with all fields included)
+	let selectedEntityOption: any[] = $state([]);
+
+	// Auto-fill current assessment fields when entity is selected
+	$effect(() => {
+		if (context === 'create' && selectedEntityOption.length > 0) {
+			const entity = selectedEntityOption[0];
+			// Only auto-fill if we have default values from the entity
+			if (entity.default_dependency !== undefined) {
+				// Update form data - RadioGroup will react to these changes now
+				$formData.current_dependency = entity.default_dependency ?? 0;
+				$formData.current_penetration = entity.default_penetration ?? 0;
+				$formData.current_maturity = entity.default_maturity ?? 1;
+				$formData.current_trust = entity.default_trust ?? 1;
+			}
+		}
+	});
 </script>
 
 <AutocompleteSelect
@@ -110,24 +126,44 @@
 	<div class="flex flex-wrap items-center gap-4">
 		<div>
 			<span class="flex flex-row space-x-4">
-				<Select
-					{form}
-					options={model.selectOptions['category']}
-					field="category"
-					label={m.category()}
-					cacheLock={cacheLocks['category']}
-					bind:cachedValue={formDataCache['category']}
-					helpText={m.stakeholderCategoryHelpText()}
-				/>
 				<AutocompleteSelect
 					{form}
 					optionsEndpoint="entities"
 					field="entity"
 					cacheLock={cacheLocks['entity']}
 					bind:cachedValue={formDataCache['entity']}
+					bind:cachedOptions={selectedEntityOption}
 					label={m.entity()}
 					hidden={initialData.entity}
 					helpText={m.stakeholderEntityHelpText()}
+					includeAllOptionFields={true}
+					optionsInfoFields={{
+						fields: [
+							{
+								field: 'relationship',
+								display: (relationships) => {
+									if (!relationships || relationships.length === 0) return '';
+									return relationships.map((r) => safeTranslate(r.str || r.name || r)).join(' | ');
+								}
+							}
+						],
+						position: 'suffix',
+						separator: ' | ',
+						classes: 'text-xs text-surface-500'
+					}}
+				/>
+				<AutocompleteSelect
+					{form}
+					optionsEndpoint="terminologies"
+					optionsDetailedUrlParameters={[
+						['field_path', 'entity.relationship'],
+						['is_visible', 'true']
+					]}
+					field="category"
+					label={m.category()}
+					cacheLock={cacheLocks['category']}
+					bind:cachedValue={formDataCache['category']}
+					helpText={m.stakeholderCategoryHelpText()}
 				/>
 			</span>
 
@@ -264,7 +300,11 @@
 				/>
 			</div>
 			<div class="flex items-end">
-				<button class="btn input h-11 w-11" onclick={modalMeasureCreateForm} type="button"
+				<button
+					class="btn input h-11 w-11"
+					aria-label={m.addAppliedControl()}
+					onclick={modalMeasureCreateForm}
+					type="button"
 					><i class="fa-solid fa-plus text-sm"></i>
 				</button>
 			</div>

@@ -4,6 +4,8 @@ import type { RiskScenarioSchema } from './schemas';
 
 export interface User {
 	id: string;
+	actor_id: string;
+	all_actor_ids: string[];
 	email: string;
 	first_name: string;
 	last_name: string;
@@ -43,14 +45,18 @@ export const URL_MODEL = [
 	'applied-controls',
 	'policies',
 	'risk-acceptances',
+	'validation-flows',
 	'reference-controls',
 	'assets',
+	'actors',
+	'teams',
 	'users',
 	'user-groups',
 	'roles',
 	'role-assignments',
 	'compliance-assessments',
 	'evidences',
+	'evidence-revisions',
 	'frameworks',
 	'requirements',
 	'requirement-assessments',
@@ -64,9 +70,11 @@ export const URL_MODEL = [
 	'entities',
 	'entity-assessments',
 	'solutions',
+	'contracts',
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	'library-filtering-labels',
 	// 'ebios-rm',
 	'feared-events',
 	'ro-to',
@@ -77,8 +85,6 @@ export const URL_MODEL = [
 	'elementary-actions',
 	'operating-modes',
 	'kill-chains',
-	// qualifications
-	'qualifications',
 	'processings',
 	'processing-natures',
 	'security-exceptions',
@@ -86,6 +92,8 @@ export const URL_MODEL = [
 	'findings-assessments',
 	// privacy,
 	'processings',
+	'right-requests',
+	'data-breaches',
 	'purposes',
 	'personal-data',
 	'data-subjects',
@@ -103,11 +111,39 @@ export const URL_MODEL = [
 	'escalation-thresholds',
 	'asset-assessments',
 	'asset-class',
+	'asset-capabilities',
 	// campaigns,
-	'campaigns'
+	'campaigns',
+	// iso,
+	'organisation-issues',
+	'organisation-objectives',
+	// crq,
+	'quantitative-risk-studies',
+	'quantitative-risk-scenarios',
+	'quantitative-risk-hypotheses',
+	// terminologies
+	'terminologies',
+	// roles,
+	'roles',
+	'permissions',
+	// pmbok
+	'generic-collections',
+	'accreditations',
+	// metrology
+	'metric-definitions',
+	'metric-instances',
+	'custom-metric-samples',
+	'dashboards',
+	'dashboard-widgets',
+	'dashboard-text-widgets',
+	'dashboard-builtin-widgets'
 ] as const;
 
-export const THIRD_PARTY_URL_MODEL = ['compliance-assessments', 'evidences'] as const;
+export const THIRD_PARTY_URL_MODEL = [
+	'compliance-assessments',
+	'evidences',
+	'evidence-revisions'
+] as const;
 
 export type urlModel = (typeof URL_MODEL)[number];
 
@@ -192,6 +228,12 @@ export interface AggregatedData {
 }
 
 export interface AppliedControlStatus {
+	localLables: string[];
+	labels: any[];
+	values: any[]; // Set these types later on
+}
+
+export interface AppliedControlImpact {
 	localLables: string[];
 	labels: any[];
 	values: any[]; // Set these types later on

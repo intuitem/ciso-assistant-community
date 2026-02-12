@@ -48,7 +48,7 @@
 						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments'].includes(URLModel)}
 								<button
-									class="inline-block border-e p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+									class="inline-block border-e p-3 text-gray-50 bg-primary-500 hover:bg-primary-400 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
@@ -73,7 +73,7 @@
 								>
 							{:else if URLModel === 'frameworks'}
 								<a
-									href="/libraries?object_type=framework"
+									href="/libraries?object_type=frameworks"
 									class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"

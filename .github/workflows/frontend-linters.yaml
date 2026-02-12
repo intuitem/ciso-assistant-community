@@ -7,9 +7,9 @@ on:
     paths:
       - "frontend/**"
 
-# If two events are triggered within a short time in the same PR, cancel the run of the oldest event
+# Cancel older in-progress runs for the same PR or the same ref (branch)
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 env:
@@ -18,7 +18,7 @@ env:
   NODE_VERSION: "22"
 
 jobs:
-  build:
+  lint-community:
     runs-on: ubuntu-24.04
     env:
       working-directory: ./frontend
@@ -47,6 +47,45 @@ jobs:
       - name: Run prettier
         working-directory: ${{env.working-directory}}
         run: pnpm exec prettier --check .
+      # NOTE: The following will be uncommented once the codebase is cleaned up
+      # - name: Install dependencies
+      #   working-directory: ${{env.working-directory}}
+      #   run: pnpm i --frozen-lockfile
+      # - name: Run prettier check & eslint
+      #   working-directory: ${{env.working-directory}}
+      #   run: pnpm run lint
+      # - name: Run svelte-check
+      #   working-directory: ${{env.working-directory}}
+      #   run: pnpm run check
+  lint-enterprise:
+    runs-on: ubuntu-24.04
+    env:
+      working-directory: ./frontend
+      PUBLIC_BACKEND_API_URL: "http://127.0.0.1:8000/api"
+
+    strategy:
+      max-parallel: 4
+      matrix:
+        node-version: ["22"]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up node ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install latest pnpm
+        working-directory: ${{env.working-directory}}
+        run: |
+          npm install -g pnpm &&
+          pnpm --version &&
+          pnpm list -g --depth 0
+      - name: Install prettier
+        working-directory: ${{env.working-directory}}
+        run: pnpm add --save-dev prettier
+      - name: Run prettier
+        working-directory: ${{env.working-directory}}
+        run: pnpm exec prettier --check ../enterprise/frontend
       # NOTE: The following will be uncommented once the codebase is cleaned up
       # - name: Install dependencies
       #   working-directory: ${{env.working-directory}}

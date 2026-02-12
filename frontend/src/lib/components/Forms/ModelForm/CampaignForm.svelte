@@ -78,9 +78,12 @@
 	multiple
 	{form}
 	optionsEndpoint="perimeters"
+	optionsExtraFields={[['folder', 'str']]}
 	field="perimeters"
-	label="Perimeters in scope"
-	hidden={initialData.perimeters}
+	cacheLock={cacheLocks['perimeters']}
+	bind:cachedValue={formDataCache['perimeters']}
+	label={m.perimeters()}
+	disabled={initialData.perimeters}
 />
 <TextField
 	type="date"
@@ -110,9 +113,9 @@
 	{form}
 	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
+	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	helpText={m.campaignDomainHelpText()}
 />

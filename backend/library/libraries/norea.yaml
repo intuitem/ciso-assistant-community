@@ -1,3 +1,5 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
 urn: urn:intuitem:risk:library:norea-dora-in-control
 locale: en
 ref_id: NOREA-DORA-in-control
@@ -17,10 +19,30 @@ copyright: "The NOREA DORA in Control Framework and Dashboard is licensed under 
   \ must give appropriate credit , provide a link to the license, and indicate if\
   \ changes were made. You may do so in any reasonable manner, but not in any way\
   \ that suggests the licensor endorses you or your use."
-version: 1
-publication_date: 2024-11-10
+version: 2
+publication_date: 2025-09-17
 provider: NOREA
 packager: intuitem
+translations:
+  fr:
+    name: "NOREA - Cadre de ma\xEEtrise DORA V3.0"
+    description: "[Traduction non officielle]\nNOREA - DORA en Control Framework est\
+      \ un outil pratique con\xE7u pour aider les organisations \xE0 se conformer\
+      \ \xE0 la loi sur la r\xE9silience op\xE9rationnelle num\xE9rique (DORA). Bien\
+      \ que ce cadre offre des indications pr\xE9cieuses, il est important de noter\
+      \ que les exigences juridiques \xE9nonc\xE9es dans la DORA elle-m\xEAme restent\
+      \ de premier plan.\nLien : https://www.norea.nl/dora"
+    copyright: "NOREA - DORA en Control Framework et le tableau de bord est sous licence\
+      \ Creative Commons BY 4.0. Pour plus d\u2019informations :\nhttps://creativecommons.org/licenses/by/4.0/\n\
+      Vous \xEAtes libre de :\nPartager \u2014 copier et redistribuer le mat\xE9riel\
+      \ sur n\u2019importe quel support ou format\nAdapter - remixer, transformer\
+      \ et construire sur le mat\xE9riel \xE0 n\u2019importe quelle fin, m\xEAme commerciale\n\
+      Le conc\xE9dant ne peut pas r\xE9voquer ces libert\xE9s tant que vous respectez\
+      \ les termes de la licence.\nDans les conditions suivantes :\nAttribution -\
+      \ Vous devez donner le cr\xE9dit appropri\xE9, fournir un lien vers la licence\
+      \ et indiquer si des modifications ont \xE9t\xE9 apport\xE9es. Vous pouvez le\
+      \ faire de toute mani\xE8re raisonnable, mais pas d\u2019une mani\xE8re qui\
+      \ sugg\xE8re que le conc\xE9dant vous approuve ou approuve votre utilisation."
 objects:
   framework:
     urn: urn:intuitem:risk:framework:norea-dora-in-control
@@ -33,21 +55,71 @@ objects:
       remain leading.
 
       Link: https://www.norea.nl/dora'
+    translations:
+      fr:
+        name: "NOREA - Cadre de ma\xEEtrise DORA V3.0"
+        description: "[Traduction non officielle]\nNOREA - DORA en Control Framework\
+          \ est un outil pratique con\xE7u pour aider les organisations \xE0 se conformer\
+          \ \xE0 la loi sur la r\xE9silience op\xE9rationnelle num\xE9rique (DORA).\
+          \ Bien que ce cadre offre des indications pr\xE9cieuses, il est important\
+          \ de noter que les exigences juridiques \xE9nonc\xE9es dans la DORA elle-m\xEA\
+          me restent de premier plan.\nLien : https://www.norea.nl/dora"
     min_score: 0
     max_score: 5
     scores_definition:
     - score: 0
       name: Incomplete
       description: Incomplete - No attention has been given to this control.
+      translations:
+        fr:
+          name: Incomplet
+          description: "Incomplet - Aucune attention n\u2019a \xE9t\xE9 accord\xE9\
+            e \xE0 ce contr\xF4le."
+          annotation: N/a
     - score: 1
       name: Initial
       description: Initial - The control is (partially) defined but is performed in
         an inconsistent manner with a large dependency on individuals relating to
         control execution.
+      translations:
+        fr:
+          name: Initial
+          description: "Initial - Le contr\xF4le est (partiellement) d\xE9fini mais\
+            \ est ex\xE9cut\xE9 de mani\xE8re incoh\xE9rente avec une grande d\xE9\
+            pendance vis-\xE0-vis des individus en ce qui concerne l\u2019ex\xE9cution\
+            \ du contr\xF4le."
+          annotation: "\u25AA Aucune mesure de gestion ou peu de mesures de gestion\
+            \ mises en \u0153uvre.\n\u25AA Des mesures de gestion ont \xE9t\xE9 mises\
+            \ en \u0153uvre ad hoc.\n\u25AA La mesure de gestion n\u2019est pas document\xE9\
+            e.\n\u25AA La m\xE9thode de mise en \u0153uvre d\xE9pend d\u2019un individu\
+            \ et n\u2019est pas standardis\xE9e.\n\u25AA Les t\xE2ches et les responsabilit\xE9\
+            s, y compris la s\xE9paration n\xE9cessaire des t\xE2ches, sont d\xE9\
+            crites pour ce contr\xF4le, mais dans la pratique, elles ne sont souvent\
+            \ pas ex\xE9cut\xE9es comme d\xE9crit.\n\u25AA Le fonctionnement de cette\
+            \ commande est test\xE9 de temps en temps.\n\u25AA L\u2019effet de la\
+            \ mesure de contr\xF4le n\u2019est pas \xE9valu\xE9."
     - score: 2
       name: Managed
       description: Managed - The control is implemented and performed with consistence
         and structure for part of the proces or control (evidence not always available)
+      translations:
+        fr:
+          name: "G\xE9r\xE9"
+          description: "Gestion - Le contr\xF4le est mis en \u0153uvre et ex\xE9cut\xE9\
+            \ avec coh\xE9rence et structure pour une partie du processus ou du contr\xF4\
+            le (les preuves ne sont pas toujours disponibles)"
+          annotation: "\u25AA La conception et l\u2019existence sont limit\xE9es,\
+            \ d\xE9montrables.\n\u25AA La mesure de contr\xF4le n\u2019est qu\u2019\
+            en partie d\xE9termin\xE9e, en partie consign\xE9e par \xE9crit et en\
+            \ partie ancr\xE9e dans l\u2019organisation.\n\u25AA Les t\xE2ches et\
+            \ les responsabilit\xE9s, y compris la s\xE9paration n\xE9cessaire des\
+            \ t\xE2ches, sont d\xE9crites pour cette mesure de contr\xF4le et sont\
+            \ ex\xE9cut\xE9es dans la pratique.\n\u25AA L\u2019effet du contr\xF4\
+            le ne peut pas \xEAtre d\xE9montr\xE9 et/ou n\u2019est pas enregistr\xE9\
+            .\n\u25AA L\u2019efficacit\xE9 de la mesure de contr\xF4le est test\xE9\
+            e et consign\xE9e p\xE9riodiquement pendant moins de 6 mois, ou l\u2019\
+            efficacit\xE9 ne peut \xEAtre d\xE9montr\xE9e sur une p\xE9riode de 6\
+            \ mois."
     - score: 3
       name: Defined
       description: Defined (design existence and operation) - The design of the control
@@ -55,12 +127,54 @@ objects:
         The required effectiveness of the control measure can be demonstrated and
         is tested. Where necessary, the control measure is improved. *This is the
         advised level to be demonstrably compliant with DORA.
+      translations:
+        fr:
+          name: "D\xE9fini"
+          description: "D\xE9fini (conception, existence et fonctionnement) - La conception\
+            \ de la mesure de contr\xF4le est document\xE9e et mise en \u0153uvre\
+            \ de mani\xE8re structur\xE9e et formalis\xE9e. L\u2019efficacit\xE9 requise\
+            \ de la mesure de contr\xF4le peut \xEAtre d\xE9montr\xE9e et test\xE9\
+            e. Si n\xE9cessaire, la mesure de contr\xF4le est am\xE9lior\xE9e. *Il\
+            \ s\u2019agit du niveau conseill\xE9 pour \xEAtre manifestement conforme\
+            \ \xE0 DORA."
+          annotation: "\u25AA La conception, l\u2019existence et le fonctionnement\
+            \ efficace sont d\xE9montrables.\n\u25AA La mesure de contr\xF4le a \xE9\
+            t\xE9 d\xE9finie sur la base d\u2019une \xE9valuation des risques.\n\u25AA\
+            \ La mesure de contr\xF4le a \xE9t\xE9 d\xE9finie, consign\xE9e par \xE9\
+            crit et ancr\xE9e dans l\u2019organisation.\n\u25AA Les t\xE2ches et les\
+            \ responsabilit\xE9s, y compris la s\xE9paration n\xE9cessaire des t\xE2\
+            ches, ont \xE9t\xE9 mises en \u0153uvre par \xE9crit, et mises \xE0 l\u2019\
+            essai et \xE9valu\xE9es.\n\u25AA L\u2019efficacit\xE9 a \xE9t\xE9 test\xE9\
+            e, d\xE9montr\xE9e et enregistr\xE9e sur une p\xE9riode d\u2019au moins\
+            \ 6 mois sur une base de risque.\n\u25AA La mise en \u0153uvre de la mesure\
+            \ de contr\xF4le est signal\xE9e \xE0 la direction."
     - score: 4
       name: Quantitative
       description: Quantitatively Managed - In addition to the effectiveness of individual
         control measures, the effectiveness of the cohesion of all information security
         measures is also evaluated periodically. This evaluation of the system of
         control measures is recorded and reported to management.
+      translations:
+        fr:
+          name: Quantitatif
+          description: "Gestion quantitative - En plus de l\u2019efficacit\xE9 des\
+            \ mesures de contr\xF4le individuelles, l\u2019efficacit\xE9 de la coh\xE9\
+            sion de toutes les mesures de s\xE9curit\xE9 de l\u2019information est\
+            \ \xE9galement \xE9valu\xE9e p\xE9riodiquement. Cette \xE9valuation du\
+            \ syst\xE8me de mesures de contr\xF4le est consign\xE9e et communiqu\xE9\
+            e \xE0 la direction."
+          annotation: "Crit\xE8res d\u2019inscription au niveau 3 et crit\xE8res de\
+            \ distinction suivants :\n\u25AA L\u2019\xE9valuation de la mesure de\
+            \ contr\xF4le a lieu dans le cadre du syst\xE8me de mesures de s\xE9curit\xE9\
+            \ de l\u2019information.\n\u25AA L\u2019\xE9valuation est document\xE9\
+            e.\n\u25AA Les r\xF4les et les responsabilit\xE9s en mati\xE8re d\u2019\
+            \xE9valuation ont \xE9t\xE9 officialis\xE9s.\n\u25AA La fr\xE9quence des\
+            \ \xE9valuations est fond\xE9e sur le profil de risque de l\u2019\xE9\
+            tablissement et a lieu au moins une fois par ann\xE9e.\n\u25AA Lors de\
+            \ l\u2019examen p\xE9riodique du fonctionnement efficace du contr\xF4\
+            le, des CIP (m\xE9triques) sont utilis\xE9s, les incidents (op\xE9rationnels)\
+            \ sont inclus et une analyse comparative avec les pairs a lieu.\n\u25AA\
+            \ Les r\xE9sultats de l\u2019examen sont communiqu\xE9s \xE0 la direction."
     - score: 5
       name: Optimizing
       description: Optimizing - Continuous efforts are made to improve the effectiveness
@@ -68,18 +182,48 @@ objects:
         involves the use of external data and benchmarking. Employees are proactively
         involved in the future-oriented improvement of the effectiveness of the coherence
         of information security measures.
+      translations:
+        fr:
+          name: Optimisation
+          description: "Optimisation - Des efforts continus sont d\xE9ploy\xE9s pour\
+            \ am\xE9liorer l\u2019efficacit\xE9 du syst\xE8me de mesures de contr\xF4\
+            le en tenant compte des risques futurs. Cela implique l\u2019utilisation\
+            \ de donn\xE9es externes et l\u2019analyse comparative. Les employ\xE9\
+            s sont impliqu\xE9s de mani\xE8re proactive dans l\u2019am\xE9lioration\
+            \ orient\xE9e vers l\u2019avenir de l\u2019efficacit\xE9 de la coh\xE9\
+            rence des mesures de s\xE9curit\xE9 de l\u2019information."
+          annotation: "Crit\xE8res d\u2019obtention du niveau 4 et crit\xE8res de\
+            \ distinction suivants :\n\u25AA Les mesures de gestion sont constamment\
+            \ mises \xE0 jour. L\u2019\xE9valuation est ax\xE9e sur l\u2019avenir\
+            \ et comprend une analyse comparative avec des pairs.\n\u25AA Les r\xE9\
+            sultats des auto-\xE9valuations, des analyses des \xE9carts et des causes\
+            \ profondes ont \xE9t\xE9 utilis\xE9s dans la conception de la mesure\
+            \ de contr\xF4le.\n\u25AA Les mesures de contr\xF4le en place sont compar\xE9\
+            es \xE0 des donn\xE9es externes et constituent des \xAB pratiques exemplaires\
+            \ \xBB par rapport \xE0 celles d\u2019autres organisations.\n\u25AA L\u2019\
+            \xE9valuation de l\u2019efficacit\xE9 de l\u2019application de la mesure\
+            \ de contr\xF4le est fond\xE9e sur des CIP (m\xE9triques).\n\u25AA Il\
+            \ est prouv\xE9 que les employ\xE9s sont impliqu\xE9s en permanence et\
+            \ de mani\xE8re proactive dans l\u2019am\xE9lioration des mesures de contr\xF4\
+            le."
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
       assessable: false
       depth: 1
       ref_id: GRM
       name: Governance and Risk Management
+      translations:
+        fr:
+          name: Gouvernance et gestion des risques
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
       ref_id: '1'
       name: Management Responsibilities
+      translations:
+        fr:
+          name: "Responsabilit\xE9s de la direction"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.1
       assessable: true
       depth: 3
@@ -102,26 +246,51 @@ objects:
         informed about third-party  arrangements, services provided, planned material
         changes regarding third- party service providers, and understand the impact
         of these changes on critical and important functions of the entity (including
-        risk assessment results).  '
+        risk assessment results).'
       annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+      translations:
+        fr:
+          name: Gouvernance du risque ICT
+          description: "L\u2019organe de direction assume la responsabilit\xE9 ultime\
+            \ de la gestion efficace de tous les risques informatiques de l\u2019\
+            entit\xE9 financi\xE8re. \xC0 ce titre, l\u2019organe de direction examine\
+            \ et approuve p\xE9riodiquement (par exemple une fois par an) :\n- Politiques\
+            \ relatives \xE0 la disponibilit\xE9, \xE0 l\u2019authenticit\xE9, \xE0\
+            \ l\u2019int\xE9grit\xE9 et \xE0 la confidentialit\xE9 des donn\xE9es,\
+            \ y compris la politique sur les arrangements avec les fournisseurs de\
+            \ services tiers TIC (voir contr\xF4le 2.1).\n- Les r\xF4les, les responsabilit\xE9\
+            s et les dispositions de gouvernance en mati\xE8re de gestion des risques\
+            \ li\xE9s aux TIC (y compris ceux li\xE9s aux accords avec des tiers TIC),\
+            \ y compris la surveillance continue de ceux-ci.\n- la politique sur les\
+            \ ententes conclues avec les fournisseurs de services tiers en mati\xE8\
+            re de TIC, et se tient inform\xE9 des ententes avec des tiers, des services\
+            \ fournis, des changements importants pr\xE9vus concernant les fournisseurs\
+            \ de services tiers, et comprend l\u2019incidence de ces changements sur\
+            \ les fonctions critiques et importantes de l\u2019entit\xE9 (y compris\
+            \ les r\xE9sultats de l\u2019\xE9valuation des risques)."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
       ref_id: '1.2'
       name: Knowledge of the Management Body
-      description: 'The Management body shall ensure that it is kept up to date with
+      description: The Management body shall ensure that it is kept up to date with
         sufficient knowledge and skills to understand and assess ICT risks and operations
         (e.g. through periodic trainings).
-
-        '
       annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+      translations:
+        fr:
+          name: "Connaissance de l\u2019organe de direction"
+          description: "L\u2019organe de direction veille \xE0 ce qu\u2019il dispose\
+            \ de connaissances et de comp\xE9tences suffisantes pour comprendre et\
+            \ \xE9valuer les risques et les op\xE9rations li\xE9s aux TIC (par exemple,\
+            \ par le biais de formations p\xE9riodiques)."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:1
       ref_id: '1.3'
-      name: 'Digital Operational Resilience Strategy '
+      name: Digital Operational Resilience Strategy
       description: "The Management body shall set and approve the digital operational\
         \ resilience strategy and periodically update when needed.\n\nThe digital\
         \ operational resilience strategy  must:\n- Set out how the risk management\
@@ -142,6 +311,36 @@ objects:
         \ is arranged on the the effectiveness of the implementation of the digital\
         \ operational resilience."
       annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+      translations:
+        fr:
+          name: "Strat\xE9gie de r\xE9silience op\xE9rationnelle num\xE9rique"
+          description: "L\u2019organe de direction d\xE9finit et approuve la strat\xE9\
+            gie de r\xE9silience op\xE9rationnelle num\xE9rique et la met p\xE9riodiquement\
+            \ \xE0 jour si n\xE9cessaire.\n\nLa strat\xE9gie de r\xE9silience op\xE9\
+            rationnelle num\xE9rique doit :\n- \xC9tablir la fa\xE7on dont le cadre\
+            \ de gestion des risques sera mis en \u0153uvre. \n- \xC9laborer sur l\u2019\
+            alignement entre le cadre de gestion des risques et la strat\xE9gie et\
+            \ les objectifs de l\u2019entreprise. \n- \xC9tablir le niveau de tol\xE9\
+            rance au risque li\xE9 aux TIC (en fonction de l\u2019app\xE9tit pour\
+            \ le risque) et le niveau de tol\xE9rance \xE0 l\u2019impact en cas de\
+            \ perturbation des TIC. \n- Incluez des objectifs de s\xE9curit\xE9 clairs,\
+            \ y compris des indicateurs cl\xE9s de performance (KPI) et des mesures\
+            \ de risque. \n- \xC9laborer l\u2019architecture de r\xE9f\xE9rence ICT\
+            \ et les modifications n\xE9cessaires pour atteindre des objectifs commerciaux\
+            \ sp\xE9cifiques.\n- D\xE9crire les m\xE9canismes en place pour d\xE9\
+            tecter les incidents li\xE9s aux TIC\n- Contenir des preuves de la situation\
+            \ actuelle en mati\xE8re de r\xE9silience op\xE9rationnelle num\xE9rique\
+            \ (par exemple, sur la base du nombre d\u2019incidents majeurs li\xE9\
+            s aux TIC et de l\u2019efficacit\xE9 des mesures pr\xE9ventives).\n- Contenir\
+            \ la mani\xE8re dont les tests de r\xE9silience op\xE9rationnelle num\xE9\
+            rique sont mis en \u0153uvre (voir les contr\xF4les sous 19 et 20).\n\
+            - Esquisser la strat\xE9gie de communication en cas d\u2019incident (voir\
+            \ 11.3)\n\nL\u2019organe de direction alloue et examine le budget n\xE9\
+            cessaire aux ressources n\xE9cessaires pour r\xE9pondre aux besoins de\
+            \ l\u2019entit\xE9 en mati\xE8re de r\xE9silience op\xE9rationnelle num\xE9\
+            rique.\n\nVeiller \xE0 ce qu\u2019un suivi soit organis\xE9 sur l\u2019\
+            efficacit\xE9 de la mise en \u0153uvre de la r\xE9silience op\xE9rationnelle\
+            \ num\xE9rique."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.4
       assessable: true
       depth: 3
@@ -151,6 +350,13 @@ objects:
       description: The Management body reviews and approves periodically (e.g. annually)
         the ICT business continuity policy and the ICT response and recovery plans.
       annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+      translations:
+        fr:
+          name: "Surveillance de la continuit\xE9 des activit\xE9s"
+          description: "L\u2019organe de direction examine et approuve p\xE9riodiquement\
+            \ (par exemple une fois par an) la politique de continuit\xE9 des activit\xE9\
+            s TIC ainsi que les plans d\u2019intervention et de relance dans le domaine\
+            \ des TIC."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:1.5
       assessable: true
       depth: 3
@@ -160,12 +366,21 @@ objects:
       description: The Management body reviews and approves periodically (e.g. annually)
         internal ICT audit plans, ICT audits, and material modifications to the audits.
       annotation: "5.1\n5.2 \n5.3\n5.4 \n6.8\n13.4\n13.7"
+      translations:
+        fr:
+          name: "Approbation et examen du plan d\u2019audit"
+          description: "L\u2019organe de direction examine et approuve p\xE9riodiquement\
+            \ (par exemple une fois par an) les plans d\u2019audit interne des TIC,\
+            \ les audits TIC et les modifications importantes apport\xE9es aux audits."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
       ref_id: '2'
       name: Risk Management Framework
+      translations:
+        fr:
+          name: Cadre de gestion des risques
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.1
       assessable: true
       depth: 3
@@ -257,6 +472,28 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: Mesures de protection
+          description: "Mettre en \u0153uvre des politiques et des proc\xE9dures pour\
+            \ prot\xE9ger toutes les informations, les actifs TIC et les composants\
+            \ et infrastructures physiques TIC pertinents. Au moins les politiques\
+            \ suivantes doivent \xEAtre \xE9tablies, maintenues et approuv\xE9es par\
+            \ l\u2019organe de direction.\n\n- Politique de s\xE9curit\xE9\n- Politique\
+            \ de ressources humaines \n- Politique de cryptage et de contr\xF4le cryptographique\n\
+            - Politique de gestion des identit\xE9s et des acc\xE8s (IAM)\n- Politique\
+            \ de gestion du changement\n- Politique de s\xE9curit\xE9 du r\xE9seau\n\
+            - Politiques et proc\xE9dures op\xE9rationnelles des TIC \n- Politique\
+            \ de communication\n- Politique de gestion des vuln\xE9rabilit\xE9s et\
+            \ des correctifs\n- Politique de sauvegarde\n- Politique de gestion de\
+            \ projet\n- Politique de s\xE9curit\xE9 physique et environnementale\n\
+            - Politique de continuit\xE9 d\u2019activit\xE9 avec plans d\u2019intervention\
+            \ et de reprise (y compris des plans de test)\n- Politique de gestion\
+            \ des fournisseurs de services tiers ICT\n- Exploitation des actifs TIC\
+            \ (assurer la s\xE9curit\xE9 du r\xE9seau, prot\xE9ger contre les intrusions\
+            \ et l\u2019utilisation abusive des donn\xE9es et d\xE9finir la mani\xE8\
+            re dont l\u2019entit\xE9 exploite, surveille, contr\xF4le et restaure\
+            \ les actifs TIC, y compris la documentation des op\xE9rations TIC)"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.2
       assessable: true
       depth: 3
@@ -338,6 +575,14 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: Fonctions critiques et importantes
+          description: "Identifier, classifier et documenter ad\xE9quatement toutes\
+            \ les fonctions critiques et importantes. Ce processus consiste \xE0 d\xE9\
+            terminer quelles fonctions sont essentielles \xE0 la stabilit\xE9 et \xE0\
+            \ la continuit\xE9 op\xE9rationnelles de l\u2019entit\xE9.  Examinez au\
+            \ besoin, et au moins une fois par an, la pertinence de cette classification."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.3
       assessable: true
       depth: 3
@@ -418,16 +663,23 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: "S\xE9paration claire des t\xE2ches (SoD)"
+          description: "\xC9tablir une s\xE9paration des t\xE2ches en ce qui concerne\
+            \ les fonctions de gestion des risques, selon le mod\xE8le des trois lignes\
+            \ de d\xE9fense ou le mod\xE8le interne de gestion et de contr\xF4le des\
+            \ risques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
       ref_id: '2.4'
-      name: 'ICT Risk management framework '
-      description: 'A sound, comprehensive and well-documented ICT risk management
+      name: ICT Risk management framework
+      description: A sound, comprehensive and well-documented ICT risk management
         framework is in place. Which as goal to address all ICT risks properly and
         ensure a high level of digital resilience. The reponsibility for risk management
-        is properly assigned to a control function. '
+        is properly assigned to a control function.
       annotation: '6.1
 
         6.2
@@ -499,17 +751,26 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Cadre de gestion des risques li\xE9s aux TIC"
+          description: "Un cadre solide, complet et bien document\xE9 de gestion des\
+            \ risques li\xE9s aux TIC est en place. L\u2019objectif est de traiter\
+            \ correctement tous les risques li\xE9s aux TIC et d\u2019assurer un haut\
+            \ niveau de r\xE9silience num\xE9rique. La responsabilit\xE9 de la gestion\
+            \ des risques est correctement attribu\xE9e \xE0 une fonction de contr\xF4\
+            le."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.5
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:2
       ref_id: '2.5'
       name: Annual Framework Review and Audit Process
-      description: 'The effectiveness of the risk management framework is monitored
+      description: The effectiveness of the risk management framework is monitored
         based on the risk exposure over time to critical or important business functions.
         Implement a reviewing and auditing process, with a minimum yearly review of
         the framework, triggered by major ICT incidents, regulator instructions, or
-        major audit findings. '
+        major audit findings.
       annotation: '6.1
 
         6.2
@@ -581,6 +842,16 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Processus annuel d\u2019examen et de v\xE9rification du cadre"
+          description: "L\u2019efficacit\xE9 du cadre de gestion des risques est surveill\xE9\
+            e en fonction de l\u2019exposition au risque au fil du temps pour les\
+            \ fonctions op\xE9rationnelles critiques ou importantes. Mettre en \u0153\
+            uvre un processus d\u2019examen et d\u2019audit, avec un examen annuel\
+            \ minimum du cadre, d\xE9clench\xE9 par des incidents informatiques majeurs,\
+            \ des instructions des organismes de r\xE9glementation ou des r\xE9sultats\
+            \ d\u2019audit majeurs."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:2.6
       assessable: true
       depth: 3
@@ -597,7 +868,7 @@ objects:
         \ to monitor relations with the third-parties and the contractual arrangements.\
         \ \n- A multi-vendor strategy, if deemed relevant,  showing key dependencies\
         \ on ICT third-party service providers and explaining the rationale behind\
-        \ the procurement mix of ICT third-party service providers.  "
+        \ the procurement mix of ICT third-party service providers."
       annotation: '6.1
 
         6.2
@@ -669,23 +940,44 @@ objects:
         8.1 (RTS RM)
 
         8.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Programme de gestion des risques li\xE9s aux tiers (fournisseurs\
+            \ multiples)"
+          description: "Maintenir un programme complet de gestion des risques li\xE9\
+            s aux tiers qui comprend :\n- Un registre d\u2019informations relatives\
+            \ \xE0 l\u2019utilisation de prestataires de services tiers, en particulier\
+            \ ceux qui soutiennent des fonctions critiques ou importantes (voir \xE9\
+            galement contr\xF4le 17.3).\n- Mettre en place une politique sur la gestion\
+            \ des tiers ICT, y compris les crit\xE8res de d\xE9termination de la criticit\xE9\
+            \ des fournisseurs de services et les responsabilit\xE9s internes en mati\xE8\
+            re de gestion des tiers. \n- S\u2019assurer que la haute direction examine\
+            \ la politique et d\xE9signe un membre pour surveiller les relations avec\
+            \ les tiers et les arrangements contractuels. \n- Une strat\xE9gie multifournisseur,\
+            \ si elle est jug\xE9e pertinente, montrant les principales d\xE9pendances\
+            \ vis-\xE0-vis des fournisseurs de services tiers TIC et expliquant la\
+            \ raison d\u2019\xEAtre de la combinaison d\u2019achats des fournisseurs\
+            \ de services tiers TIC."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
       ref_id: '3'
       name: Risk Asessments
+      translations:
+        fr:
+          name: "\xC9valuation des risques"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:3
       ref_id: '3.1'
-      name: 'Risk Assessment '
-      description: 'Identify all sources of ICT risk on a continuous basis, including
+      name: Risk Assessment
+      description: Identify all sources of ICT risk on a continuous basis, including
         risk exposure to and from other entities. Gather information, assess, and
         review at least on a yearly basis the cyber threats and ICT vulnerabilities
         relevant to business functions and assets. Evaluate the (potential) impact
-        of these threats and vulnerabilities on the assets. '
+        of these threats and vulnerabilities on the assets.
       annotation: '8.2
 
         8.3
@@ -695,6 +987,16 @@ objects:
         8.4
 
         13.1'
+      translations:
+        fr:
+          name: "\xC9valuation du risque"
+          description: "Identifier en permanence toutes les sources de risque li\xE9\
+            \ aux TIC, y compris l\u2019exposition aux risques li\xE9s \xE0 d\u2019\
+            autres entit\xE9s. Recueillir de l\u2019information, \xE9valuer et examiner\
+            \ au moins une fois par an les cybermenaces et les vuln\xE9rabilit\xE9\
+            s li\xE9es aux TIC pertinentes aux fonctions et aux actifs de l\u2019\
+            entreprise. \xC9valuez l\u2019impact (potentiel) de ces menaces et vuln\xE9\
+            rabilit\xE9s sur les actifs."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.2
       assessable: true
       depth: 3
@@ -713,6 +1015,13 @@ objects:
         8.4
 
         13.1'
+      translations:
+        fr:
+          name: "\xC9valuation des risques de changement majeur"
+          description: "Effectuez une \xE9valuation des risques \xE0 chaque changement\
+            \ majeur dans le r\xE9seau, l\u2019infrastructure informatique et les\
+            \ processus ou proc\xE9dures affectant les fonctions et les actifs de\
+            \ l\u2019entreprise."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:3.3
       assessable: true
       depth: 3
@@ -731,12 +1040,22 @@ objects:
         8.4
 
         13.1'
+      translations:
+        fr:
+          name: "\xC9valuation des risques li\xE9s aux syst\xE8mes existants"
+          description: "Effectuer des \xE9valuations des risques sp\xE9cifiques sur\
+            \ tous les syst\xE8mes, applications ou syst\xE8mes TIC existants au moins\
+            \ une fois par an. Effectuez des \xE9valuations avant et apr\xE8s la connexion\
+            \ de syst\xE8mes, d\u2019applications ou de syst\xE8mes TIC existants."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:grm
       ref_id: '4'
       name: (Internal) ICT Audit
+      translations:
+        fr:
+          name: (Interne) Audit des TIC
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.1
       assessable: true
       depth: 3
@@ -763,6 +1082,15 @@ objects:
         8.2 (RTS TPPM)
 
         8.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Approche et fr\xE9quence des audits"
+          description: "Le service d\u2019audit interne r\xE9alise des audits dans\
+            \ les domaines suivants : \n- Cadre de gestion des risques, politiques,\
+            \ processus et proc\xE9dures connexes\n- Plans de r\xE9ponse et de relance\
+            \ des TIC\n- Fournisseurs de services tiers ICT\n\nAjustez la fr\xE9quence\
+            \ et l\u2019orientation des audits en fonction du profil de risque ICT\
+            \ de l\u2019entit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.2
       assessable: true
       depth: 3
@@ -787,20 +1115,26 @@ objects:
         8.2 (RTS TPPM)
 
         8.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Exigences de l\u2019auditeur"
+          description: "S\u2019assurer que le personnel d\u2019audit interne poss\xE8\
+            de suffisamment de connaissances, de comp\xE9tences et d\u2019expertise\
+            \ en mati\xE8re de risques TIC pour effectuer les audits. Assurez-vous\
+            \ \xE9galement de l\u2019ind\xE9pendance de la fonction d\u2019audit."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:4
       ref_id: '4.3'
       name: Audit findings
-      description: "Establish a follow-up process for audit findings, including rules\
-        \ for timely verification and remediation of critical findings. Maintain a\
-        \ continuous learning and improvement process based on risk assessment results,\
-        \ resilience testing, (cyber) incidents, and testing of business continuity\
-        \ plans. The results of this process shall be reported annually by senior\
-        \ ICT staff to the management body. The format and content of the review report\
-        \ shall meet the requirements stated in Chapter 5 (Article 27) of RTS RM.\n\
-        \n "
+      description: Establish a follow-up process for audit findings, including rules
+        for timely verification and remediation of critical findings. Maintain a continuous
+        learning and improvement process based on risk assessment results, resilience
+        testing, (cyber) incidents, and testing of business continuity plans. The
+        results of this process shall be reported annually by senior ICT staff to
+        the management body. The format and content of the review report shall meet
+        the requirements stated in Chapter 5 (Article 27) of RTS RM.
       annotation: '6.6
 
         11.3
@@ -816,6 +1150,20 @@ objects:
         8.2 (RTS TPPM)
 
         8.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Constatations de l\u2019audit"
+          description: "\xC9tablir un processus de suivi des constatations d\u2019\
+            audit, y compris des r\xE8gles pour la v\xE9rification en temps opportun\
+            \ et la correction des constatations critiques. Maintenir un processus\
+            \ d\u2019apprentissage et d\u2019am\xE9lioration continu bas\xE9 sur les\
+            \ r\xE9sultats de l\u2019\xE9valuation des risques, les tests de r\xE9\
+            silience, les incidents (cyber) et les tests des plans de continuit\xE9\
+            \ des activit\xE9s. Les r\xE9sultats de ce processus sont communiqu\xE9\
+            s chaque ann\xE9e par les hauts responsables des TIC \xE0 l\u2019organe\
+            \ de direction. Le format et le contenu du rapport d\u2019examen doivent\
+            \ satisfaire aux exigences \xE9nonc\xE9es au chapitre 5 (article 27) du\
+            \ RTS RM."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:4.4
       assessable: true
       depth: 3
@@ -850,17 +1198,45 @@ objects:
         8.2 (RTS TPPM)
 
         8.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: Assurance et certifications par des tiers de Reliance
+          description: "Utiliser, le cas \xE9ch\xE9ant, des certifications de tiers,\
+            \ des rapports d\u2019audit tiers ou internes mis \xE0 disposition par\
+            \ le fournisseur de services tiers ICT, ou des rapports d\u2019audit propres\
+            \ pour confirmer le respect des exigences contractuelles en mati\xE8re\
+            \ d\u2019acc\xE8s \xE0 l\u2019information, d\u2019inspection, d\u2019\
+            audit et de test ICT avec le tiers. Ne s\u2019appuyer sur des certifications\
+            \ tierces et des rapports d\u2019audit de fournisseurs de services tiers\
+            \ ICT que si les conditions sp\xE9cifiques suivantes sont remplies : le\
+            \ plan d\u2019audit est align\xE9 sur les dispositions contractuelles,\
+            \ la port\xE9e de l\u2019audit est compl\xE8te et couvre les syst\xE8\
+            mes et les contr\xF4les cl\xE9s identifi\xE9s, l\u2019\xE9valuation continue\
+            \ du contenu des certifications/rapports est effectu\xE9e et valid\xE9\
+            e, les syst\xE8mes et contr\xF4les cl\xE9s sont couverts dans les futures\
+            \ versions du rapport de certification ou d\u2019audit,  La confiance\
+            \ est dans les capacit\xE9s de la partie qui certifie ou audite, les certifications\
+            \ et les audits respectent les normes professionnelles reconnues, le droit\
+            \ de demander l\u2019\xE9largissement de la port\xE9e est couvert par\
+            \ le contrat et le droit d\u2019effectuer des v\xE9rifications discr\xE9\
+            tionnaires est conserv\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
       assessable: false
       depth: 1
       ref_id: OM
       name: Operational Management
+      translations:
+        fr:
+          name: "Gestion op\xE9rationnelle"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
       ref_id: '5'
       name: Asset Management
+      translations:
+        fr:
+          name: "Gestion d\u2019actifs"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.1
       assessable: true
       depth: 3
@@ -878,11 +1254,20 @@ objects:
         with peak orders, message or transaction volumes as needed
 
         - Technologically resilient to deal with additional processing needs under
-        stressed market conditions or other adverse market conditions
-
-        '
+        stressed market conditions or other adverse market conditions'
       annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
         \ (RTS RM)"
+      translations:
+        fr:
+          name: "Syst\xE8mes r\xE9silients"
+          description: "Utiliser et maintenir des syst\xE8mes, des protocoles et des\
+            \ outils TIC qui sont \xE0 jour et qui :\n- Adapt\xE9 \xE0 l\u2019ampleur\
+            \ des op\xE9rations ICT\n-Fiable\n- Dot\xE9 d\u2019une capacit\xE9 suffisante\
+            \ pour traiter avec pr\xE9cision les donn\xE9es et pour traiter les pics\
+            \ d\u2019ordres, de messages ou de transactions selon les besoins\n- R\xE9\
+            silience technologique pour faire face aux besoins de traitement suppl\xE9\
+            mentaires dans des conditions de march\xE9 tendues ou d\u2019autres conditions\
+            \ de march\xE9 d\xE9favorables."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.2
       assessable: true
       depth: 3
@@ -904,6 +1289,26 @@ objects:
         \ in an automated and continuous fashion."
       annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
         \ (RTS RM)"
+      translations:
+        fr:
+          name: Gestion des stocks
+          description: "Tenir un inventaire des actifs (ICT), surveiller leur cycle\
+            \ de vie et le mettre \xE0 jour p\xE9riodiquement et \xE0 chaque changement\
+            \ majeur dans le r\xE9seau, l\u2019infrastructure informatique et les\
+            \ processus et proc\xE9dures soutenant les fonctions commerciales. Tenir\
+            \ des registres des \xE9l\xE9ments suivants pour chaque actif TIC : identificateur\
+            \ unique, emplacement (physique ou logique), classification des actifs,\
+            \ identit\xE9 du propri\xE9taire de l\u2019actif, informations pour l\u2019\
+            \xE9valuation des risques sp\xE9cifiques sur les syst\xE8mes existants,\
+            \ fonctions op\xE9rationnelles ou services pris en charge, exigences de\
+            \ continuit\xE9 des activit\xE9s (par exemple, RTO, RPO), exposition aux\
+            \ r\xE9seaux externes, y compris Internet, liens et interd\xE9pendances\
+            \ entre les actifs et les fonctions commerciales utilisant chaque actif,\
+            \  et les dates de fin des services d\u2019assistance r\xE9guliers, \xE9\
+            tendus et personnalis\xE9s du fournisseur de services tiers TIC, apr\xE8\
+            s quoi il n\u2019est plus pris en charge par son fournisseur ou par un\
+            \ fournisseur de services tiers TIC.\n\nId\xE9alement, la gestion des\
+            \ stocks est effectu\xE9e de mani\xE8re automatis\xE9e et continue."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:5.3
       assessable: true
       depth: 3
@@ -927,12 +1332,38 @@ objects:
         and up-to-date asset records.
       annotation: "7\n8.1 \n8.5\n8.6\n4.1 (RTS RM)\n4.2 (RTS RM)\n5.1 (RTS RM)\n5.2\
         \ (RTS RM)"
+      translations:
+        fr:
+          name: Classification et documentation des actifs
+          description: "Identifier, classifier et documenter toutes les fonctions\
+            \ op\xE9rationnelles soutenues par les TIC, y compris les actifs qui les\
+            \ soutiennent, et d\xE9tailler les r\xF4les et les d\xE9pendances de ces\
+            \ actifs par rapport au risque TIC. De plus, identifiez et documentez\
+            \ toutes les fonctions commerciales soutenues par les TIC qui d\xE9pendent\
+            \ de fournisseurs de services tiers TIC, et identifiez les services fournis\
+            \ par des fournisseurs tiers qui soutiennent des fonctions commerciales\
+            \ critiques ou importantes. Cartographier les actifs critiques (TIC) sur\
+            \ la base d\u2019une \xE9valuation de criticit\xE9, qui doit inclure les\
+            \ ressources r\xE9seau, les \xE9quipements mat\xE9riels et les ressources\
+            \ sur les sites distants. Cette cartographie doit \xE9galement int\xE9\
+            grer la configuration des actifs et leurs liens et interd\xE9pendances\
+            \ avec d\u2019autres actifs. L\u2019\xE9valuation de la criticit\xE9 doit\
+            \ suivre des crit\xE8res clairs pour \xE9valuer le risque li\xE9 aux TIC\
+            \ li\xE9 aux fonctions commerciales, en tenant compte de l\u2019impact\
+            \ potentiel des pertes de confidentialit\xE9, d\u2019int\xE9grit\xE9 et\
+            \ de disponibilit\xE9. Examiner la pertinence de cette classification\
+            \ et de cette documentation au moins une fois par ann\xE9e, en s\u2019\
+            assurant qu\u2019elles r\xE9pondent aux exigences relatives \xE0 la tenue\
+            \ de registres exacts et \xE0 jour des biens."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
       ref_id: '6'
       name: Change Management
+      translations:
+        fr:
+          name: Gestion du changement
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.1
       assessable: true
       depth: 3
@@ -955,6 +1386,23 @@ objects:
         17.1 (RTS RM)
 
         17.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Proc\xE9dures de changement"
+          description: "Assurez-vous que toutes les modifications apport\xE9es aux\
+            \ logiciels, au mat\xE9riel, aux composants du micrologiciel et aux syst\xE8\
+            mes, ainsi qu\u2019aux param\xE8tres de s\xE9curit\xE9, sont correctement\
+            \ plac\xE9es et d\xE9finies. Documentez et communiquez les d\xE9tails\
+            \ du changement, y compris l\u2019objectif et la port\xE9e du changement,\
+            \ le calendrier de mise en \u0153uvre et les r\xE9sultats attendus. D\xE9\
+            finissez des r\xF4les et des responsabilit\xE9s clairs pour vous assurer\
+            \ que les changements sont d\xE9finis, planifi\xE9s, transitionn\xE9s,\
+            \ mis \xE0 l\u2019essai et finalis\xE9s de mani\xE8re contr\xF4l\xE9e.\
+            \ De plus, \xE9tablissez des proc\xE9dures efficaces d\u2019assurance\
+            \ qualit\xE9. Mettre en place des m\xE9canismes pour maintenir l\u2019\
+            ind\xE9pendance entre les fonctions qui approuvent les changements et\
+            \ ceux qui sont responsables de les demander et de les mettre en \u0153\
+            uvre."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.2
       assessable: true
       depth: 3
@@ -973,6 +1421,18 @@ objects:
         17.1 (RTS RM)
 
         17.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Exigences de s\xE9curit\xE9"
+          description: "D\xE9terminer l\u2019incidence potentielle d\u2019un changement\
+            \ sur les mesures de s\xE9curit\xE9 existantes et \xE9valuer si des mesures\
+            \ de s\xE9curit\xE9 suppl\xE9mentaires sont n\xE9cessaires \xE0 sa mise\
+            \ en \u0153uvre. V\xE9rifiez que les exigences de s\xE9curit\xE9 ont \xE9\
+            t\xE9 respect\xE9es pour toutes les modifications mises en \u0153uvre.\
+            \ \xC9tablissez des proc\xE9dures de repli et attribuez les responsabilit\xE9\
+            s en cas d\u2019abandon des modifications ou de r\xE9cup\xE9ration des\
+            \ modifications qui n\u2019ont pas \xE9t\xE9 mises en \u0153uvre avec\
+            \ succ\xE8s."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.3
       assessable: true
       depth: 3
@@ -989,6 +1449,12 @@ objects:
         17.1 (RTS RM)
 
         17.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion du changement d\u2019urgence"
+          description: "D\xE9finir des proc\xE9dures pour documenter, r\xE9\xE9valuer,\
+            \ \xE9valuer et approuver la mise en \u0153uvre des modifications d\u2019\
+            urgence, y compris les solutions de contournement et les correctifs."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:6.4
       assessable: true
       depth: 3
@@ -1008,12 +1474,27 @@ objects:
         17.1 (RTS RM)
 
         17.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Mise en \u0153uvre de l\u2019OTAP"
+          description: "Assurez la s\xE9paration des environnements de production\
+            \ des environnements de d\xE9veloppement, de test et autres environnements\
+            \ hors production, englobant tous les composants d\u2019un environnement.\
+            \ Cela inclut \xE9galement les exigences relatives \xE0 la r\xE9alisation\
+            \ du d\xE9veloppement et des tests dans des environnements de production.\
+            \ S\u2019assurer que les cas dans lesquels des tests sont effectu\xE9\
+            s dans un environnement de production sont clairement identifi\xE9s, justifi\xE9\
+            s, pour des p\xE9riodes de temps limit\xE9es approuv\xE9es par la fonction\
+            \ concern\xE9e."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:om
       ref_id: '7'
       name: ICT Operations
+      translations:
+        fr:
+          name: "Op\xE9rations TIC"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.1
       assessable: true
       depth: 3
@@ -1034,6 +1515,16 @@ objects:
         9.2 (RTS RM)
 
         12.2 (RTS RM)'
+      translations:
+        fr:
+          name: Surveillance des TIC
+          description: "\xC9laborer, documenter et mettre en \u0153uvre des proc\xE9\
+            dures de gestion des capacit\xE9s et des performances afin d\u2019identifier\
+            \ les besoins en capacit\xE9s de leurs syst\xE8mes TIC et appliquer des\
+            \ proc\xE9dures d\u2019optimisation et de suivi des ressources pour maintenir\
+            \ et am\xE9liorer la disponibilit\xE9 des donn\xE9es et des syst\xE8mes\
+            \ TIC et l\u2019efficacit\xE9 des syst\xE8mes TIC et pr\xE9venir les p\xE9\
+            nuries de capacit\xE9s TIC."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.2
       assessable: true
       depth: 3
@@ -1051,6 +1542,11 @@ objects:
         9.2 (RTS RM)
 
         12.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Normalisation de la synchronisation de l\u2019horloge"
+          description: "Assurer la synchronisation de l\u2019horloge de tous les syst\xE8\
+            mes ICT avec une seule source de temps de r\xE9f\xE9rence fiable."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.3
       assessable: true
       depth: 3
@@ -1070,18 +1566,26 @@ objects:
         9.2 (RTS RM)
 
         12.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion et s\xE9curit\xE9 du syst\xE8me"
+          description: "Fournir des descriptions du syst\xE8me qui englobent l\u2019\
+            installation, la maintenance, la configuration et la d\xE9sinstallation/\xE9\
+            limination s\xE9curis\xE9es des actifs TIC. Cela comprend la gestion des\
+            \ actifs, \xE0 la fois automatis\xE9e et manuelle, ainsi que l\u2019identification\
+            \ et le contr\xF4le des syst\xE8mes TIC existants."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:7.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:7
       ref_id: '7.4'
       name: Error Handling and Recovery
-      description: 'Establish guidelines for handling errors, including support and
+      description: Establish guidelines for handling errors, including support and
         escalation contacts, as well as external support contacts in case of unexpected
         operational or technical issues. Define the procedures for ICT system restart,
         rollback, and recovery to be used in the event of an ICT system disruption.
         Ensure the contact details are available in case systems are unavailable as
-        well. '
+        well.
       annotation: '8.1 (RTS RM)
 
         8.2 (RTS RM)
@@ -1091,17 +1595,34 @@ objects:
         9.2 (RTS RM)
 
         12.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion et r\xE9cup\xE9ration des erreurs"
+          description: "\xC9tablissez des directives pour la gestion des erreurs,\
+            \ y compris les contacts d\u2019assistance et d\u2019escalade, ainsi que\
+            \ les contacts d\u2019assistance externes en cas de probl\xE8mes op\xE9\
+            rationnels ou techniques inattendus. D\xE9finir les proc\xE9dures de red\xE9\
+            marrage, de restauration et de r\xE9cup\xE9ration du syst\xE8me TIC \xE0\
+            \ utiliser en cas de perturbation du syst\xE8me TIC. Assurez-vous que\
+            \ les coordonn\xE9es sont disponibles au cas o\xF9 les syst\xE8mes ne\
+            \ seraient pas disponibles."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
       assessable: false
       depth: 1
       ref_id: CM
       name: Continuity Management
+      translations:
+        fr:
+          name: "Gestion de la continuit\xE9"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
       ref_id: '8'
       name: Backup Management
+      translations:
+        fr:
+          name: Gestion des sauvegardes
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8.1
       assessable: true
       depth: 3
@@ -1124,6 +1645,20 @@ objects:
         12.6
 
         12.7'
+      translations:
+        fr:
+          name: Politique de sauvegarde
+          description: "D\xE9finissez des politiques de sauvegarde visant \xE0 garantir\
+            \ un minimum de temps d\u2019arr\xEAt, des interruptions et des pertes\
+            \ limit\xE9es, et mettez en place des proc\xE9dures de restauration et\
+            \ de r\xE9cup\xE9ration. Sp\xE9cifiez l\u2019\xE9tendue des donn\xE9es\
+            \ soumises aux sauvegardes et la fr\xE9quence minimale des sauvegardes,\
+            \ en fonction de la criticit\xE9 ou de la confidentialit\xE9 des donn\xE9\
+            es. D\xE9terminez un objectif de temps de r\xE9cup\xE9ration (RTO) et\
+            \ un objectif de point de r\xE9cup\xE9ration (RPO) en fonction de la criticit\xE9\
+            \ des donn\xE9es et de l\u2019impact global sur l\u2019efficacit\xE9 du\
+            \ march\xE9 pour garantir que les niveaux de service sont respect\xE9\
+            s dans des sc\xE9narios extr\xEAmes."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:8.2
       assessable: true
       depth: 3
@@ -1146,7 +1681,7 @@ objects:
         \ scheduled date.\n\nAdditionally for data reporting service providers*: the\
         \ providers shall additionally maintain adequate resources and have back-up\
         \ and restoration facilities in place in order to offer and maintain their\
-        \ services at all times.\n\n*For definition of DRSP see: https://www.esma.europa.eu/esmas-activities/markets-and-infrastructure/data-reporting-services-providers "
+        \ services at all times.\n\n*For definition of DRSP see: https://www.esma.europa.eu/esmas-activities/markets-and-infrastructure/data-reporting-services-providers"
       annotation: '12.1
 
         12.2
@@ -1156,12 +1691,42 @@ objects:
         12.6
 
         12.7'
+      translations:
+        fr:
+          name: "Proc\xE9dures de restauration"
+          description: "S\u2019assurer que l\u2019activation des syst\xE8mes de sauvegarde\
+            \ ne compromettra pas la s\xE9curit\xE9 des syst\xE8mes TIC ni la disponibilit\xE9\
+            , l\u2019authenticit\xE9, l\u2019int\xE9grit\xE9 ou la confidentialit\xE9\
+            \ des donn\xE9es. Par exemple par l\u2019ex\xE9cution de tests de restauration\
+            \ p\xE9riodiques bas\xE9s sur les proc\xE9dures de sauvegarde, de restauration\
+            \ et de r\xE9cup\xE9ration. \n\nLors de la restauration des donn\xE9es\
+            \ de sauvegarde \xE0 l\u2019aide de syst\xE8mes autog\xE9r\xE9s, assurez-vous\
+            \ que des syst\xE8mes sont s\xE9par\xE9s physiquement et logiquement du\
+            \ syst\xE8me source pour assurer la protection. De plus, les syst\xE8\
+            mes de sauvegarde doivent \xEAtre prot\xE9g\xE9s en toute s\xE9curit\xE9\
+            \ contre tout acc\xE8s non autoris\xE9 ou toute corruption informatique\
+            \ et permettre une restauration en temps opportun. Les \xE9tablissements\
+            \ doivent v\xE9rifier que le plus haut niveau d\u2019int\xE9grit\xE9 des\
+            \ donn\xE9es est maintenu lors de la restauration des sauvegardes.\n\n\
+            En outre, pour les contreparties centrales, les plans de redressement\
+            \ doivent permettre le recouvrement de toutes les transactions au moment\
+            \ de la perturbation afin de permettre \xE0 la contrepartie centrale de\
+            \ continuer \xE0 fonctionner avec certitude et d\u2019achever le r\xE8\
+            glement \xE0 la date pr\xE9vue.\n\nEn outre, pour les prestataires de\
+            \ services de communication de donn\xE9es* : les fournisseurs doivent\
+            \ en outre disposer de ressources ad\xE9quates et disposer d\u2019installations\
+            \ de sauvegarde et de restauration afin d\u2019offrir et de maintenir\
+            \ leurs services \xE0 tout moment.\n\n*Pour la d\xE9finition du DRSP,\
+            \ voir\_: https://www.esma.europa.eu/esmas-activities/markets-and-infrastructure/data-reporting-services-providers"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:cm
       ref_id: '9'
       name: Response and Recovery
+      translations:
+        fr:
+          name: "R\xE9ponse et r\xE9tablissement"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.1
       assessable: true
       depth: 3
@@ -1226,6 +1791,22 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Politique de continuit\xE9 des activit\xE9s"
+          description: "\xC9tablir une politique de continuit\xE9 des activit\xE9\
+            s TIC qui permet la continuit\xE9 des fonctions critiques ou importantes,\
+            \ assure une r\xE9ponse rapide aux incidents, facilite la reprise des\
+            \ activit\xE9s, le d\xE9ploiement des mesures de confinement, l\u2019\
+            activation et la d\xE9sactivation des proc\xE9dures d\u2019intervention\
+            \ et de r\xE9cup\xE9ration, l\u2019estimation de l\u2019impact, des dommages\
+            \ et des pertes, et fournit une communication claire aux parties prenantes\
+            \ concern\xE9es. Examiner r\xE9guli\xE8rement la politique de continuit\xE9\
+            \ des activit\xE9s et apporter les ajustements n\xE9cessaires pour am\xE9\
+            liorer l\u2019efficacit\xE9.\n\nSe r\xE9f\xE9rer aux articles 24.2-4 des\
+            \ RTS RM pour les exigences sp\xE9cifiques applicables aux contreparties\
+            \ centrales, aux plates-formes de n\xE9gociation et aux d\xE9positaires\
+            \ centraux de titres."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.2
       assessable: true
       depth: 3
@@ -1282,6 +1863,14 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion de crise
+          description: "Mettre en place et maintenir une \xE9quipe de gestion de crise\
+            \ charg\xE9e de superviser et de coordonner les actions lors d\u2019une\
+            \ crise ou d\u2019une perturbation majeure. Examiner r\xE9guli\xE8rement\
+            \ les plans de r\xE9tablissement et d\u2019intervention. Faites les ajustements\
+            \ n\xE9cessaires pour am\xE9liorer l\u2019efficacit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.3
       assessable: true
       depth: 3
@@ -1339,21 +1928,30 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: Tenue
+          description: "Tenez des registres d\xE9taill\xE9s des activit\xE9s men\xE9\
+            es avant, pendant et apr\xE8s les perturbations, y compris les mesures\
+            \ prises et les r\xE9sultats. Tenir \xE0 jour une estimation des co\xFB\
+            ts et des pertes annuels agr\xE9g\xE9s r\xE9sultant de perturbations majeures.\
+            \ Ces informations doivent \xEAtre communiqu\xE9es \xE0 l\u2019organisme\
+            \ de r\xE9glementation \xE0 leur demande."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.4
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:9
       ref_id: '9.4'
       name: Business Impact analysis
-      description: "Perform a comprehensive Business Impact Analysis (BIA) of exposures\
-        \ to severe business disruptions. The BIA should be done by means of quantitative\
-        \ and qualitative criteria, using internal and external data and scenario\
-        \ analysis, as appropriate. The BIA shall consider the criticality of identified\
-        \ and mapped business functions, support processes, third-party dependencies\
-        \ and information assets, and their interdependencies. Financial entities\
-        \ shall ensure that ICT assets and ICT services are designed and used in full\
-        \ alignment with the BIA, in particular with regard to adequately ensuring\
-        \ the redundancy of all critical components.\n\n "
+      description: Perform a comprehensive Business Impact Analysis (BIA) of exposures
+        to severe business disruptions. The BIA should be done by means of quantitative
+        and qualitative criteria, using internal and external data and scenario analysis,
+        as appropriate. The BIA shall consider the criticality of identified and mapped
+        business functions, support processes, third-party dependencies and information
+        assets, and their interdependencies. Financial entities shall ensure that
+        ICT assets and ICT services are designed and used in full alignment with the
+        BIA, in particular with regard to adequately ensuring the redundancy of all
+        critical components.
       annotation: '11.1
 
         11.2
@@ -1401,6 +1999,21 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Analyse d\u2019impact sur l\u2019activit\xE9"
+          description: "Effectuez une analyse compl\xE8te des impacts sur les activit\xE9\
+            s (BIA) des expositions \xE0 de graves perturbations des activit\xE9s.\
+            \ L\u2019AIB doit \xEAtre r\xE9alis\xE9e au moyen de crit\xE8res quantitatifs\
+            \ et qualitatifs, \xE0 l\u2019aide de donn\xE9es internes et externes\
+            \ et d\u2019une analyse de sc\xE9narios, le cas \xE9ch\xE9ant. L\u2019\
+            AIB doit tenir compte de la criticit\xE9 des fonctions op\xE9rationnelles\
+            \ identifi\xE9es et cartographi\xE9es, des processus de soutien, des d\xE9\
+            pendances de tiers et des actifs informationnels, ainsi que de leurs interd\xE9\
+            pendances. Les entit\xE9s financi\xE8res veillent \xE0 ce que les actifs\
+            \ et les services TIC soient con\xE7us et utilis\xE9s dans le plein alignement\
+            \ sur le BIA, en particulier en ce qui concerne la garantie ad\xE9quate\
+            \ de la redondance de tous les composants critiques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.5
       assessable: true
       depth: 3
@@ -1465,6 +2078,25 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: "R\xE9ponse et r\xE9tablissement"
+          description: "\xC9tablir des plans d\u2019intervention et de r\xE9tablissement\
+            \ complets englobant des options de r\xE9tablissement \xE0 court et \xE0\
+            \ long terme. Ces plans doivent identifier de mani\xE8re approfondie les\
+            \ sc\xE9narios potentiels et doivent d\xFBment tenir compte des sc\xE9\
+            narios de cyberattaques, de basculements, de d\xE9gradation des fonctions\
+            \ critiques, de d\xE9faillance des locaux, de pannes d\u2019actifs TIC\
+            \ ou d\u2019infrastructures de communication, d\u2019indisponibilit\xE9\
+            \ du personnel, de catastrophes naturelles et de l\u2019impact du changement\
+            \ climatique, de situations pand\xE9miques, d\u2019attaques physiques,\
+            \ de menaces internes, d\u2019instabilit\xE9 politique ou sociale et de\
+            \ pannes de courant. De plus, ces plans doivent int\xE9grer d\u2019autres\
+            \ options dans les cas o\xF9 les principales mesures de r\xE9tablissement\
+            \ ne sont pas pratiques \xE0 court terme en raison de facteurs tels que\
+            \ le co\xFBt, les risques, la logistique ou des circonstances impr\xE9\
+            vues. S\u2019attaquer aux d\xE9faillances potentielles des principaux\
+            \ fournisseurs de services tiers dans le domaine des TIC dans les plans."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:9.6
       assessable: true
       depth: 3
@@ -1534,17 +2166,49 @@ objects:
         26.3 (RTS RM)
 
         26.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Tests et \xE9valuations"
+          description: "Testez r\xE9guli\xE8rement les plans de continuit\xE9, de\
+            \ r\xE9ponse et de reprise des activit\xE9s ICT, en particulier en collaboration\
+            \ avec des fournisseurs de services tiers prenant en charge des fonctions\
+            \ critiques ou importantes. Les tests devraient tenir compte de l\u2019\
+            IBA de l\u2019entit\xE9 financi\xE8re et de l\u2019\xE9valuation des risques\
+            \ li\xE9s aux TIC et avoir lieu sur une base annuelle et chaque fois que\
+            \ des changements importants sont apport\xE9s aux syst\xE8mes soutenant\
+            \ des fonctions critiques ou importantes. \nLes tests doivent \xEAtre\
+            \ bas\xE9s sur des sc\xE9narios r\xE9alistes et englober des sc\xE9narios\
+            \ tels que les cyberattaques, l\u2019insolvabilit\xE9 ou la d\xE9faillance\
+            \ d\u2019un tiers, les restaurations de sauvegarde et le basculement entre\
+            \ les sites de traitement primaires et redondants. \nLes tests doivent\
+            \ v\xE9rifier si au moins les fonctions critiques ou importantes peuvent\
+            \ \xEAtre exploit\xE9es de mani\xE8re appropri\xE9e, pendant une p\xE9\
+            riode de temps suffisante, et si le fonctionnement normal (du processus\
+            \ d\u2019entreprise) peut \xEAtre r\xE9tabli. Mettre \xE0 l\u2019essai\
+            \ des plans de communication de crise afin d\u2019assurer l\u2019efficacit\xE9\
+            \ des strat\xE9gies de communication en cas de crise ou de perturbation\
+            \ majeure. Documenter les r\xE9sultats des tests et signaler \xE0 l\u2019\
+            organe de direction toute d\xE9faillance identifi\xE9e r\xE9sultant des\
+            \ tests.\n\nSe r\xE9f\xE9rer aux articles 24.2-3 des RTS RM pour les exigences\
+            \ sp\xE9cifiques applicables aux contreparties centrales et aux d\xE9\
+            positaires centraux de garanties."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
       assessable: false
       depth: 1
       ref_id: IM
       name: Incident Management
+      translations:
+        fr:
+          name: Gestion des incidents
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
       ref_id: '10'
       name: Incident Classification
+      translations:
+        fr:
+          name: Classification des incidents
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10.1
       assessable: true
       depth: 3
@@ -1566,7 +2230,7 @@ objects:
         recurring incidents, where recurring incidents are considered major when (1)
         the incidents have occurred at least twice within 6 months, (2) the incidents
         have the same apparent root cause, (3) the incidents collectively categorise
-        as a major incident.  '
+        as a major incident.'
       annotation: '18.1
 
         18.2
@@ -1602,14 +2266,33 @@ objects:
         15 (RTS IM)
 
         16 (RTS IM)'
+      translations:
+        fr:
+          name: "Crit\xE8res de classification des incidents"
+          description: "Classer les incidents li\xE9s aux TIC en fonction de leur\
+            \ impact \xE0 l\u2019aide des crit\xE8res suivants : nombre de clients\
+            \ ou de contreparties financi\xE8res touch\xE9s, nombre de transactions\
+            \ touch\xE9es, atteinte \xE0 la r\xE9putation, dur\xE9e de l\u2019incident\
+            \ et temps d\u2019arr\xEAt des services, r\xE9partition g\xE9ographique\
+            \ de l\u2019incident, perte de donn\xE9es par rapport \xE0 la triade CIA,\
+            \ criticit\xE9 des services touch\xE9s et impact \xE9conomique global\
+            \ de l\u2019incident.\n\nUn incident est consid\xE9r\xE9 comme majeur\
+            \ si (1) tout acc\xE8s malveillant non autoris\xE9 au r\xE9seau et aux\
+            \ syst\xE8mes d\u2019information est identifi\xE9, pouvant entra\xEEner\
+            \ des pertes de donn\xE9es ou (2) les seuils de deux crit\xE8res suppl\xE9\
+            mentaires sont remplis (se r\xE9f\xE9rer \xE0 la fiche DORA RTS IM (Incidents\
+            \ Majeurs) pour les seuils). De plus, tenez compte des incidents r\xE9\
+            currents, o\xF9 les incidents r\xE9currents sont consid\xE9r\xE9s comme\
+            \ majeurs lorsque (1) les incidents se sont produits au moins deux fois\
+            \ en 6 mois, (2) les incidents ont la m\xEAme cause profonde apparente,\
+            \ (3) les incidents sont collectivement class\xE9s comme des incidents\
+            \ majeurs."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:10.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:10
       ref_id: '10.2'
-      name: 'Cyber Threat Classification Criteria
-
-        '
+      name: Cyber Threat Classification Criteria
       description: Classify significant cyber threats. A threat is considered significant
         if it has a high probability of materialisation, could meet any of the criteria
         that classify as a 'major incident' when materialised, and when it could affect
@@ -1651,12 +2334,27 @@ objects:
         15 (RTS IM)
 
         16 (RTS IM)'
+      translations:
+        fr:
+          name: "Crit\xE8res de classification des cybermenaces"
+          description: "Classifiez les cybermenaces importantes. Une menace est consid\xE9\
+            r\xE9e comme significative si elle a une forte probabilit\xE9 de se mat\xE9\
+            rialiser, si elle pourrait r\xE9pondre \xE0 l\u2019un des crit\xE8res\
+            \ de qualification d'\xAB incident majeur \xBB lorsqu\u2019elle s\u2019\
+            est mat\xE9rialis\xE9e, et si elle est susceptible d\u2019affecter ou\
+            \ aurait pu affecter des fonctions critiques ou importantes de l\u2019\
+            entit\xE9 financi\xE8re, ou si elle pourrait affecter d\u2019autres entit\xE9\
+            s financi\xE8res, des fournisseurs tiers, des clients ou des contreparties\
+            \ financi\xE8res."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:im
       ref_id: '11'
       name: Incident Management
+      translations:
+        fr:
+          name: Gestion des incidents
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.1
       assessable: true
       depth: 3
@@ -1718,6 +2416,34 @@ objects:
         6.5 (RTS/ITS MIR)
 
         7.1 (RTS/ITS MIR)'
+      translations:
+        fr:
+          name: Processus de gestion des incidents
+          description: "Mettre en \u0153uvre un processus de gestion des incidents\
+            \ pour d\xE9tecter, g\xE9rer et signaler les incidents TIC. Cela comprend\
+            \ des proc\xE9dures d\u2019intervention en cas d\u2019incident afin d\u2019\
+            att\xE9nuer les impacts et d\u2019assurer le r\xE9tablissement rapide\
+            \ des services. Attribuez des r\xF4les et des responsabilit\xE9s sp\xE9\
+            cifiques pour divers sc\xE9narios d\u2019incident. \xC9tablissez \xE9\
+            galement une liste de contacts avec les fonctions internes et les parties\
+            \ prenantes externes qui sont directement impliqu\xE9es dans la s\xE9\
+            curit\xE9 des op\xE9rations TIC, y compris en mati\xE8re de d\xE9tection\
+            \ et de surveillance des cybermenaces, de d\xE9tection des activit\xE9\
+            s anormales et de gestion des vuln\xE9rabilit\xE9s. \xC9tablir des indicateurs\
+            \ d\u2019alerte pr\xE9coce pour les incidents potentiels et les d\xE9\
+            clencheurs d\u2019incidents en cas d\u2019activit\xE9 malveillante, de\
+            \ pertes de donn\xE9es, d\u2019impact n\xE9gatif d\xE9tect\xE9 sur les\
+            \ transactions et les op\xE9rations de l\u2019entit\xE9 financi\xE8re,\
+            \ d\u2019indisponibilit\xE9 des syst\xE8mes et du r\xE9seau, de probl\xE8\
+            mes signal\xE9s par les utilisateurs de l\u2019entit\xE9 financi\xE8re\
+            \ et de notifications d\u2019incidents provenant d\u2019un fournisseur\
+            \ de services tiers d\xE9tect\xE9s dans les syst\xE8mes et les r\xE9seaux\
+            \ du fournisseur de services tiers et susceptibles d\u2019affecter l\u2019\
+            entit\xE9 financi\xE8re. Identifiez, documentez et traitez les causes\
+            \ profondes des incidents. Effectuer des examens post-incidents li\xE9\
+            s aux TIC apr\xE8s des perturbations majeures. Analysez les causes, \xE9\
+            valuez la rapidit\xE9 et la qualit\xE9 des r\xE9ponses, et \xE9valuez\
+            \ l\u2019escalade des incidents et l\u2019efficacit\xE9 de la communication."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.2
       assessable: true
       depth: 3
@@ -1767,6 +2493,15 @@ objects:
         6.5 (RTS/ITS MIR)
 
         7.1 (RTS/ITS MIR)'
+      translations:
+        fr:
+          name: Suivi des incidents
+          description: "\xC9laborer des proc\xE9dures pour identifier, suivre, consigner,\
+            \ cat\xE9goriser et classifier les incidents li\xE9s aux TIC en fonction\
+            \ de la priorit\xE9, de la gravit\xE9 et de la criticit\xE9 des services\
+            \ touch\xE9s. Tenir des registres de tous les incidents li\xE9s aux TIC\
+            \ et des cybermenaces importantes. Mettre en place un processus de surveillance\
+            \ pour suivre les incidents et les cybermenaces."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:11.3
       assessable: true
       depth: 3
@@ -1788,7 +2523,7 @@ objects:
         than one month from the submission of the latest updated intermediate report).
         Also provide notifications to the regulator on significant cyber threats.
         The incident reports and notifications on cyber threats shall follow the content
-        guidelines defined in the corresponding RTS/ITS. '
+        guidelines defined in the corresponding RTS/ITS.'
       annotation: '13.2
 
         17.1
@@ -1828,17 +2563,48 @@ objects:
         6.5 (RTS/ITS MIR)
 
         7.1 (RTS/ITS MIR)'
+      translations:
+        fr:
+          name: Communication et signalement des incidents
+          description: "Cr\xE9er des plans de communication pour informer les parties\
+            \ prenantes internes (personnel, haute direction) et externes (clients/clients,\
+            \ contreparties financi\xE8res) des incidents. Informez rapidement les\
+            \ clients touch\xE9s d\xE8s qu\u2019ils sont inform\xE9s d\u2019un incident\
+            \ qui les concerne. Fournir des d\xE9tails sur l\u2019incident et d\xE9\
+            crire les mesures d\u2019att\xE9nuation prises et pr\xE9vues. Signalement\
+            \ des incidents majeurs \xE0 l\u2019autorit\xE9 de r\xE9glementation,\
+            \ en trois \xE9tapes : 1) notification initiale d\xE8s la d\xE9couverte\
+            \ de l\u2019incident (dans les 4 heures \xE0 compter de la classification\
+            \ de l\u2019incident comme majeur, mais au plus tard 24 heures \xE0 compter\
+            \ de la d\xE9tection de l\u2019incident) , 2) rapport interm\xE9diaire\
+            \ sur l\u2019\xE9volution de l\u2019incident (dans les 72 heures suivant\
+            \ la soumission de la notification initiale, m\xEAme si l\u2019\xE9tat\
+            \ ou le traitement de l\u2019incident n\u2019ont pas chang\xE9,  ou lorsque\
+            \ les activit\xE9s habituelles ont \xE9t\xE9 r\xE9tablies), et 3) le rapport\
+            \ final avec l\u2019analyse des causes profondes et les actions de suivi\
+            \ (au plus tard un mois apr\xE8s la soumission du dernier rapport interm\xE9\
+            diaire mis \xE0 jour). Fournir \xE9galement des avis \xE0 l\u2019organisme\
+            \ de r\xE9glementation sur les cybermenaces importantes. Les rapports\
+            \ d\u2019incidents et les notifications sur les cybermenaces doivent suivre\
+            \ les lignes directrices en mati\xE8re de contenu d\xE9finies dans les\
+            \ RTS/ITS correspondantes."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
       assessable: false
       depth: 1
       ref_id: SSD
       name: Software and Systems Development
+      translations:
+        fr:
+          name: "D\xE9veloppement de logiciels et de syst\xE8mes"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
       ref_id: '12'
       name: Acquisition, Development, and Maintenance
+      translations:
+        fr:
+          name: "Acquisition, d\xE9veloppement et maintenance"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.1
       assessable: true
       depth: 3
@@ -1860,6 +2626,18 @@ objects:
         16.4 (RTS RM)
 
         16.5 (RTS RM)'
+      translations:
+        fr:
+          name: "Cadre strat\xE9gique"
+          description: "\xC9tablir et tenir \xE0 jour une politique r\xE9gissant l\u2019\
+            acquisition, le d\xE9veloppement et l\u2019entretien des syst\xE8mes TIC.\
+            \ Mettre en \u0153uvre des pratiques et des m\xE9thodologies de s\xE9\
+            curit\xE9 tout au long du cycle de vie de l\u2019acquisition, du d\xE9\
+            veloppement et de la maintenance. D\xE9finir les exigences fonctionnelles\
+            \ et non fonctionnelles pour les syst\xE8mes TIC, y compris les aspects\
+            \ de s\xE9curit\xE9. Obtenir l\u2019approbation des fonctions commerciales\
+            \ et des propri\xE9taires d\u2019actifs concern\xE9s conform\xE9ment \xE0\
+            \ la gouvernance interne."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.2
       assessable: true
       depth: 3
@@ -1884,6 +2662,21 @@ objects:
         16.4 (RTS RM)
 
         16.5 (RTS RM)'
+      translations:
+        fr:
+          name: "Mesures d\u2019att\xE9nuation des risques environnementaux"
+          description: "Mettre en place des mesures pour att\xE9nuer le risque d\u2019\
+            alt\xE9ration involontaire ou de manipulation intentionnelle pendant le\
+            \ d\xE9veloppement, la maintenance et le d\xE9ploiement en production.\
+            \ Prot\xE9gez l\u2019int\xE9grit\xE9 et la confidentialit\xE9 des donn\xE9\
+            es dans les environnements hors production. Stockez uniquement les donn\xE9\
+            es de production anonymis\xE9es, pseudonymis\xE9es ou al\xE9atoires. \n\
+            \nLes donn\xE9es de production qui ne sont pas anonymis\xE9es, non pseudonymis\xE9\
+            es ou non randomis\xE9es ne peuvent \xEAtre stock\xE9es que pour des occasions\
+            \ de test sp\xE9cifiques, pour des p\xE9riodes limit\xE9es et apr\xE8\
+            s approbation par la fonction concern\xE9e et, pour les entit\xE9s financi\xE8\
+            res autres que les microentreprises, la notification de ces occasions\
+            \ \xE0 l\u2019ICT\nfonction de gestion des risques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.3
       assessable: true
       depth: 3
@@ -1905,6 +2698,18 @@ objects:
         16.4 (RTS RM)
 
         16.5 (RTS RM)'
+      translations:
+        fr:
+          name: "Proc\xE9dures d\u2019essai des syst\xE8mes"
+          description: "\xC9laborer et suivre des proc\xE9dures pour la mise \xE0\
+            \ l\u2019essai et l\u2019approbation de tous les syst\xE8mes TIC avant\
+            \ leur utilisation et apr\xE8s leur maintenance. D\xE9terminer le niveau\
+            \ de test en fonction de la criticit\xE9 des fonctions commerciales et\
+            \ des actifs ICT. Concevoir et mettre en \u0153uvre des proc\xE9dures\
+            \ de test pour v\xE9rifier que les nouveaux syst\xE8mes TIC sont ad\xE9\
+            quats pour fonctionner comme pr\xE9vu, y compris la qualit\xE9 des logiciels\
+            \ d\xE9velopp\xE9s en interne. Effectuer des tests de s\xE9curit\xE9 des\
+            \ progiciels au plus tard lors de la phase d\u2019int\xE9gration."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:12.4
       assessable: true
       depth: 3
@@ -1928,12 +2733,30 @@ objects:
         16.4 (RTS RM)
 
         16.5 (RTS RM)'
+      translations:
+        fr:
+          name: Revues de code source
+          description: "Effectuer des examens du code source, y compris des tests\
+            \ statiques et dynamiques, \xE0 des fins d\u2019acquisition, de d\xE9\
+            veloppement et de maintenance de syst\xE8mes TIC. Incluez des tests de\
+            \ s\xE9curit\xE9 pour les syst\xE8mes expos\xE9s \xE0 Internet. Identifiez\
+            \ et traitez les vuln\xE9rabilit\xE9s et les anomalies dans le code source\
+            \ et mettez en place des plans pour les att\xE9nuer. Surveillez les efforts\
+            \ d\u2019att\xE9nuation. Mettez en \u0153uvre des contr\xF4les pour prot\xE9\
+            ger l\u2019int\xE9grit\xE9 du code source, qu\u2019il soit d\xE9velopp\xE9\
+            \ en interne ou par un fournisseur de services tiers. Analysez et testez\
+            \ les vuln\xE9rabilit\xE9s du code source et des logiciels propri\xE9\
+            taires fournis par des fournisseurs de services tiers ou issus de projets\
+            \ open source."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:ssd
       ref_id: '13'
       name: Project Management
+      translations:
+        fr:
+          name: Gestion de projet
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13.1
       assessable: true
       depth: 3
@@ -1962,6 +2785,28 @@ objects:
         15.4 (RTS RM)
 
         15.5 (RTS RM)'
+      translations:
+        fr:
+          name: Pratiques de gestion de projets TIC
+          description: "Assurer une gestion efficace des projets TIC li\xE9s \xE0\
+            \ l\u2019acquisition, \xE0 la maintenance et, le cas \xE9ch\xE9ant, au\
+            \ d\xE9veloppement de syst\xE8mes TIC, par le biais d\u2019une politique\
+            \ de gestion de projet. Le plan de projet TIC doit comprendre : des objectifs\
+            \ clairs du projet, une structure de gouvernance du projet, des r\xF4\
+            les et des responsabilit\xE9s, un calendrier et des \xE9tapes d\xE9finis,\
+            \ les principaux jalons du projet et les exigences en mati\xE8re de gestion\
+            \ du changement. Pr\xE9ciser les exigences pour les membres de l\u2019\
+            \xE9quipe de projet, en veillant \xE0 ce que le personnel des activit\xE9\
+            s ou des fonctions commerciales touch\xE9es par le projet soit inclus.\
+            \ Les membres de l\u2019\xE9quipe doivent poss\xE9der les connaissances\
+            \ n\xE9cessaires pour assurer la mise en \u0153uvre s\xFBre et r\xE9ussie\
+            \ du projet. \xC9tablir des exigences en mati\xE8re de rapports, y compris\
+            \ des rapports p\xE9riodiques sur l\u2019\xE9tablissement et l\u2019avancement\
+            \ des projets ayant une incidence sur des fonctions critiques ou importantes,\
+            \ ainsi que sur les risques associ\xE9s. Des rapports sont \xE9tablis\
+            \ p\xE9riodiquement et, si n\xE9cessaire, en fonction des \xE9v\xE9nements,\
+            \ en tenant compte de l\u2019importance et de la taille des projets TIC\
+            \ et de l\u2019\xE9valuation des risques du projet."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:13.2
       assessable: true
       depth: 3
@@ -1980,17 +2825,30 @@ objects:
         15.4 (RTS RM)
 
         15.5 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion des risques du projet
+          description: "Effectuer une \xE9valuation des risques du projet TIC. Effectuer\
+            \ des tests de toutes les exigences de gestion de projet, y compris les\
+            \ exigences de s\xE9curit\xE9. \xC9tablissez un processus d\u2019approbation\
+            \ pour le d\xE9ploiement dans l\u2019environnement de production."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       assessable: false
       depth: 1
       ref_id: TPRM
       name: Third-party Risk Management
+      translations:
+        fr:
+          name: "Gestion des risques li\xE9s aux tiers"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       ref_id: '14'
       name: Third-party Due Diligence and Selection
+      translations:
+        fr:
+          name: "Diligence raisonnable et s\xE9lection de tiers"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14.1
       assessable: true
       depth: 3
@@ -2014,6 +2872,18 @@ objects:
         6.2 (RTS TPPM)
 
         6.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Crit\xE8res d\u2019aptitude"
+          description: "Veiller \xE0 ce que le prestataire de services tiers dispose\
+            \ de la r\xE9putation de l\u2019entreprise, des capacit\xE9s suffisantes,\
+            \ de l\u2019expertise et des ressources financi\xE8res, humaines et techniques\
+            \ ad\xE9quates, des normes de s\xE9curit\xE9 de l\u2019information, d\u2019\
+            une structure organisationnelle appropri\xE9e (y compris la gestion des\
+            \ risques et les contr\xF4les internes) et, le cas \xE9ch\xE9ant, de la\
+            \ ou des autorisations ou enregistrements requis pour fournir des services\
+            \ TIC soutenant les fonctions critiques ou importantes de mani\xE8re fiable\
+            \ et professionnelle."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:14.2
       assessable: true
       depth: 3
@@ -2044,12 +2914,36 @@ objects:
         6.2 (RTS TPPM)
 
         6.3 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Crit\xE8res de s\xE9lection"
+          description: "Tenir compte des \xE9l\xE9ments suivants lors de la s\xE9\
+            lection et de l\u2019\xE9valuation du prestataire de services : les audits\
+            \ effectu\xE9s par l\u2019entit\xE9 financi\xE8re ou pour son compte,\
+            \ les certifications de tiers, les rapports d\u2019audit ind\xE9pendants,\
+            \ les rapports de fonction d\u2019audit interne et les informations accessibles\
+            \ au public. Confirmer l\u2019adh\xE9sion aux principes \xE9thiques, sociaux,\
+            \ humains et environnementaux (durabilit\xE9), y compris des conditions\
+            \ de travail appropri\xE9es, y compris l\u2019interdiction du travail\
+            \ des enfants. \xC9valuer si le prestataire de services op\xE8re dans\
+            \ un pays tiers et \xE9valuer si cette pratique augmente les risques op\xE9\
+            rationnels, de r\xE9putation ou li\xE9s aux sanctions. Obtenir le consentement\
+            \ du fournisseur de services pour une r\xE9alisation efficace de l\u2019\
+            audit, \xE0 la fois sur place et par des parties d\xE9sign\xE9es, y compris\
+            \ des auditeurs de l\u2019entit\xE9 financi\xE8re, externes (auditeurs\
+            \ tiers) et par les autorit\xE9s comp\xE9tentes (telles que l\u2019organisme\
+            \ de r\xE9glementation). V\xE9rifiez si le fournisseur de services a l\u2019\
+            intention de faire appel \xE0 des sous-traitants en TIC pour une partie\
+            \ importante de ses services."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       ref_id: '15'
       name: Third-party (Standard) Contract Management
+      translations:
+        fr:
+          name: Gestion des contrats par des tiers (standard)
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.1
       assessable: true
       depth: 3
@@ -2069,6 +2963,18 @@ objects:
         30.2
 
         3.9 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Droits et conditions de r\xE9siliation"
+          description: "D\xE9finir des droits de r\xE9siliation explicites, y compris\
+            \ les violations importantes des lois, des r\xE8glements ou des conditions\
+            \ contractuelles, les changements importants dans les risques li\xE9s\
+            \ aux tiers, les faiblesses d\xE9montr\xE9es des TIC et les contraintes\
+            \ de surveillance des r\xE9gulateurs. \xC9tablir des dispositions pour\
+            \ assurer l\u2019acc\xE8s, la r\xE9cup\xE9ration et la restitution des\
+            \ donn\xE9es dans un format facilement accessible en cas de r\xE9siliation,\
+            \ d\u2019insolvabilit\xE9, de r\xE9solution ou d\u2019interruption des\
+            \ activit\xE9s commerciales du fournisseur de services."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.2
       assessable: true
       depth: 3
@@ -2087,6 +2993,16 @@ objects:
         30.2
 
         3.9 (RTS TPPM)'
+      translations:
+        fr:
+          name: Gestion des niveaux de service
+          description: "D\xE9finissez des descriptions de niveau de service claires\
+            \ et mesurables d\xE9crivant les performances attendues et les normes\
+            \ de qualit\xE9. S\u2019assurer que le fournisseur de services fournit\
+            \ une description compl\xE8te de toutes les fonctions et de tous les services\
+            \ TIC offerts, y compris les ententes de sous-traitance. Mettre en place\
+            \ des dispositions garantissant des niveaux appropri\xE9s de protection\
+            \ des donn\xE9es conform\xE9ment aux exigences r\xE9glementaires."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.3
       assessable: true
       depth: 3
@@ -2102,6 +3018,12 @@ objects:
         30.2
 
         3.9 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Lieux de service et traitement des donn\xE9es"
+          description: "Sp\xE9cifiez les emplacements de service et les sites de traitement\
+            \ des donn\xE9es. Exiger un avis en temps opportun de tout changement\
+            \ pr\xE9vu \xE0 ces emplacements."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.4
       assessable: true
       depth: 3
@@ -2118,6 +3040,12 @@ objects:
         30.2
 
         3.9 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Coop\xE9ration en mati\xE8re d\u2019intervention en cas d\u2019incident"
+          description: "Obliger le fournisseur de services tiers ICT \xE0 coop\xE9\
+            rer pleinement avec le r\xE9gulateur et \xE0 fournir l\u2019assistance\
+            \ n\xE9cessaire en cas d\u2019incident li\xE9 au service fourni."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:15.5
       assessable: true
       depth: 3
@@ -2133,12 +3061,22 @@ objects:
         30.2
 
         3.9 (RTS TPPM)'
+      translations:
+        fr:
+          name: "Participation \xE0 des programmes de sensibilisation \xE0 la s\xE9\
+            curit\xE9"
+          description: "Pr\xE9ciser les conditions de participation du prestataire\
+            \ de services aux programmes/formations de sensibilisation \xE0 la s\xE9\
+            curit\xE9 et de r\xE9silience."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       ref_id: '16'
       name: Third-party (Critical) Contract Management
+      translations:
+        fr:
+          name: Gestion des contrats avec des tiers (critiques)
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.1
       assessable: true
       depth: 3
@@ -2167,9 +3105,28 @@ objects:
 
         4.2 (RTS SCM)
 
-        7.1 (RTS SCM)
-
-        '
+        7.1 (RTS SCM)'
+      translations:
+        fr:
+          name: (Critique) Gestion des niveaux de service
+          description: "S\u2019assurer que le contrat avec le fournisseur de services\
+            \ tiers ICT fournissant des services critiques ou importants comprend\
+            \ des descriptions compl\xE8tes du niveau de service, y compris des mises\
+            \ \xE0 jour et des rapports d\xE9taill\xE9s (quantitatifs et qualitatifs).\
+            \ \xC9valuer la conformit\xE9 du fournisseur de services aux normes de\
+            \ performance et de qualit\xE9 en examinant les rapports sur les activit\xE9\
+            s et les services, les rapports d\u2019incidents, les mesures de s\xE9\
+            curit\xE9 et de continuit\xE9 des activit\xE9s et les tests. \xC9valuez\
+            \ les performances \xE0 l\u2019aide d\u2019indicateurs cl\xE9s de performance,\
+            \ d\u2019indicateurs cl\xE9s de contr\xF4le, d\u2019audits, d\u2019auto-certifications\
+            \ et d\u2019examens ind\xE9pendants. Recevoir de l\u2019information pertinente\
+            \ du fournisseur de services concernant ses activit\xE9s et ses services\
+            \ et veiller \xE0 ce que les incidents soient signal\xE9s et r\xE9pondus\
+            \ en temps opportun. Effectuez des examens ind\xE9pendants et des audits\
+            \ de conformit\xE9 aux exigences et politiques l\xE9gales et r\xE9glementaires.\
+            \ Sp\xE9cifiez des p\xE9riodes de notification pour tout changement important\
+            \ susceptible d\u2019avoir une incidence sur l\u2019entit\xE9 ou les niveaux\
+            \ de service convenus."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.2
       assessable: true
       depth: 3
@@ -2196,9 +3153,25 @@ objects:
 
         4.2 (RTS SCM)
 
-        7.1 (RTS SCM)
-
-        '
+        7.1 (RTS SCM)'
+      translations:
+        fr:
+          name: Clauses contractuelles
+          description: "Des droits s\xE9curis\xE9s pour la surveillance continue des\
+            \ performances, y compris des droits illimit\xE9s d\u2019acc\xE8s, d\u2019\
+            inspection et d\u2019audit. Cela comprend d\u2019autres niveaux d\u2019\
+            assurance, la coop\xE9ration avec les inspections des organismes de r\xE9\
+            glementation et la divulgation compl\xE8te de la port\xE9e, des proc\xE9\
+            dures et de la fr\xE9quence des audits. Inclure une p\xE9riode de transition\
+            \ obligatoire en cas de r\xE9siliation, permettant au fournisseur de services\
+            \ de continuer \xE0 offrir des services pendant la migration, donnant\
+            \ \xE0 l\u2019entit\xE9 le temps de passer \xE0 un autre fournisseur ou\
+            \ \xE0 des solutions internes bas\xE9es sur la complexit\xE9 du service.\
+            \ Mandater la mise en \u0153uvre et la mise \xE0 l\u2019essai de plans\
+            \ d\u2019urgence d\u2019affaires et la mise en place d\u2019un syst\xE8\
+            me de gestion de la s\xE9curit\xE9 par le fournisseur de services. Exiger\
+            \ la participation du fournisseur de services au programme de tests (avanc\xE9\
+            s) de l\u2019entit\xE9, le cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:16.3
       assessable: true
       depth: 3
@@ -2228,15 +3201,39 @@ objects:
 
         4.2 (RTS SCM)
 
-        7.1 (RTS SCM)
-
-        '
+        7.1 (RTS SCM)'
+      translations:
+        fr:
+          name: Gestion de la sous-traitance critique par des tiers
+          description: "D\xE9finir les services TIC critiques et importants dans les\
+            \ contrats conclus avec des fournisseurs de services TIC tiers, en pr\xE9\
+            cisant les conditions de sous-traitance. Exiger une surveillance continue\
+            \ des services sous-trait\xE9s soutenant les fonctions critiques afin\
+            \ d\u2019assurer la conformit\xE9 aux obligations contractuelles. D\xE9\
+            tailler les responsabilit\xE9s du fournisseur de services tiers en mati\xE8\
+            re de surveillance et de production de rapports \xE0 l\u2019\xE9gard de\
+            \ l\u2019entit\xE9 financi\xE8re, y compris les \xE9valuations des risques\
+            \ li\xE9s \xE0 l\u2019emplacement des sous-traitants et \xE0 la propri\xE9\
+            t\xE9 des donn\xE9es. Exigez des plans d\u2019intervention en cas d\u2019\
+            incident et de continuit\xE9 des activit\xE9s pour les sous-traitants,\
+            \ ainsi que le respect des niveaux de service et des normes de s\xE9curit\xE9\
+            \ sp\xE9cifi\xE9s. S\u2019assurer que les sous-traitants accordent les\
+            \ m\xEAmes droits d\u2019audit et d\u2019acc\xE8s \xE0 l\u2019entit\xE9\
+            \ financi\xE8re que le fournisseur de services principal. Conserver les\
+            \ droits de r\xE9siliation de l\u2019entit\xE9 financi\xE8re en cas de\
+            \ sous-traitance non autoris\xE9e ou de non-respect des niveaux de service\
+            \ convenus. Mettre en \u0153uvre les changements relatifs aux ententes\
+            \ contractuelles d\xE8s que possible et documenter l\u2019\xE9ch\xE9ancier\
+            \ pr\xE9vu pour la mise en \u0153uvre."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       ref_id: '17'
       name: Third-party Risk Management
+      translations:
+        fr:
+          name: "Gestion des risques li\xE9s aux tiers"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.1
       assessable: true
       depth: 3
@@ -2256,6 +3253,25 @@ objects:
         services provided by third parties.
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: "Gestion des risques li\xE9s aux tiers"
+          description: "G\xE9rer les risques li\xE9s aux tiers de mani\xE8re proportionn\xE9\
+            e \xE0 la nature de d\xE9pendance, aux risques li\xE9s aux services et\
+            \ \xE0 l\u2019impact sur la continuit\xE9 et la disponibilit\xE9 de l\u2019\
+            entit\xE9 en cas de perturbation. Mettre en \u0153uvre une politique pour\
+            \ les services TIC \xE0 fonctions critiques fournis par des fournisseurs\
+            \ de services tiers, en tenant compte de l\u2019emplacement du fournisseur\
+            \ de services (ou de sa soci\xE9t\xE9 m\xE8re), du niveau d\u2019assurance\
+            \ concernant le cadre de gestion des risques des fournisseurs de services\
+            \ (y compris les mesures d\u2019att\xE9nuation des risques et de continuit\xE9\
+            \ des activit\xE9s), de la nature des donn\xE9es partag\xE9es avec le\
+            \ fournisseur de services, de l\u2019emplacement du traitement et du stockage\
+            \ des donn\xE9es,  l\u2019affiliation de groupe du prestataire, et l\u2019\
+            impact potentiel des risques et perturbations sur la continuit\xE9 et\
+            \ la disponibilit\xE9 des activit\xE9s de l\u2019entit\xE9. Testez la\
+            \ r\xE9ponse et la r\xE9cup\xE9ration des services de soutien aux fonctions\
+            \ critiques fournis par des tiers."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.2
       assessable: true
       depth: 3
@@ -2273,18 +3289,43 @@ objects:
         resources for ensuring entity compliance with all legal and regulatory requirements.'
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: "\xC9valuation des risques pr\xE9contractuelle"
+          description: "Effectuer une \xE9valuation des risques pr\xE9contractuelle.\
+            \ Cette \xE9valuation doit \xE9valuer si : le contrat porte sur des services\
+            \ soutenant des fonctions critiques ou importantes, si un prestataire\
+            \ de services est facilement rempla\xE7able, si les risques de sous-traitance\
+            \ sont couverts, si les risques d\u2019externalisation de services vers\
+            \ un pays tiers sont couverts, si les risques de faillite sont couverts\
+            \ du c\xF4t\xE9 du prestataire de services, si les conditions de surveillance\
+            \ de la passation de contrats sont remplies, si tous les risques contractuels\
+            \ sont identifi\xE9s et \xE9valu\xE9s (par exemple,  pour couvrir les\
+            \ risques de concentration dans le secteur des TIC), le prestataire de\
+            \ services est appropri\xE9, et s\u2019il y a des conflits d\u2019int\xE9\
+            r\xEAts. \xC9valuer les ressources du fournisseur de services pour assurer\
+            \ la conformit\xE9 de l\u2019entit\xE9 \xE0 toutes les exigences l\xE9\
+            gales et r\xE9glementaires."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:17
       ref_id: '17.3'
       name: Register of Information
-      description: 'Maintain a comprehensive register of information related to contractual
+      description: Maintain a comprehensive register of information related to contractual
         arrangements with third-party service providers, distinguishing those supporting
         critical/important functions. Ensure that the register is in line with all
-        mandatory fields as defined in the ITS on the register of information.  '
+        mandatory fields as defined in the ITS on the register of information.
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: Registre des informations
+          description: "Tenir un registre complet des informations relatives aux ententes\
+            \ contractuelles avec les fournisseurs de services tiers, en distinguant\
+            \ ceux qui soutiennent les fonctions critiques et importantes. S\u2019\
+            assurer que le registre est conforme \xE0 tous les champs obligatoires\
+            \ d\xE9finis dans le STI sur le registre d\u2019informations."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.4
       assessable: true
       depth: 3
@@ -2297,6 +3338,16 @@ objects:
         ensuring auditors possess requisite skills and knowledge for complex services
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: Exigences contractuelles
+          description: "Ne contracter qu\u2019avec des fournisseurs de services r\xE9\
+            pondant aux normes de s\xE9curit\xE9 de l\u2019information appropri\xE9\
+            es (par exemple, ISO 27001, SOC, PCI-DSS, etc.) appropri\xE9es \xE0 la\
+            \ criticit\xE9 des services fournis. D\xE9terminer la fr\xE9quence des\
+            \ audits pour les fournisseurs de services, en s\u2019assurant que les\
+            \ auditeurs poss\xE8dent les comp\xE9tences et les connaissances requises\
+            \ pour des services complexes."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.5
       assessable: true
       depth: 3
@@ -2314,6 +3365,22 @@ objects:
         or service quality decline.
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: "Strat\xE9gies de sortie"
+          description: "\xC9laborer et mettre \xE0 l\u2019essai p\xE9riodiquement\
+            \ des strat\xE9gies et des plans de sortie, en tenant compte des risques\
+            \ li\xE9s aux fournisseurs de services tiers, y compris les d\xE9faillances\
+            \ potentielles, la d\xE9t\xE9rioration de la qualit\xE9 du service, l\u2019\
+            interruption des activit\xE9s et la r\xE9siliation des ententes contractuelles.\
+            \ Veiller \xE0 ce que le plan de sortie soit r\xE9aliste, r\xE9alisable,\
+            \ fond\xE9 sur des sc\xE9narios plausibles et des hypoth\xE8ses raisonnables,\
+            \ et \xE0 ce qu\u2019il soit assorti d\u2019un calendrier de mise en \u0153\
+            uvre compatible avec les conditions de sortie et de r\xE9siliation \xE9\
+            tablies dans les arrangements contractuels pertinents. Assurez \xE9galement\
+            \ une sortie en douceur et une migration de la charge de travail vers\
+            \ un autre fournisseur de services sans interruption de l\u2019activit\xE9\
+            , perte de conformit\xE9 ou baisse de la qualit\xE9 du service."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:17.6
       assessable: true
       depth: 3
@@ -2325,12 +3392,22 @@ objects:
         basis, with immediate notification for critical services.
       annotation: "8.5\n11.4\n28.1\n28.3\n28.4\n28.5\n28.6\n28.8\n29.1\n29.2 \n3.9\
         \ (RTS TPPM)\n4.1 (RTS TPPM)\n10.1 (RTS TPPM)"
+      translations:
+        fr:
+          name: Rapport annuel sur les nouveaux arrangements
+          description: "Signaler chaque ann\xE9e \xE0 l\u2019organisme de r\xE9glementation\
+            \ les nouvelles ententes conclues avec les fournisseurs de services, en\
+            \ particulier ceux qui soutiennent des fonctions essentielles ou importantes,\
+            \ et en aviser imm\xE9diatement les services essentiels."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:tprm
       ref_id: '18'
       name: Subcontracting Management
+      translations:
+        fr:
+          name: Gestion de la sous-traitance
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.1
       assessable: true
       depth: 3
@@ -2375,9 +3452,30 @@ objects:
 
         6.3 (RTS SCM)
 
-        6.4 (RTS SCM)
-
-        '
+        6.4 (RTS SCM)'
+      translations:
+        fr:
+          name: Due diligence des sous-traitants tiers
+          description: "Mettre en \u0153uvre des proc\xE9dures de diligence raisonnable\
+            \ pour \xE9valuer les pratiques de sous-traitance des fournisseurs de\
+            \ services TIC tiers. S\u2019assurer que ces fournisseurs s\u2019engagent\
+            \ activement dans les rapports et les tests op\xE9rationnels, d\xE9montrant\
+            \ ainsi leur capacit\xE9 \xE0 \xE9valuer efficacement les capacit\xE9\
+            s des sous-traitants. Exiger une participation active et une notification\
+            \ de l\u2019entit\xE9 financi\xE8re dans les d\xE9cisions de sous-traitance,\
+            \ en veillant \xE0 l\u2019alignement avec les arrangements contractuels.\
+            \ V\xE9rifiez que les accords de sous-traitance refl\xE8tent les conditions\
+            \ g\xE9n\xE9rales d\xE9crites dans le contrat principal entre l\u2019\
+            entit\xE9 financi\xE8re et le fournisseur tiers. \xC9valuez la structure\
+            \ organisationnelle, les ressources et les normes de s\xE9curit\xE9 de\
+            \ l\u2019information du fournisseur tiers, y compris les m\xE9canismes\
+            \ d\u2019intervention en cas d\u2019incident et de gestion des risques.\
+            \ Att\xE9nuez les risques associ\xE9s \xE0 la d\xE9faillance des sous-traitants\
+            \ et \xE0 l\u2019emplacement g\xE9ographique, en tenant compte des impacts\
+            \ potentiels sur la r\xE9silience op\xE9rationnelle num\xE9rique et la\
+            \ stabilit\xE9 financi\xE8re. \xC9liminer les obstacles \xE0 l\u2019audit\
+            \ et aux droits d\u2019acc\xE8s pour les autorit\xE9s comp\xE9tentes et\
+            \ l\u2019institution financi\xE8re."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.2
       assessable: true
       depth: 3
@@ -2420,9 +3518,26 @@ objects:
 
         6.3 (RTS SCM)
 
-        6.4 (RTS SCM)
-
-        '
+        6.4 (RTS SCM)'
+      translations:
+        fr:
+          name: Gestion des risques de sous-traitance
+          description: "\xC9tablissez un processus de gestion des risques pour superviser\
+            \ efficacement les activit\xE9s de sous-traitance. Suivre l\u2019ensemble\
+            \ de la cha\xEEne de sous-traitance informatique, en documentant les conditions\
+            \ et en veillant au respect des obligations contractuelles et de l\u2019\
+            obligation de tenir et de mettre \xE0 jour le registre des informations.\
+            \ Examiner la documentation contractuelle et les indicateurs cl\xE9s de\
+            \ performance pour v\xE9rifier le respect des conditions \xE9tablies tout\
+            \ au long de la cha\xEEne de sous-traitance. Exiger un pr\xE9avis des\
+            \ changements importants apport\xE9s aux ententes de sous-traitance, ce\
+            \ qui permet une \xE9valuation et une att\xE9nuation approfondies des\
+            \ risques. Veiller \xE0 ce que le droit d\u2019approuver des modifications\
+            \ ou de demander des modifications aux activit\xE9s de sous-traitance\
+            \ mat\xE9rielle soit ajout\xE9 aux contrats conclus avec les fournisseurs\
+            \ de services TIC tiers qui fournissent des fonctions critiques ou importantes.\
+            \ Mettre en \u0153uvre des mesures proactives pour g\xE9rer les risques\
+            \ cern\xE9s et am\xE9liorer la surveillance de la sous-traitance."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:18.3
       assessable: true
       depth: 3
@@ -2463,33 +3578,54 @@ objects:
 
         6.3 (RTS SCM)
 
-        6.4 (RTS SCM)
-
-        '
+        6.4 (RTS SCM)'
+      translations:
+        fr:
+          name: Suivi de la sous-traitance
+          description: "Mettre en place un processus d\u2019am\xE9lioration continue\
+            \ et de surveillance afin d\u2019am\xE9liorer les pratiques de sous-traitance\
+            \ et d\u2019att\xE9nuer les risques associ\xE9s. Examinez et mettez \xE0\
+            \ jour r\xE9guli\xE8rement les conditions de sous-traitance en fonction\
+            \ de l\u2019\xE9volution de l\u2019environnement commercial et de l\u2019\
+            \xE9valuation des risques. Effectuer des \xE9valuations p\xE9riodiques\
+            \ des crit\xE8res de sous-traitance, y compris les menaces informatiques,\
+            \ les risques de concentration et les facteurs g\xE9opolitiques. Assurer\
+            \ une mise en \u0153uvre uniforme des conditions de sous-traitance dans\
+            \ toutes les filiales, dans les limites autoris\xE9es. Surveiller et \xE9\
+            valuer l\u2019efficacit\xE9 des contr\xF4les de sous-traitance au moyen\
+            \ d\u2019examens ind\xE9pendants et d\u2019audits de conformit\xE9. Cerner\
+            \ et corriger de mani\xE8re proactive les lacunes ou les risques \xE9\
+            mergents afin de renforcer la gouvernance et la surveillance de la sous-traitance."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
       assessable: false
       depth: 1
       ref_id: RT
       name: Resilience testing
+      translations:
+        fr:
+          name: "Tests de r\xE9silience"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
       ref_id: '19'
       name: Digital Operational Resilience Testing
+      translations:
+        fr:
+          name: "Tests de r\xE9silience op\xE9rationnelle num\xE9rique"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:19
       ref_id: '19.1'
       name: Resilience Testing Program
-      description: 'Establish a risk-based digital operational resilience testing
-        program encompassing identification, classification, and full remediation
-        of test deficiencies based on risk landscape and criticality of assets and
-        services. Utilize independent internal or external parties for conducting
-        tests, ensuring clear Segregation of Duties (SoD). Conduct yearly tests on
-        all systems and applications supporting critical or important functions (see
-        controls 19-20 for the digital operational resilience tests). '
+      description: Establish a risk-based digital operational resilience testing program
+        encompassing identification, classification, and full remediation of test
+        deficiencies based on risk landscape and criticality of assets and services.
+        Utilize independent internal or external parties for conducting tests, ensuring
+        clear Segregation of Duties (SoD). Conduct yearly tests on all systems and
+        applications supporting critical or important functions (see controls 19-20
+        for the digital operational resilience tests).
       annotation: '24.1
 
         24.2
@@ -2503,6 +3639,19 @@ objects:
         24.6
 
         25.1'
+      translations:
+        fr:
+          name: "Programme de tests de r\xE9silience"
+          description: "Mettre en place un programme de tests de r\xE9silience op\xE9\
+            rationnelle num\xE9rique bas\xE9 sur les risques, englobant l\u2019identification,\
+            \ la classification et la correction compl\xE8te des d\xE9ficiences des\
+            \ tests en fonction du paysage des risques et de la criticit\xE9 des actifs\
+            \ et des services. Faites appel \xE0 des parties internes ou externes\
+            \ ind\xE9pendantes pour effectuer les tests, en veillant \xE0 ce que la\
+            \ s\xE9paration des t\xE2ches soit claire. Effectuer des tests annuels\
+            \ sur tous les syst\xE8mes et applications prenant en charge des fonctions\
+            \ critiques ou importantes (voir les contr\xF4les 19-20 pour les tests\
+            \ de r\xE9silience op\xE9rationnelle num\xE9rique)."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.2
       assessable: true
       depth: 3
@@ -2527,6 +3676,17 @@ objects:
         24.6
 
         25.1'
+      translations:
+        fr:
+          name: "Diverses modalit\xE9s de test"
+          description: "Utiliser une gamme de tests, y compris des \xE9valuations\
+            \ de vuln\xE9rabilit\xE9, des analyses open source, des \xE9valuations\
+            \ de la s\xE9curit\xE9 du r\xE9seau, des analyses des lacunes, des examens\
+            \ de la s\xE9curit\xE9 physique, des questionnaires, des solutions logicielles\
+            \ d\u2019analyse, des examens du code source (le cas \xE9ch\xE9ant), des\
+            \ tests bas\xE9s sur des sc\xE9narios, des tests de compatibilit\xE9,\
+            \ des tests de performance, des tests de bout en bout et des tests d\u2019\
+            intrusion, le cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:19.3
       assessable: true
       depth: 3
@@ -2581,12 +3741,30 @@ objects:
         12 (RTS TLPT)
 
         13 (RTS TLPT)'
+      translations:
+        fr:
+          name: "Tests TLPT p\xE9riodiques"
+          description: "Effectuer des tests d\u2019intrusion bas\xE9s sur la menace\
+            \ (TLPT) tous les trois ans, en s\u2019alignant sur le profil de risque\
+            \ de l\u2019entit\xE9. Assurez-vous que TLPT couvre toutes les fonctions\
+            \ critiques ou importantes et testez-les sur des syst\xE8mes de production\
+            \ en direct. Fournir \xE0 l\u2019organisme de r\xE9glementation un rapport\
+            \ englobant les constatations du TLPT, les plans de rem\xE9diation et\
+            \ la documentation d\xE9montrant le respect de ce contr\xF4le. Effectuer\
+            \ des TLPT selon le cadre TLPT DORA (bas\xE9 sur le cadre TIBER-EU) tel\
+            \ que d\xE9fini dans les RTS correspondants. \n\n*Notez que ce contr\xF4\
+            le ne s\u2019applique qu\u2019aux institutions financi\xE8res qui sont\
+            \ \xE9ligibles au TLPT. Reportez-vous aux RTS sur TLPT pour plus d\u2019\
+            informations sur l\u2019applicabilit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:rt
       ref_id: '20'
       name: Threat-led Penetration Testing (TLPT)
+      translations:
+        fr:
+          name: "Tests d\u2019intrusion bas\xE9s sur la menace (TLPT)"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20.1
       assessable: true
       depth: 3
@@ -2640,6 +3818,17 @@ objects:
         12 (RTS TLPT)
 
         13 (RTS TLPT)'
+      translations:
+        fr:
+          name: "Tests de syst\xE8mes externalis\xE9s"
+          description: "\xC9tendez TLPT aux syst\xE8mes, processus et technologies\
+            \ externalis\xE9s critiques. L\u2019entit\xE9 reste responsable de la\
+            \ conformit\xE9 des contr\xF4les. Collaborer avec les fournisseurs de\
+            \ services pour \xE9tablir des contr\xF4les de gestion des risques, att\xE9\
+            nuer les risques li\xE9s aux donn\xE9es, aux actifs et aux fonctions critiques.\n\
+            \n*Notez que ce contr\xF4le ne s\u2019applique qu\u2019aux institutions\
+            \ financi\xE8res qui sont \xE9ligibles au TLPT. Reportez-vous aux RTS\
+            \ sur TLPT pour plus d\u2019informations sur l\u2019applicabilit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:20.2
       assessable: true
       depth: 3
@@ -2695,17 +3884,39 @@ objects:
         12 (RTS TLPT)
 
         13 (RTS TLPT)'
+      translations:
+        fr:
+          name: "S\xE9lection des testeurs TLPT"
+          description: "Engagez des testeurs TLPT internes ou externes, avec des testeurs\
+            \ externes contract\xE9s tous les trois cycles TLPT. Assurez-vous que\
+            \ les testeurs internes sont approuv\xE9s par les organismes de r\xE9\
+            glementation, qu\u2019ils disposent de ressources ad\xE9quates et qu\u2019\
+            ils font appel \xE0 des fournisseurs externes de renseignements sur les\
+            \ menaces. S\xE9lectionnez les testeurs TLPT en fonction de leur r\xE9\
+            putation, de leur expertise en mati\xE8re de renseignements sur les menaces,\
+            \ de tests d\u2019intrusion et des pratiques de l\u2019\xE9quipe rouge,\
+            \ de certifications pertinentes, d\u2019une assurance ind\xE9pendante\
+            \ et d\u2019une couverture d\u2019assurance indemnit\xE9.\n\n*Notez que\
+            \ ce contr\xF4le ne s\u2019applique qu\u2019aux institutions financi\xE8\
+            res qui sont \xE9ligibles au TLPT. Reportez-vous aux RTS sur TLPT pour\
+            \ plus d\u2019informations sur l\u2019applicabilit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       assessable: false
       depth: 1
       ref_id: SM
       name: Security Management
+      translations:
+        fr:
+          name: "Gestion de la s\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '21'
       name: Architectural and Network Security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 architecturale et r\xE9seau"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.1
       assessable: true
       depth: 3
@@ -2728,6 +3939,23 @@ objects:
         13.1 (RTS RM)
 
         13.2 (RTS RM)'
+      translations:
+        fr:
+          name: "Conception et segmentation du r\xE9seau"
+          description: "Concevez l\u2019infrastructure r\xE9seau de mani\xE8re \xE0\
+            \ ce qu\u2019elle puisse \xEAtre instantan\xE9ment sectionn\xE9e ou segment\xE9\
+            e afin de minimiser et d\u2019emp\xEAcher la contagion. Pr\xE9voyez des\
+            \ dispositions pour isoler temporairement les sous-r\xE9seaux et les composants/p\xE9\
+            riph\xE9riques r\xE9seau. Assurez-vous que les capacit\xE9s redondantes\
+            \ sont \xE9quip\xE9es de ressources, de capacit\xE9s et de fonctions suffisantes\
+            \ (par exemple, une configuration de r\xE9seau redondante). Les syst\xE8\
+            mes et les r\xE9seaux doivent \xEAtre s\xE9par\xE9s en fonction de la\
+            \ criticit\xE9 de la fonction, de la classification et du profil de risque\
+            \ global. Maintenir un r\xE9seau distinct pour l\u2019administration des\
+            \ actifs. Fournir une repr\xE9sentation visuelle de couche 3 ou 7 (L3/L7)\
+            \ de tous les r\xE9seaux et flux de donn\xE9es. Effectuer des \xE9valuations\
+            \ annuelles des performances de l\u2019architecture et de la conception\
+            \ du r\xE9seau."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.2
       assessable: true
       depth: 3
@@ -2758,6 +3986,33 @@ objects:
         13.1 (RTS RM)
 
         13.2 (RTS RM)'
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 du r\xE9seau"
+          description: "Mettez en \u0153uvre des contr\xF4les pour pr\xE9venir et\
+            \ d\xE9tecter les connexions r\xE9seau non autoris\xE9es. \xC9tablissez\
+            \ et maintenez une base de configuration s\xE9curis\xE9e pour tous les\
+            \ composants du r\xE9seau, en suivant les instructions du fournisseur,\
+            \ les normes du secteur et les meilleures pratiques. Assurer la confidentialit\xE9\
+            , l\u2019int\xE9grit\xE9 et la disponibilit\xE9 (CIA) des donn\xE9es lors\
+            \ de la transmission r\xE9seau. Pr\xE9venez et d\xE9tectez les fuites\
+            \ de donn\xE9es, et s\xE9curisez le transfert de donn\xE9es avec des parties\
+            \ externes. Mettre en \u0153uvre des mesures pour s\xE9curiser le trafic\
+            \ r\xE9seau entre les r\xE9seaux internes et les connexions Internet/externes.\
+            \ Appliquez le chiffrement \xE0 tous les protocoles de communication sur\
+            \ les r\xE9seaux d\u2019entreprise, publics, domestiques, tiers et sans\
+            \ fil, en fonction de la classification des donn\xE9es et de l\u2019\xE9\
+            valuation des risques. \n\nExaminez r\xE9guli\xE8rement les r\xF4les et\
+            \ les responsabilit\xE9s en mati\xE8re de d\xE9finition, de mise en \u0153\
+            uvre, d\u2019approbation, de modification et d\u2019examen des r\xE8gles\
+            \ de pare-feu et des filtres de connexion.\n\nLes entit\xE9s financi\xE8\
+            res proc\xE8dent r\xE9guli\xE8rement \xE0 l\u2019examen des r\xE8gles\
+            \ de pare-feu et des filtres de connexion, en fonction de la classification\
+            \ et du profil de risque global des syst\xE8mes TIC concern\xE9s. En ce\
+            \ qui concerne les syst\xE8mes TIC prenant en charge des fonctions critiques\
+            \ ou importantes, les entit\xE9s financi\xE8res v\xE9rifient l\u2019ad\xE9\
+            quation des r\xE8gles de pare-feu et des filtres de connexion existants\
+            \ au moins tous les six mois."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:21.3
       assessable: true
       depth: 3
@@ -2773,12 +4028,21 @@ objects:
         13.1 (RTS RM)
 
         13.2 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion de session
+          description: "Appliquez des proc\xE9dures pour limiter, verrouiller et mettre\
+            \ fin aux sessions syst\xE8me et \xE0 distance apr\xE8s une p\xE9riode\
+            \ d\u2019inactivit\xE9 pr\xE9d\xE9finie."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '22'
       name: Security Monitoring & Log Management
+      translations:
+        fr:
+          name: "Surveillance de la s\xE9curit\xE9 et gestion des journaux"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.1
       assessable: true
       depth: 3
@@ -2813,6 +4077,22 @@ objects:
         23.3 (RTS RM)
 
         23.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Surveillance de la s\xE9curit\xE9 (SIEM)"
+          description: "Mettre en place des m\xE9canismes pour d\xE9tecter les activit\xE9\
+            s anormales, y compris les probl\xE8mes de performance du r\xE9seau, les\
+            \ incidents (signal\xE9s par les tiers dans les services qu\u2019ils fournissent)\
+            \ et les points de d\xE9faillance uniques importants potentiels. Ces m\xE9\
+            canismes doivent permettre d\u2019effectuer plusieurs niveaux de contr\xF4\
+            le, de d\xE9finir des seuils d\u2019alerte, de surveiller des \xE9v\xE9\
+            nements et des crit\xE8res sp\xE9cifiques pour d\xE9clencher automatiquement\
+            \ une r\xE9ponse aux incidents. Identifier et mettre en \u0153uvre des\
+            \ outils g\xE9n\xE9rant des alertes en cas d\u2019activit\xE9s et de comportements\
+            \ anormaux, au moins pour les actifs TIC et les actifs informationnels\
+            \ soutenant des fonctions critiques ou importantes. Consacrer des ressources\
+            \ suffisantes aux activit\xE9s de d\xE9tection et de surveillance, en\
+            \ particulier aux attaques de cybers\xE9curit\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.2
       assessable: true
       depth: 3
@@ -2845,17 +4125,31 @@ objects:
         23.3 (RTS RM)
 
         23.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Identification des \xE9v\xE9nements pour la journalisation"
+          description: "Identifiez les \xE9v\xE9nements \xE0 consigner, couvrant l\u2019\
+            acc\xE8s logique, l\u2019acc\xE8s physique, la gestion des identit\xE9\
+            s, la gestion des capacit\xE9s, la gestion des modifications, le fonctionnement\
+            \ des TIC (y compris l\u2019activit\xE9 du syst\xE8me) et les activit\xE9\
+            s de trafic r\xE9seau (y compris les performances du r\xE9seau). D\xE9\
+            terminez le niveau de d\xE9tail des journaux, en fonction de l\u2019objectif\
+            \ pour lequel ils ont \xE9t\xE9 cr\xE9\xE9s et pour permettre une d\xE9\
+            tection efficace des activit\xE9s anormales. D\xE9finissez des p\xE9riodes\
+            \ de conservation des journaux, en tenant compte des objectifs commerciaux\
+            \ et de s\xE9curit\xE9, de l\u2019objectif de l\u2019enregistrement des\
+            \ journaux et des \xE9valuations des risques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:22.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:22
       ref_id: '22.3'
       name: Secure Handling of Log Data
-      description: 'Implement measures to secure and handle log data, taking into
-        account the purpose for which the logs were created. Establish measures to
-        detect failures in logging systems. Protect the recording of anomalous activities
+      description: Implement measures to secure and handle log data, taking into account
+        the purpose for which the logs were created. Establish measures to detect
+        failures in logging systems. Protect the recording of anomalous activities
         against tampering and unauthorised access at rest, in use, where relevant,
-        and in transit. '
+        and in transit.
       annotation: '10.1
 
         10.2
@@ -2875,12 +4169,25 @@ objects:
         23.3 (RTS RM)
 
         23.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Traitement s\xE9curis\xE9 des donn\xE9es de journal"
+          description: "Mettre en \u0153uvre des mesures de s\xE9curisation et de\
+            \ traitement des donn\xE9es de journal, en tenant compte de l\u2019objectif\
+            \ pour lequel les journaux ont \xE9t\xE9 cr\xE9\xE9s. \xC9tablissez des\
+            \ mesures pour d\xE9tecter les d\xE9faillances des syst\xE8mes de journalisation.\
+            \ Prot\xE9gez l\u2019enregistrement des activit\xE9s anormales contre\
+            \ les manipulations et les acc\xE8s non autoris\xE9s au repos, en cours\
+            \ d\u2019utilisation, le cas \xE9ch\xE9ant et en transit."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '23'
       name: Data and (Legacy) System Security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 des donn\xE9es et des syst\xE8mes (h\xE9rit\xE9s)"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.1
       assessable: true
       depth: 3
@@ -2897,6 +4204,13 @@ objects:
         11.2 (RTS RM)
 
         20.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Syst\xE8mes, outils et solutions ICT (Security)"
+          description: "Concevoir, acqu\xE9rir et mettre en \u0153uvre des solutions\
+            \ et des outils de s\xE9curit\xE9 dans le but d\u2019assurer la r\xE9\
+            silience, la continuit\xE9 et l\u2019ICA des syst\xE8mes TIC, en particulier\
+            \ ceux qui soutiennent des fonctions critiques ou importantes."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.2
       assessable: true
       depth: 3
@@ -2919,6 +4233,23 @@ objects:
         11.2 (RTS RM)
 
         20.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Pratiques en mati\xE8re de protection des donn\xE9es"
+          description: "\xC9tablissez une base de configuration s\xE9curis\xE9e pour\
+            \ les actifs ICT, en int\xE9grant les pratiques et les techniques du secteur\
+            \ afin de minimiser l\u2019exposition aux cybermenaces. D\xE9ployez des\
+            \ mesures de s\xE9curit\xE9 pour garantir la CIA, pr\xE9venir les pertes\
+            \ et les fuites de donn\xE9es et vous prot\xE9ger contre les codes malveillants.\
+            \ Prot\xE9gez les donn\xE9es contre les risques li\xE9s \xE0 la gestion\
+            \ des donn\xE9es, notamment les erreurs administratives, les risques de\
+            \ traitement et les erreurs humaines. Assurez le transfert s\xE9curis\xE9\
+            \ des donn\xE9es et minimisez le risque de corruption ou de perte de donn\xE9\
+            es, d\u2019acc\xE8s non autoris\xE9 et de d\xE9fauts techniques susceptibles\
+            \ d\u2019entraver l\u2019activit\xE9 commerciale. Mettre en place des\
+            \ restrictions d\u2019acc\xE8s bas\xE9es sur des sch\xE9mas de classification\
+            \ des donn\xE9es. V\xE9rifier r\xE9guli\xE8rement le d\xE9ploiement effectif\
+            \ de ces r\xE9f\xE9rences."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.3
       assessable: true
       depth: 3
@@ -2936,6 +4267,14 @@ objects:
         11.2 (RTS RM)
 
         20.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Param\xE8tres de s\xE9curit\xE9 recommand\xE9s par le fournisseur"
+          description: "Tenez compte des mesures de s\xE9curit\xE9 et des param\xE8\
+            tres recommand\xE9s par le fournisseur de services tiers qui fournit le\
+            \ service TIC. Mettre en \u0153uvre des mesures techniques et organisationnelles\
+            \ pour minimiser les risques li\xE9s \xE0 l\u2019infrastructure utilis\xE9\
+            e et g\xE9r\xE9e par le fournisseur de services tiers ICT."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.4
       assessable: true
       depth: 3
@@ -2959,6 +4298,25 @@ objects:
         11.2 (RTS RM)
 
         20.1 (RTS RM)'
+      translations:
+        fr:
+          name: Terminaux
+          description: "Appliquez les exigences d\u2019utilisation pour les terminaux\
+            \ portables et non portables. Assurez-vous que seuls les supports de stockage\
+            \ de donn\xE9es, les syst\xE8mes et les p\xE9riph\xE9riques de point de\
+            \ terminaison autoris\xE9s sont utilis\xE9s pour transf\xE9rer et stocker\
+            \ les donn\xE9es. Mettre en \u0153uvre des mesures de s\xE9curit\xE9 pour\
+            \ s\u2019assurer que le t\xE9l\xE9travail et l\u2019utilisation d\u2019\
+            appareils de point de terminaison priv\xE9s n\u2019ont pas d\u2019impact\
+            \ n\xE9gatif sur la s\xE9curit\xE9 globale de l\u2019entit\xE9. Cela inclut\
+            \ la mise en place d\u2019une solution de gestion centralis\xE9e pour\
+            \ g\xE9rer et effacer \xE0 distance les terminaux, des m\xE9canismes de\
+            \ s\xE9curit\xE9 qui ne peuvent pas \xEAtre modifi\xE9s, supprim\xE9s\
+            \ ou contourn\xE9s, et l\u2019utilisation de p\xE9riph\xE9riques de stockage\
+            \ de donn\xE9es amovibles uniquement lorsque le risque ICT r\xE9siduel\
+            \ reste dans les niveaux de tol\xE9rance au risque pr\xE9d\xE9finis. Appliquez\
+            \ des mesures de s\xE9curit\xE9 pour autoriser uniquement l\u2019installation\
+            \ de logiciels autoris\xE9s sur les syst\xE8mes et les terminaux."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:23.5
       assessable: true
       depth: 3
@@ -2975,24 +4333,35 @@ objects:
         11.2 (RTS RM)
 
         20.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Suppression et \xE9limination s\xE9curis\xE9es des donn\xE9es"
+          description: "\xC9tablissez un processus pour supprimer en toute s\xE9curit\xE9\
+            \ les donn\xE9es sur site et hors site. \xC9tablissez un processus pour\
+            \ \xE9liminer ou d\xE9sactiver en toute s\xE9curit\xE9 les dispositifs\
+            \ de stockage de donn\xE9es sur site et hors site qui contiennent des\
+            \ informations confidentielles."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '24'
       name: Encryption and Cryptography
+      translations:
+        fr:
+          name: Cryptage et cryptographie
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:24
       ref_id: '24.1'
       name: Data Encryption
-      description: 'Define rules for encrypting data at rest, in transit, and, where
+      description: Define rules for encrypting data at rest, in transit, and, where
         applicable, in use, considering data classification and risk assessments.
         Specify procedures when encryption of data in use is not feasible, ensuring
         processing in a separate and protected environment or taking equivalent measures.
         Implement rules for encrypting internal network connections and traffic with
-        external parties, aligned with data classification and risk assessments. '
+        external parties, aligned with data classification and risk assessments.
       annotation: '6.1 (RTS RM)
 
         6.2 (RTS RM)
@@ -3012,6 +4381,19 @@ objects:
         7.4 (RTS RM)
 
         7.5 (RTS RM)'
+      translations:
+        fr:
+          name: "Cryptage des donn\xE9es"
+          description: "D\xE9finir des r\xE8gles de chiffrement des donn\xE9es au\
+            \ repos, en transit et, le cas \xE9ch\xE9ant, en cours d\u2019utilisation,\
+            \ en tenant compte de la classification des donn\xE9es et de l\u2019\xE9\
+            valuation des risques. Sp\xE9cifier les proc\xE9dures lorsque le cryptage\
+            \ des donn\xE9es en cours d\u2019utilisation n\u2019est pas possible,\
+            \ en assurant le traitement dans un environnement s\xE9par\xE9 et prot\xE9\
+            g\xE9 ou en prenant des mesures \xE9quivalentes. Mettez en \u0153uvre\
+            \ des r\xE8gles de chiffrement des connexions r\xE9seau internes et du\
+            \ trafic avec des parties externes, align\xE9es sur la classification\
+            \ des donn\xE9es et les \xE9valuations des risques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:24.2
       assessable: true
       depth: 3
@@ -3049,12 +4431,36 @@ objects:
         7.4 (RTS RM)
 
         7.5 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion et cycle de vie des cl\xE9s cryptographiques"
+          description: "\xC9tablissez des protocoles pour l\u2019utilisation, la protection\
+            \ et la gestion du cycle de vie des cl\xE9s cryptographiques. D\xE9finir\
+            \ les crit\xE8res de s\xE9lection des techniques et des pratiques cryptographiques,\
+            \ en int\xE9grant les meilleures pratiques et les normes de l\u2019industrie.\
+            \ Utiliser des mesures d\u2019att\xE9nuation et de surveillance s\u2019\
+            il n\u2019est pas possible de respecter ces pratiques et normes. D\xE9\
+            crire les exigences relatives \xE0 la gestion et au contr\xF4le des cl\xE9\
+            s cryptographiques tout au long de leur cycle de vie, y compris la g\xE9\
+            n\xE9ration, le stockage, la sauvegarde, l\u2019archivage, la r\xE9cup\xE9\
+            ration, la transmission, le retrait, la r\xE9vocation et la destruction.\
+            \ \xC9tablissez des m\xE9thodes pour r\xE9cup\xE9rer les cl\xE9s cryptographiques\
+            \ en cas de perte, de compromission ou de dommage. Surveiller les d\xE9\
+            veloppements de l\u2019analyse cryptographique et, si n\xE9cessaire, mettre\
+            \ \xE0 jour ou modifier la technologie cryptographique. Mettre en \u0153\
+            uvre des mesures d\u2019att\xE9nuation et de surveillance s\u2019il n\u2019\
+            est pas possible de modifier ou de mettre \xE0 jour la technologie cryptographique.\
+            \ Tenez un registre pour tous les certificats et les p\xE9riph\xE9riques\
+            \ de stockage de certificats."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '25'
       name: Identity and Access Management
+      translations:
+        fr:
+          name: "Gestion des identit\xE9s et des acc\xE8s"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.1
       assessable: true
       depth: 3
@@ -3071,6 +4477,16 @@ objects:
         20.2 (RTS RM)
 
         21.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion des identit\xE9s"
+          description: "Attribuez une identit\xE9 unique \xE0 chaque membre du personnel\
+            \ ou au personnel du fournisseur de services tiers acc\xE9dant aux informations\
+            \ et aux actifs TIC. Mettez en \u0153uvre un processus de gestion du cycle\
+            \ de vie des identit\xE9s, couvrant la cr\xE9ation, la modification, la\
+            \ recertification, la d\xE9sactivation temporaire et la r\xE9siliation\
+            \ des comptes utilisateur. Utiliser des solutions automatis\xE9es, le\
+            \ cas \xE9ch\xE9ant."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.2
       assessable: true
       depth: 3
@@ -3088,6 +4504,19 @@ objects:
         20.2 (RTS RM)
 
         21.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion des acc\xE8s privil\xE9gi\xE9s"
+          description: "D\xE9finissez les droits d\u2019acc\xE8s en fonction des principes\
+            \ du besoin de savoir, du besoin d\u2019utiliser et du moindre privil\xE8\
+            ge, y compris des dispositions pour l\u2019acc\xE8s \xE0 distance et d\u2019\
+            urgence. Appliquer la s\xE9paration des t\xE2ches pour emp\xEAcher l\u2019\
+            acc\xE8s injustifi\xE9 ou les combinaisons qui pourraient contourner les\
+            \ contr\xF4les. Assurer la responsabilisation des utilisateurs en limitant\
+            \ les comptes d\u2019utilisateurs g\xE9n\xE9riques et partag\xE9s, en\
+            \ permettant l\u2019identification des utilisateurs pour toutes les actions\
+            \ du syst\xE8me TIC. Mettre en \u0153uvre des contr\xF4les et des outils\
+            \ pour restreindre l\u2019acc\xE8s non autoris\xE9."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.3
       assessable: true
       depth: 3
@@ -3107,6 +4536,21 @@ objects:
         20.2 (RTS RM)
 
         21.1 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion de compte
+          description: "\xC9tablissez des proc\xE9dures pour l\u2019octroi, la modification\
+            \ et la r\xE9vocation des droits d\u2019acc\xE8s, en pr\xE9cisant les\
+            \ r\xF4les et les responsabilit\xE9s. D\xE9finissez des p\xE9riodes de\
+            \ conservation pour les journaux d\u2019acc\xE8s. Attribuez des acc\xE8\
+            s privil\xE9gi\xE9s, d\u2019urgence et administrateur en fonction des\
+            \ besoins ou de mani\xE8re ad hoc, gr\xE2ce \xE0 des solutions automatis\xE9\
+            es de gestion des acc\xE8s privil\xE9gi\xE9s. Retirer rapidement les droits\
+            \ d\u2019acc\xE8s \xE0 la cessation d\u2019emploi ou lorsqu\u2019ils ne\
+            \ sont plus n\xE9cessaires. Proc\xE9der \xE0 des examens p\xE9riodiques\
+            \ des droits d\u2019acc\xE8s, en veillant \xE0 ce qu\u2019ils soient examin\xE9\
+            s au moins une fois par an pour les syst\xE8mes TIC non critiques et semestriels\
+            \ pour les syst\xE8mes critiques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:25.4
       assessable: true
       depth: 3
@@ -3121,12 +4565,23 @@ objects:
         20.2 (RTS RM)
 
         21.1 (RTS RM)'
+      translations:
+        fr:
+          name: "M\xE9thodes d\u2019authentification"
+          description: "Utiliser des m\xE9thodes d\u2019authentification adapt\xE9\
+            es \xE0 la classification et au profil de risque des actifs TIC. Mettre\
+            \ en \u0153uvre des m\xE9thodes d\u2019authentification fortes, en particulier\
+            \ pour l\u2019acc\xE8s \xE0 distance, l\u2019acc\xE8s privil\xE9gi\xE9\
+            \ et l\u2019acc\xE8s aux actifs ICT critiques."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:26
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '26'
       name: Physical and Environmental Security
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 physique et environnementale"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:26.1
       assessable: true
       depth: 3
@@ -3154,19 +4609,49 @@ objects:
         20.2 (RTS RM)
 
         21.1 (RTS RM)'
+      translations:
+        fr:
+          name: "S\xE9curit\xE9 physique et environnementale"
+          description: "Mettre en \u0153uvre des mesures pour prot\xE9ger l\u2019\
+            environnement (locaux, centres de donn\xE9es et zones sensibles d\xE9\
+            sign\xE9es) o\xF9 se trouvent des actifs importants contre les attaques,\
+            \ les accidents et les menaces et dangers environnementaux. Le niveau\
+            \ de protection contre les menaces environnementales doit \xEAtre proportionnel\
+            \ \xE0 l\u2019importance de l\u2019emplacement de stockage des actifs\
+            \ et \xE0 la criticit\xE9 des op\xE9rations. Prot\xE9ger les actifs \xE0\
+            \ l\u2019int\xE9rieur et \xE0 l\u2019ext\xE9rieur des locaux de l\u2019\
+            entit\xE9, en assurant la confidentialit\xE9, l\u2019int\xE9grit\xE9 et\
+            \ la disponibilit\xE9 (CIA) de ces actifs. Ces mesures devraient \xEA\
+            tre d\xE9termin\xE9es en fonction des r\xE9sultats d\u2019une \xE9valuation\
+            \ des risques. Cela comprend \xE9galement des pratiques telles que le\
+            \ maintien d\u2019un bureau propre et la garantie que les \xE9crans sont\
+            \ d\xE9gag\xE9s dans les installations de traitement et l\u2019acc\xE8\
+            s aux actifs TIC critiques. Identifier et enregistrer le personnel autoris\xE9\
+            \ qui entre dans les lieux critiques de l\u2019entit\xE9 financi\xE8re.\
+            \ Accordez des droits d\u2019acc\xE8s physique aux actifs TIC critiques\
+            \ en fonction du besoin d\u2019en conna\xEEtre, des principes du moindre\
+            \ privil\xE8ge et des exigences ad hoc conform\xE9ment \xE0 la politique\
+            \ de gestion des acc\xE8s. Surveillez l\u2019acc\xE8s physique aux locaux,\
+            \ aux centres de donn\xE9es et aux zones sensibles d\xE9sign\xE9es, en\
+            \ fonction de la classification des actifs et de la criticit\xE9 de la\
+            \ zone. R\xE9examinez r\xE9guli\xE8rement et r\xE9voquez rapidement les\
+            \ droits d\u2019acc\xE8s physique inutiles."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '27'
       name: Security Awareness
+      translations:
+        fr:
+          name: "Sensibilisation \xE0 la s\xE9curit\xE9"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27.1
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
       ref_id: '27.1'
       name: Resilience Training Programs
-      description: 'Implement security awareness and digital operational resilience
+      description: Implement security awareness and digital operational resilience
         training as integral components of staff training schemes and ensure training
         extends to all staff members, including senior management. Customize training
         intensity based on employee roles and functions. For the training content,
@@ -3176,36 +4661,69 @@ objects:
         basis. Staff shall be informed on the ICT security policies, procedures and
         protocols and be made aware of the reporting channels put in place for detecting
         anomalous activities. Upon termination of employment, all staff are required
-        to return all ICT assets and information assets. '
+        to return all ICT assets and information assets.
       annotation: '5.2
 
         13.6
 
         19.1 (RTS RM)'
+      translations:
+        fr:
+          name: "Programmes de formation \xE0 la r\xE9silience"
+          description: "Mettre en \u0153uvre une formation de sensibilisation \xE0\
+            \ la s\xE9curit\xE9 et de r\xE9silience op\xE9rationnelle num\xE9rique\
+            \ en tant que partie int\xE9grante des programmes de formation du personnel\
+            \ et veiller \xE0 ce que la formation s\u2019\xE9tende \xE0 tous les membres\
+            \ du personnel, y compris la direction. Personnalisez l\u2019intensit\xE9\
+            \ de la formation en fonction des r\xF4les et des fonctions des employ\xE9\
+            s. Pour le contenu de la formation, abordez des sujets tels que la s\xE9\
+            curit\xE9 du r\xE9seau, les informations sur les incidents pr\xE9c\xE9\
+            dents, les renseignements sur les menaces, les d\xE9fenses contre les\
+            \ intrusions, les mesures de protection des donn\xE9es (par exemple, le\
+            \ cryptage, la cryptographie). Mener le programme de formation sur la\
+            \ r\xE9silience sur une base annuelle. Le personnel doit \xEAtre inform\xE9\
+            \ des politiques, proc\xE9dures et protocoles de s\xE9curit\xE9 des TIC\
+            \ et des canaux de signalement mis en place pour d\xE9tecter les activit\xE9\
+            s anormales. En cas de cessation d\u2019emploi, tous les membres du personnel\
+            \ sont tenus de restituer tous les actifs informatiques et informationnels."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:27.2
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:27
       ref_id: '27.2'
       name: Inclusion of Third-Party Providers
-      description: 'Incorporate ICT third-party service providers as participants
-        in relevant training programs, where appropriate. Third-parties shall be informed
+      description: Incorporate ICT third-party service providers as participants in
+        relevant training programs, where appropriate. Third-parties shall be informed
         on the ICT security policies, procedures and protocols and be made aware of
         the reporting channels put in place for detecting anomalous activities. Upon
         termination of employment or contract termination, the third-parties are required
         to return all ICT assets and information assets that belong to the financial
-        entity. '
+        entity.
       annotation: '5.2
 
         13.6
 
         19.1 (RTS RM)'
+      translations:
+        fr:
+          name: Inclusion de fournisseurs tiers
+          description: "Int\xE9grer des fournisseurs de services tiers dans le domaine\
+            \ des TIC en tant que participants aux programmes de formation pertinents,\
+            \ le cas \xE9ch\xE9ant. Les tiers doivent \xEAtre inform\xE9s des politiques,\
+            \ proc\xE9dures et protocoles de s\xE9curit\xE9 informatique et des canaux\
+            \ de signalement mis en place pour d\xE9tecter les activit\xE9s anormales.\
+            \ En cas de cessation d\u2019emploi ou de cessation de contrat, les tiers\
+            \ sont tenus de restituer tous les actifs TIC et les actifs informationnels\
+            \ appartenant \xE0 l\u2019entit\xE9 financi\xE8re."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
       assessable: false
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:sm
       ref_id: '28'
       name: Vulnerability and Patch Management
+      translations:
+        fr:
+          name: "Gestion des vuln\xE9rabilit\xE9s et des correctifs"
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.1
       assessable: true
       depth: 3
@@ -3225,6 +4743,14 @@ objects:
         10.3 (RTS RM)
 
         10.4 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion des ressources
+          description: "Identifier et tenir \xE0 jour des ressources d\u2019information\
+            \ pertinentes et fiables pour renforcer et maintenir la sensibilisation\
+            \ aux vuln\xE9rabilit\xE9s. Suivez l\u2019utilisation des biblioth\xE8\
+            ques tierces, y compris les biblioth\xE8ques open source, en surveillant\
+            \ les versions et les mises \xE0 jour potentielles (voir aussi 28.2-3)."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.2
       assessable: true
       depth: 3
@@ -3255,13 +4781,33 @@ objects:
         10.3 (RTS RM)
 
         10.4 (RTS RM)'
+      translations:
+        fr:
+          name: "Gestion des vuln\xE9rabilit\xE9s"
+          description: "Effectuer des analyses et des \xE9valuations automatis\xE9\
+            es des vuln\xE9rabilit\xE9s des actifs TIC. Pour les actifs prenant en\
+            \ charge des fonctions critiques ou importantes, effectuez des analyses\
+            \ et des \xE9valuations sur une base hebdomadaire. Enregistrez les vuln\xE9\
+            rabilit\xE9s d\xE9tect\xE9es, surveillez leur \xE9tat de r\xE9solution\
+            \ et v\xE9rifiez la correction des vuln\xE9rabilit\xE9s. Divulguer les\
+            \ vuln\xE9rabilit\xE9s de mani\xE8re responsable aux clients, aux partenaires\
+            \ financiers et au public, le cas \xE9ch\xE9ant. S\u2019assurer que les\
+            \ fournisseurs de services tiers signalent les vuln\xE9rabilit\xE9s li\xE9\
+            es aux services qu\u2019ils offrent. Cela comprend l\u2019enqu\xEAte sur\
+            \ les vuln\xE9rabilit\xE9s, la d\xE9termination des causes profondes et\
+            \ la mise en \u0153uvre de solutions appropri\xE9es par les fournisseurs\
+            \ de services.\n\n*Sp\xE9cifique aux d\xE9positaires centraux de titres\
+            \ et aux contreparties centrales : effectuer des \xE9valuations de vuln\xE9\
+            rabilit\xE9 avant tout d\xE9ploiement ou red\xE9ploiement d\u2019applications\
+            \ et de composants d\u2019infrastructure nouveaux ou existants, ainsi\
+            \ que de services ICT soutenant des fonctions critiques ou importantes."
     - urn: urn:intuitem:risk:req_node:norea-dora-in-control:28.3
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:norea-dora-in-control:28
       ref_id: '28.3'
       name: Patch Management
-      description: 'Identify and evaluate available ICT assets (e.g., software and
+      description: Identify and evaluate available ICT assets (e.g., software and
         hardware) patches and updates using automated tools, to the extent possible.
         Deploy patches to address identified vulnerabilities. Prioritize the deployment
         of patches and other mitigation measures based on the criticality of the vulnerability
@@ -3271,7 +4817,7 @@ objects:
         asset patches and updates, and establish escalation procedures in case the
         due dates  cannot be met. In cases where no patches can be applied or are
         available, identify and implement alternative mitigation measures within the
-        set due dates. '
+        set due dates.
       annotation: '25.2
 
         10.1 (RTS RM)
@@ -3281,3 +4827,23 @@ objects:
         10.3 (RTS RM)
 
         10.4 (RTS RM)'
+      translations:
+        fr:
+          name: Gestion des correctifs
+          description: "Dans la mesure du possible, identifier et \xE9valuer les correctifs\
+            \ et les mises \xE0 jour des actifs TIC disponibles (p. ex., logiciels\
+            \ et mat\xE9riel) \xE0 l\u2019aide d\u2019outils automatis\xE9s. D\xE9\
+            ployez des correctifs pour corriger les vuln\xE9rabilit\xE9s identifi\xE9\
+            es. Prioriser le d\xE9ploiement de correctifs et d\u2019autres mesures\
+            \ d\u2019att\xE9nuation en fonction de la criticit\xE9 de la vuln\xE9\
+            rabilit\xE9 et de la classification et du profil de risque des actifs\
+            \ affect\xE9s. \xC9tablir des proc\xE9dures d\u2019urgence pour l\u2019\
+            application de correctifs et la mise \xE0 jour des ressources informatiques.\
+            \ Testez et d\xE9ployez les correctifs et les mises \xE0 jour des actifs\
+            \ TIC.  Fixez des dates d\u2019\xE9ch\xE9ance pour l\u2019installation\
+            \ des correctifs et des mises \xE0 jour des actifs TIC, et \xE9tablissez\
+            \ des proc\xE9dures d\u2019escalade au cas o\xF9 les dates d\u2019\xE9\
+            ch\xE9ance ne pourraient pas \xEAtre respect\xE9es. Dans les cas o\xF9\
+            \ aucun correctif ne peut \xEAtre appliqu\xE9 ou n\u2019est disponible,\
+            \ identifiez et mettez en \u0153uvre d\u2019autres mesures d\u2019att\xE9\
+            nuation dans les dates d\u2019\xE9ch\xE9ance fix\xE9es."
