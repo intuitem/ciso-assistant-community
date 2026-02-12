@@ -3022,6 +3022,70 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'organisation-issues': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'validation-flows': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'quantitative-risk-studies': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'ebios-rm': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	entities: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	processings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'processings/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'findings-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'metric-instances': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'metric-instances/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	]
 };
 

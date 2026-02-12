@@ -924,31 +924,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             folder_value = folder_value.get("id")
         if not folder_value:
             return
-        try:
-            target_id = UUID(str(folder_value))
-        except (TypeError, ValueError):
-            return
-        if instance.folder_id and instance.folder_id == target_id:
-            return
-        target_folder = Folder.objects.filter(id=target_id).first()
-        if not target_folder:
-            return
-        model = self.model or instance.__class__
-        perm = Permission.objects.get(
-            codename=f"add_{model._meta.model_name}",
-            content_type__app_label=model._meta.app_label,
-            content_type__model=model._meta.model_name,
-        )
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=perm,
-            folder=target_folder,
-        ):
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
+        self._check_folder_move_permission(request.user, instance, folder_value)
 
     def _validate_parent_field_change(self, request: Request, instance) -> None:
         """Block updates to immutable parent fields on indirect-parent models."""
@@ -1066,6 +1042,9 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def batch_action(self, request):
         """
         Perform a batch action on multiple objects.
+        Uses the IAM-filtered queryset and serializers to respect permissions
+        and validation, mirroring the standard partial_update / destroy flows.
+
         Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
                    "ids": [...], "field": "<field_name>", "value": ... }
         """
@@ -1102,37 +1081,24 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        model_name = self.model._meta.model_name
-        if action_type == "delete":
-            perm_codename = f"delete_{model_name}"
-        else:
-            perm_codename = f"change_{model_name}"
+        # Use the IAM-filtered queryset — objects the user cannot see are excluded
+        queryset = self.get_queryset()
 
-        try:
-            perm = Permission.objects.get(codename=perm_codename)
-        except Permission.DoesNotExist:
-            return Response(
-                {"error": f"Permission {perm_codename} not found"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Resolve the write serializer once for all update operations
+        if action_type != "delete":
+            serializer_class = self.get_serializer_class(action="partial_update")
 
         succeeded = []
         failed = []
 
         for obj_id in ids:
             try:
-                obj = self.model.objects.get(id=obj_id)
+                obj = queryset.get(id=obj_id)
             except self.model.DoesNotExist:
-                failed.append({"id": str(obj_id), "error": "Object not found"})
-                continue
-
-            folder = getattr(obj, "folder", Folder.get_root_folder())
-            if not RoleAssignment.is_access_allowed(request.user, perm, folder):
                 failed.append(
                     {
                         "id": str(obj_id),
-                        "name": str(obj),
-                        "error": "Permission denied",
+                        "error": "Object not found or access denied",
                     }
                 )
                 continue
@@ -1156,86 +1122,92 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                         )
                     obj.delete()
 
-                elif action_type == "change_field":
-                    if not hasattr(obj, field_name):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": f"Object has no '{field_name}' field",
-                            }
-                        )
-                        continue
-                    setattr(obj, field_name, value)
-                    obj.save()
+                else:
+                    # Build data dict for the serializer
+                    if action_type == "change_folder":
+                        data = {"folder": value}
+                        # Validate folder move permission (mirrors _validate_folder_change)
+                        self._check_folder_move_permission(request.user, obj, value)
+                    elif action_type == "change_m2m":
+                        actor_ids = value if isinstance(value, list) else [value]
+                        data = {field_name: actor_ids}
+                    else:  # change_field
+                        data = {field_name: value}
 
-                elif action_type == "change_m2m":
-                    if not hasattr(obj, field_name):
+                    # Go through the serializer for validation + save,
+                    # and perform_update for webhook dispatch
+                    serializer = serializer_class(
+                        obj,
+                        data=data,
+                        partial=True,
+                        context=self.get_serializer_context(),
+                    )
+                    if not serializer.is_valid():
                         failed.append(
                             {
                                 "id": str(obj_id),
                                 "name": str(obj),
-                                "error": f"Object has no '{field_name}' field",
+                                "error": serializer.errors,
                             }
                         )
                         continue
-                    from core.models import Actor
-
-                    actor_ids = value if isinstance(value, list) else [value]
-                    getattr(obj, field_name).set(Actor.objects.filter(id__in=actor_ids))
-
-                elif action_type == "change_folder":
-                    if not hasattr(obj, "folder"):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Object has no folder field",
-                            }
-                        )
-                        continue
-                    try:
-                        new_folder = Folder.objects.get(id=value)
-                    except Folder.DoesNotExist:
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Target folder not found",
-                            }
-                        )
-                        continue
-                    # Check add permission on target folder (same as _validate_folder_change)
-                    try:
-                        add_perm = Permission.objects.get(
-                            codename=f"add_{model_name}",
-                            content_type__app_label=self.model._meta.app_label,
-                            content_type__model=model_name,
-                        )
-                    except Permission.DoesNotExist:
-                        add_perm = None
-                    if add_perm and not RoleAssignment.is_access_allowed(
-                        request.user, add_perm, new_folder
-                    ):
-                        failed.append(
-                            {
-                                "id": str(obj_id),
-                                "name": str(obj),
-                                "error": "Permission denied on target folder",
-                            }
-                        )
-                        continue
-                    obj.folder = new_folder
-                    obj.save()
+                    self.perform_update(serializer)
 
                 succeeded.append({"id": str(obj_id), "name": str(obj)})
-            except Exception as e:
+
+            except PermissionDenied as e:
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": e.detail
+                        if hasattr(e, "detail")
+                        else "Permission denied",
+                    }
+                )
+            except Exception:
                 logger.error("Batch action failed for %s", obj_id, exc_info=True)
                 failed.append(
-                    {"id": str(obj_id), "name": str(obj), "error": "Unexpected error"}
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Unexpected error",
+                    }
                 )
 
         return Response({"succeeded": succeeded, "failed": failed})
+
+    def _check_folder_move_permission(self, user, instance, folder_id):
+        """
+        Check that the user has add permission on the target folder.
+        Raises PermissionDenied if not allowed.
+        Mirrors the permission logic from _validate_folder_change.
+        """
+        if not hasattr(instance, "folder") or not folder_id:
+            return
+        try:
+            target_id = UUID(str(folder_id))
+        except (TypeError, ValueError):
+            return
+        if instance.folder_id and instance.folder_id == target_id:
+            return
+        target_folder = Folder.objects.filter(id=target_id).first()
+        if not target_folder:
+            return  # serializer will catch invalid FK
+        model = self.model or instance.__class__
+        perm = Permission.objects.get(
+            codename=f"add_{model._meta.model_name}",
+            content_type__app_label=model._meta.app_label,
+            content_type__model=model._meta.model_name,
+        )
+        if not RoleAssignment.is_access_allowed(
+            user=user, perm=perm, folder=target_folder
+        ):
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
