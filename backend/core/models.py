@@ -2196,6 +2196,18 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         fallback_ref = ":".join(self.urn.split(":")[5:])
         return self.display_short if self.display_short else fallback_ref
 
+    @property
+    def get_typical_evidence_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("typical_evidence", self.typical_evidence)
+
+    @property
+    def get_questions_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("questions", self.questions)
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
