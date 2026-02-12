@@ -2318,7 +2318,7 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
 class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
-    actor = FieldsRelatedField()
+    actor = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
 
     class Meta:

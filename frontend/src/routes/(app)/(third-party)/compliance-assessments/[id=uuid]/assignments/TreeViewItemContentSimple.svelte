@@ -9,7 +9,7 @@
 		node_content: string;
 		assessable: boolean;
 		hasParentNode: boolean;
-		assignmentInfo: { actorName: string } | null;
+		assignmentInfo: Array<{ actorName: string }> | null;
 		isAssigned: boolean;
 		nodeId: string;
 		childrenIds: string[]; // IDs of all assessable children (for batch selection)
@@ -175,15 +175,17 @@
 				{/if}
 			</span>
 
-			<!-- Assignment badge (hidden when node is being edited) -->
+			<!-- Assignment badges (hidden when node is being edited) -->
 			{#if assignmentInfo && !isBeingEdited}
-				<span
-					class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
-					title="{m.assignedTo()} {assignmentInfo.actorName}"
-				>
-					<i class="fa-solid fa-user text-xs"></i>
-					<span class="max-w-[100px] truncate">{assignmentInfo.actorName}</span>
-				</span>
+				{#each assignmentInfo as info}
+					<span
+						class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 border border-blue-200"
+						title="{m.assignedTo()} {info.actorName}"
+					>
+						<i class="fa-solid fa-user text-xs"></i>
+						<span class="max-w-[100px] truncate">{info.actorName}</span>
+					</span>
+				{/each}
 			{/if}
 
 			<!-- Section-level assignment badges -->

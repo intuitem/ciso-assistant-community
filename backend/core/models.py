@@ -7182,9 +7182,8 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         related_name="requirement_assignments",
         verbose_name=_("Compliance Assessment"),
     )
-    actor = models.ForeignKey(
+    actor = models.ManyToManyField(
         "Actor",
-        on_delete=models.CASCADE,
         related_name="requirement_assignments",
         verbose_name=_("Assigned To"),
     )
@@ -7201,7 +7200,8 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         ordering = ["created_at"]
 
     def __str__(self) -> str:
-        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{self.actor}"
+        actors = ", ".join(str(a) for a in self.actor.all())
+        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
 
 
 class FindingsAssessment(Assessment):

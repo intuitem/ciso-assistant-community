@@ -6,7 +6,7 @@
 		result: string | undefined;
 		resultColor: string;
 		isAssigned: boolean;
-		assignmentInfo: { actorName: string } | null;
+		assignmentInfo: Array<{ actorName: string }> | null;
 	}
 
 	let { assessable, result, resultColor, isAssigned, assignmentInfo }: Props = $props();

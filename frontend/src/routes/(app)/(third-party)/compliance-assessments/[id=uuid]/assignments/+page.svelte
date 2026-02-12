@@ -71,14 +71,15 @@
 	let showRequirementsModal = $state(false);
 	let selectedAssignmentForModal = $state<(typeof assignments)[0] | null>(null);
 
-	// Get selected actor ID from form store
-	let selectedActorId = $derived($assignmentFormStore.actor ?? '');
+	// Get selected actor IDs from form store (now an array)
+	let selectedActorIds = $derived(($assignmentFormStore.actor as string[]) ?? []);
+	let hasSelectedActors = $derived(selectedActorIds.length > 0);
 
-	// Get assignment info for a node
-	function getAssignmentInfo(nodeId: string): { actorName: string } | null {
+	// Get assignment info for a node - returns array of actor names
+	function getAssignmentInfo(nodeId: string): Array<{ actorName: string }> | null {
 		for (const assignment of assignments) {
 			if (assignment.requirement_assessments.includes(nodeId)) {
-				return { actorName: assignment.actor.str };
+				return assignment.actor.map((a: { str: string }) => ({ actorName: a.str }));
 			}
 		}
 		return null;
@@ -161,8 +162,12 @@
 		const actorNames = new Set<string>();
 		const descendantIds = getAssessableDescendantIds(node);
 		for (const raId of descendantIds) {
-			const info = getAssignmentInfo(raId);
-			if (info) actorNames.add(info.actorName);
+			const infos = getAssignmentInfo(raId);
+			if (infos) {
+				for (const info of infos) {
+					actorNames.add(info.actorName);
+				}
+			}
 		}
 		return [...actorNames].map((name) => ({ actorName: name }));
 	}
@@ -251,14 +256,14 @@
 	}
 
 	async function handleCreateAssignment() {
-		if (!selectedActorId || availableCheckedNodes.length === 0) {
+		if (!hasSelectedActors || availableCheckedNodes.length === 0) {
 			return;
 		}
 
 		isCreating = true;
 		try {
 			const formData = new FormData();
-			formData.append('actor', selectedActorId);
+			formData.append('actor', JSON.stringify(selectedActorIds));
 			formData.append('requirement_assessments', JSON.stringify(availableCheckedNodes));
 			formData.append('compliance_assessment', data.compliance_assessment.id);
 			formData.append('folder', data.compliance_assessment.folder.id);
@@ -271,7 +276,7 @@
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.status === 201) {
 				// Reset form
-				$assignmentFormStore.actor = undefined;
+				$assignmentFormStore.actor = [];
 				$checkedNodesStore = new Set();
 				// Apply the action result and refresh page data
 				await applyAction(result);
@@ -314,8 +319,8 @@
 
 	function startEdit(assignment: (typeof assignments)[0]) {
 		editingAssignmentId = assignment.id;
-		// Populate the form with the assignment's actor
-		$assignmentFormStore.actor = assignment.actor.id;
+		// Populate the form with the assignment's actors (array of IDs)
+		$assignmentFormStore.actor = assignment.actor.map((a: { id: string }) => a.id);
 		// Populate checked nodes with the assignment's requirements
 		$checkedNodesStore = new Set(assignment.requirement_assessments);
 		// Set the editing requirement IDs for tree styling
@@ -324,13 +329,13 @@
 
 	function cancelEdit() {
 		editingAssignmentId = null;
-		$assignmentFormStore.actor = undefined;
+		$assignmentFormStore.actor = [];
 		$checkedNodesStore = new Set();
 		$editingRequirementIdsStore = new Set();
 	}
 
 	async function handleUpdateAssignment() {
-		if (!editingAssignmentId || !selectedActorId || availableCheckedNodes.length === 0) {
+		if (!editingAssignmentId || !hasSelectedActors || availableCheckedNodes.length === 0) {
 			return;
 		}
 
@@ -338,7 +343,7 @@
 		try {
 			const formData = new FormData();
 			formData.append('id', editingAssignmentId);
-			formData.append('actor', selectedActorId);
+			formData.append('actor', JSON.stringify(selectedActorIds));
 			formData.append('requirement_assessments', JSON.stringify(availableCheckedNodes));
 
 			const response = await fetch(`?/update`, {
@@ -387,6 +392,17 @@
 
 	function collapseAll() {
 		expandedNodes = [];
+	}
+
+	// Helper to format actor display string
+	function formatActors(actors: Array<{ str: string; type?: string }>): string {
+		return actors.map((a) => a.str).join(', ');
+	}
+
+	// Helper to determine icon for actor list
+	function actorIcon(actors: Array<{ type?: string }>): string {
+		if (actors.length > 1) return 'users';
+		return actors[0]?.type === 'user' ? 'user' : 'users';
 	}
 </script>
 
@@ -523,6 +539,7 @@
 							field="actor"
 							label={m.assignTo()}
 							placeholder={m.selectActor()}
+							multiple
 						/>
 					{/key}
 
@@ -538,7 +555,7 @@
 					{#if editingAssignmentId}
 						<button
 							class="btn preset-filled-primary-500 w-full"
-							disabled={!selectedActorId || availableCheckedNodes.length === 0 || isUpdating}
+							disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isUpdating}
 							onclick={handleUpdateAssignment}
 						>
 							{#if isUpdating}
@@ -556,7 +573,7 @@
 					{:else}
 						<button
 							class="btn preset-filled-primary-500 w-full"
-							disabled={!selectedActorId || availableCheckedNodes.length === 0 || isCreating}
+							disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isCreating}
 							onclick={handleCreateAssignment}
 						>
 							{#if isCreating}
@@ -569,7 +586,7 @@
 						</button>
 					{/if}
 
-					{#if !selectedActorId || availableCheckedNodes.length === 0}
+					{#if !hasSelectedActors || availableCheckedNodes.length === 0}
 						<p class="text-xs text-gray-500 text-center">
 							{m.fillAllFieldsToCreateAssignment()}
 						</p>
@@ -603,11 +620,9 @@
 									<div class="flex-1">
 										<div class="flex items-center text-sm text-gray-900 font-medium">
 											<i
-												class="fa-solid fa-{assignment.actor.type === 'user'
-													? 'user'
-													: 'users'} mr-1"
+												class="fa-solid fa-{actorIcon(assignment.actor)} mr-1"
 											></i>
-											<span>{assignment.actor.str}</span>
+											<span>{formatActors(assignment.actor)}</span>
 										</div>
 										<div class="mt-2">
 											<button
@@ -678,11 +693,9 @@
 				<div>
 					<h2 id="modal-title" class="h4 font-semibold">
 						<i
-							class="fa-solid fa-{selectedAssignmentForModal.actor.type === 'user'
-								? 'user'
-								: 'users'} mr-2"
+							class="fa-solid fa-{actorIcon(selectedAssignmentForModal.actor)} mr-2"
 						></i>
-						{selectedAssignmentForModal.actor.str}
+						{formatActors(selectedAssignmentForModal.actor)}
 					</h2>
 				</div>
 				<button

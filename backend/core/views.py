@@ -12448,9 +12448,9 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .select_related(
                 "folder",
                 "compliance_assessment",
-                "actor",
             )
             .prefetch_related(
+                "actor",
                 "requirement_assessments",
             )
         )
