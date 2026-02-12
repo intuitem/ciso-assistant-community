@@ -42,6 +42,14 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 			return null;
 		});
 
+	const auditsMetricsPromise = fetch(`${BASE_API_URL}/get_audits_metrics/`)
+		.then((res) => res.json())
+		.then((data) => data.results)
+		.catch((error) => {
+			console.error('Failed to fetch or parse audits metrics:', error);
+			return null;
+		});
+
 	const countersPromise = fetch(`${BASE_API_URL}/get_counters/`)
 		.then((res) => res.json())
 		.then((data) => data.results)
@@ -182,6 +190,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		title: m.analytics(),
 		stream: {
 			metrics: metricsPromise,
+			auditsMetrics: auditsMetricsPromise,
 			counters: countersPromise,
 			combinedAssessmentsStatus: combinedAssessmentsStatusPromise,
 			governanceCalendarData: governanceCalendarDataPromise,

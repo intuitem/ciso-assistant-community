@@ -186,11 +186,25 @@
 											href="/compliance-assessments/"
 											emphasis={true}
 										/>
-										<SimpleCard
-											count="{metrics.compliance.progress_avg}%"
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
+										{#await data.stream.auditsMetrics}
+											<SimpleCard
+												count="..."
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:then auditsMetrics}
+											<SimpleCard
+												count="{auditsMetrics?.progress_avg ?? 0}%"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:catch}
+											<SimpleCard
+												count="-"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{/await}
 										<SimpleCard
 											count={metrics.compliance.non_compliant_items}
 											label={m.sumpageNonCompliantItems()}
@@ -212,14 +226,30 @@
 
 								<!-- Audits Chart (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-										<StackedBarsNormalized
-											names={metrics.audits_stats.names}
-											data={metrics.audits_stats.data}
-											uuids={metrics.audits_stats.uuids}
-											title={m.recentlyUpdatedAudits()}
-										/>
-									</div>
+									{#await data.stream.auditsMetrics}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center"
+										>
+											<LoadingSpinner />
+										</div>
+									{:then auditsMetrics}
+										<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
+											{#if auditsMetrics?.audits_stats}
+												<StackedBarsNormalized
+													names={auditsMetrics.audits_stats.names}
+													data={auditsMetrics.audits_stats.data}
+													uuids={auditsMetrics.audits_stats.uuids}
+													title={m.recentlyUpdatedAudits()}
+												/>
+											{/if}
+										</div>
+									{:catch}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center text-red-500"
+										>
+											<p>Error loading audits data</p>
+										</div>
+									{/await}
 								</div>
 							</div>
 							<!-- Risk Section + Charts Row -->
