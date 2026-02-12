@@ -196,6 +196,13 @@
 								{/if}
 								<div class="flex-1">
 									<div class="font-semibold text-gray-900">{asset.str}</div>
+									<div>
+										{#if asset.type === 'PR'}
+											<span class="text-xs font-medium">{m.businessValue()}</span>
+										{:else}
+											<span class="text-xs font-medium">{m.support()}</span>
+										{/if}
+									</div>
 									{#if asset.folder}
 										<div class="text-xs text-gray-600">
 											<span class="font-medium">{m.domain()}:</span>
