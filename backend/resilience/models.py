@@ -272,11 +272,13 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
                 "hexcolor": "#f9fafb",
             }
         risk_matrix = parsed_matrix
-        if not risk_matrix["impact"][impact].get("hexcolor"):
-            risk_matrix["impact"][impact]["hexcolor"] = "#f9fafb"
+        max_index = len(risk_matrix["impact"]) - 1
+        clamped = min(impact, max_index)
+        if not risk_matrix["impact"][clamped].get("hexcolor"):
+            risk_matrix["impact"][clamped]["hexcolor"] = "#f9fafb"
         return {
-            **risk_matrix["impact"][impact],
-            "value": impact,
+            **risk_matrix["impact"][clamped],
+            "value": clamped,
         }
 
     @property
