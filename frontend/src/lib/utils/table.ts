@@ -2694,6 +2694,156 @@ export const contextMenuActions = {
 	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
 
+// Batch action configuration
+export interface BatchActionConfig {
+	type: 'delete' | 'change_status' | 'change_owner';
+	label: string;
+	icon: string;
+	optionsEndpoint?: string;
+}
+
+export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	'applied-controls': [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'applied-controls/status'
+		},
+		{
+			type: 'change_owner',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			optionsEndpoint: 'applied-controls/owner'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	evidences: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'evidences/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	incidents: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'incidents/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-scenarios': [
+		{
+			type: 'change_owner',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			optionsEndpoint: 'risk-scenarios/owner'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-assessments': [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'risk-assessments/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'compliance-assessments': [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'compliance-assessments/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	findings: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'findings/status'
+		},
+		{
+			type: 'change_owner',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			optionsEndpoint: 'findings/owner'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-nodes': [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'task-nodes/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	assets: [
+		{
+			type: 'change_owner',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			optionsEndpoint: 'assets/owner'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-exceptions': [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'security-exceptions/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	vulnerabilities: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'vulnerabilities/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	campaigns: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'campaigns/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	contracts: [
+		{
+			type: 'change_status',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			optionsEndpoint: 'contracts/status'
+		},
+		{
+			type: 'change_owner',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			optionsEndpoint: 'contracts/owner'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	]
+};
+
+export function getBatchActions(model: urlModel): BatchActionConfig[] {
+	return batchActions[model] ?? [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }];
+}
+
 export function getListViewFields({
 	key,
 	featureFlags = {}

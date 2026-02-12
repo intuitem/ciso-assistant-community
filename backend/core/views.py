@@ -1048,6 +1048,123 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=False, methods=["post"], url_path="batch-action")
+    def batch_action(self, request):
+        """
+        Perform a batch action on multiple objects.
+        Payload: { "action": "delete"|"change_status"|"change_owner", "ids": [...], "value": ... }
+        """
+        action_type = request.data.get("action")
+        ids = request.data.get("ids", [])
+        value = request.data.get("value")
+
+        if action_type not in ("delete", "change_status", "change_owner"):
+            return Response(
+                {"error": "Invalid action type"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not ids:
+            return Response(
+                {"error": "No ids provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        model_name = self.model._meta.model_name
+        if action_type == "delete":
+            perm_codename = f"delete_{model_name}"
+        else:
+            perm_codename = f"change_{model_name}"
+
+        try:
+            perm = Permission.objects.get(codename=perm_codename)
+        except Permission.DoesNotExist:
+            return Response(
+                {"error": f"Permission {perm_codename} not found"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        succeeded = []
+        failed = []
+
+        for obj_id in ids:
+            try:
+                obj = self.model.objects.get(id=obj_id)
+            except self.model.DoesNotExist:
+                failed.append({"id": str(obj_id), "error": "Object not found"})
+                continue
+
+            folder = getattr(obj, "folder", Folder.get_root_folder())
+            if not RoleAssignment.is_access_allowed(request.user, perm, folder):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Permission denied",
+                    }
+                )
+                continue
+
+            try:
+                if action_type == "delete":
+                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Cannot delete builtin object",
+                            }
+                        )
+                        continue
+                    try:
+                        dispatch_webhook_event(obj, "deleted")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch delete", exc_info=True
+                        )
+                    obj.delete()
+                elif action_type == "change_status":
+                    if not hasattr(obj, "status"):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Object has no status field",
+                            }
+                        )
+                        continue
+                    obj.status = value
+                    obj.save()
+                elif action_type == "change_owner":
+                    owner_field = None
+                    for field_name in ("owner", "owners"):
+                        if hasattr(obj, field_name):
+                            field = self.model._meta.get_field(field_name)
+                            if field.many_to_many:
+                                owner_field = field_name
+                                break
+                    if not owner_field:
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Object has no owner field",
+                            }
+                        )
+                        continue
+                    from core.models import Actor
+
+                    actor_ids = value if isinstance(value, list) else [value]
+                    getattr(obj, owner_field).set(
+                        Actor.objects.filter(id__in=actor_ids)
+                    )
+
+                succeeded.append({"id": str(obj_id), "name": str(obj)})
+            except Exception as e:
+                failed.append({"id": str(obj_id), "name": str(obj), "error": str(e)})
+
+        return Response({"succeeded": succeeded, "failed": failed})
+
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
         """

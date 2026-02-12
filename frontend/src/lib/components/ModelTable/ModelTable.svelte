@@ -18,11 +18,12 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import type { ListViewFilterConfig } from '$lib/utils/table';
+	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
 	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
-	import { contextMenuActions, listViewFields } from '$lib/utils/table';
+	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
+	import BatchActionBar from './BatchActionBar.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -567,73 +568,129 @@
 	};
 
 	let openState = $state(false);
+
+	// Batch selection state
+	let selectedIds: Set<string> = $state(new Set());
+
+	const currentBatchActions: BatchActionConfig[] = $derived(
+		URLModel ? getBatchActions(URLModel) : []
+	);
+	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+
+	let selectAllChecked = $derived.by(() => {
+		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
+		return pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
+	});
+
+	function toggleRowSelection(id: string) {
+		const next = new Set(selectedIds);
+		if (next.has(id)) {
+			next.delete(id);
+		} else {
+			next.add(id);
+		}
+		selectedIds = next;
+	}
+
+	function toggleSelectAll() {
+		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
+		if (selectAllChecked) {
+			selectedIds = new Set();
+		} else {
+			selectedIds = new Set(pageIds);
+		}
+	}
+
+	function clearSelection() {
+		selectedIds = new Set();
+	}
+
+	// Clear selection when rows change (page/filter change)
+	let previousRowSignature = '';
+	$effect(() => {
+		const sig = $rows.map((r: any) => r.meta?.id).join(',');
+		if (previousRowSignature && sig !== previousRowSignature) {
+			selectedIds = new Set();
+		}
+		previousRowSignature = sig;
+	});
 </script>
 
 <div class="card table-wrap {classesBase}">
 	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if !hideFilters}
-			<Popover
-				open={openState}
-				onOpenChange={(e) => (openState = e.open)}
-				positioning={{ placement: 'bottom-start' }}
-				triggerBase="btn preset-filled-primary-500 self-end relative"
-				contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-				zIndex="1000"
-				autoFocus={false}
-				onPointerDownOutside={() => (openState = false)}
-				closeOnInteractOutside={false}
-			>
-				{#snippet trigger()}
-					<i class="fa-solid fa-filter mr-2"></i>
-					{m.filters()}
-					{#if filterCount}
-						<span class="text-sm">{filterCount}</span>
-					{/if}
-				{/snippet}
-				{#snippet content()}
-					<SuperForm {_form} validators={zod(z.object({}))}>
-						{#snippet children({ form })}
-							{#each filteredFields as field}
-								{#if filters[field]?.component}
-									{@const FilterComponent = filters[field].component}
-									<FilterComponent
-										{form}
-										{field}
-										{...filters[field].props}
-										fieldContext="filter"
-										label={safeTranslate(filters[field].props?.label)}
-										onChange={(value) => {
-											const arrayValue = Array.isArray(value) ? value : [value];
-											const sanitizedArrayValue = arrayValue.filter(
-												(v) => v !== null && v !== undefined
-											);
+		{#if hasBatchActions && selectedIds.size > 0}
+			<BatchActionBar
+				{selectedIds}
+				actions={currentBatchActions}
+				{URLModel}
+				{handler}
+				onClearSelection={clearSelection}
+			/>
+		{:else}
+			{#if !hideFilters}
+				<Popover
+					open={openState}
+					onOpenChange={(e) => (openState = e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					triggerBase="btn preset-filled-primary-500 self-end relative"
+					contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+					zIndex="1000"
+					autoFocus={false}
+					onPointerDownOutside={() => (openState = false)}
+					closeOnInteractOutside={false}
+				>
+					{#snippet trigger()}
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="text-sm">{filterCount}</span>
+						{/if}
+					{/snippet}
+					{#snippet content()}
+						<SuperForm {_form} validators={zod(z.object({}))}>
+							{#snippet children({ form })}
+								{#each filteredFields as field}
+									{#if filters[field]?.component}
+										{@const FilterComponent = filters[field].component}
+										<FilterComponent
+											{form}
+											{field}
+											{...filters[field].props}
+											fieldContext="filter"
+											label={safeTranslate(filters[field].props?.label)}
+											onChange={(value) => {
+												const arrayValue = Array.isArray(value) ? value : [value];
+												const sanitizedArrayValue = arrayValue.filter(
+													(v) => v !== null && v !== undefined
+												);
 
-											filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-											invalidateTable = true;
-										}}
-									/>
-								{/if}
-							{/each}
-						{/snippet}
-					</SuperForm>
-				{/snippet}
-			</Popover>
-		{/if}
-		{#if search}
-			<Search {handler} />
-		{/if}
-		{#if pagination && rowsPerPage}
-			<RowsPerPage {handler} />
-		{/if}
-		<div class="flex space-x-2 items-center">
-			{@render optButton?.()}
-			{#if canSelectObject}
-				{@render selectButton?.()}
+												filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+												invalidateTable = true;
+											}}
+										/>
+									{/if}
+								{/each}
+							{/snippet}
+						</SuperForm>
+					{/snippet}
+				</Popover>
 			{/if}
-			{#if canCreateObject && !disableCreate}
-				{@render addButton?.()}
+			{#if search}
+				<Search {handler} />
 			{/if}
-		</div>
+			{#if pagination && rowsPerPage}
+				<RowsPerPage {handler} />
+			{/if}
+			<div class="flex space-x-2 items-center">
+				{@render optButton?.()}
+				{#if canSelectObject}
+					{@render selectButton?.()}
+				{/if}
+				{#if canCreateObject && !disableCreate}
+					{@render addButton?.()}
+				{/if}
+			</div>
+		{/if}
 	</header>
 	{@render quickFilters?.(filterValues, _form, () => {
 		invalidateTable = true;
@@ -654,6 +711,18 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
+				{#if hasBatchActions}
+					<th class="{regionHeadCell} w-10 text-center">
+						<input
+							type="checkbox"
+							class="checkbox"
+							checked={selectAllChecked}
+							title={m.selectAll()}
+							onchange={toggleSelectAll}
+							onclick={(e) => e.stopPropagation()}
+						/>
+					</th>
+				{/if}
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
 						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
@@ -667,6 +736,9 @@
 			</tr>
 			{#if thFilter}
 				<tr>
+					{#if hasBatchActions}
+						<th></th>
+					{/if}
 					{#each Object.entries(tableSource.head) as [key, _]}
 						{#if thFilterFields.includes(key)}
 							<ThFilter {handler} filterBy={key} />
@@ -690,6 +762,19 @@
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
 							>
+								{#if hasBatchActions}
+									<td class="w-10 text-center" role="gridcell">
+										<input
+											type="checkbox"
+											class="checkbox"
+											checked={selectedIds.has(meta?.id)}
+											onclick={(e) => {
+												e.stopPropagation();
+												if (meta?.id) toggleRowSelection(meta.id);
+											}}
+										/>
+									</td>
+								{/if}
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
 										{@const component = fieldComponentMap[key]}
