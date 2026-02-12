@@ -1205,12 +1205,35 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                             }
                         )
                         continue
+                    # Check add permission on target folder (same as _validate_folder_change)
+                    try:
+                        add_perm = Permission.objects.get(
+                            codename=f"add_{model_name}",
+                            content_type__app_label=self.model._meta.app_label,
+                            content_type__model=model_name,
+                        )
+                    except Permission.DoesNotExist:
+                        add_perm = None
+                    if add_perm and not RoleAssignment.is_access_allowed(
+                        request.user, add_perm, new_folder
+                    ):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Permission denied on target folder",
+                            }
+                        )
+                        continue
                     obj.folder = new_folder
                     obj.save()
 
                 succeeded.append({"id": str(obj_id), "name": str(obj)})
             except Exception as e:
-                failed.append({"id": str(obj_id), "name": str(obj), "error": str(e)})
+                logger.error("Batch action failed for %s", obj_id, exc_info=True)
+                failed.append(
+                    {"id": str(obj_id), "name": str(obj), "error": "Unexpected error"}
+                )
 
         return Response({"succeeded": succeeded, "failed": failed})
 
