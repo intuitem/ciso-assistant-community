@@ -538,9 +538,12 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
-                if library is not None and not LoadedLibrary.objects.filter(
-                    urn=library.urn, locale=library.locale
-                ).exists():
+                if (
+                    library is not None
+                    and not LoadedLibrary.objects.filter(
+                        urn=library.urn, locale=library.locale
+                    ).exists()
+                ):
                     library.delete()
                 return HttpResponse(
                     json.dumps({"error": "Failed to store library content."}),
@@ -554,9 +557,12 @@ class StoredLibraryViewSet(BaseModelViewSet):
             )
         except Exception:
             logger.exception("Upload library failed")
-            if library is not None and not LoadedLibrary.objects.filter(
-                urn=library.urn, locale=library.locale
-            ).exists():
+            if (
+                library is not None
+                and not LoadedLibrary.objects.filter(
+                    urn=library.urn, locale=library.locale
+                ).exists()
+            ):
                 library.delete()
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),

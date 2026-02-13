@@ -833,19 +833,21 @@ class LibraryUpdater:
                             requirement_node_object
                         )
                     else:
-                        requirement_node_object, _ = RequirementNode.objects.update_or_create(
-                            urn=urn,
-                            defaults={
-                                "framework": new_framework,
-                                **self.referential_object_dict,
-                                **requirement_node_dict,
-                            },
-                            create_defaults={
-                                "framework": new_framework,
-                                **self.referential_object_dict,
-                                **self.i18n_object_dict,
-                                **requirement_node_dict,
-                            },
+                        requirement_node_object, _ = (
+                            RequirementNode.objects.update_or_create(
+                                urn=urn,
+                                defaults={
+                                    "framework": new_framework,
+                                    **self.referential_object_dict,
+                                    **requirement_node_dict,
+                                },
+                                create_defaults={
+                                    "framework": new_framework,
+                                    **self.referential_object_dict,
+                                    **self.i18n_object_dict,
+                                    **requirement_node_dict,
+                                },
+                            )
                         )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
