@@ -1,0 +1,19 @@
+# English display-name overrides for CISO Assistant.
+# Copyright (C) 2024 intuitem
+# This file is distributed under the same license as the ciso-assistant package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ciso-assistant\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-14 00:00+0000\n"
+"PO-Revision-Date: 2026-02-14 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: English\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Auditee"
+msgstr "Respondent"

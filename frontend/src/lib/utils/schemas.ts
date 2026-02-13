@@ -550,7 +550,8 @@ export const FeatureFlagsSchema = z.object({
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
-	data_breaches: z.boolean().optional()
+	data_breaches: z.boolean().optional(),
+	auditee_mode: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
