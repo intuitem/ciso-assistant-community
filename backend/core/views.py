@@ -6798,7 +6798,7 @@ class FolderViewSet(BaseModelViewSet):
                     objects_to_create.append(model(**fields))
 
                 created_objects = model.objects.bulk_create(objects_to_create)
-                has_save_method_override = "save" in model.__dict__
+                has_save_method_override = model.save is not models.Model.save
 
                 is_requirement_assessment = model is RequirementAssessment
 
