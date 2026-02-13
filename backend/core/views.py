@@ -910,76 +910,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
-    def _validate_folder_change(self, request: Request, instance) -> None:
-        if not hasattr(instance, "folder"):
-            return
-        if "folder" not in request.data:
-            return
-        folder_value = request.data.get("folder")
-        if isinstance(folder_value, list):
-            if not folder_value:
-                return
-            folder_value = folder_value[0]
-        if isinstance(folder_value, dict):
-            folder_value = folder_value.get("id")
-        if not folder_value:
-            return
-        try:
-            target_id = UUID(str(folder_value))
-        except (TypeError, ValueError):
-            return
-        if instance.folder_id and instance.folder_id == target_id:
-            return
-        target_folder = Folder.objects.filter(id=target_id).first()
-        if not target_folder:
-            return
-        model = self.model or instance.__class__
-        perm = Permission.objects.get(
-            codename=f"add_{model._meta.model_name}",
-            content_type__app_label=model._meta.app_label,
-            content_type__model=model._meta.model_name,
-        )
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=perm,
-            folder=target_folder,
-        ):
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
-
-    def _validate_parent_field_change(self, request: Request, instance) -> None:
-        """Block updates to immutable parent fields on indirect-parent models."""
-        parent_fields = {
-            "RiskScenario": "risk_assessment",
-            "Representative": "entity",
-            "Solution": "provider_entity",
-        }
-        parent_field_name = parent_fields.get(instance.__class__.__name__)
-        if not parent_field_name or parent_field_name not in request.data:
-            return
-
-        new_parent_value = request.data.get(parent_field_name)
-        if isinstance(new_parent_value, list):
-            new_parent_value = new_parent_value[0] if new_parent_value else None
-        if isinstance(new_parent_value, dict):
-            new_parent_value = new_parent_value.get("id")
-        if not new_parent_value:
-            return
-
-        try:
-            new_parent_id = UUID(str(new_parent_value))
-        except (TypeError, ValueError):
-            raise PermissionDenied({parent_field_name: "Invalid value"})
-
-        current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
-        if current_parent_id and current_parent_id == new_parent_id:
-            return
-
-        raise PermissionDenied({parent_field_name: "This field is immutable"})
-
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
@@ -995,9 +925,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        instance = self.get_object()
-        self._validate_folder_change(request, instance)
-        self._validate_parent_field_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -1033,9 +960,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
-        instance = self.get_object()
-        self._validate_folder_change(request, instance)
-        self._validate_parent_field_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 

@@ -282,6 +282,7 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 
 
 class RepresentativeWriteSerializer(BaseModelSerializer):
+    IMMUTABLE_FIELDS = ["entity"]
     create_user = serializers.BooleanField(default=False)
 
     def _create_or_update_user(self, instance, user):
@@ -358,6 +359,8 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    IMMUTABLE_FIELDS = ["provider_entity"]
+
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
         dora_char_fields = [
