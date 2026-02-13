@@ -831,33 +831,11 @@ class LibraryUpdater:
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
 
-                    # Fields safe to update on existing requirement nodes.
-                    # Excludes structural fields (parent_urn) that
-                    # would break the framework hierarchy.
-                    UPDATABLE_FIELDS = {
-                        "name",
-                        "description",
-                        "annotation",
-                        "typical_evidence",
-                        "translations",
-                        "assessable",
-                        "implementation_groups",
-                        "questions",
-                        "weight",
-                        "importance",
-                        "order_id",
-                    }
-
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
-                        update_dict = {
-                            k: v
-                            for k, v in requirement_node_dict.items()
-                            if k in UPDATABLE_FIELDS
-                        }
-                        for key, value in update_dict.items():
+                        for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
-                        all_fields_to_update.update(update_dict.keys())
+                        all_fields_to_update.update(requirement_node_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
