@@ -1049,20 +1049,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
-    # Fields allowed for batch change_field action (simple value fields)
-    BATCH_ALLOWED_VALUE_FIELDS = {
-        "status",
-        "priority",
-        "treatment",
-        "result",
-    }
-    # Fields allowed for batch change_m2m action (ManyToMany to Actor)
-    BATCH_ALLOWED_M2M_FIELDS = {
-        "owner",
-        "owners",
-        "assigned_to",
-    }
-
     @action(detail=False, methods=["post"], url_path="batch-action")
     def batch_action(self, request):
         """
@@ -1098,22 +1084,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if action_type == "change_field":
-            if field_name not in self.BATCH_ALLOWED_VALUE_FIELDS:
-                return Response(
-                    {"error": f"Field '{field_name}' is not allowed for batch change"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        elif action_type == "change_m2m":
-            if field_name not in self.BATCH_ALLOWED_M2M_FIELDS:
-                return Response(
-                    {
-                        "error": f"Field '{field_name}' is not allowed for batch M2M change"
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-        # Use the IAM-filtered queryset — objects the user cannot see are excluded
+        # Use the IAM-filtered queryset (same as get_object() in update/destroy)
         queryset = self.get_queryset()
         objects_by_id = {str(o.id): o for o in queryset.filter(id__in=ids)}
 
