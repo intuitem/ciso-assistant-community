@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
+	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
@@ -30,7 +30,7 @@
 		model
 	}: Props = $props();
 
-	run(() => {
+	onMount(() => {
 		const isEdit = Boolean(object?.id);
 		if (!isEdit && form.data?.create_iam_groups !== true) {
 			form.form.update((currentData) => ({
