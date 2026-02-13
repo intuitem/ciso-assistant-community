@@ -15,6 +15,7 @@
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import { getToastStore } from '$lib/components/Toast/stores';
+	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: PageData;
@@ -23,6 +24,7 @@
 	let { data }: Props = $props();
 
 	const toastStore = getToastStore();
+	const modalStore = getModalStore();
 
 	// Create superForm instance for AutocompleteSelect - keep full result
 	const assignmentSuperForm = superForm(data.assignmentForm, {
@@ -309,7 +311,19 @@
 		}
 	}
 
-	async function handleDeleteAssignment(assignmentId: string) {
+	function handleDeleteAssignment(assignmentId: string) {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.confirmDeleteAssignment(),
+			body: m.confirmDeleteAssignmentBody(),
+			response: (confirmed: boolean) => {
+				if (confirmed) doDeleteAssignment(assignmentId);
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	async function doDeleteAssignment(assignmentId: string) {
 		isDeleting = assignmentId;
 		try {
 			const formData = new FormData();

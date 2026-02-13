@@ -1181,6 +1181,8 @@
 	"assignmentCreated": "Assignment created successfully",
 	"assignmentUpdated": "Assignment updated successfully",
 	"assignmentDeleted": "Assignment deleted successfully",
+	"confirmDeleteAssignment": "Delete assignment",
+	"confirmDeleteAssignmentBody": "Are you sure you want to delete this assignment? The associated requirements will become unassigned.",
 	"assignmentCreationFailed": "Failed to create assignment",
 	"assignmentUpdateFailed": "Failed to update assignment",
 	"assignmentDeletionFailed": "Failed to delete assignment",
