@@ -913,6 +913,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         serializer = self.get_serializer(instance)
         serializer.delete(instance)
+        try:
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
@@ -969,11 +973,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        instance = self.get_object()
-        try:
-            dispatch_webhook_event(instance, "deleted")
-        except Exception:
-            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
