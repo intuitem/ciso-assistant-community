@@ -2985,6 +2985,7 @@
 	],
 	"cascadeAffectedHint": "Die unten aufgeführten Elemente bleiben im System, aber ihre Verknüpfungen zu diesem Objekt werden entfernt.",
 	"libraryFilteringLabels": "Bibliotheksetiketten",
+	"campaignsDescription": "Verwaltung von Audit-Kampagnen",
 	"appliedControlsPlaceholder": "Angewandte Kontrollen auswählen...",
 	"assignmentSettings": "Zuweisungseinstellungen",
 	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
