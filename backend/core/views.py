@@ -1079,7 +1079,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                        self._validate_folder_change(request, obj, folder_value=value)
                     elif action_type == "change_m2m":
                         actor_ids = value if isinstance(value, list) else [value]
                         data = {field_name: actor_ids}
