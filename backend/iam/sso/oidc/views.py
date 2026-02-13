@@ -22,7 +22,7 @@ logger = structlog.get_logger(__name__)
 
 @login_not_required
 def callback(request, provider_id):
-    logger.info(
+    logger.debug(
         "OIDC callback initiated",
         provider=provider_id,
         method=request.method,
@@ -53,7 +53,7 @@ def callback(request, provider_id):
             OpenIDConnectOAuth2Adapter(request, provider_id)
         )(request)
 
-        logger.info(
+        logger.debug(
             "OIDC adapter response received",
             provider=provider_id,
             status_code=response.status_code,
@@ -82,16 +82,11 @@ def callback(request, provider_id):
                 request, None, error=AuthError.FAILED_SSO
             )
 
-        logger.info(
-            "Generating authentication token for user",
-            provider=provider_id,
-        )
-
         token = generate_token(request.user)
         next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate/{token}"
 
         logger.info(
-            "SSO authentication successful - redirecting to frontend",
+            "SSO authentication successful",
             provider=provider_id,
         )
 
@@ -132,7 +127,7 @@ def login(request, provider_id):
         except Exception:
             referer_origin = None
 
-    logger.info(
+    logger.debug(
         "OIDC login initiated",
         provider=provider_id,
         method=request.method,
@@ -151,7 +146,7 @@ def login(request, provider_id):
         )
         response = view(request)
 
-        logger.info(
+        logger.debug(
             "OIDC login redirect prepared",
             provider=provider_id,
             status_code=response.status_code,
