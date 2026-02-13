@@ -1241,8 +1241,6 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
     def quotation_method(self):
         return self.ebios_rm_study.quotation_method
 
-    fields_to_check = ["ebios_rm_study"]
-
     class Meta:
         verbose_name = _("Operational scenario")
         verbose_name_plural = _("Operational scenarios")
