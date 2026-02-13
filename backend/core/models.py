@@ -821,6 +821,10 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if requirement_node_dict.get("parent_urn"):
+                        requirement_node_dict["parent_urn"] = requirement_node_dict[
+                            "parent_urn"
+                        ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
 
@@ -837,6 +841,7 @@ class LibraryUpdater:
                             urn=urn,
                             framework=new_framework,
                             **self.referential_object_dict,
+                            **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
                         for ca in compliance_assessments:
