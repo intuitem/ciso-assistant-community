@@ -404,13 +404,6 @@
 							<p class="text-sm text-gray-500 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
-					<span
-						class="badge text-sm font-semibold px-2 py-1 rounded-md"
-						style="background-color: {complianceResultColorMap[requirementAssessment.result] ??
-							'#ddd'};"
-					>
-						{safeTranslate(requirementAssessment.result)}
-					</span>
 				</div>
 
 				<!-- Description -->
