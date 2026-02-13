@@ -1749,7 +1749,7 @@ msgid "Reader"
 msgstr "Lecteur"
 
 #: core/utils.py
-msgid "Respondent"
+msgid "Auditee"
 msgstr "Répondant"
 
 #: core/utils.py:76 core/utils.py:87
