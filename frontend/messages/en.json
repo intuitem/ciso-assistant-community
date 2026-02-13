@@ -1160,6 +1160,7 @@
 	"aboutAssignments": "About assignments",
 	"assignmentsDescription": "Create assignments to delegate groups of requirements to specific actors (users or teams). Once assigned, requirements can only be viewed and managed by the assigned actor.",
 	"selectRequirementsToAssign": "Select requirements to include in a new assignment",
+	"makeSureActorsHavePermissions": "Make sure that the assigned users have access to the domain of this audit",
 	"selectAllAvailable": "Select all available",
 	"clearSelection": "Clear",
 	"expandAll": "Expand all",

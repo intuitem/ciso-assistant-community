@@ -1091,6 +1091,7 @@
 	"aboutAssignments": "À propos des affectations",
 	"assignmentsDescription": "Créez des affectations pour déléguer des groupes d'exigences à des acteurs spécifiques (utilisateurs ou équipes). Une fois affectées, les exigences ne peuvent être consultées et gérées que par l'acteur assigné.",
 	"selectRequirementsToAssign": "Sélectionnez les exigences à inclure dans une nouvelle affectation",
+	"makeSureActorsHavePermissions": "Assurez-vous que les personnes assignées disposent des droits sur le domaine de cet audit",
 	"selectAllAvailable": "Tout sélectionner",
 	"clearSelection": "Effacer",
 	"expandAll": "Tout déplier",
