@@ -7,8 +7,8 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
+	import { displayScoreColor, getScoreHexColor } from '$lib/utils/helpers';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import ComparisonRadarChart from '$lib/components/Chart/ComparisonRadarChart.svelte';
 
@@ -154,20 +154,20 @@
 			<!-- Left: Base Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					<div class="flex flex-col items-center h-48">
-						{#if data.baseAudit.global_score >= 0}
-							<span class="text-sm font-medium text-gray-600 mb-2">{m.maturity()}</span>
-							<ProgressRing
-								strokeWidth="20px"
-								meterStroke={displayScoreColor(
+					<div class="flex flex-col items-center w-full h-48">
+						{#if data.baseAudit && data.baseAudit.global_score >= 0}
+							<RingProgress
+								name="base_maturity"
+								value={data.baseAudit.global_score}
+								max={data.baseAudit.total_max_score}
+								color={getScoreHexColor(
 									data.baseAudit.global_score,
-									data.baseAudit.max_score
+									data.baseAudit.total_max_score
 								)}
-								value={(data.baseAudit.global_score * 100) / data.baseAudit.max_score}
-								size="size-40"
-							>
-								<p class="font-semibold text-3xl">{data.baseAudit.global_score}</p>
-							</ProgressRing>
+								strokeWidth={32}
+								fontSize={32}
+								title={m.maturity()}
+							/>
 						{:else}
 							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
 							<div class="flex items-center justify-center size-40">
@@ -210,20 +210,20 @@
 			<!-- Right: Comparison Audit Scores -->
 			<div class="p-6">
 				<div class="flex flex-col items-center space-y-4">
-					<div class="flex flex-col items-center h-48">
-						{#if data.compareAudit.global_score >= 0}
-							<span class="text-sm font-medium text-gray-600 mb-2">{m.maturity()}</span>
-							<ProgressRing
-								strokeWidth="20px"
-								meterStroke={displayScoreColor(
+					<div class="flex flex-col items-center w-full h-48">
+						{#if data.compareAudit && data.compareAudit.global_score >= 0}
+							<RingProgress
+								name="compare_maturity"
+								value={data.compareAudit.global_score}
+								max={data.compareAudit.total_max_score}
+								color={getScoreHexColor(
 									data.compareAudit.global_score,
-									data.compareAudit.max_score
+									data.compareAudit.total_max_score
 								)}
-								value={(data.compareAudit.global_score * 100) / data.compareAudit.max_score}
-								size="size-40"
-							>
-								<p class="font-semibold text-3xl">{data.compareAudit.global_score}</p>
-							</ProgressRing>
+								strokeWidth={32}
+								fontSize={32}
+								title={m.maturity()}
+							/>
 						{:else}
 							<span class="text-sm font-medium text-gray-400 mb-2">{m.maturity()}</span>
 							<div class="flex items-center justify-center size-40">

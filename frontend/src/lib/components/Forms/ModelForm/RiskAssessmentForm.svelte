@@ -4,14 +4,14 @@
 	import TextArea from '$lib/components/Forms/TextArea.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
 	import Select from '../Select.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
 	import Checkbox from '../Checkbox.svelte';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		duplicate?: boolean;
 		cacheLocks?: Record<string, CacheLock>;
@@ -34,6 +34,46 @@
 
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
 
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
+
 	async function handleRiskMatrixChange(id: string) {
 		riskToleranceChoices = [];
 
@@ -51,10 +91,13 @@
 					if (riskMatrix && riskMatrix.json_definition) {
 						const jsonDefinition = JSON.parse(riskMatrix.json_definition);
 						const riskLevels = jsonDefinition.risk || [];
-						riskToleranceChoices = riskLevels.map((level, index) => ({
-							label: level.name,
-							value: level.id ?? index
-						}));
+						riskToleranceChoices = [
+							{ label: '--', value: -1 },
+							...riskLevels.map((level, index) => ({
+								label: level.name,
+								value: level.id ?? index
+							}))
+						];
 					}
 				}
 			} catch (error) {
@@ -65,22 +108,38 @@
 	}
 </script>
 
+{#key folderKey}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		nullable
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
 <TextField
 	{form}
 	field="ref_id"
 	label={m.refId()}
 	cacheLock={cacheLocks['ref_id']}
 	bind:cachedValue={formDataCache['ref_id']}
-/>
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-	hidden={initialData.perimeter}
 />
 <TextField
 	{form}
@@ -102,7 +161,6 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		disabled={object.id || isLocked}
 		translateOptions={false}
 		disableDoubleDash
 		optionsEndpoint="risk-matrices"
@@ -110,8 +168,7 @@
 		cacheLock={cacheLocks['risk_matrix']}
 		bind:cachedValue={formDataCache['risk_matrix']}
 		label={m.riskMatrix()}
-		helpText={m.riskAssessmentMatrixHelpText()}
-		hidden={initialData.risk_matrix}
+		helpText={object?.id ? m.riskAssessmentMatrixHelpText() : ''}
 		onChange={async (e) => await handleRiskMatrixChange(e)}
 		mount={async (e) => await handleRiskMatrixChange(e)}
 	/>
@@ -119,6 +176,7 @@
 		<Select
 			{form}
 			translateOptions={false}
+			disableDoubleDash
 			options={riskToleranceChoices}
 			field="risk_tolerance"
 			cacheLock={cacheLocks['risk_tolerance']}
@@ -130,8 +188,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="authors"
 		cacheLock={cacheLocks['authors']}
 		bind:cachedValue={formDataCache['authors']}
@@ -141,8 +203,12 @@
 		<AutocompleteSelect
 			{form}
 			multiple
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}

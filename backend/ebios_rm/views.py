@@ -1,8 +1,13 @@
+import io
+
 import django_filters as df
+import pandas as pd
+from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
 from iam.models import RoleAssignment
+from openpyxl.styles import Alignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -60,7 +65,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         ebios_rm_study = self.get_object()
         return Response(RiskMatrixReadSerializer(ebios_rm_study.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
         ebios_rm_study: EbiosRMStudy = self.get_object()
@@ -250,7 +254,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "eta": assessment.eta,
                     "due_date": assessment.due_date,
                     "status": assessment.status,
-                    "progress": assessment.get_progress(),
+                    "progress": assessment.progress,
                     "result_counts": result_counts,
                 }
             )
@@ -263,7 +267,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
@@ -359,6 +365,339 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         return Response(report_data)
 
+    @action(detail=True, name="Export EBIOS RM study as XLSX", url_path="export-xlsx")
+    def export_xlsx(self, request, pk):
+        """Export EBIOS RM study data to Excel with multiple sheets."""
+        study = get_object_or_404(EbiosRMStudy, id=pk)
+
+        # Get all related data
+        feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
+        ro_to_couples = RoTo.objects.filter(ebios_rm_study=study).with_pertinence()
+        stakeholders = Stakeholder.objects.filter(ebios_rm_study=study)
+        strategic_scenarios = StrategicScenario.objects.filter(ebios_rm_study=study)
+        attack_paths = AttackPath.objects.filter(ebios_rm_study=study)
+        operational_scenarios = OperationalScenario.objects.filter(ebios_rm_study=study)
+
+        buffer = io.BytesIO()
+
+        # Sheet names prefixed with workshop.activity for i18n and organization
+        SHEET_NAMES = {
+            "study": "1.1 Study",
+            "assets": "1.2 Assets",
+            "feared_events": "1.3 Feared Events",
+            "ro_to": "2.1 RO-TO Couples",
+            "stakeholders": "3.1 Stakeholders",
+            "strategic_scenarios": "3.2.1 Strategic Scenarios",
+            "attack_paths": "3.2.2 Attack Paths",
+            "stakeholder_controls": "3.3 Stakeholder Controls",
+            "elementary_actions": "4.0 Elementary Actions",
+            "operational_scenarios": "4.1.1 Operational Scenarios",
+            "operating_modes": "4.1.2 Operating Modes",
+        }
+
+        with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+            # 1.1 Study sheet
+            study_data = [
+                {
+                    "ref_id": study.ref_id,
+                    "name": study.name,
+                    "description": study.description or "",
+                    "version": study.version or "",
+                    "status": study.status or "",
+                    "eta": str(study.eta) if study.eta else "",
+                    "due_date": str(study.due_date) if study.due_date else "",
+                    "observation": study.observation or "",
+                }
+            ]
+            df_study = pd.DataFrame(study_data)
+            df_study.to_excel(writer, sheet_name=SHEET_NAMES["study"], index=False)
+
+            # 1.2 Assets sheet
+            assets_data = []
+            for asset in study.assets.all():
+                assets_data.append(
+                    {
+                        "ref_id": asset.ref_id or "",
+                        "name": asset.name,
+                        "description": asset.description or "",
+                        "type": asset.type or "",
+                        "parent_asset": asset.parent_assets.first().name
+                        if asset.parent_assets.exists()
+                        else "",
+                    }
+                )
+            if assets_data:
+                df_assets = pd.DataFrame(assets_data)
+                df_assets.to_excel(
+                    writer, sheet_name=SHEET_NAMES["assets"], index=False
+                )
+
+            # 1.3 Feared Events sheet
+            fe_data = []
+            for fe in feared_events:
+                fe_data.append(
+                    {
+                        "ref_id": fe.ref_id,
+                        "name": fe.name,
+                        "description": fe.description or "",
+                        "gravity": fe.get_gravity_display().get("name", ""),
+                        "is_selected": fe.is_selected,
+                        "justification": fe.justification or "",
+                        "assets": "\n".join([a.name for a in fe.assets.all()]),
+                    }
+                )
+            if fe_data:
+                df_fe = pd.DataFrame(fe_data)
+                df_fe.to_excel(
+                    writer, sheet_name=SHEET_NAMES["feared_events"], index=False
+                )
+
+            # 1.4.x Compliance Assessment sheets
+            for idx, ca in enumerate(study.compliance_assessments.all(), start=1):
+                ca_data = []
+                for ra in (
+                    ca.requirement_assessments.select_related("requirement")
+                    .prefetch_related("applied_controls")
+                    .order_by("requirement__order_id")
+                ):
+                    req = ra.requirement
+                    # Skip non-assessable items
+                    if not req.assessable:
+                        continue
+                    ca_data.append(
+                        {
+                            "urn": req.urn or "",
+                            "ref_id": req.ref_id or "",
+                            "name": req.name or "",
+                            "description": req.description or "",
+                            "result": ra.get_result_display(),
+                            "observation": ra.observation or "",
+                            "applied_controls": "\n".join(
+                                [ac.name for ac in ra.applied_controls.all()]
+                            ),
+                        }
+                    )
+                if ca_data:
+                    # Sheet name: "1.4.1 AuditName" (max 31 chars for Excel)
+                    sheet_name = f"1.4.{idx} {ca.name}"[:31]
+                    df_ca = pd.DataFrame(ca_data)
+                    df_ca.to_excel(writer, sheet_name=sheet_name, index=False)
+
+            # 2.1 RO/TO Couples sheet
+            roto_data = []
+            for roto in ro_to_couples:
+                roto_data.append(
+                    {
+                        "risk_origin": roto.risk_origin.get_name_translated
+                        if roto.risk_origin
+                        else "",
+                        "target_objective": roto.target_objective,
+                        "motivation": roto.get_motivation_display(),
+                        "resources": roto.get_resources_display(),
+                        "activity": roto.get_activity_display(),
+                        "pertinence": roto.get_pertinence_display(),
+                        "is_selected": roto.is_selected,
+                        "justification": roto.justification or "",
+                        "feared_events": "\n".join(
+                            [fe.name for fe in roto.feared_events.all()]
+                        ),
+                    }
+                )
+            if roto_data:
+                df_roto = pd.DataFrame(roto_data)
+                df_roto.to_excel(writer, sheet_name=SHEET_NAMES["ro_to"], index=False)
+
+            # 3.1 Stakeholders sheet
+            sh_data = []
+            for sh in stakeholders:
+                sh_data.append(
+                    {
+                        "entity": sh.entity.name if sh.entity else "",
+                        "category": sh.category.get_name_translated
+                        if sh.category
+                        else "",
+                        "current_dependency": sh.current_dependency,
+                        "current_penetration": sh.current_penetration,
+                        "current_maturity": sh.current_maturity,
+                        "current_trust": sh.current_trust,
+                        "current_criticality": sh.get_current_criticality_display(),
+                        "residual_dependency": sh.residual_dependency,
+                        "residual_penetration": sh.residual_penetration,
+                        "residual_maturity": sh.residual_maturity,
+                        "residual_trust": sh.residual_trust,
+                        "residual_criticality": sh.get_residual_criticality_display(),
+                        "is_selected": sh.is_selected,
+                        "justification": sh.justification or "",
+                    }
+                )
+            if sh_data:
+                df_sh = pd.DataFrame(sh_data)
+                df_sh.to_excel(
+                    writer, sheet_name=SHEET_NAMES["stakeholders"], index=False
+                )
+
+            # 3.2.1 Strategic Scenarios sheet
+            ss_data = []
+            for ss in strategic_scenarios:
+                roto = ss.ro_to_couple
+                ss_data.append(
+                    {
+                        "ref_id": ss.ref_id,
+                        "name": ss.name,
+                        "description": ss.description or "",
+                        "risk_origin": roto.risk_origin.get_name_translated
+                        if roto and roto.risk_origin
+                        else "",
+                        "target_objective": roto.target_objective if roto else "",
+                        "gravity": ss.get_gravity_display().get("name", ""),
+                    }
+                )
+            if ss_data:
+                df_ss = pd.DataFrame(ss_data)
+                df_ss.to_excel(
+                    writer, sheet_name=SHEET_NAMES["strategic_scenarios"], index=False
+                )
+
+            # 3.2 Attack Paths sheet
+            ap_data = []
+            for ap in attack_paths:
+                ap_data.append(
+                    {
+                        "ref_id": ap.ref_id,
+                        "name": ap.name,
+                        "description": ap.description or "",
+                        "strategic_scenario": ap.strategic_scenario.name
+                        if ap.strategic_scenario
+                        else "",
+                        "stakeholders": "\n".join(
+                            [str(s) for s in ap.stakeholders.all()]
+                        ),
+                        "is_selected": ap.is_selected,
+                        "justification": ap.justification or "",
+                    }
+                )
+            if ap_data:
+                df_ap = pd.DataFrame(ap_data)
+                df_ap.to_excel(
+                    writer, sheet_name=SHEET_NAMES["attack_paths"], index=False
+                )
+
+            # 3.3 Stakeholder Controls sheet
+            from core.models import AppliedControl
+
+            stakeholder_controls = AppliedControl.objects.filter(
+                stakeholders__ebios_rm_study=study
+            ).distinct()
+            sc_data = []
+            for ac in stakeholder_controls:
+                sc_data.append(
+                    {
+                        "ref_id": ac.ref_id or "",
+                        "name": ac.name,
+                        "description": ac.description or "",
+                        "status": ac.get_status_display(),
+                        "stakeholders": "\n".join(
+                            [
+                                str(s)
+                                for s in ac.stakeholders.filter(ebios_rm_study=study)
+                            ]
+                        ),
+                    }
+                )
+            if sc_data:
+                df_sc = pd.DataFrame(sc_data)
+                df_sc.to_excel(
+                    writer, sheet_name=SHEET_NAMES["stakeholder_controls"], index=False
+                )
+
+            # 4.0 Elementary Actions sheet
+            elementary_actions = ElementaryAction.objects.filter(
+                operating_modes__operational_scenario__ebios_rm_study=study
+            ).distinct()
+            ea_data = []
+            for ea in elementary_actions:
+                ea_data.append(
+                    {
+                        "ref_id": ea.ref_id or "",
+                        "name": ea.name,
+                        "description": ea.description or "",
+                        "attack_stage": ea.get_attack_stage_display(),
+                        "icon": ea.get_icon_display() if ea.icon else "",
+                    }
+                )
+            if ea_data:
+                df_ea = pd.DataFrame(ea_data)
+                df_ea.to_excel(
+                    writer, sheet_name=SHEET_NAMES["elementary_actions"], index=False
+                )
+
+            # 4.1.1 Operational Scenarios sheet
+            os_data = []
+            for os in operational_scenarios:
+                os_data.append(
+                    {
+                        "ref_id": os.ref_id,
+                        "name": os.name,
+                        "attack_path": os.attack_path.name if os.attack_path else "",
+                        "likelihood": os.get_likelihood_display().get("name", ""),
+                        "gravity": os.get_gravity_display().get("name", ""),
+                        "risk_level": os.get_risk_level_display().get("name", ""),
+                        "operating_modes_description": os.operating_modes_description
+                        or "",
+                        "is_selected": os.is_selected,
+                        "justification": os.justification or "",
+                    }
+                )
+            if os_data:
+                df_os = pd.DataFrame(os_data)
+                df_os.to_excel(
+                    writer, sheet_name=SHEET_NAMES["operational_scenarios"], index=False
+                )
+
+            # 4.1.2 Operating Modes sheet
+            operating_modes = OperatingMode.objects.filter(
+                operational_scenario__ebios_rm_study=study
+            )
+            om_data = []
+            for om in operating_modes:
+                om_data.append(
+                    {
+                        "ref_id": om.ref_id or "",
+                        "name": om.name,
+                        "description": om.description or "",
+                        "operational_scenario": om.operational_scenario.name
+                        if om.operational_scenario
+                        else "",
+                        "likelihood": om.get_likelihood_display().get("name", ""),
+                        "elementary_actions": "\n".join(
+                            [ea.name for ea in om.elementary_actions.all()]
+                        ),
+                    }
+                )
+            if om_data:
+                df_om = pd.DataFrame(om_data)
+                df_om.to_excel(
+                    writer, sheet_name=SHEET_NAMES["operating_modes"], index=False
+                )
+
+            # Apply styling to all sheets
+            for sheet_name in writer.sheets:
+                worksheet = writer.sheets[sheet_name]
+                for col_idx, col in enumerate(worksheet.columns, 1):
+                    worksheet.column_dimensions[col[0].column_letter].width = 20
+                    for cell in col[1:]:
+                        cell.alignment = Alignment(wrap_text=True, vertical="top")
+
+        buffer.seek(0)
+
+        filename = f"ebios-rm-{study.ref_id or study.name[:20]}.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
 
 class FearedEventViewSet(BaseModelViewSet):
     model = FearedEvent
@@ -377,7 +716,6 @@ class FearedEventViewSet(BaseModelViewSet):
         feared_event = self.get_object()
         return Response(RiskMatrixReadSerializer(feared_event.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get gravity choices")
     def gravity(self, request, pk):
         feared_event: FearedEvent = self.get_object()
@@ -635,6 +973,13 @@ class StrategicScenarioViewSet(BaseModelViewSet):
         "attack_paths": ["exact", "isnull"],
     }
 
+    def get_queryset(self):
+        """Optimize queryset to prefetch feared events from ro_to_couple"""
+        queryset = super().get_queryset()
+        return queryset.select_related("ro_to_couple").prefetch_related(
+            "ro_to_couple__feared_events"
+        )
+
 
 class AttackPathFilter(GenericFilterSet):
     used = df.BooleanFilter(method="is_used", label="Used")
@@ -660,6 +1005,15 @@ class AttackPathViewSet(BaseModelViewSet):
 
     filterset_class = AttackPathFilter
 
+    def perform_create(self, serializer):
+        if not serializer.validated_data.get(
+            "ref_id"
+        ) and serializer.validated_data.get("strategic_scenario"):
+            strategic_scenario = serializer.validated_data["strategic_scenario"]
+            ref_id = AttackPath.get_default_ref_id(strategic_scenario)
+            serializer.validated_data["ref_id"] = ref_id
+        serializer.save()
+
 
 class OperationalScenarioViewSet(BaseModelViewSet):
     model = OperationalScenario
@@ -671,7 +1025,6 @@ class OperationalScenarioViewSet(BaseModelViewSet):
         attack_path = self.get_object()
         return Response(RiskMatrixReadSerializer(attack_path.risk_matrix).data)
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get likelihood choices")
     def likelihood(self, request, pk):
         attack_path: AttackPath = self.get_object()

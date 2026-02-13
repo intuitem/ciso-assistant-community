@@ -48,6 +48,10 @@ router.register(
 router.register(r"assets", AssetViewSet, basename="assets")
 router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
+router.register(r"actors", ActorViewSet, basename="actors")
+
+router.register(r"teams", TeamViewSet, basename="teams")
+
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
@@ -95,6 +99,11 @@ router.register(
     basename="filtering-labels",
 )
 router.register(
+    r"library-filtering-labels",
+    LibraryFilteringLabelViewSet,
+    basename="library-filtering-labels",
+)
+router.register(
     r"security-exceptions",
     SecurityExceptionViewSet,
     basename="security-exceptions",
@@ -133,6 +142,7 @@ urlpatterns = [
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
     path("pmbok/", include("pmbok.urls")),
+    path("metrology/", include("metrology.urls")),
     path("csrf/", get_csrf_token, name="get_csrf_token"),
     path("health/", healthcheck, name="healthcheck"),
     path("build/", get_build, name="get_build"),
@@ -148,6 +158,9 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
+    ),
     path(
         "get_combined_assessments_status/",
         get_combined_assessments_status_view,
@@ -200,6 +213,10 @@ urlpatterns = [
     ),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
+    path(
+        "task-nodes/<uuid:pk>/evidences/",
+        TaskNodeEvidenceList.as_view(),
+    ),
 ]
 
 # Additional modules take precedence over the default modules

@@ -24,17 +24,24 @@
 	let options: { label: string; value: string }[] = $state([]);
 
 	onMount(async () => {
-		options = await fetch('/applied-controls/effort').then((r) => r.json());
+		const rawOptions = await fetch('/applied-controls/effort').then((r) => r.json());
+		// Move '--' to the end while preserving order of other options
+		options = [
+			...rawOptions.filter((o: { label: string }) => o.label !== '--'),
+			...rawOptions.filter((o: { label: string }) => o.label === '--')
+		];
 	});
 
 	async function changeEffort(newEffort: string) {
 		const endpoint = `/applied-controls/${row?.meta?.id}/effort`;
+		// Convert '--' to empty string to clear the field
+		const effortValue = newEffort === '--' ? '' : newEffort;
 		const requestInit = {
 			method: 'PATCH',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ effort: newEffort })
+			body: JSON.stringify({ effort: effortValue })
 		};
 		try {
 			const response = await fetch(endpoint, requestInit);
@@ -64,13 +71,13 @@
 		<div class="flex items-center">{m.changeEffort()}</div>
 	</ContextMenu.SubTrigger>
 	<ContextMenu.SubContent
-		class="z-50 w-full max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md cursor-default data-highlighted:bg-surface-50"
+		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-white px-1 py-1.5 shadow-md border border-surface-200 cursor-default data-highlighted:bg-surface-50"
 		sideOffset={10}
 	>
 		{#each options as option}
 			<ContextMenu.Item
 				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50"
-				on:click={async () => await changeEffort(option.value)}
+				onclick={async () => await changeEffort(option.value)}
 			>
 				{safeTranslate(option.label)}
 			</ContextMenu.Item>

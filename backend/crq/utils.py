@@ -498,9 +498,15 @@ def risk_tolerance_curve(risk_tolerance_data: Dict) -> Dict:
     point1 = points["point1"]
     point2 = points["point2"]
 
-    # Validate point structure
+    # Validate point structure - keys must exist and values must not be None
     required_keys = ["probability", "acceptable_loss"]
-    if not all(key in point1 and key in point2 for key in required_keys):
+    if not all(
+        key in point1
+        and point1.get(key) is not None
+        and key in point2
+        and point2.get(key) is not None
+        for key in required_keys
+    ):
         return {}
 
     try:

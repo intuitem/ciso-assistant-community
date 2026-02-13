@@ -6,7 +6,7 @@
 	$pageTitle = 'Experimental';
 </script>
 
-<div class="bg-white grid grid-cols-2 p-4 gap-4">
+<div class="bg-white grid grid-cols-2 p-4 gap-4 card">
 	<Article
 		title={m.requirementsExplorer()}
 		desc={m.visualizeRequirements()}
@@ -24,5 +24,11 @@
 		desc="Create multiple assets, entities, or feared events at once from a simple text list"
 		link="/experimental/batch-create"
 		tags={['assets', 'entities', 'ebios-rm', 'bulk']}
+	/>
+	<Article
+		title="Yearly Tasks Review"
+		desc="Review all recurrent tasks grouped by folder for yearly planning"
+		link="/experimental/yearly-tasks-review"
+		tags={['tasks', 'planning', 'review', 'PRO']}
 	/>
 </div>

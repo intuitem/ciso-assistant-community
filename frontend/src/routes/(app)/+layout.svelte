@@ -27,7 +27,11 @@
 	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
-	import { interceptExternalLinks, setGlobalModalStore } from '$lib/utils/external-links';
+	import {
+		interceptExternalLinks,
+		setGlobalModalStore,
+		setShowWarningExternalLinks
+	} from '$lib/utils/external-links';
 
 	let sidebarOpen = $state(true);
 
@@ -105,6 +109,9 @@
 	$effect(() => {
 		if (browser) {
 			setGlobalModalStore(modalStore);
+			// Set the warning preference from settings (default to true if not set)
+			const showWarning = data?.settings?.show_warning_external_links ?? true;
+			setShowWarningExternalLinks(showWarning);
 			interceptExternalLinks();
 		}
 	});
@@ -148,11 +155,17 @@
 	// $inspect(data);
 </script>
 
+<svelte:head>
+	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+</svelte:head>
+
 <!-- App Shell -->
-<div class="overflow-x-hidden">
+<div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
+		base="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 {classesSidebarOpen(
+			sidebarOpen
+		)}"
 		background="bg-white"
 		padding="pb-2 px-4"
 	>

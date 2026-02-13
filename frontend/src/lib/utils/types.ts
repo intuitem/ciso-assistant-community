@@ -4,6 +4,8 @@ import type { RiskScenarioSchema } from './schemas';
 
 export interface User {
 	id: string;
+	actor_id: string;
+	all_actor_ids: string[];
 	email: string;
 	first_name: string;
 	last_name: string;
@@ -46,6 +48,8 @@ export const URL_MODEL = [
 	'validation-flows',
 	'reference-controls',
 	'assets',
+	'actors',
+	'teams',
 	'users',
 	'user-groups',
 	'roles',
@@ -70,6 +74,7 @@ export const URL_MODEL = [
 	'representatives',
 	'vulnerabilities',
 	'filtering-labels',
+	'library-filtering-labels',
 	// 'ebios-rm',
 	'feared-events',
 	'ro-to',
@@ -123,7 +128,15 @@ export const URL_MODEL = [
 	'permissions',
 	// pmbok
 	'generic-collections',
-	'accreditations'
+	'accreditations',
+	// metrology
+	'metric-definitions',
+	'metric-instances',
+	'custom-metric-samples',
+	'dashboards',
+	'dashboard-widgets',
+	'dashboard-text-widgets',
+	'dashboard-builtin-widgets'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

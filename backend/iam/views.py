@@ -5,6 +5,7 @@ import structlog
 from allauth.account.models import EmailAddress
 from django.contrib.auth import get_user_model, login, logout
 from django.db import models
+from django.db.models import Q, Exists, OuterRef
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -27,6 +28,8 @@ from rest_framework.status import (
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 
+from global_settings.models import GlobalSettings
+from core.models import Actor
 from .models import Folder, PersonalAccessToken, Role, RoleAssignment
 from .serializers import (
     ChangePasswordSerializer,
@@ -209,7 +212,7 @@ class CurrentUserView(views.APIView):
         user_groups_data = list(request.user.user_groups.values("name", "builtin"))
         user_groups = [(ug["name"], ug["builtin"]) for ug in user_groups_data]
 
-        accessible_domains = RoleAssignment.get_accessible_folders(
+        accessible_domains = RoleAssignment.get_accessible_folder_ids(
             Folder.get_root_folder(), request.user, Folder.ContentType.DOMAIN
         )
 
@@ -222,6 +225,8 @@ class CurrentUserView(views.APIView):
 
         res_data = {
             "id": request.user.id,
+            "actor_id": request.user.actor.id,
+            "all_actor_ids": [str(a.id) for a in Actor.get_all_for_user(request.user)],
             "email": request.user.email,
             "first_name": request.user.first_name,
             "last_name": request.user.last_name,
@@ -273,18 +278,63 @@ class PasswordResetView(views.APIView):
     @method_decorator(ensure_csrf_cookie)
     def post(self, request):
         email = request.data["email"]  # type: ignore
-        associated_user = User.objects.filter(email=email).first()
+        associated_user = User.objects.filter(email__iexact=email).first()
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             if associated_user is not None and associated_user.is_local:
                 try:
+                    logger.info(
+                        "Attempting to send password reset email", recipient=email
+                    )
                     associated_user.mailing(
                         email_template_name="registration/password_reset_email.html",
                         subject=_("CISO Assistant: Password Reset"),
                     )
-                    print("Sending reset mail to", email)
+                    logger.info(
+                        "Password reset email request processed", recipient=email
+                    )
                 except Exception as e:
-                    print(e)
+                    logger.error(
+                        "Failed to send password reset email",
+                        recipient=email,
+                        error=str(e),
+                    )
+            else:
+                # Provide detailed logging about why password reset was not sent
+                if associated_user is None:
+                    logger.info(
+                        "Password reset requested for non-existent user",
+                        email=email,
+                    )
+                elif not associated_user.is_active:
+                    logger.info(
+                        "Password reset requested for inactive user",
+                        email=email,
+                        user_id=associated_user.id,
+                    )
+                else:
+                    # User exists and is active but is_local is False
+                    # Check why is_local is False
+
+                    try:
+                        sso_settings = GlobalSettings.objects.get(
+                            name=GlobalSettings.Names.SSO
+                        ).value
+                    except GlobalSettings.DoesNotExist:
+                        sso_settings = {}
+
+                    sso_enabled = sso_settings.get("is_enabled", False)
+                    sso_forced = sso_settings.get("force_sso", False)
+
+                    logger.info(
+                        "Password reset requested for non-local user",
+                        email=email,
+                        user_id=associated_user.id,
+                        keep_local_login=associated_user.keep_local_login,
+                        sso_enabled=sso_enabled,
+                        sso_forced=sso_forced,
+                    )
             return Response(status=HTTP_202_ACCEPTED)
+        logger.warning("Password reset requested but email server not configured")
         return Response(
             data={
                 "error": "Email server not configured, please contact your administrator"
@@ -393,3 +443,40 @@ class SetPasswordView(views.APIView):
                 )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class RevokeOtherSessionsView(views.APIView):
+    """
+    An endpoint for revoking all other user sessions (except the current one).
+    """
+
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        auth_header = request.META.get("HTTP_AUTHORIZATION")
+        if not auth_header or " " not in auth_header:
+            return Response(
+                {"error": "Invalid authorization header"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        access_token = auth_header.split(" ")[1]
+        digest = crypto.hash_token(access_token)
+        user_id = str(request.user.id)
+
+        deleted_count, _ = (
+            AuthToken.objects.filter(user_id=user_id)
+            .exclude(
+                Q(digest=digest)
+                | Q(
+                    Exists(
+                        PersonalAccessToken.objects.filter(auth_token=OuterRef("pk"))
+                    )
+                )
+            )
+            .delete()
+        )
+
+        return Response(
+            {"revoked_sessions": deleted_count},
+            status=status.HTTP_200_OK,
+        )

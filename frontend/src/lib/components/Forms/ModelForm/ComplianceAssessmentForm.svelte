@@ -3,7 +3,7 @@
 	import Select from '../Select.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
-	import type { SuperValidated } from 'sveltekit-superforms';
+	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import * as m from '$paraglide/messages';
 	import Checkbox from '../Checkbox.svelte';
@@ -12,7 +12,7 @@
 	import FrameworkResultSnippet from '$lib/components/Snippets/AutocompleteSelect/FrameworkResultSnippet.svelte';
 
 	interface Props {
-		form: SuperValidated<any>;
+		form: SuperForm<any>;
 		model: ModelInfo;
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
@@ -40,6 +40,46 @@
 	let is_dynamic = $state(false);
 
 	let isLocked = $derived(form.data?.is_locked || object?.is_locked || false);
+
+	let selectedFolder = $state<string | undefined>(undefined);
+	let folderKey = $state(0);
+	let isAutoFillingFolder = $state(false);
+
+	function handleFolderChange(folderId: string) {
+		selectedFolder = folderId;
+		// Clear perimeter when folder changes (unless we're auto-filling from perimeter)
+		if (!isAutoFillingFolder && form.data?.perimeter) {
+			form.form.update((currentData) => ({
+				...currentData,
+				perimeter: undefined
+			}));
+		}
+		isAutoFillingFolder = false;
+	}
+
+	async function handlePerimeterChange(perimeterId: string) {
+		if (perimeterId && !selectedFolder) {
+			// Fetch perimeter to get its folder and auto-fill
+			try {
+				const response = await fetch(`/perimeters/${perimeterId}`);
+				if (response.ok) {
+					const perimeter = await response.json();
+					if (perimeter.folder?.id) {
+						isAutoFillingFolder = true;
+						selectedFolder = perimeter.folder.id;
+						// Update form data and force folder component to re-render
+						form.form.update((currentData) => ({
+							...currentData,
+							folder: perimeter.folder.id
+						}));
+						folderKey++;
+					}
+				}
+			} catch (error) {
+				console.error('Error fetching perimeter:', error);
+			}
+		}
+	}
 
 	async function handleFrameworkChange(id: string) {
 		if (id) {
@@ -94,16 +134,32 @@
 		hidden
 	/>
 {/if}
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="perimeters"
-	optionsExtraFields={[['folder', 'str']]}
-	field="perimeter"
-	cacheLock={cacheLocks['perimeter']}
-	bind:cachedValue={formDataCache['perimeter']}
-	label={m.perimeter()}
-	hidden={initialData.perimeter && context !== 'clone'}
-/>
+{#key folderKey}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		field="folder"
+		cacheLock={cacheLocks['folder']}
+		bind:cachedValue={formDataCache['folder']}
+		label={m.folder()}
+		onChange={handleFolderChange}
+		mount={handleFolderChange}
+	/>
+{/key}
+{#key selectedFolder}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="perimeters"
+		optionsDetailedUrlParameters={selectedFolder ? [['folder', selectedFolder]] : []}
+		optionsExtraFields={[['folder', 'str']]}
+		field="perimeter"
+		nullable
+		cacheLock={cacheLocks['perimeter']}
+		bind:cachedValue={formDataCache['perimeter']}
+		label={m.perimeter()}
+		onChange={handlePerimeterChange}
+	/>
+{/key}
 {#if context === 'fromBaseline' && initialData.baseline}
 	<AutocompleteSelect
 		{form}
@@ -122,7 +178,7 @@
 		}}
 		includeAllOptionFields
 	>
-		{#snippet optionSnippet(option: Record<string, any>)}
+		{#snippet optionSnippet(option: Record)}
 			<FrameworkResultSnippet {option} />
 		{/snippet}
 	</AutocompleteSelect>
@@ -156,16 +212,6 @@
 		/>
 	{/key}
 {/if}
-<AutocompleteSelect
-	{form}
-	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
-	field="authors"
-	cacheLock={cacheLocks['authors']}
-	bind:cachedValue={formDataCache['authors']}
-	label={m.authors()}
-/>
 <TextField
 	{form}
 	field="version"
@@ -173,6 +219,20 @@
 	helpText={m.versionHelpText()}
 	cacheLock={cacheLocks['version']}
 	bind:cachedValue={formDataCache['version']}
+/>
+<AutocompleteSelect
+	{form}
+	multiple
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
+	field="authors"
+	cacheLock={cacheLocks['authors']}
+	bind:cachedValue={formDataCache['authors']}
+	label={m.authors()}
 />
 <TextField
 	type="date"
@@ -184,24 +244,52 @@
 	bind:cachedValue={formDataCache['eta']}
 />
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
-	{#if context === 'create' && suggestions}
+	<div class="space-y-4">
+		{#if context === 'create' && suggestions}
+			<Checkbox
+				{form}
+				field="create_applied_controls_from_suggestions"
+				label={m.suggestControls()}
+				helpText={m.createAppliedControlsFromSuggestionsHelpText()}
+				cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
+				bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			/>
+		{/if}
 		<Checkbox
 			{form}
-			field="create_applied_controls_from_suggestions"
-			label={m.suggestControls()}
-			helpText={m.createAppliedControlsFromSuggestionsHelpText()}
-			cacheLock={cacheLocks['create_applied_controls_from_suggestions']}
-			bind:cachedValue={formDataCache['create_applied_controls_from_suggestions']}
+			field="show_documentation_score"
+			label={m.useDocumentationScore()}
+			helpText={m.useDocumentationScoreHelpText()}
+			cacheLock={cacheLocks['show_documentation_score']}
+			bind:cachedValue={formDataCache['show_documentation_score']}
 		/>
-	{/if}
-	<Checkbox
-		{form}
-		field="show_documentation_score"
-		label={m.useDocumentationScore()}
-		helpText={m.useDocumentationScoreHelpText()}
-		cacheLock={cacheLocks['show_documentation_score']}
-		bind:cachedValue={formDataCache['show_documentation_score']}
-	/>
+		<Checkbox
+			{form}
+			field="extended_result_enabled"
+			label={m.extendedResultEnabled()}
+			helpText={m.extendedResultEnabledHelpText()}
+			cacheLock={cacheLocks['extended_result_enabled']}
+			bind:cachedValue={formDataCache['extended_result_enabled']}
+		/>
+		<Checkbox
+			{form}
+			field="progress_status_enabled"
+			label={m.progressStatusEnabled()}
+			helpText={m.progressStatusEnabledHelpText()}
+			cacheLock={cacheLocks['progress_status_enabled']}
+			bind:cachedValue={formDataCache['progress_status_enabled']}
+		/>
+		<Select
+			{form}
+			options={model.selectOptions['score_calculation_method']}
+			field="score_calculation_method"
+			label={m.scoreCalculationMethod()}
+			helpText={m.scoreCalculationMethodHelpText()}
+			cacheLock={cacheLocks['score_calculation_method']}
+			bind:cachedValue={formDataCache['score_calculation_method']}
+			disableDoubleDash
+		/>
+	</div>
 	<TextField
 		{form}
 		field="ref_id"
@@ -246,8 +334,12 @@
 	<AutocompleteSelect
 		{form}
 		multiple
-		optionsEndpoint="users?is_third_party=false"
-		optionsLabelField="email"
+		optionsEndpoint="actors"
+		optionsLabelField="str"
+		optionsInfoFields={{
+			fields: [{ field: 'type', translate: true }],
+			position: 'prefix'
+		}}
 		field="reviewers"
 		cacheLock={cacheLocks['reviewers']}
 		bind:cachedValue={formDataCache['reviewers']}

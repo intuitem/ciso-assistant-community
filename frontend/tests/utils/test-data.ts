@@ -634,7 +634,7 @@ export default {
 	threat: {
 		name: 'T1011 - Exfiltration Over Other Network Medium',
 		library: {
-			name: 'Mitre ATT&CK v16 - Threats and mitigations',
+			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
 			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack'
 		},
@@ -643,7 +643,7 @@ export default {
 	threat2: {
 		name: 'T1052 - Exfiltration Over Physical Medium',
 		library: {
-			name: 'Mitre ATT&CK v16 - Threats and mitigations',
+			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
 			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack'
 		},
