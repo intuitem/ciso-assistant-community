@@ -8230,5 +8230,6 @@ auditlog.register(
 auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
+    m2m_fields={"actor", "requirement_assessments"},
 )
 # actions - 0: create, 1: update, 2: delete

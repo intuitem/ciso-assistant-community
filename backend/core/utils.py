@@ -1,5 +1,6 @@
 import hashlib
 from enum import Enum
+
 import json
 from re import sub
 from typing import Literal
@@ -730,6 +731,24 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
+def _resolve_auditee_role_ids():
+    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
+    from iam.cache_builders import get_roles_state
+
+    role_id_by_name = get_roles_state().role_id_by_name
+    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
+    higher_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (
+            RoleCodename.ANALYST,
+            RoleCodename.DOMAIN_MANAGER,
+            RoleCodename.ADMINISTRATOR,
+        )
+        if rc.value in role_id_by_name
+    )
+    return auditee_id, higher_ids
+
+
 def get_auditee_filtered_folder_ids(user) -> set:
     """Return folder IDs where *user* holds the auditee role but NO higher role.
 
@@ -738,36 +757,15 @@ def get_auditee_filtered_folder_ids(user) -> set:
     normal queryset is sufficient; only the returned set needs assignment
     filtering.
 
-    Uses the IAM caches exclusively (no extra DB queries except the
-    one-time role-id resolution which is itself cached).
+    Uses the IAM snapshot caches exclusively (no extra DB queries).
     """
-    from functools import lru_cache
-    from iam.models import Role, _iter_assignment_lites_for_user
+    from iam.models import _iter_assignment_lites_for_user
     from iam.cache_builders import (
         get_folder_state,
         iter_descendant_ids,
     )
 
-    # Resolve role IDs for auditee + higher roles (cached across calls
-    # within the same cache generation).
-    @lru_cache(maxsize=1)
-    def _role_ids():
-        qs = Role.objects.filter(
-            name__in=[
-                RoleCodename.AUDITEE.value,
-                RoleCodename.ANALYST.value,
-                RoleCodename.DOMAIN_MANAGER.value,
-                RoleCodename.ADMINISTRATOR.value,
-            ]
-        ).values_list("name", "id")
-        mapping = {name: rid for name, rid in qs}
-        auditee_id = mapping.get(RoleCodename.AUDITEE.value)
-        higher_ids = frozenset(
-            rid for name, rid in mapping.items() if name != RoleCodename.AUDITEE.value
-        )
-        return auditee_id, higher_ids
-
-    auditee_role_id, higher_role_ids = _role_ids()
+    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
     if auditee_role_id is None:
         return set()
 

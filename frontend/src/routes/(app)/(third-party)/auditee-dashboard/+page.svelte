@@ -18,7 +18,7 @@
 	};
 
 	// Group audits by folder (domain)
-	const auditsByFolder = $derived(() => {
+	const auditsByFolder = $derived.by(() => {
 		const groups: Record<string, typeof data.dashboard> = {};
 		for (const audit of data.dashboard) {
 			const folder = audit.folder ?? m.undefined?.() ?? '--';
@@ -36,7 +36,7 @@
 			<p class="text-gray-500 text-lg">{m.noAuditAssignments()}</p>
 		</div>
 	{:else}
-		{#each auditsByFolder() as [folderName, audits]}
+		{#each auditsByFolder as [folderName, audits]}
 			<div class="space-y-3">
 				<h3 class="text-base font-semibold text-gray-700 flex items-center gap-2">
 					<i class="fa-solid fa-sitemap text-gray-400"></i>

@@ -666,15 +666,15 @@
 	</div>
 </div>
 
+<svelte:window onkeydown={(e) => showRequirementsModal && e.key === 'Escape' && closeRequirementsModal()} />
+
 <!-- Requirements Detail Modal -->
 {#if showRequirementsModal && selectedAssignmentForModal}
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 bg-black/50 z-40"
 		onclick={closeRequirementsModal}
-		onkeydown={(e) => e.key === 'Escape' && closeRequirementsModal()}
-		role="button"
-		tabindex="-1"
+		role="presentation"
 	></div>
 
 	<!-- Modal -->
