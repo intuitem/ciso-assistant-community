@@ -6784,11 +6784,13 @@ class FolderViewSet(BaseModelViewSet):
                     logger.debug("Creating object", fields=fields)
 
                     # Create the object
-                    objects_creation_data.append({
-                        "id": obj_id,
-                        "fields": fields,
-                        "many_to_many_map_ids": many_to_many_map_ids
-                    })
+                    objects_creation_data.append(
+                        {
+                            "id": obj_id,
+                            "fields": fields,
+                            "many_to_many_map_ids": many_to_many_map_ids,
+                        }
+                    )
 
                 objects_to_create = []
                 for object_creation_data in objects_creation_data:
@@ -6797,7 +6799,9 @@ class FolderViewSet(BaseModelViewSet):
 
                 created_objects = model.objects.bulk_create(objects_to_create)
 
-                for obj_created, object_creation_data in zip(created_objects, objects_creation_data):
+                for obj_created, object_creation_data in zip(
+                    created_objects, objects_creation_data
+                ):
                     obj_id = object_creation_data["id"]
                     link_dump_database_ids[obj_id] = obj_created.id
 
@@ -6814,7 +6818,6 @@ class FolderViewSet(BaseModelViewSet):
                 raise ValidationError(
                     f"Error creating {model._meta.model_name}: {str(e)}"
                 )
-
 
     def _process_model_relationships(
         self,
