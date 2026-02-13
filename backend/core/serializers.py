@@ -2346,9 +2346,7 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                 if ra.compliance_assessment_id != compliance_assessment.id:
                     raise serializers.ValidationError(
                         {
-                            "requirement_assessments": _(
-                                "Requirement assessment '{}' does not belong to the specified compliance assessment."
-                            ).format(ra)
+                            "requirement_assessments": f"Requirement assessment '{ra}' does not belong to the specified compliance assessment."
                         }
                     )
 
@@ -2366,9 +2364,7 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
             if existing_assignment_ids:
                 raise serializers.ValidationError(
                     {
-                        "requirement_assessments": _(
-                            "Some requirement assessments are already assigned to another assignment."
-                        )
+                        "requirement_assessments": "Some requirement assessments are already assigned to another assignment."
                     }
                 )
 
