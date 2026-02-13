@@ -910,6 +910,10 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
+    def perform_destroy(self, instance):
+        serializer = self.get_serializer(instance)
+        serializer.delete(instance)
+
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
         if request.data.get("filtering_labels"):
