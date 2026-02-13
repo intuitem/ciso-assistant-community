@@ -1286,13 +1286,23 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		head: [
+			'ref_id',
+			'name',
+			'riskMatrix',
+			'status',
+			'riskScenarios',
+			'folder',
+			'perimeter',
+			'updatedAt'
+		],
 		body: [
 			'ref_id',
 			'str',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
+			'folder',
 			'perimeter',
 			'updated_at'
 		],
@@ -1612,6 +1622,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'reviewProgress',
 			'createdAt',
@@ -1622,6 +1633,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'progress',
 			'created_at',
@@ -2197,8 +2209,8 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter', 'folder'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter', 'folder'],
+		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'folder', 'perimeter'],
+		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'folder', 'perimeter'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
