@@ -531,6 +531,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                 "Library already loaded, stored new version for update",
                                 urn=library.urn,
                             )
+                            return Response(
+                                {
+                                    **StoredLibrarySerializer(library).data,
+                                    "warning": "libraryStoredForUpdate",
+                                },
+                                status=HTTP_201_CREATED,
+                            )
 
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED

@@ -628,6 +628,7 @@
 	"anErrorOccurred": "Une erreur est survenue",
 	"attachmentDeleted": "La pièce jointe a été supprimée avec succès",
 	"librarySuccessfullyLoaded": "La bibliothèque a été chargée avec succès",
+	"libraryStoredForUpdate": "Une nouvelle version de la bibliothèque a été enregistrée. Veuillez déclencher la mise à jour pour l'appliquer.",
 	"noLibraryDetected": "Aucune bibliothèque détectée",
 	"errorLoadingLibrary": "Erreur lors du chargement de la bibliothèque",
 	"updateThisLibrary": "Mettre à jour cette bibliothèque",
