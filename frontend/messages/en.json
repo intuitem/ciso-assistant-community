@@ -676,6 +676,7 @@
 	"anErrorOccurred": "An error has occurred",
 	"attachmentDeleted": "The attachment has been successfully deleted",
 	"librarySuccessfullyLoaded": "The library has been successfully loaded",
+	"libraryStoredForUpdate": "A new version of the library has been stored. Please trigger the update to apply it.",
 	"noLibraryDetected": "No library detected",
 	"errorLoadingLibrary": "Error loading library",
 	"updateThisLibrary": "Update this library",
