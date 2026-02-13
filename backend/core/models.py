@@ -649,13 +649,14 @@ class LibraryUpdater:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
+                framework_dict["urn"] = framework_dict["urn"].lower()
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
-                    urn=new_framework["urn"],
+                    urn=framework_dict["urn"],
                     defaults=framework_dict,
                     create_defaults={
                         **self.referential_object_dict,
@@ -820,23 +821,68 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if (
+                        "parent_urn" in requirement_node_dict
+                        and requirement_node_dict["parent_urn"]
+                    ):
+                        requirement_node_dict["parent_urn"] = requirement_node_dict[
+                            "parent_urn"
+                        ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    all_fields_to_update.update(requirement_node_dict.keys())
+
+                    # Fields safe to update on existing requirement nodes.
+                    # Excludes structural fields (parent_urn) that
+                    # would break the framework hierarchy.
+                    UPDATABLE_FIELDS = {
+                        "name",
+                        "description",
+                        "annotation",
+                        "typical_evidence",
+                        "translations",
+                        "assessable",
+                        "implementation_groups",
+                        "questions",
+                        "weight",
+                        "importance",
+                        "order_id",
+                    }
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
-                        for key, value in requirement_node_dict.items():
+                        update_dict = {
+                            k: v
+                            for k, v in requirement_node_dict.items()
+                            if k in UPDATABLE_FIELDS
+                        }
+                        for key, value in update_dict.items():
                             setattr(requirement_node_object, key, value)
+                        all_fields_to_update.update(update_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
                     else:
-                        requirement_node_object = RequirementNode.objects.create(
-                            urn=urn,
-                            framework=new_framework,
-                            **self.referential_object_dict,
-                            **requirement_node_dict,
+                        existing_node = RequirementNode.objects.filter(urn=urn).first()
+                        if (
+                            existing_node
+                            and existing_node.framework_id != new_framework.id
+                        ):
+                            raise ValidationError("requirementNodeUrnConflict")
+                        requirement_node_object, _ = (
+                            RequirementNode.objects.update_or_create(
+                                urn=urn,
+                                defaults={
+                                    "framework": new_framework,
+                                    **self.referential_object_dict,
+                                    **requirement_node_dict,
+                                },
+                                create_defaults={
+                                    "framework": new_framework,
+                                    **self.referential_object_dict,
+                                    **self.i18n_object_dict,
+                                    **requirement_node_dict,
+                                },
+                            )
                         )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
@@ -1960,7 +2006,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations_in_object(self.json_definition)
 
     @property
-    def grid(self) -> list:
+    def grid(self) -> list[list]:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
