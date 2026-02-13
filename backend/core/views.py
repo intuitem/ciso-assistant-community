@@ -6748,11 +6748,13 @@ class FolderViewSet(BaseModelViewSet):
         """Create a batch of objects with proper relationship handling."""
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
-            for obj in batch:
-                obj_id = obj.get("id")
-                fields = obj.get("fields", {}).copy()
+            try:
+                objects_creation_data = []
 
-                try:
+                for obj in batch:
+                    obj_id = obj.get("id")
+                    fields = obj.get("fields", {}).copy()
+
                     # Handle library objects
                     if fields.get("library") or model == LoadedLibrary:
                         logger.info(f"Skipping creation of library object {obj_id}")
@@ -6782,22 +6784,37 @@ class FolderViewSet(BaseModelViewSet):
                     logger.debug("Creating object", fields=fields)
 
                     # Create the object
-                    obj_created = model.objects.create(**fields)
+                    objects_creation_data.append({
+                        "id": obj_id,
+                        "fields": fields,
+                        "many_to_many_map_ids": many_to_many_map_ids
+                    })
+
+                objects_to_create = []
+                for object_creation_data in objects_creation_data:
+                    fields = object_creation_data["fields"]
+                    objects_to_create.append(model(**fields))
+
+                created_objects = model.objects.bulk_create(objects_to_create)
+
+                for obj_created, object_creation_data in zip(created_objects, objects_creation_data):
+                    obj_id = object_creation_data["id"]
                     link_dump_database_ids[obj_id] = obj_created.id
 
-                    # Handle many-to-many relationships
+                    many_to_many_map_ids = object_creation_data["many_to_many_map_ids"]
                     self._set_many_to_many_relations(
                         model=model,
                         obj=obj_created,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
 
-                except Exception as e:
-                    logger.error("Error creating object", obj=obj, exc_info=True)
-                    # This will trigger a rollback of the entire batch
-                    raise ValidationError(
-                        f"Error creating {model._meta.model_name}: {str(e)}"
-                    )
+            except Exception as e:
+                logger.error("Error creating object", obj=obj, exc_info=True)
+                # This will trigger a rollback of the entire batch
+                raise ValidationError(
+                    f"Error creating {model._meta.model_name}: {str(e)}"
+                )
+
 
     def _process_model_relationships(
         self,
