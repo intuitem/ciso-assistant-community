@@ -468,7 +468,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     # If so, this is an update scenario: the StoredLibrary must be
                     # kept so the user can trigger the update via the _update endpoint.
                     already_loaded = LoadedLibrary.objects.filter(
-                        urn=library.urn, locale=library.locale
+                        urn=library.urn
                     ).exists()
 
                     try:
@@ -547,9 +547,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 logger.error("Failed to store library content", error=e)
                 if (
                     library is not None
-                    and not LoadedLibrary.objects.filter(
-                        urn=library.urn, locale=library.locale
-                    ).exists()
+                    and not LoadedLibrary.objects.filter(urn=library.urn).exists()
                 ):
                     library.delete()
                 return HttpResponse(
@@ -566,9 +564,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             logger.exception("Upload library failed")
             if (
                 library is not None
-                and not LoadedLibrary.objects.filter(
-                    urn=library.urn, locale=library.locale
-                ).exists()
+                and not LoadedLibrary.objects.filter(urn=library.urn).exists()
             ):
                 library.delete()
             return HttpResponse(
