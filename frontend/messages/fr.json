@@ -1085,7 +1085,7 @@
 	"auditDashboard": "Vue audité.e",
 	"auditeeMode": "Mode audité.e",
 	"auditeeModeDescription": "Activer le mode audité.e pour permettre aux audité.es d'évaluer uniquement les exigences qui leur sont assignées",
-	"noAuditAssignments": "Aucun audit ne vous est encore assigné",
+	"noAuditAssignments": "Aucun audit ne vous est encore assigné, ou une permission est manquante",
 	"startAssessment": "Commencer l'évaluation",
 	"continueAssessment": "Continuer l'évaluation",
 	"aboutAssignments": "À propos des affectations",

@@ -1154,7 +1154,7 @@
 	"auditDashboard": "Auditee View",
 	"auditeeMode": "Auditee mode",
 	"auditeeModeDescription": "Enable auditee mode to allow auditees to assess only their assigned requirements",
-	"noAuditAssignments": "No audits assigned to you yet",
+	"noAuditAssignments": "No audits assigned to you yet, or a permission is missing",
 	"startAssessment": "Start Assessment",
 	"continueAssessment": "Continue Assessment",
 	"aboutAssignments": "About assignments",
