@@ -768,7 +768,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment_id": ea.compliance_assessment.id
                 if ea.compliance_assessment
                 else "#",
-                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",

@@ -2058,6 +2058,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             )
         return reference_controls
 
+    @property
+    def has_update(self) -> bool:
+        if self.library is None:
+            return False
+        return self.library.has_update
+
     def get_requirement_nodes(self):
         # Prefetch related objects if they exist to reduce database queries.
         # Adjust prefetch_related paths according to your model relationships.
@@ -6040,16 +6046,7 @@ class ComplianceAssessment(Assessment):
         def infer_result(applied_controls):
             if not applied_controls:
                 return RequirementAssessment.Result.NOT_ASSESSED
-
-            if len(applied_controls) == 1:
-                ac_status = applied_controls[0].status
-                if ac_status == AppliedControl.Status.ACTIVE:
-                    return RequirementAssessment.Result.COMPLIANT
-                else:
-                    return RequirementAssessment.Result.NON_COMPLIANT
-
             statuses = [ac.status for ac in applied_controls]
-
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
             elif AppliedControl.Status.ACTIVE in statuses:
@@ -6057,29 +6054,43 @@ class ComplianceAssessment(Assessment):
             else:
                 return RequirementAssessment.Result.NON_COMPLIANT
 
-        changes = dict()
-        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
-            compliance_assessment=self, applied_controls__isnull=False
-        ).distinct()
-        with transaction.atomic():
-            for ra in requirement_assessments_with_ac:
-                ac = AppliedControl.objects.filter(requirement_assessments=ra)
-                ic(ac)
-                new_result = infer_result(ac)
-                if ra.result != new_result:
-                    changes[str(ra.id)] = {
-                        "str": str(ra.requirement.safe_display_str),
-                        "current": ra.result,
-                        "new": new_result,
-                    }
-                    if not dry_run:
-                        ra.result = new_result
-                        ra.save(update_fields=["result"])
+        changes: dict[str, dict[str, RequirementAssessment.Result]] = {}
+        requirement_assessments_with_ac = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self, applied_controls__isnull=False
+            )
+            .select_related("requirement")
+            .prefetch_related("applied_controls")
+            .distinct()
+        )
 
-        ic(changes)
+        to_update: list[RequirementAssessment] = []
+        for ra in requirement_assessments_with_ac:
+            applied_controls = list(ra.applied_controls.all())
+            new_result = infer_result(applied_controls)
+            if ra.result != new_result:
+                changes[str(ra.id)] = {
+                    "str": str(ra.requirement.safe_display_str),
+                    "current": ra.result,
+                    "new": new_result,
+                }
+                if not dry_run:
+                    ra.result = new_result
+                    to_update.append(ra)
 
-        if dry_run:
+        if dry_run or not to_update:
             return changes
+
+        with transaction.atomic():
+            RequirementAssessment.objects.bulk_update(to_update, ["result"])
+            ComplianceAssessment.objects.filter(pk=self.pk).update(
+                updated_at=timezone.now()
+            )
+            # Ensure metrics are refreshed once after the bulk update.
+            self.refresh_from_db(fields=["updated_at"])
+            self.upsert_daily_metrics()
+
+        return changes
 
     def get_global_score(self):
         """
@@ -6174,6 +6185,28 @@ class ComplianceAssessment(Assessment):
             for group in framework.implementation_groups_definition
             if group.get("ref_id") in self.selected_implementation_groups
         ]
+
+    def requirement_matches_selected_groups(
+        self, requirement: RequirementNode | None
+    ) -> bool:
+        """
+        Return True when the requirement is within the selected implementation groups.
+        """
+        if requirement is None:
+            return True
+
+        if not self.selected_implementation_groups:
+            return True
+
+        selected_groups = set(self.selected_implementation_groups)
+        if not selected_groups:
+            return True
+
+        requirement_groups = set(requirement.implementation_groups or [])
+        if not requirement_groups:
+            return False
+
+        return bool(selected_groups & requirement_groups)
 
     def get_requirement_assessments(self, include_non_assessable: bool):
         """
@@ -6960,39 +6993,54 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
 
-    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+    def create_applied_controls_from_suggestions(
+        self, *, dry_run: bool = False
+    ) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return applied_controls
         for reference_control in self.requirement.reference_controls.all():
             try:
-                applied_control, created = AppliedControl.objects.get_or_create(
+                applied_control = AppliedControl.objects.filter(
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
-                    defaults={
-                        "name": reference_control.get_name_translated
-                        or reference_control.ref_id,
-                        "ref_id": reference_control.ref_id,
-                    },
-                )
+                    requirement_assessments=self,
+                ).first()
 
-                if (
-                    reference_control.description
-                    and applied_control.description is None
-                ):
-                    applied_control.description = reference_control.description
-                    applied_control.save()
-                if created:
-                    logger.info(
-                        "Successfully created applied control from reference_control",
-                        applied_control=applied_control,
-                        reference_control=reference_control,
-                    )
+                if applied_control:
+                    # Already linked to this requirement assessment, skip entirely so
+                    # dry-run mirrors the actual creation.
+                    continue
+
+                existing_control = AppliedControl.objects.filter(
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                ).first()
+
+                if existing_control:
+                    applied_control = existing_control
                 else:
-                    logger.info(
-                        "Applied control already exists, skipping creation and using existing one",
-                        applied_control=applied_control,
+                    applied_control = AppliedControl(
+                        folder=self.folder,
                         reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
                     )
+                    if not dry_run:
+                        applied_control.save()
+                        logger.info(
+                            "Successfully created applied control from reference_control",
+                            applied_control=applied_control,
+                            reference_control=reference_control,
+                        )
+
                 applied_controls.append(applied_control)
             except Exception as e:
                 logger.error(
@@ -7001,8 +7049,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     exc_info=e,
                 )
                 continue
-        if applied_controls:
-            self.applied_controls.add(*applied_controls)
+
+        if not dry_run and applied_controls:
+            saved_controls = [ac for ac in applied_controls if ac.pk]
+            if saved_controls:
+                self.applied_controls.add(*saved_controls)
+
         return applied_controls
 
     class Meta:
