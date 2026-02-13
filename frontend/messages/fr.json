@@ -483,7 +483,7 @@
 	"evidencesBiaHelpText": "Des preuves liées à l'implémentation ou les tests de résilience",
 	"scopedAsset": "Typiquement un actif primaire / fonction métier qui sera le focus de cette entrée",
 	"copyright": "Copyright",
-	"customExternalLibrary": "Bibliothèque personalisée/externe",
+	"customExternalLibrary": "Bibliothèque personnalisée/externe",
 	"addYourLibrary": "Ajouter votre propre bibliothèque",
 	"libraryFileInYamlOrXlsx": "Formats supportés : .yaml ou .xlsx",
 	"libraryAddHelpText": "Vous pouvez importer vos bibliothèques définies dans le format CISO Assistant ou d'autres externes comme le CIS ou CCM. Les bibliothèques peuvent être en format Excel ou converties avec la boite à outils externe.",
