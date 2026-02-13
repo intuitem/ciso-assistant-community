@@ -1254,24 +1254,6 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra2.perimeter_folders.add(global_approvers.folder)
 
-    # if global auditees user group does not exist, then create it
-    if not UserGroup.objects.filter(
-        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
-    ).exists():
-        global_auditees = UserGroup.objects.create(
-            name=UserGroupCodename.GLOBAL_AUDITEE.value,
-            folder=Folder.get_root_folder(),
-            builtin=True,
-        )
-        ra = RoleAssignment.objects.create(
-            user_group=global_auditees,
-            role=Role.objects.get(name=RoleCodename.AUDITEE.value),
-            is_recursive=True,
-            builtin=True,
-            folder=Folder.get_root_folder(),
-        )
-        ra.perimeter_folders.add(global_auditees.folder)
-
     third_party_respondent_permissions = Permission.objects.filter(
         codename__in=THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST
     )
@@ -1307,6 +1289,24 @@ def startup(sender: AppConfig, **kwargs):
                 is_recursive=True,
             )
             ra.perimeter_folders.add(domain_folder)
+
+    # if global auditees user group does not exist, then create it
+    if not UserGroup.objects.filter(
+        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
+    ).exists():
+        global_auditees = UserGroup.objects.create(
+            name=UserGroupCodename.GLOBAL_AUDITEE.value,
+            folder=Folder.get_root_folder(),
+            builtin=True,
+        )
+        ra = RoleAssignment.objects.create(
+            user_group=global_auditees,
+            role=auditee_role,
+            is_recursive=True,
+            builtin=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra.perimeter_folders.add(global_auditees.folder)
 
     # Create default Qualifications
     try:
