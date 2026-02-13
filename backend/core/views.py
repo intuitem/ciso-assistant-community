@@ -1066,6 +1066,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        BATCH_SIZE_LIMIT = 100
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         if action_type == "change_field":
             if field_name not in self.BATCH_ALLOWED_VALUE_FIELDS:
                 return Response(
@@ -1083,6 +1090,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
         # Use the IAM-filtered queryset — objects the user cannot see are excluded
         queryset = self.get_queryset()
+        objects_by_id = {str(o.id): o for o in queryset.filter(id__in=ids)}
 
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
@@ -1092,9 +1100,8 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         failed = []
 
         for obj_id in ids:
-            try:
-                obj = queryset.get(id=obj_id)
-            except self.model.DoesNotExist:
+            obj = objects_by_id.get(str(obj_id))
+            if obj is None:
                 failed.append(
                     {
                         "id": str(obj_id),
