@@ -41,7 +41,7 @@ class SerializerFactory:
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
             serializer_name = f"{base_name}ReadSerializer"
-        elif action in ["create", "update", "partial_update"]:
+        elif action in ["create", "update", "partial_update", "destroy"]:
             serializer_name = f"{base_name}WriteSerializer"
         else:
             return None
@@ -72,20 +72,51 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
 
-    def update(self, instance: models.Model, validated_data: Any) -> models.Model:
-        if (
-            getattr(instance, "builtin", False)
-            and hasattr(instance, "folder_id")
-            and ("folder" in validated_data or "folder_id" in validated_data)
+    def _check_object_perm(
+        self, instance_or_data, action: str, *, folder: Folder | None = None
+    ) -> None:
+        """Check that the requesting user has *action* permission on the resolved folder."""
+        if folder is None:
+            folder = Folder.get_folder(instance_or_data)
+        if folder is None:
+            return
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"{action}_{self.Meta.model._meta.model_name}",
+            ),
+            folder=folder,
         ):
-            new_folder = validated_data.get("folder", validated_data.get("folder_id"))
-            new_folder_id = (
-                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            raise PermissionDenied(
+                {
+                    "folder": f"You do not have permission to {action} objects in this folder"
+                }
             )
-            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+
+    def _ensure_immutable(self, field_name: str, value) -> None:
+        """Raise PermissionDenied if a field's value is changing on update."""
+        if self.instance is None:
+            return
+        current_id = getattr(self.instance, f"{field_name}_id", None)
+        if current_id and str(value.id) != str(current_id):
+            raise PermissionDenied({field_name: "This field is immutable"})
+
+    def validate_folder(self, folder: Folder) -> Folder:
+        """Enforce permission when an object is moved to a different folder."""
+        if (
+            self.instance is not None
+            and hasattr(self.instance, "folder_id")
+            and str(folder.id) != str(self.instance.folder_id)
+        ):
+            if getattr(self.instance, "builtin", False):
                 raise PermissionDenied(
                     {"folder": "Builtin objects cannot change folder"}
                 )
+            self._check_object_perm(self.instance, "add", folder=folder)
+        return folder
+
+    def update(self, instance: models.Model, validated_data: Any) -> models.Model:
+        self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -95,25 +126,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
+    def delete(self, instance: models.Model) -> None:
+        """Enforce delete permission before removing *instance*."""
+        self._check_object_perm(instance, "delete")
+        instance.delete()
+
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
         folder = Folder.get_folder(validated_data)
         folder = folder if folder else Folder.get_root_folder()
-        can_create_in_folder = RoleAssignment.is_access_allowed(
-            user=self.context["request"].user,
-            perm=Permission.objects.get(
-                codename=f"add_{self.Meta.model._meta.model_name}",
-                content_type__app_label=self.Meta.model._meta.app_label,
-                content_type__model=self.Meta.model._meta.model_name,
-            ),
-            folder=folder,
-        )
-        if not can_create_in_folder:
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
+        self._check_object_perm(validated_data, "add", folder=folder)
         try:
             object_created = super().create(validated_data)
             return object_created
@@ -749,6 +771,10 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
     )
+
+    def validate_risk_assessment(self, value):
+        self._ensure_immutable("risk_assessment", value)
+        return value
 
     def validate(self, attrs):
         if (
@@ -1493,9 +1519,16 @@ class FolderWriteSerializer(BaseModelSerializer):
     def validate_parent_folder(self, value):
         """
         If parent_folder is empty or None, default to the root folder.
+        On update, check add permission on the target parent folder.
         """
         if not value:
             return Folder.get_root_folder()
+        if (
+            self.instance is not None
+            and self.instance.parent_folder_id
+            and str(value.id) != str(self.instance.parent_folder_id)
+        ):
+            self._check_object_perm(self.instance, "add", folder=value)
         return value
 
 
