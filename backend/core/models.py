@@ -7223,9 +7223,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
 class RequirementAssignment(AbstractBaseModel, FolderMixin):
     """
-    Represents an assignment of a group of requirement assessments to an actor.
+    Represents an assignment of a group of requirement assessments to one or multiple actors.
     Used to delegate audit work within a compliance assessment to specific users or teams.
-    A requirement assessment can only belong to one assignment within a compliance assessment.
     """
 
     compliance_assessment = models.ForeignKey(
