@@ -101,13 +101,24 @@ export const actions: Actions = {
 				delete form.data['file']; // This removes a warning: Cannot stringify arbitrary non-POJOs (data..form.data.file)
 				return fail(400, { form });
 			}
-			setFlash(
-				{
-					type: 'success',
-					message: m.librarySuccessfullyLoaded({}, locale ? { locale } : {})
-				},
-				event
-			);
+			const response = await req.json();
+			if (response.warning === 'libraryStoredForUpdate') {
+				setFlash(
+					{
+						type: 'success',
+						message: m.libraryStoredForUpdate({}, locale ? { locale } : {})
+					},
+					event
+				);
+			} else {
+				setFlash(
+					{
+						type: 'success',
+						message: m.librarySuccessfullyLoaded({}, locale ? { locale } : {})
+					},
+					event
+				);
+			}
 		} else {
 			setFlash({ type: 'error', message: m.noLibraryDetected() }, event);
 			return fail(400, { form });
