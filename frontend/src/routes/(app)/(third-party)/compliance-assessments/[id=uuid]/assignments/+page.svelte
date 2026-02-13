@@ -601,7 +601,7 @@
 							field="actor"
 							label={m.assignTo()}
 							placeholder={m.selectActor()}
-              helpText={m.makeSureActorsHavePermissions()}
+							helpText={m.makeSureActorsHavePermissions()}
 							multiple
 						/>
 					{/key}
