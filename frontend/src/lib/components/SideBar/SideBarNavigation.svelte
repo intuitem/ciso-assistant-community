@@ -15,7 +15,7 @@
 			// Check and filter the sub-items based on user permissions
 			const filteredSubItems = item.items.filter((subItem) => {
 				if (subItem.exclude) {
-					return subItem.exclude.some((role) => user?.roles && !user.roles.includes(role));
+					return user?.roles?.some((role: string) => !subItem.exclude.includes(role)) ?? false;
 				} else if (subItem.permissions) {
 					return subItem.permissions?.some(
 						(permission) => user?.permissions && Object.hasOwn(user.permissions, permission)
