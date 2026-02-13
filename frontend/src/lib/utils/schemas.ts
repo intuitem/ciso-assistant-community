@@ -108,7 +108,8 @@ export const LibraryUploadSchema = z.object({
 export const RiskAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -357,7 +358,8 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	noRedirect: z.boolean().default(false)
+	noRedirect: z.boolean().default(false),
+	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
@@ -426,7 +428,8 @@ export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),
 	ref_id: z.string().optional(),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	framework: z.string(),
@@ -643,7 +646,8 @@ export const EntityAssessmentSchema = z.object({
 	framework: z.string().optional(),
 	selected_implementation_groups: z.array(z.string().optional()).optional(),
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -736,7 +740,8 @@ export const vulnerabilitySchema = z.object({
 export const BusinessImpactAnalysisSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	risk_matrix: z.string(),
@@ -934,25 +939,20 @@ export const quantitativeRiskStudySchema = z.object({
 				.object({
 					point1: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.default({ probability: 0.99 })
 						.optional(),
 					point2: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.optional()
 				})
-				.optional(),
-			curve_data: z
-				.object({
-					loss_values: z.array(z.number()).optional(),
-					probability_values: z.array(z.number()).optional()
-				})
 				.optional()
+			// Note: curve_data is computed by the backend and should not be sent from frontend
 		})
 		.optional(),
 	// .default({
@@ -1127,7 +1127,8 @@ export const FindingSchema = z.object({
 export const FindingsAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('0.1'),
-	perimeter: z.string(),
+	folder: z.string(),
+	perimeter: z.string().optional().nullable(),
 	status: z.string().optional().nullable(),
 	ref_id: z.string().optional(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
@@ -1380,14 +1381,16 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
-	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
-	value: jsonSchema
+	value: jsonSchema,
+	observation: z.string().optional().nullable(),
+	evidence_revision: z.string().uuid().optional().nullable()
 });
 
 export const DashboardSchema = z.object({

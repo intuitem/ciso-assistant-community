@@ -471,7 +471,8 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
-				{data}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
@@ -861,7 +862,9 @@
 				{...rest}
 			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+		>
 			{#if closeModal}
 				<button
 					class="btn bg-gray-400 text-white font-semibold w-full"

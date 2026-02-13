@@ -32,8 +32,8 @@ services:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG={{ enable_debug }}
       - AUTH_TOKEN_TTL=7200
-      - LICENSE_SEATS=5
-      - LICENSE_EXPIRATION=2025-12-21
+      - LICENSE_SEATS={{ license_seats }}
+      - LICENSE_EXPIRATION={{ license_expiration }}
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config
@@ -74,8 +74,8 @@ services:
       - CISO_ASSISTANT_URL=https://{{ fqdn }}:{{ port }}
       - DJANGO_DEBUG=False
       - AUTH_TOKEN_TTL=7200
-      - LICENSE_SEATS=5
-      - LICENSE_EXPIRATION=2025-12-21
+      - LICENSE_SEATS={{ license_seats }}
+      - LICENSE_EXPIRATION={{ license_expiration }}
       - HOME=/tmp
       - XDG_CACHE_HOME=/tmp/.cache
       - XDG_CONFIG_HOME=/tmp/.config

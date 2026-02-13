@@ -744,10 +744,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             object_type=EntityAssessment,
         )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
+            "folder", "entity"
+        ):
+            # Use entity assessment's folder for grouping
+            folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
+                "folder_id": str(folder.id) if folder else None,
+                "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
@@ -762,7 +768,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment_id": ea.compliance_assessment.id
                 if ea.compliance_assessment
                 else "#",
-                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
@@ -779,9 +785,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             entry.update({"completion": completion})
 
             review_progress = (
-                ea.compliance_assessment.get_progress()
-                if ea.compliance_assessment
-                else 0
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
             )
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
@@ -793,13 +797,6 @@ class RepresentativeViewSet(BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user:
-            instance.user.delete()
-
-        return super().destroy(request, *args, **kwargs)
 
     model = Representative
     filterset_fields = ["entity", "ref_id", "filtering_labels"]

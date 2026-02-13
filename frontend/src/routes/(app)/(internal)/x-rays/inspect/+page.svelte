@@ -9,6 +9,7 @@
 	}
 
 	let { data }: Props = $props();
+	let treeMinHeight = $state('100vh');
 
 	async function toggleEnclaves(checked: boolean) {
 		await goto(`/x-rays/inspect?include_enclaves=${checked ? 'true' : 'false'}`, {
@@ -47,9 +48,15 @@
 			</span>
 		</div>
 	</div>
-	<div class="w-full h-dvh">
+	<div class="w-full" style="height: {treeMinHeight};">
 		{#key data.includeEnclaves}
-			<TreeChart title="Organisation overview" tree={data.data} name="org_tree" />
+			<TreeChart
+				title="Organisation overview"
+				tree={data.data}
+				name="org_tree"
+				height="h-full"
+				bind:minHeight={treeMinHeight}
+			/>
 		{/key}
 	</div>
 </div>

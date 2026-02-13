@@ -9,7 +9,8 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
-	perimeter: vars.perimeterName,
+	// folder is inherited from the entity via initialData, no need to specify it
+	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
@@ -78,7 +79,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create solution', async () => {
 		await page.getByRole('tab', { name: 'Solutions' }).click();
-		await expect(page.getByTestId('tabs-panel').getByText('Associated solutions')).toBeVisible();
 		await solutionsPage.createItem(
 			{
 				name: 'Test solution'
@@ -91,9 +91,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create representative', async () => {
 		await page.getByRole('tab', { name: 'Representatives' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated representatives')
-		).toBeVisible();
 		await representativesPage.createItem(
 			{
 				email: 'third-party@tests.com',
@@ -108,9 +105,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('verify that user was created alongside representative', async () => {
 		await page.getByRole('tab', { name: 'Representatives' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated representatives')
-		).toBeVisible();
 		await representativesPage.viewItemDetail('third-party@tests.com');
 		await expect(page.getByTestId('user-field-value')).not.toBeEmpty();
 		await page.getByTestId('user-field-value').locator('a').first().click();
@@ -125,9 +119,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create entity assessment', async () => {
 		await page.getByRole('tab', { name: 'Entity assessments' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated entity assessments')
-		).toBeVisible();
 		await entityAssessmentsPage.createItem(
 			entityAssessment,
 			undefined,

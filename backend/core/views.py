@@ -6092,6 +6092,75 @@ class FolderViewSet(BaseModelViewSet):
             my_map[item.name] = item.id
         return Response(my_map)
 
+    def _get_quality_checks_for_folders(self, folders, user):
+        """
+        Helper method to aggregate quality checks for a queryset of folders.
+        Enforces RBAC for both folders and assessments.
+        """
+        # Get viewable assessment IDs for proper RBAC
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=user, object_type=ComplianceAssessment
+        )
+        (viewable_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=user, object_type=RiskAssessment
+        )
+
+        res = {
+            str(f.id): {
+                "folder": FolderReadSerializer(f).data,
+                "compliance_assessments": {"objects": {}},
+                "risk_assessments": {"objects": {}},
+            }
+            for f in folders
+        }
+        for ca in ComplianceAssessment.objects.filter(
+            folder__in=folders, id__in=viewable_ca_ids
+        ):
+            res[str(ca.folder.id)]["compliance_assessments"]["objects"][str(ca.id)] = {
+                "object": ComplianceAssessmentReadSerializer(ca).data,
+                "quality_check": ca.quality_check(),
+            }
+        for ra in RiskAssessment.objects.filter(
+            folder__in=folders, id__in=viewable_ra_ids
+        ):
+            res[str(ra.folder.id)]["risk_assessments"]["objects"][str(ra.id)] = {
+                "object": RiskAssessmentReadSerializer(ra).data,
+                "quality_check": ra.quality_check(),
+            }
+        return res
+
+    @action(detail=False, methods=["get"])
+    def quality_check(self, request):
+        """
+        Returns the quality check of assessments grouped by folder.
+        """
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
+        )
+        folders = Folder.objects.filter(id__in=viewable_objects).exclude(
+            content_type=Folder.ContentType.ROOT
+        )
+        return Response(
+            {"results": self._get_quality_checks_for_folders(folders, request.user)}
+        )
+
+    @action(detail=True, methods=["get"], url_path="quality_check")
+    def quality_check_detail(self, request, pk):
+        """
+        Returns the quality check of assessments for a specific folder.
+        """
+        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(), user=request.user, object_type=Folder
+        )
+        if UUID(pk) not in viewable_objects:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        folder = self.get_object()
+        result = self._get_quality_checks_for_folders(
+            Folder.objects.filter(pk=folder.pk), request.user
+        )
+        return Response(result.get(str(folder.id), {}))
+
     @action(detail=False, methods=["get"])
     def my_assignments(self, request):
         include_teams = (
@@ -6120,7 +6189,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.get_progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -7230,6 +7299,17 @@ def get_metrics_view(request):
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
+def get_audits_metrics_view(request):
+    """
+    API endpoint that returns the expensive audit metrics (progress avg + audits stats).
+    Split from get_metrics to allow independent streaming.
+    """
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_audits_metrics(request.user, folder_id)})
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
 def get_combined_assessments_status_view(request):
     """
     API endpoint that returns combined assessment counts per status
@@ -8029,6 +8109,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
+                "requirement_assessments",  # To calcul progress
             )
         )
 
@@ -8047,12 +8128,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
 
@@ -8499,14 +8574,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             for author in instance.authors.all():
                 try:
-                    author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="compliance-assessments",
-                        object_id=instance.id,
-                    )
+                    specific = author.specific
+                    if hasattr(specific, "mailing"):
+                        specific.mailing(
+                            email_template_name="tprm/third_party_email.html",
+                            subject=_(
+                                "CISO Assistant: A questionnaire has been assigned to you"
+                            ),
+                            object="compliance-assessments",
+                            object_id=instance.id,
+                        )
+                    else:
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
                 except Exception as primary_exception:
                     logger.error(
                         f"Failed to send email to {author}: {primary_exception}"
@@ -9304,10 +9385,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return Response(comparison_data)
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
+        if request.method == "GET":
+            dry_run = True
+        if request.method == "GET":
+            dry_run = True
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
@@ -9318,7 +9408,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         controls = []
         for requirement_assessment in requirement_assessments:
             controls.append(
-                requirement_assessment.create_applied_controls_from_suggestions()
+                requirement_assessment.create_applied_controls_from_suggestions(
+                    dry_run=dry_run
+                )
             )
         return Response(
             AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
@@ -9551,17 +9643,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return Response(dict(RequirementAssessment.ExtendedResult.choices))
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         requirement_assessment = RequirementAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        controls = requirement_assessment.create_applied_controls_from_suggestions(
+            dry_run=dry_run
+        )
         return Response(
             AppliedControlReadSerializer(controls, many=True).data,
             status=status.HTTP_200_OK,

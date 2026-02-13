@@ -341,6 +341,12 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
 
+        # Check if folder is being changed (either directly or via perimeter)
+        new_folder = validated_data.get("folder")
+        if new_folder and new_folder != instance.folder:
+            # Cascade folder change to all child RiskScenarios
+            instance.risk_scenarios.update(folder=new_folder)
+
         return super().update(instance, validated_data)
 
     class Meta:
@@ -777,17 +783,22 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
 
         return super().validate(attrs)
 
+    def create(self, validated_data):
+        # Set folder from risk_assessment before the permission check in parent class
+        if "risk_assessment" in validated_data and validated_data["risk_assessment"]:
+            validated_data["folder"] = validated_data["risk_assessment"].folder
+        return super().create(validated_data)
+
     class Meta:
         model = RiskScenario
-        fields = "__all__"
+        exclude = ["folder"]
 
 
 class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
     risk_assessment = FieldsRelatedField(["id", "name", "is_locked"])
     risk_matrix = FieldsRelatedField(source="risk_assessment.risk_matrix")
-    perimeter = FieldsRelatedField(
-        source="risk_assessment.perimeter", fields=["id", "name", "folder"]
-    )
+    folder = FieldsRelatedField()
     version = serializers.StringRelatedField(source="risk_assessment.version")
     operational_scenario = FieldsRelatedField(["id", "name", "ebios_rm_study"])
     threats = FieldsRelatedField(many=True)
@@ -820,6 +831,10 @@ class RiskScenarioReadSerializer(RiskScenarioWriteSerializer):
     filtering_labels = FieldsRelatedField(many=True)
 
     within_tolerance = serializers.CharField()
+
+    class Meta:
+        model = RiskScenario
+        fields = "__all__"
 
 
 class RiskScenarioImportExportSerializer(BaseModelSerializer):
@@ -1519,6 +1534,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
+    has_update = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Framework
@@ -1853,6 +1869,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "implementation_groups_definition",
             "ref_id",
             "reference_controls",
+            "has_update",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(

@@ -289,7 +289,7 @@
 		{form}
 		multiple
 		optionsEndpoint="risk-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="str"
 		field="risk_assessments"
 		cacheLock={cacheLocks['risk_assessments']}

@@ -254,7 +254,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "eta": assessment.eta,
                     "due_date": assessment.due_date,
                     "status": assessment.status,
-                    "progress": assessment.get_progress(),
+                    "progress": assessment.progress,
                     "result_counts": result_counts,
                 }
             )
@@ -267,7 +267,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
