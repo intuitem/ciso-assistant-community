@@ -17,7 +17,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		object?: Record<string, any>; // export let context: string = 'default';
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -119,14 +119,12 @@
 />
 <AutocompleteSelect
 	{form}
-	disabled={object.id}
 	optionsEndpoint="risk-matrices"
 	field="risk_matrix"
 	cacheLock={cacheLocks['risk_matrix']}
 	bind:cachedValue={formDataCache['risk_matrix']}
 	label={m.riskMatrix()}
 	helpText={m.riskAssessmentMatrixHelpText()}
-	hidden={initialData.risk_matrix}
 />
 <TextField
 	type="date"
