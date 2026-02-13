@@ -358,6 +358,17 @@ class Folder(NameDescriptionMixin):
                 is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
+            auditees = UserGroup.objects.create(
+                name=str(UserGroupCodename.AUDITEE), folder=folder, builtin=True
+            )
+            ra5 = RoleAssignment.objects.create(
+                user_group=auditees,
+                role=Role.objects.get(name=RoleCodename.AUDITEE),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra5.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
             # Create a UG and RA for each non-builtin role (idempotent)
@@ -755,6 +766,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             .values_list("roleassignment__role__name", flat=True)
             .distinct()
         )
+
+    @property
+    def is_auditee(self) -> bool:
+        """True when the user holds the auditee role on at least one domain."""
+        from core.utils import get_auditee_filtered_folder_ids
+
+        return bool(get_auditee_filtered_folder_ids(self))
 
     @property
     def has_backup_permission(self) -> bool:

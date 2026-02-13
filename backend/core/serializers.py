@@ -2350,6 +2350,64 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class RequirementAssignmentReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField()
+    actor = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+
+
+class RequirementAssignmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        """
+        Validate that requirement assessments belong to the specified compliance assessment
+        and are not already assigned to another assignment.
+        """
+        compliance_assessment = attrs.get(
+            "compliance_assessment",
+            getattr(self.instance, "compliance_assessment", None),
+        )
+        requirement_assessments = attrs.get("requirement_assessments", [])
+
+        if compliance_assessment and requirement_assessments:
+            # Check that all requirement assessments belong to the compliance assessment
+            for ra in requirement_assessments:
+                if ra.compliance_assessment_id != compliance_assessment.id:
+                    raise serializers.ValidationError(
+                        {
+                            "requirement_assessments": f"Requirement assessment '{ra}' does not belong to the specified compliance assessment."
+                        }
+                    )
+
+            # Check that requirement assessments are not already assigned to another assignment
+            existing_assignment_ids = (
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    requirement_assessments__in=requirement_assessments,
+                )
+                .exclude(id=self.instance.id if self.instance else None)
+                .values_list("id", flat=True)
+                .distinct()
+            )
+
+            if existing_assignment_ids:
+                raise serializers.ValidationError(
+                    {
+                        "requirement_assessments": "Some requirement assessments are already assigned to another assignment."
+                    }
+                )
+
+        return attrs
+
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+
+
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
     pass
 

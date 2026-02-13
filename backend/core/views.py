@@ -125,6 +125,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     compare_schema_versions,
+    get_auditee_filtered_folder_ids,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -8209,6 +8210,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             ),
         )
 
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
+
         return qs
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -8997,6 +9006,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments = [
+                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+            ]
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -9036,6 +9058,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments_objects = [
+                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+            ]
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -9123,8 +9158,73 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
-        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        compliance_assessment = self.get_object()
         return Response(compliance_assessment.donut_render())
+
+    @action(detail=True, methods=["get"], url_path="is-auditee")
+    def is_auditee(self, request, pk):
+        """Returns whether the current user is an auditee for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        is_auditee = bool(
+            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        )
+        return Response({"is_auditee": is_auditee})
+
+    @action(detail=False, methods=["get"], url_path="auditee-dashboard")
+    def auditee_dashboard(self, request):
+        """Returns aggregated progress data for the auditee's assigned audits."""
+        user_actors = Actor.get_all_for_user(request.user)
+        assignments = (
+            RequirementAssignment.objects.filter(actor__in=user_actors)
+            .select_related(
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__folder",
+            )
+            .prefetch_related("requirement_assessments")
+        )
+
+        # Only include compliance assessments the user can view
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Group by compliance assessment
+        ca_map = defaultdict(list)
+        for assignment in assignments:
+            if assignment.compliance_assessment_id in viewable_ca_ids:
+                ca_map[assignment.compliance_assessment_id].append(assignment)
+
+        dashboard_data = []
+        for ca_id, group in ca_map.items():
+            ca = group[0].compliance_assessment
+            ra_ids = set()
+            for assignment in group:
+                ra_ids.update(
+                    assignment.requirement_assessments.values_list("id", flat=True)
+                )
+
+            ras = RequirementAssessment.objects.filter(
+                id__in=ra_ids, requirement__assessable=True
+            )
+            total = ras.count()
+            done = ras.exclude(result="not_assessed").count()
+
+            dashboard_data.append(
+                {
+                    "id": str(ca.id),
+                    "name": ca.name,
+                    "folder": ca.folder.name if ca.folder else None,
+                    "framework": ca.framework.name if ca.framework else None,
+                    "status": ca.status,
+                    "total_requirements": total,
+                    "assessed_requirements": done,
+                    "progress_percent": round(done / total * 100) if total > 0 else 0,
+                }
+            )
+
+        return Response(dashboard_data)
 
     @action(detail=True, methods=["get"])
     def comparable_audits(self, request, pk):
@@ -9617,7 +9717,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries for table view and serializer - high-impact due to many nested relationships"""
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related(
@@ -9634,6 +9734,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
             )
         )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(assignments__actor__in=user_actors)
+            ).distinct()
+        return qs
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
@@ -12419,3 +12527,38 @@ class TerminologyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+
+class RequirementAssignmentViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows requirement assignments to be viewed or edited.
+    Requirement assignments delegate groups of requirement assessments to specific actors.
+    """
+
+    model = RequirementAssignment
+    filterset_fields = [
+        "folder",
+        "compliance_assessment",
+        "actor",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "compliance_assessment",
+            )
+            .prefetch_related(
+                "actor",
+                "requirement_assessments",
+            )
+        )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+            ).distinct()
+        return qs
