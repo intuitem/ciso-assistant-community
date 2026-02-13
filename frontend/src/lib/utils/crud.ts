@@ -1,14 +1,16 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
-import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
-import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
-import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
-import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
+import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
+import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
+import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
+import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
+import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
 import type { urlModel } from './types';
-import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
-import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
+import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
+import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
@@ -526,6 +528,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'referenceControls',
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'category' },
+			{ field: 'csf_function' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
@@ -1041,6 +1053,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'perimeter' },
+			{ field: 'risk_matrix' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
@@ -2411,6 +2424,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview
+	},
+	frameworks: {
+		name: FrameworkName
 	}
 };
 

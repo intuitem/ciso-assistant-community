@@ -14,7 +14,7 @@
 	import { tableA11y } from '$lib/components/ModelTable/actions';
 	// Types
 	import { browser } from '$app/environment';
-	import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
+	import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
@@ -196,13 +196,18 @@
 		const rowMetaData = $rows[rowIndex].meta;
 		if (!rowMetaData[identifierField] || !URLModel) return;
 
+		const preferredLabel =
+			URLModel === 'reference-controls' ? rowMetaData.name || rowMetaData.ref_id : undefined;
+		const label =
+			preferredLabel ||
+			rowMetaData.str ||
+			rowMetaData.name ||
+			rowMetaData.email ||
+			rowMetaData.label ||
+			rowMetaData[identifierField];
+
 		goto(`/${URLModel}/${rowMetaData[identifierField]}${detailQueryParameter}`, {
-			label:
-				rowMetaData.str ??
-				rowMetaData.name ??
-				rowMetaData.email ??
-				rowMetaData.label ??
-				rowMetaData[identifierField],
+			label,
 			breadcrumbAction: 'push'
 		});
 	}

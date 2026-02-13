@@ -267,7 +267,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
