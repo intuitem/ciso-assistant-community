@@ -219,10 +219,11 @@ class EntityAssessmentSerializersTestCase(TestCase):
 
         self.assertIn("framework", context.exception.detail)
 
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     @patch(
         "tprm.serializers.EntityAssessmentWriteSerializer._assign_third_party_respondents"
     )
-    def test_entity_assessment_write_update(self, mock_assign):
+    def test_entity_assessment_write_update(self, mock_assign, mock_is_access_allowed):
         """Test that EntityAssessmentWriteSerializer correctly updates an EntityAssessment"""
         new_rep = User.objects.create_user(
             email="newrep@example.com", password="password"
@@ -231,7 +232,7 @@ class EntityAssessmentSerializersTestCase(TestCase):
         data = {"name": "Updated Assessment", "representatives": [new_rep.id]}
 
         serializer = EntityAssessmentWriteSerializer(
-            self.assessment, data=data, partial=True
+            self.assessment, data=data, partial=True, context={"request": MagicMock()}
         )
         self.assertTrue(serializer.is_valid())
         updated_assessment = serializer.save()
