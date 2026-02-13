@@ -619,9 +619,7 @@
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
 										<div class="flex items-center text-sm text-gray-900 font-medium">
-											<i
-												class="fa-solid fa-{actorIcon(assignment.actor)} mr-1"
-											></i>
+											<i class="fa-solid fa-{actorIcon(assignment.actor)} mr-1"></i>
 											<span>{formatActors(assignment.actor)}</span>
 										</div>
 										<div class="mt-2">
@@ -692,9 +690,7 @@
 			<div class="flex items-center justify-between p-4 border-b">
 				<div>
 					<h2 id="modal-title" class="h4 font-semibold">
-						<i
-							class="fa-solid fa-{actorIcon(selectedAssignmentForModal.actor)} mr-2"
-						></i>
+						<i class="fa-solid fa-{actorIcon(selectedAssignmentForModal.actor)} mr-2"></i>
 						{formatActors(selectedAssignmentForModal.actor)}
 					</h2>
 				</div>
