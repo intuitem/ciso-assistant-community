@@ -72,7 +72,24 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
 
+    def _check_object_perm(self, instance: models.Model, action: str) -> None:
+        """Check that the requesting user has *action* permission on *instance*'s folder."""
+        folder = Folder.get_folder(instance)
+        if folder is None:
+            return
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"{action}_{self.Meta.model._meta.model_name}",
+            ),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": f"You do not have permission to {action} objects in this folder"}
+            )
+
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
+        self._check_object_perm(instance, "change")
         if (
             getattr(instance, "builtin", False)
             and hasattr(instance, "folder_id")
@@ -94,6 +111,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
         except Exception as e:
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
+
+    def delete(self, instance: models.Model) -> None:
+        """Enforce delete permission before removing *instance*."""
+        self._check_object_perm(instance, "delete")
+        instance.delete()
 
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
