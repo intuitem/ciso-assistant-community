@@ -832,7 +832,7 @@ class LibraryUpdater:
                     order_id += 1
 
                     # Fields safe to update on existing requirement nodes.
-                    # Excludes structural fields (parent_urn, order_id) that
+                    # Excludes structural fields (parent_urn) that
                     # would break the framework hierarchy.
                     UPDATABLE_FIELDS = {
                         "name",
@@ -845,6 +845,7 @@ class LibraryUpdater:
                         "questions",
                         "weight",
                         "importance",
+                        "order_id",
                     }
 
                     if urn in existing_requirement_node_objects:
