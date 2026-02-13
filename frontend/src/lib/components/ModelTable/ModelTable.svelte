@@ -573,7 +573,13 @@
 	let selectedIds: Set<string> = $state(new Set());
 
 	const currentBatchActions: BatchActionConfig[] = $derived(
-		URLModel ? getBatchActions(URLModel) : []
+		URLModel && model
+			? getBatchActions(URLModel).filter((a) =>
+					a.type === 'delete'
+						? Object.hasOwn(user.permissions, `delete_${model.name}`)
+						: Object.hasOwn(user.permissions, `change_${model.name}`)
+				)
+			: []
 	);
 	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
 
