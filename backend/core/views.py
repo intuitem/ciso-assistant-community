@@ -2256,11 +2256,13 @@ class RiskMatrixViewSet(BaseModelViewSet):
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
             _choices = {}
             for i, risk in enumerate(matrix.json_definition["risk"]):
+                translations = risk.get("translations")
+                if not isinstance(translations, dict):
+                    translations = {}
+                translated = translations.get(current_language, {})
+
                 # Use the translated name if available, otherwise fall back to the default name
-                if current_language in risk.get("translations", {}):
-                    name = risk["translations"][current_language]["name"]
-                else:
-                    name = risk["name"]
+                name = translated.get("name") or risk.get("name", "")
                 _choices[risk.get("id", i)] = name
             options = options | _choices
 
