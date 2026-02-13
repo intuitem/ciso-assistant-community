@@ -1845,7 +1845,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				disableEdit: true,
 				defaultFilters: {
-					past: [{ value: 'false' }]
+					status: [{ value: 'pending' }, { value: 'in_progress' }]
 				}
 			}
 		]
