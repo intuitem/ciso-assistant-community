@@ -1519,9 +1519,16 @@ class FolderWriteSerializer(BaseModelSerializer):
     def validate_parent_folder(self, value):
         """
         If parent_folder is empty or None, default to the root folder.
+        On update, check add permission on the target parent folder.
         """
         if not value:
             return Folder.get_root_folder()
+        if (
+            self.instance is not None
+            and self.instance.parent_folder_id
+            and str(value.id) != str(self.instance.parent_folder_id)
+        ):
+            self._check_object_perm(self.instance, "add", folder=value)
         return value
 
 
