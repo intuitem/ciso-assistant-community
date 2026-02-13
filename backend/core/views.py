@@ -5996,7 +5996,7 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
-    batch_size = 100  # Configurable batch size for processing domain import
+    batch_size = 1000  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
         """
@@ -6798,6 +6798,25 @@ class FolderViewSet(BaseModelViewSet):
                     objects_to_create.append(model(**fields))
 
                 created_objects = model.objects.bulk_create(objects_to_create)
+                has_save_method_override = "save" in model.__dict__
+
+                is_requirement_assessment = model is RequirementAssessment
+
+                if has_save_method_override and not is_requirement_assessment:
+                    for created_object in created_objects:
+                        created_object.save()
+
+                if is_requirement_assessment:
+                    compliance_assessment_to_requirement_assessment: dict[
+                        ComplianceAssessment, RequirementAssessment
+                    ] = {
+                        requirement_assessment.compliance_assessment: requirement_assessment
+                        for requirement_assessment in created_objects
+                    }
+                    for (
+                        requirement_assessment
+                    ) in compliance_assessment_to_requirement_assessment.values():
+                        requirement_assessment.trigger_compliance_assessment_update_hooks()
 
                 for obj_created, object_creation_data in zip(
                     created_objects, objects_creation_data
