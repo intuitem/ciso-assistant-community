@@ -160,10 +160,12 @@
 </svelte:head>
 
 <!-- App Shell -->
-<div class="overflow-x-hidden">
+<div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
+		base="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 {classesSidebarOpen(
+			sidebarOpen
+		)}"
 		background="bg-white"
 		padding="pb-2 px-4"
 	>

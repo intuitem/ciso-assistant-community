@@ -164,6 +164,9 @@ urlpatterns = [
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
     path(
+        "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
+    ),
+    path(
         "get_combined_assessments_status/",
         get_combined_assessments_status_view,
         name="get_combined_assessments_status_view",

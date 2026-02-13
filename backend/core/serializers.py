@@ -1534,6 +1534,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
+    has_update = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Framework
@@ -1868,6 +1869,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "implementation_groups_definition",
             "ref_id",
             "reference_controls",
+            "has_update",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
