@@ -125,8 +125,8 @@
 			<button
 				type="button"
 				class="btn text-sm {action.type === 'delete'
-					? 'preset-tonal-error'
-					: 'preset-tonal-primary'}"
+					? 'preset-tonal-error hover:ring-2 hover:ring-error-500'
+					: 'preset-tonal-primary hover:ring-2 hover:ring-primary-500'}"
 				onclick={() => triggerAction(action)}
 			>
 				<i class={action.icon}></i>
