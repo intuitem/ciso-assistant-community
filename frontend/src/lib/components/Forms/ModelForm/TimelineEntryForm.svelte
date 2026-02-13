@@ -7,7 +7,6 @@
 	import Select from '../Select.svelte';
 	import MarkdownField from '../MarkdownField.svelte';
 	import TextField from '../TextField.svelte';
-	import HiddenInput from '../HiddenInput.svelte';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -32,7 +31,15 @@
 	const formStore = form.form;
 </script>
 
-<HiddenInput {form} field="folder" />
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	field="folder"
+	pathField="path"
+	cacheLock={cacheLocks['folder']}
+	bind:cachedValue={formDataCache['folder']}
+	label={m.domain()}
+/>
 {#if context != 'edit'}
 	<AutocompleteSelect
 		{form}
@@ -43,16 +50,17 @@
 		label={m.incident()}
 		hidden={initialData.incident}
 	/>
+{/if}
+{#if !['severity_changed', 'status_changed'].includes($value)}
 	<Select
 		{form}
+		disableDoubleDash
 		options={model.selectOptions['entry_type']}
 		field="entry_type"
 		label={m.entryType()}
 		cacheLock={cacheLocks['entry_type']}
 		bind:cachedValue={formDataCache['entry_type']}
 	/>
-{/if}
-{#if !['severity_changed', 'status_changed'].includes($value)}
 	<TextField
 		{form}
 		field="entry"

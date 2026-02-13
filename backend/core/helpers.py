@@ -288,10 +288,12 @@ def get_sorted_requirement_nodes(
                 "ra_id": str(req_as.id) if req_as else None,
                 "status": req_as.status if req_as else None,
                 "result": req_as.result if req_as else None,
+                "extended_result": req_as.extended_result if req_as else None,
                 "is_scored": req_as.is_scored if req_as else None,
                 "score": req_as.score if req_as else None,
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
+                "weight": node.weight if node.weight else 1,
                 "questions": node.questions,
                 "answers": req_as.answers if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
@@ -334,6 +336,7 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "max_score": max_score if child_req_as else None,
+                    "weight": child.weight if child.weight else 1,
                     "questions": child.questions,
                     "answers": child_req_as.answers if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
@@ -346,6 +349,9 @@ def get_sorted_requirement_nodes(
                     if child_req_as
                     else None,
                     "result": child_req_as.result if child_req_as else None,
+                    "extended_result": child_req_as.extended_result
+                    if child_req_as
+                    else None,
                     "result_i18n": camel_case(child_req_as.result)
                     if child_req_as and child_req_as.result is not None
                     else None,
@@ -1200,9 +1206,6 @@ def get_metrics(user: User, folder_id):
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
-    progress_avg = math.ceil(
-        mean([x.get_progress() for x in viewable_compliance_assessments] or [0])
-    )
     missed_eta_count = (
         viewable_controls.filter(
             eta__lt=date.today(),
@@ -1243,12 +1246,29 @@ def get_metrics(user: User, folder_id):
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
-            "progress_avg": progress_avg,
         },
-        "audits_stats": build_audits_stats(user, folder_id),
         "csf_functions": csf_functions(user, folder_id),
     }
     return data
+
+
+def get_audits_metrics(user: User, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, ComplianceAssessment
+    )
+    viewable_compliance_assessments = ComplianceAssessment.objects.filter(
+        id__in=object_ids
+    )
+    progress_avg = math.ceil(
+        mean([x.progress for x in viewable_compliance_assessments] or [0])
+    )
+    return {
+        "progress_avg": progress_avg,
+        "audits_stats": build_audits_stats(user, folder_id),
+    }
 
 
 def get_compliance_analytics(user: User, folder_id=None):
@@ -1311,12 +1331,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 )
                 & Q(requirement_assessments__requirement__assessable=True),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
     )
@@ -1723,19 +1737,37 @@ def qualifications_count_per_name(user: User, folder_id=None) -> Dict[str, List]
 
 
 def get_folder_content(
-    folder: Folder, include_perimeters, viewable_objects, needed_folders
+    folder: Folder,
+    include_perimeters,
+    include_enclaves,
+    viewable_objects,
+    needed_folders,
 ):
     content = []
     for f in Folder.objects.filter(parent_folder=folder).distinct():
         if f.id in viewable_objects or f.id in needed_folders:
+            # Skip enclaves if not included
+            if not include_enclaves and f.content_type == Folder.ContentType.ENCLAVE:
+                continue
             entry = {
                 "name": f.name,
                 "uuid": f.id,
                 "viewable": viewable_objects and f.id in viewable_objects,
+                "content_type": f.content_type,
             }
+            # Add enclave-specific styling
+            if f.content_type == Folder.ContentType.ENCLAVE:
+                entry.update(
+                    {
+                        "symbol": "triangle",
+                        "symbolSize": 12,
+                        "itemStyle": {"color": "#6366f1"},
+                    }
+                )
             children = get_folder_content(
                 f,
                 include_perimeters=include_perimeters,
+                include_enclaves=include_enclaves,
                 viewable_objects=viewable_objects,
                 needed_folders=needed_folders,
             )
@@ -1751,20 +1783,6 @@ def get_folder_content(
                     "symbol": "circle",
                     "symbolSize": 10,
                     "itemStyle": {"color": "#222436"},
-                    "children": [
-                        {
-                            "name": "Audits",
-                            "symbol": "diamond",
-                            "value": ComplianceAssessment.objects.filter(
-                                perimeter=p
-                            ).count(),
-                        },
-                        {
-                            "name": "Risk assessments",
-                            "symbol": "diamond",
-                            "value": RiskAssessment.objects.filter(perimeter=p).count(),
-                        },
-                    ],
                 }
             )
     return content

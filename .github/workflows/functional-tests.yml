@@ -59,6 +59,8 @@ jobs:
 
       - name: Build community frontend
         working-directory: ${{ env.frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: pnpm run build
 
       - name: Upload Community Frontend Build Artifact
@@ -97,6 +99,8 @@ jobs:
 
       - name: Build enterprise frontend
         working-directory: ${{ env.enterprise-frontend-directory }}
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
         run: make
 
       - name: Upload Enterprise Frontend Build Artifact
@@ -181,7 +185,7 @@ jobs:
       max-parallel: 16
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
         playwright-browser: ["chromium"]
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.community_test_files) }}
 
@@ -347,7 +351,7 @@ jobs:
       max-parallel: 16
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
         playwright-browser: ["chromium"]
         test_file: ${{ fromJson(needs.get_playwright_test_files.outputs.enterprise_test_files) }}
 

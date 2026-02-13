@@ -80,7 +80,7 @@
 		buttonTextSubmit = $bindable('Submit'),
 		regionBackdrop = '',
 		regionHeader = 'text-2xl font-bold',
-		regionBody = 'max-h-[200px] overflow-hidden',
+		regionBody = 'max-h-[400px] overflow-y-auto whitespace-pre-line',
 		regionFooter = 'flex justify-end space-x-2',
 		transitions = true,
 		transitionIn = fly as TransitionIn,
@@ -101,7 +101,7 @@
 
 	// Base Styles
 	const cBackdrop = 'fixed top-0 left-0 right-0 bottom-0 bg-surface-950/50 p-4';
-	const cTransitionLayer = 'w-full h-fit min-h-full overflow-y-auto flex justify-center';
+	const cTransitionLayer = 'w-full h-fit min-h-full flex justify-center';
 	const cModal = 'block overflow-y-auto';
 	const cModalImage = 'w-full h-auto';
 
@@ -164,6 +164,11 @@
 		modalStore.close();
 	}
 
+	function onCloseButton(): void {
+		if ($modalStore[0].response) $modalStore[0].response(undefined);
+		modalStore.close();
+	}
+
 	function onConfirm(): void {
 		if ($modalStore[0].response) $modalStore[0].response(true);
 		modalStore.close();
@@ -185,7 +190,7 @@
 
 	function onKeyDown(event: SvelteEvent<KeyboardEvent, Window>): void {
 		if (!$modalStore.length) return;
-		if (event.code === 'Escape') onClose();
+		if (event.code === 'Escape') onCloseButton();
 	}
 
 	// Replacing $$props.class with classProp for compatibility
@@ -277,7 +282,30 @@
 						aria-label={$modalStore[0].title ?? 'Modal'}
 					>
 						{#if $modalStore[0]?.title}
-							<header class="modal-header {regionHeader}">{$modalStore[0].title}</header>
+							<header class="modal-header {regionHeader} flex justify-between items-center">
+								<span>{$modalStore[0].title}</span>
+								<button
+									type="button"
+									class="btn-icon btn-icon-sm text-gray-500 hover:text-gray-700"
+									onclick={onCloseButton}
+									aria-label="Close"
+								>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										width="20"
+										height="20"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										stroke-width="2"
+										stroke-linecap="round"
+										stroke-linejoin="round"
+									>
+										<line x1="18" y1="6" x2="6" y2="18"></line>
+										<line x1="6" y1="6" x2="18" y2="18"></line>
+									</svg>
+								</button>
+							</header>
 						{/if}
 						{#if $modalStore[0]?.body}
 							<article class="modal-body {regionBody}">{$modalStore[0].body}</article>

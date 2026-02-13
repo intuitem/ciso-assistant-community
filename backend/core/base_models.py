@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy as _
 from django.urls.base import reverse_lazy
 from django.core.exceptions import ValidationError
@@ -68,12 +68,6 @@ class AbstractBaseModel(models.Model):
 
         return not scope.filter(**filters).exists()
 
-    def display_path(self):
-        pass
-
-    def display_name(self):
-        pass
-
     @property
     def edit_url(self):
         return reverse_lazy(
@@ -82,16 +76,26 @@ class AbstractBaseModel(models.Model):
 
     def get_scope(self):
         if hasattr(self, "risk_scenario") and self.risk_scenario is not None:
-            return self.__class__.objects.filter(risk_scenario=self.risk_scenario)
+            return self.__class__.objects.filter(
+                risk_scenario=self.risk_scenario
+            ).order_by("created_at", "id")
         if hasattr(self, "risk_assessment") and self.risk_assessment is not None:
-            return self.__class__.objects.filter(risk_assessment=self.risk_assessment)
+            return self.__class__.objects.filter(
+                risk_assessment=self.risk_assessment
+            ).order_by("created_at", "id")
         if hasattr(self, "perimeter") and self.perimeter is not None:
-            return self.__class__.objects.filter(perimeter=self.perimeter)
+            return self.__class__.objects.filter(perimeter=self.perimeter).order_by(
+                "created_at", "id"
+            )
         if hasattr(self, "folder") and self.folder is not None:
-            return self.__class__.objects.filter(folder=self.folder)
+            return self.__class__.objects.filter(folder=self.folder).order_by(
+                "created_at", "id"
+            )
         if hasattr(self, "parent_folder") and self.parent_folder is not None:
-            return self.__class__.objects.filter(parent_folder=self.parent_folder)
-        return self.__class__.objects.all()
+            return self.__class__.objects.filter(
+                parent_folder=self.parent_folder
+            ).order_by("created_at", "id")
+        return self.__class__.objects.all().order_by("created_at", "id")
 
     def clean(self) -> None:
         scope = self.get_scope()
@@ -142,3 +146,60 @@ class ETADueDateMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class ActorSyncMixin(models.Model):
+    """
+    Intercepts save() to ensure an Actor exists for individual records.
+    """
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            is_new = self._state.adding
+            super().save(*args, **kwargs)
+
+            # If this is a new record, create the actor.
+            # We use get_or_create to be safe against race conditions/re-saves.
+            if is_new:
+                from .models import Actor
+
+                field_name = self.__class__.__name__.lower()
+                Actor.objects.get_or_create(**{field_name: self})
+
+
+class ActorSyncManager(models.Manager):
+    """
+    Intercepts bulk_create to ensure Actors are created for every new record.
+    """
+
+    def bulk_create(self, objs, batch_size=None, ignore_conflicts=False, **kwargs):
+        if self.model.__name__ == "Team":
+            for obj in objs:
+                obj.is_published = True
+
+        # Perform the standard bulk_create
+        created_objs = super().bulk_create(
+            objs, batch_size=batch_size, ignore_conflicts=ignore_conflicts, **kwargs
+        )
+
+        # Extract the newly created instances
+        from .models import Actor  # Import inside to avoid circular dependency
+
+        # Determine the field name on the Actor model (user/team/entity)
+        field_name = self.model.__name__.lower()
+
+        actors = []
+        for obj in created_objs:
+            if obj.pk:  # Only link if the object was actually created
+                actor = Actor(**{field_name: obj})
+                actor.is_published = True
+                actors.append(actor)
+
+        # Bulk create the corresponding Actors
+        if actors:
+            Actor.objects.bulk_create(actors, ignore_conflicts=True)
+
+        return created_objs

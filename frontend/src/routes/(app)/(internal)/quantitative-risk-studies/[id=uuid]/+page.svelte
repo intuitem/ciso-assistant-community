@@ -10,6 +10,7 @@
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
 	import { getToastStore } from '$lib/components/Toast/stores.ts';
+	import { safeTranslate } from '$lib/utils/i18n';
 
 	interface Props {
 		data: PageData;
@@ -69,7 +70,9 @@
 							if (result.data?.error) {
 								const errorData = result.data.message;
 								toastStore.trigger({
-									message: `Simulation Failed: ${errorData.details || errorData.error || 'Unknown error occurred'}`,
+									message: m.simulationFailed({
+										errorMessage: errorData.details || errorData.error || 'Unknown error occurred'
+									}),
 									background: 'bg-red-400 text-white',
 									timeout: 5000,
 									autohide: true
@@ -82,20 +85,27 @@
 								if (backendResults?.success === false) {
 									// Backend reported failure
 									toastStore.trigger({
-										message: `Simulation Failed: ${backendResults.message || 'Unknown error occurred'}`,
+										message: m.simulationFailed({
+											errorMessage: backendResults.message || 'Unknown error occurred'
+										}),
 										background: 'bg-red-400 text-white',
 										timeout: 5000,
 										autohide: true
 									});
 								} else {
 									// Backend reported success
-									let message = 'All simulations completed successfully!';
+									let message = m.allSimulationsCompletedSuccessfully();
 
 									if (summary) {
 										if (summary.failed_simulations > 0) {
-											message = `Simulations completed with ${summary.failed_simulations} failures out of ${summary.total_hypotheses} hypotheses`;
+											message = m.simulationsCompletedWithFailures({
+												failedSimulations: summary.failed_simulations,
+												totalHypotheses: summary.total_hypotheses
+											});
 										} else {
-											message = `All ${summary.successful_simulations} simulations completed successfully!`;
+											message = m.allNSimulationsCompletedSuccessfully({
+												successfulSimulations: summary.successful_simulations
+											});
 										}
 									}
 
@@ -163,7 +173,7 @@
 						<!-- Current ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-blue-600 mb-2">
-								{metrics.current_ale_combined_display}
+								{safeTranslate(metrics.current_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.currentAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -175,7 +185,7 @@
 						<!-- Residual ALE Combined -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-green-600 mb-2">
-								{metrics.residual_ale_combined_display}
+								{safeTranslate(metrics.residual_ale_combined_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.residualAleCombined()}</div>
 							<div class="text-xs text-gray-500 mt-1">
@@ -187,7 +197,7 @@
 						<!-- Risk Reduction -->
 						<div class="text-center">
 							<div class="text-2xl font-bold text-purple-600 mb-2">
-								{metrics.risk_reduction_display}
+								{safeTranslate(metrics.risk_reduction_display)}
 							</div>
 							<div class="text-sm text-gray-600">{m.riskReduction()}</div>
 							<div class="text-xs text-gray-500 mt-1">{m.currentAle()} - {m.residualAle()}</div>
@@ -206,6 +216,7 @@
 				<!-- Combined LEC Chart Section -->
 				{#if data.combinedLec?.curves && data.combinedLec.curves.length > 0}
 					{@const curves = data.combinedLec.curves}
+					{@const inherentRiskCurve = curves.find((c) => c.type === 'combined_inherent')}
 					{@const currentRiskCurve = curves.find((c) => c.type === 'combined_current')}
 					{@const residualRiskCurve = curves.find((c) => c.type === 'combined_residual')}
 					{@const toleranceCurve = curves.find((c) => c.type === 'tolerance')}
@@ -214,11 +225,15 @@
 						<div class="flex justify-between items-center mb-4">
 							<h3 class="text-lg font-semibold">{m.portfolioOverview()}</h3>
 							<div class="text-sm text-gray-600">
-								Current: {data.combinedLec.scenarios_with_current_data} / {data.combinedLec
-									.total_scenarios}
+								{#if data.combinedLec.scenarios_with_inherent_data}
+									{m.inherentLabel()}: {data.combinedLec.scenarios_with_inherent_data} / {data
+										.combinedLec.total_scenarios} |
+								{/if}
+								{m.currentLabel()}: {data.combinedLec.scenarios_with_current_data} / {data
+									.combinedLec.total_scenarios}
 								{#if data.combinedLec.scenarios_with_residual_data}
-									| Residual: {data.combinedLec.scenarios_with_residual_data} / {data.combinedLec
-										.total_scenarios}
+									| {m.residualLabel()}: {data.combinedLec.scenarios_with_residual_data} / {data
+										.combinedLec.total_scenarios}
 									{m.scenarios()}
 								{/if}
 							</div>
@@ -227,6 +242,7 @@
 						<div class="w-full">
 							<LossExceedanceCurve
 								data={currentRiskCurve?.data || []}
+								inherentData={inherentRiskCurve?.data || []}
 								residualData={residualRiskCurve?.data || []}
 								toleranceData={toleranceCurve?.data || []}
 								lossThreshold={data.data.loss_threshold}

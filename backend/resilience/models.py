@@ -1,4 +1,21 @@
-from django.db import models
+from django.db import models, transaction
+from django.db.models import (
+    BooleanField,
+    CharField,
+    FloatField,
+    ForeignKey,
+    IntegerField,
+    ManyToManyField,
+    TextField,
+    Count,
+    Q,
+    F,
+)
+from django.db.models.functions import Greatest, Least
+from django.utils.functional import cached_property
+from auditlog.registry import auditlog
+
+from iam.models import FolderMixin
 from core.models import (
     AppliedControl,
     Asset,
@@ -8,18 +25,6 @@ from core.models import (
     AbstractBaseModel,
     Terminology,
 )
-from django.db.models import (
-    BooleanField,
-    CharField,
-    FloatField,
-    ForeignKey,
-    IntegerField,
-    ManyToManyField,
-    TextField,
-)
-from iam.models import FolderMixin
-from django.db.models import Count, Q
-from django.utils.functional import cached_property
 
 
 class BusinessImpactAnalysis(Assessment):
@@ -31,6 +36,37 @@ class BusinessImpactAnalysis(Assessment):
     @cached_property
     def parsed_matrix(self):
         return self.risk_matrix.parse_json_translated()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            super().save(*args, **kwargs)
+            return
+
+        old_matrix_id = (
+            BusinessImpactAnalysis.objects.filter(pk=self.pk)
+            .values_list("risk_matrix_id", flat=True)
+            .first()
+        )
+
+        matrix_changed = old_matrix_id != self.risk_matrix_id
+
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+
+            if matrix_changed:
+                impacts = self.risk_matrix.impact
+                min_impact = 0
+                max_impact = len(impacts) - 1 if impacts else 0
+
+                EscalationThreshold.objects.filter(
+                    asset_assessment__bia=self,
+                    quali_impact__gte=0,
+                ).update(
+                    quali_impact=Least(
+                        Greatest(F("quali_impact"), min_impact),
+                        max_impact,
+                    )
+                )
 
     def metrics(self):
         qs = AssetAssessment.objects.filter(bia=self).aggregate(
@@ -236,11 +272,13 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
                 "hexcolor": "#f9fafb",
             }
         risk_matrix = parsed_matrix
-        if not risk_matrix["impact"][impact].get("hexcolor"):
-            risk_matrix["impact"][impact]["hexcolor"] = "#f9fafb"
+        max_index = len(risk_matrix["impact"]) - 1
+        clamped = min(impact, max_index)
+        if not risk_matrix["impact"][clamped].get("hexcolor"):
+            risk_matrix["impact"][clamped]["hexcolor"] = "#f9fafb"
         return {
-            **risk_matrix["impact"][impact],
-            "value": impact,
+            **risk_matrix["impact"][clamped],
+            "value": clamped,
         }
 
     @property
@@ -256,3 +294,18 @@ class EscalationThreshold(AbstractBaseModel, FolderMixin):
             "description": raw["description"],
             "hexcolor": raw["hexcolor"],
         }
+
+
+common_exclude = ["created_at", "updated_at"]
+auditlog.register(
+    AssetAssessment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    BusinessImpactAnalysis,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    EscalationThreshold,
+    exclude_fields=common_exclude,
+)

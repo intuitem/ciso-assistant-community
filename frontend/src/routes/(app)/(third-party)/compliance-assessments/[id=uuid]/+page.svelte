@@ -10,7 +10,7 @@
 
 	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
 
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	import {} from '@skeletonlabs/skeleton-svelte';
 	import type { ActionData, PageData } from './$types';
@@ -20,10 +20,15 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 
-	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
+	import {
+		complianceResultColorMap,
+		complianceStatusColorMap,
+		extendedResultColorMap
+	} from '$lib/utils/constants';
 
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
-	import { URL_MODEL_MAP } from '$lib/utils/crud';
+	import RingProgress from '$lib/components/DataViz/RingProgress.svelte';
+	import { URL_MODEL_MAP, getModelInfo } from '$lib/utils/crud';
 	import type { Node } from './types';
 
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -33,11 +38,13 @@
 
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { displayScoreColor, darkenColor } from '$lib/utils/helpers';
+	import { displayScoreColor, darkenColor, getScoreHexColor } from '$lib/utils/helpers';
 	import { auditFiltersStore, expandedNodesState } from '$lib/utils/stores';
 	import { derived } from 'svelte/store';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 
 	interface Props {
 		data: PageData;
@@ -46,13 +53,15 @@
 
 	let { data, form }: Props = $props();
 
+	const compliance_assessment = $derived(data.compliance_assessment);
+
 	const user = page.data.user;
 	const model = URL_MODEL_MAP['compliance-assessments'];
 	const canEditObject: boolean = canPerformAction({
 		user,
 		action: 'change',
 		model: model.name,
-		domain: data.compliance_assessment.folder.id
+		domain: compliance_assessment.folder.id
 	});
 	const requirementAssessmentModel = URL_MODEL_MAP['requirement-assessments'];
 	const canEditRequirementAssessment: boolean =
@@ -65,6 +74,10 @@
 		});
 
 	const has_threats = data.threats.total_unique_threats > 0;
+
+	const objectsNotVisibleLabel = (count: number): string => {
+		return m.objectsNotVisible({ count });
+	};
 
 	let threatDialogOpen = $state(false);
 	let dialogElement = $state();
@@ -121,13 +134,15 @@
 			resultCounts[node.status] = (resultCounts[node.status] || 0) + 1;
 		}
 		if (node.is_scored && node.assessable && node.result !== 'not_applicable') {
+			const weight = node.weight || 1;
 			resultCounts['scored'] = (resultCounts['scored'] || 0) + 1;
+			resultCounts['total_weight'] = (resultCounts['total_weight'] || 0) + weight;
 			const nodeDocumentationScore = data.compliance_assessment.show_documentation_score
 				? node.documentation_score
 				: 0;
 			resultCounts['total_documentation_score'] =
-				(resultCounts['total_documentation_score'] || 0) + nodeDocumentationScore;
-			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + node.score;
+				(resultCounts['total_documentation_score'] || 0) + (nodeDocumentationScore || 0) * weight;
+			resultCounts['total_score'] = (resultCounts['total_score'] || 0) + (node.score || 0) * weight;
 		}
 
 		if (node.children && Object.keys(node.children).length > 0) {
@@ -147,12 +162,14 @@
 	// reactive values that update whenever auditFiltersStore changes
 	let selectedStatus = $state([]);
 	let selectedResults = $state([]);
+	let selectedExtendedResults = $state([]);
 	let displayOnlyAssessableNodes = $state(false);
 	$effect(
 		() =>
 			({
 				selectedStatus = [],
 				selectedResults = [],
+				selectedExtendedResults = [],
 				displayOnlyAssessableNodes = false
 			} = $currentFilters)
 	);
@@ -175,13 +192,20 @@
 		auditFiltersStore.setResults(page.params.id, selectedResults);
 	}
 
+	function toggleExtendedResult(extendedResult) {
+		selectedExtendedResults = toggleItem(extendedResult, selectedExtendedResults);
+		auditFiltersStore.setExtendedResults(page.params.id, selectedExtendedResults);
+	}
+
 	function isNodeHidden(node: Node, displayOnlyAssessableNodes: boolean): boolean {
 		const hasAssessableChildren = Object.keys(node.children || {}).length > 0;
 		return (
 			(displayOnlyAssessableNodes && !node.assessable && !hasAssessableChildren) ||
 			(node.assessable &&
 				((selectedStatus.length > 0 && !selectedStatus.includes(node.status)) ||
-					(selectedResults.length > 0 && !selectedResults.includes(node.result))))
+					(selectedResults.length > 0 && !selectedResults.includes(node.result)) ||
+					(selectedExtendedResults.length > 0 &&
+						!selectedExtendedResults.includes(node.extended_result))))
 		);
 	}
 	function transformToTreeView(nodes: Node[], hasParentNode: boolean = false) {
@@ -197,6 +221,7 @@
 					canEditRequirementAssessment,
 					hasParentNode,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
+					scoreCalculationMethod: data.compliance_assessment.score_calculation_method,
 					hidden,
 					selectedStatus
 				},
@@ -211,7 +236,11 @@
 					documentationScore: node.documentation_score,
 					isScored: node.is_scored,
 					showDocumentationScore: data.compliance_assessment.show_documentation_score,
-					max_score: node.max_score
+					max_score: node.max_score,
+					progressStatusEnabled: data.compliance_assessment.progress_status_enabled,
+					extendedResultEnabled: data.compliance_assessment.extended_result_enabled,
+					extendedResult: node.extended_result,
+					extendedResultColor: extendedResultColorMap[node.extended_result]
 				},
 				children: node.children ? transformToTreeView(Object.entries(node.children), true) : []
 			};
@@ -289,6 +318,27 @@
 		};
 		modalStore.trigger(modal);
 	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: getModelInfo('validation-flows'),
+				formAction: '/validation-flows?/create',
+				invalidateAll: true,
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
 	let syncingToActionsIsLoading = $state(false);
 	async function modalConfirmSyncToActions(
 		id: string,
@@ -338,7 +388,37 @@
 	}
 	let createAppliedControlsLoading = $state(false);
 
-	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
+		let previewItems: string[] = [];
+		try {
+			const previewResponse = await fetch(
+				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
+			);
+			if (previewResponse.ok) {
+				const previewData: any[] = await previewResponse.json();
+				previewItems = previewData.map(
+					(control) =>
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				);
+			} else {
+				throw new Error(await previewResponse.text());
+			}
+		} catch (error) {
+			console.error('Unable to fetch suggested controls preview', error);
+			previewItems = data.compliance_assessment.framework.reference_controls.map(
+				(control) =>
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					''
+			);
+		}
+
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -349,7 +429,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: data.compliance_assessment.framework.reference_controls,
+					items: previewItems,
 					message: m.theFollowingControlsWillBeAddedColon()
 				}
 			}
@@ -360,7 +440,7 @@
 			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: data.compliance_assessment.framework.reference_controls.length
+				count: previewItems.length
 			}),
 			response: (r: boolean) => {
 				createAppliedControlsLoading = r;
@@ -395,8 +475,22 @@
 	let filterCount = $derived(
 		(selectedStatus.length > 0 ? 1 : 0) +
 			(selectedResults.length > 0 ? 1 : 0) +
+			(selectedExtendedResults.length > 0 ? 1 : 0) +
 			(displayOnlyAssessableNodes ? 1 : 0)
 	);
+
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+		for (const [key, value] of Object.entries(data.compliance_assessment)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
@@ -411,22 +505,31 @@
 			</div>
 		</div>
 	{/if}
+
 	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
-					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'assets', 'evidences', 'campaign'];
+					const fieldsToShow = ['ref_id', 'name', 'description', 'version', 'folder', 'perimeter', 'framework', 'authors', 'reviewers', 'status', 'selected_implementation_groups', 'campaign'];
 					if (!fieldsToShow.includes(key)) return false;
 					// Hide selected_implementation_groups if framework doesn't support implementation groups
 					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
 					return true;
 				}) as [key, value]}
+					{@const isUpdatableFramework = key === 'framework' && value.has_update}
 					<div class="flex flex-col">
 						<div
 							class="text-sm font-medium text-gray-800 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
+							{#if isUpdatableFramework}
+								<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"
+								></i>
+							{/if}
 							{safeTranslate(key)}
+							{#if isUpdatableFramework}
+								({m.updateAvailable()})
+							{/if}
 						</div>
 						<ul class="text-sm">
 							<li
@@ -435,26 +538,43 @@
 							>
 								{#if value}
 									{#if Array.isArray(value)}
-										<ul>
-											{#each value as val}
-												<li>
-													{#if val.str && val.id}
-														{@const itemHref = `/${
-															URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
-																(item) => item.field === key
-															)?.urlModel
-														}/${val.id}`}
-														{#if !page.data.user.is_third_party}
-															<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
-														{:else}
+										{@const hiddenCount = countMasked(value)}
+										{@const visibleValues = value.filter((item) => !isMaskedPlaceholder(item))}
+										{#if visibleValues.length > 0}
+											<ul>
+												{#each visibleValues as val}
+													<li>
+														{#if val.str && val.id}
+															{@const itemHref = `/${
+																URL_MODEL_MAP[data.URLModel]['foreignKeyFields']?.find(
+																	(item) => item.field === key
+																)?.urlModel
+															}/${val.id}`}
+															{#if !page.data.user.is_third_party}
+																<Anchor href={itemHref} class="anchor">{val.str}</Anchor>
+															{:else}
+																{val.str}
+															{/if}
+														{:else if val.str}
 															{val.str}
+														{:else}
+															{safeTranslate(val)}
 														{/if}
-													{:else}
-														{val}
-													{/if}
-												</li>
-											{/each}
-										</ul>
+													</li>
+												{/each}
+											</ul>
+											{#if hiddenCount > 0}
+												<p class="mt-1 text-xs text-yellow-700">
+													{objectsNotVisibleLabel(hiddenCount)}
+												</p>
+											{/if}
+										{:else if hiddenCount > 0}
+											<p class="text-xs text-yellow-700">
+												{objectsNotVisibleLabel(hiddenCount)}
+											</p>
+										{:else}
+											--
+										{/if}
 									{:else if value.str && value.id}
 										{@const itemHref = `/${
 											URL_MODEL_MAP['compliance-assessments']['foreignKeyFields']?.find(
@@ -466,6 +586,8 @@
 										{:else}
 											{value.str}
 										{/if}
+									{:else if isMaskedPlaceholder(value)}
+										<p class="text-xs text-yellow-700">{objectsNotVisibleLabel(1)}</p>
 									{:else if key === 'description'}
 										<MarkdownRenderer content={value} />
 									{:else}
@@ -482,27 +604,27 @@
 					<div class="font-medium">{m.createdAt()}</div>
 					{formatDateOrDateTime(data.compliance_assessment.created_at, getLocale())}
 				</div>
+				{#if page.data?.featureflags?.validation_flows}
+					{#key compliance_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={compliance_assessment.validation_flows} />
+					{/key}
+				{/if}
 			</div>
 			{#key compliance_assessment_donut_values}
-				<div class="flex w-1/3 relative">
-					{#if data.global_score.score >= 0}
-						<div class="absolute font-bold text-sm">{m.maturity()}</div>
-						<div class="flex justify-center items-center w-full">
-							<ProgressRing
-								strokeWidth="20px"
-								meterStroke={displayScoreColor(
-									data.global_score.score,
-									data.global_score.max_score
-								)}
-								value={(data.global_score.score * 100) / data.global_score.max_score}
-								size="size-52"
-							>
-								<p class="font-semibold text-4xl">{data.global_score.score}</p>
-							</ProgressRing>
-						</div>
-					{/if}
-				</div>
-				<div class="w-1/3">
+				{#if data.global_score && data.global_score.score >= 0}
+					<div class="w-1/4">
+						<RingProgress
+							name="global_maturity"
+							value={data.global_score.score}
+							max={data.global_score.total_max_score}
+							color={getScoreHexColor(data.global_score.score, data.global_score.total_max_score)}
+							strokeWidth={35}
+							fontSize={36}
+							title={m.maturity()}
+						/>
+					</div>
+				{/if}
+				<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
 					<DonutChart
 						s_label="Result"
 						name="compliance_result"
@@ -512,20 +634,39 @@
 						colors={compliance_assessment_donut_values.result.values.map(
 							(object) => object.itemStyle.color
 						)}
+						showPercentage={true}
 					/>
 				</div>
-				<div class="w-1/3">
-					<DonutChart
-						s_label="Status"
-						name="compliance_status"
-						title={m.progress()}
-						orientation="horizontal"
-						values={compliance_assessment_donut_values.status.values}
-						colors={compliance_assessment_donut_values.status.values.map(
-							(object) => object.itemStyle.color
-						)}
-					/>
-				</div>
+				{#if data.compliance_assessment.extended_result_enabled && compliance_assessment_donut_values.extended_result?.values?.length > 0}
+					<div class="w-1/4">
+						<DonutChart
+							s_label="Extended Result"
+							name="compliance_extended_result"
+							title={m.extendedResult()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.extended_result.values}
+							colors={compliance_assessment_donut_values.extended_result.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
+				{#if data.compliance_assessment.progress_status_enabled}
+					<div class={data.compliance_assessment.extended_result_enabled ? 'w-1/4' : 'w-1/3'}>
+						<DonutChart
+							s_label="Status"
+							name="compliance_status"
+							title={m.progress()}
+							orientation="horizontal"
+							values={compliance_assessment_donut_values.status.values}
+							colors={compliance_assessment_donut_values.status.values.map(
+								(object) => object.itemStyle.color
+							)}
+							showPercentage={true}
+						/>
+					</div>
+				{/if}
 			{/key}
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
@@ -576,6 +717,12 @@
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
+											.id}/action-plan/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<a
+										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/pdf"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
 										>... {m.asPDF()}</a
@@ -599,6 +746,7 @@
 						href={`${page.url.pathname}/action-plan`}
 						class="btn preset-filled-primary-500 h-fit"
 						breadcrumbAction="push"
+						data-testid="action-plan-button"
 						><i class="fa-solid fa-heart-pulse mr-2"></i>{m.actionPlan()}</Anchor
 					>
 					<Anchor
@@ -614,6 +762,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
 				{/if}
@@ -622,6 +771,7 @@
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
 						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
 				{/if}
@@ -639,16 +789,27 @@
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-red-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 					</button>
+					{#if page.data?.featureflags?.validation_flows}
+						<button
+							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							onclick={() => modalRequestValidation()}
+							data-testid="request-validation-button"
+						>
+							<i class="fa-solid fa-check-circle mr-2"></i>
+							{m.requestValidation()}
+						</button>
+					{/if}
 				{/if}
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
 						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
 								data.compliance_assessment.id,
@@ -701,12 +862,12 @@
 				{/if}
 				{#if has_threats && !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-amber-500 to-orange-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
 						onclick={openThreatsDialog}
 					>
 						<div class="flex items-center space-x-2">
-							<i class="fa-solid fa-triangle-exclamation text-red-700"></i>
-							<span class="text-red-700 font-bold">{data.threats.total_unique_threats}</span>
+							<i class="fa-solid fa-triangle-exclamation text-white"></i>
+							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
 							<span>{m.potentialThreats()}</span>
 						</div>
 					</button>
@@ -764,25 +925,50 @@
 							{/each}
 						</div>
 					</div>
-					<div>
-						<span class="text-sm font-bold">{m.status()}</span>
-						<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-							{#each Object.entries(complianceStatusColorMap) as [status, color]}
-								<button
-									type="button"
-									onclick={() => toggleStatus(status)}
-									class="px-2 py-1 rounded-md font-bold"
-									style="background-color: {selectedStatus.includes(status)
-										? color + '44'
-										: 'grey'}; color: {selectedStatus.includes(status)
-										? darkenColor(color, 0.3)
-										: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-								>
-									{safeTranslate(status)}
-								</button>
-							{/each}
+					{#if data.compliance_assessment.progress_status_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.status()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+									<button
+										type="button"
+										onclick={() => toggleStatus(status)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedStatus.includes(status)
+											? color + '44'
+											: 'grey'}; color: {selectedStatus.includes(status)
+											? darkenColor(color, 0.3)
+											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+									>
+										{safeTranslate(status)}
+									</button>
+								{/each}
+							</div>
 						</div>
-					</div>
+					{/if}
+					{#if data.compliance_assessment.extended_result_enabled}
+						<div>
+							<span class="text-sm font-bold">{m.extendedResult()}</span>
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+									<button
+										type="button"
+										onclick={() => toggleExtendedResult(extendedResult)}
+										class="px-2 py-1 rounded-md font-bold"
+										style="background-color: {selectedExtendedResults.includes(extendedResult)
+											? color
+											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+											extendedResult
+										)
+											? 1
+											: 0.3};"
+									>
+										{safeTranslate(extendedResult)}
+									</button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 					<div>
 						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
 						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
@@ -813,7 +999,7 @@
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
 		{#key data}
-			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults}
+			{#key displayOnlyAssessableNodes || selectedStatus || selectedResults || selectedExtendedResults}
 				<RecursiveTreeView
 					nodes={transformToTreeView(Object.entries(tree))}
 					bind:expandedNodes

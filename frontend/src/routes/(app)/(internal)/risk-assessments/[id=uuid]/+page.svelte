@@ -25,6 +25,8 @@
 	import { defaults, superForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import z from 'zod';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	let { data, form } = $props();
 
@@ -32,7 +34,7 @@
 
 	const showRisks = true;
 	const useBubbles = data.useBubbles;
-	const risk_assessment = data.risk_assessment;
+	const risk_assessment = $derived(data.risk_assessment);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -80,6 +82,29 @@
 			component: modalComponent,
 			// Data
 			title: m.duplicateRiskAssessment()
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
 		};
 		modalStore.trigger(modal);
 	}
@@ -198,7 +223,11 @@
 		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
-					{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{#if risk_assessment.perimeter}
+						{risk_assessment.perimeter.str}/{risk_assessment.name} - {risk_assessment.version}
+					{:else}
+						{risk_assessment.folder.str}/{risk_assessment.name} - {risk_assessment.version}
+					{/if}
 				</div>
 				<br />
 				<div class="text-sm">
@@ -220,6 +249,14 @@
 							</ul>
 						</li>
 						<li>
+							<span class="font-semibold">{m.reviewers()}:</span>
+							<ul>
+								{#each risk_assessment.reviewers as reviewer}
+									<li>{reviewer.str}</li>
+								{/each}
+							</ul>
+						</li>
+						<li>
 							<span class="font-semibold">{m.createdAt()}:</span>
 							{new Date(risk_assessment.created_at).toLocaleString(getLocale())}
 						</li>
@@ -229,6 +266,12 @@
 						</li>
 					</ul>
 				</div>
+				<br />
+				{#if page.data?.featureflags?.validation_flows}
+					{#key risk_assessment.validation_flows}
+						<ValidationFlowsSection validationFlows={risk_assessment.validation_flows} />
+					{/key}
+				{/if}
 			</div>
 			<div class="container w-2/3">
 				<div class="text-sm">
@@ -281,8 +324,12 @@
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/csv"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+								>
+								<a
+									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asCSV()}</a
+									>... {m.asXLSX()}</a
 								>
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
 								<a
@@ -301,7 +348,7 @@
 						<Anchor
 							href="/risk-assessments/{risk_assessment.id}/edit?next=/risk-assessments/{risk_assessment.id}"
 							label={m.edit()}
-							class="btn preset-filled-primary-500"
+							class="btn preset-filled-primary-500 w-full"
 							data-testid="edit-button"
 						>
 							<i class="fa-solid fa-edit mr-2"></i>
@@ -354,6 +401,16 @@
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
+				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
+					<button
+						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
+						onclick={() => modalRequestValidation()}
+						data-testid="request-validation-button"
+					>
+						<i class="fa-solid fa-check-circle mr-2"></i>
+						{m.requestValidation()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
