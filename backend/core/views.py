@@ -910,21 +910,46 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
-    def _validate_folder_change(self, request: Request, instance) -> None:
+    def _validate_folder_change(
+        self, request: Request, instance, folder_value=None
+    ) -> None:
         if not hasattr(instance, "folder"):
             return
-        if "folder" not in request.data:
-            return
-        folder_value = request.data.get("folder")
-        if isinstance(folder_value, list):
-            if not folder_value:
+        if folder_value is None:
+            if "folder" not in request.data:
                 return
-            folder_value = folder_value[0]
-        if isinstance(folder_value, dict):
-            folder_value = folder_value.get("id")
+            folder_value = request.data.get("folder")
+            if isinstance(folder_value, list):
+                if not folder_value:
+                    return
+                folder_value = folder_value[0]
+            if isinstance(folder_value, dict):
+                folder_value = folder_value.get("id")
         if not folder_value:
             return
-        self._check_folder_move_permission(request.user, instance, folder_value)
+        try:
+            target_id = UUID(str(folder_value))
+        except (TypeError, ValueError):
+            return
+        if instance.folder_id and instance.folder_id == target_id:
+            return
+        target_folder = Folder.objects.filter(id=target_id).first()
+        if not target_folder:
+            return  # serializer will catch invalid FK
+        model = self.model or instance.__class__
+        perm = Permission.objects.get(
+            codename=f"add_{model._meta.model_name}",
+            content_type__app_label=model._meta.app_label,
+            content_type__model=model._meta.model_name,
+        )
+        if not RoleAssignment.is_access_allowed(
+            user=request.user, perm=perm, folder=target_folder
+        ):
+            raise PermissionDenied(
+                {
+                    "folder": "You do not have permission to create objects in this folder"
+                }
+            )
 
     def _validate_parent_field_change(self, request: Request, instance) -> None:
         """Block updates to immutable parent fields on indirect-parent models."""
@@ -1133,8 +1158,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     # Build data dict for the serializer
                     if action_type == "change_folder":
                         data = {"folder": value}
-                        # Validate folder move permission (mirrors _validate_folder_change)
-                        self._check_folder_move_permission(request.user, obj, value)
+                        self._validate_folder_change(request, obj, folder_value=value)
                     elif action_type == "change_m2m":
                         actor_ids = value if isinstance(value, list) else [value]
                         data = {field_name: actor_ids}
@@ -1183,38 +1207,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                 )
 
         return Response({"succeeded": succeeded, "failed": failed})
-
-    def _check_folder_move_permission(self, user, instance, folder_id):
-        """
-        Check that the user has add permission on the target folder.
-        Raises PermissionDenied if not allowed.
-        Mirrors the permission logic from _validate_folder_change.
-        """
-        if not hasattr(instance, "folder") or not folder_id:
-            return
-        try:
-            target_id = UUID(str(folder_id))
-        except (TypeError, ValueError):
-            return
-        if instance.folder_id and instance.folder_id == target_id:
-            return
-        target_folder = Folder.objects.filter(id=target_id).first()
-        if not target_folder:
-            return  # serializer will catch invalid FK
-        model = self.model or instance.__class__
-        perm = Permission.objects.get(
-            codename=f"add_{model._meta.model_name}",
-            content_type__app_label=model._meta.app_label,
-            content_type__model=model._meta.model_name,
-        )
-        if not RoleAssignment.is_access_allowed(
-            user=user, perm=perm, folder=target_folder
-        ):
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
