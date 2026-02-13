@@ -7467,6 +7467,17 @@ def get_metrics_view(request):
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
+def get_audits_metrics_view(request):
+    """
+    API endpoint that returns the expensive audit metrics (progress avg + audits stats).
+    Split from get_metrics to allow independent streaming.
+    """
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_audits_metrics(request.user, folder_id)})
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
 def get_combined_assessments_status_view(request):
     """
     API endpoint that returns combined assessment counts per status

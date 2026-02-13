@@ -1960,7 +1960,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations_in_object(self.json_definition)
 
     @property
-    def grid(self) -> list:
+    def grid(self) -> list[list]:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:

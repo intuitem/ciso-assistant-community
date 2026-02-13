@@ -50,7 +50,7 @@
 	/* (all other styles here...) */
 	html,
 	body {
-		@apply h-auto overflow-auto;
+		@apply h-auto;
 	}
 	.capitalize-first:first-letter {
 		@apply capitalize;
