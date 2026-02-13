@@ -975,6 +975,157 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         self._process_request_data(request)
         return super().destroy(request, *args, **kwargs)
 
+    @action(detail=False, methods=["post"], url_path="batch-action")
+    def batch_action(self, request):
+        """
+        Perform a batch action on multiple objects.
+        Uses the IAM-filtered queryset and serializers to respect permissions
+        and validation, mirroring the standard partial_update / destroy flows.
+
+        Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
+                   "ids": [...], "field": "<field_name>", "value": ... }
+        """
+        action_type = request.data.get("action")
+        ids = request.data.get("ids", [])
+        value = request.data.get("value")
+        field_name = request.data.get("field")
+
+        valid_actions = ("delete", "change_field", "change_m2m", "change_folder")
+        if action_type not in valid_actions:
+            return Response(
+                {"error": "Invalid action type"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not ids:
+            return Response(
+                {"error": "No ids provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        BATCH_SIZE_LIMIT = 100
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Use the IAM-filtered queryset (same as get_object() in update/destroy)
+        queryset = self.get_queryset()
+        objects_by_id = {str(o.id): o for o in queryset.filter(id__in=ids)}
+
+        # Resolve the required permission for the action type
+        perm_codename = (
+            f"delete_{self.model._meta.model_name}"
+            if action_type == "delete"
+            else f"change_{self.model._meta.model_name}"
+        )
+        required_perm = Permission.objects.get(codename=perm_codename)
+
+        # Resolve the write serializer once for all update operations
+        if action_type != "delete":
+            serializer_class = self.get_serializer_class(action="partial_update")
+
+        succeeded = []
+        failed = []
+
+        for obj_id in ids:
+            obj = objects_by_id.get(str(obj_id))
+            if obj is None:
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "error": "Object not found or access denied",
+                    }
+                )
+                continue
+
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=required_perm,
+                folder=Folder.get_folder(obj),
+            ):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Permission denied",
+                    }
+                )
+                continue
+
+            try:
+                if action_type == "delete":
+                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Cannot delete builtin object",
+                            }
+                        )
+                        continue
+                    try:
+                        dispatch_webhook_event(obj, "deleted")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch delete", exc_info=True
+                        )
+                    obj.delete()
+
+                else:
+                    # Build data dict for the serializer
+                    if action_type == "change_folder":
+                        data = {"folder": value}
+                    elif action_type == "change_m2m":
+                        actor_ids = value if isinstance(value, list) else [value]
+                        data = {field_name: actor_ids}
+                    else:  # change_field
+                        data = {field_name: value}
+
+                    # Go through the serializer for validation + save,
+                    # and perform_update for webhook dispatch
+                    serializer = serializer_class(
+                        obj,
+                        data=data,
+                        partial=True,
+                        context=self.get_serializer_context(),
+                    )
+                    if not serializer.is_valid():
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": serializer.errors,
+                            }
+                        )
+                        continue
+                    self.perform_update(serializer)
+
+                succeeded.append({"id": str(obj_id), "name": str(obj)})
+
+            except PermissionDenied as e:
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": e.detail
+                        if hasattr(e, "detail")
+                        else "Permission denied",
+                    }
+                )
+            except Exception:
+                logger.error("Batch action failed for %s", obj_id, exc_info=True)
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Unexpected error",
+                    }
+                )
+
+        return Response({"succeeded": succeeded, "failed": failed})
+
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
         """
