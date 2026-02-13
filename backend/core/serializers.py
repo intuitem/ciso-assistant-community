@@ -93,6 +93,14 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 }
             )
 
+    def _ensure_immutable(self, field_name: str, value) -> None:
+        """Raise PermissionDenied if a field's value is changing on update."""
+        if self.instance is None:
+            return
+        current_id = getattr(self.instance, f"{field_name}_id", None)
+        if current_id and str(value.id) != str(current_id):
+            raise PermissionDenied({field_name: "This field is immutable"})
+
     def validate_folder(self, folder: Folder) -> Folder:
         """Enforce permission when an object is moved to a different folder."""
         if (
@@ -765,12 +773,7 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
     )
 
     def validate_risk_assessment(self, value):
-        if (
-            self.instance is not None
-            and self.instance.risk_assessment_id
-            and str(value.id) != str(self.instance.risk_assessment_id)
-        ):
-            raise PermissionDenied({"risk_assessment": "This field is immutable"})
+        self._ensure_immutable("risk_assessment", value)
         return value
 
     def validate(self, attrs):

@@ -1,6 +1,5 @@
 from django.db import transaction
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import ComplianceAssessment, Framework
 
@@ -286,12 +285,7 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
 
     def validate_entity(self, value):
-        if (
-            self.instance is not None
-            and self.instance.entity_id
-            and str(value.id) != str(self.instance.entity_id)
-        ):
-            raise PermissionDenied({"entity": "This field is immutable"})
+        self._ensure_immutable("entity", value)
         return value
 
     def _create_or_update_user(self, instance, user):
@@ -369,12 +363,7 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 class SolutionWriteSerializer(BaseModelSerializer):
     def validate_provider_entity(self, value):
-        if (
-            self.instance is not None
-            and self.instance.provider_entity_id
-            and str(value.id) != str(self.instance.provider_entity_id)
-        ):
-            raise PermissionDenied({"provider_entity": "This field is immutable"})
+        self._ensure_immutable("provider_entity", value)
         return value
 
     def to_internal_value(self, data):
