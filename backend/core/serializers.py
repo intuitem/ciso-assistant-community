@@ -64,7 +64,6 @@ class SerializerFactory:
 
 class BaseModelSerializer(serializers.ModelSerializer):
     FLAGGED_FIELDS: dict[str, str] = {}
-    IMMUTABLE_FIELDS: list[str] = []
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -107,21 +106,6 @@ class BaseModelSerializer(serializers.ModelSerializer):
                 )
             self._check_object_perm(self.instance, "add", folder=folder)
         return folder
-
-    def validate(self, attrs):
-        """Block changes to fields declared in IMMUTABLE_FIELDS on update."""
-        if self.instance is not None and self.IMMUTABLE_FIELDS:
-            for field_name in self.IMMUTABLE_FIELDS:
-                if field_name not in attrs:
-                    continue
-                current_id = getattr(self.instance, f"{field_name}_id", None)
-                new_value = attrs[field_name]
-                new_id = (
-                    new_value.id if isinstance(new_value, models.Model) else new_value
-                )
-                if current_id and str(current_id) != str(new_id):
-                    raise PermissionDenied({field_name: "This field is immutable"})
-        return super().validate(attrs)
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
         self._check_object_perm(instance, "change")
@@ -775,11 +759,19 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
     # Note: Inherent risk fields are always accepted for writing,
     # but only displayed when inherent_risk feature flag is enabled
     FLAGGED_FIELDS = {}
-    IMMUTABLE_FIELDS = ["risk_assessment"]
 
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
     )
+
+    def validate_risk_assessment(self, value):
+        if (
+            self.instance is not None
+            and self.instance.risk_assessment_id
+            and str(value.id) != str(self.instance.risk_assessment_id)
+        ):
+            raise PermissionDenied({"risk_assessment": "This field is immutable"})
+        return value
 
     def validate(self, attrs):
         if (
