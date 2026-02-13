@@ -257,11 +257,7 @@
 						{#snippet content()}
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
+									<div class="py-2"></div>
 									{#if model.table}
 										<ModelTable
 											source={model.table}
