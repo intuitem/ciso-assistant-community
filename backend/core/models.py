@@ -7074,7 +7074,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     def trigger_compliance_assessment_update_hooks(self):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
-        self.compliance_assessment.upsert_daily_metrics()
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)
