@@ -1015,13 +1015,12 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         objects_by_id = {str(o.id): o for o in queryset.filter(id__in=ids)}
 
         # Resolve the required permission for the action type
-        # DELETE ME AFTER
-        # perm_codename = (
-        #     f"delete_{self.model._meta.model_name}"
-        #     if action_type == "delete"
-        #     else f"change_{self.model._meta.model_name}"
-        # )
-        # required_perm = Permission.objects.get(codename=perm_codename)
+        perm_codename = (
+            f"delete_{self.model._meta.model_name}"
+            if action_type == "delete"
+            else f"change_{self.model._meta.model_name}"
+        )
+        required_perm = Permission.objects.get(codename=perm_codename)
 
         # Resolve the write serializer once for all update operations
         if action_type != "delete":
@@ -1040,21 +1039,20 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     }
                 )
                 continue
-            # DELETE ME AFTER
 
-            # if not RoleAssignment.is_access_allowed(
-            #     user=request.user,
-            #     perm=required_perm,
-            #     folder=Folder.get_folder(obj),
-            # ):
-            #     failed.append(
-            #         {
-            #             "id": str(obj_id),
-            #             "name": str(obj),
-            #             "error": "Permission denied",
-            #         }
-            #     )
-            #     continue
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=required_perm,
+                folder=Folder.get_folder(obj),
+            ):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Permission denied",
+                    }
+                )
+                continue
 
             try:
                 if action_type == "delete":
