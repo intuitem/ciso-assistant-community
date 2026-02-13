@@ -43,8 +43,10 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
-	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
+	const requirementHashmap = $derived(
+		Object.fromEntries(
+			data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
+		)
 	);
 
 	// --- Assessable items only (for prev/next navigation) ---
@@ -220,12 +222,15 @@
 
 	let accordionItems: Record<string, ['' | 'observation' | 'evidence']> = $state(
 		// svelte-ignore state_referenced_locally
-		requirementAssessments.reduce((acc, requirementAssessment) => {
-			return {
-				...acc,
-				[requirementAssessment.id]: ['']
-			};
-		})
+		requirementAssessments.reduce(
+			(acc, requirementAssessment) => {
+				return {
+					...acc,
+					[requirementAssessment.id]: ['']
+				};
+			},
+			{} as Record<string, ['' | 'observation' | 'evidence']>
+		)
 	);
 
 	// --- Title helper ---
@@ -235,7 +240,7 @@
 			return titleMap.get(requirementAssessment.id);
 		}
 		const requirement =
-			requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment;
+			requirementHashmap[requirementAssessment.requirement?.id ?? requirementAssessment.requirement] ?? requirementAssessment;
 		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
 		titleMap.set(requirementAssessment.id, result);
 		return result;
@@ -389,7 +394,7 @@
 		{#if currentItem}
 			{@const requirementAssessment = currentItem}
 			{@const requirement =
-				requirementHashmap[requirementAssessment.requirement] ?? requirementAssessment}
+				requirementHashmap[requirementAssessment.requirement?.id ?? requirementAssessment.requirement] ?? requirementAssessment}
 			<div
 				id="current-requirement"
 				class="card bg-white shadow-lg px-6 py-4 flex flex-col space-y-4"
@@ -407,33 +412,33 @@
 				</div>
 
 				<!-- Description -->
-				{#if requirementAssessment.requirement.description}
+				{#if requirement.description}
 					<div class="card w-full font-light text-lg p-4 preset-tonal-primary">
 						<h4 class="font-semibold text-base mb-1">
 							<i class="fa-solid fa-file-lines mr-2"></i>{m.description()}
 						</h4>
-						<MarkdownRenderer content={requirementAssessment.requirement.description} />
+						<MarkdownRenderer content={requirement.description} />
 					</div>
 				{/if}
 
 				<!-- Additional info (annotation, typical evidence) -->
-				{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence}
+				{#if requirement.annotation || requirement.typical_evidence}
 					<div class="card p-4 preset-tonal-secondary text-sm flex flex-col space-y-2 w-full">
 						<h4 class="font-semibold text-base">
 							<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
 						</h4>
-						{#if requirementAssessment.requirement.annotation}
+						{#if requirement.annotation}
 							<div>
 								<p class="font-medium"><i class="fa-solid fa-pencil mr-1"></i>{m.annotation()}</p>
-								<MarkdownRenderer content={requirementAssessment.requirement.annotation} />
+								<MarkdownRenderer content={requirement.annotation} />
 							</div>
 						{/if}
-						{#if requirementAssessment.requirement.typical_evidence}
+						{#if requirement.typical_evidence}
 							<div>
 								<p class="font-medium">
 									<i class="fa-solid fa-pencil mr-1"></i>{m.typicalEvidence()}
 								</p>
-								<MarkdownRenderer content={requirementAssessment.requirement.typical_evidence} />
+								<MarkdownRenderer content={requirement.typical_evidence} />
 							</div>
 						{/if}
 					</div>
@@ -449,10 +454,10 @@
 							method="post"
 						>
 							<!-- Questions (if present) -->
-							{#if requirementAssessment.requirement.questions != null && Object.keys(requirementAssessment.requirement.questions).length !== 0}
+							{#if requirement.questions != null && Object.keys(requirement.questions).length !== 0}
 								<div class="flex flex-col w-full space-y-2">
 									<Question
-										questions={requirementAssessment.requirement.questions}
+										questions={requirement.questions}
 										initialValue={requirementAssessment.answers}
 										field="answers"
 										onChange={(urn, newAnswer) => {
@@ -468,7 +473,7 @@
 								<p class="flex items-center font-semibold text-purple-600 italic">
 									{m.result()}
 								</p>
-								{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
+								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.compute_result !== undefined))}
 									<span
 										class="badge text-sm font-semibold"
 										style="background-color: {complianceResultColorMap[
@@ -497,7 +502,7 @@
 
 							<!-- Score -->
 							<div class="flex flex-col w-full place-items-center">
-								{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
+								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 									<div class="flex flex-row items-center space-x-4">
 										<span class="font-medium">{m.score()}</span>
 										<ProgressRing
@@ -605,7 +610,7 @@
 											</button>
 										</div>
 										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.applied_controls as ac}
+											{#each requirementAssessment.applied_controls ?? [] as ac}
 												<p class="p-2">
 													<Anchor class="anchor" href="/applied-controls/{ac.id}" label={ac.str}>
 														<i class="fa-solid fa-fire-extinguisher mr-2"></i>{ac.str}
@@ -649,7 +654,7 @@
 											</button>
 										</div>
 										<div class="flex flex-wrap space-x-2 items-center">
-											{#each requirementAssessment.evidences as evidence}
+											{#each requirementAssessment.evidences ?? [] as evidence}
 												<p class="p-2">
 													<Anchor
 														class="anchor"
