@@ -521,7 +521,7 @@
 											size="size-10">{requirementAssessment.score}</ProgressRing
 										>
 									</div>
-								{:else}
+								{:else if requirementAssessment.result !== 'not_applicable'}
 									<Score
 										form={scoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
@@ -536,8 +536,7 @@
 											requirementAssessment.score = newScore;
 											updateScore(requirementAssessment);
 										}}
-										disabled={!requirementAssessment.is_scored ||
-											requirementAssessment.result === 'not_applicable'}
+										disabled={!requirementAssessment.is_scored}
 									>
 										{#snippet left()}
 											<div>
@@ -571,8 +570,7 @@
 												requirementAssessment.documentation_score = newScore;
 												updateScore(requirementAssessment);
 											}}
-											disabled={!requirementAssessment.is_scored ||
-												requirementAssessment.result === 'not_applicable'}
+											disabled={!requirementAssessment.is_scored}
 										/>
 									{/if}
 								{/if}

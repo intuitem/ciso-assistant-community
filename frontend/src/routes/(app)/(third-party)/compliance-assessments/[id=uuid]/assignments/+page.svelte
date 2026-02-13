@@ -666,7 +666,9 @@
 	</div>
 </div>
 
-<svelte:window onkeydown={(e) => showRequirementsModal && e.key === 'Escape' && closeRequirementsModal()} />
+<svelte:window
+	onkeydown={(e) => showRequirementsModal && e.key === 'Escape' && closeRequirementsModal()}
+/>
 
 <!-- Requirements Detail Modal -->
 {#if showRequirementsModal && selectedAssignmentForModal}
