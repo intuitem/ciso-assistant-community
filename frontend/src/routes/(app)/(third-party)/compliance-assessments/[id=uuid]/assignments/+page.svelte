@@ -14,12 +14,15 @@
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import { superForm } from 'sveltekit-superforms';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	interface Props {
 		data: PageData;
 	}
 
 	let { data }: Props = $props();
+
+	const toastStore = getToastStore();
 
 	// Create superForm instance for AutocompleteSelect - keep full result
 	const assignmentSuperForm = superForm(data.assignmentForm, {
@@ -281,11 +284,26 @@
 				// Apply the action result and refresh page data
 				await applyAction(result);
 				await invalidateAll();
+				toastStore.trigger({
+					message: m.assignmentCreated(),
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
 			} else {
 				console.error('Failed to create assignment:', result);
+				toastStore.trigger({
+					message: m.assignmentCreationFailed(),
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
 			}
 		} catch (error) {
 			console.error('Error creating assignment:', error);
+			toastStore.trigger({
+				message: m.assignmentCreationFailed(),
+				background: 'variant-filled-error',
+				timeout: 3000
+			});
 		} finally {
 			isCreating = false;
 		}
@@ -307,11 +325,26 @@
 				// Apply the action result and refresh page data
 				await applyAction(result);
 				await invalidateAll();
+				toastStore.trigger({
+					message: m.assignmentDeleted(),
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
 			} else {
 				console.error('Failed to delete assignment:', result);
+				toastStore.trigger({
+					message: m.assignmentDeletionFailed(),
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
 			}
 		} catch (error) {
 			console.error('Error deleting assignment:', error);
+			toastStore.trigger({
+				message: m.assignmentDeletionFailed(),
+				background: 'variant-filled-error',
+				timeout: 3000
+			});
 		} finally {
 			isDeleting = null;
 		}
@@ -357,11 +390,26 @@
 				cancelEdit();
 				await applyAction(result);
 				await invalidateAll();
+				toastStore.trigger({
+					message: m.assignmentUpdated(),
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
 			} else {
 				console.error('Failed to update assignment:', result);
+				toastStore.trigger({
+					message: m.assignmentUpdateFailed(),
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
 			}
 		} catch (error) {
 			console.error('Error updating assignment:', error);
+			toastStore.trigger({
+				message: m.assignmentUpdateFailed(),
+				background: 'variant-filled-error',
+				timeout: 3000
+			});
 		} finally {
 			isUpdating = false;
 		}
