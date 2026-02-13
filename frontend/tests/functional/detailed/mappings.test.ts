@@ -117,7 +117,9 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			IDAM1Score.value.toString()
 		);
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
 		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
 			'aria-valuenow',
@@ -161,7 +163,9 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			IDAM1Score.value.toString()
 		);
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
 		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
 			'aria-valuenow',
