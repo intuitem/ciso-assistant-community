@@ -89,7 +89,9 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder=folder,
         ):
             raise PermissionDenied(
-                {"folder": f"You do not have permission to {action} objects in this folder"}
+                {
+                    "folder": f"You do not have permission to {action} objects in this folder"
+                }
             )
 
     def validate_folder(self, folder: Folder) -> Folder:
@@ -118,9 +120,7 @@ class BaseModelSerializer(serializers.ModelSerializer):
                     new_value.id if isinstance(new_value, models.Model) else new_value
                 )
                 if current_id and str(current_id) != str(new_id):
-                    raise PermissionDenied(
-                        {field_name: "This field is immutable"}
-                    )
+                    raise PermissionDenied({field_name: "This field is immutable"})
         return super().validate(attrs)
 
     def update(self, instance: models.Model, validated_data: Any) -> models.Model:
