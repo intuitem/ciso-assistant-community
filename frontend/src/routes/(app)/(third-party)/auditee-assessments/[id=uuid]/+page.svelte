@@ -240,7 +240,9 @@
 			return titleMap.get(requirementAssessment.id);
 		}
 		const requirement =
-			requirementHashmap[requirementAssessment.requirement?.id ?? requirementAssessment.requirement] ?? requirementAssessment;
+			requirementHashmap[
+				requirementAssessment.requirement?.id ?? requirementAssessment.requirement
+			] ?? requirementAssessment;
 		const result = requirement.display_short ? requirement.display_short : (requirement.name ?? '');
 		titleMap.set(requirementAssessment.id, result);
 		return result;
@@ -394,7 +396,9 @@
 		{#if currentItem}
 			{@const requirementAssessment = currentItem}
 			{@const requirement =
-				requirementHashmap[requirementAssessment.requirement?.id ?? requirementAssessment.requirement] ?? requirementAssessment}
+				requirementHashmap[
+					requirementAssessment.requirement?.id ?? requirementAssessment.requirement
+				] ?? requirementAssessment}
 			<div
 				id="current-requirement"
 				class="card bg-white shadow-lg px-6 py-4 flex flex-col space-y-4"
