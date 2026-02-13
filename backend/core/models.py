@@ -649,13 +649,14 @@ class LibraryUpdater:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
+                framework_dict["urn"] = framework_dict["urn"].lower()
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
-                    urn=new_framework["urn"],
+                    urn=framework_dict["urn"],
                     defaults=framework_dict,
                     create_defaults={
                         **self.referential_object_dict,
@@ -832,11 +833,19 @@ class LibraryUpdater:
                             requirement_node_object
                         )
                     else:
-                        requirement_node_object = RequirementNode.objects.create(
+                        requirement_node_object, _ = RequirementNode.objects.update_or_create(
                             urn=urn,
-                            framework=new_framework,
-                            **self.referential_object_dict,
-                            **requirement_node_dict,
+                            defaults={
+                                "framework": new_framework,
+                                **self.referential_object_dict,
+                                **requirement_node_dict,
+                            },
+                            create_defaults={
+                                "framework": new_framework,
+                                **self.referential_object_dict,
+                                **self.i18n_object_dict,
+                                **requirement_node_dict,
+                            },
                         )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
