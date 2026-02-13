@@ -9107,10 +9107,16 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             .prefetch_related("requirement_assessments")
         )
 
+        # Only include compliance assessments the user can view
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
         # Group by compliance assessment
         ca_map = defaultdict(list)
         for assignment in assignments:
-            ca_map[assignment.compliance_assessment_id].append(assignment)
+            if assignment.compliance_assessment_id in viewable_ca_ids:
+                ca_map[assignment.compliance_assessment_id].append(assignment)
 
         dashboard_data = []
         for ca_id, group in ca_map.items():

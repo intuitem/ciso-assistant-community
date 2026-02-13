@@ -60,6 +60,7 @@ class UserGroupCodename(Enum):
     ADMINISTRATOR = "BI-UG-ADM"
     GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
+    GLOBAL_AUDITEE = "BI-UG-GAE"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
@@ -85,6 +86,7 @@ BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
     str(UserGroupCodename.GLOBAL_READER): _("Reader"),
     str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
+    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
     str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
     str(UserGroupCodename.ANALYST): _("Analyst"),
     str(UserGroupCodename.APPROVER): _("Approver"),
