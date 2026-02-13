@@ -114,19 +114,17 @@
 	);
 
 	async function updateScore(requirementAssessment: Record<string, any>) {
-		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
-		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
+		requirementAssessmentScores[requirementAssessment.id] = [
+			requirementAssessment.is_scored,
+			score,
+			documentationScore
+		];
 		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
-			if (
-				isScored === currentScoreValue[0] &&
-				score === currentScoreValue[1] &&
-				documentationScore === currentScoreValue[2]
-			) {
+			if (score === currentScoreValue[1] && documentationScore === currentScoreValue[2]) {
 				await updateBulk(requirementAssessment, {
-					is_scored: isScored,
 					score: score,
 					documentation_score: documentationScore
 				});
@@ -450,6 +448,7 @@
 
 				<!-- Assessment form -->
 				{#if requirementAssessment.assessable}
+					{#key requirementAssessment.id}
 					<form
 						class="flex flex-col space-y-4 items-center justify-evenly w-full"
 						id="tableModeForm-{requirementAssessment.id}"
@@ -550,8 +549,8 @@
 												checkboxComponent="switch"
 												classes="h-full flex flex-row items-center justify-center my-1"
 												classesContainer="h-full flex flex-row items-center space-x-4"
-												onChange={async () => {
-													requirementAssessment.is_scored = !requirementAssessment.is_scored;
+												onChange={async (newValue) => {
+													requirementAssessment.is_scored = newValue;
 													await update(requirementAssessment, 'is_scored');
 												}}
 											/>
@@ -692,6 +691,7 @@
 							</Accordion.Item>
 						</Accordion>
 					</form>
+					{/key}
 				{/if}
 			</div>
 
