@@ -821,33 +821,57 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if "parent_urn" in requirement_node_dict and requirement_node_dict["parent_urn"]:
+                        requirement_node_dict["parent_urn"] = requirement_node_dict["parent_urn"].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    all_fields_to_update.update(requirement_node_dict.keys())
+
+                    # Fields safe to update on existing requirement nodes.
+                    # Excludes structural fields (parent_urn, order_id) that
+                    # would break the framework hierarchy.
+                    UPDATABLE_FIELDS = {
+                        "name",
+                        "description",
+                        "annotation",
+                        "typical_evidence",
+                        "translations",
+                        "assessable",
+                        "implementation_groups",
+                        "questions",
+                        "weight",
+                        "importance",
+                    }
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
-                        for key, value in requirement_node_dict.items():
+                        update_dict = {
+                            k: v
+                            for k, v in requirement_node_dict.items()
+                            if k in UPDATABLE_FIELDS
+                        }
+                        for key, value in update_dict.items():
                             setattr(requirement_node_object, key, value)
+                        all_fields_to_update.update(update_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
                     else:
-                        requirement_node_object, _ = (
-                            RequirementNode.objects.update_or_create(
-                                urn=urn,
-                                defaults={
-                                    "framework": new_framework,
-                                    **self.referential_object_dict,
-                                    **requirement_node_dict,
-                                },
-                                create_defaults={
-                                    "framework": new_framework,
-                                    **self.referential_object_dict,
-                                    **self.i18n_object_dict,
-                                    **requirement_node_dict,
-                                },
-                            )
+                        existing_node = RequirementNode.objects.filter(urn=urn).first()
+                        if existing_node and existing_node.framework_id != new_framework.id:
+                            raise ValidationError("requirementNodeUrnConflict")
+                        requirement_node_object, _ = RequirementNode.objects.update_or_create(
+                            urn=urn,
+                            defaults={
+                                "framework": new_framework,
+                                **self.referential_object_dict,
+                                **requirement_node_dict,
+                            },
+                            create_defaults={
+                                "framework": new_framework,
+                                **self.referential_object_dict,
+                                **self.i18n_object_dict,
+                                **requirement_node_dict,
+                            },
                         )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
