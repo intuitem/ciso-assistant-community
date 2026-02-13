@@ -468,7 +468,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     # If so, this is an update scenario: the StoredLibrary must be
                     # kept so the user can trigger the update via the _update endpoint.
                     already_loaded = LoadedLibrary.objects.filter(
-                        urn=library.urn, locale=library.locale
+                        urn=library.urn
                     ).exists()
 
                     try:
@@ -548,7 +548,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                 if (
                     library is not None
                     and not LoadedLibrary.objects.filter(
-                        urn=library.urn, locale=library.locale
+                        urn=library.urn
                     ).exists()
                 ):
                     library.delete()
@@ -567,7 +567,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             if (
                 library is not None
                 and not LoadedLibrary.objects.filter(
-                    urn=library.urn, locale=library.locale
+                    urn=library.urn
                 ).exists()
             ):
                 library.delete()
