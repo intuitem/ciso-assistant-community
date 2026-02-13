@@ -708,7 +708,7 @@
 								size="size-10">{computedScore}</ProgressRing
 							>
 						</div>
-					{:else}
+					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">
 							<Score
 								{form}
@@ -719,7 +719,7 @@
 								label={page.data.compliance_assessment_score.show_documentation_score
 									? m.implementationScore()
 									: m.score()}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							>
 								{#snippet left()}
 									<div>
@@ -745,7 +745,7 @@
 								field="documentation_score"
 								label={m.documentationScore()}
 								isDoc={true}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							/>
 						{/if}
 					{/if}
