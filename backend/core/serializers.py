@@ -41,7 +41,7 @@ class SerializerFactory:
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
             serializer_name = f"{base_name}ReadSerializer"
-        elif action in ["create", "update", "partial_update"]:
+        elif action in ["create", "update", "partial_update", "destroy"]:
             serializer_name = f"{base_name}WriteSerializer"
         else:
             return None
