@@ -117,14 +117,35 @@ A **Personal Access Token** is a time-limited secret that allows a script, CI/CD
 
 > This ensures **tight control over non-human access**, balancing automation flexibility with strict security hygiene.
 
-### 5. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
-
 CISO Assistant includes native tracking of all key actions:
 
 * logins, restorations, configuration changes, approvals…
 * a searchable audit log accessible via the UI or API
 
 > This enables complete accountability over critical operations.
+
+### 5. Illustration <a href="#ember969" id="ember969"></a>
+
+The following schematic illustrates the fundamental concepts of IAM in CISO Assistant.
+
+<figure><img src="../../.gitbook/assets/rbac.png" alt=""><figcaption></figcaption></figure>
+
+### 6. Publication mechanism
+
+All objects of CISO Assistant support a built-in flag called _**is\_published.**_&#x20;
+
+Objects with the flag _is\_published_ are visible in subdomains as if they were attached to each subdomain of the object's domain. This mechanism only concerns visibility, not creation/udpate/deletion.\
+All objects are currently published, except assessments (audits, risk analysis, BIA, entitiy assessments)
+
+To avoid an object being published, the simplest solution is to put it in a leaf subdomain.
+
+The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups instead (e.g. the group of all users).
+
+#### 🤔 Can I make an object visible to all users without attaching it to global?
+
+You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and more generic.
+
+### 7. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
 
 ### 🧠 In Summary <a href="#ember969" id="ember969"></a>
 
@@ -139,10 +160,3 @@ It supports complex organizations while remaining readable, scalable, and compli
 
 
 
-## Note on inheritance&#x20;
-
-
-
-Multiple objects of CISO Assistant support a built-in flag called is\_published that controls wether an object is visible by affiliated domais ins. This flag is set by default tochildren'sd quite useful to be able to benefit children domains from some controls or evidence covered on their parent domains.<br>
-
-It's expected by Q2/26 to be able to control the behaviour of inheritance in a more fine-grained manner, such as preventing it or managing it between domains with no direct affiliation.
