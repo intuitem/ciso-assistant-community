@@ -117,12 +117,7 @@ A **Personal Access Token** is a time-limited secret that allows a script, CI/CD
 
 > This ensures **tight control over non-human access**, balancing automation flexibility with strict security hygiene.
 
-CISO Assistant includes native tracking of all key actions:
 
-* logins, restorations, configuration changes, approvals…
-* a searchable audit log accessible via the UI or API
-
-> This enables complete accountability over critical operations.
 
 ### 5. Illustration <a href="#ember969" id="ember969"></a>
 
@@ -146,6 +141,13 @@ The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups ins
 You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and is more generic.
 
 ### 7. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
+
+CISO Assistant includes native tracking of all key actions:
+
+* logins, restorations, configuration changes, approvals…
+* a searchable audit log accessible via the UI or API
+
+> This enables complete accountability over critical operations.
 
 ### 🧠 In Summary <a href="#ember969" id="ember969"></a>
 
