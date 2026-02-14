@@ -2989,6 +2989,7 @@
 	"assignmentSettings": "Zuweisungseinstellungen",
 	"allowAssignmentsToEntities": "Zuweisungen an Entitäten zulassen",
 	"allowAssignmentsToEntitiesDescription": "Ermöglicht, dass Entitäten als Akteure erscheinen, wenn Eigentümer, Autoren oder Prüfer zugewiesen werden.",
+	"duplicateEbiosRmStudy": "Ebios RM-Studie duplizieren",
 	"fileTooLarge": "Datei zu groß",
 	"invalidFileFormat": "Ungültiges Dateiformat",
 	"invalidCompatMode": "Ungültiger Kompatibilitätsmodus",

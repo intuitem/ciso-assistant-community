@@ -2347,6 +2347,7 @@
 	"assignmentSettings": "Impostazioni assegnazioni",
 	"allowAssignmentsToEntities": "Consenti assegnazioni alle entità",
 	"allowAssignmentsToEntitiesDescription": "Consente alle entità di apparire come attori quando si assegnano proprietari, autori o revisori.",
+	"duplicateEbiosRmStudy": "Duplica lo studio Ebios RM",
 	"fileTooLarge": "File troppo grande",
 	"invalidFileFormat": "Formato file non valido",
 	"invalidCompatMode": "Modalità di compatibilità non valida",

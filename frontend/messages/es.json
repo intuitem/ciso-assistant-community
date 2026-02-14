@@ -3130,6 +3130,7 @@
 	"assignmentSettings": "Asignaciones",
 	"allowAssignmentsToEntities": "Permitir asignaciones a entidades",
 	"allowAssignmentsToEntitiesDescription": "Permite que las entidades aparezcan como actores al asignar propietarios, autores o revisores.",
+	"duplicateEbiosRmStudy": "Duplicar el estudio EBIOS RM",
 	"fileTooLarge": "Archivo demasiado grande",
 	"invalidFileFormat": "Formato de archivo inválido",
 	"invalidCompatMode": "Modo de compatibilidad inválido",

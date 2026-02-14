@@ -1115,6 +1115,7 @@
 	"assignmentSettings": "Hozzárendelési beállítások",
 	"allowAssignmentsToEntities": "Engedélyezze a hozzárendelést entitásokhoz",
 	"allowAssignmentsToEntitiesDescription": "Lehetővé teszi, hogy az entitások szereplőként jelenjenek meg tulajdonosok, szerzők vagy lektorok kijelölésekor.",
+	"duplicateEbiosRmStudy": "Ebios RM tanulmány duplikálása",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

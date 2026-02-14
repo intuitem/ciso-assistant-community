@@ -3431,6 +3431,7 @@
 	"viewTeam": "Voir une équipe",
 	"changeTeam": "Modifier une équipe",
 	"deleteTeam": "Supprimer une équipe",
+	"duplicateEbiosRmStudy": "Dupliquer l’étude EBIOS RM",
 	"jumpTo": "Aller vers",
 	"fileTooLarge": "Fichier trop volumineux",
 	"invalidFileFormat": "Format de fichier invalide",

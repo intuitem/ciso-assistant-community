@@ -2084,6 +2084,7 @@
 	"assignmentSettings": "Postavke dodjele",
 	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",
 	"allowAssignmentsToEntitiesDescription": "Omogućuje da se entiteti prikazuju kao akteri pri dodjeli vlasnika, autora ili recenzenata.",
+	"duplicateEbiosRmStudy": "Dupliciraj Ebios RM istraživanje",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

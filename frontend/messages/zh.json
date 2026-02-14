@@ -3142,6 +3142,7 @@
 	"assignmentSettings": "分配设置",
 	"allowAssignmentsToEntities": "允许将任务分配给实体",
 	"allowAssignmentsToEntitiesDescription": "在分配所有者、作者或审阅者时，让实体显示为参与者。",
+	"duplicateEbiosRmStudy": "复制 EBIOS RM 研究",
 	"fileTooLarge": "文件太大",
 	"invalidFileFormat": "无效的文件格式",
 	"invalidCompatMode": "无效的兼容模式",

@@ -2,11 +2,12 @@ import io
 
 import django_filters as df
 import pandas as pd
+from uuid import UUID
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
-from iam.models import RoleAssignment
+from iam.models import RoleAssignment, Folder, Permission
 from openpyxl.styles import Alignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -27,6 +28,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import status
 
 from django.shortcuts import get_object_or_404
 
@@ -121,10 +123,60 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
             ecosystem_circular_chart_data(Stakeholder.objects.filter(ebios_rm_study=pk))
         )
 
-    @action(detail=True, name="Get EBIOS RM  study visual analysis")
+    @action(detail=True, name="Get EBIOS RM study visual analysis")
     def visual_analysis(self, request, pk):
         study = get_object_or_404(EbiosRMStudy, id=pk)
         return Response(ebios_rm_visual_analysis(study))
+
+    @action(
+        detail=True,
+        name="Duplicate EBIOS RM study",
+        methods=["post"],
+    )
+    def duplicate(self, request, pk):
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, EbiosRMStudy
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"results": "Ebios RM study not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        ebios_rm_study = self.get_object()
+        data = request.data
+
+        folder_id = data.get("folder")
+        new_folder = Folder.objects.filter(id=folder_id).first()
+        if new_folder is None:
+            return Response(
+                {"error": "Folder not found."}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_ebiosrmstudy"),
+            folder=new_folder,
+        ):
+            return Response(
+                {
+                    "error": "You don't have permission to create an EBIOS RM Study in this folder."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        new_name = data.get("name", ebios_rm_study.name)
+        new_version = data.get("version", ebios_rm_study.version)
+
+        duplicate_ebios_rm_study, error = ebios_rm_study.duplicate(
+            new_folder, new_name, new_version
+        )
+        if error is not None:
+            return Response({"error": error}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(
+            {"results": EbiosRMStudyReadSerializer(duplicate_ebios_rm_study).data}
+        )
 
     @action(detail=True, name="Get EBIOS RM study report data", url_path="report-data")
     def report_data(self, request, pk):
