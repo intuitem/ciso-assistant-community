@@ -19,7 +19,7 @@ Mappings are essentially a representation of the links between assessable nodes 
 
 Mapping is a directed graph linked a SRC framework to a TGT framework on which the nodes can have one of the following relationships:\
 \
-![](<../.gitbook/assets/image (2) (1) (1).png>) &#x20;
+![](<../.gitbook/assets/image (2) (1) (1) (1).png>) &#x20;
 
 
 

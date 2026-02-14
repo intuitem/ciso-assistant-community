@@ -50,7 +50,7 @@ To configure the integration, you will need to perform steps on both the Jira an
 1. In Jira, go to the project you want to integrate with CISO Assistant.
 2. The project key is a short identifier for your project (e.g., 'PROJ', 'CIS'). You can find it in the project details or in the URL.
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 
 #### 2. Configure CISO Assistant
 
