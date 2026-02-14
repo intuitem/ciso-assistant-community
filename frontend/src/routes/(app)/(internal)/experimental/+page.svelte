@@ -31,4 +31,10 @@
 		link="/experimental/yearly-tasks-review"
 		tags={['tasks', 'planning', 'review', 'PRO']}
 	/>
+	<Article
+		title="Gantt Diagram"
+		desc="Visualize applied controls on a timeline with milestones, tasks, and control implementations"
+		link="/experimental/gantt"
+		tags={['visualization', 'timeline', 'controls', 'planning']}
+	/>
 </div>
