@@ -143,7 +143,7 @@ The plan is to remove this mechanism by Q2 2026 and introduce dynamic groups ins
 
 #### 🤔 Can I make an object visible to all users without attaching it to global?
 
-You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and more generic.
+You can attach this object to a subdomain (e.g. named "published"), and add every user in the group corresponding to reader role on the subdomain. This does not rely on the publication mechanism, and is more generic.
 
 ### 7. Accounting: Full Audit and Traceability <a href="#ember965" id="ember965"></a>
 
