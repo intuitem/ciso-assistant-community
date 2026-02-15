@@ -66,8 +66,9 @@ except Exception as e:
 
 
 @pytest.mark.skipif(
-    condition=lambda: not os.path.exists("/usr/bin/bwrap")
-    and not shutil.which("bwrap"),
+    condition=lambda: (
+        not os.path.exists("/usr/bin/bwrap") and not shutil.which("bwrap")
+    ),
     reason="Memory limit test requires bubblewrap",
 )
 # Using the fixture value in 'if' is better, but skipif runs at collection time.

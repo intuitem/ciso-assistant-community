@@ -2772,6 +2772,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Incident
