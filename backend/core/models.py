@@ -3989,7 +3989,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Evidence Revisions")
 
 
-class Incident(NameDescriptionMixin, FolderMixin):
+class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"

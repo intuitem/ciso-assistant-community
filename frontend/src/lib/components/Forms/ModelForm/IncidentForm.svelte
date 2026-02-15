@@ -155,4 +155,16 @@
 		bind:cachedValue={formDataCache['entities']}
 		label={m.entities()}
 	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		createFromSelection={true}
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		helpText={m.labelsHelpText()}
+		label={m.labels()}
+		translateOptions={false}
+		allowUserOptions="append"
+	/>
 </Dropdown>
