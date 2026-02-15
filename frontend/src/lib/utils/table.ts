@@ -2279,7 +2279,8 @@ export const listViewFields = {
 			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
-			severity: INCIDENT_SEVERITY_FILTER
+			severity: INCIDENT_SEVERITY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'timeline-entries': {

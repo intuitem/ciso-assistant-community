@@ -1786,7 +1786,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owners', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
-			{ field: 'entities', urlModel: 'entities' }
+			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [
@@ -1810,7 +1811,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entities' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
-			{ field: 'link' }
+			{ field: 'link' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	'timeline-entries': {
