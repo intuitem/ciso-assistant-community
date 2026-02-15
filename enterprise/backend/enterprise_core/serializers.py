@@ -69,7 +69,7 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = group.permissions
+        perms = [p for p in group.permissions if p not in User.NON_SEAT_PERMISSIONS]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:

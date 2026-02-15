@@ -804,6 +804,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
+    # Permissions that grant write access but do not consume a license seat
+    NON_SEAT_PERMISSIONS = {"change_validationflow"}
+
     @property
     def is_editor(self) -> bool:
         permissions = RoleAssignment.get_permissions(self)
@@ -811,6 +814,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return any(
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
+            if perm not in self.NON_SEAT_PERMISSIONS
         )
 
     @property
