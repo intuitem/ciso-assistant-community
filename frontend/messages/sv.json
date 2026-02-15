@@ -1106,6 +1106,7 @@
 	"assignmentSettings": "Tilldelningsinställningar",
 	"allowAssignmentsToEntities": "Tillåt tilldelningar till enheter",
 	"allowAssignmentsToEntitiesDescription": "Låter enheter visas som aktörer när ägare, författare eller granskare tilldelas.",
+	"duplicateEbiosRmStudy": "Duplicera Ebios RM-studie",
 	"fileTooLarge": "Filen är för stor",
 	"invalidFileFormat": "Ogiltigt filformat",
 	"invalidCompatMode": "Ogiltigt kompatibilitetsläge",

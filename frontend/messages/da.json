@@ -1397,6 +1397,7 @@
 	"assignmentSettings": "Tildelingsindstillinger",
 	"allowAssignmentsToEntities": "Tillad tildelinger til enheder",
 	"allowAssignmentsToEntitiesDescription": "Lader enheder optræde som aktører, når der tildeles ejere, forfattere eller gennemlæsere.",
+	"duplicateEbiosRmStudy": "Duplikér Ebios RM-analysen",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

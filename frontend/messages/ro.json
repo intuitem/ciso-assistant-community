@@ -1112,6 +1112,7 @@
 	"assignmentSettings": "Setări atribuiri",
 	"allowAssignmentsToEntities": "Permite atribuiri către entități",
 	"allowAssignmentsToEntitiesDescription": "Permite entităților să apară ca actori atunci când atribui proprietari, autori sau recenzori.",
+	"duplicateEbiosRmStudy": "Duplicarea studiului Ebios RM",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

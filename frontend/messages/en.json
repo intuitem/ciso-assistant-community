@@ -3471,5 +3471,6 @@
 	"changeTeam": "Change team",
 	"deleteTeam": "Delete team",
 	"appliedControlsPlaceholder": "Select applied controls...",
-	"jumpTo": "Jump to"
+	"jumpTo": "Jump to",
+	"duplicateEbiosRmStudy": "Duplicate Ebios RM study"
 }

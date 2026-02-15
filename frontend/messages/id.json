@@ -1300,6 +1300,7 @@
 	"assignmentSettings": "Pengaturan penugasan",
 	"allowAssignmentsToEntities": "Izinkan penugasan ke entitas",
 	"allowAssignmentsToEntitiesDescription": "Memungkinkan entitas muncul sebagai aktor saat menetapkan pemilik, penulis, atau peninjau.",
+	"duplicateEbiosRmStudy": "Duplikasi studi Ebios RM",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

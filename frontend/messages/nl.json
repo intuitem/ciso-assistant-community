@@ -2990,6 +2990,7 @@
 	"assignmentSettings": "Toewijzingsinstellingen",
 	"allowAssignmentsToEntities": "Toewijzingen aan entiteiten toestaan",
 	"allowAssignmentsToEntitiesDescription": "Laat entiteiten als actoren verschijnen bij het toewijzen van eigenaren, auteurs of reviewers.",
+	"duplicateEbiosRmStudy": "Dupliceer de Ebios RM-studie",
 	"fileTooLarge": "Bestand te groot",
 	"invalidFileFormat": "Ongeldig bestandsformaat",
 	"invalidCompatMode": "Ongeldige compatibiliteitsmodus",

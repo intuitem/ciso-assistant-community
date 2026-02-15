@@ -1083,6 +1083,7 @@
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",
 	"allowAssignmentsToEntities": "اینٹیٹیز کو اسائنمنٹ کی اجازت دیں",
 	"allowAssignmentsToEntitiesDescription": "مالکان، مصنفین یا جائزہ کار تعین کرتے وقت اداروں کو کردار کے طور پر ظاہر ہونے دیں۔",
+	"duplicateEbiosRmStudy": "Ebios RM مطالعہ کی نقل تیار کریں",
 	"fileTooLarge": "File too large",
 	"invalidFileFormat": "Invalid file format",
 	"invalidCompatMode": "Invalid compatibility mode",

@@ -1,10 +1,11 @@
+from os import name
+from typing import Optional, Final
+
 from auditlog.registry import auditlog
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Case, When, IntegerField, Q
-from django.db.models.signals import post_delete, post_save
-from django.dispatch import receiver
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -22,8 +23,15 @@ from core.models import (
 from core.validators import (
     JSONSchemaInstanceValidator,
 )
-from iam.models import FolderMixin, User
+from iam.models import FolderMixin, Folder, RoleAssignment, Permission
 from tprm.models import Entity
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from django.db.models.manager import RelatedManager
+else:
+    RelatedManager = ...
 
 INITIAL_META = {
     "workshops": [
@@ -55,7 +63,17 @@ def get_initial_meta():
     return INITIAL_META
 
 
+type EbiosRMObject = FearedEvent | Stakeholder
+
+
 class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
+    feared_events: RelatedManager
+    rotos: RelatedManager
+    stakeholders: RelatedManager
+    strategic_scenarios: RelatedManager
+    attack_paths: RelatedManager
+    operational_scenarios: RelatedManager
+
     class Status(models.TextChoices):
         PLANNED = "planned", _("Planned")
         IN_PROGRESS = "in_progress", _("In progress")
@@ -228,15 +246,15 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
 
     @property
     def roto_count(self):
-        return self.roto_set.count()
+        return self.rotos.count()
 
     @property
     def selected_roto_count(self):
-        return self.roto_set.filter(is_selected=True).count()
+        return self.rotos.filter(is_selected=True).count()
 
     @property
     def selected_attack_path_count(self):
-        return self.attackpath_set.filter(is_selected=True).count()
+        return self.attack_paths.filter(is_selected=True).count()
 
     @property
     def operational_scenario_count(self):
@@ -278,7 +296,7 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 ebios_rm_study=self, is_selected=True
             ).count(),
             "compliance_assessment_count": self.compliance_assessments.count(),
-            "roto_count": self.roto_set.count(),
+            "roto_count": self.rotos.count(),
             "stakeholder_count": Stakeholder.objects.filter(
                 ebios_rm_study=self, is_selected=True
             ).count(),
@@ -321,6 +339,69 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         index = step if workshop == 4 else step - 1
         self.meta["workshops"][workshop - 1]["steps"][index]["status"] = new_status
         return self.save()
+
+    def duplicate(
+        self, new_folder: Folder, new_name: str, new_version: Optional[str]
+    ) -> tuple["EbiosRMStudy", None] | tuple[None, str]:
+        try:
+            with transaction.atomic():
+                duplicated_ebios_rm_study = EbiosRMStudy.objects.create(
+                    name=new_name,
+                    version=new_version,
+                    ref_id=self.ref_id,
+                    quotation_method=self.quotation_method,
+                    folder=new_folder,
+                    risk_matrix=self.risk_matrix,
+                    reference_entity=self.reference_entity,
+                    status=self.status,
+                    observation=self.observation,
+                    meta=self.meta,
+                )
+
+                duplicated_ebios_rm_study.assets.set(self.assets.all())
+                duplicated_ebios_rm_study.compliance_assessments.set(
+                    self.compliance_assessments.all()
+                )
+                duplicated_ebios_rm_study.reviewers.set(self.reviewers.all())
+                duplicated_ebios_rm_study.authors.set(self.authors.all())
+
+                RELATED_NAMES: Final[list[str]] = [
+                    "feared_events",
+                    "rotos",
+                    "stakeholders",
+                    "strategic_scenarios",
+                    "attack_paths",
+                    "operational_scenarios",
+                ]
+                for related_name in RELATED_NAMES:
+                    duplicated_objects: list[EbiosRMObject] = []
+
+                    related_manager: RelatedManager[EbiosRMObject] = getattr(
+                        self, related_name
+                    )
+                    duplicated_related_manager: RelatedManager[EbiosRMObject] = getattr(
+                        duplicated_ebios_rm_study, related_name
+                    )
+
+                    for ebios_object in related_manager.all():
+                        duplicated_ebios_object, error = ebios_object.duplicate(
+                            duplicated_ebios_rm_study
+                        )
+                        if duplicated_ebios_object is None:
+                            raise ValueError(error)
+
+                        duplicated_objects.append(duplicated_ebios_object)
+
+                    duplicated_related_manager.set(duplicated_objects)
+
+            return duplicated_ebios_rm_study, None
+
+        except Exception as e:
+            error = str(e)
+            return (
+                None,
+                error,
+            )
 
 
 class FearedEvent(NameDescriptionMixin, FolderMixin):
@@ -375,6 +456,23 @@ class FearedEvent(NameDescriptionMixin, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["FearedEvent", None] | tuple[None, str]:
+        duplicated_feared_event = FearedEvent.objects.create(
+            ebios_rm_study=ebios_rm_study,
+            name=self.name,
+            description=self.description,
+            ref_id=self.ref_id,
+            gravity=self.gravity,
+            is_selected=self.is_selected,
+            justification=self.justification,
+        )
+        duplicated_feared_event.assets.set(self.assets.all())
+        duplicated_feared_event.qualifications.set(self.qualifications.all())
+
+        return duplicated_feared_event, None
 
     @property
     def risk_matrix(self):
@@ -478,6 +576,7 @@ class RoTo(AbstractBaseModel, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
+        related_name="rotos",
         on_delete=models.CASCADE,
     )
     feared_events = models.ManyToManyField(
@@ -543,6 +642,23 @@ class RoTo(AbstractBaseModel, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["RoTo", None] | tuple[None, str]:
+        duplicated_roto = RoTo.objects.create(
+            ebios_rm_study=ebios_rm_study,
+            target_objective=self.target_objective,
+            motivation=self.motivation,
+            resources=self.resources,
+            activity=self.activity,
+            is_selected=self.is_selected,
+            justification=self.justification,
+            risk_origin=self.risk_origin,
+        )
+        duplicated_roto.feared_events.set(self.feared_events.all())
+
+        return duplicated_roto, None
 
     def get_pertinence_display(self):
         PERTINENCE_MATRIX = [
@@ -672,6 +788,28 @@ class Stakeholder(AbstractBaseModel, FolderMixin):
         )
         return result
 
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["Stakeholder", None] | tuple[None, str]:
+        duplicated_stakeholder = Stakeholder.objects.create(
+            ebios_rm_study=ebios_rm_study,
+            entity=self.entity,
+            category=self.category,
+            current_dependency=self.current_dependency,
+            current_penetration=self.current_penetration,
+            current_maturity=self.current_maturity,
+            current_trust=self.current_trust,
+            residual_dependency=self.residual_dependency,
+            residual_penetration=self.residual_penetration,
+            residual_maturity=self.residual_maturity,
+            residual_trust=self.residual_trust,
+            is_selected=self.is_selected,
+            justification=self.justification,
+        )
+        duplicated_stakeholder.applied_controls.set(self.applied_controls.all())
+
+        return duplicated_stakeholder, None
+
     @staticmethod
     def _compute_criticality(
         dependency: int, penetration: int, maturity: int, trust: int
@@ -762,6 +900,40 @@ class StrategicScenario(NameDescriptionMixin, FolderMixin):
         )
         return result
 
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["StrategicScenario", None] | tuple[None, str]:
+        duplicated_roto = RoTo.objects.filter(
+            ebios_rm_study=ebios_rm_study,
+            target_objective=self.ro_to_couple.target_objective,
+            risk_origin=self.ro_to_couple.risk_origin,
+        ).first()
+        if duplicated_roto is None:
+            return None, f"Duplicated roto couple not found."
+
+        feared_event = self.focused_feared_event
+        if feared_event is None:
+            duplicated_feared_event = None
+        else:
+            duplicated_feared_event = FearedEvent.objects.filter(
+                ebios_rm_study=ebios_rm_study,
+                name=feared_event.name,
+                ref_id=feared_event.ref_id,
+            ).first()
+
+            if duplicated_feared_event is None:
+                return None, f"Duplicated feared event not found."
+
+        duplicated_strategic_scenario = StrategicScenario.objects.create(
+            ebios_rm_study=ebios_rm_study,
+            name=self.name,
+            description=self.description,
+            ref_id=self.ref_id,
+            ro_to_couple=duplicated_roto,
+            focused_feared_event=duplicated_feared_event,
+        )
+        return duplicated_strategic_scenario, None
+
     def get_gravity_display(self):
         if self.focused_feared_event:
             gravity = self.focused_feared_event.gravity
@@ -774,6 +946,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     ebios_rm_study = models.ForeignKey(
         EbiosRMStudy,
         verbose_name=_("EBIOS RM study"),
+        related_name="attack_paths",
         on_delete=models.CASCADE,
     )
     strategic_scenario = models.ForeignKey(
@@ -808,6 +981,7 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
     def save(self, *args, **kwargs):
         self.ebios_rm_study = self.strategic_scenario.ebios_rm_study
         self.folder = self.ebios_rm_study.folder
+
         super().save(*args, **kwargs)
         EbiosRMStudy.objects.filter(id=self.ebios_rm_study.id).update(
             updated_at=timezone.now()
@@ -820,6 +994,28 @@ class AttackPath(NameDescriptionMixin, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["AttackPath", None] | tuple[None, str]:
+        duplicated_strategic_scenario = StrategicScenario.objects.filter(
+            ebios_rm_study=ebios_rm_study,
+            name=self.strategic_scenario.name,
+            ref_id=self.strategic_scenario.ref_id,
+        ).first()
+        if duplicated_strategic_scenario is None:
+            return None, f"Duplicated strategic scenario not found."
+
+        duplicated_attack_path = AttackPath.objects.create(
+            name=self.name,
+            description=self.description,
+            strategic_scenario=duplicated_strategic_scenario,
+            ref_id=self.ref_id,
+            is_selected=self.is_selected,
+            justification=self.justification,
+        )
+        duplicated_attack_path.stakeholders.set(self.stakeholders.all())
+        return duplicated_attack_path, None
 
     @classmethod
     def get_default_ref_id(cls, strategic_scenario):
@@ -1064,6 +1260,28 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
             updated_at=timezone.now()
         )
         return result
+
+    def duplicate(
+        self, ebios_rm_study: EbiosRMStudy
+    ) -> tuple["OperationalScenario", None] | tuple[None, str]:
+        duplicated_attack_path = AttackPath.objects.filter(
+            ebios_rm_study=ebios_rm_study,
+            name=self.attack_path.name,
+        ).first()
+        if duplicated_attack_path is None:
+            return None, f"Duplicated attack path not found."
+
+        duplicated_operation_scenario = OperationalScenario.objects.create(
+            ebios_rm_study=ebios_rm_study,
+            operating_modes_description=self.operating_modes_description,
+            likelihood=self.likelihood,
+            is_selected=self.is_selected,
+            justification=self.justification,
+            attack_path=duplicated_attack_path,
+        )
+        duplicated_operation_scenario.threats.set(self.threats.all())
+
+        return duplicated_operation_scenario, None
 
     @property
     def risk_matrix(self):

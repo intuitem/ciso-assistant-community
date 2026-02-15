@@ -1859,6 +1859,7 @@
 	"assignmentSettings": "Ustawienia przydziałów",
 	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
 	"allowAssignmentsToEntitiesDescription": "Pozwala, aby encje pojawiały się jako aktorzy podczas przypisywania właścicieli, autorów lub recenzentów.",
+	"duplicateEbiosRmStudy": "Powiel badanie Ebios RM",
 	"fileTooLarge": "Plik jest zbyt duży",
 	"invalidFileFormat": "Nieprawidłowy format pliku",
 	"invalidCompatMode": "Nieprawidłowy tryb zgodności",

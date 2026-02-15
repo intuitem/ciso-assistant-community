@@ -43,6 +43,7 @@
 	import RightRequestForm from './ModelForm/RightRequestForm.svelte';
 	import DataBreachForm from './ModelForm/DataBreachForm.svelte';
 	import EbiosRmForm from './ModelForm/EbiosRmForm.svelte';
+	import EbiosRmDuplicateForm from './ModelForm/EbiosRmDuplicateForm.svelte';
 	import FearedEventForm from './ModelForm/FearedEventForm.svelte';
 	import RoToForm from './ModelForm/RoToForm.svelte';
 	import StakeholderForm from './ModelForm/StakeholderForm.svelte';
@@ -611,7 +612,11 @@
 				{...rest}
 			/>
 		{:else if URLModel === 'ebios-rm'}
-			<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			{#if duplicate}
+				<EbiosRmDuplicateForm {form} {cacheLocks} {formDataCache} />
+			{:else}
+				<EbiosRmForm {form} {model} {cacheLocks} {formDataCache} {context} {...rest} />
+			{/if}
 		{:else if URLModel === 'feared-events'}
 			<FearedEventForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'ro-to'}

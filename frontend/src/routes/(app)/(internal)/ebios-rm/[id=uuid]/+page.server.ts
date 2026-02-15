@@ -1,10 +1,6 @@
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
-import {
-	getModelInfo,
-	urlParamModelForeignKeyFields,
-	urlParamModelSelectFields
-} from '$lib/utils/crud';
+import { getModelInfo, urlParamModelSelectFields, urlParamModelVerboseName } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
@@ -12,6 +8,10 @@ import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { z } from 'zod';
+import { handleErrorResponse } from '$lib/utils/actions';
+import { safeTranslate } from '$lib/utils/i18n';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { m } from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
 	const URLModel = 'ebios-rm';
@@ -121,5 +121,38 @@ export const actions: Actions = {
 		}
 
 		return { success: true, form };
+	},
+	duplicate: async (event) => {
+		const formData = await event.request.formData();
+		const schema = modelSchema(formData.get('urlmodel') as string);
+
+		const form = await superValidate(formData, zod(schema));
+
+		if (!form.valid) {
+			console.log(form.errors);
+			return fail(400, { form: form });
+		}
+
+		const endpoint = `${BASE_API_URL}/ebios-rm/studies/${event.params.id}/duplicate/`;
+		const requestInitOptions: RequestInit = {
+			method: 'POST',
+			body: JSON.stringify(form.data)
+		};
+		const response = await event.fetch(endpoint, requestInitOptions);
+
+		if (!response.ok) return handleErrorResponse({ event, response, form });
+
+		const modelVerboseName: string = urlParamModelVerboseName('ebios-rm');
+		setFlash(
+			{
+				type: 'success',
+				message: m.successfullyDuplicateObject({
+					object: safeTranslate(modelVerboseName).toLowerCase()
+				})
+			},
+			event
+		);
+
+		return { form };
 	}
 };
