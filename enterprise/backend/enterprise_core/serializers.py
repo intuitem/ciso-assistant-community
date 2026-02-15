@@ -94,6 +94,10 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
             for group in validated_data["user_groups"]:
                 self.check_editor_permissions(instance, group)
 
+    def create(self, validated_data):
+        self._update_user_groups(None, validated_data)
+        return super().create(validated_data)
+
     def update(self, instance: User, validated_data):
         self._update_user_groups(instance, validated_data)
         return super().update(instance, validated_data)

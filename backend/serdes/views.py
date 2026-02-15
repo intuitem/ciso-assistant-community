@@ -18,6 +18,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from ciso_assistant.settings import SCHEMA_VERSION, VERSION
 from core.models import EvidenceRevision
 from core.utils import compare_schema_versions
+from iam.models import User
 from serdes.serializers import LoadBackupSerializer
 
 from auditlog.models import LogEntry
@@ -138,6 +139,16 @@ class LoadBackupView(APIView):
                         "auditlog.logentry",
                     ],
                 )
+
+            # Enforce LICENSE_SEATS after restore
+            license_seats = getattr(settings, "LICENSE_SEATS", 0)
+            if license_seats:
+                editor_count = len(User.get_editors())
+                if editor_count > license_seats:
+                    raise ValueError(
+                        f"Backup contains {editor_count} editors but license allows {license_seats}. "
+                        "Restore aborted, original data has been recovered."
+                    )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
             logger.error(
