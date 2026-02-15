@@ -1166,6 +1166,7 @@ export const IncidentSchema = z.object({
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional()
 });
 
