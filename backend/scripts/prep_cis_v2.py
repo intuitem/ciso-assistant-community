@@ -185,6 +185,9 @@ def build_v2_workbook(
     output_filename: str,
     cis_language: str = "en",
 ) -> None:
+    
+    lang = cis_language if cis_language in CIS_LANGUAGES.values() else "en"
+
     packager_slug = slugify_packager(packager)
     library_urn = f"urn:{packager_slug}:risk:library:{LIBRARY_SLUG}"
     framework_urn = f"urn:{packager_slug}:risk:framework:{LIBRARY_SLUG}"
@@ -199,7 +202,7 @@ def build_v2_workbook(
     ws_library.append(["type", "library"])
     ws_library.append(["urn", library_urn])
     ws_library.append(["version", "1"])
-    ws_library.append(["locale", "en"])
+    ws_library.append(["locale", cis_language])
     ws_library.append(["ref_id", LIBRARY_REF_ID])
     ws_library.append(["name", LIBRARY_NAME])
     ws_library.append(["description", LIBRARY_DESCRIPTION])
@@ -251,9 +254,6 @@ def build_v2_workbook(
 
     ws_impl_content = wb.create_sheet(f"{IMPLEMENTATION_GROUPS_SHEET_BASE}_content")
     ws_impl_content.append(["ref_id", "name", "description"])
-
-    lang = cis_language if cis_language in CIS_LANGUAGES.values() else "en"
-
     ws_impl_content.append(["IG1", "IG1", IG_DESCRIPTIONS["IG1"][lang]])
     ws_impl_content.append(["IG2", "IG2", IG_DESCRIPTIONS["IG2"][lang]])
     ws_impl_content.append(["IG3", "IG3", IG_DESCRIPTIONS["IG3"][lang]])
