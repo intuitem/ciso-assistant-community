@@ -122,6 +122,7 @@
 	"focusMode": "Focusmodus",
 	"focusModeTooltip": "Focus op een specifiek domein",
 	"objectNotReachableFromCurrentFocus": "Dit object is niet bereikbaar vanuit de huidige focus. Omleiden naar de lijstweergave.",
+	"objectNotFound": "Object niet gevonden. Omleiden naar de lijstweergave.",
 	"clearFocus": "Wis focus",
 	"noDomainsAvailable": "Geen domeinen beschikbaar",
 	"urn": "URN",

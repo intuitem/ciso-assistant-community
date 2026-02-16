@@ -170,6 +170,7 @@
 	"focusMode": "Mode focus",
 	"focusModeTooltip": "Se concentrer sur un domaine spécifique",
 	"objectNotReachableFromCurrentFocus": "Cet objet n'est pas accessible depuis le focus actuel. Redirection vers la vue liste.",
+	"objectNotFound": "Objet introuvable. Redirection vers la vue liste.",
 	"clearFocus": "Effacer le focus",
 	"noDomainsAvailable": "Aucun domaine disponible",
 	"enclave": "Enclave",

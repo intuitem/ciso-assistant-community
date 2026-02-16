@@ -179,6 +179,7 @@
 	"focusMode": "Focus mode",
 	"focusModeTooltip": "Focus on a specific domain",
 	"objectNotReachableFromCurrentFocus": "This object is not reachable from the current focus. Redirecting to the list view.",
+	"objectNotFound": "Object not found. Redirecting to the list view.",
 	"clearFocus": "Clear focus",
 	"noDomainsAvailable": "No domains available",
 	"enclave": "Enclave",

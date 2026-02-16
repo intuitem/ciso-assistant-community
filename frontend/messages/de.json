@@ -122,6 +122,7 @@
 	"focusMode": "Fokusmodus",
 	"focusModeTooltip": "Auf einen bestimmten Bereich fokussieren",
 	"objectNotReachableFromCurrentFocus": "Dieses Objekt ist vom aktuellen Fokus aus nicht erreichbar. Umleitung zur Listenansicht.",
+	"objectNotFound": "Objekt nicht gefunden. Umleitung zur Listenansicht.",
 	"clearFocus": "Fokus löschen",
 	"noDomainsAvailable": "Keine Bereiche verfügbar",
 	"urn": "URN",

@@ -74,7 +74,15 @@ export const loadDetail = async ({ event, model, id }) => {
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
 		if (res.status === 404) {
-			setFlash({ type: 'warning', message: m.objectNotReachableFromCurrentFocus() }, event);
+			// Check if focus mode is active
+			const focusFolderId = event.cookies.get('focus_folder_id');
+			const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+			const isFocusModeActive = focusFolderId && focusModeEnabled;
+
+			const message = isFocusModeActive
+				? m.objectNotReachableFromCurrentFocus()
+				: m.objectNotFound();
+			setFlash({ type: 'warning', message }, event);
 			throw redirect(302, `/${model.urlModel}`);
 		}
 		// Let other errors (403, 500, etc.) propagate with appropriate error

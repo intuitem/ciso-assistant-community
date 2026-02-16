@@ -161,6 +161,7 @@
 	"focusMode": "Način fokusa",
 	"focusModeTooltip": "Fokusiraj se na određenu domenu",
 	"objectNotReachableFromCurrentFocus": "Ovaj objekt nije dostupan iz trenutnog fokusa. Preusmjeravanje na prikaz popisa.",
+	"objectNotFound": "Objekt nije pronađen. Preusmjeravanje na prikaz popisa.",
 	"clearFocus": "Obriši fokus",
 	"noDomainsAvailable": "Nema dostupnih domena",
 	"urn": "URN",
