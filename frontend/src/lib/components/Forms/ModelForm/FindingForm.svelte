@@ -179,6 +179,13 @@
 	<AutocompleteSelect
 		multiple
 		{form}
+		optionsEndpoint="threats"
+		field="threats"
+		label={m.threats()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
 		optionsEndpoint="vulnerabilities"
 		optionsExtraFields={[['folder', 'str']]}
 		field="vulnerabilities"

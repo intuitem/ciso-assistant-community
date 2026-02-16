@@ -1747,6 +1747,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Findings',
 		foreignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings-assessments' },
+			{ field: 'threats', urlModel: 'threats' },
 			{ field: 'applied_controls', urlModel: 'applied-controls' },
 			{ field: 'evidences', urlModel: 'evidences' }
 		],
