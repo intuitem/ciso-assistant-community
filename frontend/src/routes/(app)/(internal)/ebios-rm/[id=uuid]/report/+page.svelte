@@ -257,7 +257,14 @@
 							{#if event.assets.length > 0}
 								<div>
 									<span class="font-semibold text-gray-700">{m.assets()}:</span>
-									<span class="ml-2">{event.assets.map((a) => a.str).join(', ')}</span>
+									{#each event.assets as asset, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/assets/${asset.id}`}
+											label={asset.str}
+											class="space-x-2 text-primary-800 hover:text-primary-600">{asset.str}</Anchor
+										>
+									{/each}
 								</div>
 							{/if}
 							{#if event.qualifications.length > 0}
@@ -449,15 +456,23 @@
 							</div>
 						</div>
 						{#if roto.feared_events.length > 0}
-							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.fearedEvents()}:</span>
-								<span class="ml-2 text-gray-600"
-									>{reportData.feared_events
-										.filter((fe) => roto.feared_events.some((id) => id.id === fe.id))
-										.map((fe) => fe.name)
-										.join(', ')}</span
-								>
-							</div>
+							{@const fearedEvents = reportData.feared_events.filter((fe) =>
+								roto.feared_events.some((id) => id.id === fe.id)
+							)}
+							{#if fearedEvents.length > 0}
+								<div class="mt-2 text-sm">
+									<span class="font-semibold text-gray-700">{m.fearedEvents()}:</span>
+									{#each fearedEvents as fearedEvent, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/feared-events/${fearedEvent.id}`}
+											label={fearedEvent.name}
+											class="space-x-2 text-primary-800 hover:text-primary-600"
+											>{fearedEvent.name}</Anchor
+										>
+									{/each}
+								</div>
+							{/if}
 						{/if}
 						{#if roto.justification}
 							<div class="mt-2 text-sm">
@@ -721,9 +736,14 @@
 							{#if opScenario.threats && opScenario.threats.length > 0}
 								<div class="mt-3 text-sm">
 									<span class="font-semibold text-gray-700">{m.threats()}:</span>
-									<span class="ml-2 text-gray-700">
-										{opScenario.threats.map((t) => t.str).join(', ')}
-									</span>
+									{#each opScenario.threats as threat, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/threats/${threat.id}`}
+											label={threat.str}
+											class="space-x-2 text-primary-800 hover:text-primary-600">{threat.str}</Anchor
+										>
+									{/each}
 								</div>
 							{/if}
 							{#if opScenario.stakeholders && opScenario.stakeholders.length > 0}
