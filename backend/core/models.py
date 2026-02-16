@@ -304,7 +304,13 @@ class StoredLibrary(LibraryMixin):
         )
 
     @classmethod
-    def store_library_content(cls, library_content: bytes, builtin: bool = False, dry_run: bool = False, force_update: bool = False) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
+    def store_library_content(
+        cls,
+        library_content: bytes,
+        builtin: bool = False,
+        dry_run: bool = False,
+        force_update: bool = False,
+    ) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
         """
         Store a library from its YAML byte content into the database.
 
@@ -389,7 +395,7 @@ class StoredLibrary(LibraryMixin):
         locale = library_data.get("locale", "en")
         version = int(library_data["version"])
         is_loaded = LoadedLibrary.objects.filter(  # We consider the library as loaded even if the loaded version is different
-            urn=urn, locale=locale
+            urn=urn
         ).exists()
 
         if dry_run:
@@ -422,7 +428,6 @@ class StoredLibrary(LibraryMixin):
             if same_lib:
                 version = same_lib.version + 1
 
-
         same_version_lib = StoredLibrary.objects.filter(
             urn=urn, locale=locale, version=version
         ).first()
@@ -433,17 +438,16 @@ class StoredLibrary(LibraryMixin):
             same_version_lib.save()
             return None, "libraryAlreadyLoadedError"
 
-        if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
+        if StoredLibrary.objects.filter(urn=urn, version__gte=version):
             return (
                 None,
                 "libraryOutdatedError",
             )  # We do not accept to store outdated libraries
 
-        with transaction.atomic():            
-            
+        with transaction.atomic():
             # Allow adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
             for outdated_library in StoredLibrary.objects.filter(
-                urn=urn, locale=locale, version__lt=version
+                urn=urn, version__lt=version
             ):
                 outdated_library.delete()
 
@@ -1310,9 +1314,7 @@ class LoadedLibrary(LibraryMixin):
     @transaction.atomic
     def update(self, strategy=None) -> Union[str, None]:
         new_libraries = [
-            *StoredLibrary.objects.filter(
-                urn=self.urn, version__gt=self.version
-            )
+            *StoredLibrary.objects.filter(urn=self.urn, version__gt=self.version)
         ]
 
         if not new_libraries:

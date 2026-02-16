@@ -51,6 +51,7 @@ logger = structlog.get_logger(__name__)
 
 CIS_LOCAL_LIBRARY_URN = "urn:local:risk:library:cis-controls-v8"
 
+
 class MultiStringFilter(df.CharFilter):
     def filter(self, qs, value):
         values = self.parent.data.getlist(self.field_name)
@@ -404,7 +405,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                 )
 
                             error_payload = {"error": error_code}
-                            detail = upload_excel_result.get("detail") or upload_excel_result.get("error")
+                            detail = upload_excel_result.get(
+                                "detail"
+                            ) or upload_excel_result.get("error")
                             if detail:
                                 error_payload["detail"] = detail
 
@@ -415,7 +418,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
                         # Convert YAML string to bytes for storage
                         content = upload_excel_result["yaml"].encode("utf-8")
-                        
+
                         special_cis = upload_excel_result.get("special") == "CIS"
 
                     except SandboxViolationError as e:
@@ -451,7 +454,6 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     # YAML file - read directly
                     content = attachment.read()
 
-
                 dry_run = request.query_params.get("dry_run", "false").lower() == "true"
 
                 # Store the library content (YAML bytes)
@@ -477,8 +479,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     already_loaded = LoadedLibrary.objects.filter(
                         urn=library.urn
                     ).exists()
-                    
-                    print("ALREADY LOADED = ", already_loaded)
+
+                    print("ALREADY LOADED = ", already_loaded, library.urn)
 
                     try:
                         load_error = library.load()

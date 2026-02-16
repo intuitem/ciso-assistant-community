@@ -33,12 +33,13 @@ URN_PREFIX_SHEET_BASE = "urn_prefix"
 REFERENCE_CONTROL_PREFIX_ID = "cis"
 
 CIS_FRAMEWORK_SHEET_NAMES = ("contrôles v8", "controls v8")
-CIS_LANGUAGES = {
-    "contrôles v8": "fr",
-    "controls v8": "en"
-}
+CIS_LANGUAGES = {"contrôles v8": "fr", "controls v8": "en"}
 
-CIS_COPYRIGHT_SHEET_NAMES = ("License for Use", "License dutilisation", "License d'utilisation")
+CIS_COPYRIGHT_SHEET_NAMES = (
+    "License for Use",
+    "License dutilisation",
+    "License d'utilisation",
+)
 
 IG_DESCRIPTIONS = {
     "IG1": {
@@ -56,10 +57,10 @@ IG_DESCRIPTIONS = {
 }
 
 CSF_FUNCTION_TRANSLATIONS = {
-    "govern":  ["gouverner"],
-    "identify":["identifier"],
+    "govern": ["gouverner"],
+    "identify": ["identifier"],
     "protect": ["protéger"],
-    "detect":  ["détecter"],
+    "detect": ["détecter"],
     "respond": ["répondre"],
     "recover": ["rétablir"],
 }
@@ -185,7 +186,6 @@ def build_v2_workbook(
     output_filename: str,
     cis_language: str = "en",
 ) -> None:
-    
     lang = cis_language if cis_language in CIS_LANGUAGES.values() else "en"
 
     packager_slug = slugify_packager(packager)
@@ -293,7 +293,9 @@ def main():
         description="Convert CIS Controls official Excel file to a CISO Assistant v2 Excel file.",
     )
     parser.add_argument("filename", help="Path to the CIS Controls Excel file")
-    parser.add_argument("-p", "--packager", required=True, help="Name of the packager entity")
+    parser.add_argument(
+        "-p", "--packager", required=True, help="Name of the packager entity"
+    )
     parser.add_argument(
         "-o",
         "--output",
@@ -324,7 +326,6 @@ def main():
     library_copyright = ""
 
     for sheet in workbook.worksheets:
-
         title = sheet.title
         print(f'⌛ Parsing tab "{title}"...')
 
@@ -334,7 +335,11 @@ def main():
         else:
             # In order to retrieve the matched element in order to set  right language for IGs
             matched_prefix = next(
-                (prefix for prefix in CIS_FRAMEWORK_SHEET_NAMES if title.strip().lower().startswith(prefix)),
+                (
+                    prefix
+                    for prefix in CIS_FRAMEWORK_SHEET_NAMES
+                    if title.strip().lower().startswith(prefix)
+                ),
                 None,
             )
 
@@ -364,7 +369,7 @@ def main():
             reference_controls,
             library_copyright,
             args.output,
-            current_cis_language
+            current_cis_language,
         )
     except PermissionError:
         print(

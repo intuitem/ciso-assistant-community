@@ -877,12 +877,9 @@ class LibraryImporter:
 
     @transaction.atomic
     def _import_library(self):
-        print("Coucou 1")
         library_object = self.create_or_update_library()
-        print("Coucou 2")
         self.import_objects(library_object)
-        print("Coucou 3")
-        
+
         if dependencies := self._library.dependencies:
             library_object.dependencies.set(
                 LoadedLibrary.objects.filter(urn__in=dependencies)

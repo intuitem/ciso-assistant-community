@@ -81,7 +81,7 @@ class ExcelUploadHandler:
     ) -> dict[str, Any]:
         """
         Process Django UploadedFile using external conversion script.
-        
+
         The return dictionary contains the following keys:
             - yaml: Binary content of the YAML file
             - status: HTTP code (integer)
@@ -99,7 +99,7 @@ class ExcelUploadHandler:
             return self._error(f"File too large (max {self.max_file_size} bytes)", 413)
 
         mode = compat_mode if compat_mode is not None else self.compat_mode
-        
+
         special = None
 
         try:
