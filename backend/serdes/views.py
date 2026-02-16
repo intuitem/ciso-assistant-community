@@ -140,15 +140,6 @@ class LoadBackupView(APIView):
                     ],
                 )
 
-            # Enforce LICENSE_SEATS after restore
-            license_seats = getattr(settings, "LICENSE_SEATS", 0)
-            if license_seats:
-                editor_count = len(User.get_editors())
-                if editor_count > license_seats:
-                    raise ValueError(
-                        f"Backup contains {editor_count} editors but license allows {license_seats}. "
-                        "Restore aborted, original data has been recovered."
-                    )
         except Exception as e:
             logger.error("Error while loading backup", exc_info=e)
             logger.error(
@@ -181,6 +172,39 @@ class LoadBackupView(APIView):
         finally:
             post_save.disconnect(fixture_callback)
             post_save.connect(add_user_info_to_log_entry, sender=LogEntry)
+
+        # Enforce LICENSE_SEATS after successful restore
+        license_seats = getattr(settings, "LICENSE_SEATS", None)
+        if license_seats is not None:
+            editor_count = len(User.get_editors())
+            if editor_count > license_seats:
+                logger.error(
+                    "Backup exceeds license seats, rolling back",
+                    editor_count=editor_count,
+                    license_seats=license_seats,
+                )
+                try:
+                    sys.stdin = io.StringIO(current_backup)
+                    management.call_command("flush", interactive=False)
+                    management.call_command(
+                        "loaddata",
+                        "-",
+                        format="json",
+                        verbosity=0,
+                    )
+                except Exception as restore_error:
+                    logger.error(
+                        "Error restoring original backup", exc_info=restore_error
+                    )
+                    return Response(
+                        {"error": "RestoreFailed"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
+                return Response(
+                    {"error": "errorLicenseSeatsExceeded"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         return Response({}, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
