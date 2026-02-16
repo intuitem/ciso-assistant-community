@@ -254,6 +254,7 @@
 	"versionColon": "Version:",
 	"versionHelpText": "Revision number of the audit",
 	"treatment": "Treatment",
+	"treatmentProgress": "Treatment progress",
 	"currentProba": "Current probability",
 	"currentImpact": "Current impact",
 	"residualProba": "Residual probability",
