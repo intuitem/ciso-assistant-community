@@ -150,6 +150,8 @@
 	"selectDomain": "اختر مجال",
 	"focusMode": "وضع التركيز",
 	"focusModeTooltip": "التركيز على مجال محدد",
+	"objectNotReachableFromCurrentFocus": "لا يمكن الوصول إلى هذا الكائن من التركيز الحالي. إعادة التوجيه إلى طريقة عرض القائمة.",
+	"objectNotFound": "لم يتم العثور على الكائن. إعادة التوجيه إلى طريقة عرض القائمة.",
 	"clearFocus": "مسح التركيز",
 	"noDomainsAvailable": "لا توجد مجالات متاحة",
 	"urn": "URN",
