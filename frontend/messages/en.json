@@ -1045,6 +1045,7 @@
 	"associatedEntities": "Associated entities",
 	"noMailerConfigured": "No mailer configured",
 	"errorLicenseSeatsExceeded": "The number of editor seats allowed by your license is exceeded, you will not be able to grant editing rights to this user. Please contact your administrator.",
+	"errorUserAlreadyExistsAsInternal": "A user with this email already exists as an internal user and cannot be converted to a third-party representative.",
 	"availableSeats": "Available seats",
 	"showImagesUnauthenticated": "Show logo and favicon to unauthenticated users",
 	"showImagesUnauthenticatedHelpText": "If disabled, the regular CISO Assistant logo and favicon will be displayed on the login screen",

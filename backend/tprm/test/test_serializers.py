@@ -312,10 +312,12 @@ class RepresentativeSerializersTestCase(TestCase):
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     @patch("iam.models.User.objects.filter")
-    def test_representative_write_serializer_existing_user(
+    def test_representative_write_serializer_existing_third_party_user(
         self, mock_filter, mock_is_access_allowed
     ):
-        """Test that RepresentativeWriteSerializer correctly associates an existing user with a Representative"""
+        """Test that RepresentativeWriteSerializer correctly associates an existing third-party user with a Representative"""
+        self.user.is_third_party = True
+
         mock_filter_result = MagicMock()
         mock_filter_result.first.return_value = self.user
         mock_filter.return_value = mock_filter_result
@@ -335,6 +337,32 @@ class RepresentativeSerializersTestCase(TestCase):
         representative = serializer.save()
 
         self.assertEqual(representative.user, self.user)
+
+    @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
+    @patch("iam.models.User.objects.filter")
+    def test_representative_write_serializer_rejects_internal_user(
+        self, mock_filter, mock_is_access_allowed
+    ):
+        """Test that RepresentativeWriteSerializer refuses to convert an internal user to third-party"""
+        mock_filter_result = MagicMock()
+        mock_filter_result.first.return_value = self.user
+        mock_filter.return_value = mock_filter_result
+
+        data = {
+            "email": "existing@example.com",
+            "first_name": "Updated",
+            "last_name": "User",
+            "entity": self.entity.id,
+            "create_user": True,
+        }
+
+        serializer = RepresentativeWriteSerializer(
+            data=data, context={"request": MagicMock()}
+        )
+        self.assertTrue(serializer.is_valid())
+
+        with self.assertRaises(ValidationError):
+            serializer.save()
 
     @patch("iam.models.RoleAssignment.is_access_allowed", return_value=True)
     @patch("iam.models.User.objects.create_user")
