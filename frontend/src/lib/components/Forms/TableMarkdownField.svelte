@@ -33,6 +33,7 @@
 	}
 
 	function preview() {
+		saveChanges();
 		isEditing = false;
 	}
 </script>
