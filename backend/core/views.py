@@ -10581,6 +10581,7 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                 _dealt_findings=Count(
                     "findings",
                     filter=Q(findings__status__in=dealt_with_statuses),
+                    distinct=True,
                 ),
                 treatment_progress=Case(
                     When(_total_findings=0, then=Value(0)),
