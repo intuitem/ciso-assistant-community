@@ -976,6 +976,7 @@
 	"associatedEntities": "Entités associées",
 	"noMailerConfigured": "Aucun mailer configuré",
 	"errorLicenseSeatsExceeded": "Le nombre de sièges disponibles est dépassé, vous ne pourrez pas accorder de droits d'édition à cet utilisateur. Veuillez contacter votre administrateur.",
+	"errorUserAlreadyExistsAsInternal": "Un utilisateur avec cet email existe déjà en tant qu'utilisateur interne et ne peut pas être converti en représentant tiers.",
 	"availableSeats": "Sièges disponibles",
 	"showImagesUnauthenticated": "Afficher le logo et le favicon aux utilisateurs non authentifiés",
 	"showImagesUnauthenticatedHelpText": "Si cette option est désactivée, le logo et l'icône habituels de l'assistant CISO seront affichés sur l'écran de connexion.",
