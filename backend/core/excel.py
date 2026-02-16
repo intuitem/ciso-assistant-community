@@ -10,6 +10,8 @@ from core.sandbox import SandboxFactory, SandboxTimeoutError, SandboxViolationEr
 
 logger = structlog.get_logger(__name__)
 
+CIS_SHEET_NAMES = ("contrôles v8", "controls v8")
+
 
 class ExcelUploadHandler:
     """
@@ -79,6 +81,11 @@ class ExcelUploadHandler:
     ) -> dict[str, Any]:
         """
         Process Django UploadedFile using external conversion script.
+        
+        The return dictionary contains the following keys:
+            - yaml: Binary content of the YAML file
+            - status: HTTP code (integer)
+            - special: String with value None / "CIS" / "CCM"
         """
         if not uploaded_file.size:
             logger.error("No file uploaded or file is empty")
@@ -92,6 +99,8 @@ class ExcelUploadHandler:
             return self._error(f"File too large (max {self.max_file_size} bytes)", 413)
 
         mode = compat_mode if compat_mode is not None else self.compat_mode
+        
+        special = None
 
         try:
             content = uploaded_file.read()
@@ -106,12 +115,14 @@ class ExcelUploadHandler:
             prep_output_filename = ""
 
             # Check for CIS V8
-            if any(s.strip().lower().startswith("controls v8") for s in sheet_names):
+            if any(s.strip().lower().startswith(CIS_SHEET_NAMES) for s in sheet_names):
+                special = "CIS"
                 prep_script = self.CIS_V8_PREP_SCRIPT_PATH
                 prep_output_filename = "cis-controls-v8.xlsx"
 
             # Check for CSA CCM
             elif "CCM" in sheet_names:
+                special = "CCM"
                 prep_script = self.CSA_CCM_PREP_SCRIPT_PATH
                 prep_output_filename = "ccm-controls-v4.xlsx"
 
@@ -143,7 +154,7 @@ class ExcelUploadHandler:
                 binary_output=False,
             )
 
-            return {"yaml": yaml_output, "status": 200}
+            return {"yaml": yaml_output, "status": 200, "special": special}
 
         except SandboxViolationError as e:
             logger.warning(f"Security violation in Excel upload: {e}", exc_info=True)

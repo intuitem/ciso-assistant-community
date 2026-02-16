@@ -304,9 +304,62 @@ class StoredLibrary(LibraryMixin):
         )
 
     @classmethod
-    def store_library_content(
-        cls, library_content: bytes, builtin: bool = False, dry_run: bool = False
-    ) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
+    def store_library_content(cls, library_content: bytes, builtin: bool = False, dry_run: bool = False, force_update: bool = False) -> Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
+        """
+        Store a library from its YAML byte content into the database.
+
+        This method validates, parses and conditionally persists a library definition.
+        It prevents duplicate uploads, enforces required fields, validates the URN format, and ensures version consistency.
+
+        Depending on the `dry_run` flag, it either:
+        - Returns metadata without persisting anything (validation mode)
+        - Stores the library and returns the created StoredLibrary instance
+
+        The method also:
+        - Rejects outdated versions
+        - Deletes older versions when storing a newer one
+
+        Args:
+            cls: The StoredLibrary class.
+            library_content (bytes):
+                Raw YAML content of the library file.
+            builtin (bool, optional):
+                Whether the library is a builtin library.
+                Builtin libraries must explicitly contain a `builtin: true` line
+                in their YAML definition. Defaults to False.
+            dry_run (bool, optional):
+                If True, validates and parses the library without storing it
+                in the database. Returns metadata only. Defaults to False.
+            force_update (bool, optional):
+                Currently unused. Intended to allow forcing storage of a version
+                even if version conflicts exist. Defaults to False.
+
+        Raises:
+            yaml.YAMLError:
+                If the YAML content is invalid or does not deserialize into a dictionary.
+            ValueError:
+                - If required fields are missing.
+                - If the URN format is invalid.
+                - If the library is outdated.
+
+        Returns:
+            Tuple[Optional[Union["StoredLibrary", dict]], Optional[str]]:
+
+                On success (dry_run=False):
+                    (StoredLibrary instance, None)
+
+                On success (dry_run=True):
+                    (dict containing library metadata preview, None)
+
+                On controlled failure:
+                    (None, error_code)
+
+            Possible error codes:
+                - "libraryAlreadyLoadedError":
+                    The library hash already exists OR same version already stored.
+                - "libraryOutdatedError":
+                    A newer or equal version already exists in the store.
+        """
         hash_checksum = sha256(library_content)
         if not dry_run and hash_checksum in StoredLibrary.HASH_CHECKSUM_SET:
             # We do not store the library if its hash checksum is in the database.
@@ -363,28 +416,40 @@ class StoredLibrary(LibraryMixin):
                 None,
             )
 
-        same_version_lib = StoredLibrary.objects.filter(
-            urn=urn, locale=locale, version=version
-        ).first()
-        if same_version_lib:
-            # update hash following cosmetic change (e.g. when we added publication date)
-            logger.info("update hash", urn=urn)
-            same_version_lib.hash_checksum = hash_checksum
-            same_version_lib.save()
-            return None, "libraryAlreadyLoadedError"
 
-        if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-            return (
-                None,
-                "libraryOutdatedError",
-            )  # We do not accept to store outdated libraries
+        # If not force update, only update hash or refuse library
+        if not force_update:
+            same_version_lib = StoredLibrary.objects.filter(
+                urn=urn, locale=locale, version=version
+            ).first()
+            if same_version_lib:
+                # update hash following cosmetic change (e.g. when we added publication date)
+                logger.info("update hash", urn=urn)
+                same_version_lib.hash_checksum = hash_checksum
+                same_version_lib.save()
+                return None, "libraryAlreadyLoadedError"
+
+            if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
+                return (
+                    None,
+                    "libraryOutdatedError",
+                )  # We do not accept to store outdated libraries
 
         with transaction.atomic():
-            # This code allows adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
-            for outdated_library in StoredLibrary.objects.filter(
-                urn=urn, locale=locale, version__lt=version
-            ):
-                outdated_library.delete()
+            
+            print("FORCE = ", force_update)
+            
+            if force_update:
+                # If force update, delete all versions of the library, no matter the version
+                for outdated_library in StoredLibrary.objects.filter(urn=urn):
+                    print("OUTDATED = ", outdated_library)
+                    outdated_library.delete()
+            else:
+                # Else, allow adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
+                for outdated_library in StoredLibrary.objects.filter(
+                    urn=urn, locale=locale, version__lt=version
+                ):
+                    outdated_library.delete()
 
             objects_meta = {
                 key: (1 if key == "framework" else len(value))
@@ -393,7 +458,7 @@ class StoredLibrary(LibraryMixin):
 
             dependencies = library_data.get(
                 "dependencies", []
-            )  # I don't want whitespaces in URN anymore nontheless
+            )  # I don't want whitespaces in URN anymore nonetheless
 
             library_objects = library_data["objects"]
             label_names = library_data.get("labels", [])
