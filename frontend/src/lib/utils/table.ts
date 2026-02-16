@@ -2209,8 +2209,26 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'folder', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'folder', 'perimeter'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings',
+			'treatmentProgress',
+			'folder',
+			'perimeter'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings_count',
+			'treatment_progress',
+			'folder',
+			'perimeter'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,

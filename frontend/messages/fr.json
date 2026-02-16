@@ -248,6 +248,7 @@
 	"diskSpace": "Espace disque",
 	"diskUsed": "Utilisé",
 	"treatment": "Traitement",
+	"treatmentProgress": "Avancement du traitement",
 	"currentProba": "Vraisemblance actuelle",
 	"currentImpact": "Conséquence actuelle",
 	"residualProba": "Vraisemblance résiduelle",

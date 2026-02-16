@@ -10568,6 +10568,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
+        dealt_with_statuses = [
+            Finding.Status.MITIGATED,
+            Finding.Status.RESOLVED,
+            Finding.Status.DISMISSED,
+            Finding.Status.CLOSED,
+        ]
         return (
             super()
             .get_queryset()
@@ -10575,6 +10581,19 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+            )
+            .annotate(
+                _total_findings=Count("findings"),
+                _dealt_findings=Count(
+                    "findings",
+                    filter=Q(findings__status__in=dealt_with_statuses),
+                    distinct=True,
+                ),
+                treatment_progress=Case(
+                    When(_total_findings=0, then=Value(0)),
+                    default=100 * F("_dealt_findings") / F("_total_findings"),
+                    output_field=IntegerField(),
+                ),
             )
         )
 
