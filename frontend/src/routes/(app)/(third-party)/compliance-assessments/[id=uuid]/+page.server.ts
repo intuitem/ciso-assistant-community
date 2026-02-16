@@ -3,7 +3,7 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo } from '$lib/utils/crud';
 import { loadValidationFlowFormData } from '$lib/utils/load';
 import { ComplianceAssessmentSchema } from '$lib/utils/schemas';
-import { type Actions } from '@sveltejs/kit';
+import { error, redirect, type Actions } from '@sveltejs/kit';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
@@ -11,12 +11,19 @@ import { z } from 'zod';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, cookies }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 	const objectEndpoint = `${endpoint}object/`;
 
 	const res = await fetch(endpoint);
+	if (!res.ok) {
+		if (res.status === 404) {
+			setFlash({ type: 'warning', message: m.objectNotReachableFromCurrentFocus() }, cookies);
+			throw redirect(302, '/compliance-assessments');
+		}
+		throw error(res.status, res.statusText || 'Failed to load compliance assessment');
+	}
 	const compliance_assessment = await res.json();
 
 	const object = await fetch(objectEndpoint).then((res) => res.json());

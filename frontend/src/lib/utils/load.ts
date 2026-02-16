@@ -10,7 +10,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 
@@ -73,8 +73,12 @@ export const loadDetail = async ({ event, model, id }) => {
 
 	const res = await event.fetch(endpoint);
 	if (!res.ok) {
-		setFlash({ type: 'warning', message: m.objectNotReachableFromCurrentFocus() }, event);
-		throw redirect(302, `/${model.urlModel}`);
+		if (res.status === 404) {
+			setFlash({ type: 'warning', message: m.objectNotReachableFromCurrentFocus() }, event);
+			throw redirect(302, `/${model.urlModel}`);
+		}
+		// Let other errors (403, 500, etc.) propagate with appropriate error
+		throw error(res.status, res.statusText || `Failed to load ${model.urlModel}`);
 	}
 	const data = await res.json();
 
