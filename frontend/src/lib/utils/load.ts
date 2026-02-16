@@ -243,6 +243,20 @@ export const loadDetail = async ({ event, model, id }) => {
 		title = hasName ? data.name : data.ref_id || title;
 	}
 
+	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
+	let updateForm: SuperValidated<AnyZodObject> | undefined;
+	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
+	if (hasAddExisting) {
+		const parentEndpointUrl = model.endpointUrl ?? model.urlModel;
+		const objectEndpoint = `${BASE_API_URL}/${parentEndpointUrl}/${id}/object/`;
+		const objectResponse = await event.fetch(objectEndpoint);
+		if (objectResponse.ok) {
+			const parentObject = await objectResponse.json();
+			const parentSchema = modelSchema(model.urlModel);
+			updateForm = await superValidate(parentObject, zod(parentSchema), { errors: false });
+		}
+	}
+
 	return {
 		data,
 		title,
@@ -250,6 +264,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
 		model,
-		modelVerboseName: urlParamModelVerboseName(model.urlModel)
+		modelVerboseName: urlParamModelVerboseName(model.urlModel),
+		updateForm
 	};
 };

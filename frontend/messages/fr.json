@@ -2097,6 +2097,7 @@
 	"addElementaryAction": "Ajouter une action élémentaire",
 	"associatedElementaryActions": "Actions élémentaires associées",
 	"selectElementaryActions": "Sélectionner une action élémentaire",
+	"selectExisting": "Sélectionner existant",
 	"icon": "Icône",
 	"operatingModes": "Modes opératoires",
 	"operatingMode": "Mode opératoire",
