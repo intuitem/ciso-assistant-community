@@ -2273,8 +2273,8 @@ class LoadFileView(APIView):
             # Process controls first - collect all unique control names
             all_controls = set()
             for record in records:
-                existing_controls = record.get("existing_applied_controls", "").strip()
-                additional_controls = record.get("additional_controls", "").strip()
+                existing_controls = str(record.get("existing_applied_controls", "")).strip()
+                additional_controls = str(record.get("additional_controls", "")).strip()
 
                 if existing_controls:
                     all_controls.update(
