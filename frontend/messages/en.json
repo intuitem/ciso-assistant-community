@@ -2193,6 +2193,7 @@
 	"addElementaryAction": "Add elementary action",
 	"associatedElementaryActions": "Associated elementary actions",
 	"selectElementaryActions": "Select elementary actions",
+	"selectExisting": "Select existing",
 	"icon": "Icon",
 	"operatingModes": "Operating modes",
 	"operatingMode": "Operating mode",
