@@ -912,6 +912,7 @@ export const organisationObjectiveSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
 	metrics: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -925,6 +926,7 @@ export const organisationIssueSchema = z.object({
 	status: z.string().optional().default('draft'),
 	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	objectives: z.string().uuid().optional().array().optional(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });

@@ -440,7 +440,13 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'sync_mappings' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'applied_controls', urlModel: 'evidences' },
+			{
+				field: 'applied_controls',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
@@ -1192,7 +1198,9 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'nature', urlModel: 'natures' },
 			{ field: 'assigned_to', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
-			{ field: 'perimeters', urlModel: 'perimeters' }
+			{ field: 'perimeters', urlModel: 'perimeters' },
+			{ field: 'associated_controls', urlModel: 'applied-controls' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		detailViewFields: [
 			{ field: 'folder' },
@@ -1229,14 +1237,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'processings',
 				urlModel: 'applied-controls',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'associated_controls'
+				}
 			},
 			{
 				field: 'processings',
 				urlModel: 'evidences',
-				disableCreate: true,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'evidences'
+				}
 			}
 		]
 	},
@@ -1788,7 +1800,14 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'findings_assessment', urlModel: 'findings' },
-			{ field: 'findings_assessments', urlModel: 'evidences' }
+			{
+				field: 'findings_assessments',
+				urlModel: 'evidences',
+				disableDelete: false,
+				addExisting: {
+					parentField: 'evidences'
+				}
+			}
 		],
 		selectFields: [{ field: 'status' }, { field: 'category' }],
 		detailViewFields: [
@@ -1821,8 +1840,20 @@ export const URL_MODEL_MAP: ModelMap = {
 		reverseForeignKeyFields: [
 			// 	{ field: 'findings', urlModel: 'vulnerabilities' },
 			// 	{ field: 'findings', urlModel: 'reference-controls' },
-			{ field: 'findings', urlModel: 'applied-controls' },
-			{ field: 'findings', urlModel: 'evidences' }
+			{
+				field: 'findings',
+				urlModel: 'applied-controls',
+				addExisting: {
+					parentField: 'applied_controls'
+				}
+			},
+			{
+				field: 'findings',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			}
 		],
 		selectFields: [
 			{ field: 'severity', valueType: 'number' },
@@ -2019,7 +2050,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'issues', urlModel: 'organisation-issues' },
 			{ field: 'tasks', urlModel: 'task-templates' },
 			{ field: 'metrics', urlModel: 'metric-instances' },
-			{ field: 'assigned_to', urlModel: 'actors' }
+			{ field: 'assigned_to', urlModel: 'actors' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		],
 		detailViewFields: [
 			{ field: 'ref_id' },
@@ -2041,13 +2073,19 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'objectives',
 				urlModel: 'applied-controls',
 				disableCreate: false,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'applied_controls'
+				}
 			},
 			{
 				field: 'organisation_objectives',
 				urlModel: 'metric-instances',
 				disableCreate: false,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'metrics'
+				}
 			}
 		],
 		filters: [{ field: 'folder' }]
@@ -2061,14 +2099,18 @@ export const URL_MODEL_MAP: ModelMap = {
 		selectFields: [{ field: 'category' }, { field: 'origin' }, { field: 'status' }],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'objectives', urlModel: 'organisation-objectives' }
 		],
 		reverseForeignKeyFields: [
 			{
 				field: 'issues',
 				urlModel: 'organisation-objectives',
 				disableCreate: false,
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'objectives'
+				}
 			}
 		],
 		filters: [{ field: 'folder' }]

@@ -1828,6 +1828,12 @@ class OrganisationObjectiveReadSerializer(BaseModelSerializer):
 
 
 class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
+    applied_controls = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=AppliedControl.objects.all(),
+        required=False,
+    )
+
     class Meta:
         model = OrganisationObjective
         fields = "__all__"
@@ -1848,6 +1854,12 @@ class OrganisationIssueReadSerializer(BaseModelSerializer):
 
 
 class OrganisationIssueWriteSerializer(BaseModelSerializer):
+    objectives = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=OrganisationObjective.objects.all(),
+        required=False,
+    )
+
     class Meta:
         model = OrganisationIssue
         fields = "__all__"
