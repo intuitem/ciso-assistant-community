@@ -150,6 +150,8 @@
 	"selectDomain": "डोमेन चुनें",
 	"focusMode": "फोकस मोड",
 	"focusModeTooltip": "किसी विशिष्ट डोमेन पर ध्यान केंद्रित करें",
+	"objectNotReachableFromCurrentFocus": "यह ऑब्जेक्ट वर्तमान फ़ोकस से पहुंच योग्य नहीं है। सूची दृश्य पर पुनर्निर्देशित कर रहे हैं।",
+	"objectNotFound": "ऑब्जेक्ट नहीं मिला। सूची दृश्य पर पुनर्निर्देशित कर रहे हैं।",
 	"clearFocus": "फोकस साफ़ करें",
 	"noDomainsAvailable": "कोई डोमेन उपलब्ध नहीं",
 	"urn": "URN",
