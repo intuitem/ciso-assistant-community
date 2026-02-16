@@ -4924,6 +4924,10 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Is locked"),
     )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
+    )
     fields_to_check = ["name", "version"]
 
     class Meta:

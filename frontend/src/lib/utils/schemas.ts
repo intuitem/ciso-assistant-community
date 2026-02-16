@@ -120,7 +120,8 @@ export const RiskAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	ebios_rm_study: z.string().uuid().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -447,7 +448,8 @@ export const ComplianceAssessmentSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
