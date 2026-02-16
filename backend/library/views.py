@@ -477,6 +477,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     already_loaded = LoadedLibrary.objects.filter(
                         urn=library.urn
                     ).exists()
+                    
+                    print("ALREADY LOADED = ", already_loaded)
 
                     try:
                         load_error = library.load()
@@ -516,6 +518,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
                         )
 
+                    # print("LOAD_ERROR = ", load_error)
                     if load_error is not None:
                         if not already_loaded:
                             logger.error(

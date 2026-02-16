@@ -416,36 +416,36 @@ class StoredLibrary(LibraryMixin):
                 None,
             )
 
+        if force_update:
+            same_lib = StoredLibrary.objects.filter(urn=urn).first()
 
-        # If not force update, only update hash or refuse library
-        if not force_update:
-            same_version_lib = StoredLibrary.objects.filter(
-                urn=urn, locale=locale, version=version
-            ).first()
-            if same_version_lib:
-                # update hash following cosmetic change (e.g. when we added publication date)
-                logger.info("update hash", urn=urn)
-                same_version_lib.hash_checksum = hash_checksum
-                same_version_lib.save()
-                return None, "libraryAlreadyLoadedError"
+            if same_lib:
+                version = same_lib.version + 1
 
-            if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
-                return (
-                    None,
-                    "libraryOutdatedError",
-                )  # We do not accept to store outdated libraries
+
+        same_version_lib = StoredLibrary.objects.filter(
+            urn=urn, locale=locale, version=version
+        ).first()
+        if same_version_lib:
+            # update hash following cosmetic change (e.g. when we added publication date)
+            logger.info("update hash", urn=urn)
+            same_version_lib.hash_checksum = hash_checksum
+            same_version_lib.save()
+            return None, "libraryAlreadyLoadedError"
+
+        if StoredLibrary.objects.filter(urn=urn, locale=locale, version__gte=version):
+            return (
+                None,
+                "libraryOutdatedError",
+            )  # We do not accept to store outdated libraries
 
         with transaction.atomic():            
-            if force_update:
-                # If force update, delete all versions of the library, no matter the version
-                for outdated_library in StoredLibrary.objects.filter(urn=urn):
-                    outdated_library.delete()
-            else:
-                # Else, allow adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
-                for outdated_library in StoredLibrary.objects.filter(
-                    urn=urn, locale=locale, version__lt=version
-                ):
-                    outdated_library.delete()
+            
+            # Allow adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
+            for outdated_library in StoredLibrary.objects.filter(
+                urn=urn, locale=locale, version__lt=version
+            ):
+                outdated_library.delete()
 
             objects_meta = {
                 key: (1 if key == "framework" else len(value))
@@ -521,7 +521,7 @@ class StoredLibrary(LibraryMixin):
     def load(self) -> Union[str, None]:
         from library.utils import LibraryImporter
 
-        if LoadedLibrary.objects.filter(urn=self.urn, locale=self.locale).exists():
+        if LoadedLibrary.objects.filter(urn=self.urn).exists():
             return "This library has already been loaded."
 
         library_importer = LibraryImporter(self)
@@ -1311,7 +1311,7 @@ class LoadedLibrary(LibraryMixin):
     def update(self, strategy=None) -> Union[str, None]:
         new_libraries = [
             *StoredLibrary.objects.filter(
-                urn=self.urn, locale=self.locale, version__gt=self.version
+                urn=self.urn, version__gt=self.version
             )
         ]
 
@@ -1421,7 +1421,7 @@ class LoadedLibrary(LibraryMixin):
                 f"This library is a dependency of {dependent_libraries.count()} other libraries"
             )
         super(LoadedLibrary, self).delete(*args, **kwargs)
-        StoredLibrary.objects.filter(urn=self.urn, locale=self.locale).update(
+        StoredLibrary.objects.filter(urn=self.urn).update(
             is_loaded=False, autoload=False
         )
 
