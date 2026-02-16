@@ -190,5 +190,13 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
 
     class Meta:
         model = GlobalSettings
-        fields = "__all__"
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
+        ]
         read_only_fields = ["name"]
