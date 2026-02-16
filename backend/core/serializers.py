@@ -1606,6 +1606,10 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
     display_long = serializers.CharField()
+    questions = serializers.JSONField(source="get_questions_translated")
+    typical_evidence = serializers.CharField(
+        source="get_typical_evidence_translated", allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = RequirementNode
