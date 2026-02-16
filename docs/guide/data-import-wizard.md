@@ -229,14 +229,14 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 * ref\_id : String
 * name\* : String
 * description : String
-* inherent\_impact : String<sup>(1)</sup>
-* inherent\_proba : String<sup>(1)</sup>
+* inherent\_impact : String<sup>1</sup>
+* inherent\_proba : String<sup>1</sup>
 * _existing\_controls :_ String
-* current\_impact : String<sup>(1)</sup>
-* current\_proba : String<sup>(1)</sup>
+* current\_impact : String<sup>1</sup>
+* current\_proba : String<sup>1</sup>
 * _additional\_controls :_ String
-* residual\_impact : String<sup>(1)</sup>
-* residual\_proba : String<sup>(1)</sup>
+* residual\_impact : String<sup>1</sup>
+* residual\_proba : String<sup>1</sup>
 * treatment : String
   * open
   * mitigate
