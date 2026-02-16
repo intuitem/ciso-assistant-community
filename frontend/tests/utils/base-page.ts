@@ -36,6 +36,7 @@ export abstract class BasePage {
 
 	async hasTitle(title: string | RegExp = this.name) {
 		await expect.soft(this.pageTitle).toHaveText(title);
+		await expect.soft(this.page.getByTestId('logo-image')).toBeVisible();
 	}
 
 	/**
