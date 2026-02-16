@@ -92,7 +92,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
     action,
     api_view,
@@ -2326,19 +2326,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
+        current_language = get_language()
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
-            _choices = {
-                i: name
-                for i, name in enumerate(
-                    x["name"] for x in matrix.json_definition["risk"]
-                )
-            }
+            _choices = {}
+            for i, risk in enumerate(matrix.json_definition["risk"]):
+                translations = risk.get("translations")
+                if not isinstance(translations, dict):
+                    translations = {}
+                translated = translations.get(current_language, {})
+
+                # Use the translated name if available, otherwise fall back to the default name
+                name = translated.get("name") or risk.get("name", "")
+                _choices[risk.get("id", i)] = name
             options = options | _choices
+
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
 
