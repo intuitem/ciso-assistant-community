@@ -97,8 +97,7 @@ test('user can create findings inside a follow up', async ({
 				link: 'https://intuitem.com/'
 			},
 			undefined,
-			page,
-			'Add evidence' // temporary hack
+			page
 		);
 	});
 });
