@@ -9,11 +9,30 @@ import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
 import { zod } from 'sveltekit-superforms/adapters';
+import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { m } from '$paraglide/messages';
 
-export const load: LayoutServerLoad = async ({ fetch, params }) => {
+export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals }) => {
 	const endpoint = `${BASE_API_URL}/risk-assessments/${params.id}/`;
 
-	const risk_assessment = await fetch(endpoint).then((res) => res.json());
+	const res = await fetch(endpoint);
+	if (!res.ok) {
+		if (res.status === 404) {
+			// Check if focus mode is active
+			const focusFolderId = cookies.get('focus_folder_id');
+			const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+			const isFocusModeActive = focusFolderId && focusModeEnabled;
+
+			const message = isFocusModeActive
+				? m.objectNotReachableFromCurrentFocus()
+				: m.objectNotFound();
+			setFlash({ type: 'warning', message }, cookies);
+			throw redirect(302, '/risk-assessments');
+		}
+		throw error(res.status, res.statusText || 'Failed to load risk assessment');
+	}
+	const risk_assessment = await res.json();
 	const scenarios = await fetch(`${BASE_API_URL}/risk-scenarios/?risk_assessment=${params.id}`)
 		.then((res) => res.json())
 		.then((res) => res.results);
