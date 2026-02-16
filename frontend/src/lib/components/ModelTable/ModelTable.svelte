@@ -877,14 +877,21 @@
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
 																{#if key === 'ro_to_couple'}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor" stopPropagation
+																	<Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation
 																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
 																			'-'
 																		)[1]}</Anchor
 																	>
 																{:else}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor" stopPropagation
-																		>{safeTranslate(value.str)}</Anchor
+																	<Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
 																	>
 																{/if}
 															{:else}
