@@ -2608,6 +2608,7 @@ class FindingReadSerializer(FindingWriteSerializer):
     path = PathField(read_only=True)
     owner = FieldsRelatedField(many=True)
     findings_assessment = FieldsRelatedField(["id", "name", "is_locked"])
+    threats = FieldsRelatedField(many=True)
     vulnerabilities = FieldsRelatedField(many=True)
     reference_controls = FieldsRelatedField(many=True)
     applied_controls = FieldsRelatedField(many=True)
