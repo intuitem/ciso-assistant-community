@@ -516,6 +516,8 @@ class AssetWriteSerializer(BaseModelSerializer):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
         applied_controls = validated_data.pop("applied_controls", None)
+        vulnerabilities = validated_data.pop("vulnerabilities", None)
+        incidents = validated_data.pop("incidents", None)
         asset = super().create(validated_data)
 
         if parent_assets is not None:
@@ -524,6 +526,10 @@ class AssetWriteSerializer(BaseModelSerializer):
             asset.child_assets.set(child_assets)
         if applied_controls is not None:
             asset.applied_controls.set(applied_controls)
+        if vulnerabilities is not None:
+            asset.vulnerabilities.set(vulnerabilities)
+        if incidents is not None:
+            asset.incidents.set(incidents)
 
         return asset
 
@@ -531,6 +537,8 @@ class AssetWriteSerializer(BaseModelSerializer):
         parent_assets = validated_data.pop("parent_assets", None)
         child_assets = validated_data.pop("child_assets", None)
         applied_controls = validated_data.pop("applied_controls", None)
+        vulnerabilities = validated_data.pop("vulnerabilities", None)
+        incidents = validated_data.pop("incidents", None)
 
         instance = super().update(instance, validated_data)
 
@@ -541,6 +549,10 @@ class AssetWriteSerializer(BaseModelSerializer):
             instance.child_assets.set(child_assets)
         if applied_controls is not None:
             instance.applied_controls.set(applied_controls)
+        if vulnerabilities is not None:
+            instance.vulnerabilities.set(vulnerabilities)
+        if incidents is not None:
+            instance.incidents.set(incidents)
 
         return instance
 
@@ -944,10 +956,13 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         validated_data.pop("integration_config", None)
 
         owner_data = validated_data.get("owner", [])
-        applied_control = super().create(validated_data)
         findings = validated_data.pop("findings", [])
+        task_templates = validated_data.pop("task_templates", [])
+        applied_control = super().create(validated_data)
         if findings:
             applied_control.findings.set(findings)
+        if task_templates:
+            applied_control.task_templates.set(task_templates)
 
         # Send notification to newly assigned owners
         if owner_data:
@@ -961,7 +976,15 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
         # Track old owners before update
         old_owner_ids = set(instance.owner.values_list("id", flat=True))
 
+        findings = validated_data.pop("findings", None)
+        task_templates = validated_data.pop("task_templates", None)
+
         updated_instance = super().update(instance, validated_data)
+
+        if findings is not None:
+            updated_instance.findings.set(findings)
+        if task_templates is not None:
+            updated_instance.task_templates.set(task_templates)
 
         # Get new owners after update
         new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
@@ -1839,7 +1862,18 @@ class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
         fields = "__all__"
 
     def create(self, validated_data: Any):
-        return super().create(validated_data)
+        applied_controls = validated_data.pop("applied_controls", [])
+        instance = super().create(validated_data)
+        if applied_controls:
+            instance.applied_controls.set(applied_controls)
+        return instance
+
+    def update(self, instance, validated_data):
+        applied_controls = validated_data.pop("applied_controls", None)
+        instance = super().update(instance, validated_data)
+        if applied_controls is not None:
+            instance.applied_controls.set(applied_controls)
+        return instance
 
 
 class OrganisationIssueReadSerializer(BaseModelSerializer):
@@ -1880,7 +1914,18 @@ class OrganisationIssueWriteSerializer(BaseModelSerializer):
         return super().validate(attrs)
 
     def create(self, validated_data: Any):
-        return super().create(validated_data)
+        objectives = validated_data.pop("objectives", [])
+        instance = super().create(validated_data)
+        if objectives:
+            instance.objectives.set(objectives)
+        return instance
+
+    def update(self, instance, validated_data):
+        objectives = validated_data.pop("objectives", None)
+        instance = super().update(instance, validated_data)
+        if objectives is not None:
+            instance.objectives.set(objectives)
+        return instance
 
 
 class CampaignReadSerializer(BaseModelSerializer):
