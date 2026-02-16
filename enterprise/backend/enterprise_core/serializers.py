@@ -74,7 +74,7 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = group.permissions
+        perms = [p for p in group.permissions if p not in User.NON_SEAT_PERMISSIONS]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:
@@ -98,6 +98,10 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
             )
             for group in validated_data["user_groups"]:
                 self.check_editor_permissions(instance, group)
+
+    def create(self, validated_data):
+        self._update_user_groups(None, validated_data)
+        return super().create(validated_data)
 
     def update(self, instance: User, validated_data):
         self._update_user_groups(instance, validated_data)

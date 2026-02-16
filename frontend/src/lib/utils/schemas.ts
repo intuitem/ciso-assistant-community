@@ -358,7 +358,8 @@ export const RequirementAssessmentSchema = z.object({
 	applied_controls: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	security_exceptions: z.string().uuid().optional().array().optional(),
-	noRedirect: z.boolean().default(false)
+	noRedirect: z.boolean().default(false),
+	nextRequirementAssessmentId: z.string().uuid().optional().nullable()
 });
 
 export const UserEditSchema = z.object({
@@ -550,7 +551,8 @@ export const FeatureFlagsSchema = z.object({
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
-	data_breaches: z.boolean().optional()
+	data_breaches: z.boolean().optional(),
+	auditee_mode: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -939,25 +941,20 @@ export const quantitativeRiskStudySchema = z.object({
 				.object({
 					point1: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.default({ probability: 0.99 })
 						.optional(),
 					point2: z
 						.object({
-							probability: z.number().min(0.01).max(0.99).optional(),
-							acceptable_loss: z.number().min(1).optional()
+							probability: z.number().min(0.01).max(0.99).optional().nullable(),
+							acceptable_loss: z.number().min(1).optional().nullable()
 						})
 						.optional()
 				})
-				.optional(),
-			curve_data: z
-				.object({
-					loss_values: z.array(z.number()).optional(),
-					probability_values: z.array(z.number()).optional()
-				})
 				.optional()
+			// Note: curve_data is computed by the backend and should not be sent from frontend
 		})
 		.optional(),
 	// .default({
@@ -1170,6 +1167,7 @@ export const IncidentSchema = z.object({
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional()
 });
 
@@ -1386,14 +1384,16 @@ export const MetricInstanceSchema = z.object({
 	target_value: z.coerce.number().optional().nullable(),
 	collection_frequency: z.string().optional().nullable(),
 	organisation_objectives: z.string().uuid().optional().array().optional(),
-	filtering_labels: z.string().optional().array().optional()
+	filtering_labels: z.string().optional().array().optional(),
+	evidences: z.string().uuid().optional().nullable()
 });
 
 export const CustomMetricSampleSchema = z.object({
-	folder: z.string(),
 	metric_instance: z.string().uuid(),
 	timestamp: z.string().datetime(),
-	value: jsonSchema
+	value: jsonSchema,
+	observation: z.string().optional().nullable(),
+	evidence_revision: z.string().uuid().optional().nullable()
 });
 
 export const DashboardSchema = z.object({

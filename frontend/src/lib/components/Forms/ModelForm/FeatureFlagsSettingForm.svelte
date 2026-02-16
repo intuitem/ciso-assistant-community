@@ -142,6 +142,11 @@
 					field: 'campaigns',
 					label: m.campaigns(),
 					description: m.campaignsDescription()
+				},
+				{
+					field: 'auditee_mode',
+					label: m.auditeeMode(),
+					description: m.auditeeModeDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},

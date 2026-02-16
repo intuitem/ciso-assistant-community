@@ -255,6 +255,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
+24. RBI Master Direction 2023 - india 🏦🇮🇳
 
 <br/>
 
@@ -344,12 +345,12 @@ For the following executions, use "docker compose up" directly.
 
 ### Requirements
 
-- Python 3.12+
+- Python 3.14+
 - pip 20.3+
 - poetry 2.0+
-- node 22+
+- node 24+
 - npm 10.2+
-- pnpm 9.0+
+- pnpm 10.18+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend

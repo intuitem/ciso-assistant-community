@@ -649,13 +649,14 @@ class LibraryUpdater:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
+                framework_dict["urn"] = framework_dict["urn"].lower()
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
-                    urn=new_framework["urn"],
+                    urn=framework_dict["urn"],
                     defaults=framework_dict,
                     create_defaults={
                         **self.referential_object_dict,
@@ -820,14 +821,18 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if requirement_node_dict.get("parent_urn"):
+                        requirement_node_dict["parent_urn"] = requirement_node_dict[
+                            "parent_urn"
+                        ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    all_fields_to_update.update(requirement_node_dict.keys())
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
+                        all_fields_to_update.update(requirement_node_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
@@ -836,6 +841,7 @@ class LibraryUpdater:
                             urn=urn,
                             framework=new_framework,
                             **self.referential_object_dict,
+                            **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
                         for ca in compliance_assessments:
@@ -1915,16 +1921,6 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
-    def __str__(self):
-        if self.name:
-            return self.ref_id + " - " + self.name if self.ref_id else self.name
-        else:
-            return (
-                self.ref_id + " - " + self.description
-                if self.ref_id
-                else self.description
-            )
-
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
     library = models.ForeignKey(
@@ -1970,7 +1966,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations_in_object(self.json_definition)
 
     @property
-    def grid(self) -> list:
+    def grid(self) -> list[list]:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
@@ -2067,6 +2063,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 {"str": control.display_long, "urn": control.urn, "id": control.id}
             )
         return reference_controls
+
+    @property
+    def has_update(self) -> bool:
+        if self.library is None:
+            return False
+        return self.library.has_update
 
     def get_requirement_nodes(self):
         # Prefetch related objects if they exist to reduce database queries.
@@ -3261,26 +3263,27 @@ class Asset(
 
         # Build ordered list of objective keys: defaults first (if present), then any extras
         default_order = list(getattr(self, "DEFAULT_SECURITY_OBJECTIVES", []))
-        extra_keys = sorted([k for k in so_obj.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in so_obj] + extra_keys
+        extra_keys = sorted(k for k in so_obj.keys() if k not in default_order)
+        ordered_keys = default_order + extra_keys
 
         result = []
         for key in ordered_keys:
-            o = so_obj.get(key) or {}
+            objective = so_obj.get(key) or {}
+            capacity = sc_obj.get(key) or {}
             # Only compare enabled and valid (0..4) expectations
-            if not o.get("is_enabled", False):
-                continue
-            exp_value = o.get("value", None)
-            if not isinstance(exp_value, int) or not (0 <= exp_value <= 4):
-                continue
 
-            c = sc_obj.get(key) or {}
-            if not c.get("is_enabled", False):
-                continue
-            real_value = c.get("value", None) if isinstance(c, dict) else None
+            has_objective = objective.get("is_enabled", False)
+            exp_value = None
+            if has_objective:
+                exp_value = objective.get("value", None)
+
+            has_capacity = capacity.get("is_enabled", False)
+            real_value = None
+            if has_capacity:
+                real_value = capacity.get("value", None)
 
             verdict = None
-            if isinstance(real_value, int):
+            if isinstance(real_value, int) and isinstance(exp_value, int):
                 verdict = real_value >= exp_value
 
             result.append(
@@ -3330,8 +3333,8 @@ class Asset(
         capabilities = _normalize_seconds(rc_src)
 
         default_order = list(getattr(self, "DEFAULT_DISASTER_RECOVERY_OBJECTIVES", []))
-        extras = sorted([k for k in objectives.keys() if k not in default_order])
-        ordered_keys = [k for k in default_order if k in objectives] + extras
+        extras = sorted(k for k in objectives.keys() if k not in default_order)
+        ordered_keys = default_order + extras
 
         result: list[dict] = []
         for key in ordered_keys:
@@ -3986,7 +3989,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Evidence Revisions")
 
 
-class Incident(NameDescriptionMixin, FolderMixin):
+class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"
@@ -4080,6 +4083,13 @@ class Incident(NameDescriptionMixin, FolderMixin):
     class Meta:
         verbose_name = "Incident"
         verbose_name_plural = "Incidents"
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
 
 class TimelineEntry(AbstractBaseModel, FolderMixin):
@@ -4376,6 +4386,11 @@ class AppliedControl(
                 "Triggering sync for AppliedControl", applied_control_id=self.pk
             )
             self._trigger_sync(is_new=is_new, changed_fields=changed_fields)
+
+        # Update folder metrics
+        from metrology.models import BuiltinMetricSample
+
+        BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
     def _get_changed_fields(self, old_instance):
         """Detect which fields changed"""
@@ -5825,10 +5840,7 @@ class Campaign(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         if not ComplianceAssessment.objects.filter(campaign=self).exists():
             return {"avg_progress": 0, "days_remaining": "--"}
         avg_progress = statistics.mean(
-            [
-                ca.get_progress()
-                for ca in ComplianceAssessment.objects.filter(campaign=self)
-            ]
+            [ca.progress for ca in ComplianceAssessment.objects.filter(campaign=self)]
         )
         days_remaining = "--"
         if self.due_date:
@@ -5914,7 +5926,7 @@ class ComplianceAssessment(Assessment):
                 "total": total,
                 "per_status": per_status,
                 "per_result": per_result,
-                "progress_perc": self.get_progress(),
+                "progress_perc": self.progress,
                 "score": self.get_global_score(),
             },
         }
@@ -6040,16 +6052,7 @@ class ComplianceAssessment(Assessment):
         def infer_result(applied_controls):
             if not applied_controls:
                 return RequirementAssessment.Result.NOT_ASSESSED
-
-            if len(applied_controls) == 1:
-                ac_status = applied_controls[0].status
-                if ac_status == AppliedControl.Status.ACTIVE:
-                    return RequirementAssessment.Result.COMPLIANT
-                else:
-                    return RequirementAssessment.Result.NON_COMPLIANT
-
             statuses = [ac.status for ac in applied_controls]
-
             if all(status == AppliedControl.Status.ACTIVE for status in statuses):
                 return RequirementAssessment.Result.COMPLIANT
             elif AppliedControl.Status.ACTIVE in statuses:
@@ -6057,29 +6060,43 @@ class ComplianceAssessment(Assessment):
             else:
                 return RequirementAssessment.Result.NON_COMPLIANT
 
-        changes = dict()
-        requirement_assessments_with_ac = RequirementAssessment.objects.filter(
-            compliance_assessment=self, applied_controls__isnull=False
-        ).distinct()
-        with transaction.atomic():
-            for ra in requirement_assessments_with_ac:
-                ac = AppliedControl.objects.filter(requirement_assessments=ra)
-                ic(ac)
-                new_result = infer_result(ac)
-                if ra.result != new_result:
-                    changes[str(ra.id)] = {
-                        "str": str(ra.requirement.safe_display_str),
-                        "current": ra.result,
-                        "new": new_result,
-                    }
-                    if not dry_run:
-                        ra.result = new_result
-                        ra.save(update_fields=["result"])
+        changes: dict[str, dict[str, RequirementAssessment.Result]] = {}
+        requirement_assessments_with_ac = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment=self, applied_controls__isnull=False
+            )
+            .select_related("requirement")
+            .prefetch_related("applied_controls")
+            .distinct()
+        )
 
-        ic(changes)
+        to_update: list[RequirementAssessment] = []
+        for ra in requirement_assessments_with_ac:
+            applied_controls = list(ra.applied_controls.all())
+            new_result = infer_result(applied_controls)
+            if ra.result != new_result:
+                changes[str(ra.id)] = {
+                    "str": str(ra.requirement.safe_display_str),
+                    "current": ra.result,
+                    "new": new_result,
+                }
+                if not dry_run:
+                    ra.result = new_result
+                    to_update.append(ra)
 
-        if dry_run:
+        if dry_run or not to_update:
             return changes
+
+        with transaction.atomic():
+            RequirementAssessment.objects.bulk_update(to_update, ["result"])
+            ComplianceAssessment.objects.filter(pk=self.pk).update(
+                updated_at=timezone.now()
+            )
+            # Ensure metrics are refreshed once after the bulk update.
+            self.refresh_from_db(fields=["updated_at"])
+            self.upsert_daily_metrics()
+
+        return changes
 
     def get_global_score(self):
         """
@@ -6174,6 +6191,28 @@ class ComplianceAssessment(Assessment):
             for group in framework.implementation_groups_definition
             if group.get("ref_id") in self.selected_implementation_groups
         ]
+
+    def requirement_matches_selected_groups(
+        self, requirement: RequirementNode | None
+    ) -> bool:
+        """
+        Return True when the requirement is within the selected implementation groups.
+        """
+        if requirement is None:
+            return True
+
+        if not self.selected_implementation_groups:
+            return True
+
+        selected_groups = set(self.selected_implementation_groups)
+        if not selected_groups:
+            return True
+
+        requirement_groups = set(requirement.implementation_groups or [])
+        if not requirement_groups:
+            return False
+
+        return bool(selected_groups & requirement_groups)
 
     def get_requirement_assessments(self, include_non_assessable: bool):
         """
@@ -6763,7 +6802,8 @@ class ComplianceAssessment(Assessment):
         )
         return requirement_assessments, assessment_source_dict
 
-    def get_progress(self) -> int:
+    @property
+    def progress(self) -> int:
         requirement_assessments = list(
             self.get_requirement_assessments(include_non_assessable=False)
         )
@@ -6959,39 +6999,54 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 return {"result": RequirementAssessment.Result.NON_COMPLIANT}
         return {}
 
-    def create_applied_controls_from_suggestions(self) -> list[AppliedControl]:
+    def create_applied_controls_from_suggestions(
+        self, *, dry_run: bool = False
+    ) -> list[AppliedControl]:
         applied_controls: list[AppliedControl] = []
+        if not self.compliance_assessment.requirement_matches_selected_groups(
+            self.requirement
+        ):
+            return applied_controls
         for reference_control in self.requirement.reference_controls.all():
             try:
-                applied_control, created = AppliedControl.objects.get_or_create(
+                applied_control = AppliedControl.objects.filter(
                     folder=self.folder,
                     reference_control=reference_control,
                     category=reference_control.category,
-                    defaults={
-                        "name": reference_control.get_name_translated
-                        or reference_control.ref_id,
-                        "ref_id": reference_control.ref_id,
-                    },
-                )
+                    requirement_assessments=self,
+                ).first()
 
-                if (
-                    reference_control.description
-                    and applied_control.description is None
-                ):
-                    applied_control.description = reference_control.description
-                    applied_control.save()
-                if created:
-                    logger.info(
-                        "Successfully created applied control from reference_control",
-                        applied_control=applied_control,
-                        reference_control=reference_control,
-                    )
+                if applied_control:
+                    # Already linked to this requirement assessment, skip entirely so
+                    # dry-run mirrors the actual creation.
+                    continue
+
+                existing_control = AppliedControl.objects.filter(
+                    folder=self.folder,
+                    reference_control=reference_control,
+                    category=reference_control.category,
+                ).first()
+
+                if existing_control:
+                    applied_control = existing_control
                 else:
-                    logger.info(
-                        "Applied control already exists, skipping creation and using existing one",
-                        applied_control=applied_control,
+                    applied_control = AppliedControl(
+                        folder=self.folder,
                         reference_control=reference_control,
+                        category=reference_control.category,
+                        name=reference_control.get_name_translated
+                        or reference_control.ref_id,
+                        ref_id=reference_control.ref_id,
+                        description=reference_control.description,
                     )
+                    if not dry_run:
+                        applied_control.save()
+                        logger.info(
+                            "Successfully created applied control from reference_control",
+                            applied_control=applied_control,
+                            reference_control=reference_control,
+                        )
+
                 applied_controls.append(applied_control)
             except Exception as e:
                 logger.error(
@@ -7000,8 +7055,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                     exc_info=e,
                 )
                 continue
-        if applied_controls:
-            self.applied_controls.add(*applied_controls)
+
+        if not dry_run and applied_controls:
+            saved_controls = [ac for ac in applied_controls if ac.pk]
+            if saved_controls:
+                self.applied_controls.add(*saved_controls)
+
         return applied_controls
 
     class Meta:
@@ -7120,6 +7179,40 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["score", "is_scored"])
         elif is_result_computed:
             self.save(update_fields=["result"])
+
+
+class RequirementAssignment(AbstractBaseModel, FolderMixin):
+    """
+    Represents an assignment of a group of requirement assessments to one or multiple actors.
+    Used to delegate audit work within a compliance assessment to specific users or teams.
+    """
+
+    compliance_assessment = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.CASCADE,
+        related_name="requirement_assignments",
+        verbose_name=_("Compliance Assessment"),
+    )
+    actor = models.ManyToManyField(
+        "Actor",
+        related_name="requirement_assignments",
+        verbose_name=_("Assigned To"),
+    )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        related_name="assignments",
+        verbose_name=_("Requirement Assessments"),
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Requirement Assignment")
+        verbose_name_plural = _("Requirement Assignments")
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        actors = ", ".join(str(a) for a in self.actor.all())
+        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
 
 
 class FindingsAssessment(Assessment):
@@ -7920,7 +8013,7 @@ class Actor(AbstractBaseModel):
         constraints = [
             # Ensure exactly one field is set (XOR logic)
             models.CheckConstraint(
-                check=(
+                condition=(
                     Q(user__isnull=False, team__isnull=True, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=False, entity__isnull=True)
                     | Q(user__isnull=True, team__isnull=True, entity__isnull=False)
@@ -8092,5 +8185,10 @@ auditlog.register(
 auditlog.register(
     TaskTemplate,
     exclude_fields=common_exclude,
+)
+auditlog.register(
+    RequirementAssignment,
+    exclude_fields=common_exclude,
+    m2m_fields={"actor", "requirement_assessments"},
 )
 # actions - 0: create, 1: update, 2: delete

@@ -69,7 +69,7 @@
 		var currentUrl = window.location.href;
 		var url = new URL(currentUrl);
 		var nextValue = getSecureRedirect(url.searchParams.get('next'));
-		if (nextValue) window.location.href = nextValue;
+		window.location.href = nextValue || complianceAssessmentURL;
 	}
 
 	const complianceAssessmentURL = `/compliance-assessments/${data.requirementAssessment.compliance_assessment.id}`;
@@ -141,7 +141,37 @@
 
 	let createAppliedControlsLoading = $state(false);
 
-	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
+		let previewItems: string[] = [];
+		try {
+			const previewResponse = await fetch(
+				`/requirement-assessments/${id}/suggestions/applied-controls?dry_run=true`
+			);
+			if (previewResponse.ok) {
+				const previewData: any[] = await previewResponse.json();
+				previewItems = previewData.map(
+					(control) =>
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				);
+			} else {
+				throw new Error(await previewResponse.text());
+			}
+		} catch (error) {
+			console.error('Unable to fetch suggested controls preview', error);
+			previewItems = reference_controls.map(
+				(control) =>
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					''
+			);
+		}
+
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -152,7 +182,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: reference_controls,
+					items: previewItems,
 					message: m.theFollowingControlsWillBeAddedColon()
 				}
 			}
@@ -163,7 +193,7 @@
 			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: reference_controls.length,
+				count: previewItems.length,
 				message: m.theFollowingControlsWillBeAddedColon()
 			}),
 			response: (r: boolean) => {
@@ -614,6 +644,7 @@
 				<HiddenInput {form} field="folder" />
 				<HiddenInput {form} field="requirement" />
 				<HiddenInput {form} field="compliance_assessment" />
+				<HiddenInput {form} field="nextRequirementAssessmentId" />
 				<div class="flex flex-col my-8 space-y-6">
 					{#if page.data.requirementAssessment.requirement.questions != null && Object.keys(page.data.requirementAssessment.requirement.questions).length !== 0}
 						<Question
@@ -677,7 +708,7 @@
 								size="size-10">{computedScore}</ProgressRing
 							>
 						</div>
-					{:else}
+					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">
 							<Score
 								{form}
@@ -688,7 +719,7 @@
 								label={page.data.compliance_assessment_score.show_documentation_score
 									? m.implementationScore()
 									: m.score()}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							>
 								{#snippet left()}
 									<div>
@@ -714,33 +745,36 @@
 								field="documentation_score"
 								label={m.documentationScore()}
 								isDoc={true}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							/>
 						{/if}
 					{/if}
 
 					<MarkdownField {form} field="observation" label="Observation" />
-					<div class="flex flex-row justify-between space-x-4">
-						<button
-							class="btn bg-gray-400 text-white font-semibold w-full"
-							type="button"
-							onclick={cancel}>{m.cancel()}</button
-						>
-						<button
-							class="btn preset-filled-secondary-500 font-semibold w-full"
-							data-testid="save-no-continue-button"
-							type="submit"
-							onclick={() =>
-								form.form.update((data) => {
-									return { ...data, noRedirect: true };
-								})}>{m.saveAndContinue()}</button
-						>
-						<button
-							class="btn preset-filled-primary-500 font-semibold w-full"
-							data-testid="save-button"
-							type="submit">{m.save()}</button
-						>
-					</div>
+				</div>
+				<div
+					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+				>
+					<button
+						class="btn bg-gray-400 text-white font-semibold w-full"
+						type="button"
+						onclick={cancel}>{m.cancel()}</button
+					>
+					<button
+						class="btn preset-filled-secondary-500 font-semibold w-full"
+						data-testid="save-no-continue-button"
+						type="submit"
+						onclick={() =>
+							form.form.update((data) => {
+								return { ...data, noRedirect: true };
+							})}>{m.saveAndContinue()}</button
+					>
+					<button
+						class="btn preset-filled-primary-500 font-semibold w-full"
+						data-testid="save-button"
+						type="submit"
+						>{page.data.nextRequirementAssessmentId ? m.saveAndNext() : m.save()}</button
+					>
 				</div>
 			{/snippet}
 		</SuperForm>

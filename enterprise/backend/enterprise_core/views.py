@@ -9,7 +9,7 @@ from django.db.models import CharField, Value, Case, When
 from django.db.models.functions import Lower, Cast
 import django_filters as df
 from django.contrib.auth.models import Permission
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.decorators import (
     action,
     api_view,
@@ -309,8 +309,19 @@ class RoleViewSet(BaseModelViewSet):
         Update the user groups associated with the role.
         """
         with transaction.atomic():
+            editors_before = len(User.get_editors())
+
             role = serializer.save()
             self._ensure_default_permissions(role)
+
+            editors_after = len(User.get_editors())
+            if (
+                editors_after > editors_before
+                and editors_after > settings.LICENSE_SEATS
+            ):
+                raise serializers.ValidationError(
+                    {"permissions": "errorLicenseSeatsExceeded"}
+                )
 
             ug_ids = (
                 RoleAssignment.objects.filter(

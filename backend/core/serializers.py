@@ -41,7 +41,7 @@ class SerializerFactory:
     def get_serializer(self, base_name: str, action: str):
         if action in ["list", "retrieve"]:
             serializer_name = f"{base_name}ReadSerializer"
-        elif action in ["create", "update", "partial_update"]:
+        elif action in ["create", "update", "partial_update", "destroy"]:
             serializer_name = f"{base_name}WriteSerializer"
         else:
             return None
@@ -72,20 +72,51 @@ class BaseModelSerializer(serializers.ModelSerializer):
             if not ff_is_enabled(flag_name):
                 self.fields.pop(field_name)
 
-    def update(self, instance: models.Model, validated_data: Any) -> models.Model:
-        if (
-            getattr(instance, "builtin", False)
-            and hasattr(instance, "folder_id")
-            and ("folder" in validated_data or "folder_id" in validated_data)
+    def _check_object_perm(
+        self, instance_or_data, action: str, *, folder: Folder | None = None
+    ) -> None:
+        """Check that the requesting user has *action* permission on the resolved folder."""
+        if folder is None:
+            folder = Folder.get_folder(instance_or_data)
+        if folder is None:
+            return
+        if not RoleAssignment.is_access_allowed(
+            user=self.context["request"].user,
+            perm=Permission.objects.get(
+                codename=f"{action}_{self.Meta.model._meta.model_name}",
+            ),
+            folder=folder,
         ):
-            new_folder = validated_data.get("folder", validated_data.get("folder_id"))
-            new_folder_id = (
-                new_folder.id if isinstance(new_folder, models.Model) else new_folder
+            raise PermissionDenied(
+                {
+                    "folder": f"You do not have permission to {action} objects in this folder"
+                }
             )
-            if new_folder_id and str(new_folder_id) != str(instance.folder_id):
+
+    def _ensure_immutable(self, field_name: str, value) -> None:
+        """Raise PermissionDenied if a field's value is changing on update."""
+        if self.instance is None:
+            return
+        current_id = getattr(self.instance, f"{field_name}_id", None)
+        if current_id and str(value.id) != str(current_id):
+            raise PermissionDenied({field_name: "This field is immutable"})
+
+    def validate_folder(self, folder: Folder) -> Folder:
+        """Enforce permission when an object is moved to a different folder."""
+        if (
+            self.instance is not None
+            and hasattr(self.instance, "folder_id")
+            and str(folder.id) != str(self.instance.folder_id)
+        ):
+            if getattr(self.instance, "builtin", False):
                 raise PermissionDenied(
                     {"folder": "Builtin objects cannot change folder"}
                 )
+            self._check_object_perm(self.instance, "add", folder=folder)
+        return folder
+
+    def update(self, instance: models.Model, validated_data: Any) -> models.Model:
+        self._check_object_perm(instance, "change")
         if hasattr(instance, "urn") and getattr(instance, "urn"):
             raise PermissionDenied({"urn": "Imported objects cannot be modified"})
         try:
@@ -95,25 +126,16 @@ class BaseModelSerializer(serializers.ModelSerializer):
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
+    def delete(self, instance: models.Model) -> None:
+        """Enforce delete permission before removing *instance*."""
+        self._check_object_perm(instance, "delete")
+        instance.delete()
+
     def create(self, validated_data: Any):
         logger.debug("validated data", **validated_data)
         folder = Folder.get_folder(validated_data)
         folder = folder if folder else Folder.get_root_folder()
-        can_create_in_folder = RoleAssignment.is_access_allowed(
-            user=self.context["request"].user,
-            perm=Permission.objects.get(
-                codename=f"add_{self.Meta.model._meta.model_name}",
-                content_type__app_label=self.Meta.model._meta.app_label,
-                content_type__model=self.Meta.model._meta.model_name,
-            ),
-            folder=folder,
-        )
-        if not can_create_in_folder:
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
+        self._check_object_perm(validated_data, "add", folder=folder)
         try:
             object_created = super().create(validated_data)
             return object_created
@@ -340,6 +362,12 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
             new_perimeter = validated_data["perimeter"]
             if new_perimeter and new_perimeter.folder:
                 validated_data["folder"] = new_perimeter.folder
+
+        # Check if folder is being changed (either directly or via perimeter)
+        new_folder = validated_data.get("folder")
+        if new_folder and new_folder != instance.folder:
+            # Cascade folder change to all child RiskScenarios
+            instance.risk_scenarios.update(folder=new_folder)
 
         return super().update(instance, validated_data)
 
@@ -743,6 +771,10 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
     risk_matrix = serializers.PrimaryKeyRelatedField(
         read_only=True, source="risk_assessment.risk_matrix"
     )
+
+    def validate_risk_assessment(self, value):
+        self._ensure_immutable("risk_assessment", value)
+        return value
 
     def validate(self, attrs):
         if (
@@ -1487,9 +1519,16 @@ class FolderWriteSerializer(BaseModelSerializer):
     def validate_parent_folder(self, value):
         """
         If parent_folder is empty or None, default to the root folder.
+        On update, check add permission on the target parent folder.
         """
         if not value:
             return Folder.get_root_folder()
+        if (
+            self.instance is not None
+            and self.instance.parent_folder_id
+            and str(value.id) != str(self.instance.parent_folder_id)
+        ):
+            self._check_object_perm(self.instance, "add", folder=value)
         return value
 
 
@@ -1528,6 +1567,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
     library = FieldsRelatedField(["name", "id"])
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
+    has_update = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Framework
@@ -1862,6 +1902,7 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
             "implementation_groups_definition",
             "ref_id",
             "reference_controls",
+            "has_update",
         ]
     )
     selected_implementation_groups = serializers.ReadOnlyField(
@@ -2309,6 +2350,64 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class RequirementAssignmentReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField()
+    actor = FieldsRelatedField(many=True)
+    requirement_assessments = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+
+
+class RequirementAssignmentWriteSerializer(BaseModelSerializer):
+    def validate(self, attrs):
+        """
+        Validate that requirement assessments belong to the specified compliance assessment
+        and are not already assigned to another assignment.
+        """
+        compliance_assessment = attrs.get(
+            "compliance_assessment",
+            getattr(self.instance, "compliance_assessment", None),
+        )
+        requirement_assessments = attrs.get("requirement_assessments", [])
+
+        if compliance_assessment and requirement_assessments:
+            # Check that all requirement assessments belong to the compliance assessment
+            for ra in requirement_assessments:
+                if ra.compliance_assessment_id != compliance_assessment.id:
+                    raise serializers.ValidationError(
+                        {
+                            "requirement_assessments": f"Requirement assessment '{ra}' does not belong to the specified compliance assessment."
+                        }
+                    )
+
+            # Check that requirement assessments are not already assigned to another assignment
+            existing_assignment_ids = (
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    requirement_assessments__in=requirement_assessments,
+                )
+                .exclude(id=self.instance.id if self.instance else None)
+                .values_list("id", flat=True)
+                .distinct()
+            )
+
+            if existing_assignment_ids:
+                raise serializers.ValidationError(
+                    {
+                        "requirement_assessments": "Some requirement assessments are already assigned to another assignment."
+                    }
+                )
+
+        return attrs
+
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+
+
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
     pass
 
@@ -2673,6 +2772,7 @@ class IncidentReadSerializer(IncidentWriteSerializer):
     status = serializers.CharField(source="get_status_display", read_only=True)
     detection = serializers.CharField(source="get_detection_display", read_only=True)
     folder = FieldsRelatedField()
+    filtering_labels = FieldsRelatedField(many=True)
 
     class Meta:
         model = Incident

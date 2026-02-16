@@ -27,6 +27,7 @@ type SidebarBackendKeys = {
 	purposes: boolean;
 	right_requests: boolean;
 	data_breaches: boolean;
+	auditee_mode: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -58,6 +59,7 @@ type SidebarFrontendKeys = {
 	purposes: boolean;
 	rightRequests: boolean;
 	dataBreaches: boolean;
+	auditDashboard: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -91,6 +93,7 @@ export function getSidebarVisibleItems(
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,
 		rightRequests: featureFlags?.right_requests ?? true,
-		dataBreaches: featureFlags?.data_breaches ?? true
+		dataBreaches: featureFlags?.data_breaches ?? true,
+		auditDashboard: featureFlags?.auditee_mode ?? false
 	};
 }

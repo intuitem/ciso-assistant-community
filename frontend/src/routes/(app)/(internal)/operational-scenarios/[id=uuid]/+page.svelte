@@ -136,13 +136,45 @@
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
 			<div class="flex flex-col space-y-2 items-center">
-				<div class="flex flex-col items-center space-x-2">
-					<span class="font-semibold text-lg text-gray-700"
-						><i class="fa-solid fa-shuffle"></i> {m.attackPath()}</span
-					>
-					<p class="text-gray-600">{operationalScenario.attack_path.name}</p>
-					{#if operationalScenario.attack_path.description}
-						<p class="text-gray-600">{operationalScenario.attack_path.description}</p>
+				<div class="flex items-center gap-4">
+					{#if operationalScenario.strategic_scenario}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.strategicScenario()}</h4>
+							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
+							<a
+								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
+								class="badge text-white bg-amber-500 hover:bg-amber-600"
+								>{operationalScenario.strategic_scenario.name}</a
+							>
+							{#if operationalScenario.strategic_scenario.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.strategic_scenario.description}
+								</p>
+							{/if}
+						</div>
+					{/if}
+					{#if operationalScenario.strategic_scenario && operationalScenario.attack_path}
+						<i class="fa-solid fa-arrow-right text-2xl text-gray-400"></i>
+					{/if}
+					{#if operationalScenario.attack_path}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.attackPath()}</h4>
+							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
+							<a
+								href="/attack-paths/{operationalScenario.attack_path.id}"
+								class="badge text-white bg-teal-500 hover:bg-teal-600"
+								>{operationalScenario.attack_path.name}</a
+							>
+							{#if operationalScenario.attack_path.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.attack_path.description}
+								</p>
+							{/if}
+						</div>
 					{/if}
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
@@ -151,7 +183,7 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
@@ -161,7 +193,7 @@
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
@@ -175,7 +207,9 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+							{operationalScenario.ro_to.target_objective}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -224,11 +258,7 @@
 						{#snippet content()}
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
+									<div class="py-2"></div>
 									{#if model.table}
 										<ModelTable
 											source={model.table}

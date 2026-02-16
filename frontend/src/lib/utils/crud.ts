@@ -1,14 +1,16 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
-import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
-import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
-import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
-import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
+import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
+import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
+import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
+import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
+import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
 import type { urlModel } from './types';
-import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
-import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
+import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
+import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
@@ -168,6 +170,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
+			{ field: 'folder', urlModel: 'compliance-assessments' },
+			{ field: 'folder', urlModel: 'risk-assessments' },
+			{ field: 'folder', urlModel: 'findings-assessments' },
+			{ field: 'folder', urlModel: 'accreditations' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'applied-controls' },
@@ -229,7 +235,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_study', urlModel: 'ebios-rm' }
 		],
 		reverseForeignKeyFields: [{ field: 'risk_assessment', urlModel: 'risk-scenarios' }],
-		selectFields: [{ field: 'status' }, { field: 'risk_tolerance', valueType: 'number' }],
+		selectFields: [{ field: 'status' }],
 		filters: [{ field: 'perimeter' }, { field: 'auditor' }, { field: 'status' }]
 	},
 	'risk-assessment_duplicate': {
@@ -288,6 +294,9 @@ export const URL_MODEL_MAP: ModelMap = {
 		detailViewFields: [
 			{ field: 'id' },
 			{ field: 'folder' },
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'description' },
 			{ field: 'reference_control' },
 			{ field: 'category' },
 			{ field: 'csf_function' },
@@ -298,9 +307,6 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'status' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' },
-			{ field: 'ref_id' },
-			{ field: 'name' },
-			{ field: 'description' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'owner' },
 			{ field: 'expiry_date', type: 'date' },
@@ -526,6 +532,16 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'referenceControls',
 		verboseName: 'Reference control',
 		verboseNamePlural: 'Reference controls',
+		detailViewFields: [
+			{ field: 'ref_id' },
+			{ field: 'name' },
+			{ field: 'annotation' },
+			{ field: 'description' },
+			{ field: 'category' },
+			{ field: 'csf_function' },
+			{ field: 'folder' },
+			{ field: 'filtering_labels' }
+		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
 			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
@@ -1041,6 +1057,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'perimeter' },
+			{ field: 'risk_matrix' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
@@ -1769,7 +1786,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owners', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
-			{ field: 'entities', urlModel: 'entities' }
+			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [
@@ -1793,7 +1811,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entities' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
-			{ field: 'link' }
+			{ field: 'link' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	'timeline-entries': {
@@ -1835,7 +1854,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				disableEdit: true,
 				defaultFilters: {
-					past: [{ value: 'false' }]
+					status: [{ value: 'pending' }, { value: 'in_progress' }]
 				}
 			}
 		]
@@ -2271,7 +2290,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'unit', urlModel: 'terminologies' },
 			{ field: 'owner', urlModel: 'actors' },
 			{ field: 'organisation_objectives', urlModel: 'organisation-objectives' },
-			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' },
+			{ field: 'evidences', urlModel: 'evidences' }
 		],
 		selectFields: [{ field: 'status' }, { field: 'collection_frequency' }],
 		detailViewFields: [
@@ -2288,6 +2308,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'collection_frequency' },
 			{ field: 'target_value' },
 			{ field: 'current_value' },
+			{ field: 'evidences' },
 			{ field: 'filtering_labels' },
 			{ field: 'created_at', type: 'datetime' },
 			{ field: 'updated_at', type: 'datetime' }
@@ -2296,7 +2317,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'metric_instance',
 				urlModel: 'custom-metric-samples',
-				fieldForInitialData: ['metric_definition']
+				fieldForInitialData: ['metric_definition', 'evidences']
 			}
 		],
 		filters: [
@@ -2316,7 +2337,8 @@ export const URL_MODEL_MAP: ModelMap = {
 		endpointUrl: 'metrology/custom-metric-samples',
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' },
-			{ field: 'metric_instance', urlModel: 'metric-instances' }
+			{ field: 'metric_instance', urlModel: 'metric-instances' },
+			{ field: 'evidence_revision', urlModel: 'evidence-revisions' }
 		],
 		filters: [{ field: 'folder' }, { field: 'metric_instance' }]
 	},
@@ -2408,6 +2430,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview
+	},
+	frameworks: {
+		name: FrameworkName
 	}
 };
 

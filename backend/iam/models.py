@@ -358,6 +358,17 @@ class Folder(NameDescriptionMixin):
                 is_recursive=True,
             )
             ra4.perimeter_folders.add(folder)
+            auditees = UserGroup.objects.create(
+                name=str(UserGroupCodename.AUDITEE), folder=folder, builtin=True
+            )
+            ra5 = RoleAssignment.objects.create(
+                user_group=auditees,
+                role=Role.objects.get(name=RoleCodename.AUDITEE),
+                builtin=True,
+                folder=Folder.get_root_folder(),
+                is_recursive=True,
+            )
+            ra5.perimeter_folders.add(folder)
             # Clear the cache after a new folder is created - purposely clearing everything
 
             # Create a UG and RA for each non-builtin role (idempotent)
@@ -489,6 +500,7 @@ class UserManager(BaseUserManager):
                 last_name=extra_fields.get("last_name", ""),
                 is_superuser=extra_fields.get("is_superuser", False),
                 is_active=extra_fields.get("is_active", True),
+                is_third_party=extra_fields.get("is_third_party", False),
                 observation=extra_fields.get("observation"),
                 folder=_get_root_folder(),
                 keep_local_login=extra_fields.get("keep_local_login", False),
@@ -687,10 +699,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         email = render_to_string(email_template_name, header)
         try:
             send_mail(
-                subject,
-                email,
-                None,
-                [self.email],
+                subject=subject,
+                message=email,
+                from_email=None,
+                recipient_list=[self.email],
                 fail_silently=False,
                 html_message=email,
             )
@@ -718,10 +730,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
                     ) as new_connection:
                         EmailMessage(
-                            subject,
-                            email,
-                            None,
-                            [self.email],
+                            subject=subject,
+                            body=email,
+                            from_email=None,
+                            to=[self.email],
                             connection=new_connection,
                         ).send()
                     logger.info(
@@ -757,6 +769,13 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         )
 
     @property
+    def is_auditee(self) -> bool:
+        """True when the user holds the auditee role on at least one domain."""
+        from core.utils import get_auditee_filtered_folder_ids
+
+        return bool(get_auditee_filtered_folder_ids(self))
+
+    @property
     def has_backup_permission(self) -> bool:
         return RoleAssignment.is_access_allowed(
             user=self,
@@ -786,6 +805,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def is_admin(self) -> bool:
         return self.user_groups.filter(name="BI-UG-ADM").exists()
 
+    # Permissions that grant write access but do not consume a license seat
+    NON_SEAT_PERMISSIONS = {"change_validationflow"}
+
     @property
     def is_editor(self) -> bool:
         permissions = RoleAssignment.get_permissions(self)
@@ -793,6 +815,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         return any(
             any(perm.startswith(prefix) for prefix in editor_prefixes)
             for perm in permissions
+            if perm not in self.NON_SEAT_PERMISSIONS
         )
 
     @property
