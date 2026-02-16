@@ -156,6 +156,7 @@
 	"selectDomain": "Etki alanı seç",
 	"focusMode": "Odak modu",
 	"focusModeTooltip": "Belirli bir etki alanına odaklan",
+	"objectNotReachableFromCurrentFocus": "Bu nesneye mevcut odaktan erişilemiyor. Liste görünümüne yönlendiriliyor.",
 	"clearFocus": "Odağı temizle",
 	"noDomainsAvailable": "Mevcut etki alanı yok",
 	"urn": "URN",

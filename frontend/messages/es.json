@@ -121,6 +121,7 @@
 	"selectDomain": "Seleccionar dominio",
 	"focusMode": "Modo de enfoque",
 	"focusModeTooltip": "Enfocarse en un dominio específico",
+	"objectNotReachableFromCurrentFocus": "Este objeto no es accesible desde el enfoque actual. Redirigiendo a la vista de lista.",
 	"clearFocus": "Limpiar enfoque",
 	"noDomainsAvailable": "No hay dominios disponibles",
 	"urn": "URN",

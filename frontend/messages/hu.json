@@ -150,6 +150,7 @@
 	"selectDomain": "Tartomány kiválasztása",
 	"focusMode": "Fókusz mód",
 	"focusModeTooltip": "Fókuszálás egy adott tartományra",
+	"objectNotReachableFromCurrentFocus": "Ez az objektum nem elérhető a jelenlegi fókuszból. Átirányítás a lista nézethez.",
 	"clearFocus": "Fókusz törlése",
 	"noDomainsAvailable": "Nincsenek elérhető tartományok",
 	"urn": "URN",

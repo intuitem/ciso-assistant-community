@@ -150,6 +150,7 @@
 	"selectDomain": "Selectați domeniul",
 	"focusMode": "Mod de focalizare",
 	"focusModeTooltip": "Concentrați-vă pe un domeniu specific",
+	"objectNotReachableFromCurrentFocus": "Acest obiect nu este accesibil din focalizarea curentă. Redirecționare către vizualizarea listă.",
 	"clearFocus": "Ștergeți focalizarea",
 	"noDomainsAvailable": "Niciun domeniu disponibil",
 	"urn": "URN",
