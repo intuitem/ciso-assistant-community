@@ -1,0 +1,345 @@
+---
+urn: urn:intuitem:risk:library:itil4
+locale: fr
+ref_id: ITIL4
+name: "ITIL 4 Management Practices"
+description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services"
+copyright: © AXELOS Limited 2019. ITIL® est une marque déposée d'AXELOS Limited.
+version: 1
+publication_date: 2026-02-16
+provider: AXELOS Limited
+packager: Nadia QOUDHADH
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:itil4
+    ref_id: ITIL4
+    name: "ITIL 4 Management Practices"
+    description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services"
+    min_score: 0
+    max_score: 5
+    scores_definition:
+      - score: 0
+        name: "Non défini"
+        description: "La pratique n'est pas mise en œuvre"
+      - score: 1
+        name: "Initial"
+        description: "La pratique est réalisée de manière réactive et non standardisée"
+      - score: 2
+        name: "Reproductible"
+        description: "La pratique est gérée mais encore réactive"
+      - score: 3
+        name: "Défini"
+        description: "La pratique est proactive et standardisée"
+      - score: 4
+        name: "Maîtrisé"
+        description: "La pratique est mesurée et contrôlée"
+      - score: 5
+        name: "Optimisé"
+        description: "La pratique est continuellement améliorée"
+    requirement_nodes:
+      # ===== NŒUD RACINE =====
+      - urn: urn:intuitem:risk:req_node:itil4:root
+        assessable: false
+        depth: 1
+        ref_id: "ITIL4-ROOT"
+        name: "ITIL 4 Management Practices"
+        description: "Les 34 pratiques de gestion ITIL 4 réparties en trois catégories"
+
+      # ===== CATÉGORIE 1 : Pratiques de gestion générale =====
+      - urn: urn:intuitem:risk:req_node:itil4:general
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:itil4:root
+        ref_id: "ITIL4-GEN"
+        name: "Pratiques de gestion générale"
+        description: "Pratiques adaptées des domaines de gestion d'entreprise générale"
+
+      - urn: urn:intuitem:risk:req_node:itil4:architecture-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-01"
+        name: "Gestion de l’architecture"
+        description: "Détailler l’ensemble des éléments constituant une organisation et les interactions entre ces éléments"
+
+      - urn: urn:intuitem:risk:req_node:itil4:continual-improvement
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-02"
+        name: "Amélioration continue"
+        description: "Aligner les pratiques et les services de l’organisation sur les besoins changeants du business"
+
+      - urn: urn:intuitem:risk:req_node:itil4:information-security
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-03"
+        name: "Gestion de la sécurité de l’information"
+        description: "Protéger les informations dont l’organisation a besoin pour mener ses activités"
+
+      - urn: urn:intuitem:risk:req_node:itil4:knowledge-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-04"
+        name: "Gestion des connaissances"
+        description: "Maintenir et améliorer l'utilisation efficace des informations et connaissances dans l'organisation"
+
+      - urn: urn:intuitem:risk:req_node:itil4:measurement-reporting
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-05"
+        name: "Mesure et rapports"
+        description: "Supporter une prise de décision éclairée et une amélioration continue"
+
+      - urn: urn:intuitem:risk:req_node:itil4:organizational-change
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-06"
+        name: "Gestion du changement organisationnel"
+        description: "S'assurer que les changements organisationnels sont implémentés avec succès"
+
+      - urn: urn:intuitem:risk:req_node:itil4:portfolio-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-07"
+        name: "Gestion de portefeuille"
+        description: "Gérer la combinaison optimale de programmes, projets et services"
+
+      - urn: urn:intuitem:risk:req_node:itil4:project-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-08"
+        name: "Gestion des projets"
+        description: "Assurer la livraison réussie de l'ensemble des projets"
+
+      - urn: urn:intuitem:risk:req_node:itil4:relationship-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-09"
+        name: "Gestion des relations"
+        description: "Établir et entretenir des liens avec les parties prenantes"
+
+      - urn: urn:intuitem:risk:req_node:itil4:risk-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-10"
+        name: "Gestion des risques"
+        description: "Identifier, évaluer et gérer les risques"
+
+      - urn: urn:intuitem:risk:req_node:itil4:financial-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-11"
+        name: "Gestion financière des services"
+        description: "Gérer efficacement les ressources et investissements financiers"
+
+      - urn: urn:intuitem:risk:req_node:itil4:strategy-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-12"
+        name: "Gestion de la stratégie"
+        description: "Formuler les objectifs et allouer les ressources nécessaires"
+
+      - urn: urn:intuitem:risk:req_node:itil4:supplier-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-13"
+        name: "Gestion des fournisseurs"
+        description: "Gérer les performances et relations avec les fournisseurs"
+
+      - urn: urn:intuitem:risk:req_node:itil4:workforce-talent
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:general
+        ref_id: "ITIL4-GEN-14"
+        name: "Gestion des effectifs et des talents"
+        description: "Disposer des bonnes personnes avec les compétences appropriées"
+
+      # ===== CATÉGORIE 2 : Pratiques de gestion de services =====
+      - urn: urn:intuitem:risk:req_node:itil4:service
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:itil4:root
+        ref_id: "ITIL4-SVC"
+        name: "Pratiques de gestion de services"
+        description: "Pratiques développées dans les secteurs de la gestion des services et de l'ITSM"
+
+      - urn: urn:intuitem:risk:req_node:itil4:availability-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-01"
+        name: "Gestion de la disponibilité"
+        description: "Garantir que les services délivrent les niveaux de disponibilité convenus"
+
+      - urn: urn:intuitem:risk:req_node:itil4:business-analysis
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-02"
+        name: "Business analysis"
+        description: "Analyser les besoins métier et recommander des solutions"
+
+      - urn: urn:intuitem:risk:req_node:itil4:capacity-performance
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-03"
+        name: "Gestion de la capacité et de la performance"
+        description: "S'assurer que les services atteignent les niveaux de performance attendus"
+
+      - urn: urn:intuitem:risk:req_node:itil4:change-control
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-04"
+        name: "Contrôle des changements"
+        description: "Maximiser le nombre de changements réussis en évaluant les risques"
+
+      - urn: urn:intuitem:risk:req_node:itil4:incident-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-05"
+        name: "Gestion des incidents"
+        description: "Réduire l'impact des incidents en restaurant le service rapidement"
+
+      - urn: urn:intuitem:risk:req_node:itil4:it-asset-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-06"
+        name: "Gestion des actifs informatiques"
+        description: "Planifier et gérer le cycle de vie des actifs informatiques"
+
+      - urn: urn:intuitem:risk:req_node:itil4:monitoring-event
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-07"
+        name: "Surveillance et gestion des événements"
+        description: "Observer les services et enregistrer les changements d'état"
+
+      - urn: urn:intuitem:risk:req_node:itil4:problem-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-08"
+        name: "Gestion des problèmes"
+        description: "Identifier les causes des incidents et gérer les solutions de contournement"
+
+      - urn: urn:intuitem:risk:req_node:itil4:release-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-09"
+        name: "Gestion des mises en production"
+        description: "Mettre à disposition des services et fonctionnalités nouveaux ou modifiés"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-catalogue
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-10"
+        name: "Gestion du catalogue des services"
+        description: "Fournir une source unique d'informations sur les services"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-configuration
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-11"
+        name: "Gestion de la configuration des services"
+        description: "Assurer la disponibilité d'informations fiables sur la configuration"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-continuity
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-12"
+        name: "Gestion de la continuité des services"
+        description: "Maintenir les services en cas de désastre"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-design
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-13"
+        name: "Conception des services"
+        description: "Concevoir des produits et services adaptés au besoin et à l'utilisation"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-desk
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-14"
+        name: "Centre de services"
+        description: "Point de contact unique pour les utilisateurs"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-level
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-15"
+        name: "Gestion des niveaux de service"
+        description: "Définir et gérer les niveaux de service cibles"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-request
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-16"
+        name: "Gestion des demandes de service"
+        description: "Traiter efficacement les demandes de service des utilisateurs"
+
+      - urn: urn:intuitem:risk:req_node:itil4:service-validation
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:service
+        ref_id: "ITIL4-SVC-17"
+        name: "Validation et test des services"
+        description: "S'assurer que les services répondent aux exigences définies"
+
+      # ===== CATÉGORIE 3 : Pratiques de gestion technique =====
+      - urn: urn:intuitem:risk:req_node:itil4:technical
+        assessable: false
+        depth: 2
+        parent_urn: urn:intuitem:risk:req_node:itil4:root
+        ref_id: "ITIL4-TECH"
+        name: "Pratiques de gestion technique"
+        description: "Pratiques adaptées des domaines de gestion technologique pour les services informatiques"
+
+      - urn: urn:intuitem:risk:req_node:itil4:deployment-management
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:technical
+        ref_id: "ITIL4-TECH-01"
+        name: "Gestion des déploiements"
+        description: "Déplacer des composants vers les environnements de production"
+
+      - urn: urn:intuitem:risk:req_node:itil4:infrastructure-platform
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:technical
+        ref_id: "ITIL4-TECH-02"
+        name: "Gestion de l’infrastructure et des plates-formes"
+        description: "Superviser l'infrastructure et les plates-formes utilisées"
+
+      - urn: urn:intuitem:risk:req_node:itil4:software-development
+        assessable: true
+        depth: 3
+        parent_urn: urn:intuitem:risk:req_node:itil4:technical
+        ref_id: "ITIL4-TECH-03"
+        name: "Développement et gestion des logiciels"
+        description: "S'assurer que les applications répondent aux besoins des parties prenantes"
