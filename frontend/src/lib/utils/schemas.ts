@@ -1112,6 +1112,7 @@ export const FindingSchema = z.object({
 	ref_id: z.string().optional(),
 	owner: z.string().optional().array().optional(),
 	status: z.string().default('--'),
+	threats: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),

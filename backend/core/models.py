@@ -7342,6 +7342,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
     findings_assessment = models.ForeignKey(
         FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
     )
+    threats = models.ManyToManyField(
+        Threat,
+        verbose_name=_("Threats"),
+        related_name="findings",
+        blank=True,
+    )
     vulnerabilities = models.ManyToManyField(
         Vulnerability,
         verbose_name=_("Vulnerabilities"),
