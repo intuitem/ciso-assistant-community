@@ -616,7 +616,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'assets', urlModel: 'vulnerabilities' },
+			{
+				field: 'assets',
+				urlModel: 'vulnerabilities',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'vulnerabilities'
+				}
+			},
 			{ field: 'assets', urlModel: 'risk-scenarios', disableCreate: true, disableDelete: true },
 			{
 				field: 'assets',
@@ -624,10 +631,30 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'assets', urlModel: 'solutions', disableCreate: true, disableDelete: true },
+			{
+				field: 'assets',
+				urlModel: 'solutions',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'solutions'
+				}
+			},
 			{ field: 'assets', urlModel: 'personal-data', disableCreate: true, disableDelete: true },
-			{ field: 'assets', urlModel: 'incidents' },
-			{ field: 'assets', urlModel: 'applied-controls', disableDelete: true }
+			{
+				field: 'assets',
+				urlModel: 'incidents',
+				addExisting: {
+					parentField: 'incidents'
+				}
+			},
+			{
+				field: 'assets',
+				urlModel: 'applied-controls',
+				disableDelete: true,
+				addExisting: {
+					parentField: 'applied_controls'
+				}
+			}
 		],
 		foreignKeyFields: [
 			{ field: 'parent_assets', urlModel: 'assets' },
@@ -640,7 +667,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'ebios_rm_studies', urlModel: 'ebios-rm', endpointUrl: 'ebios-rm/studies' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
 			{ field: 'overridden_children_capabilities', urlModel: 'asset-capabilities' },
-			{ field: 'solutions', urlModel: 'solutions' }
+			{ field: 'solutions', urlModel: 'solutions' },
+			{ field: 'vulnerabilities', urlModel: 'vulnerabilities' },
+			{ field: 'incidents', urlModel: 'incidents' },
+			{ field: 'applied_controls', urlModel: 'applied-controls' }
 		],
 		selectFields: [
 			{ field: 'type' },

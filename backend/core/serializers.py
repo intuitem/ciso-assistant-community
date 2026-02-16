@@ -478,6 +478,16 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=AppliedControl.objects.all(),
         required=False,
     )
+    vulnerabilities = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Vulnerability.objects.all(),
+        required=False,
+    )
+    incidents = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Incident.objects.all(),
+        required=False,
+    )
 
     class Meta:
         model = Asset
