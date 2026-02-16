@@ -435,14 +435,10 @@ class StoredLibrary(LibraryMixin):
                     "libraryOutdatedError",
                 )  # We do not accept to store outdated libraries
 
-        with transaction.atomic():
-            
-            print("FORCE = ", force_update)
-            
+        with transaction.atomic():            
             if force_update:
                 # If force update, delete all versions of the library, no matter the version
                 for outdated_library in StoredLibrary.objects.filter(urn=urn):
-                    print("OUTDATED = ", outdated_library)
                     outdated_library.delete()
             else:
                 # Else, allow adding outdated libraries in the library store but they will be erased if a greater version of this library is stored.
