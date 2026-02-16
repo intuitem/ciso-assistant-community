@@ -2561,6 +2561,7 @@ class FindingsAssessmentReadSerializer(AssessmentReadSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
     findings_count = serializers.IntegerField(source="findings.count")
+    treatment_progress = serializers.IntegerField(read_only=True, default=0)
     evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
         many=True,

@@ -910,7 +910,7 @@
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-														{:else if key === 'progress'}
+														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{safeTranslate('percentageDisplay', { number: value })}</span
 															>
