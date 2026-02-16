@@ -649,13 +649,14 @@ class LibraryUpdater:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
+                framework_dict["urn"] = framework_dict["urn"].lower()
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
-                    urn=new_framework["urn"],
+                    urn=framework_dict["urn"],
                     defaults=framework_dict,
                     create_defaults={
                         **self.referential_object_dict,
@@ -820,14 +821,18 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if requirement_node_dict.get("parent_urn"):
+                        requirement_node_dict["parent_urn"] = requirement_node_dict[
+                            "parent_urn"
+                        ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    all_fields_to_update.update(requirement_node_dict.keys())
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
+                        all_fields_to_update.update(requirement_node_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
@@ -836,6 +841,7 @@ class LibraryUpdater:
                             urn=urn,
                             framework=new_framework,
                             **self.referential_object_dict,
+                            **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
                         for ca in compliance_assessments:
@@ -1960,7 +1966,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations_in_object(self.json_definition)
 
     @property
-    def grid(self) -> list:
+    def grid(self) -> list[list]:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
@@ -2057,6 +2063,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
                 {"str": control.display_long, "urn": control.urn, "id": control.id}
             )
         return reference_controls
+
+    @property
+    def has_update(self) -> bool:
+        if self.library is None:
+            return False
+        return self.library.has_update
 
     def get_requirement_nodes(self):
         # Prefetch related objects if they exist to reduce database queries.
@@ -3977,7 +3989,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Evidence Revisions")
 
 
-class Incident(NameDescriptionMixin, FolderMixin):
+class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"
@@ -7169,6 +7181,40 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["result"])
 
 
+class RequirementAssignment(AbstractBaseModel, FolderMixin):
+    """
+    Represents an assignment of a group of requirement assessments to one or multiple actors.
+    Used to delegate audit work within a compliance assessment to specific users or teams.
+    """
+
+    compliance_assessment = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.CASCADE,
+        related_name="requirement_assignments",
+        verbose_name=_("Compliance Assessment"),
+    )
+    actor = models.ManyToManyField(
+        "Actor",
+        related_name="requirement_assignments",
+        verbose_name=_("Assigned To"),
+    )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        related_name="assignments",
+        verbose_name=_("Requirement Assessments"),
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("Requirement Assignment")
+        verbose_name_plural = _("Requirement Assignments")
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        actors = ", ".join(str(a) for a in self.actor.all())
+        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
 class FindingsAssessment(Assessment):
     class Category(models.TextChoices):
         UNDEFINED = "--", "Undefined"
@@ -8139,5 +8185,10 @@ auditlog.register(
 auditlog.register(
     TaskTemplate,
     exclude_fields=common_exclude,
+)
+auditlog.register(
+    RequirementAssignment,
+    exclude_fields=common_exclude,
+    m2m_fields={"actor", "requirement_assessments"},
 )
 # actions - 0: create, 1: update, 2: delete

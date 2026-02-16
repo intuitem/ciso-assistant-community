@@ -551,7 +551,8 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
-	chat_mode: z.boolean().optional()
+	chat_mode: z.boolean().optional(),
+	auditee_mode: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1166,6 +1167,7 @@ export const IncidentSchema = z.object({
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional()
 });
 

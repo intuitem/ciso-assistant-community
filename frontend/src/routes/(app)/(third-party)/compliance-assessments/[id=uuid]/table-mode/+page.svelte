@@ -198,19 +198,17 @@
 	);
 
 	async function updateScore(requirementAssessment: Record<string, any>) {
-		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
-		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
+		requirementAssessmentScores[requirementAssessment.id] = [
+			requirementAssessment.is_scored,
+			score,
+			documentationScore
+		];
 		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
-			if (
-				isScored === currentScoreValue[0] &&
-				score === currentScoreValue[1] &&
-				documentationScore === currentScoreValue[2]
-			) {
+			if (score === currentScoreValue[1] && documentationScore === currentScoreValue[2]) {
 				await updateBulk(requirementAssessment, {
-					is_scored: isScored,
 					score: score,
 					documentation_score: documentationScore
 				});
@@ -636,7 +634,7 @@
 														size="size-10">{requirementAssessment.score}</ProgressRing
 													>
 												</div>
-											{:else}
+											{:else if requirementAssessment.result !== 'not_applicable'}
 												<Score
 													form={scoreForms[requirementAssessment.id]}
 													min_score={complianceAssessment.min_score}
@@ -651,8 +649,7 @@
 														requirementAssessment.score = newScore;
 														updateScore(requirementAssessment);
 													}}
-													disabled={!requirementAssessment.is_scored ||
-														requirementAssessment.result === 'not_applicable'}
+													disabled={!requirementAssessment.is_scored}
 												>
 													{#snippet left()}
 														<div>
@@ -664,9 +661,8 @@
 																checkboxComponent="switch"
 																classes="h-full flex flex-row items-center justify-center my-1"
 																classesContainer="h-full flex flex-row items-center space-x-4"
-																onChange={async () => {
-																	requirementAssessment.is_scored =
-																		!requirementAssessment.is_scored;
+																onChange={async (newValue) => {
+																	requirementAssessment.is_scored = newValue;
 																	await update(requirementAssessment, 'is_scored');
 																}}
 															/>
@@ -687,8 +683,7 @@
 															requirementAssessment.documentation_score = newScore;
 															updateScore(requirementAssessment);
 														}}
-														disabled={!requirementAssessment.is_scored ||
-															requirementAssessment.result === 'not_applicable'}
+														disabled={!requirementAssessment.is_scored}
 													/>
 												{/if}
 											{/if}

@@ -229,6 +229,7 @@ def get_folder_path(
 class RolesCacheState:
     role_permissions: Mapping[uuid.UUID, FrozenSet[str]]
     permission_ids_by_codename: Mapping[str, int]
+    role_id_by_name: Mapping[str, uuid.UUID]
 
 
 def build_roles_cache_state() -> RolesCacheState:
@@ -236,7 +237,7 @@ def build_roles_cache_state() -> RolesCacheState:
 
     roles = (
         Role.objects.all()
-        .only("id")
+        .only("id", "name")
         .prefetch_related(
             Prefetch(
                 "permissions",
@@ -246,10 +247,13 @@ def build_roles_cache_state() -> RolesCacheState:
     )
 
     role_permissions: Dict[uuid.UUID, FrozenSet[str]] = {}
+    role_id_by_name: Dict[str, uuid.UUID] = {}
     for role in roles:
         role_permissions[role.id] = frozenset(
             p.codename for p in role.permissions.all() if p.codename
         )
+        if role.name:
+            role_id_by_name[role.name] = role.id
 
     permissions = Permission.objects.all().only("codename", "id")
     permission_ids_by_codename: Dict[str, int] = {
@@ -259,6 +263,7 @@ def build_roles_cache_state() -> RolesCacheState:
     return RolesCacheState(
         role_permissions=MappingProxyType(role_permissions),
         permission_ids_by_codename=MappingProxyType(permission_ids_by_codename),
+        role_id_by_name=MappingProxyType(role_id_by_name),
     )
 
 

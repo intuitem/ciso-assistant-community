@@ -234,6 +234,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     chat_mode = serializers.BooleanField(
         source="value.chat_mode", required=False, default=False
     )
+    auditee_mode = serializers.BooleanField(
+        source="value.auditee_mode", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
@@ -268,6 +271,7 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
             "right_requests",
             "data_breaches",
             "chat_mode",
+            "auditee_mode",
         ]
         read_only_fields = ["name"]
 

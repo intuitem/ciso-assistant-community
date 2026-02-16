@@ -708,7 +708,7 @@
 								size="size-10">{computedScore}</ProgressRing
 							>
 						</div>
-					{:else}
+					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">
 							<Score
 								{form}
@@ -719,7 +719,7 @@
 								label={page.data.compliance_assessment_score.show_documentation_score
 									? m.implementationScore()
 									: m.score()}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							>
 								{#snippet left()}
 									<div>
@@ -745,34 +745,36 @@
 								field="documentation_score"
 								label={m.documentationScore()}
 								isDoc={true}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							/>
 						{/if}
 					{/if}
 
 					<MarkdownField {form} field="observation" label="Observation" />
-					<div class="flex flex-row justify-between space-x-4">
-						<button
-							class="btn bg-gray-400 text-white font-semibold w-full"
-							type="button"
-							onclick={cancel}>{m.cancel()}</button
-						>
-						<button
-							class="btn preset-filled-secondary-500 font-semibold w-full"
-							data-testid="save-no-continue-button"
-							type="submit"
-							onclick={() =>
-								form.form.update((data) => {
-									return { ...data, noRedirect: true };
-								})}>{m.saveAndContinue()}</button
-						>
-						<button
-							class="btn preset-filled-primary-500 font-semibold w-full"
-							data-testid="save-button"
-							type="submit"
-							>{page.data.nextRequirementAssessmentId ? m.saveAndNext() : m.save()}</button
-						>
-					</div>
+				</div>
+				<div
+					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+				>
+					<button
+						class="btn bg-gray-400 text-white font-semibold w-full"
+						type="button"
+						onclick={cancel}>{m.cancel()}</button
+					>
+					<button
+						class="btn preset-filled-secondary-500 font-semibold w-full"
+						data-testid="save-no-continue-button"
+						type="submit"
+						onclick={() =>
+							form.form.update((data) => {
+								return { ...data, noRedirect: true };
+							})}>{m.saveAndContinue()}</button
+					>
+					<button
+						class="btn preset-filled-primary-500 font-semibold w-full"
+						data-testid="save-button"
+						type="submit"
+						>{page.data.nextRequirementAssessmentId ? m.saveAndNext() : m.save()}</button
+					>
 				</div>
 			{/snippet}
 		</SuperForm>

@@ -12,6 +12,6 @@ body: |
   - Domain: ${folder_name}
 
   Log in to your CISO Assistant portal to view and manage this task:
-  ${ciso_assistant_url}
+  ${ciso_assistant_url}/task-templates/${task_id}
 
   Thank you.

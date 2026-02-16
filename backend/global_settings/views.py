@@ -1,5 +1,6 @@
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
@@ -62,6 +63,11 @@ class FeatureFlagsViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureFlagsSerializer
     queryset = GlobalSettings.objects.filter(name="feature-flags")
     serializers_module = "global_settings.serializers"
+
+    def get_permissions(self):
+        if self.request.method in ("GET", "HEAD", "OPTIONS"):
+            return [IsAuthenticated()]
+        return super().get_permissions()
 
     def get_serializer_class(self, **kwargs):
         serializer_factory = GlobalSettingsSerializerFactory(

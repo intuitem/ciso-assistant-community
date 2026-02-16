@@ -1,14 +1,16 @@
 // define the content of forms
 
-import EvidenceFilePreview from '$lib/components/ModelTable/EvidenceFilePreview.svelte';
-import LanguageDisplay from '$lib/components/ModelTable/LanguageDisplay.svelte';
-import LibraryActions from '$lib/components/ModelTable/LibraryActions.svelte';
-import UserGroupNameDisplay from '$lib/components/ModelTable/UserGroupNameDisplay.svelte';
-import LecChartPreview from '$lib/components/ModelTable/LecChartPreview.svelte';
+import EvidenceFilePreview from '$lib/components/ModelTable/field/EvidenceFilePreview.svelte';
+import LanguageDisplay from '$lib/components/ModelTable/field/LanguageDisplay.svelte';
+import FrameworkName from '$lib/components/ModelTable/field/FrameworkName.svelte';
+import LibraryActions from '$lib/components/ModelTable/field/LibraryActions.svelte';
+import UserGroupNameDisplay from '$lib/components/ModelTable/field/UserGroupNameDisplay.svelte';
+import LecChartPreview from '$lib/components/ModelTable/field/LecChartPreview.svelte';
 import { listViewFields } from './table';
 import type { urlModel } from './types';
-import LibraryOverview from '$lib/components/ModelTable/LibraryOverview.svelte';
-import MarkdownDescription from '$lib/components/ModelTable/MarkdownDescription.svelte';
+import LibraryOverview from '$lib/components/ModelTable/field/LibraryOverview.svelte';
+import MarkdownDescription from '$lib/components/ModelTable/field/MarkdownDescription.svelte';
+
 type GetOptionsParams = {
 	objects: any[];
 	suggestions?: any[];
@@ -168,6 +170,10 @@ export const URL_MODEL_MAP: ModelMap = {
 		],
 		reverseForeignKeyFields: [
 			{ field: 'folder', urlModel: 'perimeters' },
+			{ field: 'folder', urlModel: 'compliance-assessments' },
+			{ field: 'folder', urlModel: 'risk-assessments' },
+			{ field: 'folder', urlModel: 'findings-assessments' },
+			{ field: 'folder', urlModel: 'accreditations' },
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'applied-controls' },
@@ -1051,6 +1057,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'name' },
 			{ field: 'perimeter' },
+			{ field: 'risk_matrix' },
 			{ field: 'authors' },
 			{ field: 'reviewers' },
 			{ field: 'created_at', type: 'datetime' },
@@ -1779,7 +1786,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'perimeters' },
 			{ field: 'owners', urlModel: 'actors', urlParams: 'is_third_party=false' },
 			{ field: 'qualifications', urlModel: 'terminologies' },
-			{ field: 'entities', urlModel: 'entities' }
+			{ field: 'entities', urlModel: 'entities' },
+			{ field: 'filtering_labels', urlModel: 'filtering-labels' }
 		],
 		reverseForeignKeyFields: [{ field: 'incident', urlModel: 'timeline-entries' }],
 		selectFields: [
@@ -1803,7 +1811,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'entities' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
-			{ field: 'link' }
+			{ field: 'link' },
+			{ field: 'filtering_labels' }
 		]
 	},
 	'timeline-entries': {
@@ -1845,7 +1854,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				disableEdit: true,
 				defaultFilters: {
-					past: [{ value: 'false' }]
+					status: [{ value: 'pending' }, { value: 'in_progress' }]
 				}
 			}
 		]
@@ -2421,6 +2430,9 @@ const FIELD_COMPONENT_MAP = {
 	},
 	'quantitative-risk-hypotheses': {
 		lec_data: LecChartPreview
+	},
+	frameworks: {
+		name: FrameworkName
 	}
 };
 
