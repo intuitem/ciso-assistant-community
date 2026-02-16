@@ -226,25 +226,25 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 
 ### Supported fields:
 
-* ref\_id
-* name\*
-* description&#x20;
-* inherent\_impact
-* inherent\_proba
-* _existing\_controls_
-* current\_impact
-* current\_proba
-* _additional\_controls_
-* residual\_impact
-* residual\_proba
-* treatment
+* ref\_id : String
+* name\* : String
+* description : String
+* inherent\_impact : String<sup>(1)</sup>
+* inherent\_proba : String<sup>(1)</sup>
+* _existing\_controls :_ String
+* current\_impact : String<sup>(1)</sup>
+* current\_proba : String<sup>(1)</sup>
+* _additional\_controls :_ String
+* residual\_impact : String<sup>(1)</sup>
+* residual\_proba : String<sup>(1)</sup>
+* treatment : String
   * open
   * mitigate
   * accept
   * avoid
   * transfer
 
-
+(1): the string of characters must represent a value present in the chosen risk matrix
 
 ## ⚙️  Elementary actions
 
