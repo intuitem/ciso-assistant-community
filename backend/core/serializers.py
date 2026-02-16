@@ -911,6 +911,9 @@ class AppliedControlWriteSerializer(BaseModelSerializer):
     stakeholders = serializers.PrimaryKeyRelatedField(
         many=True, required=False, queryset=Stakeholder.objects.all()
     )
+    task_templates = serializers.PrimaryKeyRelatedField(
+        many=True, required=False, queryset=TaskTemplate.objects.all()
+    )
     cost = serializers.JSONField(required=False, allow_null=True)
     integration_config = serializers.PrimaryKeyRelatedField(
         required=False,

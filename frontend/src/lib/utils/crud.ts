@@ -113,6 +113,16 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 	folderPermsNeeded?: { action: 'add' | 'view' | 'change' | 'delete'; model: string }[]; // Permissions needed on the folder to display this reverse foreign key field
 	defaultFilters?: { [key: string]: any[] }; // Default filters to initialize the table with (user can change/remove them)
 	expectedCountField?: string; // Field on parent payload that holds related items (for masked count)
+	addExisting?: {
+		parentField: string; // M2M field name on the parent model (e.g., 'elementary_actions')
+		optionsEndpoint?: string; // Defaults to the reverse FK's urlModel
+		label?: string; // i18n key for modal title (defaults to 'selectExisting')
+		optionsInfoFields?: {
+			// Optional info fields for autocomplete display
+			fields: { field: string; translate?: boolean }[];
+			classes?: string;
+		};
+	};
 }
 
 interface Field {
@@ -328,11 +338,24 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'requirement_assessments', urlModel: 'requirement-assessments' },
 			{ field: 'risk_scenarios', urlModel: 'risk-scenarios' },
 			{ field: 'quantitative_risk_scenarios', urlModel: 'quantitative-risk-scenarios' },
-			{ field: 'assets', urlModel: 'assets' }
+			{ field: 'assets', urlModel: 'assets' },
+			{ field: 'task_templates', urlModel: 'task-templates' }
 		],
 		reverseForeignKeyFields: [
-			{ field: 'applied_controls', urlModel: 'evidences' },
-			{ field: 'applied_controls', urlModel: 'task-templates' },
+			{
+				field: 'applied_controls',
+				urlModel: 'evidences',
+				addExisting: {
+					parentField: 'evidences'
+				}
+			},
+			{
+				field: 'applied_controls',
+				urlModel: 'task-templates',
+				addExisting: {
+					parentField: 'task_templates'
+				}
+			},
 			{
 				field: 'applied_controls',
 				urlModel: 'requirement-assessments',
@@ -1377,7 +1400,15 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'compliance_assessments', urlModel: 'compliance-assessments' },
 			{ field: 'reference_entity', urlModel: 'entities' }
 		],
-		reverseForeignKeyFields: [{ field: 'ebios_rm_studies', urlModel: 'assets' }],
+		reverseForeignKeyFields: [
+			{
+				field: 'ebios_rm_studies',
+				urlModel: 'assets',
+				addExisting: {
+					parentField: 'assets'
+				}
+			}
+		],
 		selectFields: [{ field: 'quotation_method' }]
 	},
 	'feared-events': {
@@ -1626,7 +1657,14 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'operating_modes',
 				urlModel: 'elementary-actions',
 				endpointUrl: 'ebios-rm/elementary-actions',
-				disableDelete: true
+				disableDelete: true,
+				addExisting: {
+					parentField: 'elementary_actions',
+					optionsInfoFields: {
+						fields: [{ field: 'attack_stage', translate: true }],
+						classes: 'text-yellow-700'
+					}
+				}
 			},
 			{
 				field: 'operating_mode',
