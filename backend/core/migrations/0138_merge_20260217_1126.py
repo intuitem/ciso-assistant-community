@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0137_add_auto_sync_to_risk_compliance_assessments'),
-        ('core', '0137_add_threats_to_finding'),
+        ("core", "0137_add_auto_sync_to_risk_compliance_assessments"),
+        ("core", "0137_add_threats_to_finding"),
     ]
 
-    operations = [
-    ]
+    operations = []
