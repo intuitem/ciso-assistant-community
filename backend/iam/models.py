@@ -449,6 +449,7 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
             if self.builtin
             else self.name,
         }
+
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
         invalidate_groups_cache()
