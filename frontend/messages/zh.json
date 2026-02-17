@@ -211,6 +211,8 @@
 	"selectDomain": "选择域",
 	"focusMode": "聚焦模式",
 	"focusModeTooltip": "聚焦于特定域",
+	"objectNotReachableFromCurrentFocus": "此对象无法从当前焦点访问。正在重定向到列表视图。",
+	"objectNotFound": "未找到对象。正在重定向到列表视图。",
 	"clearFocus": "清除焦点",
 	"noDomainsAvailable": "没有可用的域",
 	"urn": "URN",

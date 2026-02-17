@@ -155,6 +155,8 @@
 	"selectDomain": "Välj domän",
 	"focusMode": "Fokusläge",
 	"focusModeTooltip": "Fokusera på en specifik domän",
+	"objectNotReachableFromCurrentFocus": "Det här objektet kan inte nås från den aktuella fokusen. Omdirigerar till listvisningen.",
+	"objectNotFound": "Objektet hittades inte. Omdirigerar till listvisningen.",
 	"clearFocus": "Rensa fokus",
 	"noDomainsAvailable": "Inga domäner tillgängliga",
 	"urn": "URN",

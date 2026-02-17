@@ -155,6 +155,8 @@
 	"selectDomain": "Pilih domain",
 	"focusMode": "Mode fokus",
 	"focusModeTooltip": "Fokus pada domain tertentu",
+	"objectNotReachableFromCurrentFocus": "Objek ini tidak dapat dijangkau dari fokus saat ini. Mengalihkan ke tampilan daftar.",
+	"objectNotFound": "Objek tidak ditemukan. Mengalihkan ke tampilan daftar.",
 	"clearFocus": "Hapus fokus",
 	"noDomainsAvailable": "Tidak ada domain tersedia",
 	"urn": "URN",

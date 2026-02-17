@@ -155,6 +155,8 @@
 	"selectDomain": "ڈومین منتخب کریں",
 	"focusMode": "فوکس موڈ",
 	"focusModeTooltip": "کسی مخصوص ڈومین پر توجہ مرکوز کریں",
+	"objectNotReachableFromCurrentFocus": "یہ آبجیکٹ موجودہ فوکس سے قابل رسائی نہیں ہے۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
+	"objectNotFound": "آبجیکٹ نہیں ملا۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
 	"clearFocus": "فوکس صاف کریں",
 	"noDomainsAvailable": "کوئی ڈومین دستیاب نہیں",
 	"urn": "URN",

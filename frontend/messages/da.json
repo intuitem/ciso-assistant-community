@@ -155,6 +155,8 @@
 	"selectDomain": "Vælg domæne",
 	"focusMode": "Fokustilstand",
 	"focusModeTooltip": "Fokuser på et specifikt domæne",
+	"objectNotReachableFromCurrentFocus": "Dette objekt kan ikke nås fra det aktuelle fokus. Omdirigerer til listevisningen.",
+	"objectNotFound": "Objekt blev ikke fundet. Omdirigerer til listevisningen.",
 	"clearFocus": "Ryd fokus",
 	"noDomainsAvailable": "Ingen domæner tilgængelige",
 	"urn": "URN",

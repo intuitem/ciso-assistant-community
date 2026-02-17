@@ -207,6 +207,7 @@ export const AppliedControlSchema = z.object({
 	progress_field: z.number().optional().default(0),
 	filtering_labels: z.string().optional().array().optional(),
 	findings: z.string().uuid().optional().array().optional(),
+	task_templates: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	integration_config: z.string().optional().nullable(),
 	remote_object_id: z.string().optional().nullable(),
@@ -333,6 +334,8 @@ export const AssetSchema = z.object({
 	overridden_children_capabilities: z.string().uuid().optional().array().optional(),
 	solutions: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
+	vulnerabilities: z.string().uuid().optional().array().optional(),
+	incidents: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -551,7 +554,8 @@ export const FeatureFlagsSchema = z.object({
 	personal_data: z.boolean().optional(),
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
-	data_breaches: z.boolean().optional()
+	data_breaches: z.boolean().optional(),
+	auditee_mode: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -909,6 +913,7 @@ export const organisationObjectiveSchema = z.object({
 	assets: z.string().uuid().optional().array().optional(),
 	tasks: z.string().uuid().optional().array().optional(),
 	metrics: z.string().uuid().optional().array().optional(),
+	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
@@ -922,6 +927,7 @@ export const organisationIssueSchema = z.object({
 	status: z.string().optional().default('draft'),
 	origin: z.string().optional(),
 	assets: z.string().uuid().optional().array().optional(),
+	objectives: z.string().uuid().optional().array().optional(),
 	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	expiration_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
@@ -1112,6 +1118,7 @@ export const FindingSchema = z.object({
 	ref_id: z.string().optional(),
 	owner: z.string().optional().array().optional(),
 	status: z.string().default('--'),
+	threats: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	reference_controls: z.string().uuid().optional().array().optional(),
@@ -1166,6 +1173,7 @@ export const IncidentSchema = z.object({
 	owners: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	qualifications: z.string().uuid().optional().array().optional(),
+	filtering_labels: z.string().optional().array().optional(),
 	entities: z.string().uuid().optional().array().optional()
 });
 

@@ -160,6 +160,8 @@
 	"selectDomain": "Wybierz domenę",
 	"focusMode": "Tryb skupienia",
 	"focusModeTooltip": "Skup się na konkretnej domenie",
+	"objectNotReachableFromCurrentFocus": "Ten obiekt nie jest dostępny z obecnego skupienia. Przekierowywanie do widoku listy.",
+	"objectNotFound": "Nie znaleziono obiektu. Przekierowywanie do widoku listy.",
 	"clearFocus": "Wyczyść fokus",
 	"noDomainsAvailable": "Brak dostępnych domen",
 	"urn": "URN",
