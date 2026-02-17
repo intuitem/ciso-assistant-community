@@ -4924,10 +4924,6 @@ class Assessment(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
         null=True,
         verbose_name=_("Is locked"),
     )
-    auto_sync = models.BooleanField(
-        default=False,
-        verbose_name=_("Automatic sync to actions"),
-    )
     fields_to_check = ["name", "version"]
 
     class Meta:
@@ -4961,6 +4957,10 @@ class RiskAssessment(Assessment):
         null=True,
         blank=True,
         related_name="risk_assessments",
+    )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
     )
 
     class Meta:
@@ -5920,6 +5920,10 @@ class ComplianceAssessment(Assessment):
         choices=CalculationMethod.choices,
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
+    )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
     )
 
     fields_to_check = ["name", "version"]
