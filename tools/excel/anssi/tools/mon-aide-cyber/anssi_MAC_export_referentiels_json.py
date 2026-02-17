@@ -204,8 +204,10 @@ def resolve_mesure_texts(api_src: Path, mesures: dict[str, Any]) -> None:
     for payload in mesures.values():
         if not isinstance(payload, dict):
             continue
-        for level in ("niveau1", "niveau2"):
-            lvl = payload.get(level)
+        # Gère dynamiquement tous les niveaux (niveau1, niveau2, niveau3, ...)
+        for level_name, lvl in payload.items():
+            if not level_name.startswith("niveau"):
+                continue
             if not isinstance(lvl, dict):
                 continue
             for field in ("pourquoi", "comment"):
@@ -333,8 +335,11 @@ def main() -> None:
         questions_ref = parse_referentiel_questions(api_src)
         mesures_ref = parse_referentiel_mesures(api_src)
         resolve_mesure_texts(api_src, mesures_ref)
-        links = build_mesure_links(questions_ref)
-        mesures_enriched = enrich_mesures_with_links(mesures_ref, links)
+        # Désactivé pour le moment: liaison mesures <-> questions.
+        # On garde le code ci-dessous en commentaire pour réutilisation ultérieure.
+        # links = build_mesure_links(questions_ref)
+        # mesures_enriched = enrich_mesures_with_links(mesures_ref, links)
+        mesures_enriched = mesures_ref
 
         questionnaire_payload = {
             "source": "mon-aide-cyber-api/src/diagnostic/referentiel",
