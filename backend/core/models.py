@@ -1052,7 +1052,13 @@ class LibraryUpdater:
                     # Ensure all needed fields are included
                     fields_to_update = sorted(
                         all_fields_to_update.union(
-                            {"name", "description", "order_id", "questions"}
+                            {
+                                "name",
+                                "description",
+                                "order_id",
+                                "questions",
+                                "implementation_groups",
+                            }
                         )
                     )
                     RequirementNode.objects.bulk_update(
