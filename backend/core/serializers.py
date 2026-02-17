@@ -1982,7 +1982,13 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     selected_implementation_groups = serializers.ReadOnlyField(
         source="get_selected_implementation_groups"
     )
-    progress = serializers.ReadOnlyField()
+    progress = serializers.SerializerMethodField()
+
+    def get_progress(self, obj):
+        total = getattr(obj, "total_requirements", 0)
+        assessed = getattr(obj, "assessed_requirements", 0)
+        return int((assessed / total) * 100) if total else 0
+
     assets = FieldsRelatedField(many=True)
     evidences = FieldsRelatedField(many=True)
     validation_flows = FieldsRelatedField(
@@ -1999,6 +2005,38 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
     class Meta:
         model = ComplianceAssessment
         fields = "__all__"
+
+
+class ComplianceAssessmentListSerializer(BaseModelSerializer):
+    """Optimized serializer for list views - only includes fields needed by the table."""
+
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+    framework = FieldsRelatedField()
+    perimeter = FieldsRelatedField()
+    progress = serializers.SerializerMethodField()
+
+    def get_progress(self, obj):
+        total = getattr(obj, "total_requirements", 0)
+        assessed = getattr(obj, "assessed_requirements", 0)
+        return int((assessed / total) * 100) if total else 0
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "version",
+            "framework",
+            "folder",
+            "perimeter",
+            "progress",
+            "status",
+            "created_at",
+            "updated_at",
+            "path",
+        ]
 
 
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):

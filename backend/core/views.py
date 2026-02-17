@@ -8180,6 +8180,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import ComplianceAssessmentListSerializer
+
+            return ComplianceAssessmentListSerializer
+        return super().get_serializer_class(**kwargs)
+
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         qs = (
@@ -8190,17 +8198,29 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+            )
+        )
+
+        if self.action == "list":
+            # List view: only annotations needed for progress, no M2M prefetches
+            pass
+        else:
+            # Detail/other views: full prefetches for the read serializer
+            qs = qs.select_related(
+                "framework__library",  # For framework.has_update property
                 "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
                 "campaign",  # Serialized as FieldsRelatedField
-            )
-            .prefetch_related(
+            ).prefetch_related(
                 "assets",  # ManyToManyField serialized as FieldsRelatedField
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
-                "requirement_assessments",  # To calcul progress
+                "requirement_assessments",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related("approver"),
+                ),
             )
-        )
 
         qs = qs.annotate(
             total_requirements=Count(
@@ -8211,9 +8231,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             assessed_requirements=Count(
                 "requirement_assessments",
                 filter=Q(
-                    ~Q(
-                        requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                    ),
+                    Q(
+                        ~Q(
+                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                        )
+                    )
+                    | Q(requirement_assessments__score__isnull=False),
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
