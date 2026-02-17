@@ -19,8 +19,8 @@ from typing import Any
 try:
     import json5
 except ModuleNotFoundError as exc:  # pragma: no cover
-    raise SystemExit(
-        "Module 'json5' manquant. Installe-le avec: python3 -m pip install json5"
+    raise ModuleNotFoundError(
+        "Module 'json5' manquant. Installez-le avec: python3 -m pip install json5"
     ) from exc
 
 
@@ -289,6 +289,19 @@ def enrich_mesures_with_links(
     return out
 
 
+def display_path(path: Path, base_dir: Path) -> str:
+    try:
+        return str(path.relative_to(base_dir))
+    except ValueError:
+        return str(path)
+
+
+def dump_json(path: Path, payload: dict[str, Any]) -> None:
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(payload, f, ensure_ascii=False, indent=2)
+        f.write("\n")
+
+
 def main() -> None:
     try:
         parser = argparse.ArgumentParser(
@@ -313,6 +326,7 @@ def main() -> None:
         args = parser.parse_args()
 
         api_src = Path(args.api_root).resolve() / "src"
+        script_dir = Path(__file__).resolve().parent
         out_dir = Path(args.out_dir).resolve()
         out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -333,21 +347,17 @@ def main() -> None:
 
         questions_out = out_dir / args.questions_file
         mesures_out = out_dir / args.mesures_file
-        questions_out.write_text(
-            json.dumps(questionnaire_payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        mesures_out.write_text(
-            json.dumps(mesures_payload, ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
-        print(f"OK: {questions_out}")
-        print(f"OK: {mesures_out}")
+
+        dump_json(questions_out, questionnaire_payload)
+        dump_json(mesures_out, mesures_payload)
+
+        print(f"- Questions: \"{display_path(questions_out, script_dir)}\"")
+        print(f"- Mesures:   \"{display_path(mesures_out, script_dir)}\"")
     except KeyboardInterrupt:
-        print("Interrompu par l'utilisateur.", file=sys.stderr)
+        print("❌ [ERROR] Interrompu par l'utilisateur.", file=sys.stderr)
         raise SystemExit(130)
     except Exception as exc:
-        print(f"Erreur: {exc}", file=sys.stderr)
+        print(f"❌ [ERROR] {exc}", file=sys.stderr)
         raise SystemExit(1)
 
 
