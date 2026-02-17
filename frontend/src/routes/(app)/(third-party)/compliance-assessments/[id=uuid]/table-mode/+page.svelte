@@ -565,27 +565,33 @@
 								>
 									{#if !questionnaireMode}
 										<div class="flex flex-row w-full space-x-2 my-4">
-											<div class="flex flex-col items-center w-1/2">
-												<p class="flex items-center font-semibold text-blue-600 italic">
-													{m.status()}
-												</p>
-												<RadioGroup
-													possibleOptions={status_options}
-													key="id"
-													labelKey="label"
-													field="status"
-													colorMap={complianceStatusTailwindColorMap}
-													disabled={isReadOnly}
-													initialValue={requirementAssessment.status}
-													onChange={(newValue) => {
-														const newStatus =
-															requirementAssessment.status === newValue ? 'to_do' : newValue;
-														requirementAssessment.status = newStatus;
-														update(requirementAssessment, 'status');
-													}}
-												/>
-											</div>
-											<div class="flex flex-col items-center w-1/2">
+											{#if complianceAssessment.progress_status_enabled}
+												<div class="flex flex-col items-center w-1/2">
+													<p class="flex items-center font-semibold text-blue-600 italic">
+														{m.status()}
+													</p>
+													<RadioGroup
+														possibleOptions={status_options}
+														key="id"
+														labelKey="label"
+														field="status"
+														colorMap={complianceStatusTailwindColorMap}
+														disabled={isReadOnly}
+														initialValue={requirementAssessment.status}
+														onChange={(newValue) => {
+															const newStatus =
+																requirementAssessment.status === newValue ? 'to_do' : newValue;
+															requirementAssessment.status = newStatus;
+															update(requirementAssessment, 'status');
+														}}
+													/>
+												</div>
+											{/if}
+											<div
+												class="flex flex-col items-center {complianceAssessment.progress_status_enabled
+													? 'w-1/2'
+													: 'w-full'}"
+											>
 												<p class="flex items-center font-semibold text-purple-600 italic">
 													{m.result()}
 												</p>
