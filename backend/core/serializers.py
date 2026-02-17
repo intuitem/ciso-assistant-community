@@ -2047,6 +2047,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "perimeter",
             "progress",
             "status",
+            "is_locked",
             "created_at",
             "updated_at",
             "path",
