@@ -285,7 +285,7 @@ class RoleViewSet(BaseModelViewSet):
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,
-                    defaults={"builtin": True},
+                    defaults={"builtin": False},
                 )
                 user_groups.append(ug)
 
@@ -327,7 +327,7 @@ class RoleViewSet(BaseModelViewSet):
                 RoleAssignment.objects.filter(
                     role=role,
                     user_group__isnull=False,
-                    user_group__builtin=True,
+                    user_group__builtin=False,
                 )
                 .values_list("user_group_id", flat=True)
                 .distinct()
@@ -354,7 +354,7 @@ class RoleViewSet(BaseModelViewSet):
             if ug_ids:
                 # Delete only non-builtin groups that are now orphaned (no remaining RAs)
                 orphan_ug_ids = list(
-                    UserGroup.objects.filter(id__in=ug_ids, builtin=True)
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=False)
                     .annotate(ra_count=models.Count("roleassignment"))
                     .filter(ra_count=0)
                     .values_list("id", flat=True)
