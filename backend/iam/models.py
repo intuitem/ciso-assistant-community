@@ -435,20 +435,20 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return f"{self.folder.name} - {resolved_name}"
+        if self.builtin:
+            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
+        return f"{self.folder.name} - {self.name}"
 
     def get_name_display(self) -> str:
         return self.name
 
     def get_localization_dict(self) -> dict:
-        resolved_name = (
-            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
-        ) or self.name
-        return {"folder": self.folder.name, "role": resolved_name}
-
+        return {
+            "folder": self.folder.name,
+            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
+            if self.builtin
+            else self.name,
+        }
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
         invalidate_groups_cache()
