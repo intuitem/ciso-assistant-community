@@ -872,7 +872,7 @@
 						</div>
 					</button>
 				{/if}
-				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode}
+				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/assignments`}

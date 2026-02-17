@@ -43,6 +43,10 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
+	let isReadOnly = $derived(
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+	);
+
 	const requirementHashmap = $derived(
 		Object.fromEntries(
 			data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
@@ -392,6 +396,18 @@
 			</div>
 		</div>
 
+		<!-- Read-only banner -->
+		{#if isReadOnly}
+			<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
+				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+				<p class="text-yellow-800 font-medium">
+					{complianceAssessment.is_locked
+						? m.lockedAssessmentMessage()
+						: m.assessmentInReviewMessage()}
+				</p>
+			</div>
+		{/if}
+
 		<!-- Current requirement assessment -->
 		{#if currentItem}
 			{@const requirementAssessment = currentItem}
@@ -464,6 +480,7 @@
 										questions={requirement.questions}
 										initialValue={requirementAssessment.answers}
 										field="answers"
+										disabled={isReadOnly}
 										onChange={(urn, newAnswer) => {
 											requirementAssessment.answers[urn] = newAnswer;
 											update(requirementAssessment, 'answers', requirementAssessment.answers);
@@ -493,6 +510,7 @@
 										labelKey="label"
 										field="result"
 										colorMap={complianceResultTailwindColorMap}
+										disabled={isReadOnly}
 										initialValue={requirementAssessment.result}
 										onChange={(newValue) => {
 											const newResult =
@@ -505,7 +523,11 @@
 							</div>
 
 							<!-- Score -->
-							<div class="flex flex-col w-full place-items-center">
+							<div
+								class="flex flex-col w-full place-items-center {isReadOnly
+									? 'pointer-events-none opacity-60'
+									: ''}"
+							>
 								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 									<div class="flex flex-row items-center space-x-4">
 										<span class="font-medium">{m.score()}</span>
@@ -545,6 +567,7 @@
 												<Checkbox
 													form={isScoredForms[requirementAssessment.id]}
 													field="is_scored"
+													disabled={isReadOnly}
 													label={''}
 													helpText={m.scoringHelpText()}
 													checkboxComponent="switch"
@@ -595,24 +618,26 @@
 										</p>
 									{/snippet}
 									{#snippet panel()}
-										<div class="flex flex-row space-x-2 items-center">
-											<button
-												class="btn preset-filled-primary-500 self-start"
-												onclick={() =>
-													modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
-												type="button"
-											>
-												<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
-											</button>
-											<button
-												class="btn preset-filled-secondary-500 self-start"
-												type="button"
-												onclick={() =>
-													modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
-											>
-												<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
-											</button>
-										</div>
+										{#if !isReadOnly}
+											<div class="flex flex-row space-x-2 items-center">
+												<button
+													class="btn preset-filled-primary-500 self-start"
+													onclick={() =>
+														modalMeasureCreateForm(requirementAssessment.measureCreateForm)}
+													type="button"
+												>
+													<i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}
+												</button>
+												<button
+													class="btn preset-filled-secondary-500 self-start"
+													type="button"
+													onclick={() =>
+														modalUpdateForm(requirementAssessment, 'selectAppliedControls')}
+												>
+													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectAppliedControls()}
+												</button>
+											</div>
+										{/if}
 										<div class="flex flex-wrap space-x-2 items-center">
 											{#each requirementAssessment.applied_controls ?? [] as ac}
 												<p class="p-2">
@@ -638,25 +663,27 @@
 										</p>
 									{/snippet}
 									{#snippet panel()}
-										<div class="flex flex-row space-x-2 items-center">
-											<button
-												class="btn preset-filled-primary-500 self-start"
-												onclick={() =>
-													modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
-												type="button"
-												data-testid="create-evidence-button"
-											>
-												<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
-											</button>
-											<button
-												class="btn preset-filled-secondary-500 self-start"
-												type="button"
-												data-testid="select-evidence-button"
-												onclick={() => modalUpdateForm(requirementAssessment, 'selectEvidences')}
-											>
-												<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
-											</button>
-										</div>
+										{#if !isReadOnly}
+											<div class="flex flex-row space-x-2 items-center">
+												<button
+													class="btn preset-filled-primary-500 self-start"
+													onclick={() =>
+														modalEvidenceCreateForm(requirementAssessment.evidenceCreateForm)}
+													type="button"
+													data-testid="create-evidence-button"
+												>
+													<i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}
+												</button>
+												<button
+													class="btn preset-filled-secondary-500 self-start"
+													type="button"
+													data-testid="select-evidence-button"
+													onclick={() => modalUpdateForm(requirementAssessment, 'selectEvidences')}
+												>
+													<i class="fa-solid fa-hand-pointer mr-2"></i>{m.selectEvidence()}
+												</button>
+											</div>
+										{/if}
 										<div class="flex flex-wrap space-x-2 items-center">
 											{#each requirementAssessment.evidences ?? [] as evidence}
 												<p class="p-2">
@@ -682,6 +709,7 @@
 									{#snippet panel()}
 										<TableMarkdownField
 											bind:value={requirementAssessment.observation}
+											disabled={isReadOnly}
 											onSave={async (newValue) => {
 												await update(requirementAssessment, 'observation');
 												requirementAssessment.observationBuffer = newValue;

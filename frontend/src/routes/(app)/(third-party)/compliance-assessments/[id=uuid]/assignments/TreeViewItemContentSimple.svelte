@@ -33,6 +33,8 @@
 	const checkedNodesStore = getContext<Writable<Set<string>>>('checkedNodes');
 	const assignedNodesStore = getContext<Writable<Set<string>>>('assignedNodes');
 	const editingRequirementIdsStore = getContext<Writable<Set<string>>>('editingRequirementIds');
+	const isReadOnlyStore = getContext<Writable<boolean>>('isReadOnly');
+	let isPageReadOnly = $derived($isReadOnlyStore ?? false);
 
 	// Check if this node belongs to the assignment being edited
 	let isBeingEdited = $derived($editingRequirementIdsStore?.has(nodeId) ?? false);
@@ -40,8 +42,8 @@
 	// For leaf nodes: check if this node is checked
 	let isChecked = $derived($checkedNodesStore?.has(nodeId) ?? false);
 
-	// A node is effectively locked only if assigned AND not being edited
-	let isLocked = $derived(isAssigned && !isBeingEdited);
+	// A node is effectively locked only if assigned AND not being edited, OR page is read-only
+	let isLocked = $derived(isPageReadOnly || (isAssigned && !isBeingEdited));
 
 	// For parent nodes: calculate selection state of children
 	let availableChildrenIds = $derived(childrenIds.filter((id) => !$assignedNodesStore?.has(id)));
