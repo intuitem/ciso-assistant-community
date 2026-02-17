@@ -6679,9 +6679,7 @@ class FolderViewSet(BaseModelViewSet):
             with transaction.atomic():
                 # Create base folder and store its ID
                 base_folder = Folder.objects.create(
-                    name=domain_name,
-                    content_type=Folder.ContentType.DOMAIN,
-                    create_iam_groups=True,
+                    name=domain_name, content_type=Folder.ContentType.DOMAIN
                 )
                 link_dump_database_ids["base_folder"] = base_folder
                 Folder.create_default_ug_and_ra(base_folder)
