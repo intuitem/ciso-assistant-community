@@ -19,9 +19,7 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 	};
 	const getAuditsMetrics = async () => {
 		try {
-			const response = await fetch(
-				`${BASE_API_URL}/get_audits_metrics/?folder=${params.id}`
-			);
+			const response = await fetch(`${BASE_API_URL}/get_audits_metrics/?folder=${params.id}`);
 			const data = await response.json();
 			return data.results;
 		} catch (error) {

@@ -2040,6 +2040,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "id",
             "ref_id",
             "name",
+            "description",
             "version",
             "framework",
             "folder",
