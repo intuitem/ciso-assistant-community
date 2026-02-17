@@ -1102,12 +1102,11 @@ class LoadFileView(APIView):
     serializer_class = LoadFileSerializer
 
     VULNERABILITY_SEVERITY_MAP = {
-        -1: "undefined",
-        0: "info",
-        1: "low",
-        2: "medium",
-        3: "high",
-        4: "critical",
+        "Informational": 0,
+        "Low": 1,
+        "Medium": 2,
+        "High": 3,
+        "Critical": 4,
     }
 
     VULNERABILITY_STATUS_MAP = {

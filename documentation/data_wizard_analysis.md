@@ -546,6 +546,37 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
+
+## 20. Vulnerability
+
+| Field | Type | Required | Note |
+|-------|------|---------|-------|
+| `ref_id`      | string | No  ||
+| `name`        | string | yes ||
+| `description` | string | No  ||
+|`status`       | string | No  | The list of the possible statuses below |
+| `severity`    | string | No  | The list of the possible severities below |
+| `filtering_label` | list | No | List of labels, newline-separated |
+| `assets`      | list   | No | List of the named of the related assets, newline-separated |
+| `applied_controls` | list | No | List of the name of the related applied controls, newline-separated |
+| `security_exceptions`| list | No | List of the name of the related security exceptions, newline-separated |
+
+**Vulnerability's status**
+* Potential
+* Exploitable
+* Mitigated
+* Fixed
+* Not exploitable
+* Unaffected
+
+**Vulnerability's severity**
+* Information
+* Low
+* Medium
+* High
+* Critical
+
+
 ## Models NOT Supported by Data Wizard
 
 ### Core App (`core/models.py`)
@@ -569,7 +600,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | OrganisationIssue | Not supported | Medium |
 | OrganisationObjective | Not supported | Medium |
 | Policy | **Supported** | Done |
-| Vulnerability | **Not supported** | **High** |
 | HistoricalMetric | Not supported | Low |
 | Campaign | Not supported | Medium |
 | RiskAcceptance | **Not supported** | **High** |
