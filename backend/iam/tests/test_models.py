@@ -1,6 +1,8 @@
 from django.core.exceptions import ValidationError
 import pytest
 
+from iam.models import Folder
+
 
 @pytest.mark.django_db
 class TestFolder:
