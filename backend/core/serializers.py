@@ -2047,6 +2047,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "perimeter",
             "progress",
             "status",
+            "is_locked",
             "created_at",
             "updated_at",
             "path",
@@ -2263,6 +2264,14 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         if compliance_assessment and compliance_assessment.is_locked:
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the requirement when the audit is locked."
+            )
+
+        if (
+            compliance_assessment
+            and compliance_assessment.status == Assessment.Status.IN_REVIEW
+        ):
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
         # Validate extended_result against result

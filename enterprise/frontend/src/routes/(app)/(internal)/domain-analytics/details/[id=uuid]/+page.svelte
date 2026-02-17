@@ -75,7 +75,7 @@
 				{#await data.stream.auditsMetrics then auditsMetrics}
 					<Card count="{auditsMetrics?.progress_avg ?? 0}%" label={m.sumpageAvgProgress()} />
 				{:catch}
-				    <Card count="0%" label={m.sumpageAvgProgress()} />
+					<Card count="0%" label={m.sumpageAvgProgress()} />
 				{/await}
 				<Card
 					count={metrics.compliance.non_compliant_items}
