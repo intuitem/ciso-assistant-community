@@ -167,7 +167,7 @@ class Folder(NameDescriptionMixin):
     )
     builtin = models.BooleanField(default=False)
     create_iam_groups = models.BooleanField(
-        default=True,
+        default=False,
         help_text=_("Automatically provision IAM groups for domain folders."),
     )
 
