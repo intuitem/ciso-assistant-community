@@ -8202,8 +8202,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         if self.action == "list":
-            # List view: only annotations needed for progress, no M2M prefetches
-            pass
+            # List view: lightweight prefetch for progress with implementation groups
+            qs = qs.prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                ),
+            )
         else:
             # Detail/other views: full prefetches for the read serializer
             qs = qs.select_related(
