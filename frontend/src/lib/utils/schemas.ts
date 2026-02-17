@@ -75,7 +75,7 @@ export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	parent_folder: z.string(),
-	create_iam_groups: z.boolean().default(false),
+	create_iam_groups: z.boolean().default(true),
 	filtering_labels: z.array(z.string()).optional()
 });
 
