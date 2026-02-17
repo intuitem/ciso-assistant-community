@@ -155,6 +155,8 @@
 	"selectDomain": "Επιλογή τομέα",
 	"focusMode": "Λειτουργία εστίασης",
 	"focusModeTooltip": "Εστίαση σε συγκεκριμένο τομέα",
+	"objectNotReachableFromCurrentFocus": "Αυτό το αντικείμενο δεν είναι προσβάσιμο από την τρέχουσα εστίαση. Ανακατεύθυνση στην προβολή λίστας.",
+	"objectNotFound": "Το αντικείμενο δεν βρέθηκε. Ανακατεύθυνση στην προβολή λίστας.",
 	"clearFocus": "Εκκαθάριση εστίασης",
 	"noDomainsAvailable": "Δεν υπάρχουν διαθέσιμοι τομείς",
 	"urn": "URN",
@@ -1800,6 +1802,7 @@
 	],
 	"cascadeAffectedHint": "Τα παρακάτω αντικείμενα παραμένουν στο σύστημα αλλά οι σύνδεσμοι τους με αυτό το αντικείμενο θα αφαιρεθούν.",
 	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης",
+	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

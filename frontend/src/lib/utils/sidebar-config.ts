@@ -9,6 +9,7 @@ type SidebarBackendKeys = {
 	scoring_assistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	tprm: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -26,6 +27,7 @@ type SidebarBackendKeys = {
 	purposes: boolean;
 	right_requests: boolean;
 	data_breaches: boolean;
+	auditee_mode: boolean;
 };
 
 type SidebarFrontendKeys = {
@@ -39,6 +41,7 @@ type SidebarFrontendKeys = {
 	scoringAssistant: boolean;
 	vulnerabilities: boolean;
 	compliance: boolean;
+	campaigns: boolean;
 	thirdPartyCategory: boolean;
 	privacy: boolean;
 	experimental: boolean;
@@ -56,6 +59,7 @@ type SidebarFrontendKeys = {
 	purposes: boolean;
 	rightRequests: boolean;
 	dataBreaches: boolean;
+	auditDashboard: boolean;
 };
 
 export function getSidebarVisibleItems(
@@ -72,6 +76,7 @@ export function getSidebarVisibleItems(
 		scoringAssistant: featureFlags?.scoring_assistant ?? false,
 		vulnerabilities: featureFlags?.vulnerabilities ?? false,
 		compliance: featureFlags?.compliance ?? false,
+		campaigns: featureFlags?.campaigns ?? false,
 		thirdPartyCategory: featureFlags?.tprm ?? false,
 		privacy: featureFlags?.privacy ?? false,
 		experimental: featureFlags?.experimental ?? false,
@@ -88,6 +93,7 @@ export function getSidebarVisibleItems(
 		personalData: featureFlags?.personal_data ?? true,
 		purposes: featureFlags?.purposes ?? true,
 		rightRequests: featureFlags?.right_requests ?? true,
-		dataBreaches: featureFlags?.data_breaches ?? true
+		dataBreaches: featureFlags?.data_breaches ?? true,
+		auditDashboard: featureFlags?.auditee_mode ?? false
 	};
 }

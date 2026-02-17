@@ -654,13 +654,15 @@
 							label={m.questionSingular()}
 						/>
 					{/if}
-					<Select
-						{form}
-						options={page.data.model.selectOptions['status']}
-						field="status"
-						label={m.status()}
-						helpText={m.requirementAssessmentStatusHelpText()}
-					/>
+					{#if page.data.requirementAssessment.compliance_assessment.progress_status_enabled}
+						<Select
+							{form}
+							options={page.data.model.selectOptions['status']}
+							field="status"
+							label={m.status()}
+							helpText={m.requirementAssessmentStatusHelpText()}
+						/>
+					{/if}
 					{#if computedResult}
 						<p class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.result()}</span>
@@ -708,7 +710,7 @@
 								size="size-10">{computedScore}</ProgressRing
 							>
 						</div>
-					{:else}
+					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">
 							<Score
 								{form}
@@ -719,7 +721,7 @@
 								label={page.data.compliance_assessment_score.show_documentation_score
 									? m.implementationScore()
 									: m.score()}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							>
 								{#snippet left()}
 									<div>
@@ -745,7 +747,7 @@
 								field="documentation_score"
 								label={m.documentationScore()}
 								isDoc={true}
-								disabled={!data.is_scored || data.result === 'not_applicable'}
+								disabled={!data.is_scored}
 							/>
 						{/if}
 					{/if}

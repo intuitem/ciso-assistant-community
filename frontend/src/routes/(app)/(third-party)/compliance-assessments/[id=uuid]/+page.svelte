@@ -872,6 +872,17 @@
 						</div>
 					</button>
 				{/if}
+				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
+					<Anchor
+						breadcrumbAction="push"
+						href={`${page.url.pathname}/assignments`}
+						class="btn text-gray-100 bg-linear-to-r from-lime-500 to-green-600 h-fit"
+						data-testid="assignments-button"
+					>
+						<i class="fa-solid fa-user-tag mr-2"></i>
+						{m.assignments?.() ?? 'Assignments'}
+					</Anchor>
+				{/if}
 			</div>
 		</div>
 	</div>

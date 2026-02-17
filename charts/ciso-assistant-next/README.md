@@ -1,6 +1,6 @@
 # ciso-assistant
 
-![Version: 0.7.8](https://img.shields.io/badge/Version-0.7.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.11.1](https://img.shields.io/badge/AppVersion-v3.11.1-informational?style=flat-square)
+![Version: 0.8.1](https://img.shields.io/badge/Version-0.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.12.3](https://img.shields.io/badge/AppVersion-v3.12.3-informational?style=flat-square)
 
 A Helm chart for CISO Assistant k8s's deployment
 
