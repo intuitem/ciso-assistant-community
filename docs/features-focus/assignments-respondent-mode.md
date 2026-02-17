@@ -6,6 +6,10 @@ description: Overview of the requirements dispatch mode
 
 This feature is intended for organisations who wish to rely on a single audit where multiple users or teams will collaborate by responding to their specific sections (one or multiple requirements).
 
+The feature flag can be enabled from Extra/Settings/Feature flags:
+
+<figure><img src="../.gitbook/assets/image (80).png" alt=""><figcaption></figcaption></figure>
+
 Once the feature flag is enabled, the design is as follows:
 
 * an analyst (or higher role) starts an audit
