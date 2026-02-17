@@ -5996,7 +5996,7 @@ class FolderViewSet(BaseModelViewSet):
     model = Folder
     filterset_class = FolderFilter
     search_fields = ["name"]
-    batch_size = 1000  # Configurable batch size for processing domain import
+    batch_size = 100  # Configurable batch size for processing domain import
 
     def perform_create(self, serializer):
         """
@@ -6792,31 +6792,34 @@ class FolderViewSet(BaseModelViewSet):
                         }
                     )
 
-                objects_to_create = []
-                for object_creation_data in objects_creation_data:
-                    fields = object_creation_data["fields"]
-                    objects_to_create.append(model(**fields))
-
-                created_objects = model.objects.bulk_create(objects_to_create)
-                has_save_method_override = model.save is not models.Model.save
-
+                # Use bulk_create for models without custom save() or for
+                # RequirementAssessment (whose side effects are handled
+                # explicitly below). Fall back to individual create() for
+                # other models with custom save() to preserve their side
+                # effects without double-writing.
                 is_requirement_assessment = model is RequirementAssessment
+                has_save_override = model.save is not models.Model.save
 
-                if has_save_method_override and not is_requirement_assessment:
-                    for created_object in created_objects:
-                        created_object.save()
+                if has_save_override and not is_requirement_assessment:
+                    created_objects = []
+                    for object_creation_data in objects_creation_data:
+                        obj_created = model.objects.create(
+                            **object_creation_data["fields"]
+                        )
+                        created_objects.append(obj_created)
+                else:
+                    objects_to_create = [
+                        model(**ocd["fields"]) for ocd in objects_creation_data
+                    ]
+                    created_objects = model.objects.bulk_create(objects_to_create)
 
                 if is_requirement_assessment:
-                    compliance_assessment_to_requirement_assessment: dict[
-                        ComplianceAssessment, RequirementAssessment
-                    ] = {
-                        requirement_assessment.compliance_assessment: requirement_assessment
-                        for requirement_assessment in created_objects
-                    }
-                    for (
-                        requirement_assessment
-                    ) in compliance_assessment_to_requirement_assessment.values():
-                        requirement_assessment.trigger_compliance_assessment_update_hooks()
+                    seen_cas = set()
+                    for ra in created_objects:
+                        ca_id = ra.compliance_assessment_id
+                        if ca_id not in seen_cas:
+                            seen_cas.add(ca_id)
+                            ra.trigger_compliance_assessment_update_hooks()
 
                 for obj_created, object_creation_data in zip(
                     created_objects, objects_creation_data
@@ -6832,7 +6835,11 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             except Exception as e:
-                logger.error("Error creating object", obj=obj, exc_info=True)
+                logger.error(
+                    "Error creating object batch",
+                    model=model._meta.model_name,
+                    exc_info=True,
+                )
                 # This will trigger a rollback of the entire batch
                 raise ValidationError(
                     f"Error creating {model._meta.model_name}: {str(e)}"
