@@ -35,7 +35,6 @@
 	"addComplianceAssessment": "Démarrer l'audit",
 	"addEvidence": "Ajouter une preuve",
 	"addDomain": "Ajouter un domaine",
-	"whenEnabledIamGroupsAreCreatedAutomatically": "Les groupes IAM servent à assigner des rôles aux utilisateurs",
 	"addPerimeter": "Ajouter un périmètre",
 	"addUser": "Ajouter un utilisateur",
 	"addPolicy": "Ajouter une politique",
