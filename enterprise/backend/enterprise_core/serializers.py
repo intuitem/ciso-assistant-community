@@ -187,8 +187,3 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False
     )
-
-    class Meta:
-        model = GlobalSettings
-        fields = "__all__"
-        read_only_fields = ["name"]

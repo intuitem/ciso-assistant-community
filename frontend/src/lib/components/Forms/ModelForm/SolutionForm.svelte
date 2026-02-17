@@ -28,6 +28,7 @@
 	{form}
 	optionsEndpoint="entities"
 	field="provider_entity"
+	optionsExtraFields={[['folder', 'str']]}
 	cacheLock={cacheLocks['provider_entity']}
 	bind:cachedValue={formDataCache['provider_entity']}
 	label={m.providerEntity()}
