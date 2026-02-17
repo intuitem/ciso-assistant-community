@@ -394,6 +394,7 @@ class Folder(NameDescriptionMixin):
                     # Ensure perimeter folder link exists
                     ra.perimeter_folders.add(folder)
 
+
 class FolderMixin(models.Model):
     """
     Add foreign key to Folder, defaults to root folder
