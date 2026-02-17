@@ -3,7 +3,7 @@ urn: urn:intuitem:risk:library:itil4
 locale: fr
 ref_id: ITIL4
 name: "ITIL 4 Management Practices"
-description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services"
+description: "Référentiel complet des 34 pratiques de gestion d'ITIL 4 pour le management des services. Inclut 14 pratiques de gestion générale, 17 pratiques de gestion de services et 3 pratiques de gestion technique. Version 1.0 alignée sur le référentiel AXELOS."
 copyright: © AXELOS Limited 2019. ITIL® est une marque déposée d'AXELOS Limited.
 version: 1
 publication_date: 2026-02-16
