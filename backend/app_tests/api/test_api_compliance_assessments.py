@@ -120,20 +120,10 @@ class TestComplianceAssessmentsAuthenticated:
                 "perimeter": {
                     "id": str(perimeter.id),
                     "str": perimeter.folder.name + "/" + perimeter.name,
-                    "folder": {
-                        "id": str(perimeter.folder.id),
-                        "str": perimeter.folder.name,
-                    },
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
-                    "implementation_groups_definition": None,
-                    "reference_controls": [],
-                    "min_score": 1,
-                    "max_score": 4,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
-                    "has_update": False,
                 },
             },
             user_group=test.user_group,
@@ -161,20 +151,10 @@ class TestComplianceAssessmentsAuthenticated:
                 "perimeter": {
                     "id": str(perimeter.id),
                     "str": perimeter.folder.name + "/" + perimeter.name,
-                    "folder": {
-                        "id": str(perimeter.folder.id),
-                        "str": perimeter.folder.name,
-                    },
                 },
                 "framework": {
                     "id": str(Framework.objects.all()[0].id),
                     "str": str(Framework.objects.all()[0]),
-                    "implementation_groups_definition": None,
-                    "reference_controls": [],
-                    "min_score": Framework.objects.all()[0].min_score,
-                    "max_score": Framework.objects.all()[0].max_score,
-                    "ref_id": str(Framework.objects.all()[0].ref_id),
-                    "has_update": False,
                 },
             },
             user_group=test.user_group,
