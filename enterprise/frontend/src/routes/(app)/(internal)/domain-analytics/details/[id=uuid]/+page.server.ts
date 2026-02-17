@@ -17,6 +17,18 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 			return null;
 		}
 	};
+	const getAuditsMetrics = async () => {
+		try {
+			const response = await fetch(
+				`${BASE_API_URL}/get_audits_metrics/?folder=${params.id}`
+			);
+			const data = await response.json();
+			return data.results;
+		} catch (error) {
+			console.error('Failed to fetch or parse audits metrics:', error);
+			return null;
+		}
+	};
 	const folderData = params.id
 		? await fetch(`${BASE_API_URL}/folders/${params.id}/`)
 				.then((res) => res.json())
@@ -50,7 +62,8 @@ export const load: PageServerLoad = async ({ locals, fetch, params }) => {
 		user: locals.user,
 		title: `${m.analytics()} - ${folderData?.name}`,
 		stream: {
-			metrics: getMetrics()
+			metrics: getMetrics(),
+			auditsMetrics: getAuditsMetrics()
 		}
 	};
 };

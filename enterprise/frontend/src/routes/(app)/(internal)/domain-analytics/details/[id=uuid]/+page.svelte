@@ -58,13 +58,26 @@
 					></legend
 				>
 				<div class="col-span-5 row-span-3">
-					<StackedBarsNormalized
-						names={metrics.audits_stats.names}
-						data={metrics.audits_stats.data}
-						uuids={metrics.audits_stats.uuids}
-					/>
+					{#await data.stream.auditsMetrics}
+						<LoadingSpinner />
+					{:then auditsMetrics}
+						{#if auditsMetrics?.audits_stats}
+							<StackedBarsNormalized
+								names={auditsMetrics.audits_stats.names}
+								data={auditsMetrics.audits_stats.data}
+								uuids={auditsMetrics.audits_stats.uuids}
+							/>
+						{/if}
+					{:catch}
+						<p class="text-red-500">{m.errorLoadingData()}</p>
+					{/await}
 				</div>
-				<Card count="{metrics.compliance.progress_avg}%" label={m.sumpageAvgProgress()} />
+				{#await data.stream.auditsMetrics then auditsMetrics}
+					<Card
+						count="{auditsMetrics?.progress_avg ?? 0}%"
+						label={m.sumpageAvgProgress()}
+					/>
+				{/await}
 				<Card
 					count={metrics.compliance.non_compliant_items}
 					label={m.sumpageNonCompliantItems()}
