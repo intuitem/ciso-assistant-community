@@ -4,7 +4,7 @@ from huey.contrib.djhuey import db_periodic_task
 
 import logging.config
 from django.conf import settings
-from django.db import ProgrammingError
+from django.db import DatabaseError
 import structlog
 
 from metrology.models import MetricInstance
@@ -41,8 +41,8 @@ def _update_stale_status(frequencies: list):
             logger.info(
                 f"Stale check for {frequencies}: {stale_count} marked stale, {reactivated_count} reactivated"
             )
-    except ProgrammingError:
-        logger.debug("Metrology tables do not exist yet — skipping stale check")
+    except DatabaseError:
+        logger.warning("Metrology tables do not exist yet — skipping stale check")
 
 
 @db_periodic_task(crontab(minute="*/15"))
@@ -94,7 +94,7 @@ def cleanup_old_builtin_metric_samples():
                 f"No builtin metric samples older than {cutoff_date} to clean up "
                 f"(retention: {retention_days} days)"
             )
-    except ProgrammingError:
-        logger.debug(
+    except DatabaseError:
+        logger.warning(
             "Metrology tables do not exist yet — skipping builtin metric sample cleanup"
         )
