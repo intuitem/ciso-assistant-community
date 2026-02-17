@@ -6091,7 +6091,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         Create the default user groups after domain creation
         """
-        folder = serializer.save()
+        serializer.save()
         folder = Folder.objects.get(id=serializer.data["id"])
         Folder.create_default_ug_and_ra(folder)
 
