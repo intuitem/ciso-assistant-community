@@ -157,6 +157,7 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('check that third parties overview cards can be flipped', async () => {
 		const cards = page.getByTestId('cards-list').locator('div');
+		await expect(page.getByTestId('crumb-item').count()).toBeGreaterThan(1);
 		await cards.first().getByTestId('flip-button-front').click();
 		await expect(cards.first()).toHaveClass(/rotate-x-180/);
 

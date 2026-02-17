@@ -11,7 +11,13 @@ test.describe('SSO settings', () => {
 
 	test('SAML settings', async ({ logedPage, page }) => {
 		await test.step('configure SAML', async () => {
-			await page.getByRole('tab', { name: ' SSO' }).click();
+			await expect(async () => {
+				await page.getByRole('tab', { name: /SSO/ }).click();
+				await expect(page.getByRole('tab', { name: /SSO/ })).toHaveAttribute(
+					'aria-selected',
+					'true'
+				);
+			}).toPass({ timeout: 10_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').click();
 			await page.getByTestId('form-input-idp-entity-id').fill('http://localhost:8080/realms/test');
@@ -45,7 +51,13 @@ test.describe('SSO settings', () => {
 
 	test('OIDC settings', async ({ logedPage, page }) => {
 		await test.step('configure OIDC', async () => {
-			await page.getByRole('tab', { name: ' SSO' }).click();
+			await expect(async () => {
+				await page.getByRole('tab', { name: /SSO/ }).click();
+				await expect(page.getByRole('tab', { name: /SSO/ })).toHaveAttribute(
+					'aria-selected',
+					'true'
+				);
+			}).toPass({ timeout: 10_000, intervals: [500, 1000, 2000] });
 			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').clear();
 			// await page.getByTestId('form-input-sp-entity-id').clear();
