@@ -457,5 +457,29 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 
 
+## Vulnerability
+
+### Supported fields
+
+* ref\_id
+* name\*
+* description
+* status
+  * Potential
+  * Exploitable
+  * Mitigated
+  * Not exploitable
+  * Fixed
+  * Unaffected
+* severity
+  * Information
+  * Low
+  * Medium
+  * High
+  * Critical
+* assets (newline-separated list of the name of the assets)
+* applied\_controls (newline-separated of the names)
+* security\_exceptions (newline-separated of the names)
+
 
 
