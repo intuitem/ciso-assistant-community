@@ -76,7 +76,15 @@ export class PageContent extends BasePage {
 			await page.waitForLoadState('networkidle');
 		}
 
-		await this.form.fill(values);
+		const createValues = { ...values };
+		if (
+			this.form.fields.has('create_iam_groups') &&
+			!Object.prototype.hasOwnProperty.call(createValues, 'create_iam_groups')
+		) {
+			createValues.create_iam_groups = true;
+		}
+
+		await this.form.fill(createValues);
 
 		// If parent_folder field is visible and enabled (enterprise edition) and not already provided, fill it with 'Global'
 		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
