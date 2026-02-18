@@ -74,7 +74,6 @@
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
 		hide={initialData.parent_folder}
-		onChange={handleParentFolderChange}
 	/>
 	<AutocompleteSelect
 		multiple
