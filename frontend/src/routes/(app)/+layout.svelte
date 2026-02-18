@@ -204,7 +204,7 @@
 	<!-- Router Slot -->
 	<CommandPalette />
 	<main
-		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
+		class="min-h-screen p-8 bg-linear-to-br from-primary-100-900 to-surface-200-800 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 	>
