@@ -105,7 +105,7 @@
 		high: 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600',
 		medium: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
 		low: 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600',
-		info: 'bg-surface-50-9500 text-white border-surface-600-400 hover:bg-surface-600-400',
+		info: 'bg-surface-400-600 text-white border-surface-600-400 hover:bg-surface-600-400',
 		undefined: 'bg-slate-500 text-white border-slate-600 hover:bg-slate-600'
 	};
 
