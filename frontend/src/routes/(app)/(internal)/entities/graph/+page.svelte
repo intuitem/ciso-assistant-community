@@ -10,9 +10,9 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="bg-white shadow-sm flex flex-col overflow-x-auto">
-	<div class="flex justify-between items-center p-4 border-b border-gray-200">
-		<h1 class="text-2xl font-semibold text-gray-900">
+<div class="bg-surface-50-950 shadow-sm flex flex-col overflow-x-auto">
+	<div class="flex justify-between items-center p-4 border-b border-surface-200-800">
+		<h1 class="text-2xl font-semibold text-surface-950-50">
 			<i class="fa-solid fa-diagram-project mr-2"></i>
 			{m.entitiesGraph()}
 		</h1>

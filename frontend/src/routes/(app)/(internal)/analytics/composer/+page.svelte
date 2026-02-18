@@ -27,7 +27,7 @@
 			<i class="fa-solid fa-info-circle mr-2"></i>{m.composerHint()}
 		</div>
 	</div>
-	<div class="card p-4 bg-white shadow-sm">
+	<div class="card p-4 bg-surface-50-950 shadow-sm">
 		<div class="p-2 font-semibold text-lg">
 			{riskData.risk_assessment_objects.length <= 1
 				? m.composerTitle()
@@ -107,9 +107,9 @@
 	<div class="flex flex-col space-y-2">
 		{#each riskData.risk_assessment_objects as item}
 			<div>
-				<div class="card bg-white overflow-hidden shadow-sm" id="headingOne">
+				<div class="card bg-surface-50-950 overflow-hidden shadow-sm" id="headingOne">
 					<div
-						class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-gray-100 cursor-pointer items-center"
+						class="flex flex-row space-x-4 px-8 py-4 w-full hover:bg-surface-100-900 cursor-pointer items-center"
 						onclick={() => {
 							item.show = !item.show;
 						}}
@@ -119,14 +119,14 @@
 							if (e.key === 'Enter' || e.key === ' ') item.show = !item.show;
 						}}
 					>
-						<div class="text-gray-700">
+						<div class="text-surface-700-300">
 							{#if item.show}
 								<i class="fas fa-angle-up"></i>
 							{:else}
 								<i class="fas fa-angle-down"></i>
 							{/if}
 						</div>
-						<button class="text-gray-700 font-semibold focus:outline-hidden" type="button">
+						<button class="text-surface-700-300 font-semibold focus:outline-hidden" type="button">
 							{item.risk_assessment.perimeter.str}/{item.risk_assessment.name}
 						</button>
 						<div>
@@ -140,7 +140,7 @@
 						</div>
 					</div>
 					{#if item.show}
-						<div class="border-t px-10 py-4 bg-white flex flex-row space-x-4">
+						<div class="border-t px-10 py-4 bg-surface-50-950 flex flex-row space-x-4">
 							<div>
 								<div class="pb-2">
 									{#if item.risk_assessment.quality_check.count > 0}
@@ -160,9 +160,9 @@
 									<table class="border border-collapse my-2 p-2 rounded-sm">
 										<thead>
 											<tr>
-												<th class="border p-2 bg-gray-200"></th>
-												<th class="border p-2 bg-gray-200">{m.current()}</th>
-												<th class="border p-2 bg-gray-200">{m.residual()}</th>
+												<th class="border p-2 bg-surface-200-800"></th>
+												<th class="border p-2 bg-surface-200-800">{m.current()}</th>
+												<th class="border p-2 bg-surface-200-800">{m.residual()}</th>
 											</tr>
 										</thead>
 										<tbody>

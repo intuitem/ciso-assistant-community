@@ -97,7 +97,7 @@
 	}
 </script>
 
-<div class="bg-white shadow-sm p-4 px-8 mx-auto relative">
+<div class="bg-surface-50-950 shadow-sm p-4 px-8 mx-auto relative">
 	<!-- Back to BIA Link and Export Button -->
 	<div class="mb-4 flex justify-between items-center no-print">
 		<Anchor
@@ -119,23 +119,23 @@
 
 	<!-- Section 1: BIA Header -->
 	<section class="mb-8">
-		<h1 class="text-3xl font-bold text-gray-900 mb-2">{bia.name}</h1>
+		<h1 class="text-3xl font-bold text-surface-950-50 mb-2">{bia.name}</h1>
 		{#if bia.description}
-			<div class="text-gray-600 mb-4">
+			<div class="text-surface-600-400 mb-4">
 				<MarkdownRenderer content={bia.description} />
 			</div>
 		{/if}
 		<div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm mb-6">
 			<div>
-				<span class="font-semibold text-gray-700">{m.version()}:</span>
+				<span class="font-semibold text-surface-700-300">{m.version()}:</span>
 				<span class="ml-2">{bia.version || 'N/A'}</span>
 			</div>
 			<div>
-				<span class="font-semibold text-gray-700">{m.status()}:</span>
+				<span class="font-semibold text-surface-700-300">{m.status()}:</span>
 				<span class="ml-2">{bia.status ? safeTranslate(bia.status) : 'N/A'}</span>
 			</div>
 			<div>
-				<span class="font-semibold text-gray-700">{m.referenceScale()}:</span>
+				<span class="font-semibold text-surface-700-300">{m.referenceScale()}:</span>
 				<span class="ml-2">{bia.risk_matrix?.str || 'N/A'}</span>
 			</div>
 		</div>
@@ -143,7 +143,7 @@
 		<!-- Assets Included -->
 		{#if assets && assets.length > 0}
 			<div class="mb-4">
-				<h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-3 flex items-center gap-2">
 					<i class="fa-solid fa-server"></i>
 					{m.assets()}
 					<span class="badge preset-tonal-secondary text-xs">{assets.length}</span>
@@ -151,7 +151,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					{#each assets as assetAssessment}
 						<div
-							class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow"
+							class="border border-surface-200-800 rounded-lg p-3 bg-surface-50-950 hover:shadow-md transition-shadow"
 						>
 							<div class="flex items-start gap-2">
 								{#if assetAssessment.asset.type === 'PR'}
@@ -160,9 +160,9 @@
 									<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
 								{/if}
 								<div class="flex-1">
-									<div class="font-semibold text-gray-900">{assetAssessment.asset.name}</div>
+									<div class="font-semibold text-surface-950-50">{assetAssessment.asset.name}</div>
 									{#if assetAssessment.asset.folder}
-										<div class="text-xs text-gray-600">
+										<div class="text-xs text-surface-600-400">
 											<span class="font-medium">{m.domain()}:</span>
 											<span class="ml-1">{assetAssessment.asset.folder.str}</span>
 										</div>
@@ -178,7 +178,7 @@
 
 	<!-- Section 2: Timeline Table -->
 	<section class="mb-8 page-break-section">
-		<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+		<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 			{m.impactOverTime()}
 		</h2>
 		<TimelineTable data={timelineData} />
@@ -186,44 +186,44 @@
 
 	<!-- Section 3: Recovery Insights -->
 	<section class="mb-8 page-break-section">
-		<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+		<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 			{m.recoveryInsights()}
 		</h2>
-		<div class="flex items-center justify-center bg-gray-50 rounded-lg p-6 mb-6">
+		<div class="flex items-center justify-center bg-surface-50-950 rounded-lg p-6 mb-6">
 			<ActivityTracker {metrics} />
 		</div>
 
 		<!-- Asset Assessment Status Table -->
 		{#if assets && assets.length > 0}
 			<div class="overflow-x-auto">
-				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
-					<thead class="bg-gray-100">
+				<table class="min-w-full bg-surface-50-950 border border-surface-200-800 rounded-lg">
+					<thead class="bg-surface-100-900">
 						<tr>
-							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b"
 								>{m.asset()}</th
 							>
-							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b"
 								>{m.documented()}</th
 							>
-							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b"
 								>{m.tested()}</th
 							>
-							<th class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b"
 								>{m.objectivesMet()}</th
 							>
 						</tr>
 					</thead>
 					<tbody>
 						{#each assets as assetAssessment}
-							<tr class="border-b hover:bg-gray-50">
-								<td class="px-4 py-3 text-sm font-medium text-gray-900">
+							<tr class="border-b hover:bg-surface-50-950">
+								<td class="px-4 py-3 text-sm font-medium text-surface-950-50">
 									{assetAssessment.asset.name}
 								</td>
 								<td class="px-4 py-3 text-center">
 									<span
 										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
 										class:bg-green-500={assetAssessment.recovery_documented}
-										class:bg-gray-400={!assetAssessment.recovery_documented}
+										class:bg-surface-400-600={!assetAssessment.recovery_documented}
 									>
 										{#if assetAssessment.recovery_documented}
 											<i class="fa-solid fa-check text-white text-xs"></i>
@@ -236,7 +236,7 @@
 									<span
 										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
 										class:bg-green-500={assetAssessment.recovery_tested}
-										class:bg-gray-400={!assetAssessment.recovery_tested}
+										class:bg-surface-400-600={!assetAssessment.recovery_tested}
 									>
 										{#if assetAssessment.recovery_tested}
 											<i class="fa-solid fa-check text-white text-xs"></i>
@@ -249,7 +249,7 @@
 									<span
 										class="inline-flex items-center justify-center w-6 h-6 rounded-full"
 										class:bg-green-500={assetAssessment.recovery_targets_met}
-										class:bg-gray-400={!assetAssessment.recovery_targets_met}
+										class:bg-surface-400-600={!assetAssessment.recovery_targets_met}
 									>
 										{#if assetAssessment.recovery_targets_met}
 											<i class="fa-solid fa-check text-white text-xs"></i>
@@ -268,46 +268,46 @@
 
 	<!-- Section 4: Objectives vs Capabilities Comparison -->
 	<section class="mb-8 page-break-section">
-		<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+		<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 			{m.objectivesVsCapabilities()}
 		</h2>
 		{#if assets && assets.length > 0}
 			<div class="overflow-x-auto">
-				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
-					<thead class="bg-gray-100">
+				<table class="min-w-full bg-surface-50-950 border border-surface-200-800 rounded-lg">
+					<thead class="bg-surface-100-900">
 						<tr>
 							<th
 								rowspan="2"
-								class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b align-middle"
+								class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b align-middle"
 								>{m.asset()}</th
 							>
 							<th
 								colspan="2"
-								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l"
+								class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b border-l"
 								>{m.security()}</th
 							>
 							<th
 								colspan="2"
-								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l"
+								class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b border-l"
 								>{m.recovery()}</th
 							>
 							<th
 								rowspan="2"
-								class="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-l align-middle"
+								class="px-4 py-3 text-center text-sm font-semibold text-surface-700-300 border-b border-l align-middle"
 								>{m.alignment()}</th
 							>
 						</tr>
 						<tr>
-							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b border-l"
+							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
 								>{m.objective()}</th
 							>
-							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b"
+							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b"
 								>{m.capability()}</th
 							>
-							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b border-l"
+							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
 								>{m.objective()}</th
 							>
-							<th class="px-4 py-2 text-center text-xs font-medium text-gray-600 border-b"
+							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b"
 								>{m.capability()}</th
 							>
 						</tr>
@@ -319,20 +319,20 @@
 							{@const securityCapabilities = getSecurityCapabilities(assetAssessment.asset)}
 							{@const recoveryObjectives = getRecoveryObjectives(assetAssessment.asset)}
 							{@const recoveryCapabilities = getRecoveryCapabilities(assetAssessment.asset)}
-							<tr class="border-b hover:bg-gray-50">
-								<td class="px-4 py-3 text-sm font-medium text-gray-900">
+							<tr class="border-b hover:bg-surface-50-950">
+								<td class="px-4 py-3 text-sm font-medium text-surface-950-50">
 									{assetAssessment.asset.name}
 								</td>
-								<td class="px-4 py-3 text-xs text-gray-700 border-l whitespace-pre-line align-top">
+								<td class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top">
 									{securityObjectives || '--'}
 								</td>
-								<td class="px-4 py-3 text-xs text-gray-700 whitespace-pre-line align-top">
+								<td class="px-4 py-3 text-xs text-surface-700-300 whitespace-pre-line align-top">
 									{securityCapabilities || '--'}
 								</td>
-								<td class="px-4 py-3 text-xs text-gray-700 border-l whitespace-pre-line align-top">
+								<td class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top">
 									{recoveryObjectives || '--'}
 								</td>
-								<td class="px-4 py-3 text-xs text-gray-700 whitespace-pre-line align-top">
+								<td class="px-4 py-3 text-xs text-surface-700-300 whitespace-pre-line align-top">
 									{recoveryCapabilities || '--'}
 								</td>
 								<td class="px-4 py-3 text-center border-l align-middle">
@@ -361,36 +361,36 @@
 	<!-- Section 5: Applied Controls -->
 	{#if appliedControls && appliedControls.length > 0}
 		<section class="mb-8 page-break-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 				{m.appliedControls()}
 			</h2>
 			<div class="overflow-x-auto">
-				<table class="min-w-full bg-white border border-gray-200 rounded-lg">
-					<thead class="bg-gray-100">
+				<table class="min-w-full bg-surface-50-950 border border-surface-200-800 rounded-lg">
+					<thead class="bg-surface-100-900">
 						<tr>
-							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b"
 								>{m.name()}</th
 							>
-							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b"
 								>{m.folder()}</th
 							>
-							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b"
 								>{m.status()}</th
 							>
-							<th class="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b"
+							<th class="px-4 py-3 text-left text-sm font-semibold text-surface-700-300 border-b"
 								>{m.eta()}</th
 							>
 						</tr>
 					</thead>
 					<tbody>
 						{#each appliedControls as control}
-							<tr class="border-b hover:bg-gray-50">
-								<td class="px-4 py-3 text-sm text-gray-900">{control.str || control.name}</td>
-								<td class="px-4 py-3 text-sm text-gray-900">{control.folder.str}</td>
-								<td class="px-4 py-3 text-sm text-gray-700">
+							<tr class="border-b hover:bg-surface-50-950">
+								<td class="px-4 py-3 text-sm text-surface-950-50">{control.str || control.name}</td>
+								<td class="px-4 py-3 text-sm text-surface-950-50">{control.folder.str}</td>
+								<td class="px-4 py-3 text-sm text-surface-700-300">
 									{control.status ? safeTranslate(control.status) : '--'}
 								</td>
-								<td class="px-4 py-3 text-sm text-gray-700">
+								<td class="px-4 py-3 text-sm text-surface-700-300">
 									{control.eta ? formatDateOrDateTime(control.eta) : '--'}
 								</td>
 							</tr>

@@ -99,7 +99,7 @@
 	{/snippet}
 </DetailView>
 {#if Object.keys(data.relatedModels).length > 0}
-	<div class="card shadow-lg mt-8 bg-white w-full">
+	<div class="card shadow-lg mt-8 bg-surface-50-950 w-full">
 		<Tabs
 			value={group}
 			onValueChange={(e) => {
@@ -137,7 +137,7 @@
 									{#if urlmodel === 'elementary-actions'}
 										<div>
 											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
@@ -152,7 +152,7 @@
 								{/snippet}
 								{#snippet addButton()}
 									<div>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+										<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 											<button
 												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
 												data-testid="add-button"

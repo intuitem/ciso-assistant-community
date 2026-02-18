@@ -42,7 +42,7 @@
 </script>
 
 <div class="flex flex-col space-y-4">
-	<div class="card shadow-lg bg-white p-6">
+	<div class="card shadow-lg bg-surface-50-950 p-6">
 		<div class="flex items-center space-x-4 mb-6">
 			<div
 				class="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center text-primary-600"
@@ -50,20 +50,20 @@
 				<i class="{getTypeIcon(actorType)} text-2xl"></i>
 			</div>
 			<div>
-				<h1 class="text-2xl font-bold text-gray-900">{data.data.str}</h1>
+				<h1 class="text-2xl font-bold text-surface-950-50">{data.data.str}</h1>
 				<span
-					class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800"
+					class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-surface-100-900 text-surface-950-50"
 				>
 					{safeTranslate(actorType)}
 				</span>
 			</div>
 		</div>
 
-		<div class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs">
-			<dl class="-my-3 divide-y divide-gray-100 text-sm">
+		<div class="flow-root rounded-lg border border-surface-100-900 py-3 shadow-xs">
+			<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 				<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium text-gray-900">{m.type()}</dt>
-					<dd class="text-gray-700 sm:col-span-2">
+					<dt class="font-medium text-surface-950-50">{m.type()}</dt>
+					<dd class="text-surface-700-300 sm:col-span-2">
 						<span class="inline-flex items-center">
 							<i class="{getTypeIcon(actorType)} mr-2"></i>
 							{safeTranslate(actorType)}
@@ -73,8 +73,8 @@
 
 				{#if specific}
 					<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50 sm:grid-cols-3 sm:gap-4">
-						<dt class="font-medium text-gray-900">{safeTranslate(actorType)}</dt>
-						<dd class="text-gray-700 sm:col-span-2">
+						<dt class="font-medium text-surface-950-50">{safeTranslate(actorType)}</dt>
+						<dd class="text-surface-700-300 sm:col-span-2">
 							<Anchor
 								breadcrumbAction="push"
 								href={getTypeUrl(actorType, specific.id)}
@@ -87,8 +87,8 @@
 				{/if}
 
 				<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50 sm:grid-cols-3 sm:gap-4">
-					<dt class="font-medium text-gray-900">{m.refId()}</dt>
-					<dd class="text-gray-700 sm:col-span-2 font-mono text-xs">{data.data.id}</dd>
+					<dt class="font-medium text-surface-950-50">{m.refId()}</dt>
+					<dd class="text-surface-700-300 sm:col-span-2 font-mono text-xs">{data.data.id}</dd>
 				</div>
 			</dl>
 		</div>

@@ -521,11 +521,11 @@
 
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 		<!-- Left Panel: Tree with Checkboxes -->
-		<div class="lg:col-span-2 card bg-white shadow-lg p-4">
+		<div class="lg:col-span-2 card bg-surface-50-950 shadow-lg p-4">
 			<div class="flex items-center justify-between mb-4">
 				<div>
 					<h2 class="h4 font-semibold">{m.requirements()}</h2>
-					<p class="text-sm text-gray-500">
+					<p class="text-sm text-surface-600-400">
 						{m.selectRequirementsToAssign()}
 					</p>
 				</div>
@@ -567,7 +567,7 @@
 						<i class="fa-solid fa-square-check mr-1"></i>
 						{m.available()}
 					</span>
-					<span class="text-gray-400">({m.clickToSelect()})</span>
+					<span class="text-surface-400-600">({m.clickToSelect()})</span>
 				</div>
 				<div class="flex items-center gap-1">
 					<span class="px-2 py-1 rounded-md bg-violet-50 border border-violet-200 text-violet-700">
@@ -576,7 +576,7 @@
 					</span>
 				</div>
 				<div class="flex items-center gap-1">
-					<span class="px-2 py-1 rounded-md bg-gray-100 border border-gray-200 text-gray-500">
+					<span class="px-2 py-1 rounded-md bg-surface-100-900 border border-surface-200-800 text-surface-600-400">
 						<i class="fa-solid fa-lock mr-1"></i>
 						{m.alreadyAssigned()}
 					</span>
@@ -584,12 +584,12 @@
 			</div>
 
 			<!-- Tree View -->
-			<div class="max-h-[600px] overflow-y-auto border rounded-lg p-2 bg-gray-50">
+			<div class="max-h-[600px] overflow-y-auto border rounded-lg p-2 bg-surface-50-950">
 				{#key assignedRequirementIds}
 					<RecursiveTreeView
 						nodes={treeViewNodes}
 						bind:expandedNodes
-						hover="hover:bg-gray-100"
+						hover="hover:bg-surface-100-900"
 						padding="py-2 px-2"
 					/>
 				{/key}
@@ -601,7 +601,7 @@
 			<!-- Create/Edit Assignment Card -->
 			{#if !isReadOnly}
 				<div
-					class="card bg-white shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
+					class="card bg-surface-50-950 shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
 				>
 					<h2 class="h4 font-semibold mb-4">
 						{#if editingAssignmentId}
@@ -633,9 +633,9 @@
 						{/key}
 
 						<!-- Selected Count -->
-						<div class="bg-gray-50 rounded-lg p-3">
+						<div class="bg-surface-50-950 rounded-lg p-3">
 							<div class="flex items-center justify-between text-sm">
-								<span class="text-gray-600">{m.selectedRequirements()}:</span>
+								<span class="text-surface-600-400">{m.selectedRequirements()}:</span>
 								<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
 							</div>
 						</div>
@@ -676,7 +676,7 @@
 						{/if}
 
 						{#if !hasSelectedActors || availableCheckedNodes.length === 0}
-							<p class="text-xs text-gray-500 text-center">
+							<p class="text-xs text-surface-600-400 text-center">
 								{m.fillAllFieldsToCreateAssignment()}
 							</p>
 						{/if}
@@ -685,15 +685,15 @@
 			{/if}
 
 			<!-- Existing Assignments Card -->
-			<div class="card bg-white shadow-lg p-4">
+			<div class="card bg-surface-50-950 shadow-lg p-4">
 				<h2 class="h4 font-semibold mb-4">
 					<i class="fa-solid fa-list text-primary-500 mr-2"></i>
 					{m.existingAssignments()}
-					<span class="badge bg-gray-200 text-gray-700 ml-2">{assignments.length}</span>
+					<span class="badge bg-surface-200-800 text-surface-700-300 ml-2">{assignments.length}</span>
 				</h2>
 
 				{#if assignments.length === 0}
-					<div class="text-center py-8 text-gray-500">
+					<div class="text-center py-8 text-surface-600-400">
 						<i class="fa-solid fa-folder-open text-4xl mb-2 opacity-30"></i>
 						<p class="text-sm">{m.noAssignmentsYet()}</p>
 					</div>
@@ -704,11 +704,11 @@
 								class="border rounded-lg p-3 transition-colors {editingAssignmentId ===
 								assignment.id
 									? 'bg-violet-50 border-violet-300 ring-2 ring-violet-200'
-									: 'bg-gray-50 hover:bg-gray-100'}"
+									: 'bg-surface-50-950 hover:bg-surface-100-900'}"
 							>
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
-										<div class="flex items-center text-sm text-gray-900 font-medium">
+										<div class="flex items-center text-sm text-surface-950-50 font-medium">
 											<i class="fa-solid fa-{actorIcon(assignment.actor)} mr-1"></i>
 											<span>{formatActors(assignment.actor)}</span>
 										</div>
@@ -774,7 +774,7 @@
 	<!-- Modal -->
 	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
 		<div
-			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			class="bg-surface-50-950 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
@@ -800,7 +800,7 @@
 			<!-- Content -->
 			<div class="p-4 overflow-y-auto flex-1">
 				<div class="mb-3 flex items-center justify-between">
-					<span class="text-sm text-gray-600">
+					<span class="text-sm text-surface-600-400">
 						{m.requirements()}
 					</span>
 					<span class="badge bg-blue-100 text-blue-700 text-xs">
@@ -812,7 +812,7 @@
 				<div class="space-y-2">
 					{#each getRequirementDetails(selectedAssignmentForModal.requirement_assessments) as req}
 						<div
-							class="flex items-center gap-3 p-2 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+							class="flex items-center gap-3 p-2 rounded-md bg-surface-50-950 hover:bg-surface-100-900 transition-colors"
 						>
 							<!-- Result indicator -->
 							{#if req.result}
@@ -822,12 +822,12 @@
 									title={req.result}
 								></span>
 							{:else}
-								<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0" title={m.notAssessed()}
+								<span class="w-2 h-2 rounded-full bg-surface-300-700 flex-shrink-0" title={m.notAssessed()}
 								></span>
 							{/if}
 
 							<!-- Requirement content -->
-							<span class="text-sm text-gray-800">
+							<span class="text-sm text-surface-950-50">
 								{#if req.node_content}
 									{req.node_content}
 								{:else}
@@ -840,7 +840,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+			<div class="p-4 border-t bg-surface-50-950 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
 				</button>

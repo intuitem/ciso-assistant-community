@@ -65,7 +65,7 @@
 	</Anchor>
 </div>
 <div
-	class="rounded-xl bg-linear-to-r from-slate-50 to-white shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line ml-auto"
+	class="rounded-xl bg-linear-to-r from-slate-50 to-surface-50-950 shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line ml-auto"
 >
 	<i class="fa-solid fa-circle-info"></i>
 	{m.ebiosOperationalScenarioHelp()}
@@ -79,7 +79,7 @@
 >
 	{#snippet addButton()}
 		<div>
-			<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+			<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 				<button
 					class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 					data-testid="add-button"

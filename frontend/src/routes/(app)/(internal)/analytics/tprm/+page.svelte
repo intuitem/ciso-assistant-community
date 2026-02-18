@@ -39,19 +39,19 @@
 </script>
 
 {#if groupedData && groupedData.length > 0}
-	<div class="p-6 bg-white bg-opacity-95 space-y-8">
+	<div class="p-6 bg-surface-50-950 bg-opacity-95 space-y-8">
 		{#each groupedData as group}
 			<div>
 				<div class="flex items-center gap-3 mb-4">
 					{#if group.folder_id && group.folder_id !== 'no-folder'}
 						<a
 							href="/folders/{group.folder_id}"
-							class="text-xl font-bold text-gray-800 hover:text-primary-600 hover:underline"
+							class="text-xl font-bold text-surface-950-50 hover:text-primary-600 hover:underline"
 						>
 							{group.folder_name}
 						</a>
 					{:else}
-						<span class="text-xl font-bold text-gray-800">{group.folder_name}</span>
+						<span class="text-xl font-bold text-surface-950-50">{group.folder_name}</span>
 					{/if}
 					<span class="badge preset-tonal-secondary">{group.assessments.length}</span>
 				</div>

@@ -160,7 +160,7 @@
 
 								<!-- CSF Functions Chart (2/5 of width) -->
 								<div class="xl:col-span-2">
-									<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+									<div class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800">
 										<NightingaleChart name="nightingale" values={metrics.csf_functions} />
 									</div>
 								</div>
@@ -228,12 +228,12 @@
 								<div class="xl:col-span-3">
 									{#await data.stream.auditsMetrics}
 										<div
-											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center"
+											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center"
 										>
 											<LoadingSpinner />
 										</div>
 									{:then auditsMetrics}
-										<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
+										<div class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800">
 											{#if auditsMetrics?.audits_stats}
 												<StackedBarsNormalized
 													names={auditsMetrics.audits_stats.names}
@@ -245,7 +245,7 @@
 										</div>
 									{:catch}
 										<div
-											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center text-red-500"
+											class="bg-surface-50-950 rounded-lg p-4 h-96 border border-surface-200-800 flex items-center justify-center text-red-500"
 										>
 											<p>Error loading audits data</p>
 										</div>
@@ -289,7 +289,7 @@
 										</div>
 									{:then risksCountPerLevel}
 										<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+											<div class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800">
 												<HalfDonutChart
 													name="current_h"
 													title={m.sumpageTitleCurrentRisks()}
@@ -297,7 +297,7 @@
 													colors={risksCountPerLevel.current.map((object) => object.color)}
 												/>
 											</div>
-											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+											<div class="bg-surface-50-950 rounded-lg p-4 h-80 border border-surface-200-800">
 												<HalfDonutChart
 													name="residual_h"
 													title={m.sumpageTitleResidualRisks()}
@@ -378,7 +378,7 @@
 						</div>
 					{:then combinedAssessmentsStatus}
 						{#if combinedAssessmentsStatus}
-							<section class="bg-white rounded-lg p-4 border border-gray-200 mb-6">
+							<section class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800 mb-6">
 								<GroupedBarChart
 									name="combined_assessments_status"
 									title={m.assessmentsPerStatus()}
@@ -399,15 +399,15 @@
 
 					<!-- Calendar Heatmap -->
 					{#await data.stream.governanceCalendarData}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.activityCalendar()}</h3>
 							<div class="flex items-center justify-center h-64">
 								<LoadingSpinner />
 							</div>
 						</div>
 					{:then calendarData}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.activityCalendar()}</h3>
 							<CalendarHeatmap
 								name="governance_activity"
 								data={calendarData}
@@ -417,9 +417,9 @@
 							/>
 						</div>
 					{:catch error}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.activityCalendar()}</h3>
-							<div class="flex items-center justify-center h-64 text-gray-500">
+						<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6">
+							<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.activityCalendar()}</h3>
+							<div class="flex items-center justify-center h-64 text-surface-600-400">
 								<p>Error loading calendar data</p>
 							</div>
 						</div>
@@ -428,8 +428,8 @@
 					<!-- Applied Controls Status and Assessments Status -->
 					<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 						<!-- Applied Controls Status Donut -->
-						<div class="bg-white rounded-lg p-4 border border-gray-200">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">
+						<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
+							<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 								{m.appliedControlsStatus()}
 							</h3>
 							<div class="h-80">
@@ -448,7 +448,7 @@
 											colors={applied_control_status.values?.map((v) => v.itemStyle.color)}
 										/>
 									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
+										<div class="flex items-center justify-center h-full text-surface-600-400">
 											<p>No applied controls data available</p>
 										</div>
 									{/if}
@@ -461,8 +461,8 @@
 						</div>
 
 						<!-- Findings Assessment Distribution -->
-						<div class="bg-white rounded-lg p-4 border border-gray-200">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4">
+						<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
+							<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 								{m.findingsAssessmentDistribution()}
 							</h3>
 							<div class="h-80">
@@ -498,7 +498,7 @@
 											{series}
 										/>
 									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
+										<div class="flex items-center justify-center h-full text-surface-600-400">
 											<p>No findings assessment data available</p>
 										</div>
 									{/if}
@@ -519,8 +519,8 @@
 						</div>
 					{:then operationsAnalytics}
 						{#if operationsAnalytics}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+								<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 									{m.securityExceptionFlow()}
 								</h3>
 								<div class="h-80">
@@ -532,7 +532,7 @@
 											links={operationsAnalytics.exception_sankey.links}
 										/>
 									{:else}
-										<div class="flex items-center justify-center h-full text-gray-500">
+										<div class="flex items-center justify-center h-full text-surface-600-400">
 											<p>{m.noExceptionData()}</p>
 										</div>
 									{/if}
@@ -554,8 +554,8 @@
 						{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
 							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 								{#if threatsCount.results.labels.length > 0}
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-										<h3 class="text-lg font-semibold text-gray-900 mb-2">
+									<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-4">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
 											{m.threatRadarChart()}
 										</h3>
 										<div class="h-96">
@@ -569,14 +569,14 @@
 									</div>
 								{:else}
 									<div
-										class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 									>
-										<p class="text-gray-500">{m.noThreatsMapped()}</p>
+										<p class="text-surface-600-400">{m.noThreatsMapped()}</p>
 									</div>
 								{/if}
 								{#if qualificationsCount.results.labels.length > 0}
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 											{m.qualificationsChartTitle()}
 										</h3>
 										<div class="h-80">
@@ -591,13 +591,13 @@
 									</div>
 								{:else}
 									<div
-										class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+										class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 flex items-center justify-center"
 									>
-										<p class="text-gray-500">{m.noQualificationsFoundOnRiskScenarios()}</p>
+										<p class="text-surface-600-400">{m.noQualificationsFoundOnRiskScenarios()}</p>
 									</div>
 								{/if}
 							</div>
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6 mb-6">
 								<div class="flex flex-wrap lg:flex-nowrap gap-6">
 									{#if page.data?.featureflags?.inherent_risk}
 										<div class="h-96 flex-col grow lg:flex-1">
@@ -638,8 +638,8 @@
 						{/await}
 						<!-- Vulnerability Sankey -->
 						{#await data.stream.vulnerabilitySankeyData}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+								<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 									{m.vulnerabilityDistribution()}
 								</h3>
 								<div class="flex items-center justify-center h-80">
@@ -648,8 +648,8 @@
 							</div>
 						{:then sankeyData}
 							{#if sankeyData && sankeyData.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+								<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+									<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 										{m.vulnerabilityDistribution()}
 									</h3>
 									<div class="h-96">
@@ -662,11 +662,11 @@
 								</div>
 							{/if}
 						{:catch error}
-							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-								<h3 class="text-lg font-semibold text-gray-900 mb-4">
+							<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+								<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 									{m.vulnerabilityDistribution()}
 								</h3>
-								<div class="flex items-center justify-center h-80 text-gray-500">
+								<div class="flex items-center justify-center h-80 text-surface-600-400">
 									<p>{m.errorLoadingVulnerabilityData()}</p>
 								</div>
 							</div>
@@ -676,7 +676,7 @@
 				<Tabs.Panel value="compliance">
 					<section class="space-y-6">
 						<div class="flex justify-between items-center mb-6">
-							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
+							<h2 class="text-xl font-bold text-surface-950-50">{m.complianceAnalytics()}</h2>
 							<a
 								href="/recap"
 								class="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-colors"
@@ -695,23 +695,23 @@
 								<div class="space-y-6">
 									{#each Object.entries(complianceAnalytics) as [frameworkName, frameworkData]}
 										<div
-											class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+											class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 overflow-hidden"
 										>
 											<!-- Framework Header -->
 											<div
-												class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+												class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-surface-100-900"
 											>
 												<div class="flex justify-between items-center">
 													<div class="flex items-center gap-3">
 														<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-														<h3 class="text-lg font-semibold text-gray-900">{frameworkName}</h3>
+														<h3 class="text-lg font-semibold text-surface-950-50">{frameworkName}</h3>
 													</div>
 													<div class="flex items-center gap-2">
-														<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
+														<span class="text-sm text-surface-600-400">{m.averageProgress()}:</span>
 														<div
-															class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
+															class="flex items-center gap-2 px-3 py-1 bg-surface-50-950 rounded-full shadow-sm"
 														>
-															<div class="w-32 bg-gray-200 rounded-full h-1.5">
+															<div class="w-32 bg-surface-200-800 rounded-full h-1.5">
 																<div
 																	class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
 																	style="width: {frameworkData.framework_average}%"
@@ -731,16 +731,16 @@
 													<div class="relative">
 														<!-- Domain Header -->
 														<div
-															class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+															class="flex justify-between items-center mb-3 pb-2 border-b border-surface-100-900"
 														>
 															<div class="flex items-center gap-2">
 																<i class="fas fa-folder text-amber-500 text-sm"></i>
-																<h4 class="font-medium text-gray-800">{domain.domain}</h4>
+																<h4 class="font-medium text-surface-950-50">{domain.domain}</h4>
 															</div>
 															<div class="flex items-center gap-2">
-																<span class="text-xs text-gray-500">{m.averageProgress()}:</span>
+																<span class="text-xs text-surface-600-400">{m.averageProgress()}:</span>
 																<div class="flex items-center gap-2">
-																	<div class="w-8 bg-gray-200 rounded-full h-1">
+																	<div class="w-8 bg-surface-200-800 rounded-full h-1">
 																		<div
 																			class="bg-gradient-to-r from-amber-400 to-orange-500 h-1 rounded-full transition-all duration-300"
 																			style="width: {domain.domain_average}%"
@@ -757,16 +757,16 @@
 														<div class="grid gap-3">
 															{#each domain.assessments as assessment}
 																<div
-																	class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+																	class="group border border-surface-200-800 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
 																>
 																	<div class="flex justify-between items-start gap-4">
 																		<div class="flex-1 min-w-0">
-																			<div class="font-medium text-gray-900 mb-1 truncate">
+																			<div class="font-medium text-surface-950-50 mb-1 truncate">
 																				{assessment.assessment_name}
 																			</div>
-																			<div class="flex items-center gap-3 text-xs text-gray-500">
+																			<div class="flex items-center gap-3 text-xs text-surface-600-400">
 																				<div class="flex items-center gap-1">
-																					<i class="fas fa-cubes text-gray-400"></i>
+																					<i class="fas fa-cubes text-surface-400-600"></i>
 																					<span>{assessment.perimeter}</span>
 																				</div>
 																				<div class="flex items-center gap-1">
@@ -778,7 +778,7 @@
 																								? 'bg-blue-400'
 																								: assessment.status === 'in_review'
 																									? 'bg-yellow-400'
-																									: 'bg-gray-400'}"
+																									: 'bg-surface-400-600'}"
 																					></div>
 																					<span class="capitalize"
 																						>{assessment.status?.replace('_', ' ') ||
@@ -790,7 +790,7 @@
 																		<div class="flex items-center gap-3">
 																			<!-- Progress Bar -->
 																			<div class="flex items-center gap-2">
-																				<div class="w-20 bg-gray-200 rounded-full h-2">
+																				<div class="w-20 bg-surface-200-800 rounded-full h-2">
 																					<div
 																						class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
 																						80
@@ -829,14 +829,14 @@
 								</div>
 							{:else}
 								<div
-									class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+									class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 								>
-									<div class="text-gray-400 mb-4">
+									<div class="text-surface-400-600 mb-4">
 										<i class="fas fa-chart-bar text-6xl"></i>
 									</div>
-									<div class="text-gray-600">
+									<div class="text-surface-600-400">
 										<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
-										<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
+										<p class="text-sm text-surface-600-400">{m.createComplianceAssessment()}</p>
 									</div>
 									<a
 										href="/compliance-assessments"
@@ -865,9 +865,9 @@
 								<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
 									<!-- Applied Controls Sunburst (2/3 width) -->
 									<div
-										class="xl:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+										class="xl:col-span-2 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 									>
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 											{m.appliedControlsDistribution()}
 										</h3>
 										<div class="h-96">
@@ -878,7 +878,7 @@
 													data={operationsAnalytics.applied_controls_sunburst}
 												/>
 											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
+												<div class="flex items-center justify-center h-full text-surface-600-400">
 													<p>No applied controls data available</p>
 												</div>
 											{/if}
@@ -887,9 +887,9 @@
 
 									<!-- Task Templates Status Donut (1/3 width) -->
 									<div
-										class="xl:col-span-1 bg-white rounded-xl shadow-sm border border-gray-200 p-6"
+										class="xl:col-span-1 bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6"
 									>
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 											{m.tasksStatus()}
 										</h3>
 										<div class="h-96">
@@ -908,7 +908,7 @@
 														colors={task_template_status.values?.map((v) => v.itemStyle.color)}
 													/>
 												{:else}
-													<div class="flex items-center justify-center h-full text-gray-500">
+													<div class="flex items-center justify-center h-full text-surface-600-400">
 														<p>No tasks data available</p>
 													</div>
 												{/if}
@@ -922,8 +922,8 @@
 								</div>
 
 								<!-- Second Row: Findings Breakdown Sankey -->
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
+								<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+									<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 										{m.findingsBreakdown()}
 									</h3>
 									<div class="h-80">
@@ -935,7 +935,7 @@
 												links={operationsAnalytics.findings_sankey.links}
 											/>
 										{:else}
-											<div class="flex items-center justify-center h-full text-gray-500">
+											<div class="flex items-center justify-center h-full text-surface-600-400">
 												<p>{m.noFindingsData()}</p>
 											</div>
 										{/if}
@@ -972,8 +972,8 @@
 								<!-- Third Row: Severity Breakdown and Qualifications Radar -->
 								<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 									<!-- Severity Breakdown Chart -->
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 											{m.incidentSeverityBreakdown()}
 										</h3>
 										<div class="h-80">
@@ -985,8 +985,8 @@
 									</div>
 
 									<!-- Qualifications Radar Chart -->
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+									<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+										<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 											{m.incidentQualificationsRadar()}
 										</h3>
 										<div class="h-80">
@@ -998,7 +998,7 @@
 													values={operationsAnalytics.qualifications_breakdown.values}
 												/>
 											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
+												<div class="flex items-center justify-center h-full text-surface-600-400">
 													<p>{m.noQualificationsData()}</p>
 												</div>
 											{/if}
@@ -1010,8 +1010,8 @@
 								<div class="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
 									<!-- Monthly Incident Metrics (3/5 of width) -->
 									<div class="xl:col-span-3">
-										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+											<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 												{m.monthlyIncidentMetrics()}
 											</h3>
 											<div class="h-80">
@@ -1028,8 +1028,8 @@
 
 									<!-- Detection Breakdown Chart (2/5 of width) -->
 									<div class="xl:col-span-2">
-										<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-											<h3 class="text-lg font-semibold text-gray-900 mb-4">
+										<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+											<h3 class="text-lg font-semibold text-surface-950-50 mb-4">
 												{m.incidentDetectionBreakdown()}
 											</h3>
 											<div class="h-80">
@@ -1045,14 +1045,14 @@
 							</section>
 						{:else}
 							<div
-								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
+								class="text-center py-16 bg-gradient-to-br from-surface-50-950 to-surface-100-900 rounded-xl border-2 border-dashed border-surface-300-700"
 							>
-								<div class="text-gray-400 mb-4">
+								<div class="text-surface-400-600 mb-4">
 									<i class="fas fa-exclamation-triangle text-6xl"></i>
 								</div>
-								<div class="text-gray-600">
+								<div class="text-surface-600-400">
 									<p class="text-xl font-semibold mb-2">{m.noOperationsData()}</p>
-									<p class="text-sm text-gray-500">{m.createIncidents()}</p>
+									<p class="text-sm text-surface-600-400">{m.createIncidents()}</p>
 								</div>
 								<a
 									href="/incidents"

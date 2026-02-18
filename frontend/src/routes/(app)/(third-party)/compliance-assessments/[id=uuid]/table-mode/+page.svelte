@@ -355,11 +355,11 @@
 		className="hidden lg:block"
 	/>
 	<div
-		class="card px-6 py-4 bg-white flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
+		class="card px-6 py-4 bg-surface-50-950 flex flex-col justify-evenly shadow-lg w-full h-full space-y-2"
 	>
 		{#if !questionnaireOnly}
 			<div
-				class="sticky top-0 p-2 z-10 card bg-white items-center justify-evenly flex flex-row w-full"
+				class="sticky top-0 p-2 z-10 card bg-surface-50-950 items-center justify-evenly flex flex-row w-full"
 			>
 				<a
 					href="/compliance-assessments/{complianceAssessment.id}"
@@ -419,10 +419,10 @@
 						data-toc-level="0"
 					>
 						<div
-							class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-gray-500 to-transparent opacity-75"
+							class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-surface-400-600 to-transparent opacity-75"
 						></div>
 
-						<span class="relative z-10 bg-white px-6 text-orange-600 font-semibold text-xl">
+						<span class="relative z-10 bg-surface-50-950 px-6 text-orange-600 font-semibold text-xl">
 							{getTitle(requirementAssessment)}
 						</span>
 					</span>
@@ -494,7 +494,7 @@
 														<i class="fa-solid fa-link"></i>
 														{m.mappingInference()}
 													</p>
-													<span class="text-xs text-gray-500"
+													<span class="text-xs text-surface-600-400"
 														><i class="fa-solid fa-circle-info"></i>
 														{m.mappingInferenceHelpText()}</span
 													>
@@ -775,7 +775,7 @@
 														class="text-primary-500"
 													/>
 												{:else}
-													<p class="text-gray-400 italic">{m.noObservation()}</p>
+													<p class="text-surface-400-600 italic">{m.noObservation()}</p>
 												{/if}
 											{:else}
 												<Accordion.Item value="observation">
@@ -796,7 +796,7 @@
 											{/if}
 
 											{#if requirementAssessment.applied_controls.length === 0 && shallow}
-												<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
+												<p class="text-surface-400-600 italic">{m.noAppliedControlYet()}</p>
 											{:else}
 												<Accordion.Item value="appliedControl">
 													{#snippet control()}
@@ -852,7 +852,7 @@
 											{/if}
 
 											{#if requirementAssessment.evidences.length === 0 && shallow}
-												<p class="text-gray-400 italic" data-testid="no-evidence">
+												<p class="text-surface-400-600 italic" data-testid="no-evidence">
 													{m.noEvidences()}
 												</p>
 											{:else}

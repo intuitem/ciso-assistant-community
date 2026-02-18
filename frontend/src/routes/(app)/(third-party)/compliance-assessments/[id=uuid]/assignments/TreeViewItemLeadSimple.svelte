@@ -25,7 +25,7 @@
 		{/if}
 	{:else}
 		<!-- Section indicator -->
-		<span class="text-gray-400">
+		<span class="text-surface-400-600">
 			<i class="fa-solid fa-folder text-xs"></i>
 		</span>
 	{/if}

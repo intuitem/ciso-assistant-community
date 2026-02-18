@@ -137,7 +137,7 @@
 <div class="flex flex-col min-h-screen justify-center items-center">
 	<div
 		style="border-color: {color}"
-		class="flex flex-col bg-white w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4"
+		class="flex flex-col bg-surface-50-950 w-3/4 max-w-4xl h-3/4 min-h-[600px] rounded-xl shadow-xl p-4 border-4"
 	>
 		{#if currentRequirementAssessment}
 			<!-- Header -->
@@ -153,7 +153,7 @@
 				</div>
 				<div class="relative">
 					<button
-						class="font-semibold hover:bg-gray-100 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-gray-300 transition-colors flex items-center space-x-1"
+						class="font-semibold hover:bg-surface-100-900 px-2 py-1 rounded cursor-pointer border border-transparent hover:border-surface-300-700 transition-colors flex items-center space-x-1"
 						onclick={() => (showNavigation = !showNavigation)}
 						title="Click to jump to specific item (or press G)"
 					>
@@ -164,7 +164,7 @@
 
 					{#if showNavigation}
 						<div
-							class="absolute top-full right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-10 min-w-64"
+							class="absolute top-full right-0 mt-2 bg-surface-50-950 border border-surface-300-700 rounded-lg shadow-lg p-4 z-10 min-w-64"
 						>
 							<div class="flex flex-col space-y-3">
 								<div class="text-sm font-medium">Jump to item:</div>
@@ -176,7 +176,7 @@
 										min="1"
 										max={requirementAssessments.length}
 										placeholder="Item number"
-										class="flex-1 px-2 py-1 border border-gray-300 rounded text-sm"
+										class="flex-1 px-2 py-1 border border-surface-300-700 rounded text-sm"
 										onkeydown={(e) => {
 											if (e.key === 'Enter') {
 												e.preventDefault();
@@ -191,7 +191,7 @@
 										Go
 									</button>
 								</div>
-								<div class="text-xs text-gray-500">
+								<div class="text-xs text-surface-600-400">
 									Press G to toggle, Enter to jump, Esc to close
 								</div>
 							</div>
@@ -220,13 +220,13 @@
 					<p class="font-semibold text-xl flex-shrink-0">{title}</p>
 					<div class="flex flex-col space-y-4 overflow-y-auto flex-1 w-full max-w-4xl px-4">
 						{#if currentRequirementAssessment.description}
-							<div class="whitespace-pre-wrap leading-relaxed text-gray-700">
+							<div class="whitespace-pre-wrap leading-relaxed text-surface-700-300">
 								<MarkdownRenderer content={currentRequirementAssessment.description} />
 							</div>
 						{/if}
 						{#if requirement.annotation}
 							<div
-								class="whitespace-pre-wrap leading-relaxed text-gray-600 italic bg-gray-50 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
+								class="whitespace-pre-wrap leading-relaxed text-surface-600-400 italic bg-surface-50-950 p-4 rounded-lg border-l-4 border-blue-200 text-justify"
 							>
 								<MarkdownRenderer content={requirement.annotation} />
 							</div>
@@ -240,7 +240,7 @@
 				<div class="flex justify-center">
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
-							class="items-center w-full text-sm font-medium text-gray-900 bg-white rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+							class="items-center w-full text-sm font-medium text-surface-950-50 bg-surface-50-950 rounded-lg sm:flex"
 						>
 							<RadioGroup
 								possibleOptions={possible_options}
@@ -262,7 +262,7 @@
 
 				<div class="flex justify-between">
 					<button
-						class="bg-gray-400 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
+						class="bg-surface-400-600 text-white px-4 py-2 rounded-sm flex items-center space-x-2"
 						onclick={previousItem}
 					>
 						<span>{m.previous()}</span>

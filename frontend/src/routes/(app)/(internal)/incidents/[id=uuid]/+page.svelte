@@ -193,7 +193,7 @@
 					onOpenChange={(e) => (exportPopupOpen = e.open)}
 					positioning={{ placement: 'bottom' }}
 					triggerBase="btn preset-filled-primary-500 w-full"
-					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+					contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
 					zIndex="1000"
 				>
 					{#snippet trigger()}
@@ -203,15 +203,15 @@
 					{/snippet}
 					{#snippet content()}
 						<div>
-							<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
+							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.incident()}</p>
 							<a
 								href="/incidents/{data.data.id}/export/md"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 								>... {m.asMarkdown()}</a
 							>
 							<a
 								href="/incidents/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
 							>
 						</div>
 					{/snippet}
@@ -220,7 +220,7 @@
 		{/snippet}
 		{#snippet widgets()}
 			<div
-				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-white"
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-surface-50-950"
 				hidden={!canEditObject}
 			>
 				{#if canEditObject}
@@ -279,7 +279,7 @@
 										/>
 									</div>
 									<button
-										class="btn bg-gray-300 h-11 w-10"
+										class="btn bg-surface-300-700 h-11 w-10"
 										onclick={(_) => modalEvidenceCreateForm()}
 										type="button"
 										data-testid="add-button-evidence"
@@ -319,7 +319,7 @@
 		{/snippet}
 	</DetailView>
 
-	<div class="card shadow-lg bg-white p-4 space-y-2">
+	<div class="card shadow-lg bg-surface-50-950 p-4 space-y-2">
 		<div class="flex flex-row justify-between items-center mb-4">
 			<h1 class="text-xl font-bold">{m.timeline()}</h1>
 			<Search {handler} />
@@ -335,7 +335,7 @@
 					></div>
 					<div class="flex flex-col">
 						<div class="flex flex-row items-center space-x-3 mb-1">
-							<time class="text-sm font-normal leading-none text-gray-600 dark:text-gray-800">
+							<time class="text-sm font-normal leading-none text-surface-600-400">
 								{formatDateOrDateTime(meta.timestamp, getLocale())} - {#if meta.author}{meta?.author
 										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 							>
@@ -351,7 +351,7 @@
 								preventDelete={preventDelete(row)}
 							></TableRowActions>
 							{#if formatDateOrDateTime(meta.updated_at, getLocale()) !== formatDateOrDateTime(meta.created_at, getLocale())}
-								<span class="text-xs italic text-gray-500 dark:text-gray-400">
+								<span class="text-xs italic text-surface-600-400">
 									({m.edited()})
 								</span>
 							{/if}
@@ -370,12 +370,12 @@
 							{#if meta.observation}
 								<MarkdownRenderer content={meta.observation} class="bg-primary-50 rounded-lg p-2" />
 							{:else}
-								<p class="italic text-gray-500 dark:text-gray-400">{m.noObservation()}</p>
+								<p class="italic text-surface-600-400">{m.noObservation()}</p>
 							{/if}
 						</div>
 						{#if meta.evidences && meta.evidences.length > 0}
 							<div class="mb-2">
-								<p class="text-xs font-medium text-gray-700 mb-1">{m.associatedEvidences()}:</p>
+								<p class="text-xs font-medium text-surface-700-300 mb-1">{m.associatedEvidences()}:</p>
 								<div class="flex flex-wrap gap-1">
 									{#each meta.evidences as evidence}
 										<a

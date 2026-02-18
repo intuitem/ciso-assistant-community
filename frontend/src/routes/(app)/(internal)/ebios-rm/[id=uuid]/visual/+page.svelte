@@ -52,7 +52,7 @@
 	</Anchor>
 </div>
 
-<div class="bg-white shadow-sm flex overflow-x-auto">
+<div class="bg-surface-50-950 shadow-sm flex overflow-x-auto">
 	<div class="w-full h-screen">
 		<GraphExplorer
 			title="Visual Analysis (beta)"

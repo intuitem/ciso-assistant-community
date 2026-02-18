@@ -124,7 +124,7 @@
 			>
 				{#snippet addButton()}
 					<div>
-						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+						<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
@@ -140,7 +140,7 @@
 										open={exportPopupOpen}
 										onOpenChange={(e) => (exportPopupOpen = e.open)}
 										triggerBase="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
-										contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+										contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg"
 										positioning={{ placement: 'bottom-end' }}
 										zIndex="1000"
 									>
@@ -153,12 +153,12 @@
 											<div class="flex flex-col">
 												<a
 													href="{URLModel}/export/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 													>... {m.asCSV()}</a
 												>
 												<a
 													href="{URLModel}/export/xlsx/"
-													class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+													class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 													>... {m.asXLSX()}</a
 												>
 											</div>
@@ -217,7 +217,7 @@
 								{/if}
 								{#if URLModel === 'folders'}
 									<button
-										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
+										class="text-white inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
 										aria-label={safeTranslate('importFolder')}

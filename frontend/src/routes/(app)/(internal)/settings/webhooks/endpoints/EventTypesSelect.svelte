@@ -188,7 +188,7 @@
 		{/each}
 
 		{#if filteredModelGroups.length === 0 && searchQuery}
-			<p class="text-sm text-gray-500 mt-2 italic">{m.noResourceMatchQuery()}</p>
+			<p class="text-sm text-surface-600-400 mt-2 italic">{m.noResourceMatchQuery()}</p>
 		{/if}
 	{:else}
 		<LoadingSpinner />

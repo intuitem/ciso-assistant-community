@@ -11,11 +11,11 @@
 	<div class="flex flex-col space-y-2">
 		{#each Object.entries(riskMatrix).filter(([key, _]) => key !== 'id' && key !== 'json_definition' && key !== 'is_enabled') as [key, value]}
 			<div class="flex flex-col">
-				<div class="text-sm font-medium text-gray-800 capitalize-first">
+				<div class="text-sm font-medium text-surface-950-50 capitalize-first">
 					{key.replace('_', ' ')}
 				</div>
 				<ul class="text-sm">
-					<li class="text-gray-600 list-none">
+					<li class="text-surface-600-400 list-none">
 						{#if value}
 							{#if Array.isArray(value)}
 								<ul>

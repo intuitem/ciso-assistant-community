@@ -43,15 +43,15 @@
 
 <div class="space-y-8 p-6">
 	<div class="text-center">
-		<h1 class="text-3xl font-bold text-gray-900 mb-2">Loss Exceedance Curve Analysis</h1>
-		<p class="text-gray-600 max-w-3xl mx-auto">
+		<h1 class="text-3xl font-bold text-surface-950-50 mb-2">Loss Exceedance Curve Analysis</h1>
+		<p class="text-surface-600-400 max-w-3xl mx-auto">
 			Loss Exceedance Curves show the probability that losses will exceed a given amount. These
 			curves are essential for risk quantification and help organizations understand their potential
 			financial exposure to various risk scenarios.
 		</p>
 	</div>
 
-	<div class="bg-white rounded-lg shadow-lg p-6">
+	<div class="bg-surface-50-950 rounded-lg shadow-lg p-6">
 		<h2 class="text-xl font-semibold mb-4 text-center">
 			Chart Comparison: Full vs Light Rendering
 		</h2>

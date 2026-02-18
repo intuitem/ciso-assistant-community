@@ -105,7 +105,7 @@
 		high: 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600',
 		medium: 'bg-yellow-500 text-white border-yellow-600 hover:bg-yellow-600',
 		low: 'bg-blue-500 text-white border-blue-600 hover:bg-blue-600',
-		info: 'bg-gray-500 text-white border-gray-600 hover:bg-gray-600',
+		info: 'bg-surface-50-9500 text-white border-surface-600-400 hover:bg-surface-600-400',
 		undefined: 'bg-slate-500 text-white border-slate-600 hover:bg-slate-600'
 	};
 
@@ -115,7 +115,7 @@
 		high: 'bg-orange-50 text-orange-400 border-orange-200 hover:bg-orange-100',
 		medium: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
 		low: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
-		info: 'bg-gray-50 text-gray-400 border-gray-200 hover:bg-gray-100',
+		info: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900',
 		undefined: 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
 	};
 
@@ -142,15 +142,15 @@
 	};
 </script>
 
-<div class="bg-white p-6 h-screen overflow-auto">
+<div class="bg-surface-50-950 p-6 h-screen overflow-auto">
 	<!-- Filters Section -->
-	<div class="mb-6 space-y-6 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+	<div class="mb-6 space-y-6 bg-surface-50-950 p-6 rounded-xl border border-surface-200-800 shadow-sm">
 		<!-- Severity Filters -->
 		<div>
 			<div class="flex items-center justify-between mb-3">
 				<div>
-					<label class="text-base font-semibold text-gray-900">{m.severity()}</label>
-					<p class="text-xs text-gray-500 mt-0.5">{m.filterVulnerabilitiesBySeverity()}</p>
+					<label class="text-base font-semibold text-surface-950-50">{m.severity()}</label>
+					<p class="text-xs text-surface-600-400 mt-0.5">{m.filterVulnerabilitiesBySeverity()}</p>
 				</div>
 				<div class="flex gap-2">
 					<button
@@ -161,7 +161,7 @@
 					</button>
 					<button
 						onclick={clearAllSeverities}
-						class="text-xs px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+						class="text-xs px-3 py-1.5 bg-surface-200-800 text-surface-700-300 rounded-lg hover:bg-surface-300-700 transition-colors font-medium"
 					>
 						{m.clear()}
 					</button>
@@ -187,14 +187,14 @@
 		</div>
 
 		<!-- Divider -->
-		<div class="border-t border-gray-200"></div>
+		<div class="border-t border-surface-200-800"></div>
 
 		<!-- Status Filters -->
 		<div>
 			<div class="flex items-center justify-between mb-3">
 				<div>
-					<label class="text-base font-semibold text-gray-900">{m.status()}</label>
-					<p class="text-xs text-gray-500 mt-0.5">{m.filterVulnerabilitiesByStatus()}</p>
+					<label class="text-base font-semibold text-surface-950-50">{m.status()}</label>
+					<p class="text-xs text-surface-600-400 mt-0.5">{m.filterVulnerabilitiesByStatus()}</p>
 				</div>
 				<div class="flex gap-2">
 					<button
@@ -205,7 +205,7 @@
 					</button>
 					<button
 						onclick={clearAllStatuses}
-						class="text-xs px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+						class="text-xs px-3 py-1.5 bg-surface-200-800 text-surface-700-300 rounded-lg hover:bg-surface-300-700 transition-colors font-medium"
 					>
 						{m.clear()}
 					</button>
@@ -241,7 +241,7 @@
 			{#key `${selectedSeverities.join(',')}-${selectedStatuses.join(',')}`}
 				{@const filteredData = filterTreemapData(loadedData)}
 				{#if filteredData.length === 0}
-					<div class="flex items-center justify-center h-full text-gray-500">
+					<div class="flex items-center justify-center h-full text-surface-600-400">
 						{m.noDataMatchesFilters()}
 					</div>
 				{:else}

@@ -29,13 +29,13 @@
 <div
 	class="card p-4 w-full flex flex-col whitespace-normal group transition-all duration-200 ease-in-out
 		   bg-gradient-to-br from-white via-white to-violet-25
-		   border border-gray-100 shadow-sm hover:shadow-lg hover:border-violet-200
+		   border border-surface-100-900 shadow-sm hover:shadow-lg hover:border-violet-200
 		   {href ? 'cursor-pointer hover:scale-[1.02] hover:-translate-y-1' : ''}"
 	onclick={clickHandler}
 	role={href ? 'button' : ''}
 >
 	<div
-		class="text-xs font-medium text-gray-600 uppercase tracking-wide mb-3 group-hover:text-violet-700 transition-colors duration-200"
+		class="text-xs font-medium text-surface-600-400 uppercase tracking-wide mb-3 group-hover:text-violet-700 transition-colors duration-200"
 	>
 		{label}
 	</div>
@@ -50,7 +50,7 @@
 				</div>
 			{/if}
 			<div
-				class="text-4xl font-bold text-gray-800 group-hover:text-violet-800 transition-colors duration-200"
+				class="text-4xl font-bold text-surface-950-50 group-hover:text-violet-800 transition-colors duration-200"
 				data-testid="card-{label}"
 			>
 				{count?.toLocaleString()}

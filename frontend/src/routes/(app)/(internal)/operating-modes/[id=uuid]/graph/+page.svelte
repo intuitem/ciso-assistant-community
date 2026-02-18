@@ -42,7 +42,7 @@
 </div>
 
 <div
-	class="rounded-xl w-full bg-linear-to-r from-slate-50 to-white shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line mr-auto"
+	class="rounded-xl w-full bg-linear-to-r from-slate-50 to-surface-50-950 shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line mr-auto"
 >
 	<i class="fa-solid fa-circle-info"></i>
 	{m.graphMoHelp()}

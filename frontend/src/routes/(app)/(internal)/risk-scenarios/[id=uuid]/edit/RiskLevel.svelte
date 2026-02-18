@@ -78,9 +78,9 @@
 			{safeTranslate(riskLevel.name)}
 		</div>
 	{:else}
-		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-gray-300">--</div>
+		<div class="flex font-medium w-32 justify-center p-2 rounded-base bg-surface-300-700">--</div>
 	{/if}
 	{#if helpText}
-		<p class="text-sm text-gray-500 w-64">{helpText}</p>
+		<p class="text-sm text-surface-600-400 w-64">{helpText}</p>
 	{/if}
 </div>

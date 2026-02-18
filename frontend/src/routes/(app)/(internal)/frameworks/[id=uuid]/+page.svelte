@@ -54,7 +54,7 @@
 </script>
 
 <div class="flex flex-col space-y-4 whitespace-pre-line">
-	<div class="card px-6 py-4 bg-white flex flex-row justify-between shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 flex flex-row justify-between shadow-lg">
 		<div class="">
 			<div class="mb-1">
 				{#if data.framework.has_update}
@@ -65,7 +65,7 @@
 			<div class="flex flex-col space-y-2">
 				{#each Object.entries(data.framework).filter(([key, _]) => !blacklistedKeys.has(key)) as [key, value]}
 					<div class="flex flex-col">
-						<div class="text-sm font-medium text-gray-800 capitalize-first">
+						<div class="text-sm font-medium text-surface-950-50 capitalize-first">
 							{#if key === 'urn'}
 								{m.urn()}
 							{:else}
@@ -73,7 +73,7 @@
 							{/if}
 						</div>
 						<ul class="text-sm">
-							<li class="text-gray-600 list-none">
+							<li class="text-surface-600-400 list-none">
 								{#if value}
 									{#if key === 'library'}
 										{@const itemHref = `/loaded-libraries/${value.id}`}
@@ -145,7 +145,7 @@
 		</div>
 	</div>
 
-	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg">
 		<h4 class="h4 flex items-center font-semibold">
 			{m.associatedRequirements()}
 			<span class="badge preset-tonal-primary ml-1">
@@ -155,7 +155,7 @@
 		<RecursiveTreeView nodes={treeViewNodes} hover="hover:bg-initial" />
 	</div>
 	<!-- EQUIVALENCE WITH OTHER FRAMEWORKS -->
-	<!-- <div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+	<!-- <div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg">
 		<span class="h4">
 			Equivalences
 		</span>

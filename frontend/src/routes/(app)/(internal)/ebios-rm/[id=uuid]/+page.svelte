@@ -203,7 +203,7 @@
 
 <div class="h-full w-full p-8">
 	<div
-		class="card bg-white shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
+		class="card bg-surface-50-950 shadow-lg w-full h-full grid xl:grid-cols-3 lg:grid-cols-2 md:grid-cols-1 gap-8 p-8"
 	>
 		<Tile
 			workshop={1}
@@ -297,11 +297,11 @@
 						</button>
 						{#if exportMenuOpen}
 							<div
-								class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+								class="absolute top-full left-0 mt-1 w-full bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg z-10"
 							>
 								<a
 									href={`${page.url.pathname}/export/xlsx`}
-									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+									class="block px-4 py-2 text-sm text-surface-700-300 hover:bg-surface-100-900 rounded-lg"
 								>
 									<i class="fa-solid fa-file-excel mr-2"></i>
 									{m.exportExcel()}

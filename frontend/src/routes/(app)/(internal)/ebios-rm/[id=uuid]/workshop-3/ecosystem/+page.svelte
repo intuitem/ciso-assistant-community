@@ -58,10 +58,10 @@
 
 <div class="space-y-2">
 	<Accordion
-		class="bg-white rounded-md border hover:text-primary-700 text-gray-800"
+		class="bg-surface-50-950 rounded-md border hover:text-primary-700 text-surface-950-50"
 		{value}
 		onValueChange={(e) => (value = e.value)}
-		hover="bg-white"
+		hover="bg-surface-50-950"
 		collapsible
 	>
 		<Accordion.Item value="summary">
@@ -70,7 +70,7 @@
 				{m.ecosystemRadar()}
 			{/snippet}
 			{#snippet panel()}
-				<div class="bg-white flex flex-col space-y-4">
+				<div class="bg-surface-50-950 flex flex-col space-y-4">
 					<div class="flex w-full h-fit">
 						<EcosystemCircularRadarChart
 							title={m.current()}
@@ -101,7 +101,7 @@
 	>
 		{#snippet addButton()}
 			<div>
-				<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+				<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
 					<button
 						class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 						data-testid="add-button"

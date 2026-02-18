@@ -13,13 +13,13 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="card bg-white shadow-sm p-4">
+<div class="card bg-surface-50-950 shadow-sm p-4">
 	<ModelForm form={data.form} schema={UserEditSchema} model={data.model} />
 </div>
 
 {#if data.object.is_local}
-	<div class="card bg-white shadow-sm p-4 mt-2">
-		<p class="text-gray-500 text-sm">
+	<div class="card bg-surface-50-950 shadow-sm p-4 mt-2">
+		<p class="text-surface-600-400 text-sm">
 			{m.setTemporaryPassword1()}
 			<a
 				href="{page.url.pathname}/set-password"

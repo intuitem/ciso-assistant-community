@@ -44,7 +44,7 @@
 	const inherentRiskEnabled = data.inherentRiskEnabled;
 
 	const pertinenceColor: Record<string, string> = {
-		undefined: 'bg-gray-200 text-gray-700',
+		undefined: 'bg-surface-200-800 text-surface-700-300',
 		irrelevant: 'bg-green-200 text-green-700',
 		partially_relevant: 'bg-yellow-200 text-yellow-700',
 		fairly_relevant: 'bg-orange-200 text-orange-700',
@@ -79,12 +79,12 @@
 	};
 </script>
 
-<div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
+<div class="bg-surface-50-950 shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
 	<div
-		class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
+		class="fixed top-24 right-8 z-10 bg-surface-50-950 border-2 border-surface-300-700 rounded-lg shadow-lg p-3 no-print"
 	>
-		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
+		<div class="text-xs font-semibold text-surface-600-400 mb-2 text-center">{m.workshops()}</div>
 		<div class="flex flex-col gap-2 items-center">
 			<a
 				href="#workshop-1"
@@ -145,19 +145,19 @@
 
 	<!-- Study Header -->
 	<div class="mb-6">
-		<h1 class="text-3xl font-bold text-gray-900 mb-2">{study.name}</h1>
+		<h1 class="text-3xl font-bold text-surface-950-50 mb-2">{study.name}</h1>
 		{#if study.description}
-			<div class="text-gray-600 mb-4">
+			<div class="text-surface-600-400 mb-4">
 				<MarkdownRenderer content={study.description} />
 			</div>
 		{/if}
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 			<div>
-				<span class="font-semibold text-gray-700">{m.version()}:</span>
+				<span class="font-semibold text-surface-700-300">{m.version()}:</span>
 				<span class="ml-2">{study.version || 'N/A'}</span>
 			</div>
 			<div>
-				<span class="font-semibold text-gray-700">{m.status()}:</span>
+				<span class="font-semibold text-surface-700-300">{m.status()}:</span>
 				<span class="ml-2">{study.status ? safeTranslate(study.status) : 'N/A'}</span>
 			</div>
 		</div>
@@ -167,7 +167,7 @@
 	<div id="workshop-1" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-pink-600" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-white px-6 py-2 text-xl font-bold text-pink-600">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-pink-600">
 				{m.workshop()} 1 - {m.frameTheStudy()}
 			</span>
 		</div>
@@ -178,7 +178,7 @@
 		<!-- Selected Assets -->
 		{#if study.assets && study.assets.length > 0}
 			<div class="mb-4">
-				<h3 class="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-3 flex items-center gap-2">
 					<i class="fa-solid fa-server"></i>
 					{m.assets()}
 					<span class="badge preset-tonal-secondary text-xs">{study.assets.length}</span>
@@ -186,7 +186,7 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 					{#each study.assets as asset}
 						<div
-							class="border border-gray-200 rounded-lg p-3 bg-gray-50 hover:shadow-md transition-shadow"
+							class="border border-surface-200-800 rounded-lg p-3 bg-surface-50-950 hover:shadow-md transition-shadow"
 						>
 							<div class="flex items-start gap-2">
 								{#if asset.type === 'PR'}
@@ -195,7 +195,7 @@
 									<i class="fa-solid fa-cube text-blue-500 mt-1"></i>
 								{/if}
 								<div class="flex-1">
-									<div class="font-semibold text-gray-900">{asset.str}</div>
+									<div class="font-semibold text-surface-950-50">{asset.str}</div>
 									<div>
 										{#if asset.type === 'PR'}
 											<span class="text-xs font-medium">{m.businessValue()}</span>
@@ -204,7 +204,7 @@
 										{/if}
 									</div>
 									{#if asset.folder}
-										<div class="text-xs text-gray-600">
+										<div class="text-xs text-surface-600-400">
 											<span class="font-medium">{m.domain()}:</span>
 											<span class="ml-1">{asset.folder.str}</span>
 										</div>
@@ -219,12 +219,12 @@
 
 		<!-- Observation -->
 		{#if study.observation}
-			<div class="mb-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-				<h3 class="text-lg font-semibold text-gray-800 mb-2 flex items-center gap-2">
-					<i class="fa-solid fa-eye text-gray-500"></i>
+			<div class="mb-4 p-4 bg-surface-50-950 border border-surface-200-800 rounded-lg">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-2 flex items-center gap-2">
+					<i class="fa-solid fa-eye text-surface-600-400"></i>
 					<span>{m.observation()}</span>
 				</h3>
-				<div class="text-gray-600">
+				<div class="text-surface-600-400">
 					<MarkdownRenderer content={study.observation} />
 				</div>
 			</div>
@@ -235,18 +235,18 @@
 	{#if reportData.feared_events.length > 0}
 		<section class="mb-6 page-break-section">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 flex items-center gap-2"
 			>
 				{m.fearedEvents()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.feared_events.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.feared_events as event}
-					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-semibold text-gray-800 mb-2">{event.name}</h3>
+					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+						<h3 class="text-lg font-semibold text-surface-950-50 mb-2">{event.name}</h3>
 						<div class="flex flex-wrap gap-4 text-sm mb-3">
 							<div>
-								<span class="font-semibold text-gray-700">{m.gravity()}:</span>
+								<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 								<span
 									class="ml-2 px-2 py-1 rounded"
 									style="background-color: {event.gravity.hexcolor}"
@@ -256,7 +256,7 @@
 							</div>
 							{#if event.assets.length > 0}
 								<div>
-									<span class="font-semibold text-gray-700">{m.assets()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.assets()}:</span>
 									{#each event.assets as asset, index}
 										{index > 0 ? ', ' : ''}
 										<Anchor
@@ -269,7 +269,7 @@
 							{/if}
 							{#if event.qualifications.length > 0}
 								<div>
-									<span class="font-semibold text-gray-700">{m.qualifications()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.qualifications()}:</span>
 									<span class="ml-2"
 										>{event.qualifications.map((q) => safeTranslate(q.str)).join(', ')}</span
 									>
@@ -278,8 +278,8 @@
 						</div>
 						{#if event.description}
 							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.description()}:</span>
-								<p class="mt-1 text-gray-600">{event.description}</p>
+								<span class="font-semibold text-surface-700-300">{m.description()}:</span>
+								<p class="mt-1 text-surface-600-400">{event.description}</p>
 							</div>
 						{/if}
 					</div>
@@ -292,7 +292,7 @@
 	{#if reportData.compliance_assessments && reportData.compliance_assessments.length > 0}
 		<section class="mb-6 page-break-section">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 flex items-center gap-2"
 			>
 				{m.complianceAssessments()}
 				<span class="badge preset-tonal-secondary text-xs"
@@ -301,12 +301,12 @@
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.compliance_assessments as assessment}
-					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
 						<div class="flex justify-between items-start mb-2">
 							<div>
-								<h3 class="text-lg font-semibold text-gray-800">{assessment.name}</h3>
+								<h3 class="text-lg font-semibold text-surface-950-50">{assessment.name}</h3>
 								{#if assessment.framework}
-									<p class="text-sm text-gray-600">{assessment.framework}</p>
+									<p class="text-sm text-surface-600-400">{assessment.framework}</p>
 								{/if}
 							</div>
 							{#if assessment.version}
@@ -320,10 +320,10 @@
 						{#if assessment.progress !== undefined}
 							<div class="mb-3">
 								<div class="flex justify-between items-center mb-1">
-									<span class="text-sm font-semibold text-gray-700">{m.progress()}:</span>
-									<span class="text-sm font-semibold text-gray-900">{assessment.progress}%</span>
+									<span class="text-sm font-semibold text-surface-700-300">{m.progress()}:</span>
+									<span class="text-sm font-semibold text-surface-950-50">{assessment.progress}%</span>
 								</div>
-								<div class="w-full bg-gray-200 rounded-full h-2.5">
+								<div class="w-full bg-surface-200-800 rounded-full h-2.5">
 									<div
 										class="h-2.5 rounded-full transition-all duration-300"
 										class:bg-red-500={assessment.progress < 25}
@@ -366,11 +366,11 @@
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_applicable !== undefined}
-									<div class="bg-gray-50 border border-gray-200 rounded p-2 text-center">
-										<div class="text-2xl font-bold text-gray-700">
+									<div class="bg-surface-50-950 border border-surface-200-800 rounded p-2 text-center">
+										<div class="text-2xl font-bold text-surface-700-300">
 											{assessment.result_counts.not_applicable}
 										</div>
-										<div class="text-xs text-gray-600">{safeTranslate('notApplicable')}</div>
+										<div class="text-xs text-surface-600-400">{safeTranslate('notApplicable')}</div>
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_assessed !== undefined}
@@ -387,19 +387,19 @@
 						<div class="flex flex-wrap gap-4 text-sm">
 							{#if assessment.eta}
 								<div>
-									<span class="font-semibold text-gray-700">{m.eta()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.eta()}:</span>
 									<span class="ml-2">{formatDateOrDateTime(assessment.eta)}</span>
 								</div>
 							{/if}
 							{#if assessment.due_date}
 								<div>
-									<span class="font-semibold text-gray-700">{m.dueDate()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.dueDate()}:</span>
 									<span class="ml-2">{formatDateOrDateTime(assessment.due_date)}</span>
 								</div>
 							{/if}
 							{#if assessment.status}
 								<div>
-									<span class="font-semibold text-gray-700">{m.status()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.status()}:</span>
 									<span class="ml-2">{safeTranslate(assessment.status)}</span>
 								</div>
 							{/if}
@@ -414,7 +414,7 @@
 	<div id="workshop-2" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-fuchsia-900" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-white px-6 py-2 text-xl font-bold text-fuchsia-900">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-fuchsia-900">
 				{m.workshop()} 2 - {m.identifyRiskSources()}
 			</span>
 		</div>
@@ -424,32 +424,32 @@
 	{#if reportData.ro_to_couples.length > 0}
 		<section class="mb-6 page-break-section">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 flex items-center gap-2"
 			>
 				{m.roToCouples()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.ro_to_couples.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.ro_to_couples as roto}
-					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-semibold text-gray-800 mb-2">
+					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+						<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
 							{safeTranslate(roto.risk_origin)} - {roto.target_objective}
 						</h3>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
 							<div>
-								<span class="font-semibold text-gray-700">{m.motivation()}:</span>
+								<span class="font-semibold text-surface-700-300">{m.motivation()}:</span>
 								<span class="ml-2">{safeTranslate(roto.motivation)}</span>
 							</div>
 							<div>
-								<span class="font-semibold text-gray-700">{m.resources()}:</span>
+								<span class="font-semibold text-surface-700-300">{m.resources()}:</span>
 								<span class="ml-2">{safeTranslate(roto.resources)}</span>
 							</div>
 							<div>
-								<span class="font-semibold text-gray-700">{m.rotoActivity()}:</span>
+								<span class="font-semibold text-surface-700-300">{m.rotoActivity()}:</span>
 								<span class="ml-2">{safeTranslate(roto.activity)}</span>
 							</div>
 							<div>
-								<span class="font-semibold text-gray-700">{m.pertinence()}:</span>
+								<span class="font-semibold text-surface-700-300">{m.pertinence()}:</span>
 								<span class="badge ml-2 {pertinenceColor[roto.pertinence]}"
 									>{safeTranslate(roto.pertinence)}</span
 								>
@@ -461,7 +461,7 @@
 							)}
 							{#if fearedEvents.length > 0}
 								<div class="mt-2 text-sm">
-									<span class="font-semibold text-gray-700">{m.fearedEvents()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.fearedEvents()}:</span>
 									{#each fearedEvents as fearedEvent, index}
 										{index > 0 ? ', ' : ''}
 										<Anchor
@@ -476,8 +476,8 @@
 						{/if}
 						{#if roto.justification}
 							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.justification()}:</span>
-								<span class="ml-2 text-gray-600">{roto.justification}</span>
+								<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
+								<span class="ml-2 text-surface-600-400">{roto.justification}</span>
 							</div>
 						{/if}
 					</div>
@@ -490,7 +490,7 @@
 	<div id="workshop-3" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-teal-500" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-white px-6 py-2 text-xl font-bold text-teal-500">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-teal-500">
 				{m.workshop()} 3 - {m.studyTheEcosystem()}
 			</span>
 		</div>
@@ -500,26 +500,26 @@
 	{#if reportData.stakeholders.length > 0}
 		<section class="mb-6 page-break-section">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 flex items-center gap-2"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 flex items-center gap-2"
 			>
 				{m.stakeholders()}
 				<span class="badge preset-tonal-secondary text-xs">{reportData.stakeholders.length}</span>
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.stakeholders as stakeholder}
-					<div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-						<h3 class="text-lg font-semibold text-gray-800 mb-3">
+					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+						<h3 class="text-lg font-semibold text-surface-950-50 mb-3">
 							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
 						</h3>
 						<div class="flex flex-wrap gap-6 text-sm mb-2">
 							<div class="flex flex-col">
-								<span class="text-xs text-gray-500 mb-1">{m.currentCriticality()}</span>
+								<span class="text-xs text-surface-600-400 mb-1">{m.currentCriticality()}</span>
 								<span class="badge bg-blue-100 text-blue-800 font-bold text-base px-3 py-1"
 									>{stakeholder.current_criticality}</span
 								>
 							</div>
 							<div class="flex flex-col">
-								<span class="text-xs text-gray-500 mb-1">{m.residualCriticality()}</span>
+								<span class="text-xs text-surface-600-400 mb-1">{m.residualCriticality()}</span>
 								<span class="badge bg-green-100 text-green-800 font-bold text-base px-3 py-1"
 									>{stakeholder.residual_criticality}</span
 								>
@@ -527,16 +527,16 @@
 						</div>
 						{#if stakeholder.applied_controls.length > 0}
 							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.appliedControls()}:</span>
-								<span class="ml-2 text-gray-600"
+								<span class="font-semibold text-surface-700-300">{m.appliedControls()}:</span>
+								<span class="ml-2 text-surface-600-400"
 									>{stakeholder.applied_controls.map((c) => c.str).join(', ')}</span
 								>
 							</div>
 						{/if}
 						{#if stakeholder.justification}
 							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.justification()}:</span>
-								<span class="ml-2 text-gray-600">{stakeholder.justification}</span>
+								<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
+								<span class="ml-2 text-surface-600-400">{stakeholder.justification}</span>
 							</div>
 						{/if}
 					</div>
@@ -549,11 +549,11 @@
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
 		<section class="mb-6 radar-page">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 text-center"
 			>
 				{m.ecosystemRadar()} - {m.current()}
 			</h2>
-			<div class="bg-white radar-chart-container" data-chart="radar-current">
+			<div class="bg-surface-50-950 radar-chart-container" data-chart="radar-current">
 				<EcosystemCircularRadarChart
 					name="c_ecosystem_report"
 					data={reportData.radar}
@@ -569,11 +569,11 @@
 	{#if reportData.stakeholders.length > 0 && reportData.radar}
 		<section class="mb-6 radar-page">
 			<h2
-				class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2 text-center"
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2 text-center"
 			>
 				{m.ecosystemRadar()} - {m.residual()}
 			</h2>
-			<div class="bg-white radar-chart-container" data-chart="radar-residual">
+			<div class="bg-surface-50-950 radar-chart-container" data-chart="radar-residual">
 				<EcosystemCircularRadarChart
 					name="r_ecosystem_report"
 					data={reportData.radar}
@@ -588,7 +588,7 @@
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
 		<section class="mb-6 strategic-scenarios-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 				{m.strategicScenarios()}
 			</h2>
 			<div class="space-y-6">
@@ -603,11 +603,11 @@
 								<i class="fa-solid fa-chess-knight mr-2"></i>{scenario.name}
 							</h3>
 							{#if scenario.description}
-								<p class="text-gray-700 text-sm mb-3">{scenario.description}</p>
+								<p class="text-surface-700-300 text-sm mb-3">{scenario.description}</p>
 							{/if}
 							<div class="flex flex-wrap gap-4 text-sm">
 								<div>
-									<span class="font-semibold text-gray-700">{m.gravity()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 									<span
 										class="ml-2 px-2 py-1 rounded"
 										style="background-color: {scenario.gravity.hexcolor}"
@@ -617,7 +617,7 @@
 								</div>
 								{#if scenario.ref_id}
 									<div>
-										<span class="font-semibold text-gray-700">{m.refId()}:</span>
+										<span class="font-semibold text-surface-700-300">{m.refId()}:</span>
 										<span class="ml-2">{scenario.ref_id}</span>
 									</div>
 								{/if}
@@ -626,7 +626,7 @@
 
 						<!-- Attack Path Flow Text -->
 						{#if scenarioAttackPaths.length > 0}
-							<h4 class="text-md font-semibold text-gray-800 mb-3">
+							<h4 class="text-md font-semibold text-surface-950-50 mb-3">
 								<i class="fa-solid fa-route mr-2"></i>{m.attackPaths()}
 							</h4>
 							<AttackPathFlowText
@@ -649,7 +649,7 @@
 	<div id="workshop-4" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-yellow-600" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-white px-6 py-2 text-xl font-bold text-yellow-600">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-yellow-600">
 				{m.workshop()} 4 - {m.assessTheRiskScenarios()}
 			</span>
 		</div>
@@ -658,12 +658,12 @@
 	<!-- Operational Scenarios Section -->
 	{#if reportData.operational_scenarios.length > 0}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 				{m.operationalScenarios()}
 			</h2>
 			{#if study.quotation_method}
 				<div class="mb-4 text-sm">
-					<span class="font-semibold text-gray-700">{m.quotationMethod()}:</span>
+					<span class="font-semibold text-surface-700-300">{m.quotationMethod()}:</span>
 					<span class="ml-2">{safeTranslate(study.quotation_method)}</span>
 				</div>
 			{/if}
@@ -688,25 +688,25 @@
 							</h3>
 							{#if strategicScenario}
 								<div class="text-sm mb-3">
-									<span class="font-semibold text-gray-700">{m.strategicScenario()}:</span>
-									<span class="ml-2 text-gray-700">{strategicScenario.name}</span>
+									<span class="font-semibold text-surface-700-300">{m.strategicScenario()}:</span>
+									<span class="ml-2 text-surface-700-300">{strategicScenario.name}</span>
 								</div>
 							{/if}
 							{#if opScenario.attack_path}
 								<div class="text-sm mb-3">
-									<span class="font-semibold text-gray-700">{m.attackPath()}:</span>
-									<span class="ml-2 text-gray-700">{opScenario.attack_path.name}</span>
+									<span class="font-semibold text-surface-700-300">{m.attackPath()}:</span>
+									<span class="ml-2 text-surface-700-300">{opScenario.attack_path.name}</span>
 								</div>
 							{/if}
 							{#if opScenario.operating_modes_description && opModes.length === 0}
 								<div class="text-sm mb-3">
-									<span class="font-semibold text-gray-700">{m.operatingModesDescription()}:</span>
-									<p class="ml-2 text-gray-700 mt-1">{opScenario.operating_modes_description}</p>
+									<span class="font-semibold text-surface-700-300">{m.operatingModesDescription()}:</span>
+									<p class="ml-2 text-surface-700-300 mt-1">{opScenario.operating_modes_description}</p>
 								</div>
 							{/if}
 							<div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
 								<div>
-									<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.likelihood()}:</span>
 									<span
 										class="ml-2 px-2 py-1 rounded text-xs font-medium"
 										style="background-color: {opScenario.likelihood.hexcolor}"
@@ -715,7 +715,7 @@
 									</span>
 								</div>
 								<div>
-									<span class="font-semibold text-gray-700">{m.gravity()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.gravity()}:</span>
 									<span
 										class="ml-2 px-2 py-1 rounded text-xs font-medium"
 										style="background-color: {opScenario.gravity.hexcolor}"
@@ -724,7 +724,7 @@
 									</span>
 								</div>
 								<div>
-									<span class="font-semibold text-gray-700">{m.riskLevel()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.riskLevel()}:</span>
 									<span
 										class="ml-2 px-2 py-1 rounded text-xs font-medium"
 										style="background-color: {opScenario.risk_level.hexcolor || '#gray'}"
@@ -735,7 +735,7 @@
 							</div>
 							{#if opScenario.threats && opScenario.threats.length > 0}
 								<div class="mt-3 text-sm">
-									<span class="font-semibold text-gray-700">{m.threats()}:</span>
+									<span class="font-semibold text-surface-700-300">{m.threats()}:</span>
 									{#each opScenario.threats as threat, index}
 										{index > 0 ? ', ' : ''}
 										<Anchor
@@ -748,8 +748,8 @@
 							{/if}
 							{#if opScenario.stakeholders && opScenario.stakeholders.length > 0}
 								<div class="mt-2 text-sm">
-									<span class="font-semibold text-gray-700">{m.stakeholders()}:</span>
-									<span class="ml-2 text-gray-700">
+									<span class="font-semibold text-surface-700-300">{m.stakeholders()}:</span>
+									<span class="ml-2 text-surface-700-300">
 										{opScenario.stakeholders
 											.map((s) => {
 												const stakeholderData = reportData.stakeholders.find(
@@ -765,8 +765,8 @@
 							{/if}
 							{#if opScenario.justification}
 								<div class="mt-2 text-sm">
-									<span class="font-semibold text-gray-700">{m.justification()}:</span>
-									<p class="ml-2 text-gray-600 mt-1">{opScenario.justification}</p>
+									<span class="font-semibold text-surface-700-300">{m.justification()}:</span>
+									<p class="ml-2 text-surface-600-400 mt-1">{opScenario.justification}</p>
 								</div>
 							{/if}
 						</div>
@@ -774,32 +774,32 @@
 						<!-- Operating Modes -->
 						{#if opModes.length > 0}
 							<div class="mt-4 pt-4 border-t border-yellow-300">
-								<h4 class="text-md font-semibold text-gray-800 mb-3">
+								<h4 class="text-md font-semibold text-surface-950-50 mb-3">
 									<i class="fa-solid fa-cog mr-2"></i>{m.operatingModes()}
 								</h4>
 								<div class="space-y-3">
 									{#each opModes as mode}
-										<div class="bg-white border border-gray-200 rounded p-3">
+										<div class="bg-surface-50-950 border border-surface-200-800 rounded p-3">
 											<div class="flex items-start gap-2 mb-2">
 												{#if mode.is_selected}
 													<span class="text-green-600 mt-0.5">
 														<i class="fa-solid fa-check-circle"></i>
 													</span>
 												{:else}
-													<span class="text-gray-400 mt-0.5">
+													<span class="text-surface-400-600 mt-0.5">
 														<i class="fa-regular fa-circle"></i>
 													</span>
 												{/if}
 												<div class="flex-1">
-													<div class="font-medium text-gray-900 text-sm">{mode.name}</div>
+													<div class="font-medium text-surface-950-50 text-sm">{mode.name}</div>
 													{#if mode.description}
-														<p class="text-gray-600 text-xs mt-1">{mode.description}</p>
+														<p class="text-surface-600-400 text-xs mt-1">{mode.description}</p>
 													{/if}
 												</div>
 											</div>
 											<div class="flex flex-wrap gap-3 ml-6">
 												<div class="text-xs">
-													<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
+													<span class="font-semibold text-surface-700-300">{m.likelihood()}:</span>
 													<span
 														class="ml-1 px-2 py-0.5 rounded"
 														style="background-color: {mode.likelihood.hexcolor}"
@@ -809,19 +809,19 @@
 												</div>
 												{#if mode.elementary_actions.length > 0}
 													<div class="text-xs">
-														<span class="font-semibold text-gray-700">{m.elementaryActions()}:</span
+														<span class="font-semibold text-surface-700-300">{m.elementaryActions()}:</span
 														>
-														<span class="ml-1 text-gray-600">{mode.elementary_actions.length}</span>
+														<span class="ml-1 text-surface-600-400">{mode.elementary_actions.length}</span>
 													</div>
 												{/if}
 											</div>
 											<!-- Operating Mode Graph -->
 											{#if mode.graph}
-												<div class="mt-4 pt-4 border-t border-gray-200">
-													<h5 class="text-xs font-semibold text-gray-700 mb-2">
+												<div class="mt-4 pt-4 border-t border-surface-200-800">
+													<h5 class="text-xs font-semibold text-surface-700-300 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="bg-gray-50 rounded p-2" data-chart="operating-mode-{mode.id}">
+													<div class="bg-surface-50-950 rounded p-2" data-chart="operating-mode-{mode.id}">
 														<GraphComponent
 															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
 															panelNodes={mode.graph.panelNodes}
@@ -847,7 +847,7 @@
 	<div id="workshop-5" class="my-12 scroll-mt-20 workshop-divider">
 		<hr class="border-t-4 border-red-500" />
 		<div class="text-center -mt-5 mb-12">
-			<span class="bg-white px-6 py-2 text-xl font-bold text-red-500">
+			<span class="bg-surface-50-950 px-6 py-2 text-xl font-bold text-red-500">
 				{m.workshop()} 5 - {m.validateTheTreatment()}
 			</span>
 		</div>
@@ -861,10 +861,10 @@
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 				{m.riskMatrix()}
 				{#if reportData.risk_matrix_data.risk_assessment}
-					<span class="text-sm font-normal text-gray-600">
+					<span class="text-sm font-normal text-surface-600-400">
 						- {reportData.risk_matrix_data.risk_assessment.name}
 						{#if reportData.risk_matrix_data.risk_assessment.version}
 							(v{reportData.risk_matrix_data.risk_assessment.version})
@@ -876,40 +876,40 @@
 			<!-- Risk Scenarios Summary -->
 			{#if riskScenarios.length > 0}
 				<div class="mb-6 overflow-x-auto">
-					<table class="min-w-full divide-y divide-gray-200 border border-gray-300">
-						<thead class="bg-gray-50">
+					<table class="min-w-full divide-y divide-surface-200-800 border border-surface-300-700">
+						<thead class="bg-surface-50-950">
 							<tr>
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+									class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider border-r"
 									>{m.refId()}</th
 								>
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+									class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider border-r"
 									>{m.name()}</th
 								>
 								{#if inherentRiskEnabled}
 									<th
-										class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+										class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider border-r"
 										>{m.inherentRisk()}</th
 									>
 								{/if}
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+									class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider border-r"
 									>{m.currentRisk()}</th
 								>
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider border-r"
+									class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider border-r"
 									>{m.residualRisk()}</th
 								>
 								<th
-									class="px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider"
+									class="px-4 py-3 text-left text-xs font-medium text-surface-700-300 uppercase tracking-wider"
 									>{m.treatment()}</th
 								>
 							</tr>
 						</thead>
-						<tbody class="bg-white divide-y divide-gray-200">
+						<tbody class="bg-surface-50-950 divide-y divide-surface-200-800">
 							{#each riskScenarios as scenario}
-								<tr class="hover:bg-gray-50">
+								<tr class="hover:bg-surface-50-950">
 									<td class="px-4 py-3 text-sm font-medium border-r">
 										<a
 											href="/risk-scenarios/{scenario.id}"
@@ -918,7 +918,7 @@
 											{scenario.ref_id || '--'}
 										</a>
 									</td>
-									<td class="px-4 py-3 text-sm text-gray-700 border-r">{scenario.name}</td>
+									<td class="px-4 py-3 text-sm text-surface-700-300 border-r">{scenario.name}</td>
 									{#if inherentRiskEnabled}
 										<td class="px-4 py-3 text-sm border-r">
 											{#if scenario.inherent_level}
@@ -929,7 +929,7 @@
 													{safeTranslate(scenario.inherent_level.name)}
 												</span>
 											{:else}
-												<span class="text-gray-400">--</span>
+												<span class="text-surface-400-600">--</span>
 											{/if}
 										</td>
 									{/if}
@@ -942,7 +942,7 @@
 												{safeTranslate(scenario.current_level.name)}
 											</span>
 										{:else}
-											<span class="text-gray-400">--</span>
+											<span class="text-surface-400-600">--</span>
 										{/if}
 									</td>
 									<td class="px-4 py-3 text-sm border-r">
@@ -954,16 +954,16 @@
 												{safeTranslate(scenario.residual_level.name)}
 											</span>
 										{:else}
-											<span class="text-gray-400">--</span>
+											<span class="text-surface-400-600">--</span>
 										{/if}
 									</td>
 									<td class="px-4 py-3 text-sm">
 										{#if scenario.treatment}
-											<span class="px-2 py-1 rounded text-xs font-medium bg-gray-100">
+											<span class="px-2 py-1 rounded text-xs font-medium bg-surface-100-900">
 												{safeTranslate(scenario.treatment)}
 											</span>
 										{:else}
-											<span class="text-gray-400">--</span>
+											<span class="text-surface-400-600">--</span>
 										{/if}
 									</td>
 								</tr>
@@ -1013,7 +1013,7 @@
 	<!-- Treatment Plan Section -->
 	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan || reportData.stakeholders?.some((s) => s.applied_controls?.length > 0)}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
 				{m.treatmentPlan()}
 			</h2>
 
@@ -1033,30 +1033,30 @@
 									{/if}
 								</h3>
 								<div class="overflow-x-auto">
-									<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
-										<thead class="bg-gray-50">
+									<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+										<thead class="bg-surface-50-950">
 											<tr>
-												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.name()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.priority()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.status()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.owner()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.eta()}</th
 												>
 											</tr>
 										</thead>
-										<tbody class="divide-y divide-gray-200">
+										<tbody class="divide-y divide-surface-200-800">
 											{#each actionPlan.applied_controls as control}
-												<tr class="hover:bg-gray-50">
-													<td class="px-3 py-2 text-sm text-gray-900">
+												<tr class="hover:bg-surface-50-950">
+													<td class="px-3 py-2 text-sm text-surface-950-50">
 														<Anchor
 															href="/applied-controls/{control.id}"
 															class="text-primary-600 hover:text-primary-800 hover:underline"
@@ -1116,30 +1116,30 @@
 								</span>
 							</h3>
 							<div class="overflow-x-auto">
-								<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
-									<thead class="bg-gray-50">
+								<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+									<thead class="bg-surface-50-950">
 										<tr>
-											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.name()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.priority()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.status()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.owner()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.eta()}</th
 											>
 										</tr>
 									</thead>
-									<tbody class="divide-y divide-gray-200">
+									<tbody class="divide-y divide-surface-200-800">
 										{#each stakeholder.applied_controls as control}
-											<tr class="hover:bg-gray-50">
-												<td class="px-3 py-2 text-sm text-gray-900">
+											<tr class="hover:bg-surface-50-950">
+												<td class="px-3 py-2 text-sm text-surface-950-50">
 													<Anchor
 														href="/applied-controls/{control.id}"
 														class="text-primary-600 hover:text-primary-800 hover:underline"
@@ -1194,30 +1194,30 @@
 						<span class="text-sm font-normal text-red-700">({m.riskAssessment()})</span>
 					</h3>
 					<div class="overflow-x-auto">
-						<table class="min-w-full divide-y divide-gray-200 bg-white rounded border">
-							<thead class="bg-gray-50">
+						<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+							<thead class="bg-surface-50-950">
 								<tr>
-									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 										>{m.name()}</th
 									>
-									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 										>{m.priority()}</th
 									>
-									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 										>{m.status()}</th
 									>
-									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 										>{m.owner()}</th
 									>
-									<th class="px-3 py-2 text-left text-xs font-medium text-gray-700 uppercase"
+									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 										>{m.eta()}</th
 									>
 								</tr>
 							</thead>
-							<tbody class="divide-y divide-gray-200">
+							<tbody class="divide-y divide-surface-200-800">
 								{#each reportData.risk_action_plan.applied_controls as control}
-									<tr class="hover:bg-gray-50">
-										<td class="px-3 py-2 text-sm text-gray-900">
+									<tr class="hover:bg-surface-50-950">
+										<td class="px-3 py-2 text-sm text-surface-950-50">
 											<Anchor
 												href="/applied-controls/{control.id}"
 												class="text-primary-600 hover:text-primary-800 hover:underline"
@@ -1322,7 +1322,7 @@
 		}
 
 		/* Ensure study header starts at top of first page */
-		.bg-white.shadow-sm:first-of-type {
+		.bg-surface-50-950.shadow-sm:first-of-type {
 			padding-top: 0 !important;
 			margin-top: 0 !important;
 		}
@@ -1393,7 +1393,7 @@
 		}
 
 		/* Ensure content fills the page properly */
-		:global(.bg-white) {
+		:global(.bg-surface-50-950) {
 			background: white !important;
 		}
 

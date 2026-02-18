@@ -21,11 +21,11 @@
 		</div>
 	</div>
 	<div class="flex w-full items-center justify-center">
-		<div class="flex flex-col bg-white p-12 rounded-lg shadow-lg items-center space-y-4">
+		<div class="flex flex-col bg-surface-50-950 p-12 rounded-lg shadow-lg items-center space-y-4">
 			<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 				<i class="fa-solid fa-key"></i>
 			</div>
-			<p class="text-gray-600 text-sm text-center">
+			<p class="text-surface-600-400 text-sm text-center">
 				{m.resetPasswordHere()}<br />
 			</p>
 			<!-- SuperForm with dataType 'form' -->

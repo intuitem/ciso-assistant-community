@@ -80,11 +80,11 @@
 	});
 
 	function getStatusColor(status: string | null): string {
-		if (!status) return 'bg-white';
+		if (!status) return 'bg-surface-50-950';
 		if (status === 'completed') return 'bg-green-200';
 		if (status === 'in_progress') return 'bg-orange-200';
 		if (status === 'pending') return 'bg-red-200';
-		return 'bg-white';
+		return 'bg-surface-50-950';
 	}
 
 	function applyFilters() {
@@ -108,12 +108,12 @@
 	}
 </script>
 
-<div class="bg-white p-8 space-y-8">
+<div class="bg-surface-50-950 p-8 space-y-8">
 	<div>
 		<h1 class="text-3xl font-bold mb-2">
 			{m.yearlyTasksReview()}
 		</h1>
-		<p class="text-gray-600">
+		<p class="text-surface-600-400">
 			{startFormatted.label}
 			{startFormatted.year}
 			{m.periodTo()}
@@ -123,43 +123,43 @@
 	</div>
 
 	<!-- Filters -->
-	<div class="bg-gray-50 p-4 rounded-lg border">
+	<div class="bg-surface-50-950 p-4 rounded-lg border">
 		<div class="flex gap-4 items-end flex-wrap">
 			<!-- Start Period -->
 			<div class="min-w-[160px]">
-				<label for="start-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
+				<label for="start-period-filter" class="block text-sm font-medium text-surface-700-300 mb-1">
 					{m.startPeriod()}
 				</label>
 				<input
 					id="start-period-filter"
 					type="month"
 					bind:value={startPeriod}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="w-full px-3 py-2 border border-surface-300-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 
 			<!-- End Period -->
 			<div class="min-w-[160px]">
-				<label for="end-period-filter" class="block text-sm font-medium text-gray-700 mb-1">
+				<label for="end-period-filter" class="block text-sm font-medium text-surface-700-300 mb-1">
 					{m.endPeriod()}
 				</label>
 				<input
 					id="end-period-filter"
 					type="month"
 					bind:value={endPeriod}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="w-full px-3 py-2 border border-surface-300-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 				/>
 			</div>
 
 			<!-- Folder Filter -->
 			<div class="flex-1 min-w-[200px]">
-				<label for="folder-filter" class="block text-sm font-medium text-gray-700 mb-1">
+				<label for="folder-filter" class="block text-sm font-medium text-surface-700-300 mb-1">
 					{m.folder()}
 				</label>
 				<select
 					id="folder-filter"
 					bind:value={selectedFolder}
-					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+					class="w-full px-3 py-2 border border-surface-300-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 				>
 					<option value="">{m.allFolders()}</option>
 					{#each data.allFolders as folder}
@@ -178,7 +178,7 @@
 				</button>
 				<button
 					onclick={resetFilters}
-					class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+					class="px-4 py-2 bg-surface-200-800 text-surface-700-300 rounded-md hover:bg-surface-300-700 focus:outline-none focus:ring-2 focus:ring-surface-400-600"
 				>
 					{m.reset()}
 				</button>
@@ -189,16 +189,16 @@
 	<div class="space-y-8">
 		{#each data.folders as folder}
 			<div class="border rounded-lg overflow-hidden">
-				<div class="bg-gray-100 px-6 py-3 border-b">
+				<div class="bg-surface-100-900 px-6 py-3 border-b">
 					<h2 class="text-xl font-semibold">{folder.folder_name}</h2>
 				</div>
 
 				<div class="overflow-x-auto">
 					<table class="w-full text-sm">
 						<thead>
-							<tr class="border-b bg-gray-50">
+							<tr class="border-b bg-surface-50-950">
 								<th
-									class="px-4 py-3 text-left font-semibold min-w-[200px] sticky left-0 bg-gray-50 z-10"
+									class="px-4 py-3 text-left font-semibold min-w-[200px] sticky left-0 bg-surface-50-950 z-10"
 								>
 									{m.tasks()}
 								</th>
@@ -206,7 +206,7 @@
 									<th class="px-2 py-3 text-center font-semibold w-16">
 										{monthInfo.label}
 										{#if monthsToDisplay.length > 12 || startFormatted.year !== endFormatted.year}
-											<div class="text-xs text-gray-500">{monthInfo.year}</div>
+											<div class="text-xs text-surface-600-400">{monthInfo.year}</div>
 										{/if}
 									</th>
 								{/each}
@@ -214,8 +214,8 @@
 						</thead>
 						<tbody>
 							{#each folder.tasks as task}
-								<tr class="border-b hover:bg-gray-50">
-									<td class="px-4 py-3 sticky left-0 bg-white z-10">
+								<tr class="border-b hover:bg-surface-50-950">
+									<td class="px-4 py-3 sticky left-0 bg-surface-50-950 z-10">
 										{#if task.ref_id}
 											<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
 										{/if}
@@ -226,12 +226,12 @@
 											{task.name}
 										</a>
 										{#if task.assigned_to && task.assigned_to.length > 0}
-											<div class="text-xs text-gray-500 mt-1">
+											<div class="text-xs text-surface-600-400 mt-1">
 												{task.assigned_to.map((user) => user.str).join(', ')}
 											</div>
 										{/if}
 										{#if task.applied_controls && task.applied_controls.length > 0}
-											<div class="text-xs text-gray-700 mt-2">
+											<div class="text-xs text-surface-700-300 mt-2">
 												<span class="font-medium">{m.appliedControls()}:</span>
 												{task.applied_controls.map((control) => control.str).join(', ')}
 											</div>
@@ -251,7 +251,7 @@
 				</div>
 			</div>
 		{:else}
-			<div class="text-center py-12 text-gray-500">{m.noRecurrentTasksFound()}</div>
+			<div class="text-center py-12 text-surface-600-400">{m.noRecurrentTasksFound()}</div>
 		{/each}
 	</div>
 
@@ -269,7 +269,7 @@
 			<span>{m.pending()}</span>
 		</div>
 		<div class="flex items-center gap-2">
-			<div class="w-6 h-6 bg-white rounded border"></div>
+			<div class="w-6 h-6 bg-surface-50-950 rounded border"></div>
 			<span>{m.noData()}</span>
 		</div>
 	</div>

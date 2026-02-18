@@ -46,7 +46,7 @@
 
 	// Status color mapping
 	const statusColorMap = {
-		draft: 'bg-gray-300 text-gray-800',
+		draft: 'bg-surface-300-700 text-surface-950-50',
 		accredited: 'bg-green-300 text-green-800',
 		not_accredited: 'bg-red-300 text-red-800',
 		obsolete: 'bg-orange-300 text-orange-800'
@@ -59,7 +59,7 @@
 		acc_advanced: 'bg-purple-300 text-purple-800',
 		acc_sensitive: 'bg-pink-300 text-pink-800',
 		acc_restricted: 'bg-red-300 text-red-800',
-		other: 'bg-gray-300 text-gray-800'
+		other: 'bg-surface-300-700 text-surface-950-50'
 	};
 
 	// Get checklist progress from backend
@@ -78,7 +78,7 @@
 </DetailView>
 
 <!-- Accreditation details section -->
-<div class="card bg-white p-6 m-4 shadow-sm relative">
+<div class="card bg-surface-50-950 p-6 m-4 shadow-sm relative">
 	<!-- Status and Category badges in top right corner with progress bar below -->
 	<div class="absolute top-6 right-6 flex flex-col items-end gap-2">
 		<div class="flex gap-2">
@@ -100,8 +100,8 @@
 				title="View compliance assessment"
 			>
 				<div class="flex items-center justify-between mb-1">
-					<span class="text-xs font-semibold text-gray-700">{m.checklistProgress()}</span>
-					<span class="text-xs text-gray-600">{checklistProgress}%</span>
+					<span class="text-xs font-semibold text-surface-700-300">{m.checklistProgress()}</span>
+					<span class="text-xs text-surface-600-400">{checklistProgress}%</span>
 				</div>
 				<Progress value={checklistProgress} max={100} height="h-1.5" meter="bg-primary-500" />
 			</a>
@@ -112,7 +112,7 @@
 	<div class="mb-6 pr-48">
 		<h2 class="text-2xl font-semibold">{accreditation.name}</h2>
 		{#if accreditation.ref_id}
-			<p class="text-sm text-gray-600 mt-1">{accreditation.ref_id}</p>
+			<p class="text-sm text-surface-600-400 mt-1">{accreditation.ref_id}</p>
 		{/if}
 	</div>
 
@@ -120,24 +120,24 @@
 	<div class="grid grid-cols-2 gap-6">
 		<!-- Description -->
 		<div>
-			<h3 class="text-sm font-semibold text-gray-700 mb-2">{m.description()}</h3>
-			<div class="prose prose-sm max-w-none text-gray-900">
+			<h3 class="text-sm font-semibold text-surface-700-300 mb-2">{m.description()}</h3>
+			<div class="prose prose-sm max-w-none text-surface-950-50">
 				{#if accreditation.description}
 					<MarkdownRenderer content={accreditation.description} />
 				{:else}
-					<p class="text-gray-400 italic">No description provided</p>
+					<p class="text-surface-400-600 italic">No description provided</p>
 				{/if}
 			</div>
 		</div>
 
 		<!-- Observation -->
 		<div>
-			<h3 class="text-sm font-semibold text-gray-700 mb-2">Observation</h3>
-			<div class="prose prose-sm max-w-none text-gray-900">
+			<h3 class="text-sm font-semibold text-surface-700-300 mb-2">Observation</h3>
+			<div class="prose prose-sm max-w-none text-surface-950-50">
 				{#if accreditation.observation}
 					<MarkdownRenderer content={accreditation.observation} />
 				{:else}
-					<p class="text-gray-400 italic">No observation provided</p>
+					<p class="text-surface-400-600 italic">No observation provided</p>
 				{/if}
 			</div>
 		</div>
@@ -145,15 +145,15 @@
 
 	<!-- Associated Collection Objects -->
 	{#if collection}
-		<div class="mt-8 pt-6 border-t border-gray-200">
-			<h3 class="text-lg font-semibold text-gray-800 mb-4">{m.associatedObjects()}</h3>
+		<div class="mt-8 pt-6 border-t border-surface-200-800">
+			<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.associatedObjects()}</h3>
 
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				{#each collectionSections as section}
 					{@const items = collection[section.key]}
 					{#if items && items.length > 0}
-						<div class="bg-gray-50 rounded-lg p-4">
-							<h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+						<div class="bg-surface-50-950 rounded-lg p-4">
+							<h4 class="text-sm font-semibold text-surface-700-300 mb-3 flex items-center gap-2">
 								{section.label}
 								<span class="badge preset-tonal-secondary text-xs">{items.length}</span>
 							</h4>
@@ -175,7 +175,7 @@
 			</div>
 
 			{#if !collectionSections.some((s) => collection[s.key]?.length > 0)}
-				<p class="text-gray-400 italic text-sm">No associated objects in this collection</p>
+				<p class="text-surface-400-600 italic text-sm">No associated objects in this collection</p>
 			{/if}
 		</div>
 	{/if}

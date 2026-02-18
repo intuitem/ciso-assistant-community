@@ -100,7 +100,7 @@
 	class="flex items-center gap-3 py-1.5 px-2 rounded-md transition-colors -ml-2
 		{assessable
 		? isLocked
-			? 'bg-gray-100 border border-gray-200'
+			? 'bg-surface-100-900 border border-surface-200-800'
 			: isChecked
 				? 'bg-violet-50 border border-violet-200'
 				: 'bg-green-50 border border-green-200 hover:bg-green-100 cursor-pointer'
@@ -154,7 +154,7 @@
 			<!-- Status icon for assessable nodes -->
 			{#if assessable}
 				{#if isLocked}
-					<span class="text-gray-400" title={m.alreadyAssigned()}>
+					<span class="text-surface-400-600" title={m.alreadyAssigned()}>
 						<i class="fa-solid fa-lock text-xs"></i>
 					</span>
 				{/if}
@@ -164,11 +164,11 @@
 			<span
 				class="font-medium text-sm {assessable
 					? isLocked
-						? 'text-gray-500'
-						: 'text-gray-900'
+						? 'text-surface-600-400'
+						: 'text-surface-950-50'
 					: availableChildrenIds.length === 0 && childrenIds.length > 0
-						? 'text-gray-400'
-						: 'text-gray-600'}"
+						? 'text-surface-400-600'
+						: 'text-surface-600-400'}"
 			>
 				{#if node_content}
 					{node_content}
@@ -205,7 +205,7 @@
 
 			<!-- Children count for parent nodes -->
 			{#if !assessable && childrenIds.length > 0}
-				<span class="text-xs text-gray-400">
+				<span class="text-xs text-surface-400-600">
 					({availableChildrenIds.length}
 					{m.available()})
 				</span>
@@ -214,7 +214,7 @@
 
 		<!-- Non-assessable indicator -->
 		{#if !assessable && childrenIds.length === 0}
-			<span class="text-xs text-gray-400 italic">
+			<span class="text-xs text-surface-400-600 italic">
 				({m.section()})
 			</span>
 		{/if}

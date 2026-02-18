@@ -234,7 +234,7 @@
 	const nodeIcon = (n: NodeDatum) => n.icon || ''; // Enable icons
 </script>
 
-<div class="bg-white">
+<div class="bg-surface-50-950">
 	<VisSingleContainer data={processedData} {height}>
 		<VisGraph
 			{nodeShape}

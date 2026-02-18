@@ -100,7 +100,7 @@
 		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-2">
 			{#if data.lec?.data && Array.isArray(data.lec.data) && data.lec.data.length > 0}
 				<!-- LEC Chart -->
-				<div class="bg-white rounded-lg shadow-sm w-full">
+				<div class="bg-surface-50-950 rounded-lg shadow-sm w-full">
 					{#key data.lec.simulation_timestamp}
 						<LossExceedanceCurve
 							data={data.lec.data}
@@ -118,14 +118,14 @@
 				</div>
 			{:else}
 				<!-- Show message for stale or missing data -->
-				<div class="bg-white rounded-lg p-8 text-center shadow-sm">
+				<div class="bg-surface-50-950 rounded-lg p-8 text-center shadow-sm">
 					{#if data.lec?.message}
 						<div class="text-orange-600 mb-4">
 							<i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i>
 							<p class="font-medium">{safeTranslate(data.lec.message)}</p>
 						</div>
 					{:else}
-						<div class="text-gray-500">
+						<div class="text-surface-600-400">
 							<i class="fa-solid fa-chart-line text-2xl mb-2"></i>
 							<p>{m.noLecDataAvailableExecuteSimulation()}</p>
 						</div>
@@ -134,7 +134,7 @@
 			{/if}
 
 			<!-- Risk Metrics -->
-			<div class="bg-white rounded-lg p-6 shadow-sm">
+			<div class="bg-surface-50-950 rounded-lg p-6 shadow-sm">
 				<div class="flex justify-between items-center mb-4">
 					<h3 class="text-lg font-semibold">{m.riskInsights()}</h3>
 					{#if data.data.impact?.lb && data.data.impact?.ub}
@@ -167,14 +167,14 @@
 
 					<!-- Risk Metrics - First Row: VaR Metrics -->
 					<div class="mb-8">
-						<h4 class="text-md font-medium text-gray-700 mb-4">{m.valueAtRiskMetrics()}</h4>
+						<h4 class="text-md font-medium text-surface-700-300 mb-4">{m.valueAtRiskMetrics()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 							{#if metrics.mean_annual_loss !== undefined}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-blue-600 mb-2">
 										{formatCurrency(metrics.mean_annual_loss)}
 									</div>
-									<div class="text-sm text-gray-600">{m.meanAnnualLoss()}</div>
+									<div class="text-sm text-surface-600-400">{m.meanAnnualLoss()}</div>
 								</div>
 							{/if}
 							{#if metrics.var_95 !== undefined}
@@ -182,7 +182,7 @@
 									<div class="text-2xl font-bold text-orange-600 mb-2">
 										{formatCurrency(metrics.var_95)}
 									</div>
-									<div class="text-sm text-gray-600">VaR 95%</div>
+									<div class="text-sm text-surface-600-400">VaR 95%</div>
 								</div>
 							{/if}
 							{#if metrics.var_99 !== undefined}
@@ -190,7 +190,7 @@
 									<div class="text-2xl font-bold text-red-600 mb-2">
 										{formatCurrency(metrics.var_99)}
 									</div>
-									<div class="text-sm text-gray-600">VaR 99%</div>
+									<div class="text-sm text-surface-600-400">VaR 99%</div>
 								</div>
 							{/if}
 							{#if metrics.var_999 !== undefined}
@@ -198,7 +198,7 @@
 									<div class="text-2xl font-bold text-red-800 mb-2">
 										{formatCurrency(metrics.var_999)}
 									</div>
-									<div class="text-sm text-gray-600">VaR 99.9%</div>
+									<div class="text-sm text-surface-600-400">VaR 99.9%</div>
 								</div>
 							{/if}
 						</div>
@@ -206,14 +206,14 @@
 
 					<!-- Loss Probabilities - Second Row -->
 					<div class="mb-8">
-						<h4 class="text-md font-medium text-gray-700 mb-4">{m.lossProbabilities()}</h4>
+						<h4 class="text-md font-medium text-surface-700-300 mb-4">{m.lossProbabilities()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
 							{#if metrics.prob_zero_loss !== undefined}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-green-600 mb-2">
 										{(metrics.prob_zero_loss * 100).toFixed(1)}%
 									</div>
-									<div class="text-sm text-gray-600">{m.zeroLoss()}</div>
+									<div class="text-sm text-surface-600-400">{m.zeroLoss()}</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_threshold !== undefined && data.data.loss_threshold}
@@ -223,7 +223,7 @@
 									<div class="text-2xl font-bold text-purple-600 mb-2">
 										{(metrics.prob_above_threshold * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">
+									<div class="text-sm text-surface-600-400">
 										{m.over()}
 										{data.data.loss_threshold_display ||
 											`${currency}${data.data.loss_threshold.toLocaleString()}`}
@@ -235,7 +235,7 @@
 									<div class="text-2xl font-bold text-yellow-600 mb-2">
 										{(metrics.prob_above_10k * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">{m.over()} {currency}10K</div>
+									<div class="text-sm text-surface-600-400">{m.over()} {currency}10K</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_100k !== undefined}
@@ -243,7 +243,7 @@
 									<div class="text-2xl font-bold text-orange-600 mb-2">
 										{(metrics.prob_above_100k * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">{m.over()} {currency}100K</div>
+									<div class="text-sm text-surface-600-400">{m.over()} {currency}100K</div>
 								</div>
 							{/if}
 							{#if metrics.prob_above_1M !== undefined}
@@ -251,7 +251,7 @@
 									<div class="text-2xl font-bold text-red-600 mb-2">
 										{(metrics.prob_above_1M * 100).toFixed(2)}%
 									</div>
-									<div class="text-sm text-gray-600">{m.over()} {currency}1M</div>
+									<div class="text-sm text-surface-600-400">{m.over()} {currency}1M</div>
 								</div>
 							{/if}
 						</div>
@@ -259,14 +259,14 @@
 
 					<!-- Probability-Based Losses - Third Row -->
 					<div>
-						<h4 class="text-md font-medium text-gray-700 mb-4">{m.scenarioBasedLosses()}</h4>
+						<h4 class="text-md font-medium text-surface-700-300 mb-4">{m.scenarioBasedLosses()}</h4>
 						<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
 							{#each scenarioLosses as { key, value, percentage }}
 								<div class="text-center">
 									<div class="text-2xl font-bold text-purple-600 mb-2">
 										{formatCurrency(value)}
 									</div>
-									<div class="text-sm text-gray-600">
+									<div class="text-sm text-surface-600-400">
 										{m.lossWithPercentageChance({ percentage })}
 									</div>
 								</div>
@@ -274,7 +274,7 @@
 						</div>
 					</div>
 				{:else}
-					<div class="text-center text-gray-500">
+					<div class="text-center text-surface-600-400">
 						{#if data.lec?.message}
 							<i class="fa-solid fa-calculator text-2xl mb-2"></i>
 							<p>{m.noMetricsAvailable()} {safeTranslate(data.lec.message)}</p>
@@ -297,7 +297,7 @@
 			if (e.target === e.currentTarget) showDistributionModal = false;
 		}}
 	>
-		<div class="bg-white rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
+		<div class="bg-surface-50-950 rounded-lg p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto">
 			<div class="flex justify-between items-center mb-4">
 				<h2 class="text-xl font-semibold">{m.impactDistribution()}</h2>
 				<div class="flex items-center space-x-4">
@@ -307,7 +307,7 @@
 							onclick={() => (xAxisScale = xAxisScale === 'linear' ? 'log' : 'linear')}
 							class="px-3 py-1 text-sm rounded border {xAxisScale === 'linear'
 								? 'bg-blue-100 border-blue-300 text-blue-700'
-								: 'bg-gray-100 border-gray-300'}"
+								: 'bg-surface-100-900 border-surface-300-700'}"
 						>
 							{m.linear()}
 						</button>
@@ -315,14 +315,14 @@
 							onclick={() => (xAxisScale = xAxisScale === 'log' ? 'linear' : 'log')}
 							class="px-3 py-1 text-sm rounded border {xAxisScale === 'log'
 								? 'bg-blue-100 border-blue-300 text-blue-700'
-								: 'bg-gray-100 border-gray-300'}"
+								: 'bg-surface-100-900 border-surface-300-700'}"
 						>
 							Log
 						</button>
 					</div>
 					<button
 						onclick={() => (showDistributionModal = false)}
-						class="text-gray-500 hover:text-gray-700 text-2xl"
+						class="text-surface-600-400 hover:text-surface-700-300 text-2xl"
 					>
 						×
 					</button>
@@ -343,7 +343,7 @@
 					/>
 				{/key}
 			</div>
-			<div class="text-sm text-gray-600 space-y-2">
+			<div class="text-sm text-surface-600-400 space-y-2">
 				<p class="text-center">
 					{m.lognormalDistributionWith90ConfidenceInterval({
 						lb: data.data.impact?.lb?.toLocaleString() ?? '--',

@@ -420,7 +420,7 @@
 				>
 					{#each widgets as widget (widget.id)}
 						<div
-							class="card bg-white dark:bg-surface-900 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
+							class="card bg-surface-50-950 shadow-md p-3 cursor-move relative group transition-shadow hover:shadow-lg {isDragging &&
 							draggedWidget?.id === widget.id
 								? 'opacity-50'
 								: ''}"
@@ -557,7 +557,7 @@
 			<!-- Row Controls -->
 			<div class="flex gap-2 mt-2">
 				<button
-					class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
+					class="flex-1 py-2 border-2 border-dashed border-surface-300 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
 					onclick={addRow}
 				>
 					<i class="fa-solid fa-plus"></i>
@@ -565,7 +565,7 @@
 				</button>
 				{#if canRemoveRow}
 					<button
-						class="flex-1 py-2 border-2 border-dashed border-surface-300 dark:border-surface-600 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
+						class="flex-1 py-2 border-2 border-dashed border-surface-300 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
 						onclick={removeRow}
 					>
 						<i class="fa-solid fa-minus"></i>

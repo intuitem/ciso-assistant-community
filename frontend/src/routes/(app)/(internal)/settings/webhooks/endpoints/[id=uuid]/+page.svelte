@@ -91,7 +91,7 @@
 
 		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
 		<div class="flex flex-row justify-between space-x-4">
-			<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
+			<button class="btn bg-surface-400-600 text-white font-semibold w-full" type="button" onclick={cancel}
 				>{m.cancel()}</button
 			>
 			<button

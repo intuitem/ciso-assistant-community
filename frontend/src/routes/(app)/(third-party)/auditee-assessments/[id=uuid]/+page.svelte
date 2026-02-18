@@ -306,11 +306,11 @@
 	<div
 		class="flex-shrink-0 transition-all duration-200 {tocCollapsed
 			? 'w-10'
-			: 'w-72'} sticky top-0 self-start max-h-screen overflow-y-auto border-r border-gray-200 bg-white"
+			: 'w-72'} sticky top-0 self-start max-h-screen overflow-y-auto border-r border-surface-200-800 bg-surface-50-950"
 	>
-		<div class="flex items-center justify-between p-2 border-b border-gray-100">
+		<div class="flex items-center justify-between p-2 border-b border-surface-100-900">
 			{#if !tocCollapsed}
-				<span class="text-sm font-semibold text-gray-700">{m.tableOfContents()}</span>
+				<span class="text-sm font-semibold text-surface-700-300">{m.tableOfContents()}</span>
 			{/if}
 			<button
 				class="btn btn-sm preset-tonal-surface"
@@ -326,7 +326,7 @@
 						class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 							{section.index === currentIndex
 							? 'bg-primary-100 text-primary-800 font-semibold'
-							: 'text-gray-600 hover:bg-gray-100'}"
+							: 'text-surface-600-400 hover:bg-surface-100-900'}"
 						onclick={() => goTo(section.index)}
 						title={section.title}
 					>
@@ -344,7 +344,7 @@
 	<!-- Main content -->
 	<div class="flex-1 flex flex-col space-y-4 p-4 min-w-0">
 		<!-- Header: audit name + progress -->
-		<div class="card bg-white shadow-sm px-5 py-3">
+		<div class="card bg-surface-50-950 shadow-sm px-5 py-3">
 			<div class="flex items-center justify-between mb-2">
 				<div class="flex items-center space-x-3">
 					<a
@@ -357,19 +357,19 @@
 					<div>
 						<h2 class="text-lg font-semibold">{complianceAssessment.name}</h2>
 						{#if complianceAssessment.framework?.name}
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-book mr-1"></i>{complianceAssessment.framework.name}
 							</p>
 						{/if}
 					</div>
 				</div>
-				<div class="text-sm text-gray-500">
+				<div class="text-sm text-surface-600-400">
 					{currentIndex + 1} / {totalAssessable}
 				</div>
 			</div>
 			<!-- ETA / Due date -->
 			{#if complianceAssessment.eta || complianceAssessment.due_date}
-				<div class="flex items-center space-x-4 text-sm text-gray-500">
+				<div class="flex items-center space-x-4 text-sm text-surface-600-400">
 					{#if complianceAssessment.eta}
 						<span
 							><i class="fa-solid fa-calendar mr-1"></i>{m.eta()}: {complianceAssessment.eta}</span
@@ -384,13 +384,13 @@
 			{/if}
 			<!-- Progress bar -->
 			<div class="flex items-center space-x-3">
-				<div class="flex-1 bg-gray-200 rounded-full h-2">
+				<div class="flex-1 bg-surface-200-800 rounded-full h-2">
 					<div
 						class="bg-indigo-500 h-2 rounded-full transition-all duration-300"
 						style="width: {progressPercent}%"
 					></div>
 				</div>
-				<span class="text-sm font-medium text-gray-600 whitespace-nowrap"
+				<span class="text-sm font-medium text-surface-600-400 whitespace-nowrap"
 					>{assessedCount}/{totalAssessable} ({progressPercent}%)</span
 				>
 			</div>
@@ -417,7 +417,7 @@
 				] ?? requirementAssessment}
 			<div
 				id="current-requirement"
-				class="card bg-white shadow-lg px-6 py-4 flex flex-col space-y-4"
+				class="card bg-surface-50-950 shadow-lg px-6 py-4 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
 				<div class="flex items-start justify-between">
@@ -426,7 +426,7 @@
 							{getTitle(requirementAssessment)}
 						</h3>
 						{#if requirement.ref_id && requirement.name}
-							<p class="text-sm text-gray-500 mt-0.5">{requirement.ref_id}</p>
+							<p class="text-sm text-surface-600-400 mt-0.5">{requirement.ref_id}</p>
 						{/if}
 					</div>
 				</div>
@@ -724,7 +724,7 @@
 			</div>
 
 			<!-- Previous / Next navigation -->
-			<div class="flex items-center justify-between card bg-white shadow-sm px-5 py-3">
+			<div class="flex items-center justify-between card bg-surface-50-950 shadow-sm px-5 py-3">
 				<button
 					class="btn preset-tonal-surface"
 					disabled={currentIndex === 0}
@@ -733,7 +733,7 @@
 					<i class="fa-solid fa-arrow-left mr-2"></i>
 					{m.previous()}
 				</button>
-				<span class="text-sm text-gray-500">
+				<span class="text-sm text-surface-600-400">
 					{currentIndex + 1} / {totalAssessable}
 				</span>
 				<button
@@ -746,9 +746,9 @@
 				</button>
 			</div>
 		{:else}
-			<div class="card bg-white shadow-lg p-8 text-center">
-				<i class="fa-solid fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
-				<p class="text-gray-500 text-lg">{m.noAuditAssignments()}</p>
+			<div class="card bg-surface-50-950 shadow-lg p-8 text-center">
+				<i class="fa-solid fa-clipboard-check text-4xl text-surface-300-700 mb-4"></i>
+				<p class="text-surface-600-400 text-lg">{m.noAuditAssignments()}</p>
 			</div>
 		{/if}
 	</div>

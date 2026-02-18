@@ -166,7 +166,7 @@
 		base="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
-		background="bg-white"
+		background="bg-surface-50-950"
 		padding="pb-2 px-4"
 	>
 		{#snippet headline()}

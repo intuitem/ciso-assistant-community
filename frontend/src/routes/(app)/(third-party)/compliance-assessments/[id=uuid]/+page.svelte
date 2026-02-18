@@ -506,7 +506,7 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-col card px-6 py-4 bg-white shadow-lg w-full">
+	<div class="flex flex-col card px-6 py-4 bg-surface-50-950 shadow-lg w-full">
 		<div class="flex flex-row justify-between">
 			<div class="flex flex-col space-y-2 whitespace-pre-line w-1/5 pr-1">
 				{#each Object.entries(data.compliance_assessment).filter(([key, value]) => {
@@ -519,7 +519,7 @@
 					{@const isUpdatableFramework = key === 'framework' && value.has_update}
 					<div class="flex flex-col">
 						<div
-							class="text-sm font-medium text-gray-800 capitalize-first"
+							class="text-sm font-medium text-surface-950-50 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
 							{#if isUpdatableFramework}
@@ -533,7 +533,7 @@
 						</div>
 						<ul class="text-sm">
 							<li
-								class="text-gray-600 list-none"
+								class="text-surface-600-400 list-none"
 								data-testid={key.replaceAll('_', '-') + '-field-value'}
 							>
 								{#if value}
@@ -675,7 +675,7 @@
 						onOpenChange={(e) => (exportPopupOpen = e.open)}
 						positioning={{ placement: 'bottom' }}
 						triggerBase="btn preset-filled-primary-500 w-full"
-						contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+						contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
 						zIndex="1000"
 					>
 						{#snippet trigger()}
@@ -685,46 +685,46 @@
 						{/snippet}
 						{#snippet content()}
 							<div>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.complianceAssessment()}</p>
 								{#if !page.data.user.is_third_party}
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asCSV()}</a
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asXLSX()}</a
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asWord()}</a
 									>
 								{/if}
 								<a
 									href="/compliance-assessments/{data.compliance_assessment.id}/export"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asZIP()}</a
 								>
 								{#if !page.data.user.is_third_party}
-									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/csv"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asCSV()}</a
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asXLSX()}</a
 									>
 									<a
 										href="/compliance-assessments/{data.compliance_assessment
 											.id}/action-plan/export/pdf"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
 										>... {m.asPDF()}</a
 									>
 								{/if}
@@ -761,7 +761,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
@@ -770,33 +770,33 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
 						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
 				{/if}
 				{#if !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
 						onclick={() => modalCreateForm()}
 						data-testid="apply-mapping-button"
 						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
 						onclick={() => modalCreateCloneForm()}
 						data-testid="clone-audit-button"
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 					</button>
 					{#if page.data?.featureflags?.validation_flows}
 						<button
-							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 							onclick={() => modalRequestValidation()}
 							data-testid="request-validation-button"
 						>
@@ -808,7 +808,7 @@
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
@@ -836,7 +836,7 @@
 
 				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
 						onclick={() => {
 							modalConfirmCreateSuggestedControls(
 								data.compliance_assessment.id,
@@ -862,7 +862,7 @@
 				{/if}
 				{#if has_threats && !page.data.user.is_third_party}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
 						onclick={openThreatsDialog}
 					>
 						<div class="flex items-center space-x-2">
@@ -876,7 +876,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/assignments`}
-						class="btn text-gray-100 bg-linear-to-r from-lime-500 to-green-600 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-lime-500 to-green-600 h-fit"
 						data-testid="assignments-button"
 					>
 						<i class="fa-solid fa-user-tag mr-2"></i>
@@ -886,7 +886,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="card px-6 py-4 bg-white flex flex-col shadow-lg">
+	<div class="card px-6 py-4 bg-surface-50-950 flex flex-col shadow-lg">
 		<div class="flex flex-row items-center font-semibold justify-between">
 			<div>
 				<span class="h4">{m.associatedRequirements()}</span>
@@ -901,7 +901,7 @@
 				onOpenChange={(e) => (filterPopupOpen = e.open)}
 				positioning={{ placement: 'bottom-start' }}
 				triggerBase="btn preset-filled-primary-500 w-fit"
-				contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+				contentBase="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200 z-10"
 				zIndex="1000"
 				autoFocus={false}
 				onPointerDownOutside={() => (filterPopupOpen = false)}
@@ -917,7 +917,7 @@
 				{#snippet content()}
 					<div>
 						<span class="text-sm font-bold">{m.result()}</span>
-						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+						<div class="flex flex-wrap gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
 							{#each Object.entries(complianceResultColorMap) as [result, color]}
 								<button
 									type="button"
@@ -939,7 +939,7 @@
 					{#if data.compliance_assessment.progress_status_enabled}
 						<div>
 							<span class="text-sm font-bold">{m.status()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
 								{#each Object.entries(complianceStatusColorMap) as [status, color]}
 									<button
 										type="button"
@@ -960,7 +960,7 @@
 					{#if data.compliance_assessment.extended_result_enabled}
 						<div>
 							<span class="text-sm font-bold">{m.extendedResult()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+							<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
 								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
 									<button
 										type="button"
@@ -996,7 +996,7 @@
 								{#if displayOnlyAssessableNodes}
 									<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
 								{:else}
-									<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+									<span class="font-bold text-xs text-surface-600-400">{m.no()}</span>
 								{/if}
 							</Switch>
 						</div>
@@ -1005,7 +1005,7 @@
 			</Popover>
 		</div>
 
-		<div class="flex items-center my-2 text-xs space-x-2 text-gray-500">
+		<div class="flex items-center my-2 text-xs space-x-2 text-surface-600-400">
 			<i class="fa-solid fa-diagram-project"></i>
 			<p>{m.mappingInferenceTip()}</p>
 		</div>
@@ -1023,7 +1023,7 @@
 {#if threatDialogOpen}
 	<dialog
 		bind:this={dialogElement}
-		class="card p-4 bg-white shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
+		class="card p-4 bg-surface-50-950 shadow-2xl w-2/3 max-h-3/4 overflow-auto rounded-lg"
 		onclose={() => (threatDialogOpen = false)}
 	>
 		<div class="flex justify-between items-center mb-4">

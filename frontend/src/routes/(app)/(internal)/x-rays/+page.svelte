@@ -95,10 +95,10 @@
 	};
 </script>
 
-<div class="card bg-white p-6 shadow-md rounded-lg flex flex-col space-y-6">
+<div class="card bg-surface-50-950 p-6 shadow-md rounded-lg flex flex-col space-y-6">
 	{#await data.stream.data}
 		<div class="flex flex-col items-center justify-center py-8">
-			<div class="text-sm text-gray-600 mb-4">{m.xRaysLoadingData()}</div>
+			<div class="text-sm text-surface-600-400 mb-4">{m.xRaysLoadingData()}</div>
 			<LoadingSpinner />
 		</div>
 	{:then rawData}
@@ -110,7 +110,7 @@
 			{@const compliance_assessments = Object.values(folder.compliance_assessments.objects)}
 			{@const risk_assessments = Object.values(folder.risk_assessments.objects)}
 			<div
-				class="border border-gray-200 rounded-lg p-6 bg-gray-50/50 hover:shadow-md transition-shadow"
+				class="border border-surface-200-800 rounded-lg p-6 bg-surface-50-950/50 hover:shadow-md transition-shadow"
 			>
 				<div class="flex items-center gap-3 mb-4">
 					<span class="text-3xl">💡</span>
@@ -224,9 +224,9 @@
 															<div class="space-y-1.5">
 																{#each error.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -274,9 +274,9 @@
 															<div class="space-y-1.5">
 																{#each warning.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -322,9 +322,9 @@
 															<div class="space-y-1.5">
 																{#each info.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -405,9 +405,9 @@
 															<div class="space-y-1.5">
 																{#each error.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -455,9 +455,9 @@
 															<div class="space-y-1.5">
 																{#each warning.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -503,9 +503,9 @@
 															<div class="space-y-1.5">
 																{#each info.findings as finding, idx}
 																	<div
-																		class="flex items-center gap-2 hover:bg-gray-100 rounded px-2 py-1 transition-colors"
+																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-gray-400 text-xs font-mono min-w-[20px]"
+																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}

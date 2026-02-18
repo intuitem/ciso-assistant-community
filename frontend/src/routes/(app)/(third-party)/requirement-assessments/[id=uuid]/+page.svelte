@@ -77,7 +77,7 @@
 	let group = $state(page.data.user.is_third_party ? 'evidence' : 'applied_controls');
 </script>
 
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex flex-row space-x-2 items-center">
 		<code class="code">{data.requirement.urn}</code>
 		<span
@@ -222,7 +222,7 @@
 							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"
+						<span class="text-xs text-surface-600-400"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
 						<ul class="list-disc ml-4">
@@ -333,7 +333,7 @@
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
+		<button class="btn bg-surface-400-600 text-white font-semibold w-full" type="button" onclick={cancel}
 			>{m.back()}</button
 		>
 	</div>

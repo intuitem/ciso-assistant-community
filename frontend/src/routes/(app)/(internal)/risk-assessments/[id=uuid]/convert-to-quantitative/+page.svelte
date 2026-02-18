@@ -176,7 +176,7 @@
 			class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
 			style="backdrop-filter: blur(4px);"
 		>
-			<div class="card bg-white p-8 shadow-xl max-w-md text-center space-y-4">
+			<div class="card bg-surface-50-950 p-8 shadow-xl max-w-md text-center space-y-4">
 				<ProgressRing
 					strokeWidth="16px"
 					meterStroke="stroke-primary-500"
@@ -184,24 +184,24 @@
 					classes="mx-auto"
 				/>
 				<h3 class="text-xl font-bold">{m.converting()}</h3>
-				<p class="text-gray-600">
+				<p class="text-surface-600-400">
 					{m.runningMonteCarloSimulations()}
 				</p>
 			</div>
 		</div>
 	{/if}
 
-	<div class="card bg-white p-6 m-4 shadow-sm">
+	<div class="card bg-surface-50-950 p-6 m-4 shadow-sm">
 		<div class="mb-6">
 			<h2 class="text-2xl font-bold">{m.convertToQuantitativeRisk()}</h2>
-			<p class="text-gray-600 mt-2">
+			<p class="text-surface-600-400 mt-2">
 				{m.convertToQuantitativeRiskDescription()}
 			</p>
 		</div>
 
 		<div class="space-y-6">
 			<!-- Risk Assessment Info -->
-			<div class="p-4 bg-gray-50 rounded-lg">
+			<div class="p-4 bg-surface-50-950 rounded-lg">
 				<h3 class="font-semibold mb-2">{m.sourceRiskAssessment()}</h3>
 				<p class="text-sm">
 					<span class="font-medium">{m.name()}:</span>
@@ -220,7 +220,7 @@
 			<!-- Probability Anchoring -->
 			<div class="space-y-4">
 				<h3 class="text-lg font-semibold">{m.probabilityAnchoring()}</h3>
-				<p class="text-sm text-gray-600">{m.probabilityAnchoringDescription()}</p>
+				<p class="text-sm text-surface-600-400">{m.probabilityAnchoringDescription()}</p>
 				<div
 					class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 flex items-start space-x-2"
 				>
@@ -233,7 +233,7 @@
 				<div class="space-y-3 max-w-2xl">
 					{#each probabilityOptions as prob, index}
 						<div
-							class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-200"
+							class="flex items-center space-x-4 p-3 bg-surface-50-950 rounded-lg border border-surface-200-800"
 						>
 							<div
 								class="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-700 rounded-full font-semibold text-sm"
@@ -242,7 +242,7 @@
 							</div>
 							{#if prob.hexcolor}
 								<div
-									class="w-6 h-6 rounded border border-gray-300"
+									class="w-6 h-6 rounded border border-surface-300-700"
 									style="background-color: {prob.hexcolor};"
 									title="{prob.name} color"
 								></div>
@@ -250,7 +250,7 @@
 							<label class="flex-1 font-medium text-sm" for="prob-{index}">
 								{prob.name}
 								{#if prob.description}
-									<span class="text-xs text-gray-500 block mt-1">{prob.description}</span>
+									<span class="text-xs text-surface-600-400 block mt-1">{prob.description}</span>
 								{/if}
 							</label>
 							<input
@@ -272,7 +272,7 @@
 			<!-- Impact Anchoring -->
 			<div class="space-y-4">
 				<h3 class="text-lg font-semibold">{m.impactAnchoring()}</h3>
-				<p class="text-sm text-gray-600">{m.impactAnchoringDescription()}</p>
+				<p class="text-sm text-surface-600-400">{m.impactAnchoringDescription()}</p>
 				<div
 					class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800 flex items-start space-x-2"
 				>
@@ -285,7 +285,7 @@
 				<div class="space-y-3 max-w-2xl">
 					{#each impactOptions as impact, index}
 						<div
-							class="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-200"
+							class="flex items-center space-x-4 p-3 bg-surface-50-950 rounded-lg border border-surface-200-800"
 						>
 							<div
 								class="flex items-center justify-center w-8 h-8 bg-green-100 text-green-700 rounded-full font-semibold text-sm"
@@ -294,7 +294,7 @@
 							</div>
 							{#if impact.hexcolor}
 								<div
-									class="w-6 h-6 rounded border border-gray-300"
+									class="w-6 h-6 rounded border border-surface-300-700"
 									style="background-color: {impact.hexcolor};"
 									title="{impact.name} color"
 								></div>
@@ -302,7 +302,7 @@
 							<label class="flex-1 font-medium text-sm" for="impact-{index}">
 								{impact.name}
 								{#if impact.description}
-									<span class="text-xs text-gray-500 block mt-1">{impact.description}</span>
+									<span class="text-xs text-surface-600-400 block mt-1">{impact.description}</span>
 								{/if}
 							</label>
 							<input
@@ -323,7 +323,7 @@
 			<!-- Loss Threshold -->
 			<div class="space-y-2">
 				<h3 class="text-lg font-semibold">{m.lossThreshold()}</h3>
-				<p class="text-sm text-gray-600">{m.lossThresholdDescription()}</p>
+				<p class="text-sm text-surface-600-400">{m.lossThresholdDescription()}</p>
 				<input
 					type="number"
 					step="1000"

@@ -29,7 +29,7 @@
 	};
 </script>
 
-<div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
+<div class="bg-surface-50-950 p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
 		{m.folder()}:
 		<a
@@ -49,17 +49,17 @@
 	</p>
 </div>
 
-<div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
+<div class="flex flex-col space-y-4 bg-surface-50-950 p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
 			<p class="text-xl font-extrabold">{m.actionPlan()}</p>
-			<p class="text-sm text-gray-500">{m.controlsFromQuantitativeRisk()}</p>
+			<p class="text-sm text-surface-600-400">{m.controlsFromQuantitativeRisk()}</p>
 		</div>
 		<div class="flex gap-2 ml-auto">
 			<Anchor
 				breadcrumbAction="push"
 				href={`/applied-controls/flash-mode?quantitative_risk_studies=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-				class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+				class="btn text-surface-100-900 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 			>
 		</div>

@@ -21,7 +21,7 @@
 			operations: 'bg-yellow-50 border-yellow-200 hover:border-yellow-400',
 			assets: 'bg-purple-50 border-purple-200 hover:border-purple-400'
 		};
-		return colors[category] || 'bg-gray-50 border-gray-200 hover:border-gray-400';
+		return colors[category] || 'bg-surface-50-950 border-surface-200-800 hover:border-surface-400-600';
 	}
 
 	function getCategoryIconColor(category: string): string {
@@ -32,7 +32,7 @@
 			operations: 'text-yellow-600',
 			assets: 'text-purple-600'
 		};
-		return colors[category] || 'text-gray-600';
+		return colors[category] || 'text-surface-600-400';
 	}
 
 	const baseClasses =
@@ -43,15 +43,15 @@
 	<a {href} class="{baseClasses} {getCategoryColor(category)}">
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
-				<div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
+				<div class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm">
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>
 			<div class="flex-1 min-w-0 flex flex-col">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
 					{title}
 				</h3>
-				<p class="text-sm text-gray-600 leading-relaxed mb-auto">
+				<p class="text-sm text-surface-600-400 leading-relaxed mb-auto">
 					{description}
 				</p>
 				<div class="mt-4">
@@ -65,7 +65,7 @@
 						<div class="flex flex-wrap gap-1 mt-3">
 							{#each tags as tag}
 								<span
-									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200"
+									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-100-900 text-surface-600-400 border border-surface-200-800"
 								>
 									{tag}
 								</span>
@@ -80,15 +80,15 @@
 	<button type="button" class="{baseClasses} {getCategoryColor(category)}" {onclick}>
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
-				<div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center shadow-sm">
+				<div class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm">
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>
 			<div class="flex-1 min-w-0 flex flex-col">
-				<h3 class="text-lg font-semibold text-gray-900 mb-2">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
 					{title}
 				</h3>
-				<p class="text-sm text-gray-600 leading-relaxed mb-auto">
+				<p class="text-sm text-surface-600-400 leading-relaxed mb-auto">
 					{description}
 				</p>
 				<div class="mt-4">
@@ -102,7 +102,7 @@
 						<div class="flex flex-wrap gap-1 mt-3">
 							{#each tags as tag}
 								<span
-									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200"
+									class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-surface-100-900 text-surface-600-400 border border-surface-200-800"
 								>
 									{tag}
 								</span>

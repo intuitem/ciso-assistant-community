@@ -81,7 +81,7 @@
 			>
 			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>
@@ -94,7 +94,7 @@
 	{#snippet widgets()}
 		{#key business_impact_analysis.validation_flows}
 			<div class="h-full flex flex-col space-y-4">
-				<div class="card p-4 bg-gray-50 shadow-xs grow">
+				<div class="card p-4 bg-surface-50-950 shadow-xs grow">
 					<div class="font-bold text-xl mb-4">{m.recoveryInsights()}</div>
 					<div class="flex items-center justify-center">
 						<ActivityTracker metrics={data.metrics} />

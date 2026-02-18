@@ -97,7 +97,7 @@
 </script>
 
 <div class="grid grid-cols-4 gap-4">
-	<div class="col-span-2 bg-white shadow-sm py-4 px-6 space-y-2">
+	<div class="col-span-2 bg-surface-50-950 shadow-sm py-4 px-6 space-y-2">
 		<div>
 			<h4 class="h4 font-bold">
 				<i class="fa-solid {typeLabels[selectedType].icon} mr-2"></i>Batch Creation
@@ -109,7 +109,7 @@
 
 		<!-- Type Selector -->
 		<div class="py-2">
-			<label class="block text-sm font-medium text-gray-900 mb-2"> Type * </label>
+			<label class="block text-sm font-medium text-surface-950-50 mb-2"> Type * </label>
 			<div class="flex gap-2">
 				<button
 					type="button"
@@ -156,7 +156,7 @@
 					<li>Indent with 2 spaces (tab works too) to create parent-child relationships</li>
 					<li>Click Create</li>
 				</ol>
-				<div class="mt-3 p-3 bg-gray-50 rounded text-xs">
+				<div class="mt-3 p-3 bg-surface-50-950 rounded text-xs">
 					<p class="font-semibold mb-1">Example:</p>
 					<pre class="font-mono">PR:Customer Database
   SP:User Data
@@ -170,7 +170,7 @@ Web Application</pre>
 					<li>Optionally prefix with ref_id (REF-001:Entity Name)</li>
 					<li>Click Create</li>
 				</ol>
-				<div class="mt-3 p-3 bg-gray-50 rounded text-xs">
+				<div class="mt-3 p-3 bg-surface-50-950 rounded text-xs">
 					<p class="font-semibold mb-1">Example:</p>
 					<pre class="font-mono">Vendor A
 REF-002:Vendor B
@@ -183,7 +183,7 @@ Subsidiary C</pre>
 					<li>Optionally prefix with ref_id (REF-001:Event Name)</li>
 					<li>Click Create</li>
 				</ol>
-				<div class="mt-3 p-3 bg-gray-50 rounded text-xs">
+				<div class="mt-3 p-3 bg-surface-50-950 rounded text-xs">
 					<p class="font-semibold mb-1">Example:</p>
 					<pre class="font-mono">Data breach
 REF-002:System outage
@@ -199,14 +199,14 @@ Loss of customer trust</pre>
 			<!-- Container selector (Folder or Study) -->
 			{#if selectedType === 'assets' || selectedType === 'entities'}
 				<div class="rounded-lg p-4 border-2 border-green-500">
-					<label for="folder" class="block text-sm font-medium text-gray-900">
+					<label for="folder" class="block text-sm font-medium text-surface-950-50">
 						Target Folder *
 					</label>
 					<select
 						id="folder"
 						name="folder"
 						bind:value={selectedFolderId}
-						class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+						class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 						required
 					>
 						<option value="">Select a folder</option>
@@ -217,14 +217,14 @@ Loss of customer trust</pre>
 				</div>
 			{:else if selectedType === 'feared-events'}
 				<div class="rounded-lg p-4 border-2 border-green-500">
-					<label for="study" class="block text-sm font-medium text-gray-900">
+					<label for="study" class="block text-sm font-medium text-surface-950-50">
 						EBIOS RM Study *
 					</label>
 					<select
 						id="study"
 						name="study"
 						bind:value={selectedStudyId}
-						class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm"
+						class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm"
 						required
 					>
 						<option value="">Select a study</option>
@@ -237,7 +237,7 @@ Loss of customer trust</pre>
 
 			<!-- Items textarea -->
 			<div class="rounded-lg p-4 border-2 border-pink-500">
-				<label for="items" class="block text-sm font-medium text-gray-900">
+				<label for="items" class="block text-sm font-medium text-surface-950-50">
 					{typeLabels[selectedType].plural} List *
 				</label>
 				<textarea
@@ -245,7 +245,7 @@ Loss of customer trust</pre>
 					name="items_text"
 					bind:value={itemsText}
 					onkeydown={handleTextareaKeydown}
-					class="mt-1.5 w-full rounded-lg border-gray-300 text-gray-700 sm:text-sm font-mono"
+					class="mt-1.5 w-full rounded-lg border-surface-300-700 text-surface-700-300 sm:text-sm font-mono"
 					rows="15"
 					required
 				></textarea>
@@ -298,13 +298,13 @@ Loss of customer trust</pre>
 										{item.name}
 									</a>
 									{#if item.ref_id}
-										<span class="text-gray-500 text-xs">({item.ref_id})</span>
+										<span class="text-surface-600-400 text-xs">({item.ref_id})</span>
 									{/if}
 									{#if item.type}
-										<span class="text-gray-500">({item.type})</span>
+										<span class="text-surface-600-400">({item.type})</span>
 									{/if}
 									{#if item.parent}
-										<span class="text-gray-400 text-xs">→ child of {item.parent}</span>
+										<span class="text-surface-400-600 text-xs">→ child of {item.parent}</span>
 									{/if}
 								</div>
 							{/each}
@@ -324,10 +324,10 @@ Loss of customer trust</pre>
 										{item.name}
 									</a>
 									{#if item.ref_id}
-										<span class="text-gray-500 text-xs">({item.ref_id})</span>
+										<span class="text-surface-600-400 text-xs">({item.ref_id})</span>
 									{/if}
 									{#if item.type}
-										<span class="text-gray-500">({item.type})</span>
+										<span class="text-surface-600-400">({item.type})</span>
 									{/if}
 								</div>
 							{/each}
@@ -341,7 +341,7 @@ Loss of customer trust</pre>
 					</div>
 					<div class="space-y-2">
 						{#each form.errors as error}
-							<div class="text-sm p-2 bg-gray-50 rounded">
+							<div class="text-sm p-2 bg-surface-50-950 rounded">
 								<span class="font-mono">{error.line}</span>
 								<span class="text-red-600">
 									- {JSON.stringify(error.errors || error.error)}
@@ -356,7 +356,7 @@ Loss of customer trust</pre>
 				</div>
 			{/if}
 		{:else}
-			<p class="text-sm text-gray-500">Results will appear here after submission</p>
+			<p class="text-sm text-surface-600-400">Results will appear here after submission</p>
 		{/if}
 	</div>
 </div>

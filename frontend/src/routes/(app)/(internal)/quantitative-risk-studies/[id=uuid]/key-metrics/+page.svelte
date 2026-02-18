@@ -292,8 +292,8 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between mb-8">
 		<div>
-			<h1 class="text-3xl font-bold text-gray-900">{m.keyMetrics()}</h1>
-			<p class="text-gray-600 mt-2">{m.advancedAnalysisMetrics()}</p>
+			<h1 class="text-3xl font-bold text-surface-950-50">{m.keyMetrics()}</h1>
+			<p class="text-surface-600-400 mt-2">{m.advancedAnalysisMetrics()}</p>
 		</div>
 		<button
 			class="btn variant-ghost-surface"
@@ -309,16 +309,16 @@
 		<div class="flex justify-center items-center h-64">
 			<div class="flex flex-col items-center space-y-4">
 				<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-				<p class="text-gray-600">{m.loadingKeyMetrics()}</p>
+				<p class="text-surface-600-400">{m.loadingKeyMetrics()}</p>
 			</div>
 		</div>
 	{:then keyMetricsData}
 		{#if keyMetricsData && keyMetricsData.scenarios}
 			<!-- Study Overview -->
-			<div class="bg-white rounded-lg p-6 shadow-sm mb-8">
+			<div class="bg-surface-50-950 rounded-lg p-6 shadow-sm mb-8">
 				<div class="flex justify-between items-center mb-4">
-					<h2 class="text-xl font-semibold text-gray-900">{m.studyOverview()}</h2>
-					<div class="text-sm text-gray-600">
+					<h2 class="text-xl font-semibold text-surface-950-50">{m.studyOverview()}</h2>
+					<div class="text-sm text-surface-600-400">
 						{keyMetricsData.currency} • {keyMetricsData.total_scenarios}
 						{m.scenarios()}
 					</div>
@@ -329,19 +329,19 @@
 						<div class="text-2xl font-bold text-blue-600">
 							{keyMetricsData.scenarios_with_current_data}
 						</div>
-						<div class="text-sm text-gray-600">{m.scenariosWithCurrentData()}</div>
+						<div class="text-sm text-surface-600-400">{m.scenariosWithCurrentData()}</div>
 					</div>
 					<div class="bg-green-50 rounded-lg p-4 text-center">
 						<div class="text-2xl font-bold text-green-600">
 							{keyMetricsData.scenarios_with_residual_data}
 						</div>
-						<div class="text-sm text-gray-600">{m.scenariosWithResidualData()}</div>
+						<div class="text-sm text-surface-600-400">{m.scenariosWithResidualData()}</div>
 					</div>
 					<div class="bg-purple-50 rounded-lg p-4 text-center">
 						<div class="text-2xl font-bold text-purple-600">
 							{keyMetricsData.loss_threshold_display}
 						</div>
-						<div class="text-sm text-gray-600">{m.lossThresholdLabel()}</div>
+						<div class="text-sm text-surface-600-400">{m.lossThresholdLabel()}</div>
 					</div>
 				</div>
 			</div>
@@ -400,17 +400,17 @@
 			{/if}
 
 			<!-- Scenarios Grid -->
-			<div class="bg-white rounded-lg shadow-sm overflow-hidden">
-				<div class="px-6 py-4 border-b border-gray-200">
+			<div class="bg-surface-50-950 rounded-lg shadow-sm overflow-hidden">
+				<div class="px-6 py-4 border-b border-surface-200-800">
 					<div class="flex justify-between items-start">
 						<div>
-							<h2 class="text-xl font-semibold text-gray-900">{m.riskScenariosAnalysis()}</h2>
-							<p class="text-sm text-gray-600 mt-1">
+							<h2 class="text-xl font-semibold text-surface-950-50">{m.riskScenariosAnalysis()}</h2>
+							<p class="text-sm text-surface-600-400 mt-1">
 								{m.detailedMetricsForEachRisk()}
 							</p>
 						</div>
 						<div class="flex items-center space-x-2">
-							<span class="text-sm text-gray-500">
+							<span class="text-sm text-surface-600-400">
 								{getVisibleColumnsCount()}
 								{m.columnsOfColumns()}
 								{allColumns.length}
@@ -428,12 +428,12 @@
 
 								{#if showColumnControls}
 									<div
-										class="absolute right-0 top-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
+										class="absolute right-0 top-full mt-2 bg-surface-50-950 border border-surface-200-800 rounded-lg shadow-lg p-4 z-10 min-w-[250px] column-controls-dropdown"
 									>
 										<div class="flex justify-between items-center mb-3">
-											<h4 class="font-medium text-gray-900">{m.showHideColumns()}</h4>
+											<h4 class="font-medium text-surface-950-50">{m.showHideColumns()}</h4>
 											<button
-												class="text-gray-400 hover:text-gray-600"
+												class="text-surface-400-600 hover:text-surface-600-400"
 												on:click={() => (showColumnControls = false)}
 											>
 												<i class="fa-solid fa-times"></i>
@@ -462,7 +462,7 @@
 												{@const isLastVisible =
 													getVisibleColumnsCount() === 1 && columnVisibility[column.id]}
 												<label
-													class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded {isLastVisible
+													class="flex items-center space-x-2 cursor-pointer hover:bg-surface-50-950 p-1 rounded {isLastVisible
 														? 'opacity-50'
 														: ''}"
 												>
@@ -471,11 +471,11 @@
 														checked={columnVisibility[column.id]}
 														on:change={(e) => toggleColumn(column.id, e.target?.checked || false)}
 														disabled={isLastVisible}
-														class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded disabled:opacity-50"
+														class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-surface-300-700 rounded disabled:opacity-50"
 													/>
-													<span class="text-sm text-gray-700">{column.displayName}</span>
+													<span class="text-sm text-surface-700-300">{column.displayName}</span>
 													{#if isLastVisible}
-														<span class="text-xs text-gray-400">({m.required()})</span>
+														<span class="text-xs text-surface-400-600">({m.required()})</span>
 													{/if}
 												</label>
 											{/each}
@@ -502,20 +502,20 @@
 			</div>
 
 			<!-- Legend and Notes -->
-			<div class="mt-8 bg-gray-50 rounded-lg p-6">
-				<h3 class="text-lg font-semibold text-gray-900 mb-4">{m.legendNotes()}</h3>
+			<div class="mt-8 bg-surface-50-950 rounded-lg p-6">
+				<h3 class="text-lg font-semibold text-surface-950-50 mb-4">{m.legendNotes()}</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">{m.metricsDefinitions()}</h4>
-						<ul class="text-sm text-gray-600 space-y-1">
+						<h4 class="font-medium text-surface-950-50 mb-2">{m.metricsDefinitions()}</h4>
+						<ul class="text-sm text-surface-600-400 space-y-1">
 							<li><strong>{m.ale()}:</strong> {m.annualLossExpectancy()}</li>
 							<li><strong>VaR:</strong> {m.valueAtRisk()}</li>
 							<li><strong>P(>Threshold):</strong> {m.probabilityExceedingThreshold()}</li>
 						</ul>
 					</div>
 					<div>
-						<h4 class="font-medium text-gray-900 mb-2">{m.riskLevels()}</h4>
-						<ul class="text-sm text-gray-600 space-y-1">
+						<h4 class="font-medium text-surface-950-50 mb-2">{m.riskLevels()}</h4>
+						<ul class="text-sm text-surface-600-400 space-y-1">
 							<li><strong>{m.current()}:</strong> {m.currentRiskWithExistingControls()}</li>
 							<li><strong>{m.residual()}:</strong> {m.residualRiskAfterTreatment()}</li>
 						</ul>
@@ -524,11 +524,11 @@
 			</div>
 		{:else}
 			<!-- Empty State -->
-			<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+			<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 				<div class="flex flex-col items-center space-y-4">
-					<i class="fa-solid fa-chart-simple text-4xl text-gray-400"></i>
-					<h3 class="text-lg font-semibold text-gray-600">{m.noKeyMetricsAvailable()}</h3>
-					<p class="text-gray-500 max-w-md">
+					<i class="fa-solid fa-chart-simple text-4xl text-surface-400-600"></i>
+					<h3 class="text-lg font-semibold text-surface-600-400">{m.noKeyMetricsAvailable()}</h3>
+					<p class="text-surface-600-400 max-w-md">
 						{m.noSimulationDataFound()}
 					</p>
 				</div>
@@ -536,11 +536,11 @@
 		{/if}
 	{:catch error}
 		<!-- Error State -->
-		<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+		<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 			<div class="flex flex-col items-center space-y-4">
 				<i class="fa-solid fa-triangle-exclamation text-4xl text-red-400"></i>
-				<h3 class="text-lg font-semibold text-gray-600">{m.failedToLoadKeyMetrics()}</h3>
-				<p class="text-gray-500 max-w-md">
+				<h3 class="text-lg font-semibold text-surface-600-400">{m.failedToLoadKeyMetrics()}</h3>
+				<p class="text-surface-600-400 max-w-md">
 					{m.thereWasAnErrorLoading()}
 				</p>
 			</div>

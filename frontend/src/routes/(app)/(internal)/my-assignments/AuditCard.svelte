@@ -12,7 +12,7 @@
 		in_review: 'text-white bg-blue-500',
 		done: 'text-white bg-cyan-600',
 		deprecated: 'text-white bg-red-400',
-		null: 'bg-gray-200'
+		null: 'bg-surface-200-800'
 	};
 </script>
 

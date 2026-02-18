@@ -317,7 +317,7 @@
 		</div>
 	</div>
 {/if}
-<div class="card space-y-2 p-4 bg-white shadow-sm">
+<div class="card space-y-2 p-4 bg-surface-50-950 shadow-sm">
 	<div class="flex justify-between">
 		<div class="flex">
 			<span class="code left h-min">{data.requirement.urn}</span>
@@ -436,7 +436,7 @@
 							<i class="fa-solid fa-link"></i>
 							{m.mappingInference()}
 						</p>
-						<span class="text-xs text-gray-500"
+						<span class="text-xs text-surface-600-400"
 							><i class="fa-solid fa-circle-info"></i> {m.mappingInferenceHelpText()}</span
 						>
 						<ul class="list-disc ml-4">
@@ -495,7 +495,7 @@
 			{...rest}
 		>
 			{#snippet children({ form, data })}
-				<div class="card shadow-lg bg-white">
+				<div class="card shadow-lg bg-surface-50-950">
 					<Tabs
 						value={group}
 						onValueChange={(e) => {
@@ -519,7 +519,7 @@
 									<span class="flex flex-row justify-end items-center space-x-2">
 										{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 											<button
-												class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+												class="btn text-surface-100-900 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 												type="button"
 												onclick={() => {
 													modalConfirmCreateSuggestedControls(
@@ -758,7 +758,7 @@
 					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
 				>
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button
 					>

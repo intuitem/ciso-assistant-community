@@ -59,7 +59,7 @@
 </script>
 
 <div class="p-5 {accent_color}">
-	<div class="rounded-lg bg-white p-4 flex flex-col justify-between h-full">
+	<div class="rounded-lg bg-surface-50-950 p-4 flex flex-col justify-between h-full">
 		<div class="flex justify-between mb-2">
 			<div class="font-semibold">{title}</div>
 			<div class="text-xl" role="status" title={safeTranslate(workshopStatus())}>
@@ -80,7 +80,7 @@
 		{:else if meta}
 			<div class="flex mx-auto w-full px-6">
 				<div>
-					<ol class="relative text-gray-500 border-s border-gray-200">
+					<ol class="relative text-surface-600-400 border-s border-surface-200-800">
 						{#each steps as step, i}
 							<li class="flex flex-row justify-between items-start gap-8 mb-10 ms-6">
 								{#if createRiskAnalysis && i === 0}
@@ -122,7 +122,7 @@
 										zIndex="100"
 									>
 										{#snippet trigger()}
-											<div class="text-gray-300 *:pointer-events-none">
+											<div class="text-surface-300-700 *:pointer-events-none">
 												<span
 													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
 												>
@@ -141,14 +141,14 @@
 											</div>
 										{/snippet}
 										{#snippet content()}
-											<div class="transition card bg-white shadow-lg p-4 z-20 duration-300">
+											<div class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300">
 												<p
 													data-testid="activity-tooltip"
-													class="border-l-4 {borderColor} text-gray-500 p-2"
+													class="border-l-4 {borderColor} text-surface-600-400 p-2"
 												>
 													{step.tooltip}
 												</p>
-												<div class="arrow bg-white"></div>
+												<div class="arrow bg-surface-50-950"></div>
 											</div>
 										{/snippet}
 									</Tooltip>
@@ -169,7 +169,7 @@
 										{/snippet}
 										{#snippet content()}
 											<div
-												class="card whitespace-nowrap bg-white border border-gray-300 rounded-md py-2 w-fit shadow-lg space-y-1"
+												class="card whitespace-nowrap bg-surface-50-950 border border-surface-300-700 rounded-md py-2 w-fit shadow-lg space-y-1"
 												data-testid="sidebar-more-panel"
 											>
 												<form

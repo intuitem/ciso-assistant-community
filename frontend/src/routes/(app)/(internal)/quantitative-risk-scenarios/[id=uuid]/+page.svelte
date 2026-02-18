@@ -194,17 +194,17 @@
 		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
 			{#if data.lec?.curves?.length > 0}
 				<!-- Multi-Curve LEC Chart -->
-				<div class="bg-white rounded-lg p-4 shadow-sm w-full">
-					<h5 class="text-lg font-semibold text-gray-700 mb-4">{m.compareHypotheses()}</h5>
+				<div class="bg-surface-50-950 rounded-lg p-4 shadow-sm w-full">
+					<h5 class="text-lg font-semibold text-surface-700-300 mb-4">{m.compareHypotheses()}</h5>
 					<div id="combined-lec-chart" style="height: 400px; width: 100%;"></div>
 				</div>
 			{:else}
 				<!-- Empty State -->
-				<div class="bg-white rounded-lg p-8 shadow-sm text-center">
+				<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 					<div class="flex flex-col items-center space-y-4">
-						<i class="fa-solid fa-chart-area text-4xl text-gray-400"></i>
-						<h5 class="text-lg font-semibold text-gray-600">{m.lossExceedanceCurves()}</h5>
-						<p class="text-gray-500">
+						<i class="fa-solid fa-chart-area text-4xl text-surface-400-600"></i>
+						<h5 class="text-lg font-semibold text-surface-600-400">{m.lossExceedanceCurves()}</h5>
+						<p class="text-surface-600-400">
 							{m.noCurveDataAvailable()}
 						</p>
 					</div>

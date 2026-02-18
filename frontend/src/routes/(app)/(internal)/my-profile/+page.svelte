@@ -40,7 +40,7 @@
 	let { data }: Props = $props();
 </script>
 
-<div class="flex flex-col bg-white card shadow-lg p-4 space-y-4">
+<div class="flex flex-col bg-surface-50-950 card shadow-lg p-4 space-y-4">
 	<div class="flex flex-row items-center justify-between">
 		<h1 class="text-xl font-semibold">
 			{data.currentUser.first_name}
@@ -65,7 +65,7 @@
 		</div>
 	</div>
 	<div class="flex flex-row w-full space-x-2">
-		<div class="flex flex-col w-1/2 card bg-white p-2 space-y-4">
+		<div class="flex flex-col w-1/2 card bg-surface-50-950 p-2 space-y-4">
 			{#each Object.entries(filterUserData()) as [label, value]}
 				<div class="flex flex-col">
 					<p class="font-semibold text-sm">{safeTranslate(label)}</p>
@@ -73,7 +73,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="flex flex-col w-1/2 card bg-white p-2 space-y-4">
+		<div class="flex flex-col w-1/2 card bg-surface-50-950 p-2 space-y-4">
 			<h2 class="text-xl mb-1 font-semibold">{m.myUserGroups()}</h2>
 			<div class="overflow-auto space-y-2">
 				{#each data.currentUser.user_groups as group}

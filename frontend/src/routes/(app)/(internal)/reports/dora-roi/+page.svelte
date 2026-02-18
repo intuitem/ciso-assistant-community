@@ -32,7 +32,7 @@
 			case 'ok':
 				return 'text-green-600 bg-green-50 border-green-200';
 			default:
-				return 'text-gray-600 bg-gray-50 border-gray-200';
+				return 'text-surface-600-400 bg-surface-50-950 border-surface-200-800';
 		}
 	}
 
@@ -61,8 +61,8 @@
 	<!-- Header -->
 	<div class="flex items-center justify-between">
 		<div>
-			<h1 class="text-3xl font-bold text-gray-900">DORA Register of Information</h1>
-			<p class="mt-2 text-gray-600">Validation check before generating the report</p>
+			<h1 class="text-3xl font-bold text-surface-950-50">DORA Register of Information</h1>
+			<p class="mt-2 text-surface-600-400">Validation check before generating the report</p>
 		</div>
 		<a href="/reports" class="text-blue-600 hover:text-blue-800 flex items-center gap-2">
 			<i class="fa-solid fa-arrow-left"></i>
@@ -71,8 +71,8 @@
 	</div>
 
 	<!-- Summary Card -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-		<h2 class="text-xl font-semibold text-gray-900 mb-4">Validation Summary</h2>
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Summary</h2>
 		<div class="grid grid-cols-3 gap-4">
 			<div class="text-center p-4 rounded-lg bg-red-50 border border-red-200">
 				<div class="text-3xl font-bold text-red-600">{lintResults.summary.errors}</div>
@@ -90,8 +90,8 @@
 	</div>
 
 	<!-- Validation Results -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-		<h2 class="text-xl font-semibold text-gray-900 mb-4">Validation Details</h2>
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
+		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Details</h2>
 
 		<div class="space-y-3">
 			{#if errors.length > 0}
@@ -181,7 +181,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-800 bg-gray-50 hover:bg-gray-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-surface-600-400 hover:text-surface-950-50 bg-surface-50-950 hover:bg-surface-100-900 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-eye"></i>
 									View
@@ -195,11 +195,11 @@
 	</div>
 
 	<!-- Action Buttons -->
-	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
 		<div class="flex items-center justify-between">
 			<div>
 				{#if canGenerate}
-					<p class="text-sm text-gray-600">
+					<p class="text-sm text-surface-600-400">
 						All validation checks passed. You can now generate the DORA ROI report.
 					</p>
 				{:else}
@@ -211,7 +211,7 @@
 				disabled={!canGenerate}
 				class="px-6 py-3 rounded-lg font-medium transition-colors {canGenerate
 					? 'bg-blue-600 text-white hover:bg-blue-700'
-					: 'bg-gray-300 text-gray-500 cursor-not-allowed'}"
+					: 'bg-surface-300-700 text-surface-600-400 cursor-not-allowed'}"
 			>
 				<i class="fa-solid fa-download mr-2"></i>
 				Generate Report

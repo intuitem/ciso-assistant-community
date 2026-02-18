@@ -378,7 +378,7 @@
 		{#if hasAssessableChildren}
 			<div class="flex max-w-96 grow items-center space-x-2">
 				<div
-					class="flex max-w-96 grow bg-gray-200 rounded-full overflow-hidden h-4 shrink self-center"
+					class="flex max-w-96 grow bg-surface-200-800 rounded-full overflow-hidden h-4 shrink self-center"
 				>
 					{#each orderedResultPercentages as rp}
 						<div

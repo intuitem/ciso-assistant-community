@@ -14,11 +14,11 @@
 </script>
 
 <div class="flex w-full h-full items-center justify-center">
-	<div class="flex flex-col bg-white p-12 w-2/5 rounded-lg shadow-lg items-center space-y-4">
+	<div class="flex flex-col bg-surface-50-950 p-12 w-2/5 rounded-lg shadow-lg items-center space-y-4">
 		<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 			<i class="fa-solid fa-key"></i>
 		</div>
-		<p class="text-gray-600 text-sm text-center">
+		<p class="text-surface-600-400 text-sm text-center">
 			{m.changePasswordText()}.
 		</p>
 		<!-- SuperForm with dataType 'form' -->
@@ -40,7 +40,7 @@
 					/>
 					<div class="flex flex-row space-x-2 pt-3">
 						<a
-							class="btn bg-gray-400 text-white font-semibold w-full"
+							class="btn bg-surface-400-600 text-white font-semibold w-full"
 							href="/my-profile"
 							data-testid="cancel-button"
 							type="button"

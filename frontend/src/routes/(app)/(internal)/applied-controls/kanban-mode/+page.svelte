@@ -13,7 +13,7 @@
 
 	// Status columns configuration
 	const statusColumns = [
-		{ id: '--', label: '--', color: 'bg-gray-100', borderColor: 'border-gray-300' },
+		{ id: '--', label: '--', color: 'bg-surface-100-900', borderColor: 'border-surface-300-700' },
 		{ id: 'to_do', label: m.toDo(), color: 'bg-blue-50', borderColor: 'border-blue-300' },
 		{
 			id: 'in_progress',
@@ -39,26 +39,26 @@
 
 	// Priority color helper (API returns "P1", "P2", etc.)
 	function getPriorityColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'bg-gray-100 text-gray-600';
+		if (!priority || priority === '--') return 'bg-surface-100-900 text-surface-600-400';
 		const colorMap: Record<string, string> = {
 			P1: 'bg-red-100 text-red-800',
 			P2: 'bg-orange-100 text-orange-800',
 			P3: 'bg-yellow-100 text-yellow-800',
 			P4: 'bg-green-100 text-green-800'
 		};
-		return colorMap[priority] || 'bg-gray-100 text-gray-600';
+		return colorMap[priority] || 'bg-surface-100-900 text-surface-600-400';
 	}
 
 	// Priority flag color helper
 	function getPriorityFlagColor(priority: string | null): string {
-		if (!priority || priority === '--') return 'text-gray-400';
+		if (!priority || priority === '--') return 'text-surface-400-600';
 		const colorMap: Record<string, string> = {
 			P1: 'text-red-500',
 			P2: 'text-orange-500',
 			P3: 'text-yellow-500',
 			P4: 'text-green-500'
 		};
-		return colorMap[priority] || 'text-gray-400';
+		return colorMap[priority] || 'text-surface-400-600';
 	}
 
 	// Effort display helper
@@ -197,7 +197,7 @@
 	const folders = $derived(getUniqueFolders());
 </script>
 
-<div class="flex flex-col h-full min-h-screen bg-gray-50 p-4">
+<div class="flex flex-col h-full min-h-screen bg-surface-50-950 p-4">
 	<!-- Header -->
 	<div class="flex justify-between items-center mb-4">
 		<a
@@ -208,7 +208,7 @@
 			<span>{data.backLabel}</span>
 		</a>
 		<div class="flex items-center space-x-4">
-			<span class="text-sm text-gray-600">
+			<span class="text-sm text-surface-600-400">
 				{appliedControls.length}
 				{m.appliedControls().toLowerCase()}
 			</span>
@@ -219,10 +219,10 @@
 	<div class="flex-1 overflow-auto">
 		<div class="min-w-max">
 			<!-- Column Headers -->
-			<div class="flex sticky top-0 z-10 bg-gray-50 pb-2">
+			<div class="flex sticky top-0 z-10 bg-surface-50-950 pb-2">
 				<div class="w-48 flex-shrink-0 px-2">
 					<!-- Folder column header -->
-					<div class="h-10 flex items-center font-semibold text-gray-700">
+					<div class="h-10 flex items-center font-semibold text-surface-700-300">
 						<i class="fa-solid fa-folder mr-2"></i>
 						{m.domain()}
 					</div>
@@ -240,11 +240,11 @@
 
 			<!-- Swimlanes (Folders) -->
 			{#each folders as folder}
-				<div class="flex mb-2 border-b border-gray-200 pb-2">
+				<div class="flex mb-2 border-b border-surface-200-800 pb-2">
 					<!-- Folder Name -->
 					<div class="w-48 flex-shrink-0 px-2">
 						<div
-							class="h-full min-h-24 flex items-start pt-2 font-medium text-gray-700 sticky left-0 bg-gray-50"
+							class="h-full min-h-24 flex items-start pt-2 font-medium text-surface-700-300 sticky left-0 bg-surface-50-950"
 						>
 							<span class="truncate" title={folder.str || folder.name}>
 								{folder.str || folder.name}
@@ -270,14 +270,14 @@
 									: ''}"
 							>
 								{#if controls.length === 0}
-									<div class="text-xs text-gray-400 text-center py-4 italic">
+									<div class="text-xs text-surface-400-600 text-center py-4 italic">
 										{m.noControlsInCategory()}
 									</div>
 								{:else}
 									<div class="space-y-2">
 										{#each controls as control (control.id)}
 											<div
-												class="bg-white rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-shadow border border-gray-200 {draggedControl?.id ===
+												class="bg-surface-50-950 rounded-lg shadow-sm p-3 cursor-move hover:shadow-md transition-shadow border border-surface-200-800 {draggedControl?.id ===
 												control.id
 													? 'opacity-50'
 													: ''}"
@@ -291,7 +291,7 @@
 												<div class="mb-2">
 													<a
 														href="/applied-controls/{control.id}"
-														class="font-medium text-sm text-gray-900 hover:text-primary-600 line-clamp-2"
+														class="font-medium text-sm text-surface-950-50 hover:text-primary-600 line-clamp-2"
 														title={control.name}
 													>
 														{control.name || 'Unnamed Control'}
@@ -299,7 +299,7 @@
 												</div>
 
 												<!-- Card Details -->
-												<div class="space-y-1 text-xs text-gray-600">
+												<div class="space-y-1 text-xs text-surface-600-400">
 													<!-- Progress Bar -->
 													{#if control.progress_field !== null && control.progress_field !== undefined}
 														<div class="flex flex-col space-y-1">
@@ -307,7 +307,7 @@
 																<span>{m.progress()}</span>
 																<span class="font-medium">{control.progress_field}%</span>
 															</div>
-															<div class="w-full bg-gray-200 rounded-full h-2">
+															<div class="w-full bg-surface-200-800 rounded-full h-2">
 																<div
 																	class="h-2 rounded-full transition-all {control.progress_field >=
 																	100
@@ -387,9 +387,9 @@
 
 			<!-- Empty state if no folders -->
 			{#if folders.length === 0}
-				<div class="flex items-center justify-center py-12 text-gray-500">
+				<div class="flex items-center justify-center py-12 text-surface-600-400">
 					<div class="text-center">
-						<i class="fa-solid fa-folder-open text-4xl mb-4 text-gray-300"></i>
+						<i class="fa-solid fa-folder-open text-4xl mb-4 text-surface-300-700"></i>
 						<p>{m.noControlsInCategory()}</p>
 					</div>
 				</div>

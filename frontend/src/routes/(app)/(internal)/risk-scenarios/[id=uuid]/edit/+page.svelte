@@ -125,11 +125,11 @@
 		action="?/updateRiskScenario&next={next}"
 	>
 		<div class="flex flex-row space-x-2">
-			<div class="card p-2 bg-white shadow-lg w-1/2">
+			<div class="card p-2 bg-surface-50-950 shadow-lg w-1/2">
 				<div class="flex justify-between p-2">
 					{#if data.scenario.risk_assessment.perimeter}
 						<div>
-							<p class="text-sm font-semibold text-gray-400">{m.perimeter()}</p>
+							<p class="text-sm font-semibold text-surface-400-600">{m.perimeter()}</p>
 							<Anchor
 								class="anchor text-sm font-semibold"
 								href="/perimeters/{data.scenario.perimeter.id}"
@@ -138,7 +138,7 @@
 						</div>
 					{/if}
 					<div>
-						<p class="text-sm font-semibold text-gray-400">{m.riskAssessment()}</p>
+						<p class="text-sm font-semibold text-surface-400-600">{m.riskAssessment()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-assessments/{data.scenario.risk_assessment.id}"
@@ -146,7 +146,7 @@
 						>
 					</div>
 					<div>
-						<p class="text-sm font-semibold text-gray-400">{m.riskMatrix()}</p>
+						<p class="text-sm font-semibold text-surface-400-600">{m.riskMatrix()}</p>
 						<Anchor
 							class="anchor text-sm font-semibold"
 							href="/risk-matrices/{data.scenario.risk_matrix.id}"
@@ -156,7 +156,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-1/2">
 				<div class="flex flex-row justify-between items-stretch">
 					<div class=" px-2 w-2/3">
 						<AutocompleteSelect
@@ -187,14 +187,14 @@
 		</div>
 
 		<div class="flex flex-row space-x-2 min-h-72">
-			<div class="card px-4 py-2 bg-white shadow-lg space-y-4 w-5/12">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-4 w-5/12">
 				<span class="flex flex-row space-x-2">
 					<TextField form={_form} field="ref_id" label={m.refId()} />
 					<TextField form={_form} field="name" label={m.name()} classesContainer="w-full" />
 				</span>
 				<MarkdownField form={_form} field="description" rows={6} label={m.description()} />
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-7/12 max-h-96 overflow-y-auto">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-7/12 max-h-96 overflow-y-auto">
 				<AutocompleteSelect
 					multiple
 					form={_form}
@@ -244,7 +244,7 @@
 		</div>
 
 		<div class="flex flex-row space-x-2">
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-1/2">
 				<AutocompleteSelect
 					form={_form}
 					nullable
@@ -255,7 +255,7 @@
 					helpText={m.riskOriginHelpText()}
 				/>
 			</div>
-			<div class="card px-4 py-2 bg-white shadow-lg w-1/2">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-1/2">
 				<AutocompleteSelect
 					form={_form}
 					multiple
@@ -276,7 +276,7 @@
 		<input type="hidden" name="urlmodel" value={data.model.urlModel} />
 
 		{#if page.data?.featureflags?.inherent_risk}
-			<div class="card px-4 py-2 bg-white shadow-lg">
+			<div class="card px-4 py-2 bg-surface-50-950 shadow-lg">
 				<h4 class="h4 font-black mb-2">{m.inherentRisk()}</h4>
 				<div class="flex flex-row space-x-8 justify-between">
 					<div class="flex w-1/2">
@@ -318,7 +318,7 @@
 			</div>
 		{/if}
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg">
 			<h4 class="h4 font-black mb-2">{m.currentRisk()}</h4>
 			<div class="flex flex-row space-x-8 justify-between">
 				<div class="w-1/2">
@@ -340,7 +340,7 @@
 						<div class="flex items-center justify-center">
 							<div class="">
 								<button
-									class="btn bg-gray-300 h-10 w-10"
+									class="btn bg-surface-300-700 h-10 w-10"
 									onclick={(_) => modalMeasureCreateForm('existing_applied_controls')}
 									type="button"><i class="fa-solid fa-plus text-sm"></i></button
 								>
@@ -392,7 +392,7 @@
 			</div>
 		</div>
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg">
 			<h4 class="h4 font-black mb-2">{m.residualRisk()}</h4>
 			<div class="flex flex-row space-x-8">
 				<div class="w-1/2">
@@ -414,7 +414,7 @@
 						<div class="flex items-center justify-center">
 							<div class="">
 								<button
-									class="btn bg-gray-300 h-10 w-10"
+									class="btn bg-surface-300-700 h-10 w-10"
 									onclick={(_) => modalMeasureCreateForm('applied_controls')}
 									type="button"><i class="fa-solid fa-plus text-sm"></i></button
 								>
@@ -460,7 +460,7 @@
 			</div>
 		</div>
 
-		<div class="card px-4 py-2 bg-white shadow-lg">
+		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg">
 			<div class="flex space-x-4 mb-1">
 				<div class="w-1/2">
 					<AutocompleteSelect
@@ -501,7 +501,7 @@
 			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
 		>
 			<button
-				class="btn bg-gray-400 text-white font-semibold w-full"
+				class="btn bg-surface-400-600 text-white font-semibold w-full"
 				data-testid="cancel-button"
 				type="button"
 				onclick={cancel}>{m.cancel()}</button

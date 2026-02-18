@@ -60,9 +60,9 @@
 					/>
 
 					<div class="flex items-center justify-center w-full space-x-2">
-						<hr class="w-64 items-center bg-gray-200 border-0" />
-						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-						<hr class="w-64 items-center bg-gray-200 border-0" />
+						<hr class="w-64 items-center bg-surface-200-800 border-0" />
+						<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
+						<hr class="w-64 items-center bg-surface-200-800 border-0" />
 					</div>
 
 					<div>

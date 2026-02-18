@@ -220,7 +220,7 @@
 				</div>
 			</div>
 		{/if}
-		<div class="card bg-white p-4 m-4 shadow-sm flex space-x-2 relative">
+		<div class="card bg-surface-50-950 p-4 m-4 shadow-sm flex space-x-2 relative">
 			<div class="container w-1/3">
 				<div id="name" class="text-lg font-semibold" data-testid="name-field-value">
 					{#if risk_assessment.perimeter}
@@ -316,29 +316,29 @@
 							</span>
 						{/snippet}
 						{#snippet content()}
-							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
+							<div class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1">
+								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asCSV()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
 									>... {m.asXLSX()}</a
 								>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+									class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
 									>... {m.asXLSX()}</a
 								>
 							</div>
@@ -364,7 +364,7 @@
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
-					class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+					class="btn text-surface-100-900 bg-linear-to-l from-sky-500 to-green-600"
 					onclick={(_) => modalDuplicateForm()}
 					data-testid="duplicate-button"
 				>
@@ -373,7 +373,7 @@
 				>
 				{#if !risk_assessment?.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-surface-100-900 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						onclick={async () => {
 							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
 						}}
@@ -396,14 +396,14 @@
 				<Anchor
 					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
 					label={m.convertToQuantitative()}
-					class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500"
+					class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-pink-500"
 				>
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
 				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500"
+						class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500"
 						onclick={() => modalRequestValidation()}
 						data-testid="request-validation-button"
 					>
@@ -415,8 +415,8 @@
 		</div>
 	</div>
 	<!--Risk risk_assessment-->
-	<div class="card m-4 p-4 shadow-sm bg-white">
-		<div class="bg-white">
+	<div class="card m-4 p-4 shadow-sm bg-surface-50-950">
+		<div class="bg-surface-50-950">
 			<div class="flex flex-row justify-between">
 				<h4 class="text-lg font-semibold lowercase capitalize-first my-auto">
 					{m.associatedRiskScenarios()}
@@ -450,7 +450,7 @@
 		</div>
 	</div>
 	<!--Matrix view-->
-	<div class="card m-4 p-4 shadow-sm bg-white page-break">
+	<div class="card m-4 p-4 shadow-sm bg-surface-50-950 page-break">
 		<div class="text-lg font-semibold">{m.riskMatrixView()}</div>
 		<div class="flex flex-wrap justify-between gap-8 [&>div]:basis-xl [&>div]:grow">
 			{#if page.data?.featureflags?.inherent_risk}
