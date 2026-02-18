@@ -28,7 +28,7 @@ export const complianceResultColorMap: { [key: string]: string } = {
 };
 
 export const complianceResultTailwindColorMap: { [key: string]: string } = {
-	not_assessed: 'bg-gray-300',
+	not_assessed: 'bg-surface-300-700',
 	partially_compliant: 'bg-yellow-300',
 	non_compliant: 'bg-red-300',
 	compliant: 'bg-green-300',
@@ -43,7 +43,7 @@ export const complianceStatusColorMap: { [key: string]: string } = {
 };
 
 export const complianceStatusTailwindColorMap = {
-	to_do: 'bg-gray-400',
+	to_do: 'bg-surface-400-600',
 	in_progress: 'bg-amber-500',
 	in_review: 'bg-blue-500',
 	done: 'bg-green-300'

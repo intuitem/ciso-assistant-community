@@ -2581,15 +2581,15 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
 					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
 					active: { text: 'active', cssClasses: 'badge bg-green-200' },
-					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-surface-300-700' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
-					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+					'--': { text: 'undefined', cssClasses: 'badge bg-surface-300-700' }
 				},
 				priority: {
 					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
 					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
 					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
-					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-surface-600-400' },
 					'--': { text: '', cssClasses: '' }
 				}
 			}
@@ -2650,15 +2650,15 @@ export const FIELD_COLORED_TAG_MAP: FieldColoredTagMap = {
 					to_do: { text: 'toDo', cssClasses: 'badge bg-blue-200' },
 					in_progress: { text: 'inProgress', cssClasses: 'badge bg-yellow-300' },
 					active: { text: 'active', cssClasses: 'badge bg-green-200' },
-					on_hold: { text: 'onHold', cssClasses: 'badge bg-gray-300' },
+					on_hold: { text: 'onHold', cssClasses: 'badge bg-surface-300-700' },
 					deprecated: { text: 'deprecated', cssClasses: 'badge bg-red-300' },
-					'--': { text: 'undefined', cssClasses: 'badge bg-gray-300' }
+					'--': { text: 'undefined', cssClasses: 'badge bg-surface-300-700' }
 				},
 				priority: {
 					P1: { text: '', cssClasses: 'fa-solid fa-flag text-red-500' },
 					P2: { text: '', cssClasses: 'fa-solid fa-flag text-orange-500' },
 					P3: { text: '', cssClasses: 'fa-solid fa-flag text-blue-500' },
-					P4: { text: '', cssClasses: 'fa-solid fa-flag text-gray-500' },
+					P4: { text: '', cssClasses: 'fa-solid fa-flag text-surface-600-400' },
 					'--': { text: '', cssClasses: '' }
 				}
 			}
