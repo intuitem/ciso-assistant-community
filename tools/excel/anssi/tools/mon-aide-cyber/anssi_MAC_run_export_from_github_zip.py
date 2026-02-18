@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Wrapper Python:
-- reutilise/telescope le ZIP du repo GitHub
-- dezippe temporairement dans le dossier du script
-- execute anssi_MAC_export_referentiels_json.py
-- supprime le dossier dezippe (conserve le ZIP)
+- Réutilise/télescope le ZIP du repo GitHub
+- Dézippe temporairement dans le dossier du script
+- Exécute anssi_MAC_export_referentiels_json.py
+- Supprime le dossier dézippe (conserve le ZIP)
 """
-
-from __future__ import annotations
 
 import argparse
 import shutil

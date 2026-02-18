@@ -7,8 +7,6 @@ Sorties:
   + liens questions/reponses -> mesures
 """
 
-from __future__ import annotations
-
 import argparse
 import json
 import re
