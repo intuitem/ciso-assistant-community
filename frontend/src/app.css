@@ -29,7 +29,7 @@
 	::before,
 	::backdrop,
 	::file-selector-button {
-		border-color: var(--color-gray-200, currentcolor);
+		border-color: var(--color-surface-200-800, currentcolor);
 	}
 }
 
@@ -64,12 +64,12 @@
 	.select,
 	.multiselect,
 	.textarea {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
 	}
 
 	.checkbox,
 	.radio {
-		background-color: var(--color-surface-100);
+		background-color: var(--color-surface-100-900);
 	}
 }
 
