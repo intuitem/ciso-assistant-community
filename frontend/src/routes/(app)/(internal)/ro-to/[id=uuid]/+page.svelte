@@ -91,7 +91,7 @@
 					<span class="text-xs text-gray-500">{m.riskOrigin()}</span>
 					<span class="font-bold">{safeTranslate(roto.risk_origin)}</span>
 				</p>
-				<span class="text-gray-500 font-bold text-lg">/</span>
+				<span class="text-gray-500 font-bold text-lg px-2">/</span>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.targetObjective()}</span>
 					<span class="font-bold">{roto.target_objective}</span>
@@ -120,7 +120,7 @@
 					<span class="text-xs text-gray-500">{m.motivation()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.motivation)}</span>
 				</p>
-				<i class="fa-solid fa-xmark"></i>
+				<i class="fa-solid fa-xmark self-center"></i>
 				<p class="flex flex-col items-center">
 					<span class="text-xs text-gray-500">{m.resources()}</span>
 					<span class="badge text-sm font-bold">{safeTranslate(roto.resources)}</span>

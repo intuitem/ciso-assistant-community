@@ -150,6 +150,8 @@
 	"selectDomain": "Vybrat doménu",
 	"focusMode": "Režim zaměření",
 	"focusModeTooltip": "Zaměřit se na konkrétní doménu",
+	"objectNotReachableFromCurrentFocus": "Tento objekt není dosažitelný z aktuálního zaměření. Přesměrování na zobrazení seznamu.",
+	"objectNotFound": "Objekt nebyl nalezen. Přesměrování na zobrazení seznamu.",
 	"clearFocus": "Vymazat zaměření",
 	"noDomainsAvailable": "Žádné domény nejsou k dispozici",
 	"urn": "URN",

@@ -207,6 +207,8 @@
 	"selectDomain": "Select domain",
 	"focusMode": "Focus mode",
 	"focusModeTooltip": "Focus on a specific domain",
+	"objectNotReachableFromCurrentFocus": "Šis objektas nepasiekiamas iš dabartinio fokuso. Nukreipiama į sąrašo vaizdą.",
+	"objectNotFound": "Objektas nerastas. Nukreipiama į sąrašo vaizdą.",
 	"clearFocus": "Clear focus",
 	"noDomainsAvailable": "No domains available",
 	"enclave": "Enclave",

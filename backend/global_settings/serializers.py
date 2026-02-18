@@ -240,38 +240,14 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GlobalSettings
-        fields = [
-            "xrays",
-            "incidents",
-            "tasks",
-            "risk_acceptances",
-            "exceptions",
-            "follow_up",
-            "ebiosrm",
-            "scoring_assistant",
-            "vulnerabilities",
-            "compliance",
-            "tprm",
-            "privacy",
-            "experimental",
-            "inherent_risk",
-            "organisation_objectives",
-            "organisation_issues",
-            "quantitative_risk_studies",
-            "terminologies",
-            "bia",
-            "project_management",
-            "contracts",
-            "reports",
-            "validation_flows",
-            "outgoing_webhooks",
-            "metrology",
-            "personal_data",
-            "purposes",
-            "right_requests",
-            "data_breaches",
-            "chat_mode",
-            "auditee_mode",
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
         ]
         read_only_fields = ["name"]
 

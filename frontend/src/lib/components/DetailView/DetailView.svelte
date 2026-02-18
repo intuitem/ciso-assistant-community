@@ -4,6 +4,7 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
 	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
@@ -182,6 +183,28 @@
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSelectExisting(field: ReverseForeignKeyField): void {
+		if (!field.addExisting || !data.updateForm) return;
+		const addExisting = field.addExisting;
+		const modalComponent: ModalComponent = {
+			ref: SelectExistingModal,
+			props: {
+				form: data.updateForm,
+				urlModel: data.urlModel,
+				field: addExisting.parentField,
+				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
+				label: addExisting.label,
+				optionsInfoFields: addExisting.optionsInfoFields
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(addExisting.label ?? 'selectExisting')
 		};
 		modalStore.trigger(modal);
 	}
@@ -816,14 +839,41 @@
 									defaultFilters={field.defaultFilters || {}}
 								>
 									{#snippet addButton()}
-										<button
-											class="btn preset-filled-primary-500 self-end my-auto"
-											data-testid="add-button"
-											onclick={(_) => modalCreateForm(model)}
-											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-												'add-' + model.info.localName
-											)}</button
-										>
+										{#if canEditObject && field?.addExisting}
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+													data-testid="select-existing-button"
+													title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+													onclick={() => modalSelectExisting(field)}
+												>
+													<i class="fa-solid fa-hand-pointer"></i>
+												</button>
+											</span>
+											<span
+												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+											>
+												<button
+													class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+													data-testid="add-button"
+													title={safeTranslate('add-' + model.info.localName)}
+													onclick={(_) => modalCreateForm(model)}
+												>
+													<i class="fa-solid fa-file-circle-plus"></i>
+												</button>
+											</span>
+										{:else}
+											<button
+												class="btn preset-filled-primary-500 self-end my-auto"
+												data-testid="add-button"
+												onclick={(_) => modalCreateForm(model)}
+												><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+													'add-' + model.info.localName
+												)}</button
+											>
+										{/if}
 									{/snippet}
 								</ModelTable>
 							{/if}

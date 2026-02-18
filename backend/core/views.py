@@ -92,7 +92,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
     action,
     api_view,
@@ -2326,19 +2326,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
+        current_language = get_language()
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
-            _choices = {
-                i: name
-                for i, name in enumerate(
-                    x["name"] for x in matrix.json_definition["risk"]
-                )
-            }
+            _choices = {}
+            for i, risk in enumerate(matrix.json_definition["risk"]):
+                translations = risk.get("translations")
+                if not isinstance(translations, dict):
+                    translations = {}
+                translated = translations.get(current_language, {})
+
+                # Use the translated name if available, otherwise fall back to the default name
+                name = translated.get("name") or risk.get("name", "")
+                _choices[risk.get("id", i)] = name
             options = options | _choices
+
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
 
@@ -8174,6 +8180,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import ComplianceAssessmentListSerializer
+
+            return ComplianceAssessmentListSerializer
+        return super().get_serializer_class(**kwargs)
+
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         qs = (
@@ -8184,17 +8198,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+            )
+        )
+
+        if self.action == "list":
+            # List view: lightweight prefetch for progress with implementation groups
+            qs = qs.prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                ),
+            )
+        else:
+            # Detail/other views: full prefetches for the read serializer
+            qs = qs.select_related(
+                "framework__library",  # For framework.has_update property
                 "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
                 "campaign",  # Serialized as FieldsRelatedField
-            )
-            .prefetch_related(
+            ).prefetch_related(
                 "assets",  # ManyToManyField serialized as FieldsRelatedField
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
-                "requirement_assessments",  # To calcul progress
+                "requirement_assessments",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related("approver"),
+                ),
             )
-        )
 
         qs = qs.annotate(
             total_requirements=Count(
@@ -8205,9 +8238,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             assessed_requirements=Count(
                 "requirement_assessments",
                 filter=Q(
-                    ~Q(
-                        requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                    ),
+                    Q(
+                        ~Q(
+                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                        )
+                    )
+                    | Q(requirement_assessments__score__isnull=False),
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
@@ -10562,6 +10598,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
+        dealt_with_statuses = [
+            Finding.Status.MITIGATED,
+            Finding.Status.RESOLVED,
+            Finding.Status.DISMISSED,
+            Finding.Status.CLOSED,
+        ]
         return (
             super()
             .get_queryset()
@@ -10569,6 +10611,19 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+            )
+            .annotate(
+                _total_findings=Count("findings"),
+                _dealt_findings=Count(
+                    "findings",
+                    filter=Q(findings__status__in=dealt_with_statuses),
+                    distinct=True,
+                ),
+                treatment_progress=Case(
+                    When(_total_findings=0, then=Value(0)),
+                    default=100 * F("_dealt_findings") / F("_total_findings"),
+                    output_field=IntegerField(),
+                ),
             )
         )
 

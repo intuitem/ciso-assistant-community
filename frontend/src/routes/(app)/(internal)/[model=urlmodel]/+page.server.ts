@@ -32,6 +32,7 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 		const url = model.endpointUrl
 			? `${BASE_API_URL}/${model.endpointUrl}/${selectField.field}/`
 			: `${BASE_API_URL}/${params.model}/${selectField.field}/`;
+
 		const response = await fetch(url);
 		if (response.ok) {
 			selectOptions[selectField.field] = await response.json().then((data) =>

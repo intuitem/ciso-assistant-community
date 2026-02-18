@@ -1052,7 +1052,13 @@ class LibraryUpdater:
                     # Ensure all needed fields are included
                     fields_to_update = sorted(
                         all_fields_to_update.union(
-                            {"name", "description", "order_id", "questions"}
+                            {
+                                "name",
+                                "description",
+                                "order_id",
+                                "questions",
+                                "implementation_groups",
+                            }
                         )
                     )
                     RequirementNode.objects.bulk_update(
@@ -2201,6 +2207,18 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     def safe_display_str(self):
         fallback_ref = ":".join(self.urn.split(":")[5:])
         return self.display_short if self.display_short else fallback_ref
+
+    @property
+    def get_typical_evidence_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("typical_evidence", self.typical_evidence)
+
+    @property
+    def get_questions_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("questions", self.questions)
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -7329,6 +7347,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     findings_assessment = models.ForeignKey(
         FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        verbose_name=_("Threats"),
+        related_name="findings",
+        blank=True,
     )
     vulnerabilities = models.ManyToManyField(
         Vulnerability,
