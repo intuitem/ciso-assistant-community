@@ -2469,13 +2469,15 @@ class LoadFileView(APIView):
                     logger.warning(f"Error creating control {control_name}: {str(e)}")
 
         return control_mapping
-    
-    def _add_missing_reference_for_vulnerability(self, results, record, object_name, name, folder_id):
-        results["failed"] +=1
+
+    def _add_missing_reference_for_vulnerability(
+        self, results, record, object_name, name, folder_id
+    ):
+        results["failed"] += 1
         results["errors"].append(
             {
                 "record": record,
-                "details": f"No object \'{object_name}\' named \'{name}\' exists in folder {folder_id}."
+                "details": f"No object '{object_name}' named '{name}' exists in folder {folder_id}.",
             }
         )
 
@@ -2497,17 +2499,32 @@ class LoadFileView(APIView):
                 applied_controls = []
                 if record.get("applied_controls"):
                     applied_controls = [
-                        ap.id if (ap := AppliedControl.objects.filter(name=ap_name, folder_id=folder_id).first()) else self._add_missing_reference_for_vulnerability(results, record, "applied_controls", ap_name, folder_id)
+                        ap.id
+                        if (
+                            ap := AppliedControl.objects.filter(
+                                name=ap_name, folder_id=folder_id
+                            ).first()
+                        )
+                        else self._add_missing_reference_for_vulnerability(
+                            results, record, "applied_controls", ap_name, folder_id
+                        )
                         for ap_name in record.get("applied_controls", "").split("\n")
                     ]
                 else:
                     applied_controls = []
 
-
                 assets = []
                 if record.get("assets"):
                     assets = [
-                        asset.id if (asset := Asset.objects.filter(name=asset_name, folder_id=folder_id).first()) else self._add_missing_reference_for_vulnerability(results, record, "assets", asset_name, folder_id)
+                        asset.id
+                        if (
+                            asset := Asset.objects.filter(
+                                name=asset_name, folder_id=folder_id
+                            ).first()
+                        )
+                        else self._add_missing_reference_for_vulnerability(
+                            results, record, "assets", asset_name, folder_id
+                        )
                         for asset_name in record.get("assets", "").split("\n")
                     ]
 
@@ -2515,14 +2532,21 @@ class LoadFileView(APIView):
                 if record.get("filtering_labels"):
                     for filter_name in record.get("filtering_labels", "").split("\n"):
                         filtering_label, _ = FilteringLabel.objects.get_or_create(
-                            label=filter_name,
-                            folder=folder_id
+                            label=filter_name, folder=folder_id
                         )
                         filtering_labels.append(filtering_label.id)
 
                 if record.get("security_exceptions"):
                     security_exceptions = [
-                        security_exception.id if (security_exception := SecurityException.objects.filter(name=se_name, folder_id=folder_id).first()) else self._add_missing_reference_for_vulnerability(results, record, "security_exceptions", se_name, folder_id)
+                        security_exception.id
+                        if (
+                            security_exception := SecurityException.objects.filter(
+                                name=se_name, folder_id=folder_id
+                            ).first()
+                        )
+                        else self._add_missing_reference_for_vulnerability(
+                            results, record, "security_exceptions", se_name, folder_id
+                        )
                         for se_name in record.get("security_exceptions", "").split("\n")
                     ]
                 else:
