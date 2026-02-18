@@ -413,12 +413,16 @@ async def update_requirement_assessments(
         if error:
             return f"Error fetching requirement assessments: {error}"
 
-        # Build a lookup: ref_id → RA id
+        # Build a case-insensitive lookup: ref_id (lowered) → RA id
+        # The actual ref_id lives on the nested requirement object, not on the RA itself
         ref_id_to_ra = {}
         for ra in all_ras:
-            ref = ra.get("ref_id")
+            req_obj = ra.get("requirement") or {}
+            ref = req_obj.get("ref_id") if isinstance(req_obj, dict) else None
+            if not ref:
+                ref = ra.get("ref_id")
             if ref:
-                ref_id_to_ra[ref] = ra["id"]
+                ref_id_to_ra[ref.strip().lower()] = ra["id"]
 
         succeeded = []
         failed = []
@@ -430,7 +434,7 @@ async def update_requirement_assessments(
                 failed.append("Missing ref_id in update entry")
                 continue
 
-            ra_id = ref_id_to_ra.get(ref_id)
+            ra_id = ref_id_to_ra.get(ref_id.strip().lower())
             if not ra_id:
                 not_found.append(ref_id)
                 continue

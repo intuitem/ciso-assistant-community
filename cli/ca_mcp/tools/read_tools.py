@@ -123,8 +123,8 @@ async def get_applied_controls(folder: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Status|ETA|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result += "|UUID|Ref|Name|Status|ETA|Owner|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 
         for item in controls:
             uuid = item.get("id")
@@ -132,6 +132,15 @@ async def get_applied_controls(folder: str = None):
             name = item.get("name", "N/A")
             status = item.get("status", "N/A")
             eta = item.get("eta") or "N/A"
+            owners = item.get("owner") or []
+            owner_str = (
+                ", ".join(
+                    o.get("str", str(o)) if isinstance(o, dict) else str(o)
+                    for o in owners
+                )
+                if owners
+                else "N/A"
+            )
             domain = (item.get("folder") or {}).get("str", "N/A")
             category = item.get("category", "N/A")
             csf_function = item.get("csf_function", "N/A")
@@ -140,7 +149,7 @@ async def get_applied_controls(folder: str = None):
             priority = item.get("priority", "N/A")
             cost = item.get("cost", 0)
 
-            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
+            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{owner_str}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
 
         return success_response(
             result,
