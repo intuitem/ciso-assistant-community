@@ -2161,7 +2161,7 @@
 	"autoSync": "Synchronisation automatique des actions",
 	"autoSyncHelpText": "Lorsque activé, une tâche effectuera automatiquement la synchronisation des actions. Les évaluations verrouillées sont ignorées.",
 	"lockedAssessment": "Évaluation verrouillée",
-	"lockedAssessmentMessage": "Cette évaluation est verrouillée et ne peut être modifiée sauf pour la déverrouiller.",
+	"lockedAssessmentMessage": "Cette évaluation est verrouillée.",
 	"lockedRiskScenarioMessage": "Ce scénario de risque ne peut pas être modifié, car l'analyse de risque parente est verrouillée.",
 	"lockedRequirementAssessmentMessage": "Cette exigence ne peut pas être modifiée, car son audit parent est verrouillé.",
 	"lockedFindingMessage": "Ce constat ne peut pas être modifié, car son plan de suivi parent est verrouillé.",

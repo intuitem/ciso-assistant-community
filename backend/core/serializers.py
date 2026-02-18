@@ -2001,6 +2001,59 @@ class ComplianceAssessmentReadSerializer(AssessmentReadSerializer):
         fields = "__all__"
 
 
+class ComplianceAssessmentListSerializer(BaseModelSerializer):
+    """Optimized serializer for list views - only includes fields needed by the table."""
+
+    path = PathField(read_only=True)
+    folder = FieldsRelatedField()
+    framework = FieldsRelatedField()
+    perimeter = FieldsRelatedField()
+    progress = serializers.SerializerMethodField()
+
+    def get_progress(self, obj):
+        if not obj.selected_implementation_groups:
+            # Fast path: use SQL annotations (no implementation group filtering needed)
+            total = getattr(obj, "total_requirements", 0)
+            assessed = getattr(obj, "assessed_requirements", 0)
+        else:
+            # Use prefetched requirement_assessments filtered by implementation groups
+            selected_groups = set(obj.selected_implementation_groups)
+            ras = [
+                ra
+                for ra in obj.requirement_assessments.all()
+                if selected_groups & set(ra.requirement.implementation_groups or [])
+            ]
+            total = len(ras)
+            assessed = len(
+                [
+                    ra
+                    for ra in ras
+                    if ra.result != RequirementAssessment.Result.NOT_ASSESSED
+                    or ra.score is not None
+                ]
+            )
+        return int((assessed / total) * 100) if total else 0
+
+    class Meta:
+        model = ComplianceAssessment
+        fields = [
+            "id",
+            "ref_id",
+            "name",
+            "description",
+            "version",
+            "framework",
+            "folder",
+            "perimeter",
+            "progress",
+            "status",
+            "is_locked",
+            "created_at",
+            "updated_at",
+            "path",
+        ]
+
+
 class ComplianceAssessmentWriteSerializer(BaseModelSerializer):
     baseline = serializers.PrimaryKeyRelatedField(
         write_only=True,
@@ -2211,6 +2264,14 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         if compliance_assessment and compliance_assessment.is_locked:
             raise serializers.ValidationError(
                 "⚠️ Cannot modify the requirement when the audit is locked."
+            )
+
+        if (
+            compliance_assessment
+            and compliance_assessment.status == Assessment.Status.IN_REVIEW
+        ):
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
         # Validate extended_result against result

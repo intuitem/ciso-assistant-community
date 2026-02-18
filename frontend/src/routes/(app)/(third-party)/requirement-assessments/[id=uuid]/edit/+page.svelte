@@ -654,13 +654,15 @@
 							label={m.questionSingular()}
 						/>
 					{/if}
-					<Select
-						{form}
-						options={page.data.model.selectOptions['status']}
-						field="status"
-						label={m.status()}
-						helpText={m.requirementAssessmentStatusHelpText()}
-					/>
+					{#if page.data.requirementAssessment.compliance_assessment.progress_status_enabled}
+						<Select
+							{form}
+							options={page.data.model.selectOptions['status']}
+							field="status"
+							label={m.status()}
+							helpText={m.requirementAssessmentStatusHelpText()}
+						/>
+					{/if}
 					{#if computedResult}
 						<p class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.result()}</span>
