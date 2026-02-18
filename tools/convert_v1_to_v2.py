@@ -10,6 +10,55 @@ from copy import copy
 from openpyxl.cell.cell import Cell
 
 
+def row_has_content(row) -> bool:
+    for cell in row:
+        value = cell.value if isinstance(cell, Cell) else cell
+        if value is None:
+            continue
+        if isinstance(value, str) and value.strip() == "":
+            continue
+        return True
+    return False
+
+
+def cell_has_content(cell) -> bool:
+    value = cell.value if isinstance(cell, Cell) else cell
+    if value is None:
+        return False
+    if isinstance(value, str) and value.strip() == "":
+        return False
+    return True
+
+
+def copy_sheet_dimensions(src_ws, dst_ws):
+    # Preserve visual layout (column widths / row heights) without copying
+    # workbook-bound dimension objects that may corrupt the output file.
+    for col_key, col_dim in src_ws.column_dimensions.items():
+        dst_col = dst_ws.column_dimensions[col_key]
+        if col_dim.width is not None:
+            dst_col.width = col_dim.width
+        dst_col.hidden = col_dim.hidden
+        dst_col.outlineLevel = col_dim.outlineLevel
+        dst_col.collapsed = col_dim.collapsed
+        dst_col.bestFit = col_dim.bestFit
+
+    for row_key in range(1, src_ws.max_row + 1):
+        has_content = row_has_content(src_ws[row_key])
+
+        # Stop copying row heights at the first empty row.
+        if not has_content:
+            break
+
+        src_row_dim = src_ws.row_dimensions.get(row_key)
+        if src_row_dim is not None:
+            dst_row = dst_ws.row_dimensions[row_key]
+            if src_row_dim.height is not None:
+                dst_row.height = src_row_dim.height
+            dst_row.hidden = src_row_dim.hidden
+            dst_row.outlineLevel = src_row_dim.outlineLevel
+            dst_row.collapsed = src_row_dim.collapsed
+
+
 def build_converted_workbook(input_path: str) -> Workbook:
     wb = load_workbook(input_path, data_only=False)
 
@@ -90,6 +139,7 @@ def build_converted_workbook(input_path: str) -> Workbook:
                 object_metadata.setdefault(normalized_type, {})[field] = val1
 
     sheets_out = {"library_meta": library_meta}
+    sheet_dimensions = {}
 
     used_tabs = set()
 
@@ -123,7 +173,10 @@ def build_converted_workbook(input_path: str) -> Workbook:
         if tab_name in wb.sheetnames:
             ws = wb[tab_name]
             for row in ws.iter_rows():
+                if not row_has_content(row):
+                    break
                 content_rows.append(list(row))
+            sheet_dimensions[f"{tab_name}_content"] = ws
 
         sheets_out[f"{tab_name}_meta"] = meta_rows
         sheets_out[f"{tab_name}_content"] = content_rows
@@ -144,17 +197,22 @@ def build_converted_workbook(input_path: str) -> Workbook:
             raw = [[cell.value for cell in row] for row in ws.iter_rows()]
             if raw:
                 sheets_out[sheet_name] = raw
+                sheet_dimensions[sheet_name] = ws
 
     wb_out = Workbook()
     del wb_out["Sheet"]
 
     for sheet_name, rows in sheets_out.items():
         ws_out = wb_out.create_sheet(title=sheet_name[:31])
+        src_ws = sheet_dimensions.get(sheet_name)
+        if src_ws is not None:
+            copy_sheet_dimensions(src_ws, ws_out)
         for r_idx, row in enumerate(rows, 1):
+            # print(f"coucou {r_idx}")
             for c_idx, cell in enumerate(row, 1):
                 if isinstance(cell, Cell):
                     new_cell = ws_out.cell(row=r_idx, column=c_idx, value=cell.value)
-                    if cell.has_style:
+                    if cell.has_style and cell_has_content(cell):
                         new_cell.font = copy(cell.font)
                         new_cell.fill = copy(cell.fill)
                         new_cell.border = copy(cell.border)
