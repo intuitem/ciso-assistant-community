@@ -5,9 +5,12 @@ import argparse
 from pathlib import Path
 from openpyxl import load_workbook, Workbook
 import re
+import sys
+from copy import copy
+from openpyxl.cell.cell import Cell
 
 
-def convert_v1_to_v2(input_path: str, output_path: str):
+def build_converted_workbook(input_path: str) -> Workbook:
     wb = load_workbook(input_path, data_only=False)
 
     if "library_content" not in wb.sheetnames:
@@ -142,10 +145,6 @@ def convert_v1_to_v2(input_path: str, output_path: str):
             if raw:
                 sheets_out[sheet_name] = raw
 
-    # --- Write output workbook ---
-    from copy import copy
-    from openpyxl.cell.cell import Cell
-
     wb_out = Workbook()
     del wb_out["Sheet"]
 
@@ -165,23 +164,120 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 else:
                     ws_out.cell(row=r_idx, column=c_idx, value=cell)
 
-    wb_out.save(output_path)
-    print(f"✅ Conversion complete: {output_path}")
+    return wb_out
+
+
+def convert_v1_to_v2(input_path: Path, output_path: Path):
+    backup_path = input_path.with_name(f"{input_path.stem}_v1{input_path.suffix}.old")
+
+    if backup_path.exists():
+        raise FileExistsError(
+            f"Backup file already exists, refusing to overwrite: {backup_path}"
+        )
+
+    wb_out = build_converted_workbook(str(input_path))
+    output_existed_before = output_path.exists()
+
+    try:
+        input_path.rename(backup_path)
+        wb_out.save(output_path)
+        print(f"✅ Conversion complete: {output_path}")
+    except Exception:
+        if output_path.exists() and not output_existed_before:
+            output_path.unlink()
+        if backup_path.exists() and not input_path.exists():
+            backup_path.rename(input_path)
+        raise
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Convert Excel library v1 to v2 format."
     )
-    parser.add_argument("input_file", type=str, help="Path to the v1 Excel file")
+    parser.add_argument(
+        "input_file", type=str, help="Path to a v1 Excel file (or directory in bulk mode)"
+    )
+    parser.add_argument(
+        "--bulk",
+        action="store_true",
+        help="Enable bulk mode to process all .xlsx files in a directory.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Custom output file name (only used in non-bulk mode).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        help="Output directory for .xlsx files (only used with --bulk mode).",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     if not input_path.exists():
         raise FileNotFoundError(f"File not found: {input_path}")
 
-    output_path = input_path.with_name(f"{input_path.stem}_new.xlsx")
-    convert_v1_to_v2(str(input_path), str(output_path))
+
+    # --- BULK MODE ------------------------------------------------------------
+    if args.bulk:
+        if args.output:
+            raise ValueError('The option "--output" cannot be used with "--bulk" mode.')
+
+        if not input_path.is_dir():
+            raise NotADirectoryError("Bulk mode requires a directory as input")
+
+        if args.output_dir:
+            output_dir = Path(args.output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            output_dir = input_path
+
+        xlsx_files = [
+            f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")
+        ]
+        if not xlsx_files:
+            raise FileNotFoundError(f"No .xlsx files found in directory: {input_path}")
+
+        errors = []
+        for i, file in enumerate(xlsx_files, 1):
+            print(f'▶️  Processing file [{i}/{len(xlsx_files)}]: "{file}"')
+            try:
+                output_path = output_dir / file.name
+                convert_v1_to_v2(file, output_path)
+            except Exception as e:
+                print(f'❌ Failed to process "{file}": {e}', file=sys.stderr)
+                errors.append(file.name)
+
+        print("\n📋 Bulk mode completed!")
+        
+        if errors:
+            print(f"❌ The following file{'s' if len(errors) > 1 else ''} [{len(errors)}/{len(xlsx_files)}] failed to process:", file=sys.stderr)
+            for f in errors:
+                print(f"- {f}", file=sys.stderr)
+            sys.exit(1)
+        else:
+            print("✅ All files processed successfully!")
+            sys.exit(0)
+
+    # --- SINGLE FILE MODE -----------------------------------------------------
+    else:
+        if args.output_dir:
+            raise ValueError(
+                'The option "--output-dir" can only be used with "--bulk" mode.'
+            )
+
+        if not input_path.is_file():
+            raise FileNotFoundError(f"Input must be a file in non-bulk mode: {input_path}")
+
+        if args.output:
+            output_path = Path(args.output)
+            if output_path.suffix.lower() != ".xlsx":
+                output_path = output_path.with_suffix(".xlsx")
+        else:
+            output_path = input_path
+
+        convert_v1_to_v2(input_path, output_path)
 
 
 if __name__ == "__main__":
