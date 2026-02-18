@@ -459,6 +459,10 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 ## Vulnerability
 
+###
+
+{% file src="../.gitbook/assets/template_vulnerabilities.xlsx" %}
+
 ### Supported fields
 
 * ref\_id
