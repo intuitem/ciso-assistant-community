@@ -2,9 +2,8 @@
 """Exporte 2 JSON a partir du referentiel MonAideCyber.
 
 Sorties:
-- questionnaire_repo.json: toutes les thematiques/questions/reponses
-- mesures_repo.json: toutes les mesures avec textes resolves depuis les .pug
-  + liens questions/reponses -> mesures
+- questionnaire_repo.json: thematiques/questions/reponses + metadonnees transcripteur
+- mesures_repo.json: mesures avec textes resolves depuis les .pug
 """
 
 import argparse
@@ -22,19 +21,33 @@ except ModuleNotFoundError as exc:  # pragma: no cover
     ) from exc
 
 
-def extract_object_literal(content: str, const_name: str) -> str:
-    decl = re.search(rf"\bexport\s+const\s+{re.escape(const_name)}\b", content)
-    if not decl:
-        decl = re.search(rf"\bconst\s+{re.escape(const_name)}\b", content)
-    if not decl:
-        raise ValueError(f"Impossible de trouver const {const_name}")
+IMPORT_RE = re.compile(r"import\s+\{\s*([A-Za-z0-9_]+)\s*\}\s+from\s+'([^']+)';")
+KV_SYMBOL_RE = re.compile(r"([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_]+)")
 
-    eq_idx = content.find("=", decl.end())
-    if eq_idx < 0:
-        raise ValueError(f"Impossible de trouver '=' pour {const_name}")
-    start = content.find("{", eq_idx)
+
+def display_path(path: Path, base_dir: Path) -> str:
+    try:
+        return str(path.relative_to(base_dir))
+    except ValueError:
+        return str(path)
+
+
+def read_text(path: Path) -> str:
+    return path.read_text(encoding="utf-8")
+
+
+def parse_imports(ts_file: Path) -> dict[str, Path]:
+    imports: dict[str, Path] = {}
+    for match in IMPORT_RE.finditer(read_text(ts_file)):
+        symbol, rel = match.groups()
+        imports[symbol] = (ts_file.parent / rel).with_suffix(".ts").resolve()
+    return imports
+
+
+def extract_object_literal(content: str, start_at: int, label: str) -> str:
+    start = content.find("{", start_at)
     if start < 0:
-        raise ValueError(f"Impossible de trouver '{{' pour {const_name}")
+        raise ValueError(f"Impossible de trouver '{{' pour {label}")
 
     i = start
     depth = 0
@@ -43,9 +56,11 @@ def extract_object_literal(content: str, const_name: str) -> str:
     escaped = False
     in_line_comment = False
     in_block_comment = False
+
     while i < len(content):
         ch = content[i]
         nxt = content[i + 1] if i + 1 < len(content) else ""
+
         if in_line_comment:
             if ch == "\n":
                 in_line_comment = False
@@ -67,6 +82,7 @@ def extract_object_literal(content: str, const_name: str) -> str:
                 in_str = False
             i += 1
             continue
+
         if ch == "/" and nxt == "/":
             in_line_comment = True
             i += 2
@@ -80,6 +96,7 @@ def extract_object_literal(content: str, const_name: str) -> str:
             quote = ch
             i += 1
             continue
+
         if ch == "{":
             depth += 1
         elif ch == "}":
@@ -88,74 +105,107 @@ def extract_object_literal(content: str, const_name: str) -> str:
                 return content[start : i + 1]
         i += 1
 
-    raise ValueError(f"Objet non ferme pour {const_name}")
+    raise ValueError(f"Objet non ferme pour {label}")
 
 
-def resolve_imports(ts_file: Path) -> dict[str, Path]:
-    text = ts_file.read_text(encoding="utf-8")
-    imports: dict[str, Path] = {}
-    pattern = re.compile(r"import\s+\{\s*([A-Za-z0-9_]+)\s*\}\s+from\s+'([^']+)';")
-    for match in pattern.finditer(text):
-        symbol = match.group(1)
-        rel = match.group(2)
-        imports[symbol] = (ts_file.parent / rel).with_suffix(".ts").resolve()
-    return imports
+def parse_const_object(content: str, const_name: str) -> dict[str, Any]:
+    decl = re.search(rf"\bexport\s+const\s+{re.escape(const_name)}\b", content)
+    if not decl:
+        decl = re.search(rf"\bconst\s+{re.escape(const_name)}\b", content)
+    if not decl:
+        raise ValueError(f"Impossible de trouver const {const_name}")
+    eq_idx = content.find("=", decl.end())
+    if eq_idx < 0:
+        raise ValueError(f"Impossible de trouver '=' pour {const_name}")
+    return json5.loads(extract_object_literal(content, eq_idx, f"const {const_name}"))
+
+
+def parse_const_object_literal(content: str, const_name: str) -> str:
+    decl = re.search(rf"\bexport\s+const\s+{re.escape(const_name)}\b", content)
+    if not decl:
+        decl = re.search(rf"\bconst\s+{re.escape(const_name)}\b", content)
+    if not decl:
+        raise ValueError(f"Impossible de trouver const {const_name}")
+    eq_idx = content.find("=", decl.end())
+    if eq_idx < 0:
+        raise ValueError(f"Impossible de trouver '=' pour {const_name}")
+    return extract_object_literal(content, eq_idx, f"const {const_name}")
+
+
+def parse_field_object(content: str, field_name: str) -> dict[str, Any]:
+    field = re.search(rf"\b{re.escape(field_name)}\s*:", content)
+    if not field:
+        raise ValueError(f"Impossible de trouver le champ {field_name}")
+    return json5.loads(
+        extract_object_literal(content, field.end(), f"champ {field_name}")
+    )
 
 
 def parse_referentiel_questions(api_src: Path) -> dict[str, Any]:
-    referentiel_file = api_src / "diagnostic" / "donneesReferentiel.ts"
-    imports = resolve_imports(referentiel_file)
-    text = referentiel_file.read_text(encoding="utf-8")
-    referentiel_obj = extract_object_literal(text, "referentiel")
-    entries = re.findall(r"([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_]+)", referentiel_obj)
-
+    file = api_src / "diagnostic" / "donneesReferentiel.ts"
+    imports = parse_imports(file)
+    content = read_text(file)
+    literal = parse_const_object_literal(content, "referentiel")
+    entries = KV_SYMBOL_RE.findall(literal)
     out: dict[str, Any] = {}
     for thematique, symbol in entries:
-        src_file = imports.get(symbol)
-        if src_file is None:
+        src = imports.get(symbol)
+        if not src:
             raise ValueError(f"Import introuvable pour {symbol}")
-        content = src_file.read_text(encoding="utf-8")
-        literal = extract_object_literal(content, symbol)
-        out[thematique] = json5.loads(literal)
+        out[thematique] = parse_const_object(read_text(src), symbol)
     return out
 
 
 def parse_referentiel_mesures(api_src: Path) -> dict[str, Any]:
-    mesures_file = api_src / "diagnostic" / "donneesMesures.ts"
-    imports = resolve_imports(mesures_file)
-    text = mesures_file.read_text(encoding="utf-8")
-    tableau_literal = extract_object_literal(text, "tableauMesures")
-    spread_symbols = re.findall(r"\.\.\.([A-Za-z0-9_]+)", tableau_literal)
+    file = api_src / "diagnostic" / "donneesMesures.ts"
+    imports = parse_imports(file)
+    content = read_text(file)
+    literal = parse_const_object_literal(content, "tableauMesures")
+    symbols = re.findall(r"\.\.\.([A-Za-z0-9_]+)", literal)
 
     merged: dict[str, Any] = {}
-    for symbol in spread_symbols:
-        src_file = imports.get(symbol)
-        if src_file is None:
+    for symbol in symbols:
+        src = imports.get(symbol)
+        if not src:
             raise ValueError(f"Import introuvable pour {symbol}")
-        content = src_file.read_text(encoding="utf-8")
-        literal = extract_object_literal(content, symbol)
-        merged.update(json5.loads(literal))
+        merged.update(parse_const_object(read_text(src), symbol))
     return merged
+
+
+def parse_transcripteur(api_src: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+    trans_dir = api_src / "infrastructure" / "adaptateurs" / "transcripteur"
+    file = trans_dir / "adaptateurTranscripteur.ts"
+    imports = parse_imports(file)
+    content = read_text(file)
+
+    thematiques: dict[str, Any] = {}
+    thematiques_field = re.search(r"\bthematiques\s*:", content)
+    if not thematiques_field:
+        raise ValueError("Impossible de trouver le champ thematiques")
+    literal = extract_object_literal(content, thematiques_field.end(), "thematiques")
+    for thematique, symbol in KV_SYMBOL_RE.findall(literal):
+        src = imports.get(symbol)
+        if not src:
+            raise ValueError(f"Import transcripteur introuvable pour {symbol}")
+        thematiques[thematique] = parse_const_object(read_text(src), symbol)
+
+    conditions = parse_field_object(content, "conditionsPerimetre")
+    return thematiques, conditions
 
 
 def _line_to_text(line: str) -> tuple[str | None, bool]:
     s = line.strip()
-    if not s or s.startswith("//"):
-        return None, False
-    if s.startswith("include "):
+    if not s or s.startswith("//") or s.startswith("include "):
         return None, False
     if s.startswith("|"):
         return s[1:].strip(), False
-    m = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)(\([^)]*\))?(?:\s+(.*))?$", s)
-    if not m:
+    match = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)(\([^)]*\))?(?:\s+(.*))?$", s)
+    if not match:
         return s, False
-    tag = m.group(1)
-    inline = (m.group(3) or "").strip()
+    tag, inline = match.group(1), (match.group(3) or "").strip()
     if tag in {"p", "br"} and not inline:
         return None, True
-    if inline:
-        return inline, False
-    return None, False
+    return (inline, False) if inline else (None, False)
 
 
 def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
@@ -167,15 +217,14 @@ def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
     seen.add(pug_file)
 
     paragraphs: list[str] = []
-    current: str = ""
-    for raw_line in pug_file.read_text(encoding="utf-8").splitlines():
+    current = ""
+    for raw_line in read_text(pug_file).splitlines():
         stripped = raw_line.strip()
         if stripped.startswith("include "):
             if current:
                 paragraphs.append(current.strip())
                 current = ""
-            inc = stripped[len("include ") :].strip()
-            include_path = (pug_file.parent / inc)
+            include_path = (pug_file.parent / stripped[len("include ") :].strip())
             if include_path.suffix != ".pug":
                 include_path = include_path.with_suffix(".pug")
             included = pug_to_text(include_path, seen)
@@ -202,9 +251,8 @@ def resolve_mesure_texts(api_src: Path, mesures: dict[str, Any]) -> None:
     for payload in mesures.values():
         if not isinstance(payload, dict):
             continue
-        # Gère dynamiquement tous les niveaux (niveau1, niveau2, niveau3, ...)
         for level_name, lvl in payload.items():
-            if not level_name.startswith("niveau"):
+            if not (isinstance(level_name, str) and level_name.startswith("niveau")):
                 continue
             if not isinstance(lvl, dict):
                 continue
@@ -215,88 +263,92 @@ def resolve_mesure_texts(api_src: Path, mesures: dict[str, Any]) -> None:
                     lvl[field] = pug_to_text((include_base / rel).resolve())
 
 
-def build_mesure_links(questions_ref: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
-    links: dict[str, list[dict[str, Any]]] = {}
-
-    def add_link(mesure_id: str, link: dict[str, Any]) -> None:
-        links.setdefault(mesure_id, []).append(link)
-
-    def process_reponse(
-        *,
-        thematique: str,
-        question: dict[str, Any],
-        reponse: dict[str, Any],
-        parent: dict[str, str] | None = None,
-    ) -> None:
-        resultat = reponse.get("resultat") if isinstance(reponse, dict) else None
-        mesures = resultat.get("mesures", []) if isinstance(resultat, dict) else []
-        for mesure in mesures:
-            if not isinstance(mesure, dict):
-                continue
-            mesure_id = mesure.get("identifiant")
-            if not isinstance(mesure_id, str):
-                continue
-            add_link(
-                mesure_id,
-                {
-                    "thematique": thematique,
-                    "question_identifiant": question.get("identifiant"),
-                    "question_libelle": question.get("libelle"),
-                    "reponse_identifiant": reponse.get("identifiant"),
-                    "reponse_libelle": reponse.get("libelle"),
-                    "niveau": mesure.get("niveau"),
-                    "parent": parent,
-                },
-            )
-
-    for thematique, bloc in questions_ref.items():
-        questions = bloc.get("questions", []) if isinstance(bloc, dict) else []
-        for question in questions:
-            if not isinstance(question, dict):
-                continue
-            for reponse in question.get("reponsesPossibles", []) or []:
-                if not isinstance(reponse, dict):
-                    continue
-                process_reponse(thematique=thematique, question=question, reponse=reponse)
-                for q_tiroir in reponse.get("questions", []) or []:
-                    if not isinstance(q_tiroir, dict):
-                        continue
-                    for rep_tiroir in q_tiroir.get("reponsesPossibles", []) or []:
-                        if not isinstance(rep_tiroir, dict):
-                            continue
-                        process_reponse(
-                            thematique=thematique,
-                            question=q_tiroir,
-                            reponse=rep_tiroir,
-                            parent={
-                                "question_identifiant": str(question.get("identifiant")),
-                                "question_libelle": str(question.get("libelle")),
-                                "reponse_identifiant": str(reponse.get("identifiant")),
-                                "reponse_libelle": str(reponse.get("libelle")),
-                            },
-                        )
-    return links
+def info_bulles_to_texts(api_src: Path, info_bulles: list[str] | None) -> list[str]:
+    if not info_bulles:
+        return []
+    base = api_src / "infrastructure" / "adaptateurs" / "transcripteur" / "info-bulles"
+    return [pug_to_text((base / rel).resolve()) for rel in info_bulles]
 
 
-def enrich_mesures_with_links(
-    mesures: dict[str, Any], links: dict[str, list[dict[str, Any]]]
-) -> dict[str, Any]:
-    out: dict[str, Any] = {}
-    for mesure_id, payload in mesures.items():
-        enriched = dict(payload)
-        enriched["questions_associees"] = links.get(mesure_id, [])
-        out[mesure_id] = enriched
-    return out
+def index_transcripteur_questions(thematique_meta: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    index: dict[str, dict[str, Any]] = {}
+    if not isinstance(thematique_meta, dict):
+        return index
+
+    def visit(question: dict[str, Any]) -> None:
+        identifiant = question.get("identifiant")
+        if isinstance(identifiant, str):
+            index[identifiant] = question
+        for reponse in question.get("reponses", []) or []:
+            child = reponse.get("question") if isinstance(reponse, dict) else None
+            if isinstance(child, dict):
+                visit(child)
+
+    for groupe in thematique_meta.get("groupes", []) or []:
+        if isinstance(groupe, dict):
+            for question in groupe.get("questions", []) or []:
+                if isinstance(question, dict):
+                    visit(question)
+    return index
 
 
-def display_path(path: Path, base_dir: Path) -> str:
-    try:
-        return str(path.relative_to(base_dir))
-    except ValueError:
-        return str(path)
+def enrich_question_tree(api_src: Path, question: dict[str, Any], index: dict[str, dict[str, Any]]) -> None:
+    identifiant = question.get("identifiant")
+    meta = index.get(identifiant) if isinstance(identifiant, str) else None
+    if isinstance(meta, dict):
+        if "perimetre" in meta:
+            question["perimetre"] = meta["perimetre"]
+        if "type" in meta:
+            question["type_transcripteur"] = meta["type"]
+        info_bulles = meta.get("info-bulles")
+        if isinstance(info_bulles, list):
+            question["info-bulles"] = info_bulles
+            question["info-bulles-textes"] = info_bulles_to_texts(api_src, info_bulles)
+
+    for reponse in question.get("reponsesPossibles", []) or []:
+        if isinstance(reponse, dict):
+            for child in reponse.get("questions", []) or []:
+                if isinstance(child, dict):
+                    enrich_question_tree(api_src, child, index)
+
+
+def enrich_referentiel_with_transcripteur(
+    api_src: Path,
+    referentiel: dict[str, Any],
+    thematiques: dict[str, Any],
+    conditions_perimetre: dict[str, Any],
+) -> None:
+    section_fields = ("description", "libelle", "styles", "localisationIllustration")
+    for thematique, bloc in referentiel.items():
+        if not isinstance(bloc, dict):
+            continue
+        meta = thematiques.get(thematique)
+        if not isinstance(meta, dict):
+            continue
+        for field in section_fields:
+            if field in meta:
+                bloc[field] = meta[field]
+
+        index = index_transcripteur_questions(meta)
+        for question in bloc.get("questions", []) or []:
+            if isinstance(question, dict):
+                enrich_question_tree(api_src, question, index)
+
+        # Réordonne les clés pour afficher les informations de périmètre en tête.
+        ordered: dict[str, Any] = {}
+        for field in section_fields:
+            if field in bloc:
+                ordered[field] = bloc[field]
+        for key, value in bloc.items():
+            if key not in ordered:
+                ordered[key] = value
+        referentiel[thematique] = ordered
+
+    referentiel["_conditionsPerimetre"] = conditions_perimetre
 
 
 def dump_json(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
         f.write("\n")
@@ -313,46 +365,26 @@ def main() -> None:
             help="Chemin vers mon-aide-cyber-api",
         )
         parser.add_argument("--out-dir", default=".", help="Dossier de sortie des JSON")
-        parser.add_argument(
-            "--questions-file",
-            default="questionnaire_repo.json",
-            help="Nom du JSON questions/reponses",
-        )
-        parser.add_argument(
-            "--mesures-file",
-            default="mesures_repo.json",
-            help="Nom du JSON mesures",
-        )
+        parser.add_argument("--questions-file", default="questionnaire_repo.json")
+        parser.add_argument("--mesures-file", default="mesures_repo.json")
         args = parser.parse_args()
 
-        api_src = Path(args.api_root).resolve() / "src"
         script_dir = Path(__file__).resolve().parent
+        api_src = Path(args.api_root).resolve() / "src"
         out_dir = Path(args.out_dir).resolve()
-        out_dir.mkdir(parents=True, exist_ok=True)
 
         questions_ref = parse_referentiel_questions(api_src)
+        trans_thematiques, conditions = parse_transcripteur(api_src)
+        enrich_referentiel_with_transcripteur(api_src, questions_ref, trans_thematiques, conditions)
+
         mesures_ref = parse_referentiel_mesures(api_src)
         resolve_mesure_texts(api_src, mesures_ref)
-        # Désactivé pour le moment: liaison mesures <-> questions.
-        # On garde le code ci-dessous en commentaire pour réutilisation ultérieure.
-        # links = build_mesure_links(questions_ref)
-        # mesures_enriched = enrich_mesures_with_links(mesures_ref, links)
         mesures_enriched = mesures_ref
-
-        questionnaire_payload = {
-            "source": "mon-aide-cyber-api/src/diagnostic/referentiel",
-            "referentiel": questions_ref,
-        }
-        mesures_payload = {
-            "source": "mon-aide-cyber-api/src/diagnostic/mesures + src/infrastructure/restitution/mesures",
-            "mesures": mesures_enriched,
-        }
 
         questions_out = out_dir / args.questions_file
         mesures_out = out_dir / args.mesures_file
-
-        dump_json(questions_out, questionnaire_payload)
-        dump_json(mesures_out, mesures_payload)
+        dump_json(questions_out, {"source": "mon-aide-cyber-api/src/diagnostic/referentiel", "referentiel": questions_ref})
+        dump_json(mesures_out, {"source": "mon-aide-cyber-api/src/diagnostic/mesures + src/infrastructure/restitution/mesures", "mesures": mesures_enriched})
 
         print(f"- Questions: \"{display_path(questions_out, script_dir)}\"")
         print(f"- Mesures:   \"{display_path(mesures_out, script_dir)}\"")
