@@ -52,7 +52,7 @@
 	{#each $breadcrumbs as c, i}
 		{#if i == $breadcrumbs.length - 1}
 			<span
-				class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-gray-500 font-semibold antialiased"
+				class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-surface-600-400 font-semibold antialiased"
 				data-testid="crumb-item"
 				title={safeTranslate(c.label)}
 			>
@@ -78,7 +78,7 @@
 					</a>
 				{:else}
 					<span
-						class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-gray-500 font-semibold antialiased"
+						class="max-w-[64ch] overflow-hidden whitespace-nowrap text-ellipsis text-sm text-surface-600-400 font-semibold antialiased"
 						data-testid="crumb-item"
 						title={safeTranslate(c.label)}
 					>

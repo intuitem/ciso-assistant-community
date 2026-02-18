@@ -63,21 +63,21 @@
 	}
 </script>
 
-<div class="space-y-4 border-2 border-dashed border-gray-300 rounded-lg p-4">
+<div class="space-y-4 border-2 border-dashed border-surface-300-700 rounded-lg p-4">
 	<!-- Add Entry Form -->
 	<div class="flex gap-2">
 		<input
 			type="text"
 			bind:value={newRefId}
 			placeholder={m.orderedEntryListRefIdPlaceholder()}
-			class="input px-3 py-2 border border-gray-300 rounded w-1/3"
+			class="input px-3 py-2 border border-surface-300-700 rounded w-1/3"
 			onkeydown={(e) => e.key === 'Enter' && addEntry()}
 		/>
 		<input
 			type="text"
 			bind:value={newName}
 			placeholder={m.orderedEntryListNamePlaceholder()}
-			class="input px-3 py-2 border border-gray-300 rounded w-2/3"
+			class="input px-3 py-2 border border-surface-300-700 rounded w-2/3"
 			onkeydown={(e) => e.key === 'Enter' && addEntry()}
 		/>
 		<button
@@ -92,13 +92,13 @@
 	<!-- Entries List -->
 	<div class="space-y-2" role="list">
 		{#if entries.length === 0}
-			<div class="card bg-white p-4 shadow-sm text-center text-gray-500">
+			<div class="card bg-surface-50-950 p-4 shadow-sm text-center text-surface-600-400">
 				{m.orderedEntryListEmptyState()}
 			</div>
 		{:else}
 			{#each entries as entry, index (entry.ref_id + '-' + index)}
 				<div
-					class="card bg-white p-4 shadow-sm flex items-center gap-3 cursor-move hover:bg-gray-50 transition-colors mx-2"
+					class="card bg-surface-50-950 p-4 shadow-sm flex items-center gap-3 cursor-move hover:bg-surface-50-950 transition-colors mx-2"
 					class:opacity-50={draggedIndex === index}
 					draggable="true"
 					ondragstart={() => handleDragStart(index)}
@@ -108,12 +108,12 @@
 					role="listitem"
 				>
 					<div class="flex-none">
-						<span class="text-sm font-semibold text-gray-500 w-6 text-center">{index + 1}</span>
+						<span class="text-sm font-semibold text-surface-600-400 w-6 text-center">{index + 1}</span>
 					</div>
 					<div class="flex-none">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
-							class="h-5 w-5 text-gray-400"
+							class="h-5 w-5 text-surface-400-600"
 							fill="none"
 							viewBox="0 0 24 24"
 							stroke="currentColor"
@@ -131,7 +131,7 @@
 							<input
 								type="text"
 								value={entry.ref_id}
-								class="input px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 rounded w-full font-medium bg-transparent"
+								class="input px-2 py-1 border border-transparent hover:border-surface-300-700 focus:border-blue-500 rounded w-full font-medium bg-transparent"
 								onchange={(e) => updateEntry(index, 'ref_id', e.currentTarget.value)}
 							/>
 						</div>
@@ -139,7 +139,7 @@
 							<input
 								type="text"
 								value={entry.name}
-								class="input px-2 py-1 border border-transparent hover:border-gray-300 focus:border-blue-500 rounded w-full bg-transparent"
+								class="input px-2 py-1 border border-transparent hover:border-surface-300-700 focus:border-blue-500 rounded w-full bg-transparent"
 								onchange={(e) => updateEntry(index, 'name', e.currentTarget.value)}
 							/>
 						</div>
@@ -172,9 +172,9 @@
 
 	<!-- Debug Mode -->
 	{#if debug}
-		<div class="card bg-white p-4 shadow-sm">
+		<div class="card bg-surface-50-950 p-4 shadow-sm">
 			<h3 class="text-lg font-semibold mb-2">{m.orderedEntryListDebugTitle()}</h3>
-			<pre class="bg-gray-100 p-3 rounded text-xs overflow-x-auto font-mono">{JSON.stringify(
+			<pre class="bg-surface-100-900 p-3 rounded text-xs overflow-x-auto font-mono">{JSON.stringify(
 					entries,
 					null,
 					2

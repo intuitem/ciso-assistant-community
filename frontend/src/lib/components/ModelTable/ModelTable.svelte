@@ -120,11 +120,11 @@
 		orderBy = undefined,
 		element = 'table',
 		text = 'text-xs',
-		backgroundColor = 'bg-white',
+		backgroundColor = 'bg-surface-50-950',
 		color = '',
 		regionHead = '',
-		regionHeadCell = 'uppercase bg-white text-gray-700',
-		regionBody = 'bg-white',
+		regionHeadCell = 'uppercase bg-surface-50-950 text-surface-700-300',
+		regionBody = 'bg-surface-50-950',
 		regionCell = 'max-w-[65ch] max-h-[8em] overflow-hidden hover:overflow-y-auto',
 		regionFoot = '',
 		regionFootCell = '',
@@ -639,7 +639,7 @@
 					onOpenChange={(e) => (openState = e.open)}
 					positioning={{ placement: 'bottom-start' }}
 					triggerBase="btn preset-filled-primary-500 self-end relative"
-					contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+					contentBase="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200"
 					zIndex="1000"
 					autoFocus={false}
 					onPointerDownOutside={() => (openState = false)}
@@ -727,7 +727,7 @@
 						}}
 					>
 						<span
-							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-50-950/10"
 						>
 							<input
 								type="checkbox"
@@ -787,7 +787,7 @@
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-50-950/10"
 										>
 											<input
 												type="checkbox"
@@ -1012,7 +1012,7 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden bg-white px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
+					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}

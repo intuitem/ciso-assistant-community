@@ -195,7 +195,7 @@
 						disabled={!data.is_enabled}
 						cacheLock={cacheLocks['idp_entity_id']}
 					/>
-					<p class="text-gray-600 text-sm">{m.fillMetadataURL()}</p>
+					<p class="text-surface-600-400 text-sm">{m.fillMetadataURL()}</p>
 					<TextField
 						{form}
 						field="metadata_url"
@@ -204,11 +204,11 @@
 						cacheLock={cacheLocks['metadata_url']}
 					/>
 					<div class="flex items-center justify-center w-full space-x-2">
-						<hr class="w-1/2 items-center bg-gray-200 border-0" />
-						<span class="flex items-center text-gray-600 text-sm">{m.or()}</span>
-						<hr class="w-1/2 items-center bg-gray-200 border-0" />
+						<hr class="w-1/2 items-center bg-surface-200-800 border-0" />
+						<span class="flex items-center text-surface-600-400 text-sm">{m.or()}</span>
+						<hr class="w-1/2 items-center bg-surface-200-800 border-0" />
 					</div>
-					<p class="text-gray-600 text-sm">{m.fillSSOSLOURLx509cert()}</p>
+					<p class="text-surface-600-400 text-sm">{m.fillSSOSLOURLx509cert()}</p>
 					<TextField
 						{form}
 						field="sso_url"

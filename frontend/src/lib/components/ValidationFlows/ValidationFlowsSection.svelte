@@ -37,9 +37,9 @@
 			case 'submitted':
 				return 'fa-paper-plane text-blue-600';
 			case 'dropped':
-				return 'fa-circle-stop text-gray-600';
+				return 'fa-circle-stop text-surface-600-400';
 			default:
-				return 'fa-question-circle text-gray-600';
+				return 'fa-question-circle text-surface-600-400';
 		}
 	}
 
@@ -70,7 +70,7 @@
 	>
 		<div class="space-y-3">
 			{#each validationFlows as validation_flow}
-				<div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+				<div class="p-3 bg-surface-50-950 rounded-lg border border-surface-200-800">
 					<div class="flex items-start justify-between">
 						<div class="flex-1">
 							<div class="flex items-center space-x-2 mb-2">
@@ -95,7 +95,7 @@
 								</span>
 								<i class="fa-solid {getStatusIcon(validation_flow.status)} text-sm ml-1"></i>
 							</div>
-							<div class="text-sm text-gray-600">
+							<div class="text-sm text-surface-600-400">
 								<i class="fa-solid fa-user-check mr-1"></i>
 								<span class="font-medium">{m.approver()}:</span>
 								{getApproverName(validation_flow.approver)}

@@ -100,7 +100,7 @@
 
 <div class="flex flex-row h-full space-x-2">
 	<div
-		class="flex flex-col rounded-lg bg-white h-full {$showSidePanel
+		class="flex flex-col rounded-lg bg-surface-50-950 h-full {$showSidePanel
 			? 'w-2/3'
 			: 'w-full'} p-2 space-y-1 shadow-xl"
 	>
@@ -148,7 +148,7 @@
 			<div class="flex w-full h-full justify-between items-center">
 				<a
 					href={currentMonth()}
-					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-white text-white hover:text-primary-500 transition duration-300"
+					class="font-light text-lg border rounded-lg border-white p-2 hover:bg-surface-50-950 text-white hover:text-primary-500 transition duration-300"
 				>
 					<i class="fas fa-calendar-day"></i>
 					{m.today()}
@@ -165,7 +165,7 @@
 	</div>
 	{#if $showSidePanel && $selectedDay}
 		<div
-			class="flex flex-col rounded-lg bg-white h-full w-1/3 p-4 space-y-3 shadow-xl"
+			class="flex flex-col rounded-lg bg-surface-50-950 h-full w-1/3 p-4 space-y-3 shadow-xl"
 			in:fly={{ x: 300, duration: 300 }}
 			out:fly={{ x: 300, duration: 300 }}
 		>
@@ -174,7 +174,7 @@
 					{$selectedDay.day}
 					{monthNames[$selectedDay.month - 1]}, {$selectedDay.year}
 				</h2>
-				<button onclick={closePanel} class="text-gray-500 hover:text-gray-700 focus:outline-hidden">
+				<button onclick={closePanel} class="text-surface-600-400 hover:text-surface-700-300 focus:outline-hidden">
 					<i class="fas fa-times"></i>
 				</button>
 			</div>
@@ -202,14 +202,14 @@
 								<Anchor href={item.link} class="block">
 									<div class="font-medium">{item.label}</div>
 									{#if item.description}
-										<div class="text-sm text-gray-600 mt-1">{item.description}</div>
+										<div class="text-sm text-surface-600-400 mt-1">{item.description}</div>
 									{/if}
 								</Anchor>
 							</li>
 						{/each}
 					</ul>
 				{:else}
-					<div class="text-center text-gray-500 py-8">
+					<div class="text-center text-surface-600-400 py-8">
 						{m.noEvents()}
 					</div>
 				{/if}

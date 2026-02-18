@@ -119,7 +119,7 @@
 
 	{#if Object.keys(legalIdentifiers).length === 0}
 		<div
-			class="text-gray-500 text-sm italic text-center py-4 border-2 border-dashed border-gray-200 rounded"
+			class="text-surface-600-400 text-sm italic text-center py-4 border-2 border-dashed border-surface-200-800 rounded"
 		>
 			{m.noLegalIdentifierAdded()}
 		</div>
@@ -127,19 +127,19 @@
 
 	<div class="space-y-3">
 		{#each Object.entries(legalIdentifiers) as [type, identifier], i (i + '-' + type)}
-			<div class="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
+			<div class="flex gap-2 items-start p-3 bg-surface-50-950 rounded-lg">
 				<div class="flex-1">
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label for="identifier-type-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+					<label for="identifier-type-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
 						>{m.identifierType()}</label
 					>
 					<select
 						id="identifier-type-{i}"
 						value={type}
 						onchange={(e) => updateIdentifierType(type, e.target.value)}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					>
 						{#each identifierTypes as idType}
 							<option value={idType.value}>
@@ -153,7 +153,7 @@
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label for="identifier-value-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+					<label for="identifier-value-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
 						>{m.identifierValue()}</label
 					>
 					<input
@@ -162,7 +162,7 @@
 						value={identifier}
 						oninput={(e) => updateIdentifierValue(type, e.target.value)}
 						placeholder={m.enterIdentifierValue()}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					/>
 				</div>
 

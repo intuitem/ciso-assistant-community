@@ -25,7 +25,7 @@
 	}: Props = $props();
 </script>
 
-<p class="text-sm text-gray-500">{m.fearedEventHelpText()}</p>
+<p class="text-sm text-surface-600-400">{m.fearedEventHelpText()}</p>
 <AutocompleteSelect
 	{form}
 	field="ebios_rm_study"

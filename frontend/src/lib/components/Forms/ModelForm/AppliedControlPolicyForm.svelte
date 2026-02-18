@@ -205,7 +205,7 @@
 	>
 		<!-- Build Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">{m.buildCosts()}</h5>
+			<h5 class="font-medium text-surface-600-400 my-2 py-2">{m.buildCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}
@@ -238,7 +238,7 @@
 
 		<!-- Run Costs -->
 		<div class="space-y-2">
-			<h5 class="font-medium text-gray-600 my-2 py-2">{m.runCosts()}</h5>
+			<h5 class="font-medium text-surface-600-400 my-2 py-2">{m.runCosts()}</h5>
 			<div class="grid grid-cols-2 gap-4">
 				<NumberField
 					{form}

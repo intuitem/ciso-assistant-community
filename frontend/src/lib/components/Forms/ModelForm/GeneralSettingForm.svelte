@@ -159,7 +159,7 @@
 					/>
 				</div>
 				<div class="flex-1">
-					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
+					<div class="relative w-full h-64 max-w-md bg-surface-50-950 rounded-lg shadow-md p-4">
 						<!-- Point d’origine -->
 						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 

@@ -206,10 +206,10 @@
 
 <div class="space-y-6">
 	{#each featureFlagGroups as group}
-		<div class="bg-white shadow-sm rounded-xl p-6 border border-gray-200">
+		<div class="bg-surface-50-950 shadow-sm rounded-xl p-6 border border-surface-200-800">
 			<div class="mb-4">
-				<h2 class="text-xl font-bold text-gray-800">{group.category}</h2>
-				<p class="text-sm text-gray-500 mt-1">{group.description}</p>
+				<h2 class="text-xl font-bold text-surface-950-50">{group.category}</h2>
+				<p class="text-sm text-surface-600-400 mt-1">{group.description}</p>
 			</div>
 			<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 				{#each group.fields as { field, label, description }}

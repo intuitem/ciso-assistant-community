@@ -41,22 +41,22 @@
 </script>
 
 <!-- Text-based attack path flows -->
-<div class="mb-4 space-y-3 bg-white p-4 rounded-lg border border-gray-200">
+<div class="mb-4 space-y-3 bg-surface-50-950 p-4 rounded-lg border border-surface-200-800">
 	{#each attackPaths as path}
 		<div class="text-sm border-l-4 border-primary-500 pl-3 py-2">
 			{#if path.name}
-				<div class="font-semibold text-gray-700 mb-2">{path.name}</div>
+				<div class="font-semibold text-surface-700-300 mb-2">{path.name}</div>
 			{/if}
 			<div class="flex flex-wrap items-center gap-2 font-mono text-xs">
 				<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-semibold">
 					{safeTranslate(path.risk_origin) || 'Unknown RO'}
 				</span>
-				<i class="fa-solid fa-arrow-right text-gray-400"></i>
+				<i class="fa-solid fa-arrow-right text-surface-400-600"></i>
 
 				<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded font-semibold">
 					{path.target_objective || 'Unknown TO'}
 				</span>
-				<i class="fa-solid fa-arrow-right text-gray-400"></i>
+				<i class="fa-solid fa-arrow-right text-surface-400-600"></i>
 
 				{#if path.stakeholders && path.stakeholders.length > 0}
 					<div class="flex flex-wrap items-center gap-2">
@@ -70,11 +70,11 @@
 								{/if}
 							</span>
 							{#if stakeholder !== path.stakeholders[path.stakeholders.length - 1]}
-								<span class="text-gray-300">|</span>
+								<span class="text-surface-300-700">|</span>
 							{/if}
 						{/each}
 					</div>
-					<i class="fa-solid fa-arrow-right text-gray-400"></i>
+					<i class="fa-solid fa-arrow-right text-surface-400-600"></i>
 				{/if}
 
 				{#if fearedEvents && fearedEvents.length > 0}
@@ -84,11 +84,11 @@
 								{fe.name}
 							</span>
 							{#if fe !== fearedEvents[fearedEvents.length - 1]}
-								<span class="text-gray-300">|</span>
+								<span class="text-surface-300-700">|</span>
 							{/if}
 						{/each}
 					</div>
-					<i class="fa-solid fa-arrow-right text-gray-400"></i>
+					<i class="fa-solid fa-arrow-right text-surface-400-600"></i>
 				{/if}
 
 				{#if fearedEventsWithAssets && fearedEventsWithAssets.length > 0}
@@ -113,8 +113,8 @@
 </div>
 
 <!-- Legend -->
-<div class="mb-6 bg-white p-3 rounded-lg border border-gray-200">
-	<h4 class="text-xs font-semibold text-gray-600 mb-2">{m.legend()}:</h4>
+<div class="mb-6 bg-surface-50-950 p-3 rounded-lg border border-surface-200-800">
+	<h4 class="text-xs font-semibold text-surface-600-400 mb-2">{m.legend()}:</h4>
 	<div class="flex flex-wrap gap-3 text-xs">
 		<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-semibold">{m.riskOrigin()}</span>
 		<span class="px-2 py-1 bg-purple-100 text-purple-800 rounded font-semibold"

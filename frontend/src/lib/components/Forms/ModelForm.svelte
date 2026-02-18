@@ -867,7 +867,7 @@
 		>
 			{#if closeModal}
 				<button
-					class="btn bg-gray-400 text-white font-semibold w-full"
+					class="btn bg-surface-400-600 text-white font-semibold w-full"
 					data-testid="cancel-button"
 					type="button"
 					onclick={(event) => {
@@ -900,7 +900,7 @@
 			{:else}
 				{#if cancelButton}
 					<button
-						class="btn bg-gray-400 text-white font-semibold w-full"
+						class="btn bg-surface-400-600 text-white font-semibold w-full"
 						data-testid="cancel-button"
 						type="button"
 						onclick={cancel}>{m.cancel()}</button

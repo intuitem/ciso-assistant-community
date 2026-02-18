@@ -32,7 +32,7 @@
 	<Anchor
 		{href}
 		{label}
-		class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white hover:bg-violet-50 {cEmphasis} {customClass}"
+		class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-surface-50-950 hover:bg-violet-50 {cEmphasis} {customClass}"
 	>
 		<div class="text-xs">
 			{#if icon}
@@ -48,7 +48,7 @@
 		</div>
 	</Anchor>
 {:else}
-	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-white {cEmphasis} {customClass}">
+	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-surface-50-950 {cEmphasis} {customClass}">
 		<div class="text-xs">
 			{#if icon}
 				<span><i class={icon}></i></span>

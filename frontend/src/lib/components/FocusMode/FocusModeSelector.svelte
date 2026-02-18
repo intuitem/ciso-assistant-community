@@ -88,7 +88,7 @@
 
 	{#if isOpen && domainFolders.length > 0}
 		<div
-			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-white rounded-lg shadow-lg border border-slate-200 z-50"
+			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-surface-50-950 rounded-lg shadow-lg border border-slate-200 z-50"
 		>
 			<div class="p-2 border-b border-slate-100">
 				<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
@@ -131,7 +131,7 @@
 		</div>
 	{:else if isOpen && domainFolders.length === 0}
 		<div
-			class="absolute right-0 top-full mt-1 w-64 bg-white rounded-lg shadow-lg border border-slate-200 z-50 p-4"
+			class="absolute right-0 top-full mt-1 w-64 bg-surface-50-950 rounded-lg shadow-lg border border-slate-200 z-50 p-4"
 		>
 			<p class="text-sm text-slate-500 text-center">
 				{m.noDomainsAvailable?.() ?? 'No domains available'}

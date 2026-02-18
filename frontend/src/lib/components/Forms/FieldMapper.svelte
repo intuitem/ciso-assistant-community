@@ -130,7 +130,7 @@
 	}
 </script>
 
-<div class="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-surface-200">
+<div class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200">
 	<div class="mb-8 border-b border-surface-100 pb-4">
 		<h2 class="text-xl font-bold text-surface-800">
 			{m.serviceNowIntegrationMappingsDescription()}
@@ -223,7 +223,7 @@
 								</span>
 							</div>
 
-							<div class="p-4 bg-white space-y-3">
+							<div class="p-4 bg-surface-50-950 space-y-3">
 								{#each field.choices as choice}
 									<div class="flex items-center justify-between gap-2">
 										<div class="w-1/3 text-sm text-surface-600 truncate" title={choice.label}>

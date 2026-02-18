@@ -105,7 +105,7 @@
 
 	{#if Object.keys(translations).length === 0}
 		<div
-			class="text-gray-500 text-sm italic text-center py-4 border-2 border-dashed border-gray-200 rounded"
+			class="text-surface-600-400 text-sm italic text-center py-4 border-2 border-dashed border-surface-200-800 rounded"
 		>
 			{m.noTranslationAdded()}
 		</div>
@@ -113,19 +113,19 @@
 
 	<div class="space-y-3">
 		{#each Object.entries(translations) as [lang, text], i (i + '-' + lang)}
-			<div class="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
+			<div class="flex gap-2 items-start p-3 bg-surface-50-950 rounded-lg">
 				<div class="flex-1">
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1">{m.translationErrorMessage()}</div>
 					{/if}
-					<label for="translation-lang-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+					<label for="translation-lang-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
 						>{m.language()}</label
 					>
 					<select
 						id="translation-lang-{i}"
 						value={lang}
 						onchange={(e) => updateLanguageKey(lang, e.target.value)}
-						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					>
 						<option value="">{m.selectLanguagePlaceholder()}</option>
 						{#each locales as lang}
@@ -140,7 +140,7 @@
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.translationErrorMessage()}</div>
 					{/if}
-					<label for="translation-value-{i}" class="block text-xs font-medium text-gray-600 mb-1"
+					<label for="translation-value-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
 						>{m.translations()}</label
 					>
 					<input
@@ -149,7 +149,7 @@
 						value={text}
 						oninput={(e) => updateTranslationValue(lang, e.target.value)}
 						placeholder="Enter translation..."
-						class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+						class="w-full px-3 py-2 border border-surface-300-700 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 					/>
 				</div>
 

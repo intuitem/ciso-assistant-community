@@ -6,7 +6,7 @@
 
 <div class="flex w-full border" data-testid="line-heatmap">
 	{#if !data || data.length === 0}
-		<div class="p-4 text-center w-full text-gray-500">
+		<div class="p-4 text-center w-full text-surface-600-400">
 			{m.noDataAvailable()}
 		</div>
 	{:else}

@@ -129,7 +129,7 @@
 				{#if $value}
 					<MarkdownRenderer content={$value} />
 				{:else}
-					<p class="text-gray-500 italic">{m.markdownCTA()}</p>
+					<p class="text-surface-600-400 italic">{m.markdownCTA()}</p>
 				{/if}
 			</div>
 		{:else}
@@ -152,10 +152,10 @@
 		{/if}
 	</div>
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 	{#if !showPreview}
-		<p class="text-xs text-gray-400 mt-1">
+		<p class="text-xs text-surface-400-600 mt-1">
 			{m.markdownHelpText()}
 		</p>
 	{/if}

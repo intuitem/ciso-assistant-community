@@ -109,7 +109,7 @@
 
 <div class="flex justify-between items-center w-full">
 	<div class="flex items-center gap-3">
-		<span class="text-sm font-medium text-gray-700">
+		<span class="text-sm font-medium text-surface-700-300">
 			{m.itemsSelected({ count: selectedIds.size })}
 		</span>
 		<button

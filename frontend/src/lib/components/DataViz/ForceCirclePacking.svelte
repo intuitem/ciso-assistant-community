@@ -216,7 +216,7 @@
 	<input
 		id="graph-search"
 		type="text"
-		class="w-full rounded-md border-gray-200 py-2.5 pe-10 shadow-xs"
+		class="w-full rounded-md border-surface-200-800 py-2.5 pe-10 shadow-xs"
 		bind:value={searchQuery}
 		onkeydown={handleKeyDown}
 		placeholder="Find a node ..."
@@ -224,7 +224,7 @@
 	<span class="absolute inset-y-0 end-0 grid w-10 place-content-center">
 		<button
 			type="button"
-			class="text-gray-600 hover:text-gray-700"
+			class="text-surface-600-400 hover:text-surface-700-300"
 			onclick={() => searchNode(searchQuery)}
 			aria-label="Search"
 		>

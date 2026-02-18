@@ -132,7 +132,7 @@
 
 {#if tree.length === 0}
 	<div class="flex flex-col justify-center items-center h-full">
-		<span class="text-center text-gray-600"
+		<span class="text-center text-surface-600-400"
 			>Not enough data yet. Refresh when more content is available.</span
 		>
 	</div>

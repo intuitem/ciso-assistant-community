@@ -430,7 +430,7 @@
 	{/if}
 
 	<!-- Main content area - modified to use conditional flex layout -->
-	<div class="card shadow-lg bg-white p-4">
+	<div class="card shadow-lg bg-surface-50-950 p-4">
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
@@ -452,11 +452,11 @@
 		<div class={hasWidgets ? 'flex flex-row flex-wrap gap-4' : 'w-full'}>
 			<!-- Left side - Details (conditional width) -->
 			<div
-				class="flow-root rounded-lg border border-gray-100 py-3 shadow-xs {hasWidgets
+				class="flow-root rounded-lg border border-surface-100-900 py-3 shadow-xs {hasWidgets
 					? 'flex-1 min-w-[300px]'
 					: 'w-full'}"
 			>
-				<dl class="-my-3 divide-y divide-gray-100 text-sm">
+				<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
 						{@const isRelatedField = relatedFieldNames.has(key)}
 						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
@@ -467,7 +467,7 @@
 								: ''}"
 						>
 							<dt
-								class="font-medium text-gray-900 flex items-center gap-2"
+								class="font-medium text-surface-950-50 flex items-center gap-2"
 								data-testid="{key.replace('_', '-')}-field-title"
 							>
 								<span>{safeTranslate(key)}</span>
@@ -476,11 +476,11 @@
 									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
 									<Tooltip
 										positioning={{ placement: 'right' }}
-										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+										contentBase="card bg-surface-950-50 text-white p-3 max-w-xs shadow-xl border border-surface-700-300"
 										openDelay={200}
 										closeDelay={100}
 										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
+										arrowBase="arrow bg-surface-950-50 border border-surface-700-300"
 									>
 										{#snippet trigger()}
 											<i
@@ -493,7 +493,7 @@
 									</Tooltip>
 								{/if}
 							</dt>
-							<dd class="text-gray-700 sm:col-span-4">
+							<dd class="text-surface-700-300 sm:col-span-4">
 								<ul class="">
 									<li
 										class="list-none whitespace-pre-line"
@@ -582,7 +582,7 @@
 																		>{val.name}</Anchor
 																	>
 																	{#if val.legal_basis}
-																		<span class="text-gray-600">
+																		<span class="text-surface-600-400">
 																			- {safeTranslate(val.legal_basis)}
 																		</span>
 																	{/if}
@@ -644,7 +644,7 @@
 												<li class="fa-solid fa-flag text-blue-500"></li>
 												{m.p3()}
 											{:else if value === 'P4'}
-												<li class="fa-solid fa-flag text-gray-500"></li>
+												<li class="fa-solid fa-flag text-surface-600-400"></li>
 												{m.p4()}
 											{:else if key === 'icon'}
 												<i class="text-lg fa {data.data.icon_fa_class}"></i>
@@ -773,7 +773,7 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-gray-100 bg-linear-to-l from-sky-500 to-green-600"
+						class="btn text-surface-100-900 bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalAppliedControlDuplicateForm()}
 						data-testid="duplicate-button"
 					>
@@ -788,7 +788,7 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
+	<div class="card shadow-lg mt-8 bg-surface-50-950">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
@@ -841,7 +841,7 @@
 									{#snippet addButton()}
 										{#if canEditObject && field?.addExisting}
 											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
@@ -853,7 +853,7 @@
 												</button>
 											</span>
 											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 											>
 												<button
 													class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"

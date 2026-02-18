@@ -32,37 +32,37 @@
 	</div>
 	{#if comparisons?.length > 0}
 		<div class="overflow-x-auto">
-			<table class="min-w-full bg-white border border-gray-200 rounded-lg">
-				<thead class="bg-gray-100">
+			<table class="min-w-full bg-surface-50-950 border border-surface-200-800 rounded-lg">
+				<thead class="bg-surface-100-900">
 					<tr>
-						<th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-b"></th>
-						<th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-b"
+						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"></th>
+						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"
 							>{m.objective()}</th
 						>
-						<th class="px-4 py-2 text-left text-sm font-semibold text-gray-700 border-b"
+						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"
 							>{m.capability()}</th
 						>
-						<th class="px-4 py-2 text-center text-sm font-semibold text-gray-700 border-b"
+						<th class="px-4 py-2 text-center text-sm font-semibold text-surface-700-300 border-b"
 							>{m.alignment()}</th
 						>
 					</tr>
 				</thead>
 				<tbody>
 					{#each comparisons as comparison}
-						<tr class="border-b hover:bg-gray-50">
-							<td class="px-4 py-2 text-sm text-gray-900" class:uppercase={uppercaseLabels}
+						<tr class="border-b hover:bg-surface-50-950">
+							<td class="px-4 py-2 text-sm text-surface-950-50" class:uppercase={uppercaseLabels}
 								>{safeTranslate(comparison.objective)}</td
 							>
-							<td class="px-4 py-2 text-sm text-gray-700"
+							<td class="px-4 py-2 text-sm text-surface-700-300"
 								>{getDisplayValue(comparison.expectation)}</td
 							>
-							<td class="px-4 py-2 text-sm text-gray-700">{getDisplayValue(comparison.reality)}</td>
+							<td class="px-4 py-2 text-sm text-surface-700-300">{getDisplayValue(comparison.reality)}</td>
 							<td class="px-4 py-2 text-center">
 								<span
 									class="inline-flex items-center justify-center w-6 h-6 rounded-full"
 									class:bg-green-500={comparison.verdict === true}
 									class:bg-red-500={comparison.verdict === false}
-									class:bg-gray-400={comparison.verdict === null}
+									class:bg-surface-400-600={comparison.verdict === null}
 								>
 									{#if comparison.verdict === true}
 										<i class="fa-solid fa-check text-white text-xs"></i>
@@ -79,8 +79,8 @@
 			</table>
 		</div>
 	{:else}
-		<div class="bg-white border border-gray-200 rounded-lg p-8 flex items-center justify-center">
-			<p class="text-gray-500 text-center">{m.noDataAvailable()}</p>
+		<div class="bg-surface-50-950 border border-surface-200-800 rounded-lg p-8 flex items-center justify-center">
+			<p class="text-surface-600-400 text-center">{m.noDataAvailable()}</p>
 		</div>
 	{/if}
 </div>

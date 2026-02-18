@@ -33,11 +33,11 @@
 		<div class="text-xs space-y-2">
 			<div>
 				<strong>initialData:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(initialData, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>formDataCache:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
 			</div>
 		</div>
 	</div>

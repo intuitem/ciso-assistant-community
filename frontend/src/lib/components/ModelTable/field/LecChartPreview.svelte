@@ -169,7 +169,7 @@
 	<div bind:this={chartContainer} class="h-24 w-32 min-w-[128px]"></div>
 {:else}
 	<div
-		class="h-24 w-32 min-w-[128px] flex items-center justify-center text-gray-500 text-xs bg-gray-50 rounded"
+		class="h-24 w-32 min-w-[128px] flex items-center justify-center text-surface-600-400 text-xs bg-surface-50-950 rounded"
 	>
 		No simulation
 	</div>

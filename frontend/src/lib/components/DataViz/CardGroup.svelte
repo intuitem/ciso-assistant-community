@@ -25,16 +25,16 @@
 
 <div class="space-y-3">
 	<!-- Group Header -->
-	<div class="flex items-center gap-3 pb-2 border-b border-gray-200">
+	<div class="flex items-center gap-3 pb-2 border-b border-surface-200-800">
 		{#if icon}
 			<div class="text-xl text-violet-600">
 				<i class={icon}></i>
 			</div>
 		{/if}
 		<div>
-			<h3 class="text-lg font-semibold text-gray-800">{title}</h3>
+			<h3 class="text-lg font-semibold text-surface-950-50">{title}</h3>
 			{#if description}
-				<p class="text-sm text-gray-600">{description}</p>
+				<p class="text-sm text-surface-600-400">{description}</p>
 			{/if}
 		</div>
 	</div>

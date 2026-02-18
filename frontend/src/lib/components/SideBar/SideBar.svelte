@@ -293,22 +293,22 @@
 			open
 		)}"
 	>
-		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
+		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-surface-50-950 py-4 px-3">
 			<SideBarHeader />
 			<SideBarNavigation {sideBarVisibleItems} />
 			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
 		</nav>
 	</aside>
 	{#if $loading}
-		<div class="fixed inset-0 flex items-center justify-center bg-gray-50 bg-opacity-60 z-1000">
-			<div class="flex flex-col items-center space-y-4 p-6 rounded-lg bg-white shadow-lg">
+		<div class="fixed inset-0 flex items-center justify-center bg-surface-50-950 bg-opacity-60 z-1000">
+			<div class="flex flex-col items-center space-y-4 p-6 rounded-lg bg-surface-50-950 shadow-lg">
 				<LoadingSpinner />
 
-				<p class="text-sm text-gray-700 font-medium text-center">
+				<p class="text-sm text-surface-700-300 font-medium text-center">
 					{m.importingDemoData()}
 				</p>
 
-				<p class="text-xs text-gray-500 text-center max-w-xs">
+				<p class="text-xs text-surface-600-400 text-center max-w-xs">
 					{m.demoEnvironmentBeingPrepared()}
 				</p>
 			</div>

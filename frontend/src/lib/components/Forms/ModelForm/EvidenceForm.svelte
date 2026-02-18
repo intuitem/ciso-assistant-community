@@ -82,7 +82,7 @@
 	optionsInfoFields={{
 		fields: [{ field: 'content_type', translate: true }],
 		position: 'suffix',
-		classes: 'text-xxs bg-gray-200 px-1.5 py-0.5 rounded'
+		classes: 'text-xxs bg-surface-200-800 px-1.5 py-0.5 rounded'
 	}}
 />
 {#if context !== 'edit'}

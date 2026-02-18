@@ -297,20 +297,20 @@
 		{@const isCollapsed = collapsedGroups.has(currentPath)}
 		{@const totalOptions = getAllOptionsFromGroup(group).length}
 
-		<div class="border border-gray-200 rounded-lg" style="margin-left: {depth * 20}px;">
+		<div class="border border-surface-200-800 rounded-lg" style="margin-left: {depth * 20}px;">
 			{#if showGroupHeaders && groupBy}
 				<div
-					class="px-3 py-2 border-b border-gray-200 flex items-center justify-between"
-					class:bg-gray-50={depth === 0}
-					class:bg-gray-100={depth === 1}
-					class:bg-gray-200={depth >= 2}
+					class="px-3 py-2 border-b border-surface-200-800 flex items-center justify-between"
+					class:bg-surface-50-950={depth === 0}
+					class:bg-surface-100-900={depth === 1}
+					class:bg-surface-200-800={depth >= 2}
 				>
 					<div class="flex items-center gap-2">
 						{#if collapsibleGroups}
 							<button
 								type="button"
 								aria-label="Toggle Group"
-								class="text-gray-500 hover:text-gray-700 transition-transform duration-200"
+								class="text-surface-600-400 hover:text-surface-700-300 transition-transform duration-200"
 								class:rotate-90={!isCollapsed}
 								onclick={() => toggleGroup(currentPath)}
 							>
@@ -323,15 +323,15 @@
 								</svg>
 							</button>
 						{/if}
-						<h3 class="text-sm font-medium text-gray-700" class:font-bold={depth === 0}>
+						<h3 class="text-sm font-medium text-surface-700-300" class:font-bold={depth === 0}>
 							{safeTranslate(groupName)}
 						</h3>
-						<span class="text-xs text-gray-500">({totalOptions})</span>
+						<span class="text-xs text-surface-600-400">({totalOptions})</span>
 					</div>
 
 					<button
 						type="button"
-						class="text-xs px-2 py-1 rounded border border-gray-300 hover:bg-gray-100 transition-colors"
+						class="text-xs px-2 py-1 rounded border border-surface-300-700 hover:bg-surface-100-900 transition-colors"
 						class:bg-blue-50={getGroupSelectionState(group) === 'all'}
 						class:border-blue-300={getGroupSelectionState(group) === 'all'}
 						class:bg-blue-25={getGroupSelectionState(group) === 'partial'}
@@ -353,14 +353,14 @@
 				{#if hasDirectOptions}
 					<div class="p-3 space-y-2">
 						{#each group.options as opt}
-							<label class="flex items-center gap-2 hover:bg-gray-50 p-1 rounded transition-colors">
+							<label class="flex items-center gap-2 hover:bg-surface-50-950 p-1 rounded transition-colors">
 								<input
 									type="checkbox"
 									value={opt.value}
 									checked={selected.includes(opt.value)}
 									onchange={() => toggle(opt.value)}
 									{disabled}
-									class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+									class="rounded border-surface-300-700 text-blue-600 focus:ring-blue-500"
 								/>
 								<span class="text-sm">{opt.translatedLabel ?? opt.label}</span>
 							</label>
@@ -415,7 +415,7 @@
 	{/if}
 
 	{#if helpText}
-		<p class="text-sm text-gray-500">{helpText}</p>
+		<p class="text-sm text-surface-600-400">{helpText}</p>
 	{/if}
 
 	{#each selected as val}

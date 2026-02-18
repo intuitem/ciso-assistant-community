@@ -91,7 +91,7 @@
 			bind:cachedValue={formDataCache['task_date']}
 		/>
 		<div class="flex w-full items-center space-x-3">
-			<span class="mt-5 font-semibold text-sm text-gray-800">{m.each()}</span>
+			<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.each()}</span>
 			<NumberField
 				{form}
 				field="interval"
@@ -118,7 +118,7 @@
 		</div>
 		<div class="flex w-full items-center space-x-3">
 			{#if $frequency == 'MONTHLY' || $frequency == 'YEARLY'}
-				<span class="mt-5 font-semibold text-sm text-gray-800">{m.the()}</span>
+				<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.the()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple
@@ -165,7 +165,7 @@
 		</div>
 		{#if $frequency == 'YEARLY'}
 			<div class="flex w-full items-center space-x-3">
-				<span class="mt-5 font-semibold text-sm text-gray-800">{m.of()}</span>
+				<span class="mt-5 font-semibold text-sm text-surface-950-50">{m.of()}</span>
 				<AutocompleteSelect
 					{form}
 					multiple

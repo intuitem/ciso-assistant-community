@@ -6,8 +6,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-white p-6 w-modal space-y-6';
-	const cHeader = 'text-xl font-medium text-gray-900';
+	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cHeader = 'text-xl font-medium text-surface-950-50';
 
 	interface Props {
 		parent: any;
@@ -133,12 +133,12 @@
 			<article>{m.batchActionConfirmChange({ count })}</article>
 
 			{#if loading}
-				<div class="text-sm text-gray-500">Loading...</div>
+				<div class="text-sm text-surface-600-400">Loading...</div>
 			{:else if multiSelect}
 				<div class="space-y-2">
 					<input
 						type="text"
-						class="input w-full border border-gray-300 rounded px-3 py-2 text-sm"
+						class="input w-full border border-surface-300-700 rounded px-3 py-2 text-sm"
 						placeholder={m.searchPlaceholder()}
 						bind:value={searchQuery}
 					/>
@@ -163,10 +163,10 @@
 							{/each}
 						</div>
 					{/if}
-					<div class="max-h-48 overflow-y-auto border border-gray-200 rounded">
+					<div class="max-h-48 overflow-y-auto border border-surface-200-800 rounded">
 						{#each filteredOptions as option}
 							<label
-								class="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+								class="flex items-center gap-2 px-3 py-1.5 hover:bg-surface-50-950 cursor-pointer border-b border-surface-100-900 last:border-b-0"
 							>
 								<input
 									type="checkbox"
@@ -178,7 +178,7 @@
 							</label>
 						{/each}
 						{#if filteredOptions.length === 0}
-							<div class="px-3 py-2 text-sm text-gray-400">
+							<div class="px-3 py-2 text-sm text-surface-400-600">
 								{m.noResultsFound()}
 							</div>
 						{/if}
@@ -186,7 +186,7 @@
 				</div>
 			{:else}
 				<select
-					class="select w-full border border-gray-300 rounded px-3 py-2"
+					class="select w-full border border-surface-300-700 rounded px-3 py-2"
 					bind:value={selectedValue}
 				>
 					<option value="" disabled>--</option>
@@ -197,10 +197,10 @@
 			{/if}
 		{/if}
 
-		<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+		<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 			<button
 				type="button"
-				class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+				class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 hover:bg-surface-50-950"
 				data-testid="batch-cancel-button"
 				onclick={parent.onClose}
 			>

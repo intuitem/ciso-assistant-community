@@ -65,7 +65,7 @@
 				</button>
 			</div>
 		</div>
-		<p class="text-xs text-gray-400">
+		<p class="text-xs text-surface-400-600">
 			Supports markdown: **bold**, *italic*, `code`, [links](url), lists, etc.
 		</p>
 	{:else}
@@ -87,7 +87,7 @@
 			{#if editValue}
 				<MarkdownRenderer content={editValue} />
 			{:else}
-				<p class="text-gray-500 italic">{placeholder}</p>
+				<p class="text-surface-600-400 italic">{placeholder}</p>
 			{/if}
 		</div>
 		{#if !disabled}

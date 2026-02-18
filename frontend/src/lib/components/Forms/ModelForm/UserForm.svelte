@@ -93,6 +93,6 @@
 	bind:cachedValue={formDataCache['observation']}
 />
 
-<span class="text-gray-500 pt-5">
+<span class="text-surface-600-400 pt-5">
 	⚠️ {m.createdUserWillHaveNoRights()}
 </span>

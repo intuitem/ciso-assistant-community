@@ -72,24 +72,24 @@
 	>
 		<div class="h-auto overflow-hidden flex flex-col max-h-88 w-md rounded-lg">
 			<input
-				class="w-full bg-white px-4 py-3 border-b border-gray-200 outline-none focus:border-blue-800"
+				class="w-full bg-surface-50-950 px-4 py-3 border-b border-surface-200-800 outline-none focus:border-blue-800"
 				type="text"
 				bind:value={searchText}
 				bind:this={searchInput}
 				placeholder="Type a command..."
 			/>
 			{#if filteredNavigationCommands.length > 0}
-				<span class="bg-white py-2 px-4 text-xs uppercase text-gray-500">Navigation</span>
+				<span class="bg-surface-50-950 py-2 px-4 text-xs uppercase text-surface-600-400">Navigation</span>
 			{:else}
-				<span class="bg-white py-2 px-1 text-black">No results found.</span>
+				<span class="bg-surface-50-950 py-2 px-1 text-black">No results found.</span>
 			{/if}
 			<div class="overflow-auto flex flex-col">
 				{#each filteredNavigationCommands as navigationCommand, index}
 					{#if navigationCommand.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0}
 						<button
 							class="navigation-btn text-left py-2 px-4 text-black {selected === index
-								? 'bg-gray-100'
-								: 'bg-white'}"
+								? 'bg-surface-100-900'
+								: 'bg-surface-50-950'}"
 							data-cmdk-nav-btn=""
 							onmouseenter={() => {
 								selected = index;

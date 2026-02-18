@@ -78,5 +78,5 @@
 		{@html renderedContent}
 	</div>
 {:else}
-	<span class="text-gray-500 italic">--</span>
+	<span class="text-surface-600-400 italic">--</span>
 {/if}

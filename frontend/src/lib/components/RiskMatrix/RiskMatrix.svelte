@@ -108,7 +108,7 @@
 {#snippet xAxisHeadersSnippet()}
 	{#each xAxisHeaders as xHeader, j}
 		<div
-			class="flex flex-col items-center justify-center bg-gray-200 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
+			class="flex flex-col items-center justify-center bg-surface-200-800 min-h-20 border-dotted border-black border-2 text-center p-1 {classesCellText(
 				xHeader.hexcolor
 			)}"
 			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
@@ -176,7 +176,7 @@
 			{#each finalMatrix as row, i}
 				{@const yHeader = yAxisHeaders[finalMatrix.length - 1 - i]}
 				<div
-					class="flex flex-col items-center min-h-20 justify-center bg-gray-200 border-dotted border-black border-2 text-center p-1 {classesCellText(
+					class="flex flex-col items-center min-h-20 justify-center bg-surface-200-800 border-dotted border-black border-2 text-center p-1 {classesCellText(
 						yHeader.hexcolor
 					)}"
 					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"

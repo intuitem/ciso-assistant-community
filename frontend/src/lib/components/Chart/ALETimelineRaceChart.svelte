@@ -351,11 +351,11 @@
 </script>
 
 <div class="{classesContainer} {width} {height}">
-	<div class="bg-white rounded-lg shadow-sm overflow-hidden">
+	<div class="bg-surface-50-950 rounded-lg shadow-sm overflow-hidden">
 		<!-- Header with title and controls -->
-		<div class="px-6 py-4 border-b border-gray-200">
+		<div class="px-6 py-4 border-b border-surface-200-800">
 			<div class="flex items-center justify-between">
-				<h3 class="text-lg font-semibold text-gray-900">{title}</h3>
+				<h3 class="text-lg font-semibold text-surface-950-50">{title}</h3>
 
 				{#if timelineData.length > 0}
 					<div class="flex items-center space-x-3">
@@ -391,7 +391,7 @@
 								<i class="fa-solid fa-step-backward text-sm"></i>
 							</button>
 
-							<span class="text-sm text-gray-600 px-2">
+							<span class="text-sm text-surface-600-400 px-2">
 								{currentFrameIndex + 1} / {timelineData.length}
 							</span>
 
@@ -416,7 +416,7 @@
 
 		<!-- Timeline scrubber -->
 		{#if timelineData.length > 0}
-			<div class="px-6 py-3 border-t border-gray-200 bg-gray-50">
+			<div class="px-6 py-3 border-t border-surface-200-800 bg-surface-50-950">
 				<div class="w-full">
 					<input
 						type="range"
@@ -424,13 +424,13 @@
 						max={timelineData.length - 1}
 						bind:value={currentFrameIndex}
 						on:input={(e) => goToFrame(parseInt(e.target.value))}
-						class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+						class="w-full h-2 bg-surface-200-800 rounded-lg appearance-none cursor-pointer"
 						style="background: linear-gradient(to right, #3b82f6 0%, #3b82f6 {(currentFrameIndex /
 							(timelineData.length - 1)) *
 							100}%, #e5e7eb {(currentFrameIndex / (timelineData.length - 1)) *
 							100}%, #e5e7eb 100%)"
 					/>
-					<div class="flex justify-between text-xs text-gray-500 mt-1">
+					<div class="flex justify-between text-xs text-surface-600-400 mt-1">
 						<span>Current State</span>
 						<span>All Treatments</span>
 					</div>
@@ -442,9 +442,9 @@
 		{#if !scenarios || scenarios.length === 0}
 			<div class="p-8 text-center">
 				<div class="flex flex-col items-center space-y-3">
-					<i class="fa-solid fa-chart-bar text-3xl text-gray-400"></i>
-					<h4 class="text-lg font-medium text-gray-600">No Data Available</h4>
-					<p class="text-gray-500 max-w-md">
+					<i class="fa-solid fa-chart-bar text-3xl text-surface-400-600"></i>
+					<h4 class="text-lg font-medium text-surface-600-400">No Data Available</h4>
+					<p class="text-surface-600-400 max-w-md">
 						No scenarios with ALE data found. Please ensure scenarios have simulation data and
 						treatment plans with ETA dates.
 					</p>

@@ -8,8 +8,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-white p-6 w-modal space-y-6';
-	const cHeader = 'text-xl font-medium text-gray-900';
+	const cBase = 'card bg-surface-50-950 p-6 w-modal space-y-6';
+	const cHeader = 'text-xl font-medium text-surface-950-50';
 	const cForm = 'space-y-4';
 
 	interface Props {
@@ -88,7 +88,7 @@
 		<article>{$modalStore[0].body ?? '(body missing)'}</article>
 
 		{#if loading}
-			<div class="text-sm text-gray-500">Loading...</div>
+			<div class="text-sm text-surface-600-400">Loading...</div>
 		{:else if errorMsg}
 			<div class="p-4 bg-red-50 text-red-900 text-sm">
 				{errorMsg}
@@ -96,31 +96,31 @@
 		{:else if cascadeInfo}
 			{#if cascadeInfo.deleted?.count > 0}
 				<div class="p-4 bg-orange-50 border-l-2 border-orange-400">
-					<div class="text-sm font-medium text-gray-900 mb-3">
+					<div class="text-sm font-medium text-surface-950-50 mb-3">
 						{m.cascadeDeleteWarning({ count: cascadeInfo.deleted.count })}
 					</div>
 
 					<div class="max-h-64 overflow-y-auto space-y-1">
 						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+							<section class="border-t border-surface-200-800">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
 									aria-controls={`del-${group.model}`}
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
 								{#if expanded.has(keyFor('deleted', group.model))}
-									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950">
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
 											</li>
 										{/each}
 									</ul>
@@ -133,34 +133,34 @@
 
 			{#if cascadeInfo.affected?.count > 0}
 				<div class="p-4 bg-blue-50 border-l-2 border-blue-400">
-					<div class="text-sm font-medium text-gray-900 mb-1">
+					<div class="text-sm font-medium text-surface-950-50 mb-1">
 						{m.cascadeAffectedNotice({ count: cascadeInfo.affected.count })}
 					</div>
-					<p class="text-xs text-gray-600 mb-3">
+					<p class="text-xs text-surface-600-400 mb-3">
 						{m.cascadeAffectedHint()}
 					</p>
 
 					<div class="max-h-64 overflow-y-auto space-y-1">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="border-t border-gray-200">
+							<section class="border-t border-surface-200-800">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-gray-50 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-50-950 text-sm"
 									aria-controls={`aff-${group.model}`}
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
 								>
-									<span class="font-medium text-gray-900">{group.verbose_name ?? group.model}</span>
-									<span class="text-xs text-gray-600">
+									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
 								{#if expanded.has(keyFor('affected', group.model))}
-									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-gray-50">
+									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950">
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
-												<span class="truncate text-gray-700" title={o.name}>{o.name}</span>
+												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
 											</li>
 										{/each}
 									</ul>
@@ -173,10 +173,10 @@
 		{/if}
 
 		<form method="POST" action={formAction} use:enhance class="modal-form {cForm}">
-			<footer class="flex gap-3 justify-end pt-4 border-t border-gray-200">
+			<footer class="flex gap-3 justify-end pt-4 border-t border-surface-200-800">
 				<button
 					type="button"
-					class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50"
+					class="px-4 py-2 text-sm font-medium text-surface-700-300 bg-surface-50-950 border border-surface-300-700 hover:bg-surface-50-950"
 					data-testid="delete-cancel-button"
 					onclick={parent.onClose}
 				>

@@ -77,8 +77,8 @@
 />
 {#if object?.id}
 	<div class="space-y-2">
-		<span class="text-sm font-medium text-gray-700">{m.requestNotes()}</span>
-		<MarkdownRenderer content={object.request_notes} class="p-3 bg-gray-50 rounded-lg" />
+		<span class="text-sm font-medium text-surface-700-300">{m.requestNotes()}</span>
+		<MarkdownRenderer content={object.request_notes} class="p-3 bg-surface-50-950 rounded-lg" />
 	</div>
 {:else}
 	<TextArea
@@ -129,8 +129,8 @@
 {#if object?.id}
 	{#if object.validation_deadline}
 		<div class="space-y-2">
-			<span class="text-sm font-medium text-gray-700">{m.validationDeadline()}</span>
-			<p class="p-3 bg-gray-50 rounded-lg text-sm">{object.validation_deadline}</p>
+			<span class="text-sm font-medium text-surface-700-300">{m.validationDeadline()}</span>
+			<p class="p-3 bg-surface-50-950 rounded-lg text-sm">{object.validation_deadline}</p>
 		</div>
 	{/if}
 {:else}

@@ -93,7 +93,7 @@
 
 {#if page.data?.featureflags?.outgoing_webhooks}
 	<div class="flex flex-col gap-3">
-		<span class="text-gray-500">{m.configureOutgoingWebhooks()}</span>
+		<span class="text-surface-600-400">{m.configureOutgoingWebhooks()}</span>
 		<span class="flex flex-row justify-between">
 			<h3 class="h3">{allowMultiple ? m.webhookEndpoints() : m.webhookEndpoint()}</h3>
 			{#if data?.webhookEndpoints?.length == 0 || allowMultiple}

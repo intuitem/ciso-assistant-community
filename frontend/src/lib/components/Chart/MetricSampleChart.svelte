@@ -150,7 +150,7 @@
 {#if samples.length > 0}
 	<div id={chart_id} class="{height} {width} {classesContainer}"></div>
 {:else}
-	<div class="flex items-center justify-center {height} {width} bg-gray-50 rounded-lg">
-		<p class="text-gray-500 text-sm">{m.noDataAvailable()}</p>
+	<div class="flex items-center justify-center {height} {width} bg-surface-50-950 rounded-lg">
+		<p class="text-surface-600-400 text-sm">{m.noDataAvailable()}</p>
 	</div>
 {/if}

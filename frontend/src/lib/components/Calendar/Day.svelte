@@ -59,9 +59,9 @@
 		in:fly={{ delay: 100, duration: 300 }}
 		class="flex flex-col p-1 rounded-md text-sm h-32 max-h-32 border
 		       {isPast
-			? 'bg-gray-300 text-gray-500 cursor-pointer hover:bg-gray-400'
-			: 'border-gray-200 bg-white cursor-pointer hover:bg-gray-100'}
-		       {isToday ? 'border-gray-200 cursor-pointer hover:bg-gray-100' : ''}"
+			? 'bg-surface-300-700 text-surface-600-400 cursor-pointer hover:bg-surface-400-600'
+			: 'border-surface-200-800 bg-surface-50-950 cursor-pointer hover:bg-surface-100-900'}
+		       {isToday ? 'border-surface-200-800 cursor-pointer hover:bg-surface-100-900' : ''}"
 		onclick={openSidePanel}
 	>
 		<span

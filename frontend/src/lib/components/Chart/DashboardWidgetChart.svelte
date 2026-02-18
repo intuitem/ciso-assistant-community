@@ -697,24 +697,24 @@
 	{#if pieChartData.length > 0}
 		<div id={chartId} class="w-full {height}"></div>
 	{:else}
-		<div class="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-			<p class="text-gray-400 text-sm">{m.noDataAvailable()}</p>
+		<div class="flex items-center justify-center h-full bg-surface-50-950 rounded-lg">
+			<p class="text-surface-400-600 text-sm">{m.noDataAvailable()}</p>
 		</div>
 	{/if}
 {:else if widget.chart_type === 'table' && !isBreakdownMetric}
 	<!-- Table for scalar values -->
 	<div class="overflow-auto h-full">
 		<table class="w-full text-sm">
-			<thead class="bg-gray-50 sticky top-0">
+			<thead class="bg-surface-50-950 sticky top-0">
 				<tr>
-					<th class="px-3 py-2 text-left font-medium text-gray-600">{m.timestamp()}</th>
-					<th class="px-3 py-2 text-right font-medium text-gray-600">{m.value()}</th>
+					<th class="px-3 py-2 text-left font-medium text-surface-600-400">{m.timestamp()}</th>
+					<th class="px-3 py-2 text-right font-medium text-surface-600-400">{m.value()}</th>
 				</tr>
 			</thead>
-			<tbody class="divide-y divide-gray-100">
+			<tbody class="divide-y divide-surface-100-900">
 				{#each [...chartData].reverse().slice(0, 20) as [timestamp, value]}
-					<tr class="hover:bg-gray-50">
-						<td class="px-3 py-2 text-gray-600">
+					<tr class="hover:bg-surface-50-950">
+						<td class="px-3 py-2 text-surface-600-400">
 							{new Date(timestamp).toLocaleString()}
 						</td>
 						<td class="px-3 py-2 text-right font-medium">
@@ -725,7 +725,7 @@
 			</tbody>
 		</table>
 		{#if chartData.length === 0}
-			<div class="flex items-center justify-center h-32 text-gray-400">
+			<div class="flex items-center justify-center h-32 text-surface-400-600">
 				{m.noDataAvailable()}
 			</div>
 		{/if}
@@ -735,16 +735,16 @@
 	<div class="overflow-auto h-full">
 		{#if latestBreakdown && typeof latestBreakdown === 'object'}
 			<table class="w-full text-sm">
-				<thead class="bg-gray-50 sticky top-0">
+				<thead class="bg-surface-50-950 sticky top-0">
 					<tr>
-						<th class="px-3 py-2 text-left font-medium text-gray-600">{m.category()}</th>
-						<th class="px-3 py-2 text-right font-medium text-gray-600">{m.count()}</th>
+						<th class="px-3 py-2 text-left font-medium text-surface-600-400">{m.category()}</th>
+						<th class="px-3 py-2 text-right font-medium text-surface-600-400">{m.count()}</th>
 					</tr>
 				</thead>
-				<tbody class="divide-y divide-gray-100">
+				<tbody class="divide-y divide-surface-100-900">
 					{#each Object.entries(latestBreakdown) as [key, count], index}
-						<tr class="hover:bg-gray-50">
-							<td class="px-3 py-2 text-gray-600 flex items-center gap-2">
+						<tr class="hover:bg-surface-50-950">
+							<td class="px-3 py-2 text-surface-600-400 flex items-center gap-2">
 								<span
 									class="w-3 h-3 rounded-full"
 									style="background-color: {BREAKDOWN_COLORS[index % BREAKDOWN_COLORS.length]}"
@@ -759,7 +759,7 @@
 				</tbody>
 			</table>
 		{:else}
-			<div class="flex items-center justify-center h-32 text-gray-400">
+			<div class="flex items-center justify-center h-32 text-surface-400-600">
 				{m.noDataAvailable()}
 			</div>
 		{/if}
@@ -769,7 +769,7 @@
 	<div id={chartId} class="w-full {height}"></div>
 {:else}
 	<!-- No data -->
-	<div class="flex items-center justify-center h-full bg-gray-50 rounded-lg">
-		<p class="text-gray-400 text-sm">{m.noDataAvailable()}</p>
+	<div class="flex items-center justify-center h-full bg-surface-50-950 rounded-lg">
+		<p class="text-surface-400-600 text-sm">{m.noDataAvailable()}</p>
 	</div>
 {/if}

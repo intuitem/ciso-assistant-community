@@ -60,7 +60,7 @@
 		       {classesDisabled(disabled)} {classes}
 		       {$value
 			? 'bg-gradient-to-br from-primary-400 to-primary-500 border-primary text-white'
-			: 'bg-white border-gray-300'}"
+			: 'bg-surface-50-950 border-surface-300-700'}"
 		onclick={toggle}
 		onkeydown={(e) => {
 			if (e.key === 'Enter' || e.key === ' ') {
@@ -100,7 +100,7 @@
 		{#if helpText}
 			<p
 				class="text-sm mt-1 transition-colors duration-300 ease-in-out
-				{$value ? 'text-primary-100' : 'text-gray-500'}"
+				{$value ? 'text-primary-100' : 'text-surface-600-400'}"
 			>
 				{helpText}
 			</p>

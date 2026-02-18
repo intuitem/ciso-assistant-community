@@ -176,15 +176,15 @@
 		<div class="text-xs space-y-2">
 			<div>
 				<strong>object:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(object, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(object, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>supportedModels:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(supportedModels, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(supportedModels, null, 2)}</pre>
 			</div>
 			<div>
 				<strong>availableChartTypes:</strong>
-				<pre class="bg-white p-2 rounded mt-1">{JSON.stringify(availableChartTypes, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(availableChartTypes, null, 2)}</pre>
 			</div>
 		</div>
 	</div>

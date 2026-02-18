@@ -26,7 +26,7 @@
 		context
 	}: Props = $props();
 
-	const activityBackground = context === 'edit' ? 'bg-white' : 'bg-surface-100-900';
+	const activityBackground = context === 'edit' ? 'bg-surface-50-950' : 'bg-surface-100-900';
 
 	let activeActivity: string | null = $state(null);
 	page.url.searchParams.forEach((value, key) => {
@@ -59,12 +59,12 @@
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'one'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'one'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityOne()}
 	</p>
@@ -90,12 +90,12 @@
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'two'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'two'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityTwo()}
 	</p>
@@ -130,12 +130,12 @@
 <div
 	class="relative p-2 space-y-2 rounded-md {activeActivity === 'three'
 		? 'border-2 border-primary-500'
-		: 'border-2 border-gray-300 border-dashed'}"
+		: 'border-2 border-surface-300-700 border-dashed'}"
 >
 	<p
 		class="absolute -top-3 {activityBackground} font-bold {activeActivity === 'three'
 			? 'text-primary-500'
-			: 'text-gray-500'}"
+			: 'text-surface-600-400'}"
 	>
 		{m.activityThree()}
 	</p>
