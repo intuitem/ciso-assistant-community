@@ -3,6 +3,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { navigationLinks } from './paletteData';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { page } from '$app/state';
 
 	let opened = $state(false);
 	let searchInput: HTMLElement | null = $state(null);
@@ -17,13 +18,19 @@
 		}
 	}));
 
+	let featureFlags = page.data?.featureFlagSettings;
+
 	let selected = $state(0);
 	let searchText = $state('');
 	let filteredNavigationCommands = $derived(
-		navigationCommands.filter(
-			(link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0
-		)
+		navigationCommands
+			.filter((link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0)
+			.filter((link) => {
+				let val = link.value.substring(1).replace('-', '_');
+				return !(val in featureFlags) || featureFlags[val];
+			})
 	);
+
 	$effect(() => {
 		if (selected >= filteredNavigationCommands.length) {
 			selected = 0;
