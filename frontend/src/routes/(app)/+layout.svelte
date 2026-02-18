@@ -163,7 +163,7 @@
 <div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
 	<AppBar
-		base="sticky top-0 z-50 border-b border-slate-200 transition-all duration-300 {classesSidebarOpen(
+		base="sticky top-0 z-50 border-b border-surface-200-800 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
 		)}"
 		background="bg-surface-50-950"
@@ -177,12 +177,12 @@
 				{safeTranslate(displayTitle)}
 			</div>
 			{#if displayModelName}
-				<div class="text-sm text-slate-500 font-medium">
+				<div class="text-sm text-surface-600-400 font-medium">
 					{safeTranslate(displayModelName)}
 				</div>
 			{/if}
 			{#if displayModelDescription}
-				<div class="text-xs text-slate-400 italic">
+				<div class="text-xs text-surface-400-600 italic">
 					{safeTranslate(displayModelDescription)}
 				</div>
 			{/if}

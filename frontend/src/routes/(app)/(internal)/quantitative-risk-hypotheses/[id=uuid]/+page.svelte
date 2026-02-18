@@ -97,7 +97,7 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-2">
+		<div class="h-full flex flex-col space-y-4 bg-surface-100-900 rounded-xl p-2">
 			{#if data.lec?.data && Array.isArray(data.lec.data) && data.lec.data.length > 0}
 				<!-- LEC Chart -->
 				<div class="bg-surface-50-950 rounded-lg shadow-sm w-full">

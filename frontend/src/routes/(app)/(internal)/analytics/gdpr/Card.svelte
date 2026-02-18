@@ -11,9 +11,9 @@
 <div
 	class="bg-surface-50-950 rounded-lg shadow-md p-4 min-h-20 flex items-center gap-4 transition-all hover:shadow-lg"
 >
-	<div class="text-5xl font-bold text-slate-800">{count}</div>
+	<div class="text-5xl font-bold text-surface-950-50">{count}</div>
 	<div class="flex flex-col items-end ml-auto">
-		<div class="text-3xl text-slate-700 mb-1"><i class={icon}></i></div>
-		<div class="text-slate-500 text-xs font-medium">{text}</div>
+		<div class="text-3xl text-surface-700-300 mb-1"><i class={icon}></i></div>
+		<div class="text-surface-600-400 text-xs font-medium">{text}</div>
 	</div>
 </div>

@@ -220,7 +220,7 @@
 		{/snippet}
 		{#snippet widgets()}
 			<div
-				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-slate-50 to-surface-50-950"
+				class="shadow-xl border-l border-t p-4 rounded-sm bg-linear-to-tl from-surface-50-950 to-surface-50-950"
 				hidden={!canEditObject}
 			>
 				{#if canEditObject}

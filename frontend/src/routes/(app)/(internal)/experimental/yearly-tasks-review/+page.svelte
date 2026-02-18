@@ -217,7 +217,7 @@
 								<tr class="border-b hover:bg-surface-50-950">
 									<td class="px-4 py-3 sticky left-0 bg-surface-50-950 z-10">
 										{#if task.ref_id}
-											<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
+											<span class="text-xs bg-surface-200-800 p-1 rounded">{task.ref_id}</span>
 										{/if}
 										<a
 											href="/task-templates/{task.id}"

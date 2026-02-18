@@ -61,7 +61,7 @@
 			class="flex items-center gap-2 rounded-lg text-sm font-medium transition-all duration-200
 				{$focusMode.id
 				? 'bg-indigo-100 text-indigo-700 ring-2 ring-indigo-300 hover:bg-indigo-200 pl-3 pr-8 py-1.5'
-				: 'bg-slate-100 text-slate-600 hover:bg-slate-200 px-3 py-1.5'}"
+				: 'bg-surface-100-900 text-surface-600-400 hover:bg-surface-200-800 px-3 py-1.5'}"
 			title={m.focusModeTooltip?.() ?? 'Focus on a specific domain'}
 		>
 			<i class="fa-solid fa-crosshairs text-xs"></i>
@@ -88,10 +88,10 @@
 
 	{#if isOpen && domainFolders.length > 0}
 		<div
-			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-surface-50-950 rounded-lg shadow-lg border border-slate-200 z-50"
+			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50"
 		>
-			<div class="p-2 border-b border-slate-100">
-				<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+			<div class="p-2 border-b border-surface-100-900">
+				<span class="text-xs font-semibold text-surface-600-400 uppercase tracking-wide">
 					{m.selectDomain?.() ?? 'Select domain'}
 				</span>
 			</div>
@@ -100,25 +100,25 @@
 					<li>
 						<button
 							onclick={handleClear}
-							class="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-600"
+							class="w-full px-3 py-2 text-left text-sm hover:bg-surface-50-950 flex items-center gap-2 text-surface-600-400"
 						>
-							<i class="fa-solid fa-globe text-slate-400"></i>
+							<i class="fa-solid fa-globe text-surface-400-600"></i>
 							{m.allDomains?.() ?? 'All domains'}
 						</button>
 					</li>
-					<li class="border-t border-slate-100"></li>
+					<li class="border-t border-surface-100-900"></li>
 				{/if}
 				{#each domainFolders as folder (folder.id)}
 					<li>
 						<button
 							onclick={() => handleSelect(folder)}
 							class="w-full px-3 py-2 text-left text-sm hover:bg-indigo-50 flex items-center gap-2
-								{$focusMode.id === folder.id ? 'bg-indigo-100 text-indigo-700' : 'text-slate-700'}"
+								{$focusMode.id === folder.id ? 'bg-indigo-100 text-indigo-700' : 'text-surface-700-300'}"
 						>
 							<i
 								class="fa-solid fa-folder {$focusMode.id === folder.id
 									? 'text-indigo-500'
-									: 'text-slate-400'}"
+									: 'text-surface-400-600'}"
 							></i>
 							<span class="truncate">{folder.str || folder.name}</span>
 							{#if $focusMode.id === folder.id}
@@ -131,9 +131,9 @@
 		</div>
 	{:else if isOpen && domainFolders.length === 0}
 		<div
-			class="absolute right-0 top-full mt-1 w-64 bg-surface-50-950 rounded-lg shadow-lg border border-slate-200 z-50 p-4"
+			class="absolute right-0 top-full mt-1 w-64 bg-surface-50-950 rounded-lg shadow-lg border border-surface-200-800 z-50 p-4"
 		>
-			<p class="text-sm text-slate-500 text-center">
+			<p class="text-sm text-surface-600-400 text-center">
 				{m.noDomainsAvailable?.() ?? 'No domains available'}
 			</p>
 		</div>

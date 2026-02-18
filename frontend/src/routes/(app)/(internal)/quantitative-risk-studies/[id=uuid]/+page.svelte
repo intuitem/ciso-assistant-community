@@ -164,7 +164,7 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
+		<div class="h-full flex flex-col space-y-4 bg-surface-100-900 rounded-xl p-4">
 			{#if data.combinedAle?.combined_metrics}
 				{@const metrics = data.combinedAle.combined_metrics}
 				<!-- Combined ALE Metrics -->

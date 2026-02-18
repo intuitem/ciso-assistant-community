@@ -755,7 +755,7 @@
 					<MarkdownField {form} field="observation" label="Observation" />
 				</div>
 				<div
-					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+					class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-surface-200-800"
 				>
 					<button
 						class="btn bg-surface-400-600 text-white font-semibold w-full"

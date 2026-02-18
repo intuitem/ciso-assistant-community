@@ -14,7 +14,7 @@
 </script>
 
 <div class="grid grid-cols-12 gap-4">
-	<div class="grid grid-cols-5 bg-slate-100 p-4 gap-4 col-span-12 rounded-lg">
+	<div class="grid grid-cols-5 bg-surface-100-900 p-4 gap-4 col-span-12 rounded-lg">
 		<Card
 			icon="fa-solid fa-gem"
 			text={m.personalDataCategoriesIdentified()}
@@ -45,7 +45,7 @@
 		{#if data?.data?.countries?.length > 0}
 			<WorldMap data={data.data.countries} />
 		{:else}
-			<div class="text-slate-700">{m.noDataAvailable()}</div>
+			<div class="text-surface-700-300">{m.noDataAvailable()}</div>
 		{/if}
 	</div>
 	<div class="col-span-5 min-h-96 p-4 bg-surface-50-950 rounded-lg shadow">
@@ -77,7 +77,7 @@
 				height="h-[600px]"
 			/>
 		{:else}
-			<div class="flex items-center justify-center h-96 text-slate-700">
+			<div class="flex items-center justify-center h-96 text-surface-700-300">
 				{m.noDataAvailable()}
 			</div>
 		{/if}

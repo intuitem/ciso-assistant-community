@@ -191,7 +191,7 @@
 
 <DetailView {data}>
 	{#snippet widgets()}
-		<div class="h-full flex flex-col space-y-4 bg-slate-100 rounded-xl p-4">
+		<div class="h-full flex flex-col space-y-4 bg-surface-100-900 rounded-xl p-4">
 			{#if data.lec?.curves?.length > 0}
 				<!-- Multi-Curve LEC Chart -->
 				<div class="bg-surface-50-950 rounded-lg p-4 shadow-sm w-full">

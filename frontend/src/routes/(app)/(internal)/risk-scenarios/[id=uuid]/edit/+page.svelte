@@ -350,7 +350,7 @@
 				</div>
 				<div class="flex w-1/2">
 					<div>
-						<div class="text-xs text-slate-500 mb-4">
+						<div class="text-xs text-surface-600-400 mb-4">
 							<i class="fa-solid fa-circle-info"></i>
 							{m.riskOptionHelper()}
 						</div>
@@ -498,7 +498,7 @@
 			/>
 		</div>
 		<div
-			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-surface-200-800"
 		>
 			<button
 				class="btn bg-surface-400-600 text-white font-semibold w-full"

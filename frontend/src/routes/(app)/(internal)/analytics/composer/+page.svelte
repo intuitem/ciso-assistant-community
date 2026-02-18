@@ -72,7 +72,7 @@
 				</div>
 			</div>
 		</div>
-		<div class="bg-zinc-100 shadow-sm rounded-sm p-3 flex flex-col space-y-2">
+		<div class="bg-surface-100-900 shadow-sm rounded-sm p-3 flex flex-col space-y-2">
 			<div>
 				<i class="far fa-lightbulb mr-1"></i>
 				<span class="font-semibold">{m.forTheSelectedScope()}:</span>
