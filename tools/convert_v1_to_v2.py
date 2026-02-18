@@ -193,6 +193,15 @@ def convert_v1_to_v2(
         raise
 
 
+def with_output_suffix(path: Path, output_suffix: str) -> Path:
+    normalized = path if path.suffix.lower() == ".xlsx" else path.with_suffix(".xlsx")
+    if not output_suffix:
+        return normalized
+    return normalized.with_name(
+        f"{normalized.stem}{output_suffix}{normalized.suffix}"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Convert Excel library v1 to v2 format."
@@ -219,6 +228,12 @@ def main():
         "--old-output-dir",
         type=str,
         help="Output directory for renamed .old files (only used with --bulk mode).",
+    )
+    parser.add_argument(
+        "--output-suffix",
+        type=str,
+        default="",
+        help='Suffix added just before ".xlsx" for converted files (example: "_v2").',
     )
     args = parser.parse_args()
 
@@ -257,7 +272,7 @@ def main():
         for i, file in enumerate(xlsx_files, 1):
             print(f'▶️  Processing file [{i}/{len(xlsx_files)}]: "{file}"')
             try:
-                output_path = output_dir / file.name
+                output_path = with_output_suffix(output_dir / file.name, args.output_suffix)
                 convert_v1_to_v2(file, output_path, old_output_dir=old_output_dir)
             except Exception as e:
                 print(f'❌ Failed to process "{file}": {e}', file=sys.stderr)
@@ -289,14 +304,16 @@ def main():
             raise FileNotFoundError(f"Input must be a file in non-bulk mode: {input_path}")
 
         if args.output:
-            output_path = Path(args.output)
-            if output_path.suffix.lower() != ".xlsx":
-                output_path = output_path.with_suffix(".xlsx")
+            output_path = with_output_suffix(Path(args.output), args.output_suffix)
         else:
-            output_path = input_path
+            output_path = with_output_suffix(input_path, args.output_suffix)
 
         convert_v1_to_v2(input_path, output_path)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as err:
+        print(f"❌ [ERROR] {err}")
+        sys.exit(1)
