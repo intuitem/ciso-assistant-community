@@ -167,8 +167,11 @@ def build_converted_workbook(input_path: str) -> Workbook:
     return wb_out
 
 
-def convert_v1_to_v2(input_path: Path, output_path: Path):
-    backup_path = input_path.with_name(f"{input_path.stem}_v1{input_path.suffix}.old")
+def convert_v1_to_v2(
+    input_path: Path, output_path: Path, old_output_dir: Path | None = None
+):
+    backup_dir = old_output_dir if old_output_dir else input_path.parent
+    backup_path = backup_dir / f"{input_path.stem}_v1{input_path.suffix}.old"
 
     if backup_path.exists():
         raise FileExistsError(
@@ -212,6 +215,11 @@ def main():
         type=str,
         help="Output directory for .xlsx files (only used with --bulk mode).",
     )
+    parser.add_argument(
+        "--old-output-dir",
+        type=str,
+        help="Output directory for renamed .old files (only used with --bulk mode).",
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
@@ -233,6 +241,12 @@ def main():
         else:
             output_dir = input_path
 
+        if args.old_output_dir:
+            old_output_dir = Path(args.old_output_dir)
+            old_output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            old_output_dir = None
+
         xlsx_files = [
             f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")
         ]
@@ -244,7 +258,7 @@ def main():
             print(f'▶️  Processing file [{i}/{len(xlsx_files)}]: "{file}"')
             try:
                 output_path = output_dir / file.name
-                convert_v1_to_v2(file, output_path)
+                convert_v1_to_v2(file, output_path, old_output_dir=old_output_dir)
             except Exception as e:
                 print(f'❌ Failed to process "{file}": {e}', file=sys.stderr)
                 errors.append(file.name)
@@ -265,6 +279,10 @@ def main():
         if args.output_dir:
             raise ValueError(
                 'The option "--output-dir" can only be used with "--bulk" mode.'
+            )
+        if args.old_output_dir:
+            raise ValueError(
+                'The option "--old-output-dir" can only be used with "--bulk" mode.'
             )
 
         if not input_path.is_file():
