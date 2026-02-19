@@ -10,7 +10,7 @@
 
 	const modalStore: ModalStore = getModalStore();
 
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-4xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-4xl shadow-xl space-y-4';
 	const cHeaderRow = 'flex items-center justify-between';
 	const cHeader = 'text-2xl font-bold whitespace-pre-line';
 
@@ -131,10 +131,10 @@
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
+							<section class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
 									aria-controls={`del-${group.model}`}
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
@@ -148,7 +148,7 @@
 								{#if expanded.has(keyFor('deleted', group.model))}
 									<ul
 										id={`del-${group.model}`}
-										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50-950 border-t border-surface-300-700"
 									>
 										{#each group.objects as o (o.id)}
 											<li class="truncate text-surface-700-300" title={o.name}>
@@ -174,10 +174,10 @@
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300 bg-surface-50 overflow-hidden">
+							<section class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden">
 								<button
 									type="button"
-									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100 text-sm"
+									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
 									aria-controls={`aff-${group.model}`}
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
@@ -191,7 +191,7 @@
 								{#if expanded.has(keyFor('affected', group.model))}
 									<ul
 										id={`aff-${group.model}`}
-										class="px-3 pb-2 text-sm space-y-1 bg-surface-50 border-t border-surface-300"
+										class="px-3 pb-2 text-sm space-y-1 bg-surface-50-950 border-t border-surface-300-700"
 									>
 										{#each group.objects as o (o.id)}
 											<li class="truncate text-surface-700-300" title={o.name}>

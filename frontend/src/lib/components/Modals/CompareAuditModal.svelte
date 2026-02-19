@@ -20,7 +20,7 @@
 
 	let { parent, currentAudit }: Props = $props();
 
-	const cBase = 'card bg-surface-50 p-4 w-fit max-w-2xl shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-fit max-w-2xl shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	// Create a simple form schema for the comparison selection

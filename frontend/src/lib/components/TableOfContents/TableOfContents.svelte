@@ -286,7 +286,7 @@
 	>
 		<button
 			onclick={toggleCollapse}
-			class="toc-toggle mb-2 p-2 bg-surface-200 hover:bg-surface-300 rounded-full shadow-lg transition-all duration-200 relative z-50 cursor-pointer {isCollapsed
+			class="toc-toggle mb-2 p-2 bg-surface-200-800 hover:bg-surface-300-700 rounded-full shadow-lg transition-all duration-200 relative z-50 cursor-pointer {isCollapsed
 				? ''
 				: 'hidden'}"
 			title={m.showTableOfContents()}
@@ -299,18 +299,18 @@
 		<!-- TOC Content -->
 		{#if !isCollapsed}
 			<div
-				class="toc-content bg-surface-50 border border-surface-300 rounded-lg shadow-lg p-4 w-64 max-h-[60vh] overflow-hidden flex flex-col relative"
+				class="toc-content bg-surface-50-950 border border-surface-300-700 rounded-lg shadow-lg p-4 w-64 max-h-[60vh] overflow-hidden flex flex-col relative"
 			>
 				<button
 					onclick={toggleCollapse}
-					class="absolute top-2 right-2 p-1 text-surface-400 hover:text-surface-600 hover:bg-surface-200 rounded transition-colors duration-150"
+					class="absolute top-2 right-2 p-1 text-surface-400-600 hover:text-surface-600-400 hover:bg-surface-200-800 rounded transition-colors duration-150"
 					title={m.hideTableOfContents()}
 					aria-label={m.hideTableOfContents()}
 				>
 					<i class="fa-solid fa-times text-sm" aria-hidden="true"></i>
 				</button>
 
-				<h3 class="text-sm font-semibold text-surface-700 mb-3 flex items-center pr-8">
+				<h3 class="text-sm font-semibold text-surface-700-300 mb-3 flex items-center pr-8">
 					<i class="fa-solid fa-list-ul mr-2" aria-hidden="true"></i>
 					{m.tableOfContents()}
 				</h3>
@@ -325,13 +325,13 @@
 							type="text"
 							placeholder={m.searchSections()}
 							aria-label={m.searchSections()}
-							class="w-full px-3 py-2 pr-8 text-sm border border-surface-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+							class="w-full px-3 py-2 pr-8 text-sm border border-surface-300-700 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
 						/>
 						<div class="absolute inset-y-0 right-0 flex items-center pr-3">
 							{#if searchQuery}
 								<button
 									onclick={clearSearch}
-									class="text-surface-400 hover:text-surface-600 transition-colors"
+									class="text-surface-400-600 hover:text-surface-600-400 transition-colors"
 									title={m.clearSearch()}
 									aria-label={m.clearSearch()}
 									tabindex="-1"
@@ -339,16 +339,16 @@
 									<i class="fa-solid fa-times text-xs" aria-hidden="true"></i>
 								</button>
 							{:else}
-								<i class="fa-solid fa-search text-surface-400 text-xs" aria-hidden="true"></i>
+								<i class="fa-solid fa-search text-surface-400-600 text-xs" aria-hidden="true"></i>
 							{/if}
 						</div>
 					</div>
 
 					<!-- Keyboard hints -->
-					<div class="mt-1 text-xs text-surface-400">
-						<kbd class="px-1 py-0.5 bg-surface-200 rounded text-xs">↑↓</kbd> navigate
-						<kbd class="px-1 py-0.5 bg-surface-200 rounded text-xs ml-1">Enter</kbd> go
-						<kbd class="px-1 py-0.5 bg-surface-200 rounded text-xs ml-1">Esc</kbd> close
+					<div class="mt-1 text-xs text-surface-400-600">
+						<kbd class="px-1 py-0.5 bg-surface-200-800 rounded text-xs">↑↓</kbd> navigate
+						<kbd class="px-1 py-0.5 bg-surface-200-800 rounded text-xs ml-1">Enter</kbd> go
+						<kbd class="px-1 py-0.5 bg-surface-200-800 rounded text-xs ml-1">Esc</kbd> close
 					</div>
 				</div>
 
@@ -370,7 +370,7 @@
 										class="toc-link w-full text-left px-2 py-1 rounded transition-colors duration-150
                                                {activeId === item.id
 											? 'bg-primary-100 text-primary-700 font-medium border-l-2 border-primary-500'
-											: 'text-surface-600 hover:bg-surface-100 hover:text-surface-800'}
+											: 'text-surface-600-400 hover:bg-surface-100-900 hover:text-surface-800-200'}
                                                {focusedIndex === index
 											? 'ring-2 ring-primary-300'
 											: ''}"
@@ -414,7 +414,7 @@
 				<!-- Footer -->
 				{#if searchQuery && filteredItems.length > 0}
 					<div
-						class="mt-2 pt-2 border-t border-surface-200 text-xs text-surface-500 text-center"
+						class="mt-2 pt-2 border-t border-surface-200-800 text-xs text-surface-500 text-center"
 						role="status"
 						aria-live="polite"
 					>

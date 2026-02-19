@@ -20,7 +20,7 @@
 	}
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 w-modal shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 w-modal shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 </script>
 
@@ -28,7 +28,7 @@
 	{@const scenarios = $modalStore[0].meta?.scenarios || []}
 	<div class={cBase}>
 		<header class={cHeader}>Unprocessed Scenarios</header>
-		<p class="text-surface-600">
+		<p class="text-surface-600-400">
 			The following scenarios have multiple residual hypotheses. Please select one residual
 			hypothesis per scenario to include it in the action plan.
 		</p>
@@ -43,7 +43,7 @@
 									<h4 class="h4 font-semibold">
 										{scenario.ref_id}: {scenario.name}
 									</h4>
-									<p class="text-sm text-surface-600">
+									<p class="text-sm text-surface-600-400">
 										{scenario.residual_hypotheses_count} residual hypotheses found
 									</p>
 								</div>
@@ -56,7 +56,7 @@
 										<div
 											class="flex items-center space-x-2 p-2 rounded-lg {hypothesis.is_selected
 												? 'bg-success-100 border border-success-300'
-												: 'bg-surface-100'}"
+												: 'bg-surface-100-900'}"
 										>
 											<div class="flex-1">
 												<p class="font-medium text-sm">{hypothesis.name}</p>
@@ -82,7 +82,7 @@
 				</div>
 			{:else}
 				<div class="text-center py-8">
-					<p class="text-surface-600">No problematic scenarios found.</p>
+					<p class="text-surface-600-400">No problematic scenarios found.</p>
 				</div>
 			{/if}
 		</section>

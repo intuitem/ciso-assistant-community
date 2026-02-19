@@ -154,7 +154,7 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
+		outerDivClass: '!input !bg-surface-100-900 !px-2 !flex',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
 	};

@@ -17,7 +17,7 @@
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
 
 	// Base Classes
-	const cBase = 'card bg-surface-50 p-4 shadow-xl space-y-4';
+	const cBase = 'card bg-surface-50-950 p-4 shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 
 	interface Props {

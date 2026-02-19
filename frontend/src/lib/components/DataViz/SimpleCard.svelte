@@ -13,7 +13,7 @@
 
 	// Enhanced emphasis styling
 	const emphasisClasses = emphasis
-		? 'border-l-4 border-l-violet-500 bg-gradient-to-r from-violet-25 to-surface-50-950 shadow-md'
+		? 'border-l-4 border-l-violet-500 bg-surface-50-950 shadow-md'
 		: 'border border-surface-200-800';
 
 	// Base card styling - clean and minimal

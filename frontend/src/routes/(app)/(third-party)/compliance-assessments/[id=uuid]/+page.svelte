@@ -901,7 +901,7 @@
 				onOpenChange={(e) => (filterPopupOpen = e.open)}
 				positioning={{ placement: 'bottom-start' }}
 				triggerBase="btn preset-filled-primary-500 w-fit"
-				contentBase="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+				contentBase="card p-2 bg-surface-50-950 w-fit shadow-lg space-y-2 border border-surface-200-800 z-10"
 				zIndex="1000"
 				autoFocus={false}
 				onPointerDownOutside={() => (filterPopupOpen = false)}

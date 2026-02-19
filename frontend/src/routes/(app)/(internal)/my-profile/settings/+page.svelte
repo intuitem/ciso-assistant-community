@@ -143,7 +143,7 @@
 			<div class="p-4 flex flex-col space-y-4">
 				<div class="flex flex-col">
 					<h3 class="h3 font-medium">{m.securitySettings()}</h3>
-					<p class="text-sm text-surface-800">{m.securitySettingsDescription()}</p>
+					<p class="text-sm text-surface-800-200">{m.securitySettingsDescription()}</p>
 				</div>
 				<hr />
 				<div class="flow-root">
@@ -163,7 +163,7 @@
 											<h6 class="h6 base-font-color">{m.authenticatorApp()}</h6>
 											<p class="badge h-fit preset-tonal-secondary">{m.recommended()}</p>
 										</span>
-										<p class="text-sm text-surface-800 max-w-[50ch]">
+										<p class="text-sm text-surface-800-200 max-w-[50ch]">
 											{m.authenticatorAppDescription()}
 										</p>
 									</div>
@@ -205,7 +205,7 @@
 										<span class="flex flex-row space-x-2">
 											<h6 class="h6 text-token">{m.personalAccessTokens()}</h6>
 										</span>
-										<p class="text-sm text-surface-800 max-w-[65ch]">
+										<p class="text-sm text-surface-800-200 max-w-[65ch]">
 											{m.personalAccessTokensDescription()}
 										</p>
 										<div class="card p-4 preset-tonal-warning max-w-[65ch]">

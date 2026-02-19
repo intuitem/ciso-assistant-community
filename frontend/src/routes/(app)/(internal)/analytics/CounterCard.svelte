@@ -28,7 +28,7 @@
 
 <div
 	class="card p-4 w-full flex flex-col whitespace-normal group transition-all duration-200 ease-in-out
-		   bg-gradient-to-br from-white via-white to-violet-25
+		   bg-surface-50-950
 		   border border-surface-100-900 shadow-sm hover:shadow-lg hover:border-violet-200
 		   {href ? 'cursor-pointer hover:scale-[1.02] hover:-translate-y-1' : ''}"
 	onclick={clickHandler}

@@ -54,17 +54,17 @@
 
 <ContextMenu.Sub>
 	<ContextMenu.SubTrigger
-		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50"
+		class="flex h-10 select-none items-center rounded-button py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! data-highlighted:bg-muted data-[state=open]:bg-surface-50-950"
 	>
 		<div class="flex items-center">{m.changeStatus()}</div>
 	</ContextMenu.SubTrigger>
 	<ContextMenu.SubContent
-		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200 cursor-default data-highlighted:bg-surface-50"
+		class="z-50 w-full min-w-[180px] max-w-[209px] outline-hidden card bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 cursor-default data-highlighted:bg-surface-50-950"
 		sideOffset={10}
 	>
 		{#each options as option}
 			<ContextMenu.Item
-				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50"
+				class="flex h-10 select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium outline-hidden ring-0! ring-transparent! hover:bg-surface-50-950"
 				onclick={async () => await changeStatus(option.value)}
 			>
 				{safeTranslate(option.label)}

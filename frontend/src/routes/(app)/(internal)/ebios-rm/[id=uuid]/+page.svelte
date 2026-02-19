@@ -256,7 +256,7 @@
 							</span>
 						{:else}
 							<span
-								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200 rounded-full -start-4 ring-4 ring-white"
+								class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-white"
 							>
 								<i class="fa-solid fa-clipboard-check"></i>
 							</span>

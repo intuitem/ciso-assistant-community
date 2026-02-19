@@ -340,7 +340,7 @@
 										?.str}{:else}{m.unknownOrDeletedUser()}{/if}</time
 							>
 							<TableRowActions
-								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700"
+								baseClass="space-x-2 whitespace-nowrap flex flex-row items-center text-sm text-surface-700-300"
 								deleteForm={data.relatedModels['timeline-entries'].deleteForm}
 								model={model.info}
 								URLModel={actionsURLModel}

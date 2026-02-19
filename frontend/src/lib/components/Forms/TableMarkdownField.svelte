@@ -71,7 +71,7 @@
 	{:else}
 		<!-- Preview Mode -->
 		<div
-			class="prose prose-sm max-w-none p-3 border border-surface-300 rounded-md min-h-[120px] bg-surface-50 {disabled
+			class="prose prose-sm max-w-none p-3 border border-surface-300-700 rounded-md min-h-[120px] bg-surface-50-950 {disabled
 				? ''
 				: 'cursor-text'}"
 			ondblclick={startEdit}

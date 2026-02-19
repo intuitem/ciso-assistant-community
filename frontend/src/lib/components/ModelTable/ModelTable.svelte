@@ -639,7 +639,7 @@
 					onOpenChange={(e) => (openState = e.open)}
 					positioning={{ placement: 'bottom-start' }}
 					triggerBase="btn preset-filled-primary-500 self-end relative"
-					contentBase="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200"
+					contentBase="card p-2 bg-surface-50-950 max-w-lg shadow-lg space-y-2 border border-surface-200-800"
 					zIndex="1000"
 					autoFocus={false}
 					onPointerDownOutside={() => (openState = false)}
@@ -727,7 +727,7 @@
 						}}
 					>
 						<span
-							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-50-950/10"
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 						>
 							<input
 								type="checkbox"
@@ -775,7 +775,7 @@
 								onkeydown={(e) => onRowKeydown(e, rowIndex)}
 								oncontextmenu={() => (contextMenuOpenRow = row)}
 								aria-rowindex={rowIndex + 1}
-								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
+								class="hover:preset-tonal-primary even:bg-surface-100-900 cursor-pointer"
 							>
 								{#if hasBatchActions}
 									<td
@@ -787,7 +787,7 @@
 										}}
 									>
 										<span
-											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-50-950/10"
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-surface-100-900/10"
 										>
 											<input
 												type="checkbox"
@@ -931,7 +931,7 @@
 															<div class="flex items-center space-x-2">
 																<span>{safeTranslate(value ?? '-')}</span>
 																<span
-																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm dark:bg-green-200 dark:text-green-900"
+																	class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-sm"
 																>
 																	{m.accept()}
 																</span>
@@ -1012,17 +1012,17 @@
 			</ContextMenu.Trigger>
 			{#if contextMenuDisplayEdit || contextMenuDisplayDelete || Object.hasOwn(contextMenuActions, URLModel)}
 				<ContextMenu.Content
-					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200 rounded-md"
+					class="z-50 min-w-[180px] outline-hidden bg-surface-50-950 px-1 py-1.5 shadow-md border border-surface-200-800 rounded-md"
 				>
 					{#if Object.hasOwn(contextMenuActions, URLModel)}
 						{#each contextMenuActions[URLModel] as action}
 							<action.component row={contextMenuOpenRow} {handler} {URLModel} {action} />
 						{/each}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 					{/if}
 					{#if !(contextMenuOpenRow?.meta.builtin || contextMenuOpenRow?.meta.urn) || URLModel === 'terminologies' || URLModel === 'entities'}
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(
 									`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/edit?next=${encodeURIComponent(page.url.pathname + page.url.search)}`,
@@ -1035,7 +1035,7 @@
 							{m.edit()}
 						</ContextMenu.Item>
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								goto(`/${actionsURLModel}/${contextMenuOpenRow?.meta[identifierField]}/`, {
 									breadcrumbAction: 'push'
@@ -1046,9 +1046,9 @@
 						</ContextMenu.Item>
 					{/if}
 					{#if contextMenuDisplayDelete}
-						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100" />
+						<ContextMenu.Separator class="-mx-1 my-1 block h-px bg-surface-100-900" />
 						<ContextMenu.Item
-							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-50"
+							class="flex h-10 w-full select-none items-center rounded-xs py-3 pl-3 pr-1.5 text-sm font-medium cursor-pointer text-red-500 data-highlighted:bg-surface-100-900"
 							onclick={() => {
 								if (URLModel === 'folders') {
 									contextMenuPromptModalConfirmDelete(

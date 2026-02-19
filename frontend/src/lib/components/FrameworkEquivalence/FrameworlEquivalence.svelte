@@ -15,7 +15,7 @@
 	</thead>
 	<tbody class="w-full border-b border-b-surface-100-900 bg-surface-50-950">
 		{#each Object.entries(coverages) as [urn, cov]}
-			<tr class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer">
+			<tr class="hover:preset-tonal-primary even:bg-surface-50-950 cursor-pointer">
 				<td>
 					{urn}
 				</td>

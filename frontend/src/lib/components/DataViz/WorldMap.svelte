@@ -19,7 +19,7 @@
 
 <div class="w-full">
 	<div class="flex justify-end mb-2">
-		<label class="flex items-center gap-2 text-sm text-surface-600 cursor-pointer">
+		<label class="flex items-center gap-2 text-sm text-surface-600-400 cursor-pointer">
 			<input type="checkbox" class="checkbox" bind:checked={useEqualEarth} />
 			<span>{useEqualEarth ? 'Equal Earth' : 'Mercator'}</span>
 		</label>

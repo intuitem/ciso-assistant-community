@@ -467,7 +467,7 @@
 
 							<!-- Widget Preview -->
 							<div
-								class="flex-1 bg-surface-100-900 rounded flex items-center justify-center text-surface-400 min-h-[60px]"
+								class="flex-1 bg-surface-100-900 rounded flex items-center justify-center text-surface-400-600 min-h-[60px]"
 							>
 								<i
 									class="text-4xl fa-solid {widget.chart_type === 'kpi_card'
@@ -490,7 +490,7 @@
 
 							<!-- Position info -->
 							<div
-								class="absolute bottom-1 left-1 text-xs text-surface-400 opacity-0 group-hover:opacity-100"
+								class="absolute bottom-1 left-1 text-xs text-surface-400-600 opacity-0 group-hover:opacity-100"
 								title="Position: {widget.position_x},{widget.position_y} | Size: {widget.width}x{widget.height} | Min: {getMinDimensions(
 									widget.chart_type
 								).width}x{getMinDimensions(widget.chart_type).height}"
@@ -546,7 +546,7 @@
 								tabindex="0"
 							>
 								<i
-									class="fa-solid fa-up-right-and-down-left-from-center text-xs text-surface-400 rotate-90"
+									class="fa-solid fa-up-right-and-down-left-from-center text-xs text-surface-400-600 rotate-90"
 								></i>
 							</div>
 						</div>
@@ -557,7 +557,7 @@
 			<!-- Row Controls -->
 			<div class="flex gap-2 mt-2">
 				<button
-					class="flex-1 py-2 border-2 border-dashed border-surface-300 rounded-lg text-surface-400 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
+					class="flex-1 py-2 border-2 border-dashed border-surface-300-700 rounded-lg text-surface-400-600 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
 					onclick={addRow}
 				>
 					<i class="fa-solid fa-plus"></i>
@@ -565,7 +565,7 @@
 				</button>
 				{#if canRemoveRow}
 					<button
-						class="flex-1 py-2 border-2 border-dashed border-surface-300 rounded-lg text-surface-400 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
+						class="flex-1 py-2 border-2 border-dashed border-surface-300-700 rounded-lg text-surface-400-600 hover:border-error-500 hover:text-error-500 transition-colors flex items-center justify-center gap-2"
 						onclick={removeRow}
 					>
 						<i class="fa-solid fa-minus"></i>

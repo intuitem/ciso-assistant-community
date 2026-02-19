@@ -114,7 +114,7 @@
 	<div class="control">
 		{#if showPreview}
 			<div
-				class="p-3 border border-surface-300 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50"
+				class="p-3 border border-surface-300-700 rounded-md min-h-[120px] overflow-auto max-h-[75dvh] bg-surface-50-950"
 				ondblclick={() => !disabled && (showPreview = false)}
 				role="button"
 				tabindex="0"

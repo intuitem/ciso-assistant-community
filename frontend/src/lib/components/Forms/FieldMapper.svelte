@@ -130,9 +130,9 @@
 	}
 </script>
 
-<div class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200">
-	<div class="mb-8 border-b border-surface-100 pb-4">
-		<h2 class="text-xl font-bold text-surface-800">
+<div class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800">
+	<div class="mb-8 border-b border-surface-100-900 pb-4">
+		<h2 class="text-xl font-bold text-surface-800-200">
 			{m.serviceNowIntegrationMappingsDescription()}
 		</h2>
 		<p class="text-sm text-surface-500 mt-1">{m.serviceNowIntegrationMappingsHelpText()}</p>
@@ -159,10 +159,10 @@
 	{#if selectedTable}
 		<section class="mb-8 animate-fade-in">
 			<div class="flex justify-between items-center mb-4">
-				<h3 class="text-lg font-semibold text-surface-700">{m.fieldMapping()}</h3>
+				<h3 class="text-lg font-semibold text-surface-700-300">{m.fieldMapping()}</h3>
 			</div>
 
-			<div class="bg-surface-50 rounded-lg p-4 border border-surface-200">
+			<div class="bg-surface-50-950 rounded-lg p-4 border border-surface-200-800">
 				<div
 					class="grid grid-cols-12 gap-4 mb-2 text-xs font-semibold text-surface-500 uppercase tracking-wider"
 				>
@@ -175,11 +175,11 @@
 					{#each LOCAL_FIELDS as field}
 						<div class="grid grid-cols-12 gap-4 items-center">
 							<div class="col-span-5">
-								<div class="font-medium text-surface-700">
+								<div class="font-medium text-surface-700-300">
 									{field.label}
 									{#if field.required}<span class="text-error-400">*</span>{/if}
 								</div>
-								<div class="text-xs text-surface-400 font-mono">{field.key}</div>
+								<div class="text-xs text-surface-400-600 font-mono">{field.key}</div>
 							</div>
 
 							<div class="col-span-1 text-center text-surface-300">→</div>
@@ -206,19 +206,19 @@
 
 		{#if activeChoiceFields.length > 0}
 			<section class="mb-8 animate-fade-in">
-				<h3 class="text-lg font-semibold text-surface-700 mb-4">{m.valueMapping()}</h3>
+				<h3 class="text-lg font-semibold text-surface-700-300 mb-4">{m.valueMapping()}</h3>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					{#each activeChoiceFields as field}
 						{@const remoteField = fieldMap[field.key]}
 						{@const choices = choicesCache[`${selectedTable}:${remoteField}`] || []}
 
-						<div class="border border-surface-200 rounded-lg overflow-hidden">
+						<div class="border border-surface-200-800 rounded-lg overflow-hidden">
 							<div
-								class="bg-surface-100 px-4 py-2 border-b border-surface-200 font-medium text-surface-700 flex justify-between"
+								class="bg-surface-100-900 px-4 py-2 border-b border-surface-200-800 font-medium text-surface-700-300 flex justify-between"
 							>
 								<span>{m.valueMappingForField({ field: safeTranslate(field.label) })}</span>
-								<span class="text-xs bg-surface-200 px-2 py-1 rounded text-surface-600">
+								<span class="text-xs bg-surface-200-800 px-2 py-1 rounded text-surface-600-400">
 									{m.valueMappingToField({ field: remoteField })}
 								</span>
 							</div>
@@ -226,7 +226,7 @@
 							<div class="p-4 bg-surface-50-950 space-y-3">
 								{#each field.choices as choice}
 									<div class="flex items-center justify-between gap-2">
-										<div class="w-1/3 text-sm text-surface-600 truncate" title={choice.label}>
+										<div class="w-1/3 text-sm text-surface-600-400 truncate" title={choice.label}>
 											{choice.label}
 										</div>
 										<div class="text-surface-300">→</div>

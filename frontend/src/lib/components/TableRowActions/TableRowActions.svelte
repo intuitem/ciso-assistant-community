@@ -50,7 +50,7 @@
 		identifierField = 'id',
 		preventDelete = false,
 		preventEdit = false,
-		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700 justify-end',
+		baseClass = 'space-x-2 whitespace-nowrap flex flex-row items-center text-xl text-surface-700-300 justify-end',
 		hasBody = false,
 		head,
 		body,

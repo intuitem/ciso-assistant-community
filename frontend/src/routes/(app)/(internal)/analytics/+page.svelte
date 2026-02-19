@@ -699,7 +699,7 @@
 										>
 											<!-- Framework Header -->
 											<div
-												class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-surface-100-900"
+												class="bg-surface-100-900 px-6 py-4 border-b border-surface-100-900"
 											>
 												<div class="flex justify-between items-center">
 													<div class="flex items-center gap-3">
