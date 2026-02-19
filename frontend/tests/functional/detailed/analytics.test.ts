@@ -1,6 +1,7 @@
 import { m } from '$paraglide/messages.js';
 import { LoginPage } from '../../utils/login-page.js';
 import { PageContent } from '../../utils/page-content.js';
+import { FormFieldType } from '../../utils/form-content.js';
 import { expect, test, TestContent, type Locator } from '../../utils/test-utils.js';
 
 const vars = TestContent.generateTestVars();
@@ -23,8 +24,13 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 	librariesPage
 }) => {
 	await test.step('Create required folder', async () => {
-		await foldersPage.goto();
-		await foldersPage.createItem({
+	const foldersPageCreate = new PageContent(page, '/folders', 'Domains', [
+		{ name: 'name', type: FormFieldType.TEXT },
+		{ name: 'description', type: FormFieldType.TEXT },
+		{ name: 'create_iam_groups', type: FormFieldType.CHECKBOX }
+	]);
+	await foldersPageCreate.goto();
+	await foldersPageCreate.createItem({
 			name: vars.folderName,
 			description: vars.description
 		});
