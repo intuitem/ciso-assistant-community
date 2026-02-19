@@ -13,14 +13,14 @@ IF "%~2"=="" (
 REM Run the Python scripts
 @echo
 echo ==^> [STEP 1] Extract Excel file data...
-call python3 ../../../backend/scripts/convert_ccm_v2.py %1 -p %2
+call python ../../../backend/scripts/convert_ccm_v2.py %1 -p %2
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 1 failed
     exit /b 1
 )
 echo.
 echo ==^> [STEP 2] Convert Excel v2 file to YAML...
-call python3 ../../../backend/scripts/convert_library_v2.py ccm-controls-v4-v2.xlsx
+call python ../../../backend/scripts/convert_library_v2.py ccm-controls-v4-v2.xlsx
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 2 failed
     exit /b 1
