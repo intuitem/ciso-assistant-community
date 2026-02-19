@@ -13,18 +13,12 @@
 	let month = $derived(parseInt(page.params.month));
 
 	function getDate(dateToParse) {
-		let year = parseInt(dateToParse.split('-')[0]);
-		let month = parseInt(dateToParse.split('-')[1]);
-		let day = parseInt(dateToParse.split('-')[2]);
+		let splited = dateToParse.split('-');
+		let year = parseInt(splited[0]);
+		let month = parseInt(splited[1]);
+		let day = parseInt(splited[2]);
 
-		let date = new Date();
-		date.setFullYear(year);
-		date.setMonth(month - 1);
-		date.setDate(day);
-		date.setHours(0);
-		date.setMinutes(0);
-		date.setSeconds(0);
-		date.setMilliseconds(0);
+		let date = new Date(year, month - 1, day);
 		return date;
 	}
 
