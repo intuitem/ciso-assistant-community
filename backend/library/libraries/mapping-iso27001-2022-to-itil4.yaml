@@ -1,3 +1,4 @@
+---
 urn: urn:intuitem:risk:library:mapping-iso27001-2022-to-itil4
 locale: fr
 ref_id: mapping-iso27001-2022-to-itil4
@@ -634,7 +635,7 @@ objects:
         relationship: intersect
         rationale: "La gestion des vulnérabilités techniques est un aspect clé de la sécurité (ITIL4-GEN-03)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.8
-        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-control
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
         relationship: intersect
         rationale: "L'application de correctifs est un type de changement à contrôler (ITIL4-SVC-04)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.9
@@ -694,7 +695,7 @@ objects:
         relationship: intersect
         rationale: "La restriction et la surveillance des programmes privilégiés est une mesure de sécurité (ITIL4-GEN-03)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
-        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-control
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
         relationship: intersect
         rationale: "L'installation de logiciels est un changement à gérer (ITIL4-SVC-04)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.19
@@ -794,7 +795,7 @@ objects:
         relationship: intersect
         rationale: "C'est une pratique de gestion du développement (ITIL4-TECH-03)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
-        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-control
+        target_requirement_urn: urn:intuitem:risk:req_node:itil4:change-enablement
         relationship: intersect
         rationale: "La gestion des changements a pour objet de gérer les changements de manière à minimiser les risques (ITIL4-SVC-04)."
       - source_requirement_urn: urn:intuitem:risk:req_node:iso27001-2022:a.8.32
