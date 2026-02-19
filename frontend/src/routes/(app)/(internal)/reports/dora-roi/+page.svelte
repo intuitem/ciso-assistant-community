@@ -74,16 +74,28 @@
 	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
 		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Summary</h2>
 		<div class="grid grid-cols-3 gap-4">
-			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-red-300 dark:border-red-800">
-				<div class="text-3xl font-bold text-red-600 dark:text-red-400">{lintResults.summary.errors}</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-red-300 dark:border-red-800"
+			>
+				<div class="text-3xl font-bold text-red-600 dark:text-red-400">
+					{lintResults.summary.errors}
+				</div>
 				<div class="text-sm text-red-600 dark:text-red-400 mt-1">Errors</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-yellow-300 dark:border-yellow-800">
-				<div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{lintResults.summary.warnings}</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-yellow-300 dark:border-yellow-800"
+			>
+				<div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+					{lintResults.summary.warnings}
+				</div>
 				<div class="text-sm text-yellow-600 dark:text-yellow-400 mt-1">Warnings</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-green-300 dark:border-green-800">
-				<div class="text-3xl font-bold text-green-600 dark:text-green-400">{lintResults.summary.ok}</div>
+			<div
+				class="text-center p-4 rounded-lg bg-surface-50-950 border border-green-300 dark:border-green-800"
+			>
+				<div class="text-3xl font-bold text-green-600 dark:text-green-400">
+					{lintResults.summary.ok}
+				</div>
 				<div class="text-sm text-green-600 dark:text-green-400 mt-1">Passed</div>
 			</div>
 		</div>

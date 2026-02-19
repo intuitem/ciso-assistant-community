@@ -298,13 +298,15 @@
 							>
 						</tr>
 						<tr>
-							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
+							<th
+								class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
 								>{m.objective()}</th
 							>
 							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b"
 								>{m.capability()}</th
 							>
-							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
+							<th
+								class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b border-l"
 								>{m.objective()}</th
 							>
 							<th class="px-4 py-2 text-center text-xs font-medium text-surface-600-400 border-b"
@@ -323,13 +325,17 @@
 								<td class="px-4 py-3 text-sm font-medium text-surface-950-50">
 									{assetAssessment.asset.name}
 								</td>
-								<td class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top">
+								<td
+									class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top"
+								>
 									{securityObjectives || '--'}
 								</td>
 								<td class="px-4 py-3 text-xs text-surface-700-300 whitespace-pre-line align-top">
 									{securityCapabilities || '--'}
 								</td>
-								<td class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top">
+								<td
+									class="px-4 py-3 text-xs text-surface-700-300 border-l whitespace-pre-line align-top"
+								>
 									{recoveryObjectives || '--'}
 								</td>
 								<td class="px-4 py-3 text-xs text-surface-700-300 whitespace-pre-line align-top">
@@ -361,7 +367,9 @@
 	<!-- Section 5: Applied Controls -->
 	{#if appliedControls && appliedControls.length > 0}
 		<section class="mb-8 page-break-section">
-			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
+			<h2
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2"
+			>
 				{m.appliedControls()}
 			</h2>
 			<div class="overflow-x-auto">

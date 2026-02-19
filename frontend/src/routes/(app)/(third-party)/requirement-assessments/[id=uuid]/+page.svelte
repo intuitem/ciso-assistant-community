@@ -333,8 +333,10 @@
 		</div>
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
-		<button class="btn bg-surface-400-600 text-white font-semibold w-full" type="button" onclick={cancel}
-			>{m.back()}</button
+		<button
+			class="btn bg-surface-400-600 text-white font-semibold w-full"
+			type="button"
+			onclick={cancel}>{m.back()}</button
 		>
 	</div>
 </div>

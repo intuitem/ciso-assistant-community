@@ -108,7 +108,9 @@
 					role="listitem"
 				>
 					<div class="flex-none">
-						<span class="text-sm font-semibold text-surface-600-400 w-6 text-center">{index + 1}</span>
+						<span class="text-sm font-semibold text-surface-600-400 w-6 text-center"
+							>{index + 1}</span
+						>
 					</div>
 					<div class="flex-none">
 						<svg

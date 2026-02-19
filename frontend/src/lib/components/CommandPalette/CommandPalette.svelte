@@ -79,7 +79,9 @@
 				placeholder="Type a command..."
 			/>
 			{#if filteredNavigationCommands.length > 0}
-				<span class="bg-surface-50-950 py-2 px-4 text-xs uppercase text-surface-600-400">Navigation</span>
+				<span class="bg-surface-50-950 py-2 px-4 text-xs uppercase text-surface-600-400"
+					>Navigation</span
+				>
 			{:else}
 				<span class="bg-surface-50-950 py-2 px-1 text-black">No results found.</span>
 			{/if}

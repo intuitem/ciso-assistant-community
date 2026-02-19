@@ -288,7 +288,9 @@
 				baseEndpoint="/assets?risk_scenarios={page.params.id}"
 			/>
 		</div>
-		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto">
+		<div
+			class="card px-4 py-2 bg-surface-50-950 shadow-lg space-y-4 w-1/2 max-h-96 overflow-y-auto"
+		>
 			<h4 class="h4 font-semibold">{m.threats()}</h4>
 			<ModelTable
 				source={data.tables['threats']}
@@ -321,7 +323,9 @@
 		<div class="card px-4 py-2 bg-surface-50-950 shadow-lg w-1/2">
 			<h4 class="h4 font-semibold">{m.riskOrigin()}</h4>
 			{#if data.scenario.risk_origin}
-				<p class="font-semibold text-surface-600-400">{safeTranslate(data.scenario.risk_origin.name)}</p>
+				<p class="font-semibold text-surface-600-400">
+					{safeTranslate(data.scenario.risk_origin.name)}
+				</p>
 				{#if data.scenario.risk_origin.description}
 					<p class="text-sm text-surface-600-400 mt-1">{data.scenario.risk_origin.description}</p>
 				{/if}

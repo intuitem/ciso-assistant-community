@@ -171,7 +171,9 @@
 						{user.str}
 					</Anchor>
 				{:else}
-					<p class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400">{m.unassigned()}</p>
+					<p class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400">
+						{m.unassigned()}
+					</p>
 				{/each}
 			</div>
 		</div>
@@ -195,7 +197,9 @@
 			<p class="text-surface-700-300 text-md font-medium mb-2">
 				{m.relatedTo()}
 			</p>
-			<div class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-surface-50-950 place-items-center">
+			<div
+				class="grid grid-cols-2 gap-6 border rounded-lg p-4 bg-surface-50-950 place-items-center"
+			>
 				{#each categories as cat}
 					{#if cat.items?.length}
 						<div class="flex flex-col space-y-1">
@@ -274,7 +278,9 @@
 			</tbody>
 		</table>
 	{:else}
-		<span class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400">{m.noEvidences()}</span>
+		<span class="text-md px-1.5 py-0.5 font-light italic text-surface-600-400"
+			>{m.noEvidences()}</span
+		>
 	{/if}
 
 	<!-- OBSERVATION COMPACT -->

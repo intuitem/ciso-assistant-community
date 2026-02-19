@@ -180,11 +180,19 @@
 			</div>
 			<div>
 				<strong>supportedModels:</strong>
-				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(supportedModels, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(
+						supportedModels,
+						null,
+						2
+					)}</pre>
 			</div>
 			<div>
 				<strong>availableChartTypes:</strong>
-				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(availableChartTypes, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(
+						availableChartTypes,
+						null,
+						2
+					)}</pre>
 			</div>
 		</div>
 	</div>

@@ -33,7 +33,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		// Prepare indicators with configurable max value and min -1 to avoid distortions with 0-values
 		const indicators = labels.map((label) => ({
@@ -118,7 +122,9 @@
 							itemStyle: {
 								color: '#3b82f6',
 								borderWidth: 2,
-								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff'
 							},
 							label: {
 								show: false
@@ -141,7 +147,9 @@
 							itemStyle: {
 								color: '#f97316',
 								borderWidth: 2,
-								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff'
 							},
 							label: {
 								show: false

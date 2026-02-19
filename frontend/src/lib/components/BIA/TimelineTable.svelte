@@ -116,7 +116,9 @@
 				<table class="min-w-full border-collapse">
 					<thead>
 						<tr class="bg-surface-100-900">
-							<th class="sticky-col px-4 py-2 text-left font-medium text-surface-600-400 bg-surface-100-900">
+							<th
+								class="sticky-col px-4 py-2 text-left font-medium text-surface-600-400 bg-surface-100-900"
+							>
 								{m.asset()}
 							</th>
 							{#each xAxisPoints as point, i}
@@ -148,7 +150,9 @@
 					</tbody>
 					<tfoot>
 						<tr class="bg-surface-50-950 border-t-2 border-surface-200-800">
-							<td class="sticky-col px-4 py-2 font-medium text-surface-600-400 capitalize bg-surface-50-950">
+							<td
+								class="sticky-col px-4 py-2 font-medium text-surface-600-400 capitalize bg-surface-50-950"
+							>
 								{m.time()}
 							</td>
 							{#each xAxisPoints as point}

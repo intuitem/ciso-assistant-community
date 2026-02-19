@@ -43,7 +43,11 @@
 			</div>
 			<div>
 				<strong>formDataCache:</strong>
-				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(formDataCache, null, 2)}</pre>
+				<pre class="bg-surface-50-950 p-2 rounded mt-1">{JSON.stringify(
+						formDataCache,
+						null,
+						2
+					)}</pre>
 			</div>
 		</div>
 	</div>

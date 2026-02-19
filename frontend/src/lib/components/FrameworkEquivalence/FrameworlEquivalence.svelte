@@ -6,7 +6,9 @@
 <table class="table caption-bottom table text-xs table-interactive">
 	<thead class="table-head">
 		<tr>
-			<td class="cursor-pointer select-none uppercase bg-surface-50-950 text-surface-700-300 hover:text-black">
+			<td
+				class="cursor-pointer select-none uppercase bg-surface-50-950 text-surface-700-300 hover:text-black"
+			>
 				URN
 			</td>
 			<td> Partial coverage </td>

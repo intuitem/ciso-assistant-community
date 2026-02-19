@@ -353,7 +353,9 @@
 				{#if hasDirectOptions}
 					<div class="p-3 space-y-2">
 						{#each group.options as opt}
-							<label class="flex items-center gap-2 hover:bg-surface-50-950 p-1 rounded transition-colors">
+							<label
+								class="flex items-center gap-2 hover:bg-surface-50-950 p-1 rounded transition-colors"
+							>
 								<input
 									type="checkbox"
 									value={opt.value}

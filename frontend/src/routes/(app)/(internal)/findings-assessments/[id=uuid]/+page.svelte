@@ -97,7 +97,8 @@
 						<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
 						<a
 							href="/findings-assessments/{data.data.id}/export/xlsx"
-							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asXLSX()}</a
+							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+							>... {m.asXLSX()}</a
 						>
 						<a
 							href="/findings-assessments/{data.data.id}/export/md"
@@ -106,7 +107,8 @@
 						>
 						<a
 							href="/findings-assessments/{data.data.id}/export/pdf"
-							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
+							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+							>... {m.asPDF()}</a
 						>
 					</div>
 				{/snippet}
@@ -151,7 +153,10 @@
 					</div>
 				</div>
 
-				<div class="card p-2 bg-surface-50-950 shadow-xs flex-1 flex flex-row gap-2" use:resizeObserver>
+				<div
+					class="card p-2 bg-surface-50-950 shadow-xs flex-1 flex flex-row gap-2"
+					use:resizeObserver
+				>
 					{#key chartKey}
 						<div class="flex-1 min-h-0 min-w-0">
 							<HalfDonutChart

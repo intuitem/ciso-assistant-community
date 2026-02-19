@@ -211,7 +211,8 @@
 							>
 							<a
 								href="/incidents/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asPDF()}</a
 							>
 						</div>
 					{/snippet}
@@ -375,7 +376,9 @@
 						</div>
 						{#if meta.evidences && meta.evidences.length > 0}
 							<div class="mb-2">
-								<p class="text-xs font-medium text-surface-700-300 mb-1">{m.associatedEvidences()}:</p>
+								<p class="text-xs font-medium text-surface-700-300 mb-1">
+									{m.associatedEvidences()}:
+								</p>
 								<div class="flex flex-wrap gap-1">
 									{#each meta.evidences as evidence}
 										<a

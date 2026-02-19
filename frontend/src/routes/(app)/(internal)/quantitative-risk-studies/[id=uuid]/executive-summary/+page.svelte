@@ -24,7 +24,9 @@
 <main class="p-6 space-y-6">
 	{#await Promise.all( [data.stream.executiveSummary, data.stream.combinedLec, data.stream.aleComparison] )}
 		<!-- Breadcrumb loading state -->
-		<div class="bg-surface-50-950 p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
+		<div
+			class="bg-surface-50-950 p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2"
+		>
 			<p class="font-semibold text-lg">{m.loading()}</p>
 		</div>
 		<div class="flex items-center justify-center h-64">
@@ -56,7 +58,10 @@
 						{/if}
 						{#if summaryData.study_description}
 							<div class="mb-4">
-								<MarkdownRenderer content={summaryData.study_description} class="text-surface-600-400" />
+								<MarkdownRenderer
+									content={summaryData.study_description}
+									class="text-surface-600-400"
+								/>
 							</div>
 						{/if}
 						{#if summaryData.study_assets && summaryData.study_assets.length > 0}
@@ -86,10 +91,14 @@
 				</div>
 
 				<!-- Risk Thresholds and Treatment Cost -->
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-surface-50-950 rounded-lg">
+				<div
+					class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-surface-50-950 rounded-lg"
+				>
 					{#if summaryData.loss_threshold}
 						<div class="text-center">
-							<div class="text-sm text-surface-600-400 font-medium mb-1">{m.lossThresholdLabel()}</div>
+							<div class="text-sm text-surface-600-400 font-medium mb-1">
+								{m.lossThresholdLabel()}
+							</div>
 							<div class="text-lg font-bold text-red-600">{summaryData.loss_threshold_display}</div>
 							<div class="text-xs text-surface-600-400">{m.maximumAcceptableLoss()}</div>
 						</div>
@@ -114,7 +123,9 @@
 					{/if}
 					{#if summaryData.study_total_treatment_cost_display}
 						<div class="text-center">
-							<div class="text-sm text-surface-600-400 font-medium mb-1">{m.totalTreatmentCost()}</div>
+							<div class="text-sm text-surface-600-400 font-medium mb-1">
+								{m.totalTreatmentCost()}
+							</div>
 							<div class="text-lg font-bold text-purple-600">
 								{summaryData.study_total_treatment_cost_display}
 							</div>
@@ -462,7 +473,9 @@
 											{scenario.risk_reduction_display || m.cannotCalculate()}
 										</div>
 										<div class="text-sm text-surface-600-400">{m.riskReduction()}</div>
-										<div class="text-xs text-surface-600-400">{m.currentAle()} - {m.residualAle()}</div>
+										<div class="text-xs text-surface-600-400">
+											{m.currentAle()} - {m.residualAle()}
+										</div>
 									</div>
 									<div class="text-center">
 										<div class="text-lg font-bold text-blue-600 mb-1">
@@ -531,7 +544,9 @@
 			<!-- Error state -->
 			<div class="bg-surface-50-950 rounded-lg p-12 shadow-sm text-center">
 				<i class="fa-solid fa-exclamation-triangle text-4xl text-red-400 mb-4"></i>
-				<h3 class="text-xl font-semibold text-surface-600-400 mb-2">{m.failedToLoadExecutiveSummary()}</h3>
+				<h3 class="text-xl font-semibold text-surface-600-400 mb-2">
+					{m.failedToLoadExecutiveSummary()}
+				</h3>
 				<p class="text-surface-600-400 mb-4">{m.thereWasAnErrorLoadingExecutive()}</p>
 				<button class="btn preset-filled-primary-500" onclick={() => window.location.reload()}>
 					<i class="fa-solid fa-refresh mr-2"></i>{m.retry()}
@@ -620,7 +635,9 @@
 				{:else}
 					<div class="text-center py-8">
 						<i class="fa-solid fa-chart-column text-4xl text-surface-400-600 mb-4"></i>
-						<h3 class="text-lg font-semibold text-surface-600-400 mb-2">{m.noAleDataAvailable()}</h3>
+						<h3 class="text-lg font-semibold text-surface-600-400 mb-2">
+							{m.noAleDataAvailable()}
+						</h3>
 						<p class="text-surface-600-400">
 							{m.runSimulationsToGenerateAle()}
 						</p>

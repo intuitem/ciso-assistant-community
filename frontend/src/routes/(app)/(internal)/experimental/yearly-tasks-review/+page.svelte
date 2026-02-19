@@ -127,7 +127,10 @@
 		<div class="flex gap-4 items-end flex-wrap">
 			<!-- Start Period -->
 			<div class="min-w-[160px]">
-				<label for="start-period-filter" class="block text-sm font-medium text-surface-700-300 mb-1">
+				<label
+					for="start-period-filter"
+					class="block text-sm font-medium text-surface-700-300 mb-1"
+				>
 					{m.startPeriod()}
 				</label>
 				<input

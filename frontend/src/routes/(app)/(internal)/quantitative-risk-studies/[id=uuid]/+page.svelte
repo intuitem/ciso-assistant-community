@@ -200,7 +200,9 @@
 								{safeTranslate(metrics.risk_reduction_display)}
 							</div>
 							<div class="text-sm text-surface-600-400">{m.riskReduction()}</div>
-							<div class="text-xs text-surface-600-400 mt-1">{m.currentAle()} - {m.residualAle()}</div>
+							<div class="text-xs text-surface-600-400 mt-1">
+								{m.currentAle()} - {m.residualAle()}
+							</div>
 						</div>
 					</div>
 
@@ -263,7 +265,9 @@
 					<div class="bg-surface-50-950 rounded-lg p-8 shadow-sm text-center">
 						<div class="flex flex-col items-center space-y-4">
 							<i class="fa-solid fa-chart-area text-4xl text-surface-400-600"></i>
-							<h5 class="text-lg font-semibold text-surface-600-400">{m.combinedLossExceedanceCurve()}</h5>
+							<h5 class="text-lg font-semibold text-surface-600-400">
+								{m.combinedLossExceedanceCurve()}
+							</h5>
 							<p class="text-surface-600-400">
 								{m.noLecDataAvailable()}
 							</p>

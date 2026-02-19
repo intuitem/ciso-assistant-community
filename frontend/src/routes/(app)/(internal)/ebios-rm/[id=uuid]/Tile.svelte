@@ -141,7 +141,9 @@
 											</div>
 										{/snippet}
 										{#snippet content()}
-											<div class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300">
+											<div
+												class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300"
+											>
 												<p
 													data-testid="activity-tooltip"
 													class="border-l-4 {borderColor} text-surface-600-400 p-2"

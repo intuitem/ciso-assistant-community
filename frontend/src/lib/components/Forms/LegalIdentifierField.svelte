@@ -132,8 +132,9 @@
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label for="identifier-type-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
-						>{m.identifierType()}</label
+					<label
+						for="identifier-type-{i}"
+						class="block text-xs font-medium text-surface-600-400 mb-1">{m.identifierType()}</label
 					>
 					<select
 						id="identifier-type-{i}"
@@ -153,8 +154,9 @@
 					{#if $errors && $errors[type]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.identifierErrorMessage()}</div>
 					{/if}
-					<label for="identifier-value-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
-						>{m.identifierValue()}</label
+					<label
+						for="identifier-value-{i}"
+						class="block text-xs font-medium text-surface-600-400 mb-1">{m.identifierValue()}</label
 					>
 					<input
 						id="identifier-value-{i}"

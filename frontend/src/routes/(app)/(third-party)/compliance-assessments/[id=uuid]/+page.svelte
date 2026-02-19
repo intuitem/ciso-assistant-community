@@ -685,7 +685,9 @@
 						{/snippet}
 						{#snippet content()}
 							<div>
-								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.complianceAssessment()}</p>
+								<p class="block px-4 py-2 text-sm text-surface-950-50">
+									{m.complianceAssessment()}
+								</p>
 								{#if !page.data.user.is_third_party}
 									<a
 										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
@@ -705,7 +707,8 @@
 								{/if}
 								<a
 									href="/compliance-assessments/{data.compliance_assessment.id}/export"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asZIP()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+									>... {m.asZIP()}</a
 								>
 								{#if !page.data.user.is_third_party}
 									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
@@ -939,7 +942,9 @@
 					{#if data.compliance_assessment.progress_status_enabled}
 						<div>
 							<span class="text-sm font-bold">{m.status()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
+							<div
+								class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md"
+							>
 								{#each Object.entries(complianceStatusColorMap) as [status, color]}
 									<button
 										type="button"
@@ -960,7 +965,9 @@
 					{#if data.compliance_assessment.extended_result_enabled}
 						<div>
 							<span class="text-sm font-bold">{m.extendedResult()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md">
+							<div
+								class="flex flex-wrap w-fit gap-2 text-xs bg-surface-100-900 border-2 p-1 rounded-md"
+							>
 								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
 									<button
 										type="button"

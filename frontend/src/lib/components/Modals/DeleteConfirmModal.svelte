@@ -110,14 +110,19 @@
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
 								>
-									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
 									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
 								{#if expanded.has(keyFor('deleted', group.model))}
-									<ul id={`del-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950">
+									<ul
+										id={`del-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
 												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>
@@ -150,14 +155,19 @@
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
 								>
-									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
 									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
 								</button>
 
 								{#if expanded.has(keyFor('affected', group.model))}
-									<ul id={`aff-${group.model}`} class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950">
+									<ul
+										id={`aff-${group.model}`}
+										class="px-3 pb-2 text-sm space-y-0.5 bg-surface-50-950"
+									>
 										{#each group.objects as o (o.id)}
 											<li class="flex items-center justify-between py-1">
 												<span class="truncate text-surface-700-300" title={o.name}>{o.name}</span>

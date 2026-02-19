@@ -49,7 +49,9 @@
 	});
 </script>
 
-<div class="flex flex-col w-7/8 lg:w-3/4 p-10 rounded-lg shadow-lg bg-surface-50-950 bg-opacity-[.90]">
+<div
+	class="flex flex-col w-7/8 lg:w-3/4 p-10 rounded-lg shadow-lg bg-surface-50-950 bg-opacity-[.90]"
+>
 	<div data-testid="login" class="flex flex-col w-full items-center space-y-4">
 		<div class="bg-primary-300 px-6 py-5 rounded-full text-3xl">
 			<i class="fa-solid fa-right-to-bracket"></i>

@@ -43,7 +43,11 @@
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		let chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 		const filteredValues = values.filter((item) => item.value > 0);
 		// specify chart configuration item and data
 		let option = {

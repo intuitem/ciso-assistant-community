@@ -226,7 +226,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -276,7 +277,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -324,7 +326,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -407,7 +410,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -457,7 +461,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}
@@ -505,7 +510,8 @@
 																	<div
 																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
 																	>
-																		<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		<span
+																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
 																			>{idx + 1}.</span
 																		>
 																		{#if finding.name}

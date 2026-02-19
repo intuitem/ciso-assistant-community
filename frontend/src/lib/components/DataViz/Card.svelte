@@ -48,7 +48,9 @@
 		</div>
 	</Anchor>
 {:else}
-	<div class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-surface-50-950 {cEmphasis} {customClass}">
+	<div
+		class="flex flex-col shadow-lg text-purple-800 p-2 h-20 bg-surface-50-950 {cEmphasis} {customClass}"
+	>
 		<div class="text-xs">
 			{#if icon}
 				<span><i class={icon}></i></span>

@@ -90,7 +90,9 @@
 
 					<div class="p-4 space-y-4">
 						{#each folder.compliance_assessments as assessment}
-							<div class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900">
+							<div
+								class="bg-surface-50-950 rounded-lg p-4 shadow-inner transition hover:bg-surface-100-900"
+							>
 								<div class="flex justify-between items-center mb-4">
 									<div>
 										<p class="text-sm font-semibold">{m.name()}</p>

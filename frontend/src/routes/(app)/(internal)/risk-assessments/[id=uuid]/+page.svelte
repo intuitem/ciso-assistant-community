@@ -320,11 +320,13 @@
 								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+									>... {m.asPDF()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asCSV()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+									>... {m.asCSV()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
@@ -334,7 +336,8 @@
 								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800">... {m.asPDF()}</a
+									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+									>... {m.asPDF()}</a
 								>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"

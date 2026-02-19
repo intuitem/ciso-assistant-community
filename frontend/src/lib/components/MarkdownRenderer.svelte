@@ -74,7 +74,9 @@
 </script>
 
 {#if renderedContent}
-	<div class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}">
+	<div
+		class="prose prose-sm dark:prose-invert max-w-none wrap-break-word whitespace-pre-line {className}"
+	>
 		{@html renderedContent}
 	</div>
 {:else}

@@ -185,7 +185,11 @@
 		const container = document.getElementById(chartId);
 		if (!container) return;
 
-		chartInstance = echarts.init(container, document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		chartInstance = echarts.init(
+			container,
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const option = getChartOption(echarts);
 		chartInstance.setOption(option);
@@ -311,7 +315,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -357,7 +363,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -601,7 +609,9 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
+								borderColor: document.documentElement.classList.contains('dark')
+									? '#1e293b'
+									: '#fff',
 								borderWidth: 2
 							},
 							label: {

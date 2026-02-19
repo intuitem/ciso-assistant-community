@@ -82,7 +82,9 @@
 					: 'text-surface-600-400'}">{m.activityOne()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'one' ? 'text-primary-500' : 'text-surface-600-400'}"
+				class="font-bold text-xl {activeActivity === 'one'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs2_1()}
 			</h1>
@@ -111,7 +113,9 @@
 					: 'text-surface-600-400'}">{m.activityTwo()}</span
 			>
 			<h1
-				class="font-bold text-xl {activeActivity === 'two' ? 'text-primary-500' : 'text-surface-600-400'}"
+				class="font-bold text-xl {activeActivity === 'two'
+					? 'text-primary-500'
+					: 'text-surface-600-400'}"
 			>
 				{m.ebiosWs2_2()}
 			</h1>

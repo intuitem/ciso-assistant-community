@@ -39,9 +39,11 @@
 		</style>
 		<script>
 			// Anti-FOUC: apply dark mode class before first paint
-			(function() {
+			(function () {
 				var theme = localStorage.getItem('ciso-theme') || 'system';
-				var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+				var isDark =
+					theme === 'dark' ||
+					(theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 				if (isDark) document.documentElement.classList.add('dark');
 			})();
 		</script>

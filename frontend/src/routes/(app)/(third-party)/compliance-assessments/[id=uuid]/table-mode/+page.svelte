@@ -422,7 +422,9 @@
 							class="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-linear-to-r from-transparent via-surface-400-600 to-transparent opacity-75"
 						></div>
 
-						<span class="relative z-10 bg-surface-50-950 px-6 text-orange-600 font-semibold text-xl">
+						<span
+							class="relative z-10 bg-surface-50-950 px-6 text-orange-600 font-semibold text-xl"
+						>
 							{getTitle(requirementAssessment)}
 						</span>
 					</span>

@@ -21,7 +21,9 @@
 			operations: 'bg-surface-50-950 border-yellow-300 hover:border-yellow-400',
 			assets: 'bg-surface-50-950 border-purple-300 hover:border-purple-400'
 		};
-		return colors[category] || 'bg-surface-50-950 border-surface-200-800 hover:border-surface-400-600';
+		return (
+			colors[category] || 'bg-surface-50-950 border-surface-200-800 hover:border-surface-400-600'
+		);
 	}
 
 	function getCategoryIconColor(category: string): string {
@@ -43,7 +45,9 @@
 	<a {href} class="{baseClasses} {getCategoryColor(category)}">
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
-				<div class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm">
+				<div
+					class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm"
+				>
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>
@@ -80,7 +84,9 @@
 	<button type="button" class="{baseClasses} {getCategoryColor(category)}" {onclick}>
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
-				<div class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm">
+				<div
+					class="w-12 h-12 rounded-lg bg-surface-50-950 flex items-center justify-center shadow-sm"
+				>
 					<i class="{icon} text-2xl {getCategoryIconColor(category)}"></i>
 				</div>
 			</div>

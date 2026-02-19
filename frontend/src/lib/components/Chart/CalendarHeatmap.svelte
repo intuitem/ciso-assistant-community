@@ -44,7 +44,11 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let calendar_chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		let calendar_chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		const chartData = data.length > 0 ? data : generateSampleData(year);
 		const today = new Date().toISOString().split('T')[0];

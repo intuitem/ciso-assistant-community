@@ -130,7 +130,9 @@
 	}
 </script>
 
-<div class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800">
+<div
+	class="p-6 max-w-4xl mx-auto bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800"
+>
 	<div class="mb-8 border-b border-surface-100-900 pb-4">
 		<h2 class="text-xl font-bold text-surface-800-200">
 			{m.serviceNowIntegrationMappingsDescription()}

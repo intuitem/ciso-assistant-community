@@ -66,7 +66,9 @@
 	</div>
 
 	<!-- Info Section -->
-	<div class="bg-gradient-to-br from-surface-50-950 to-surface-100-900 card border border-surface-200-800 p-6">
+	<div
+		class="bg-gradient-to-br from-surface-50-950 to-surface-100-900 card border border-surface-200-800 p-6"
+	>
 		<div class="flex items-start gap-4">
 			<div class="flex-shrink-0">
 				<i class="fas fa-info-circle text-2xl text-blue-600"></i>

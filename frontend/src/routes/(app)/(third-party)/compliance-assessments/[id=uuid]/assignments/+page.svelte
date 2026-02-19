@@ -576,7 +576,9 @@
 					</span>
 				</div>
 				<div class="flex items-center gap-1">
-					<span class="px-2 py-1 rounded-md bg-surface-100-900 border border-surface-200-800 text-surface-600-400">
+					<span
+						class="px-2 py-1 rounded-md bg-surface-100-900 border border-surface-200-800 text-surface-600-400"
+					>
 						<i class="fa-solid fa-lock mr-1"></i>
 						{m.alreadyAssigned()}
 					</span>
@@ -601,7 +603,9 @@
 			<!-- Create/Edit Assignment Card -->
 			{#if !isReadOnly}
 				<div
-					class="card bg-surface-50-950 shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
+					class="card bg-surface-50-950 shadow-lg p-4 {editingAssignmentId
+						? 'ring-2 ring-violet-400'
+						: ''}"
 				>
 					<h2 class="h4 font-semibold mb-4">
 						{#if editingAssignmentId}
@@ -689,7 +693,9 @@
 				<h2 class="h4 font-semibold mb-4">
 					<i class="fa-solid fa-list text-primary-500 mr-2"></i>
 					{m.existingAssignments()}
-					<span class="badge bg-surface-200-800 text-surface-700-300 ml-2">{assignments.length}</span>
+					<span class="badge bg-surface-200-800 text-surface-700-300 ml-2"
+						>{assignments.length}</span
+					>
 				</h2>
 
 				{#if assignments.length === 0}
@@ -822,7 +828,9 @@
 									title={req.result}
 								></span>
 							{:else}
-								<span class="w-2 h-2 rounded-full bg-surface-300-700 flex-shrink-0" title={m.notAssessed()}
+								<span
+									class="w-2 h-2 rounded-full bg-surface-300-700 flex-shrink-0"
+									title={m.notAssessed()}
 								></span>
 							{/if}
 

@@ -131,7 +131,9 @@
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.deleted.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden">
+							<section
+								class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden"
+							>
 								<button
 									type="button"
 									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
@@ -139,7 +141,9 @@
 									aria-expanded={expanded.has(keyFor('deleted', group.model))}
 									onclick={() => toggle('deleted', group.model)}
 								>
-									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
 									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>
@@ -174,7 +178,9 @@
 
 					<div class="max-h-64 overflow-y-auto space-y-2">
 						{#each cascadeInfo.affected.grouped_objects as group (group.model)}
-							<section class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden">
+							<section
+								class="rounded-md border border-surface-300-700 bg-surface-50-950 overflow-hidden"
+							>
 								<button
 									type="button"
 									class="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-surface-100-900 text-sm"
@@ -182,7 +188,9 @@
 									aria-expanded={expanded.has(keyFor('affected', group.model))}
 									onclick={() => toggle('affected', group.model)}
 								>
-									<span class="font-medium text-surface-950-50">{group.verbose_name ?? group.model}</span>
+									<span class="font-medium text-surface-950-50"
+										>{group.verbose_name ?? group.model}</span
+									>
 									<span class="text-xs text-surface-600-400">
 										{group.objects.length}
 									</span>

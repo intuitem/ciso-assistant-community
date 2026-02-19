@@ -40,7 +40,11 @@
 		const LabelLayout = (await import('echarts/features')).LabelLayout;
 		echarts.use([LabelLayout]);
 
-		let chart_t = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		let chart_t = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		// Count visible nodes at depth 2 to determine tree size category
 		const visibleAtDepth2 = countVisibleNodes(tree as treeType, 2);

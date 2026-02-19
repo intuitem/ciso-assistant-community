@@ -23,7 +23,10 @@
 		</div>
 	</div>
 	<div class="flex w-full items-center justify-center">
-		<div id="hellothere" class="flex flex-col justify-center items-center w-3/5 text-surface-950-50">
+		<div
+			id="hellothere"
+			class="flex flex-col justify-center items-center w-3/5 text-surface-950-50"
+		>
 			<Typewriter mode="loopOnce" cursor={false} interval={50}>
 				<div class="text-2xl unstyled text-center pb-4">
 					<span class="text-2xl text-center">{m.helloThere()} 👋</span>

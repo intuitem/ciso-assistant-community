@@ -35,7 +35,8 @@
 			<table class="min-w-full bg-surface-50-950 border border-surface-200-800 rounded-lg">
 				<thead class="bg-surface-100-900">
 					<tr>
-						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"></th>
+						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"
+						></th>
 						<th class="px-4 py-2 text-left text-sm font-semibold text-surface-700-300 border-b"
 							>{m.objective()}</th
 						>
@@ -56,7 +57,9 @@
 							<td class="px-4 py-2 text-sm text-surface-700-300"
 								>{getDisplayValue(comparison.expectation)}</td
 							>
-							<td class="px-4 py-2 text-sm text-surface-700-300">{getDisplayValue(comparison.reality)}</td>
+							<td class="px-4 py-2 text-sm text-surface-700-300"
+								>{getDisplayValue(comparison.reality)}</td
+							>
 							<td class="px-4 py-2 text-center">
 								<span
 									class="inline-flex items-center justify-center w-6 h-6 rounded-full"
@@ -79,7 +82,9 @@
 			</table>
 		</div>
 	{:else}
-		<div class="bg-surface-50-950 border border-surface-200-800 rounded-lg p-8 flex items-center justify-center">
+		<div
+			class="bg-surface-50-950 border border-surface-200-800 rounded-lg p-8 flex items-center justify-center"
+		>
 			<p class="text-surface-600-400 text-center">{m.noDataAvailable()}</p>
 		</div>
 	{/if}

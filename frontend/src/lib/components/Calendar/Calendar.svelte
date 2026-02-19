@@ -174,7 +174,10 @@
 					{$selectedDay.day}
 					{monthNames[$selectedDay.month - 1]}, {$selectedDay.year}
 				</h2>
-				<button onclick={closePanel} class="text-surface-600-400 hover:text-surface-700-300 focus:outline-hidden">
+				<button
+					onclick={closePanel}
+					class="text-surface-600-400 hover:text-surface-700-300 focus:outline-hidden"
+				>
 					<i class="fas fa-times"></i>
 				</button>
 			</div>

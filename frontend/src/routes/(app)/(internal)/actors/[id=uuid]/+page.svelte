@@ -61,7 +61,9 @@
 
 		<div class="flow-root rounded-lg border border-surface-100-900 py-3 shadow-xs">
 			<dl class="-my-3 divide-y divide-surface-100-900 text-sm">
-				<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4">
+				<div
+					class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4"
+				>
 					<dt class="font-medium text-surface-950-50">{m.type()}</dt>
 					<dd class="text-surface-700-300 sm:col-span-2">
 						<span class="inline-flex items-center">
@@ -72,7 +74,9 @@
 				</div>
 
 				{#if specific}
-					<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4">
+					<div
+						class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4"
+					>
 						<dt class="font-medium text-surface-950-50">{safeTranslate(actorType)}</dt>
 						<dd class="text-surface-700-300 sm:col-span-2">
 							<Anchor
@@ -86,7 +90,9 @@
 					</div>
 				{/if}
 
-				<div class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4">
+				<div
+					class="grid grid-cols-1 gap-1 py-3 px-4 even:bg-surface-50-950 sm:grid-cols-3 sm:gap-4"
+				>
 					<dt class="font-medium text-surface-950-50">{m.refId()}</dt>
 					<dd class="text-surface-700-300 sm:col-span-2 font-mono text-xs">{data.data.id}</dd>
 				</div>

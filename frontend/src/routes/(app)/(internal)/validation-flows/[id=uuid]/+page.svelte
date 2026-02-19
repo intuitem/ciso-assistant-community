@@ -362,7 +362,9 @@
 						<h3 class="text-sm font-medium text-surface-700-300">{modelDisplayNames[key]}</h3>
 						<div class="space-y-2">
 							{#each value as item}
-								<div class="border rounded-lg p-3 bg-surface-50-950 hover:bg-surface-100-900 transition">
+								<div
+									class="border rounded-lg p-3 bg-surface-50-950 hover:bg-surface-100-900 transition"
+								>
 									<div class="flex items-start justify-between gap-2 mb-2">
 										<Anchor
 											href="/{modelUrlNames[key]}/{item.id}"

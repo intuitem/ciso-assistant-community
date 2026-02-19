@@ -113,7 +113,11 @@
 
 	onMount(async () => {
 		echarts = await import('echarts');
-		chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
+		chart = echarts.init(
+			document.getElementById(chart_id),
+			document.documentElement.classList.contains('dark') ? 'dark' : null,
+			{ renderer: 'svg' }
+		);
 
 		if (translatedTree?.length > 0) {
 			chart.setOption(createOption(translatedTree));

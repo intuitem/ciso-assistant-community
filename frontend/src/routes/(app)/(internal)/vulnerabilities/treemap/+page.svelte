@@ -116,7 +116,8 @@
 		medium: 'bg-yellow-50 text-yellow-400 border-yellow-200 hover:bg-yellow-100',
 		low: 'bg-blue-50 text-blue-400 border-blue-200 hover:bg-blue-100',
 		info: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900',
-		undefined: 'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900'
+		undefined:
+			'bg-surface-50-950 text-surface-400-600 border-surface-200-800 hover:bg-surface-100-900'
 	};
 
 	// Status colors based on vulnerability lifecycle (using raw status values)
@@ -144,7 +145,9 @@
 
 <div class="bg-surface-50-950 p-6 h-screen overflow-auto">
 	<!-- Filters Section -->
-	<div class="mb-6 space-y-6 bg-surface-50-950 p-6 rounded-xl border border-surface-200-800 shadow-sm">
+	<div
+		class="mb-6 space-y-6 bg-surface-50-950 p-6 rounded-xl border border-surface-200-800 shadow-sm"
+	>
 		<!-- Severity Filters -->
 		<div>
 			<div class="flex items-center justify-between mb-3">

@@ -242,7 +242,9 @@
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.feared_events as event}
-					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+					<div
+						class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow"
+					>
 						<h3 class="text-lg font-semibold text-surface-950-50 mb-2">{event.name}</h3>
 						<div class="flex flex-wrap gap-4 text-sm mb-3">
 							<div>
@@ -301,7 +303,9 @@
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.compliance_assessments as assessment}
-					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+					<div
+						class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow"
+					>
 						<div class="flex justify-between items-start mb-2">
 							<div>
 								<h3 class="text-lg font-semibold text-surface-950-50">{assessment.name}</h3>
@@ -321,7 +325,9 @@
 							<div class="mb-3">
 								<div class="flex justify-between items-center mb-1">
 									<span class="text-sm font-semibold text-surface-700-300">{m.progress()}:</span>
-									<span class="text-sm font-semibold text-surface-950-50">{assessment.progress}%</span>
+									<span class="text-sm font-semibold text-surface-950-50"
+										>{assessment.progress}%</span
+									>
 								</div>
 								<div class="w-full bg-surface-200-800 rounded-full h-2.5">
 									<div
@@ -366,7 +372,9 @@
 									</div>
 								{/if}
 								{#if assessment.result_counts.not_applicable !== undefined}
-									<div class="bg-surface-50-950 border border-surface-200-800 rounded p-2 text-center">
+									<div
+										class="bg-surface-50-950 border border-surface-200-800 rounded p-2 text-center"
+									>
 										<div class="text-2xl font-bold text-surface-700-300">
 											{assessment.result_counts.not_applicable}
 										</div>
@@ -431,7 +439,9 @@
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.ro_to_couples as roto}
-					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+					<div
+						class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow"
+					>
 						<h3 class="text-lg font-semibold text-surface-950-50 mb-2">
 							{safeTranslate(roto.risk_origin)} - {roto.target_objective}
 						</h3>
@@ -507,7 +517,9 @@
 			</h2>
 			<div class="space-y-4">
 				{#each reportData.stakeholders as stakeholder}
-					<div class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow">
+					<div
+						class="border border-surface-200-800 rounded-lg p-4 hover:shadow-md transition-shadow"
+					>
 						<h3 class="text-lg font-semibold text-surface-950-50 mb-3">
 							{stakeholder.entity.str} ({safeTranslate(stakeholder.category)})
 						</h3>
@@ -588,7 +600,9 @@
 	<!-- Scenarios Hierarchy Section -->
 	{#if reportData.strategic_scenarios.length > 0}
 		<section class="mb-6 strategic-scenarios-section">
-			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
+			<h2
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2"
+			>
 				{m.strategicScenarios()}
 			</h2>
 			<div class="space-y-6">
@@ -658,7 +672,9 @@
 	<!-- Operational Scenarios Section -->
 	{#if reportData.operational_scenarios.length > 0}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
+			<h2
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2"
+			>
 				{m.operationalScenarios()}
 			</h2>
 			{#if study.quotation_method}
@@ -700,8 +716,12 @@
 							{/if}
 							{#if opScenario.operating_modes_description && opModes.length === 0}
 								<div class="text-sm mb-3">
-									<span class="font-semibold text-surface-700-300">{m.operatingModesDescription()}:</span>
-									<p class="ml-2 text-surface-700-300 mt-1">{opScenario.operating_modes_description}</p>
+									<span class="font-semibold text-surface-700-300"
+										>{m.operatingModesDescription()}:</span
+									>
+									<p class="ml-2 text-surface-700-300 mt-1">
+										{opScenario.operating_modes_description}
+									</p>
 								</div>
 							{/if}
 							<div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
@@ -809,9 +829,12 @@
 												</div>
 												{#if mode.elementary_actions.length > 0}
 													<div class="text-xs">
-														<span class="font-semibold text-surface-700-300">{m.elementaryActions()}:</span
+														<span class="font-semibold text-surface-700-300"
+															>{m.elementaryActions()}:</span
 														>
-														<span class="ml-1 text-surface-600-400">{mode.elementary_actions.length}</span>
+														<span class="ml-1 text-surface-600-400"
+															>{mode.elementary_actions.length}</span
+														>
 													</div>
 												{/if}
 											</div>
@@ -821,7 +844,10 @@
 													<h5 class="text-xs font-semibold text-surface-700-300 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="bg-surface-50-950 rounded p-2" data-chart="operating-mode-{mode.id}">
+													<div
+														class="bg-surface-50-950 rounded p-2"
+														data-chart="operating-mode-{mode.id}"
+													>
 														<GraphComponent
 															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
 															panelNodes={mode.graph.panelNodes}
@@ -861,7 +887,9 @@
 		{@const currentCluster = buildRiskCluster(riskScenarios, riskMatrix, 'current')}
 		{@const residualCluster = buildRiskCluster(riskScenarios, riskMatrix, 'residual')}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
+			<h2
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2"
+			>
 				{m.riskMatrix()}
 				{#if reportData.risk_matrix_data.risk_assessment}
 					<span class="text-sm font-normal text-surface-600-400">
@@ -1013,7 +1041,9 @@
 	<!-- Treatment Plan Section -->
 	{#if reportData.compliance_action_plans?.length > 0 || reportData.risk_action_plan || reportData.stakeholders?.some((s) => s.applied_controls?.length > 0)}
 		<section class="mb-6 page-break-section">
-			<h2 class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2">
+			<h2
+				class="text-lg font-semibold text-surface-950-50 mb-4 border-b border-surface-200-800 pb-2"
+			>
 				{m.treatmentPlan()}
 			</h2>
 
@@ -1033,22 +1063,29 @@
 									{/if}
 								</h3>
 								<div class="overflow-x-auto">
-									<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+									<table
+										class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border"
+									>
 										<thead class="bg-surface-50-950">
 											<tr>
-												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+												<th
+													class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.name()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+												<th
+													class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.priority()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+												<th
+													class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.status()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+												<th
+													class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.owner()}</th
 												>
-												<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+												<th
+													class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 													>{m.eta()}</th
 												>
 											</tr>
@@ -1116,22 +1153,29 @@
 								</span>
 							</h3>
 							<div class="overflow-x-auto">
-								<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+								<table
+									class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border"
+								>
 									<thead class="bg-surface-50-950">
 										<tr>
-											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+											<th
+												class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.name()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+											<th
+												class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.priority()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+											<th
+												class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.status()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+											<th
+												class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.owner()}</th
 											>
-											<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
+											<th
+												class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"
 												>{m.eta()}</th
 											>
 										</tr>
@@ -1194,7 +1238,9 @@
 						<span class="text-sm font-normal text-red-700">({m.riskAssessment()})</span>
 					</h3>
 					<div class="overflow-x-auto">
-						<table class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border">
+						<table
+							class="min-w-full divide-y divide-surface-200-800 bg-surface-50-950 rounded border"
+						>
 							<thead class="bg-surface-50-950">
 								<tr>
 									<th class="px-3 py-2 text-left text-xs font-medium text-surface-700-300 uppercase"

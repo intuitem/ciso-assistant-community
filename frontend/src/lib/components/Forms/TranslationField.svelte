@@ -118,8 +118,9 @@
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1">{m.translationErrorMessage()}</div>
 					{/if}
-					<label for="translation-lang-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
-						>{m.language()}</label
+					<label
+						for="translation-lang-{i}"
+						class="block text-xs font-medium text-surface-600-400 mb-1">{m.language()}</label
 					>
 					<select
 						id="translation-lang-{i}"
@@ -140,8 +141,9 @@
 					{#if $errors && $errors[lang]}
 						<div class="text-xs text-red-500 mb-1 invisible">{m.translationErrorMessage()}</div>
 					{/if}
-					<label for="translation-value-{i}" class="block text-xs font-medium text-surface-600-400 mb-1"
-						>{m.translations()}</label
+					<label
+						for="translation-value-{i}"
+						class="block text-xs font-medium text-surface-600-400 mb-1">{m.translations()}</label
 					>
 					<input
 						id="translation-value-{i}"
