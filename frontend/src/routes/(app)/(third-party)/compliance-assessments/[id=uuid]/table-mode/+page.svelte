@@ -245,7 +245,7 @@
 	}
 
 	function getClassesText(mappingInferenceResult: string) {
-		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : '';
+		return complianceResultColorMap[mappingInferenceResult] === '#000000' ? 'text-white' : 'text-gray-900';
 	}
 	// Create separate superForm instances for each requirement assessment
 	let scoreForms = $state({});

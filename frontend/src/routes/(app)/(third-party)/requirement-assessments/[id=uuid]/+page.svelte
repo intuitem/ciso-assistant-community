@@ -67,7 +67,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : 'text-gray-900'
 	);
 
 	const max_score = data.complianceAssessmentScore.max_score;

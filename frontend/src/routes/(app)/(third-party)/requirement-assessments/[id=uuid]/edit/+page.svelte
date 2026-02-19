@@ -239,7 +239,7 @@
 	}
 
 	let classesText = $derived(
-		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : ''
+		complianceResultColorMap[mappingInference.result] === '#000000' ? 'text-white' : 'text-gray-900'
 	);
 
 	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');

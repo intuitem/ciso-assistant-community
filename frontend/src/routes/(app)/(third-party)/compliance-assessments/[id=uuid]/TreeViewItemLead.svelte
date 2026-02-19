@@ -41,7 +41,7 @@
 	const lead = safeTranslate(statusI18n);
 	const leadExtendedResult = extendedResult ? safeTranslate(extendedResult) : null;
 
-	let classesText = $derived(resultColor == '#000000' ? 'text-white' : '');
+	let classesText = $derived(resultColor == '#000000' ? 'text-white' : 'text-gray-900');
 </script>
 
 {#if assessable}

@@ -169,10 +169,6 @@
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
-	let classesPercentText = $derived((resultColor: string) =>
-		resultColor === '#000000' ? 'text-white' : 'text-gray-900'
-	);
-
 	export const getBadgeStyles = (answers: any, questions: any) => {
 		const visibleQuestions = Object.entries(questions || {}).filter(([_, q]) =>
 			isQuestionVisible(q, answers)
@@ -382,12 +378,12 @@
 				>
 					{#each orderedResultPercentages as rp}
 						<div
-							class="flex flex-col justify-center overflow-hidden text-xs text-center {classesPercentText(
-								complianceResultColorMap[rp.result]
-							)}"
+							class="flex flex-col justify-center overflow-hidden text-xs text-center"
 							style="width: {rp.percentage.value}%; background-color: {complianceResultColorMap[
 								rp.result
-							]}"
+							]}; color: {complianceResultColorMap[rp.result] === '#000000'
+								? '#ffffff'
+								: '#111827'}"
 						>
 							{rp.percentage.display}%
 						</div>
