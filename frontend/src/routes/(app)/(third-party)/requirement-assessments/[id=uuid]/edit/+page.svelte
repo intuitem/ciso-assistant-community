@@ -531,12 +531,12 @@
 										>
 											<span class="mr-2">
 												{#if createAppliedControlsLoading}
-													<Progress
-														strokeWidth="16px"
-														meterStroke="stroke-white"
-														classes="-ml-2"
-														size="size-6"
-													/>
+													<Progress>
+														<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+															<Progress.CircleTrack />
+															<Progress.CircleRange class="stroke-white" />
+														</Progress.Circle>
+													</Progress>
 												{:else}
 													<i class="fa-solid fa-fire-extinguisher"></i>
 												{/if}
@@ -695,19 +695,29 @@
 					{#if computedScore !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
-							<Progress
-								strokeWidth="20px"
-								meterStroke={displayScoreColor(
-									computedScore,
-									page.data.compliance_assessment_score.max_score
-								)}
-								value={formatScoreValue(
-									computedScore || 0,
-									page.data.compliance_assessment_score.max_score
-								)}
-								classes="shrink-0"
-								size="size-10">{computedScore}</Progress
-							>
+							<div class="shrink-0 relative">
+								<Progress
+									value={formatScoreValue(
+										computedScore || 0,
+										page.data.compliance_assessment_score.max_score
+									)}
+									min={0}
+									max={100}
+								>
+									<Progress.Circle class="[--size:--spacing(10)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(
+												computedScore,
+												page.data.compliance_assessment_score.max_score
+											)}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{computedScore}</span>
+									</div>
+								</Progress>
+							</div>
 						</div>
 					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">

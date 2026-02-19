@@ -80,12 +80,12 @@
 				>
 					<span class="mr-2">
 						{#if simulationIsLoading}
-							<Progress
-								strokeWidth="16px"
-								meterStroke="stroke-white"
-								size="size-6"
-								classes="-ml-2"
-							/>
+							<Progress>
+								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+									<Progress.CircleTrack />
+									<Progress.CircleRange class="stroke-white" />
+								</Progress.Circle>
+							</Progress>
 						{:else}
 							<i class="fa-solid fa-play"></i>
 						{/if}

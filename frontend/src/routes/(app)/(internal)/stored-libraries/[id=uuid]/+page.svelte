@@ -132,7 +132,12 @@
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<Progress size="size-6" meterStroke="stroke-primary-500" />
+						<Progress>
+							<Progress.Circle class="[--size:--spacing(6)]">
+								<Progress.CircleTrack />
+								<Progress.CircleRange class="stroke-primary-500" />
+							</Progress.Circle>
+						</Progress>
 					{:else}
 						<form
 							method="post"

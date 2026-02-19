@@ -191,12 +191,12 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<Progress
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									size="size-6"
-									classes="-ml-2"
-								/>
+								<Progress>
+									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+										<Progress.CircleTrack />
+										<Progress.CircleRange class="stroke-white" />
+									</Progress.Circle>
+								</Progress>
 							{:else}
 								<i class="fa-solid fa-arrows-rotate mr-2"></i>
 							{/if}

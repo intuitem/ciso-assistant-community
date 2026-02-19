@@ -110,20 +110,29 @@
 								<div class="flex flex-col lg:flex-row items-center justify-between gap-4">
 									{#if assessment.globalScore.score >= 0}
 										<div class="flex justify-center items-center lg:order-1">
-											<Progress
-												strokeWidth="16px"
-												meterStroke={displayScoreColor(
-													assessment.globalScore.score,
-													assessment.globalScore.max_score
-												)}
-												value={formatScoreValue(
-													assessment.globalScore.score,
-													assessment.globalScore.max_score
-												)}
-												size="size-24"
-											>
-												<p class="font-semibold text-2xl">{assessment.globalScore.score}</p>
-											</Progress>
+											<div class="relative">
+												<Progress
+													value={formatScoreValue(
+														assessment.globalScore.score,
+														assessment.globalScore.max_score
+													)}
+													min={0}
+													max={100}
+												>
+													<Progress.Circle class="[--size:--spacing(24)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange
+															class={displayScoreColor(
+																assessment.globalScore.score,
+																assessment.globalScore.max_score
+															)}
+														/>
+													</Progress.Circle>
+													<div class="absolute inset-0 flex items-center justify-center">
+														<p class="font-semibold text-2xl">{assessment.globalScore.score}</p>
+													</div>
+												</Progress>
+											</div>
 										</div>
 									{/if}
 

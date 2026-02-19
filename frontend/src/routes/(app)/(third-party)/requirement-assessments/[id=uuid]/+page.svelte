@@ -105,21 +105,29 @@
 			</div>
 		{/if}
 		{#if data.requirementAssessment.is_scored}
-			<Progress
-				strokeWidth="20px"
-				meterStroke={displayScoreColor(score, max_score)}
-				value={formatScoreValue(score, max_score)}
-				classes="shrink-0"
-				size="size-10">{score}</Progress
-			>
+			<div class="shrink-0 relative">
+				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
+					<Progress.Circle class="[--size:--spacing(10)]">
+						<Progress.CircleTrack />
+						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+					</Progress.Circle>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-xs font-bold">{score}</span>
+					</div>
+				</Progress>
+			</div>
 			{#if data.complianceAssessmentScore.show_documentation_score}
-				<Progress
-					strokeWidth="20px"
-					meterStroke={displayScoreColor(documentationScore, max_score)}
-					value={formatScoreValue(documentationScore, max_score)}
-					classes="shrink-0"
-					size="size-10">{documentationScore}</Progress
-				>
+				<div class="shrink-0 relative">
+					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
+						<Progress.Circle class="[--size:--spacing(10)]">
+							<Progress.CircleTrack />
+							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
+						</Progress.Circle>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="text-xs font-bold">{documentationScore}</span>
+						</div>
+					</Progress>
+				</div>
 			{/if}
 		{/if}
 	</div>

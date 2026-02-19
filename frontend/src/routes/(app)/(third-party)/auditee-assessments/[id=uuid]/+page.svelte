@@ -531,19 +531,29 @@
 								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 									<div class="flex flex-row items-center space-x-4">
 										<span class="font-medium">{m.score()}</span>
-										<Progress
-											strokeWidth="20px"
-											meterStroke={displayScoreColor(
-												requirementAssessment.score,
-												complianceAssessment.max_score
-											)}
-											value={formatScoreValue(
-												requirementAssessment.score,
-												complianceAssessment.max_score
-											)}
-											classes="shrink-0"
-											size="size-10">{requirementAssessment.score}</Progress
-										>
+										<div class="shrink-0 relative">
+											<Progress
+												value={formatScoreValue(
+													requirementAssessment.score,
+													complianceAssessment.max_score
+												)}
+												min={0}
+												max={100}
+											>
+												<Progress.Circle class="[--size:--spacing(10)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange
+														class={displayScoreColor(
+															requirementAssessment.score,
+															complianceAssessment.max_score
+														)}
+													/>
+												</Progress.Circle>
+												<div class="absolute inset-0 flex items-center justify-center">
+													<span class="text-xs font-bold">{requirementAssessment.score}</span>
+												</div>
+											</Progress>
+										</div>
 									</div>
 								{:else if requirementAssessment.result !== 'not_applicable'}
 									<Score

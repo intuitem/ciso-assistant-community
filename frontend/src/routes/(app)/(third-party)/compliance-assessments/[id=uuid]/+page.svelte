@@ -822,12 +822,12 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<Progress
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									size="size-6"
-									classes="-ml-2"
-								/>
+								<Progress>
+									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+										<Progress.CircleTrack />
+										<Progress.CircleRange class="stroke-white" />
+									</Progress.Circle>
+								</Progress>
 							{:else}
 								<i class="fa-solid fa-arrows-rotate mr-2"></i>
 							{/if}
@@ -849,12 +849,12 @@
 					>
 						<span class="mr-2">
 							{#if createAppliedControlsLoading}
-								<Progress
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									classes="-ml-2"
-									size="size-6"
-								/>
+								<Progress>
+									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+										<Progress.CircleTrack />
+										<Progress.CircleRange class="stroke-white" />
+									</Progress.Circle>
+								</Progress>
 							{:else}
 								<i class="fa-solid fa-wand-magic-sparkles"></i>
 							{/if}
@@ -988,13 +988,16 @@
 								<Switch
 									name="questionnaireToggle"
 									class="flex flex-row items-center justify-center"
-									active="bg-primary-500"
 									onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
 									onclick={() => {
 										displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
 										auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
 									}}
 								>
+									<Switch.Control>
+										<Switch.Thumb />
+									</Switch.Control>
+									<Switch.HiddenInput />
 									{#if displayOnlyAssessableNodes}
 										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
 									{:else}

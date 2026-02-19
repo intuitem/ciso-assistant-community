@@ -396,35 +396,79 @@
 				<div class="flex flex-row space-x-2 items-center">
 					{#if hasParentNode}
 						{#if nodeScore() !== null}
-							<Progress
-								strokeWidth="20px"
-								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
-								meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeScore()}</Progress
-							>
-							{#if showDocumentationScore}
+							<div class="relative">
 								<Progress
-									strokeWidth="20px"
-									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
-									meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-									size="size-12">{nodeDocumentationScore()}</Progress
+									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
 								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeScore()}</span>
+									</div>
+								</Progress>
+							</div>
+							{#if showDocumentationScore}
+								<div class="relative">
+									<Progress
+										value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+										min={0}
+										max={100}
+									>
+										<Progress.Circle class="[--size:--spacing(12)]">
+											<Progress.CircleTrack />
+											<Progress.CircleRange
+												class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+											/>
+										</Progress.Circle>
+										<div class="absolute inset-0 flex items-center justify-center">
+											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+										</div>
+									</Progress>
+								</div>
 							{/if}
 						{/if}
 					{:else if nodeScore() !== null}
-						<Progress
-							strokeWidth="20px"
-							value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
-							meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-							size="size-12">{nodeScore()}</Progress
-						>
-						{#if showDocumentationScore}
+						<div class="relative">
 							<Progress
-								strokeWidth="20px"
-								value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
-								meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeDocumentationScore()}</Progress
+								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+								min={0}
+								max={100}
 							>
+								<Progress.Circle class="[--size:--spacing(12)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{nodeScore()}</span>
+								</div>
+							</Progress>
+						</div>
+						{#if showDocumentationScore}
+							<div class="relative">
+								<Progress
+									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
+								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+									</div>
+								</Progress>
+							</div>
 						{/if}
 					{/if}
 				</div>

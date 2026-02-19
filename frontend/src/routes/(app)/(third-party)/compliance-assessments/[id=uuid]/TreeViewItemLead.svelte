@@ -60,19 +60,29 @@
 			</span>
 		{/if}
 		{#if resultI18n !== 'notApplicable' && isScored}
-			<Progress
-				strokeWidth="20px"
-				meterStroke={displayScoreColor(score, max_score)}
-				value={(score * 100) / max_score}
-				size="size-12">{score}</Progress
-			>
+			<div class="relative">
+				<Progress value={(score * 100) / max_score} min={0} max={100}>
+					<Progress.Circle class="[--size:--spacing(12)]">
+						<Progress.CircleTrack />
+						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+					</Progress.Circle>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-xs font-bold">{score}</span>
+					</div>
+				</Progress>
+			</div>
 			{#if showDocumentationScore}
-				<Progress
-					strokeWidth="20px"
-					meterStroke={displayScoreColor(documentationScore, max_score)}
-					value={(documentationScore * 100) / max_score}
-					size="size-12">{documentationScore}</Progress
-				>
+				<div class="relative">
+					<Progress value={(documentationScore * 100) / max_score} min={0} max={100}>
+						<Progress.Circle class="[--size:--spacing(12)]">
+							<Progress.CircleTrack />
+							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
+						</Progress.Circle>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="text-xs font-bold">{documentationScore}</span>
+						</div>
+					</Progress>
+				</div>
 			{/if}
 		{/if}
 	</div>

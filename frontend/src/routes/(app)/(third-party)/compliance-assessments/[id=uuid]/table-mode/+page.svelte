@@ -378,13 +378,15 @@
 						{/if}
 						<Switch
 							name="questionnaireToggle"
-							classes="flex flex-row items-center justify-center"
-							controlActive="bg-primary-500"
-							controlInactive="bg-green-500"
+							class="flex flex-row items-center justify-center"
 							onCheckedChange={(e) => {
 								questionnaireMode = e.checked;
 							}}
 						>
+							<Switch.Control>
+								<Switch.Thumb />
+							</Switch.Control>
+							<Switch.HiddenInput />
 							{#if questionnaireMode}
 								<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
 							{:else}
@@ -650,19 +652,29 @@
 											{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 												<div class="flex flex-row items-center space-x-4">
 													<span class="font-medium">{m.score()}</span>
-													<Progress
-														strokeWidth="20px"
-														meterStroke={displayScoreColor(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-														value={formatScoreValue(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-														classes="shrink-0"
-														size="size-10">{requirementAssessment.score}</Progress
-													>
+													<div class="shrink-0 relative">
+														<Progress
+															value={formatScoreValue(
+																requirementAssessment.score,
+																complianceAssessment.max_score
+															)}
+															min={0}
+															max={100}
+														>
+															<Progress.Circle class="[--size:--spacing(10)]">
+																<Progress.CircleTrack />
+																<Progress.CircleRange
+																	class={displayScoreColor(
+																		requirementAssessment.score,
+																		complianceAssessment.max_score
+																	)}
+																/>
+															</Progress.Circle>
+															<div class="absolute inset-0 flex items-center justify-center">
+																<span class="text-xs font-bold">{requirementAssessment.score}</span>
+															</div>
+														</Progress>
+													</div>
 												</div>
 											{:else if requirementAssessment.result !== 'not_applicable'}
 												<Score
@@ -721,47 +733,80 @@
 										{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.implementationScoreResult()}</span>
-												<Progress
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.score ?? '--'}
-												</Progress>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 												<span>{m.documentationScoreResult()}</span>
-												<Progress
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.documentation_score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.documentation_score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.documentation_score ?? '--'}
-												</Progress>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.documentation_score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.documentation_score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.documentation_score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 											</div>
 										{:else if requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.scoreResult()}</span>
-												<Progress
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.score ?? '--'}
-												</Progress>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 											</div>
 										{/if}
 										<Accordion
