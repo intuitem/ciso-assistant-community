@@ -13,13 +13,17 @@
 	let month = $derived(parseInt(page.params.month));
 
 	function getDate(dateToParse) {
-		let splited = dateToParse.split('-');
-		let year = parseInt(splited[0]);
-		let month = parseInt(splited[1]);
-		let day = parseInt(splited[2]);
+		try {
+			let splited = dateToParse.split('-');
+			let year = parseInt(splited[0]);
+			let month = parseInt(splited[1]);
+			let day = parseInt(splited[2]);
 
-		let date = new Date(year, month - 1, day);
-		return date;
+			let date = new Date(year, month - 1, day);
+			return date;
+		} catch (error) {
+			return new Date(dateToParse);
+		}
 	}
 
 	function createCalendarEvents(
