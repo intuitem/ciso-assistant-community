@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import BackgroundCheckbox from '$lib/components/Forms/BackgroundCheckbox.svelte';
 	import { page } from '$app/state';
+
 	interface Props {
 		form: SuperValidated<any>;
 	}
@@ -136,6 +137,11 @@
 					field: 'bia',
 					label: m.businessImpactAnalysis(),
 					description: m.businessImpactAnalysisDescription()
+				},
+				{
+					field: 'campaigns',
+					label: m.campaigns(),
+					description: m.campaignsDescription()
 				},
 				{
 					field: 'auditee_mode',

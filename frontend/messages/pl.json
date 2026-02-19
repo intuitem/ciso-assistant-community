@@ -1857,6 +1857,7 @@
 	],
 	"cascadeAffectedHint": "Poniższe elementy pozostają w systemie, ale ich linki do tego obiektu zostaną usunięte.",
 	"libraryFilteringLabels": "Etykiety biblioteki",
+	"campaignsDescription": "Zarządzanie kampaniami audytowymi",
 	"appliedControlsPlaceholder": "Wybierz stosowane kontrole...",
 	"assignmentSettings": "Ustawienia przydziałów",
 	"allowAssignmentsToEntities": "Zezwól na przydziały do encji",
