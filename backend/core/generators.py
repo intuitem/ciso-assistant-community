@@ -481,7 +481,7 @@ def gen_audit_context(id, doc, tree, lang):
     total = sum([v for v in aggregated.values()])
     if total == 0:
         print("Error:: No requirments found, something is wrong. aborting ..")
-        # TODO: We aren't aborting here, lead to a division by zero in the plot_donut function
+        # NOTICE: We aren't aborting here, lead to a division by zero in the plot_donut function
     aggregated["total"] = total
 
     # temporary hack since the gettext_lazy wasn't consistent
