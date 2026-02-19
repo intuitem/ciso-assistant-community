@@ -675,59 +675,97 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def _is_question_visible(question, answers):
-    """Check if a question is visible based on depends_on logic."""
-    depends_on = question.get("depends_on")
+def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
+    """Check if a question is visible based on depends_on logic.
+
+    Works with Question model objects (new relational models).
+    - question: a Question model instance
+    - answers_by_ref: dict of {question.ref_id: answer_value}
+    - questions_by_ref: dict of {question.ref_id: Question} (optional, for lookups)
+    """
+    depends_on = question.depends_on if hasattr(question, "depends_on") else question.get("depends_on") if isinstance(question, dict) else None
     if not depends_on:
         return True
 
-    target_answer = answers.get(depends_on["question"])
+    dep_ref = depends_on.get("question") if isinstance(depends_on, dict) else None
+    if not dep_ref:
+        return True
+
+    target_answer = answers_by_ref.get(dep_ref)
     if not target_answer:
         return False
 
-    if depends_on["condition"] == "any":
-        if isinstance(target_answer, list):
-            return any(a in depends_on["answers"] for a in target_answer)
-        return target_answer in depends_on["answers"]
+    condition = depends_on.get("condition", "any")
+    dep_answers = depends_on.get("answers", [])
 
-    if depends_on["condition"] == "all":
+    if condition == "any":
         if isinstance(target_answer, list):
-            return all(a in target_answer for a in depends_on["answers"])
-        return target_answer == depends_on["answers"][0]
+            return any(a in dep_answers for a in target_answer)
+        return target_answer in dep_answers
+
+    if condition == "all":
+        if isinstance(target_answer, list):
+            return all(a in target_answer for a in dep_answers)
+        return target_answer == dep_answers[0] if dep_answers else False
 
     return True
 
 
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
+    from core.models import Answer, Question
+
     igs_to_select = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
             "requirement", "requirement__framework"
-        ).all()
+        )
+        .prefetch_related(
+            "answer_set",
+            "answer_set__question",
+            "requirement__question_items",
+            "requirement__question_items__choices",
+        )
+        .all()
     )
+
     for ra in requirement_assessments:
-        answers = ra.answers or {}
-        if not ra.requirement.questions:
+        questions_qs = ra.requirement.question_items.all()
+        if not questions_qs:
             continue
-        for question_urn, question in ra.requirement.questions.items():
-            if not _is_question_visible(question, answers):
+
+        answers_qs = ra.answer_set.all()
+        answers_by_ref = {}
+        answers_by_qid = {}
+        questions_by_ref = {}
+        for q in questions_qs:
+            questions_by_ref[q.ref_id] = q
+        for a in answers_qs:
+            answers_by_qid[a.question_id] = a.value
+            if a.question.ref_id:
+                answers_by_ref[a.question.ref_id] = a.value
+
+        for question in questions_qs:
+            if not _is_question_visible(question, answers_by_ref, questions_by_ref):
                 continue
 
-            question_answers = answers.get(question_urn)
-            if not question_answers:
+            answer_value = answers_by_qid.get(question.id)
+            if not answer_value:
                 continue
-            if not isinstance(question_answers, list):
-                question_answers = [question_answers]
+            if not isinstance(answer_value, list):
+                answer_value = [answer_value]
 
-            for choice in question["choices"]:
-                if choice["urn"] in question_answers:
-                    igs_to_select.update(choice.get("select_implementation_groups", []))
+            for choice in question.choices.all():
+                if choice.ref_id in answer_value:
+                    igs_to_select.update(
+                        choice.select_implementation_groups or []
+                    )
 
-        for ig in ra.requirement.framework.implementation_groups_definition:
-            if ig.get("default_selected"):
-                igs_to_select.add(ig["ref_id"])
+        if ra.requirement.framework.implementation_groups_definition:
+            for ig in ra.requirement.framework.implementation_groups_definition:
+                if ig.get("default_selected"):
+                    igs_to_select.add(ig["ref_id"])
 
     compliance_assessment.selected_implementation_groups = list(igs_to_select)
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
