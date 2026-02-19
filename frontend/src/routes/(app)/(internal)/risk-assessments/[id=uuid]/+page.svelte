@@ -308,15 +308,15 @@
 					<Popover
 						open={exportPopupOpen}
 						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						triggerClasses="btn preset-filled-primary-500 w-full"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 							</span>
-						{/snippet}
-						{#snippet content()}
-							<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content>
+								<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
 								<a
 									href="/risk-assessments/{risk_assessment.id}/export/pdf"
@@ -341,8 +341,9 @@
 									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
 									>... {m.asXLSX()}</a
 								>
-							</div>
-						{/snippet}
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 					{#if canEditObject}
 						<Anchor

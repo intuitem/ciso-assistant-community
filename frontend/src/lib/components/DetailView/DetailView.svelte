@@ -479,17 +479,17 @@
 										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
 										openDelay={200}
 										closeDelay={100}
-										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
 									>
-										{#snippet trigger()}
+										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
 											></i>
-										{/snippet}
-										{#snippet content()}
-											<p class="text-sm">{tooltipText}</p>
-										{/snippet}
+										</Tooltip.Trigger>
+										<Tooltip.Positioner>
+											<Tooltip.Content>
+												<p class="text-sm">{tooltipText}</p>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 							</dt>
@@ -739,26 +739,28 @@
 						contentBase="card preset-tonal-error p-4"
 						openDelay={200}
 						closeDelay={100}
-						arrow
-						arrowBase="arrow preset-tonal-surface border border-error-100"
-						onclick={() => {
-							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						onkeydown={(_: any) => {
-							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						triggerBase={data.data.approver
-							? 'btn preset-filled-primary-500 *:pointer-events-none'
-							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
-						disabled={data.data.approver}
 					>
-						{#snippet trigger()}
+						<Tooltip.Trigger
+							onclick={() => {
+								if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							onkeydown={(_: any) => {
+								if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							class={data.data.approver
+								? 'btn preset-filled-primary-500 *:pointer-events-none'
+								: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						>
 							<i class="fas fa-paper-plane mr-2"></i>
 							{m.submit()}
-						{/snippet}
-						{#snippet content()}
-							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
-						{/snippet}
+						</Tooltip.Trigger>
+						{#if !data.data.approver}
+							<Tooltip.Positioner>
+								<Tooltip.Content>
+									<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						{/if}
 					</Tooltip>
 				{/if}
 
@@ -792,22 +794,19 @@
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
 		>
-			{#snippet list()}
+			<Tabs.List>
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger value={urlmodel}>
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}
 							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
+			</Tabs.List>
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
+					<Tabs.Content value={urlmodel}>
 						{#key urlmodel}
 							<div class="py-2"></div>
 							{@const field = data.model.reverseForeignKeyFields.find(
@@ -878,9 +877,8 @@
 								</ModelTable>
 							{/if}
 						{/key}
-					</Tabs.Panel>
+					</Tabs.Content>
 				{/each}
-			{/snippet}
 		</Tabs>
 	</div>
 {/if}

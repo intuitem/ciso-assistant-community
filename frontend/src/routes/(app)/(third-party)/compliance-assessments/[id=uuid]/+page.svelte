@@ -674,17 +674,15 @@
 						open={exportPopupOpen}
 						onOpenChange={(e) => (exportPopupOpen = e.open)}
 						positioning={{ placement: 'bottom' }}
-						triggerBase="btn preset-filled-primary-500 w-full"
-						contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-						zIndex="1000"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 							</span>
-						{/snippet}
-						{#snippet content()}
-							<div>
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+								<div>
 								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
 								{#if !page.data.user.is_third_party}
 									<a
@@ -728,8 +726,9 @@
 										>... {m.asPDF()}</a
 									>
 								{/if}
-							</div>
-						{/snippet}
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 					{#if canEditObject}
 						<Anchor
@@ -900,22 +899,20 @@
 				open={filterPopupOpen}
 				onOpenChange={(e) => (filterPopupOpen = e.open)}
 				positioning={{ placement: 'bottom-start' }}
-				triggerBase="btn preset-filled-primary-500 w-fit"
-				contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
-				zIndex="1000"
 				autoFocus={false}
 				onPointerDownOutside={() => (filterPopupOpen = false)}
 				closeOnInteractOutside={false}
 			>
-				{#snippet trigger()}
+				<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
 					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
 						<span class="text-xs">{filterCount}</span>
 					{/if}
-				{/snippet}
-				{#snippet content()}
-					<div>
+				</Popover.Trigger>
+				<Popover.Positioner>
+					<Popover.Content class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10">
+						<div>
 						<span class="text-sm font-bold">{m.result()}</span>
 						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
 							{#each Object.entries(complianceResultColorMap) as [result, color]}
@@ -1000,8 +997,9 @@
 								{/if}
 							</Switch>
 						</div>
-					</div>
-				{/snippet}
+						</div>
+					</Popover.Content>
+				</Popover.Positioner>
 			</Popover>
 		</div>
 

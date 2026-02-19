@@ -131,15 +131,13 @@
 	onValueChange={(e) => {
 		group = e.value;
 	}}
-	active="bg-primary-100 text-primary-800 border-b border-primary-800"
 >
-	{#snippet list()}
-		<Tabs.Control value="security"
-			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Control
+	<Tabs.List>
+		<Tabs.Trigger value="security"
+			><i class="fa-solid fa-shield-halved mr-2"></i>{m.securitySettings()}</Tabs.Trigger
 		>
-	{/snippet}
-	{#snippet content()}
-		<Tabs.Panel value="security">
+	</Tabs.List>
+	<Tabs.Content value="security">
 			<div class="p-4 flex flex-col space-y-4">
 				<div class="flex flex-col">
 					<h3 class="h3 font-medium">{m.securitySettings()}</h3>
@@ -249,6 +247,5 @@
 					</dl>
 				</div>
 			</div>
-		</Tabs.Panel>
-	{/snippet}
+	</Tabs.Content>
 </Tabs>

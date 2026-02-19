@@ -638,47 +638,46 @@
 					open={openState}
 					onOpenChange={(e) => (openState = e.open)}
 					positioning={{ placement: 'bottom-start' }}
-					triggerBase="btn preset-filled-primary-500 self-end relative"
-					contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-					zIndex="1000"
 					autoFocus={false}
 					onPointerDownOutside={() => (openState = false)}
 					closeOnInteractOutside={false}
 				>
-					{#snippet trigger()}
+					<Popover.Trigger class="btn preset-filled-primary-500 self-end relative">
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
 							<span class="text-sm">{filterCount}</span>
 						{/if}
-					{/snippet}
-					{#snippet content()}
-						<SuperForm {_form} validators={zod(z.object({}))}>
-							{#snippet children({ form })}
-								{#each filteredFields as field}
-									{#if filters[field]?.component}
-										{@const FilterComponent = filters[field].component}
-										<FilterComponent
-											{form}
-											{field}
-											{...filters[field].props}
-											fieldContext="filter"
-											label={safeTranslate(filters[field].props?.label)}
-											onChange={(value) => {
-												const arrayValue = Array.isArray(value) ? value : [value];
-												const sanitizedArrayValue = arrayValue.filter(
-													(v) => v !== null && v !== undefined
-												);
+					</Popover.Trigger>
+					<Popover.Positioner>
+						<Popover.Content class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200">
+							<SuperForm {_form} validators={zod(z.object({}))}>
+								{#snippet children({ form })}
+									{#each filteredFields as field}
+										{#if filters[field]?.component}
+											{@const FilterComponent = filters[field].component}
+											<FilterComponent
+												{form}
+												{field}
+												{...filters[field].props}
+												fieldContext="filter"
+												label={safeTranslate(filters[field].props?.label)}
+												onChange={(value) => {
+													const arrayValue = Array.isArray(value) ? value : [value];
+													const sanitizedArrayValue = arrayValue.filter(
+														(v) => v !== null && v !== undefined
+													);
 
-												filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												invalidateTable = true;
-											}}
-										/>
-									{/if}
-								{/each}
-							{/snippet}
-						</SuperForm>
-					{/snippet}
+													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+													invalidateTable = true;
+												}}
+											/>
+										{/if}
+									{/each}
+								{/snippet}
+							</SuperForm>
+						</Popover.Content>
+					</Popover.Positioner>
 				</Popover>
 			{/if}
 			{#if search}
