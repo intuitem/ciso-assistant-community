@@ -19,6 +19,30 @@ function resolveTheme(mode: ThemeMode): 'light' | 'dark' {
 	return mode === 'system' ? getSystemPreference() : mode;
 }
 
+async function refreshECharts(resolved: 'light' | 'dark') {
+	try {
+		const echarts = await import('echarts');
+		// Find all ECharts containers and re-init with new theme
+		document.querySelectorAll('[_echarts_instance_]').forEach((el) => {
+			const instance = echarts.getInstanceByDom(el as HTMLElement);
+			if (instance) {
+				const option = instance.getOption();
+				const rendererType = (instance as any)._zr?.painter?.type === 'canvas' ? 'canvas' : 'svg';
+				instance.dispose();
+				const newChart = echarts.init(
+					el as HTMLElement,
+					resolved === 'dark' ? 'dark' : null,
+					{ renderer: rendererType }
+				);
+				option.backgroundColor = 'transparent';
+				newChart.setOption(option);
+			}
+		});
+	} catch {
+		// ECharts not loaded yet, nothing to refresh
+	}
+}
+
 function applyTheme(resolved: 'light' | 'dark') {
 	if (!browser) return;
 	const html = document.documentElement;
@@ -27,6 +51,8 @@ function applyTheme(resolved: 'light' | 'dark') {
 	} else {
 		html.classList.remove('dark');
 	}
+	// Re-init all ECharts instances with the new theme
+	refreshECharts(resolved);
 }
 
 export const themeMode = writable<ThemeMode>(getStoredTheme());

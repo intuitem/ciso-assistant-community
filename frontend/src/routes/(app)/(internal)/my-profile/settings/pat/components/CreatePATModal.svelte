@@ -66,7 +66,7 @@
 		<article class="flex flex-row space-x-8">
 			<div class="flex flex-col space-y-4 items-center">
 				<div class="flex flex-col space-y-4 items-center self-center">
-					<p class="text-surface-900">{m.personalAccessTokenCreateDescription()}</p>
+					<p class="text-surface-900-100">{m.personalAccessTokenCreateDescription()}</p>
 					<SuperForm
 						dataType="json"
 						action={formAction}

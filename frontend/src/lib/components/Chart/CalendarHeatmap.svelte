@@ -131,6 +131,7 @@
 			]
 		};
 
+	option.backgroundColor = 'transparent';
 		calendar_chart.setOption(option);
 
 		window.addEventListener('resize', function () {

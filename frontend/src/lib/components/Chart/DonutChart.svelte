@@ -147,6 +147,7 @@
 		};
 		// console.debug(option);
 		// use configuration item and data specified to show chart
+	option.backgroundColor = 'transparent';
 		chart.setOption(option);
 		window.addEventListener('resize', function () {
 			chart.resize();

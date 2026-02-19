@@ -21,7 +21,7 @@
 		flex flex-col h-20 p-3 bg-surface-50-950 rounded-lg
 		transition-all duration-200 ease-in-out
 		group cursor-pointer
-		hover:shadow-lg hover:shadow-violet-100 hover:-translate-y-0.5
+		hover:shadow-lg hover:shadow-violet-100/50 dark:hover:shadow-violet-900/30 hover:-translate-y-0.5
 		${emphasisClasses} ${customClass}
 	`;
 
@@ -44,12 +44,12 @@
 {#snippet cardContent()}
 	<div class="flex-1 flex flex-col justify-center">
 		<div
-			class="text-2xl font-bold text-surface-950-50 leading-none mb-1 group-hover:text-violet-800 transition-colors duration-200"
+			class="text-2xl font-bold text-surface-950-50 leading-none mb-1 group-hover:text-violet-700 dark:group-hover:text-violet-400 transition-colors duration-200"
 		>
 			{formattedCount()}
 		</div>
 		<div
-			class="text-xs font-medium text-surface-600-400 capitalize group-hover:text-violet-700 transition-colors duration-200"
+			class="text-xs font-medium text-surface-600-400 capitalize group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors duration-200"
 		>
 			{label}
 		</div>

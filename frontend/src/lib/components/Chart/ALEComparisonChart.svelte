@@ -143,6 +143,7 @@
 			]
 		};
 
+	option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		// Handle window resize

@@ -46,7 +46,7 @@
 		<article class="flex flex-row space-x-8">
 			<div class="flex flex-col space-y-4 items-center">
 				<h4 class="h4">{m.step({ number: 1 })}</h4>
-				<p class="text-surface-900">{$modalStore[0].body ?? '(body missing)'}</p>
+				<p class="text-surface-900-100">{$modalStore[0].body ?? '(body missing)'}</p>
 				{#if totp?.totp_url}
 					<QR
 						data={totp.totp_url.replace(
@@ -66,7 +66,7 @@
 					</div>
 
 					<div>
-						<p class="text-center text-surface-900">{m.enterTOTPCodeManually()}</p>
+						<p class="text-center text-surface-900-100">{m.enterTOTPCodeManually()}</p>
 						<p class="text-center">{totp.secret}</p>
 					</div>
 				{/if}
@@ -76,7 +76,7 @@
 
 			<div class="flex flex-col space-y-4 items-center self-center">
 				<h4 class="h4">{m.step({ number: 2 })}</h4>
-				<p class="text-surface-900">{m.enterCodeGeneratedByApp()}</p>
+				<p class="text-surface-900-100">{m.enterCodeGeneratedByApp()}</p>
 				<!-- Enable for debugging: -->
 				<SuperForm
 					dataType="json"

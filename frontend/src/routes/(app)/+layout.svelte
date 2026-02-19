@@ -182,7 +182,7 @@
 				</div>
 			{/if}
 			{#if displayModelDescription}
-				<div class="text-xs text-surface-400-600 italic">
+				<div class="text-xs text-surface-600-400 italic">
 					{safeTranslate(displayModelDescription)}
 				</div>
 			{/if}

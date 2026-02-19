@@ -1,42 +1,52 @@
 import { browser } from '$app/environment';
 
-export interface EChartsThemeColors {
-	textPrimary: string;
-	textSecondary: string;
-	background: string;
-	gridLine: string;
-	tooltipBg: string;
-	tooltipBorder: string;
-	tooltipText: string;
+/**
+ * Returns the ECharts theme name based on current dark mode state.
+ */
+export function getEChartsTheme(): string | null {
+	if (!browser) return null;
+	return document.documentElement.classList.contains('dark') ? 'dark' : null;
 }
 
-function getCssVar(name: string): string {
-	if (!browser) return '';
-	return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
+/**
+ * Creates an ECharts instance with transparent background, automatic theme switching,
+ * and resize handling. Returns a dispose function for cleanup.
+ *
+ * Usage in onMount:
+ *   const echarts = await import('echarts');
+ *   const { chart, dispose } = createThemeAwareChart(echarts, container, option, { renderer: 'svg' });
+ *   return dispose;
+ */
+export function createThemeAwareChart(
+	echarts: any,
+	container: HTMLElement,
+	option: any,
+	rendererOpts?: Record<string, any>
+): { chart: any; dispose: () => void } {
+	option.backgroundColor = 'transparent';
 
-export function getEChartsThemeColors(): EChartsThemeColors {
-	if (!browser) {
-		return {
-			textPrimary: '#333333',
-			textSecondary: '#666666',
-			background: '#ffffff',
-			gridLine: '#e0e0e0',
-			tooltipBg: 'rgba(255, 255, 255, 0.95)',
-			tooltipBorder: '#e0e0e0',
-			tooltipText: '#333333'
-		};
-	}
+	let chart = echarts.init(container, getEChartsTheme(), rendererOpts);
+	chart.setOption(option);
 
-	const isDark = document.documentElement.classList.contains('dark');
+	const resizeHandler = () => chart.resize();
+	window.addEventListener('resize', resizeHandler);
+
+	const observer = new MutationObserver(() => {
+		const newTheme = getEChartsTheme();
+		chart.dispose();
+		chart = echarts.init(container, newTheme, rendererOpts);
+		chart.setOption(option);
+	});
+	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
 	return {
-		textPrimary: getCssVar(isDark ? '--color-surface-50' : '--color-surface-950'),
-		textSecondary: getCssVar(isDark ? '--color-surface-400' : '--color-surface-600'),
-		background: getCssVar(isDark ? '--color-surface-950' : '--color-surface-50'),
-		gridLine: getCssVar(isDark ? '--color-surface-700' : '--color-surface-200'),
-		tooltipBg: isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)',
-		tooltipBorder: getCssVar(isDark ? '--color-surface-700' : '--color-surface-200'),
-		tooltipText: getCssVar(isDark ? '--color-surface-50' : '--color-surface-950')
+		get chart() {
+			return chart;
+		},
+		dispose() {
+			observer.disconnect();
+			window.removeEventListener('resize', resizeHandler);
+			chart.dispose();
+		}
 	};
 }

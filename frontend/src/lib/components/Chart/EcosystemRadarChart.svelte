@@ -295,6 +295,7 @@
 			]
 		};
 
+	option.backgroundColor = 'transparent';
 		chart.setOption(option);
 
 		// Handle resize

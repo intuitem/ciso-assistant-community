@@ -192,6 +192,7 @@
 		);
 
 		const option = getChartOption(echarts);
+	option.backgroundColor = 'transparent';
 		chartInstance.setOption(option);
 
 		const resizeHandler = () => chartInstance?.resize();

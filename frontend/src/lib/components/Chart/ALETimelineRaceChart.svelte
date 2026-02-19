@@ -280,6 +280,7 @@
 			animationEasing: 'cubicOut'
 		};
 
+	option.backgroundColor = 'transparent';
 		chart.setOption(option, true);
 	};
 

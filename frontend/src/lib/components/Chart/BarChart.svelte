@@ -88,6 +88,7 @@
 		};
 
 		// use configuration item and data specified to show chart
+	option.backgroundColor = 'transparent';
 		bar_ch.setOption(option);
 
 		window.addEventListener('resize', function () {

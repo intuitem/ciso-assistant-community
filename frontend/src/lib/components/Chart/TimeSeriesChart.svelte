@@ -73,6 +73,7 @@
 			]
 		};
 
+	option.backgroundColor = 'transparent';
 		chart_t.setOption(option);
 
 		window.addEventListener('resize', function () {

@@ -51,6 +51,7 @@
 
 	function createOption(data: any) {
 		return {
+			backgroundColor: 'transparent',
 			toolbox: {
 				show: true,
 				feature: {

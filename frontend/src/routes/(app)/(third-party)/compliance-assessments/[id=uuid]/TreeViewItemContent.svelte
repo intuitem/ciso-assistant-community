@@ -170,7 +170,7 @@
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
 	let classesShowInfoText = $derived((show: boolean) => (show ? 'text-primary-500' : ''));
 	let classesPercentText = $derived((resultColor: string) =>
-		resultColor === '#000000' ? 'text-white' : ''
+		resultColor === '#000000' ? 'text-white' : 'text-gray-900'
 	);
 
 	export const getBadgeStyles = (answers: any, questions: any) => {
