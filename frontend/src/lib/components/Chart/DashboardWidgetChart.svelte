@@ -311,7 +311,7 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -357,7 +357,7 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
 								borderWidth: 2
 							},
 							label: {
@@ -601,7 +601,7 @@
 							avoidLabelOverlap: true,
 							itemStyle: {
 								borderRadius: 4,
-								borderColor: '#fff',
+								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
 								borderWidth: 2
 							},
 							label: {

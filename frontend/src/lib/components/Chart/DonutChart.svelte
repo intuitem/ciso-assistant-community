@@ -83,7 +83,7 @@
 					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,
-						borderColor: '#fff',
+						borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff',
 						borderWidth: 2
 					},
 					label: showPercentage

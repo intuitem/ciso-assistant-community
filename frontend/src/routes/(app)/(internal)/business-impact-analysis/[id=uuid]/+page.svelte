@@ -81,7 +81,7 @@
 			>
 			{#if !business_impact_analysis?.is_locked && page.data?.featureflags?.validation_flows}
 				<button
-					class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 					onclick={() => modalRequestValidation()}
 					data-testid="request-validation-button"
 				>

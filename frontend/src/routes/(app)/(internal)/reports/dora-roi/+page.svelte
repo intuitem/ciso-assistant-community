@@ -26,11 +26,11 @@
 	function getSeverityColor(severity: string): string {
 		switch (severity) {
 			case 'error':
-				return 'text-red-600 bg-red-50 border-red-200';
+				return 'text-red-600 dark:text-red-400 bg-surface-50-950 border-red-200 dark:border-red-800';
 			case 'warning':
-				return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+				return 'text-yellow-600 dark:text-yellow-400 bg-surface-50-950 border-yellow-200 dark:border-yellow-800';
 			case 'ok':
-				return 'text-green-600 bg-green-50 border-green-200';
+				return 'text-green-600 dark:text-green-400 bg-surface-50-950 border-green-200 dark:border-green-800';
 			default:
 				return 'text-surface-600-400 bg-surface-50-950 border-surface-200-800';
 		}
@@ -74,17 +74,17 @@
 	<div class="bg-surface-50-950 rounded-xl shadow-sm border border-surface-200-800 p-6">
 		<h2 class="text-xl font-semibold text-surface-950-50 mb-4">Validation Summary</h2>
 		<div class="grid grid-cols-3 gap-4">
-			<div class="text-center p-4 rounded-lg bg-red-50 border border-red-200">
-				<div class="text-3xl font-bold text-red-600">{lintResults.summary.errors}</div>
-				<div class="text-sm text-red-600 mt-1">Errors</div>
+			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-red-300 dark:border-red-800">
+				<div class="text-3xl font-bold text-red-600 dark:text-red-400">{lintResults.summary.errors}</div>
+				<div class="text-sm text-red-600 dark:text-red-400 mt-1">Errors</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
-				<div class="text-3xl font-bold text-yellow-600">{lintResults.summary.warnings}</div>
-				<div class="text-sm text-yellow-600 mt-1">Warnings</div>
+			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-yellow-300 dark:border-yellow-800">
+				<div class="text-3xl font-bold text-yellow-600 dark:text-yellow-400">{lintResults.summary.warnings}</div>
+				<div class="text-sm text-yellow-600 dark:text-yellow-400 mt-1">Warnings</div>
 			</div>
-			<div class="text-center p-4 rounded-lg bg-green-50 border border-green-200">
-				<div class="text-3xl font-bold text-green-600">{lintResults.summary.ok}</div>
-				<div class="text-sm text-green-600 mt-1">Passed</div>
+			<div class="text-center p-4 rounded-lg bg-surface-50-950 border border-green-300 dark:border-green-800">
+				<div class="text-3xl font-bold text-green-600 dark:text-green-400">{lintResults.summary.ok}</div>
+				<div class="text-sm text-green-600 dark:text-green-400 mt-1">Passed</div>
 			</div>
 		</div>
 	</div>
@@ -115,7 +115,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-surface-100-900 hover:bg-surface-200-800 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-pencil"></i>
 									Fix
@@ -147,7 +147,7 @@
 							{#if editUrl}
 								<a
 									href={editUrl}
-									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 bg-surface-100-900 hover:bg-surface-200-800 rounded-md transition-colors flex items-center gap-2"
 								>
 									<i class="fa-solid fa-pencil"></i>
 									Review

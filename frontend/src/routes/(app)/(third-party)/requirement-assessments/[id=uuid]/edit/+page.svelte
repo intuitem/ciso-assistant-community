@@ -519,7 +519,7 @@
 									<span class="flex flex-row justify-end items-center space-x-2">
 										{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 											<button
-												class="btn text-surface-100-900 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
+												class="btn text-white bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 												type="button"
 												onclick={() => {
 													modalConfirmCreateSuggestedControls(

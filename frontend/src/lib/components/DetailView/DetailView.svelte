@@ -773,7 +773,7 @@
 
 				{#if data.urlModel === 'applied-controls'}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-l from-sky-500 to-green-600"
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
 						onclick={(_) => modalAppliedControlDuplicateForm()}
 						data-testid="duplicate-button"
 					>

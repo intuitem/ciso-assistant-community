@@ -761,7 +761,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-surface-100-900 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						class="btn text-white bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
@@ -770,33 +770,33 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
-						class="btn text-surface-100-900 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						class="btn text-white bg-linear-to-r from-blue-500 to-sky-500 h-fit"
 						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
 				{/if}
 				{#if !page.data.user.is_third_party}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
+						class="btn text-white bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
 						onclick={() => modalCreateForm()}
 						data-testid="apply-mapping-button"
 						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
 					</button>
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						class="btn text-white bg-linear-to-r from-purple-500 to-pink-500 h-fit"
 						onclick={() => modalCreateCloneForm()}
 						data-testid="clone-audit-button"
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
+						class="btn text-white bg-linear-to-r from-rose-500 to-pink-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
 					</button>
 					{#if page.data?.featureflags?.validation_flows}
 						<button
-							class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+							class="btn text-white bg-linear-to-r from-orange-500 to-amber-500 h-fit"
 							onclick={() => modalRequestValidation()}
 							data-testid="request-validation-button"
 						>
@@ -808,7 +808,7 @@
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
@@ -836,7 +836,7 @@
 
 				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+						class="btn text-white bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
 						onclick={() => {
 							modalConfirmCreateSuggestedControls(
 								data.compliance_assessment.id,
@@ -862,7 +862,7 @@
 				{/if}
 				{#if has_threats && !page.data.user.is_third_party}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
+						class="btn text-white bg-linear-to-r from-yellow-500 to-red-600 h-fit"
 						onclick={openThreatsDialog}
 					>
 						<div class="flex items-center space-x-2">
@@ -876,7 +876,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/assignments`}
-						class="btn text-surface-100-900 bg-linear-to-r from-lime-500 to-green-600 h-fit"
+						class="btn text-white bg-linear-to-r from-lime-500 to-green-600 h-fit"
 						data-testid="assignments-button"
 					>
 						<i class="fa-solid fa-user-tag mr-2"></i>

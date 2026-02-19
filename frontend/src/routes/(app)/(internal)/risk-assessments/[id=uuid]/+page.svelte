@@ -364,7 +364,7 @@
 				>
 				<span class="pt-4 font-light text-sm">{m.powerUps()}</span>
 				<button
-					class="btn text-surface-100-900 bg-linear-to-l from-sky-500 to-green-600"
+					class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
 					onclick={(_) => modalDuplicateForm()}
 					data-testid="duplicate-button"
 				>
@@ -373,7 +373,7 @@
 				>
 				{#if !risk_assessment?.is_locked}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						onclick={async () => {
 							await modalConfirmSyncToActions(risk_assessment.id, '?/syncToActions');
 						}}
@@ -396,14 +396,14 @@
 				<Anchor
 					href="/risk-assessments/{risk_assessment.id}/convert-to-quantitative"
 					label={m.convertToQuantitative()}
-					class="btn text-surface-100-900 bg-linear-to-r from-purple-500 to-pink-500"
+					class="btn text-white bg-linear-to-r from-purple-500 to-pink-500"
 				>
 					<i class="fa-solid fa-calculator mr-2"></i>
 					{m.convertToQuantitative()}
 				</Anchor>
 				{#if !risk_assessment?.is_locked && page.data?.featureflags?.validation_flows}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-orange-500 to-amber-500"
+						class="btn text-white bg-linear-to-r from-orange-500 to-amber-500"
 						onclick={() => modalRequestValidation()}
 						data-testid="request-validation-button"
 					>

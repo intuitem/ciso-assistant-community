@@ -131,7 +131,7 @@
 	onValueChange={(e) => {
 		group = e.value;
 	}}
-	active="bg-primary-100 text-primary-800 border-b border-primary-800"
+	active="bg-primary-100-900 text-primary-800-200 border-b border-primary-800-200"
 >
 	{#snippet list()}
 		<Tabs.Control value="security"
@@ -147,10 +147,10 @@
 				</div>
 				<hr />
 				<div class="flow-root">
-					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<dl class="-my-3 divide-y divide-surface-100-900text-sm">
 						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 							<dt class="font-medium">{m.multiFactorAuthentication()}</dt>
-							<dd class="text-surface-900 sm:col-span-2">
+							<dd class="text-surface-900-100sm:col-span-2">
 								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 									<div class="flex flex-col space-y-2">
 										<span class="flex flex-row justify-between text-xl">
@@ -190,10 +190,10 @@
 							</dd>
 						</div>
 					</dl>
-					<dl class="-my-3 divide-y divide-surface-100 text-sm">
+					<dl class="-my-3 divide-y divide-surface-100-900text-sm">
 						<div class="grid grid-cols-1 gap-1 py-3 sm:grid-cols-3 sm:gap-4">
 							<dt class="font-medium">{m.personalAccessTokens()}</dt>
-							<dd class="text-surface-900 sm:col-span-2">
+							<dd class="text-surface-900-100sm:col-span-2">
 								<div class="card p-4 bg-inherit w-fit flex flex-col space-y-3">
 									<div class="flex flex-col space-y-2">
 										<span class="flex flex-row justify-between text-xl">

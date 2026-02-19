@@ -111,7 +111,7 @@
 						r: '40%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -129,7 +129,7 @@
 						r: '65%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -145,7 +145,7 @@
 						r: '85%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,
@@ -161,7 +161,7 @@
 						r: '98%',
 						itemStyle: {
 							borderWidth: 1,
-							borderColor: '#fff'
+							borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 						},
 						label: {
 							show: true,

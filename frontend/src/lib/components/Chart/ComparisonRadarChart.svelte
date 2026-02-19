@@ -118,7 +118,7 @@
 							itemStyle: {
 								color: '#3b82f6',
 								borderWidth: 2,
-								borderColor: '#fff'
+								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 							},
 							label: {
 								show: false
@@ -141,7 +141,7 @@
 							itemStyle: {
 								color: '#f97316',
 								borderWidth: 2,
-								borderColor: '#fff'
+								borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 							},
 							label: {
 								show: false

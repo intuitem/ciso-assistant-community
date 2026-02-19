@@ -91,7 +91,7 @@
 				range: year,
 				itemStyle: {
 					borderWidth: 0.5,
-					borderColor: '#fff'
+					borderColor: document.documentElement.classList.contains('dark') ? '#1e293b' : '#fff'
 				},
 				yearLabel: { show: false },
 				monthLabel: {

@@ -184,7 +184,7 @@
 				>
 				{#if !data.scenario.risk_assessment?.is_locked}
 					<button
-						class="btn text-surface-100-900 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-white bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
 						onclick={async () => {
 							await modalConfirmSyncToActions(data.scenario.id, '?/syncToActions');
 						}}

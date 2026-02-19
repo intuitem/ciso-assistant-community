@@ -15,11 +15,11 @@
 
 	function getCategoryColor(category: string): string {
 		const colors: Record<string, string> = {
-			compliance: 'bg-blue-50 border-blue-200 hover:border-blue-400',
-			risk: 'bg-red-50 border-red-200 hover:border-red-400',
-			governance: 'bg-green-50 border-green-200 hover:border-green-400',
-			operations: 'bg-yellow-50 border-yellow-200 hover:border-yellow-400',
-			assets: 'bg-purple-50 border-purple-200 hover:border-purple-400'
+			compliance: 'bg-surface-50-950 border-blue-300 hover:border-blue-400',
+			risk: 'bg-surface-50-950 border-red-300 hover:border-red-400',
+			governance: 'bg-surface-50-950 border-green-300 hover:border-green-400',
+			operations: 'bg-surface-50-950 border-yellow-300 hover:border-yellow-400',
+			assets: 'bg-surface-50-950 border-purple-300 hover:border-purple-400'
 		};
 		return colors[category] || 'bg-surface-50-950 border-surface-200-800 hover:border-surface-400-600';
 	}

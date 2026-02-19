@@ -59,7 +59,7 @@
 			<Anchor
 				breadcrumbAction="push"
 				href={`/applied-controls/flash-mode?quantitative_risk_studies=${page.params.id}&backUrl=${encodeURIComponent(page.url.pathname)}&backLabel=${encodeURIComponent(m.actionPlan())}`}
-				class="btn text-surface-100-900 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+				class="btn text-white bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 				><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 			>
 		</div>
