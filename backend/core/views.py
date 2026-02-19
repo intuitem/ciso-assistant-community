@@ -2120,13 +2120,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
@@ -2170,7 +2170,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
                 # Check if asset already exists in the folder
                 existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder_id
+                    name=asset_name, folder=folder
                 ).first()
 
                 if existing_asset:
@@ -2198,7 +2198,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     asset_data = {
                         "name": asset_name,
                         "type": asset_type,
-                        "folder": folder_id,
+                        "folder": str(folder.id),
                     }
 
                     # Add parent relationship if exists
@@ -2210,7 +2210,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     )
 
                     if serializer.is_valid():
-                        asset = serializer.save()
+                        try:
+                            asset = serializer.save()
+                        except PermissionDenied as e:
+                            return Response(
+                                {"error": e.detail},
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
 
                         # Add to stack for potential children
                         depth_stack.append(asset)

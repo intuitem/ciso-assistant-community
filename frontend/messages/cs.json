@@ -1105,6 +1105,7 @@
 	"isCustom": "Vlastní",
 	"errorUnloadingLibrary": "Chyba při uvolňování knihovny",
 	"librarySuccessfullyUnloaded": "Knihovna byla úspěšně uvolněna",
+	"campaignsDescription": "Správa auditních kampaní",
 	"libraryFilteringLabels": "Knihovnové štítky",
 	"appliedControlsPlaceholder": "Vyberte aplikované kontroly...",
 	"assignmentSettings": "Nastavení přiřazení",

@@ -23,6 +23,10 @@
 
 	let { data }: Props = $props();
 
+	let isReadOnly = $derived(
+		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
+	);
+
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
 
@@ -31,6 +35,13 @@
 		dataType: 'json'
 	});
 	const { form: assignmentFormStore } = assignmentSuperForm;
+
+	// Provide read-only state via context for tree components
+	const isReadOnlyStore = writable<boolean>(false);
+	setContext('isReadOnly', isReadOnlyStore);
+	$effect(() => {
+		$isReadOnlyStore = isReadOnly;
+	});
 
 	// Create writable stores for checked nodes and assigned nodes, provide via context
 	const checkedNodesStore = writable<Set<string>>(new Set());
@@ -496,6 +507,18 @@
 		</div>
 	</div>
 
+	<!-- Read-only banner -->
+	{#if isReadOnly}
+		<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
+			<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+			<p class="text-yellow-800 font-medium">
+				{data.compliance_assessment.is_locked
+					? m.lockedAssessmentMessage()
+					: m.assessmentInReviewMessage()}
+			</p>
+		</div>
+	{/if}
+
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 		<!-- Left Panel: Tree with Checkboxes -->
 		<div class="lg:col-span-2 card bg-white shadow-lg p-4">
@@ -516,14 +539,16 @@
 
 			<!-- Tree controls -->
 			<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
-				<button class="btn btn-sm preset-outlined-primary-500" onclick={handleSelectAll}>
-					<i class="fa-solid fa-check-double mr-1"></i>
-					{m.selectAllAvailable()}
-				</button>
-				<button class="btn btn-sm preset-outlined-surface-500" onclick={handleClearSelection}>
-					<i class="fa-solid fa-times mr-1"></i>
-					{m.clearSelection()}
-				</button>
+				{#if !isReadOnly}
+					<button class="btn btn-sm preset-outlined-primary-500" onclick={handleSelectAll}>
+						<i class="fa-solid fa-check-double mr-1"></i>
+						{m.selectAllAvailable()}
+					</button>
+					<button class="btn btn-sm preset-outlined-surface-500" onclick={handleClearSelection}>
+						<i class="fa-solid fa-times mr-1"></i>
+						{m.clearSelection()}
+					</button>
+				{/if}
 				<div class="flex-1"></div>
 				<button class="btn btn-sm preset-ghost-surface" onclick={expandAll}>
 					<i class="fa-solid fa-expand mr-1"></i>
@@ -574,88 +599,90 @@
 		<!-- Right Panel: Assignment Creation & List -->
 		<div class="space-y-4">
 			<!-- Create/Edit Assignment Card -->
-			<div
-				class="card bg-white shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
-			>
-				<h2 class="h4 font-semibold mb-4">
-					{#if editingAssignmentId}
-						<i class="fa-solid fa-pen text-violet-500 mr-2"></i>
-						{m.editAssignment()}
-					{:else}
-						<i class="fa-solid fa-plus-circle text-primary-500 mr-2"></i>
-						{m.newAssignment()}
-					{/if}
-				</h2>
+			{#if !isReadOnly}
+				<div
+					class="card bg-white shadow-lg p-4 {editingAssignmentId ? 'ring-2 ring-violet-400' : ''}"
+				>
+					<h2 class="h4 font-semibold mb-4">
+						{#if editingAssignmentId}
+							<i class="fa-solid fa-pen text-violet-500 mr-2"></i>
+							{m.editAssignment()}
+						{:else}
+							<i class="fa-solid fa-plus-circle text-primary-500 mr-2"></i>
+							{m.newAssignment()}
+						{/if}
+					</h2>
 
-				<div class="space-y-4">
-					<!-- Actor Selection (re-mount on edit mode change so initialValue is captured correctly) -->
-					{#key editingAssignmentId}
-						<AutocompleteSelect
-							form={assignmentSuperForm}
-							optionsEndpoint="actors?user__is_third_party=False"
-							optionsLabelField="str"
-							optionsInfoFields={{
-								fields: [{ field: 'type', translate: true }],
-								position: 'prefix'
-							}}
-							field="actor"
-							label={m.assignTo()}
-							placeholder={m.selectActor()}
-							helpText={m.makeSureActorsHavePermissions()}
-							multiple
-						/>
-					{/key}
+					<div class="space-y-4">
+						<!-- Actor Selection (re-mount on edit mode change so initialValue is captured correctly) -->
+						{#key editingAssignmentId}
+							<AutocompleteSelect
+								form={assignmentSuperForm}
+								optionsEndpoint="actors?user__is_third_party=False"
+								optionsLabelField="str"
+								optionsInfoFields={{
+									fields: [{ field: 'type', translate: true }],
+									position: 'prefix'
+								}}
+								field="actor"
+								label={m.assignTo()}
+								placeholder={m.selectActor()}
+								helpText={m.makeSureActorsHavePermissions()}
+								multiple
+							/>
+						{/key}
 
-					<!-- Selected Count -->
-					<div class="bg-gray-50 rounded-lg p-3">
-						<div class="flex items-center justify-between text-sm">
-							<span class="text-gray-600">{m.selectedRequirements()}:</span>
-							<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
+						<!-- Selected Count -->
+						<div class="bg-gray-50 rounded-lg p-3">
+							<div class="flex items-center justify-between text-sm">
+								<span class="text-gray-600">{m.selectedRequirements()}:</span>
+								<span class="font-semibold text-primary-600">{availableCheckedNodes.length}</span>
+							</div>
 						</div>
+
+						<!-- Create/Update Button -->
+						{#if editingAssignmentId}
+							<button
+								class="btn preset-filled-primary-500 w-full"
+								disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isUpdating}
+								onclick={handleUpdateAssignment}
+							>
+								{#if isUpdating}
+									<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+									{m.updating()}
+								{:else}
+									<i class="fa-solid fa-check mr-2"></i>
+									{m.updateAssignment()}
+								{/if}
+							</button>
+							<button class="btn preset-outlined-surface-500 w-full" onclick={cancelEdit}>
+								<i class="fa-solid fa-times mr-2"></i>
+								{m.cancel()}
+							</button>
+						{:else}
+							<button
+								class="btn preset-filled-primary-500 w-full"
+								disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isCreating}
+								onclick={handleCreateAssignment}
+							>
+								{#if isCreating}
+									<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+									{m.creating()}
+								{:else}
+									<i class="fa-solid fa-check mr-2"></i>
+									{m.createAssignment()}
+								{/if}
+							</button>
+						{/if}
+
+						{#if !hasSelectedActors || availableCheckedNodes.length === 0}
+							<p class="text-xs text-gray-500 text-center">
+								{m.fillAllFieldsToCreateAssignment()}
+							</p>
+						{/if}
 					</div>
-
-					<!-- Create/Update Button -->
-					{#if editingAssignmentId}
-						<button
-							class="btn preset-filled-primary-500 w-full"
-							disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isUpdating}
-							onclick={handleUpdateAssignment}
-						>
-							{#if isUpdating}
-								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-								{m.updating()}
-							{:else}
-								<i class="fa-solid fa-check mr-2"></i>
-								{m.updateAssignment()}
-							{/if}
-						</button>
-						<button class="btn preset-outlined-surface-500 w-full" onclick={cancelEdit}>
-							<i class="fa-solid fa-times mr-2"></i>
-							{m.cancel()}
-						</button>
-					{:else}
-						<button
-							class="btn preset-filled-primary-500 w-full"
-							disabled={!hasSelectedActors || availableCheckedNodes.length === 0 || isCreating}
-							onclick={handleCreateAssignment}
-						>
-							{#if isCreating}
-								<i class="fa-solid fa-spinner fa-spin mr-2"></i>
-								{m.creating()}
-							{:else}
-								<i class="fa-solid fa-check mr-2"></i>
-								{m.createAssignment()}
-							{/if}
-						</button>
-					{/if}
-
-					{#if !hasSelectedActors || availableCheckedNodes.length === 0}
-						<p class="text-xs text-gray-500 text-center">
-							{m.fillAllFieldsToCreateAssignment()}
-						</p>
-					{/if}
 				</div>
-			</div>
+			{/if}
 
 			<!-- Existing Assignments Card -->
 			<div class="card bg-white shadow-lg p-4">
@@ -697,28 +724,30 @@
 											</button>
 										</div>
 									</div>
-									<div class="flex items-center gap-1">
-										<button
-											class="btn btn-sm preset-ghost-surface"
-											onclick={() => startEdit(assignment)}
-											title={m.edit()}
-											disabled={editingAssignmentId !== null}
-										>
-											<i class="fa-solid fa-pen"></i>
-										</button>
-										<button
-											class="btn btn-sm preset-ghost-error-500"
-											onclick={() => handleDeleteAssignment(assignment.id)}
-											title={m.delete()}
-											disabled={isDeleting === assignment.id || editingAssignmentId !== null}
-										>
-											{#if isDeleting === assignment.id}
-												<i class="fa-solid fa-spinner fa-spin"></i>
-											{:else}
-												<i class="fa-solid fa-trash"></i>
-											{/if}
-										</button>
-									</div>
+									{#if !isReadOnly}
+										<div class="flex items-center gap-1">
+											<button
+												class="btn btn-sm preset-ghost-surface"
+												onclick={() => startEdit(assignment)}
+												title={m.edit()}
+												disabled={editingAssignmentId !== null}
+											>
+												<i class="fa-solid fa-pen"></i>
+											</button>
+											<button
+												class="btn btn-sm preset-ghost-error-500"
+												onclick={() => handleDeleteAssignment(assignment.id)}
+												title={m.delete()}
+												disabled={isDeleting === assignment.id || editingAssignmentId !== null}
+											>
+												{#if isDeleting === assignment.id}
+													<i class="fa-solid fa-spinner fa-spin"></i>
+												{:else}
+													<i class="fa-solid fa-trash"></i>
+												{/if}
+											</button>
+										</div>
+									{/if}
 								</div>
 							</div>
 						{/each}

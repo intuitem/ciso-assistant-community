@@ -2992,6 +2992,7 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"campaignsDescription": "Beheer van auditcampagnes",
 	"libraryFilteringLabels": "Bibliotheeklabels",
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",
