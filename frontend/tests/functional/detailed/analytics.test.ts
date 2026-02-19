@@ -24,13 +24,13 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 	librariesPage
 }) => {
 	await test.step('Create required folder', async () => {
-	const foldersPageCreate = new PageContent(page, '/folders', 'Domains', [
-		{ name: 'name', type: FormFieldType.TEXT },
-		{ name: 'description', type: FormFieldType.TEXT },
-		{ name: 'create_iam_groups', type: FormFieldType.CHECKBOX }
-	]);
-	await foldersPageCreate.goto();
-	await foldersPageCreate.createItem({
+		const foldersPageCreate = new PageContent(page, '/folders', 'Domains', [
+			{ name: 'name', type: FormFieldType.TEXT },
+			{ name: 'description', type: FormFieldType.TEXT },
+			{ name: 'create_iam_groups', type: FormFieldType.CHECKBOX }
+		]);
+		await foldersPageCreate.goto();
+		await foldersPageCreate.createItem({
 			name: vars.folderName,
 			description: vars.description
 		});
