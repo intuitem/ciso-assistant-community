@@ -62,7 +62,6 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install
 
       - name: Run migrations
