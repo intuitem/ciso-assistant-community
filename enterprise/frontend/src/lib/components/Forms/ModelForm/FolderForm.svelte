@@ -90,7 +90,7 @@
 	<Checkbox
 		{form}
 		field="create_iam_groups"
-		label={m.createIamGroups()}
-		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
+		label="m.createIamGroups()"
+		helpText="m.whenEnabledIamGroupsAreCreatedAutomatically()"
 	/>
 {/if}
