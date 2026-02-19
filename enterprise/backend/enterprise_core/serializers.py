@@ -8,6 +8,11 @@ from core.serializers import (
 from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User, Role
 
+from global_settings.models import GlobalSettings
+from global_settings.serializers import (
+    FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
+)
+
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -183,6 +188,10 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     of a GlobalSettings instance. Each flag is represented as an explicit
     BooleanField, mapping directly to keys within the 'value' dictionary.
     """
+
+    campaigns = serializers.BooleanField(
+        source="value.campaigns", required=False, default=True
+    )
 
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False

@@ -1082,6 +1082,7 @@
 	],
 	"cascadeAffectedHint": "नीचे दिए गए आइटम सिस्टम में बने रहेंगे लेकिन इस वस्तु से उनके लिंक हटा दिए जाएंगे।",
 	"libraryFilteringLabels": "लाइब्रेरी लेबल",
+	"campaignsDescription": "ऑडिट अभियानों का प्रबंधन",
 	"appliedControlsPlaceholder": "लागू नियंत्रण चुनें...",
 	"assignmentSettings": "असाइनमेंट सेटिंग्स",
 	"allowAssignmentsToEntities": "इकाइयों को असाइनमेंट की अनुमति दें",

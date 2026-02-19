@@ -1802,6 +1802,7 @@
 	],
 	"cascadeAffectedHint": "Τα παρακάτω αντικείμενα παραμένουν στο σύστημα αλλά οι σύνδεσμοι τους με αυτό το αντικείμενο θα αφαιρεθούν.",
 	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης",
+	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
