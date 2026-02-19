@@ -26,7 +26,7 @@
 		navigationCommands
 			.filter((link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0)
 			.filter((link) => {
-				let val = link.value.substring(1).replace('-', '_');				
+				let val = link.value.substring(1).replace('-', '_');
 				return !featureFlags ? val : !(val in featureFlags) || featureFlags[val];
 			})
 	);
