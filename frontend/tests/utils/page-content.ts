@@ -67,8 +67,10 @@ export class PageContent extends BasePage {
 		// Default to the first add button if no value is provided
 		// addButtonValue is useful when there is multiple tabs with add buttons
 		if (addButtonValue === undefined) {
+			await this.page.waitForTimeout(2000);
 			await this.addButton.first().click();
 		} else {
+			await this.page.waitForTimeout(2000);
 			await this.addButton.filter({ hasText: addButtonValue }).click();
 		}
 		await this.form.hasTitle();
