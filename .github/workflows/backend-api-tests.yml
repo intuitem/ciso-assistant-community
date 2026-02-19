@@ -130,7 +130,11 @@ jobs:
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
           key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          fail-on-cache-miss: true
+
+      - name: Install dependencies
+        working-directory: ${{ env.BACKEND_DIR }}
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install
 
       - name: Download Database
         uses: actions/download-artifact@v4
