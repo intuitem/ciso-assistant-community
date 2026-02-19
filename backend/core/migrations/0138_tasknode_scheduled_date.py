@@ -2,6 +2,7 @@ from datetime import timedelta
 from django.db import migrations, models
 from core.utils import _generate_occurrences
 
+
 def populate_scheduled_date(apps, schema_editor):
     TaskNode = apps.get_model("core", "TaskNode")
     TaskTemplate = apps.get_model("core", "TaskTemplate")
@@ -9,7 +10,6 @@ def populate_scheduled_date(apps, schema_editor):
     db_alias = schema_editor.connection.alias
 
     for template in TaskTemplate.objects.using(db_alias).filter(is_recurrent=True):
-
         # Get nodes without scheduled_date
         qs = (
             TaskNode.objects.using(db_alias)
@@ -95,7 +95,7 @@ def populate_scheduled_date(apps, schema_editor):
         # Bulk update in batches
         for k in range(0, len(nodes), 1000):
             TaskNode.objects.using(db_alias).bulk_update(
-                nodes[k:k + 1000],
+                nodes[k : k + 1000],
                 ["scheduled_date"],
             )
 
