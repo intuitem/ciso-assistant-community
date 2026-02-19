@@ -7717,7 +7717,9 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
             end_date = self.schedule["end_date"]
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
             # Delete TaskNode instances whose scheduled date is after the end date
-            TaskNode.objects.filter(task_template=self, scheduled_date__gt=end_date).delete()
+            TaskNode.objects.filter(
+                task_template=self, scheduled_date__gt=end_date
+            ).delete()
         super().save(*args, **kwargs)
 
 
