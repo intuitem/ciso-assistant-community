@@ -87,17 +87,16 @@
 </script>
 
 <Tabs value={group} onValueChange={(e) => handleTabChange(e.value)}>
-	{#snippet list()}
-		<Tabs.Control value="summary">{m.summary()}</Tabs.Control>
-		<Tabs.Control value="governance">{m.governance()}</Tabs.Control>
-		<Tabs.Control value="risk">{m.risk()}</Tabs.Control>
-		<Tabs.Control value="compliance">{m.compliance()}</Tabs.Control>
-		<Tabs.Control value="operations">{m.operations()}</Tabs.Control>
-	{/snippet}
-	{#snippet content()}
-		{#key group}
-			<div class="px-4 pb-4 space-y-8">
-				<Tabs.Panel value="summary">
+	<Tabs.List>
+		<Tabs.Trigger value="summary">{m.summary()}</Tabs.Trigger>
+		<Tabs.Trigger value="governance">{m.governance()}</Tabs.Trigger>
+		<Tabs.Trigger value="risk">{m.risk()}</Tabs.Trigger>
+		<Tabs.Trigger value="compliance">{m.compliance()}</Tabs.Trigger>
+		<Tabs.Trigger value="operations">{m.operations()}</Tabs.Trigger>
+	</Tabs.List>
+	{#key group}
+		<div class="px-4 pb-4 space-y-8">
+			<Tabs.Content value="summary">
 					{#await data.stream.metrics}
 						<div class="col-span-3 lg:col-span-1">
 							<div>Refreshing data ..</div>
@@ -317,8 +316,8 @@
 							<p class="text-red-500">Error loading metrics</p>
 						</div>
 					{/await}
-				</Tabs.Panel>
-				<Tabs.Panel value="governance">
+				</Tabs.Content>
+				<Tabs.Content value="governance">
 					{#await data.stream.counters}
 						<div class="col-span-3 lg:col-span-1">
 							<div>Refreshing data ..</div>
@@ -542,8 +541,8 @@
 					{:catch}
 						<div>Error loading exceptions data</div>
 					{/await}
-				</Tabs.Panel>
-				<Tabs.Panel value="risk">
+				</Tabs.Content>
+				<Tabs.Content value="risk">
 					<!-- Risk tab -->
 
 					<section>
@@ -672,8 +671,8 @@
 							</div>
 						{/await}
 					</section>
-				</Tabs.Panel>
-				<Tabs.Panel value="compliance">
+				</Tabs.Content>
+				<Tabs.Content value="compliance">
 					<section class="space-y-6">
 						<div class="flex justify-between items-center mb-6">
 							<h2 class="text-xl font-bold text-gray-900">{m.complianceAnalytics()}</h2>
@@ -851,8 +850,8 @@
 							<div class="text-red-500">Error loading compliance data</div>
 						{/await}
 					</section>
-				</Tabs.Panel>
-				<Tabs.Panel value="operations">
+				</Tabs.Content>
+				<Tabs.Content value="operations">
 					{#await data.stream.operationsAnalytics}
 						<div class="col-span-3 lg:col-span-1">
 							<div>Refreshing data ..</div>
@@ -1076,8 +1075,7 @@
 							</div>
 						</div>
 					{/await}
-				</Tabs.Panel>
+				</Tabs.Content>
 			</div>
 		{/key}
-	{/snippet}
 </Tabs>
