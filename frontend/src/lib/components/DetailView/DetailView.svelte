@@ -793,11 +793,11 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)}>
-			<Tabs.List>
+	<div class="card shadow-lg mt-8 bg-white py-6">
+		<Tabs value={group} onValueChange={(e) => (group = e.value)} orientation="vertical" class="w-full">
+			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Trigger value={urlmodel}>
+					<Tabs.Trigger value={urlmodel} class="justify-start">
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}
 							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
@@ -807,7 +807,7 @@
 				<Tabs.Indicator />
 			</Tabs.List>
 			{#each relatedModels as [urlmodel, model]}
-				<Tabs.Content value={urlmodel}>
+				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#key urlmodel}
 						<div class="py-2"></div>
 						{@const field = data.model.reverseForeignKeyFields.find(
