@@ -32,6 +32,7 @@ export abstract class BasePage {
 	async goto() {
 		await this.page.goto(this.url);
 		await this.page.waitForURL(this.url);
+		await this.page.waitForLoadState('networkidle');
 	}
 
 	async hasTitle(title: string | RegExp = this.name) {
