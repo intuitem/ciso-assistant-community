@@ -160,6 +160,7 @@ test('user can create representatives, solutions and entity assessments inside e
 		const firstCard = cards.first();
 		await expect(firstCard).toBeVisible();
 		await expect(firstCard.getByTestId('flip-button-front')).toBeEnabled();
+		await page.waitForTimeout(2000);
 		await firstCard.getByTestId('flip-button-front').click();
 		await expect(firstCard).toHaveClass(/rotate-x-180/);
 

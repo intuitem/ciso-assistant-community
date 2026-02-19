@@ -138,6 +138,7 @@ export class PageContent extends BasePage {
 	}
 
 	async viewItemDetail(value?: string) {
+		await this.page.waitForTimeout(2000);
 		if (value) {
 			await this.getRow(value).getByTestId('tablerow-detail-button').click();
 			this.itemDetail.setItem(value);
