@@ -25,6 +25,10 @@ def populate_scheduled_date(apps, schema_editor):
         min_due = nodes[0].due_date
         max_due = nodes[-1].due_date
 
+        # Ensure deterministic generation if task_date is missing
+        if template.task_date is None:
+            template.task_date = min_due
+
         # Generate occurrences only around real data
         start_date = min_due - timedelta(days=400)
         end_date = max_due + timedelta(days=400)
