@@ -114,19 +114,28 @@
 							{/each}
 						</select>
 						<button
-							onclick={() => { openState = false; dispatch('triggerGT'); }}
+							onclick={() => {
+								openState = false;
+								dispatch('triggerGT');
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="gt-button"
 							><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
 						>
 						<button
-							onclick={() => { openState = false; dispatch('loadDemoDomain'); }}
+							onclick={() => {
+								openState = false;
+								dispatch('loadDemoDomain');
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="load-demo-data-button"
 							><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
 						>
 						<button
-							onclick={() => { openState = false; modalBuildInfo(); }}
+							onclick={() => {
+								openState = false;
+								modalBuildInfo();
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="about-button"
 							><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
@@ -135,8 +144,7 @@
 							href="https://intuitem.gitbook.io/ciso-assistant"
 							target="_blank"
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
-							data-testid="docs-button"
-							><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
+							data-testid="docs-button"><i class="fa-solid fa-book mr-2"></i>{m.onlineDocs()}</a
 						>
 						<form action="/logout" method="POST">
 							<button class="w-full" type="submit" data-testid="logout-button">

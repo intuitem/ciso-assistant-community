@@ -135,17 +135,18 @@
 								>
 									{option.value}
 									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											openDelay={50}
-										>
+										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 											<Tooltip.Trigger>
 												{#snippet child({ props })}
-													<span {...props} class="underline"><i class="ml-2 fa-solid fa-circle-info"></i></span>
+													<span {...props} class="underline"
+														><i class="ml-2 fa-solid fa-circle-info"></i></span
+													>
 												{/snippet}
 											</Tooltip.Trigger>
 											<Tooltip.Positioner>
-												<Tooltip.Content class="card preset-filled p-4">{option.description}</Tooltip.Content>
+												<Tooltip.Content class="card preset-filled p-4"
+													>{option.description}</Tooltip.Content
+												>
 											</Tooltip.Positioner>
 										</Tooltip>
 									{/if}
@@ -171,17 +172,18 @@
 								>
 									{option.value}
 									{#if option.description}
-										<Tooltip
-											positioning={{ placement: 'top' }}
-											openDelay={50}
-										>
+										<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 											<Tooltip.Trigger>
 												{#snippet child({ props })}
-													<span {...props} class="underline"><i class="ml-2 fa-solid fa-circle-info"></i></span>
+													<span {...props} class="underline"
+														><i class="ml-2 fa-solid fa-circle-info"></i></span
+													>
 												{/snippet}
 											</Tooltip.Trigger>
 											<Tooltip.Positioner>
-												<Tooltip.Content class="card preset-filled p-4">{option.description}</Tooltip.Content>
+												<Tooltip.Content class="card preset-filled p-4"
+													>{option.description}</Tooltip.Content
+												>
 											</Tooltip.Positioner>
 										</Tooltip>
 									{/if}

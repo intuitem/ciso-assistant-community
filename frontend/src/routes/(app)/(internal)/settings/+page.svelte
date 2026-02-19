@@ -38,6 +38,7 @@
 				></Tabs.Trigger
 			>
 		{/if}
+		<Tabs.Indicator />
 	</Tabs.List>
 	<Tabs.Content value="general">
 		<GeneralSettings {data} />

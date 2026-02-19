@@ -252,6 +252,7 @@
 									{/if}
 								</Tabs.Trigger>
 							{/each}
+							<Tabs.Indicator />
 						</Tabs.List>
 						{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 							<Tabs.Content value={urlmodel}>

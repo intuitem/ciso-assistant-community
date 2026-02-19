@@ -115,11 +115,7 @@
 										{/if}
 									</Anchor>
 								{:else}
-									<Tooltip
-										open={open[i]}
-										onOpenChange={(e) => (open[i] = e.open)}
-										openDelay={0}
-									>
+									<Tooltip open={open[i]} onOpenChange={(e) => (open[i] = e.open)} openDelay={0}>
 										<Tooltip.Trigger>
 											<div class="text-gray-300 *:pointer-events-none">
 												<span

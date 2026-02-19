@@ -649,8 +649,10 @@
 							<span class="text-sm">{filterCount}</span>
 						{/if}
 					</Popover.Trigger>
-					<Popover.Positioner>
-						<Popover.Content class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200">
+					<Popover.Positioner class="z-50!">
+						<Popover.Content
+							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+						>
 							<SuperForm {_form} validators={zod(z.object({}))}>
 								{#snippet children({ form })}
 									{#each filteredFields as field}

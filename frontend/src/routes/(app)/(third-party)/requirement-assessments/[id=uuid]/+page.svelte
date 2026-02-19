@@ -278,6 +278,7 @@
 					<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
 				{/if}
 				<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+				<Tabs.Indicator />
 			</Tabs.List>
 			<Tabs.Content value="applied_controls">
 				{#if !page.data.user.is_third_party}

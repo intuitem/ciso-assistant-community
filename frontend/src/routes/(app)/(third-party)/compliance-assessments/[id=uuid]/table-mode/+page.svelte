@@ -779,10 +779,23 @@
 												{/if}
 											{:else}
 												<Accordion.Item value="observation">
-													{#snippet control()}
-														<p class="flex">{m.observation()}</p>
-													{/snippet}
-													{#snippet panel()}
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 text-left">{m.observation()}</p>
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<TableMarkdownField
 															bind:value={requirementAssessment.observation}
 															disabled={isReadOnly}
@@ -791,7 +804,7 @@
 																requirementAssessment.observationBuffer = newValue;
 															}}
 														/>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 
@@ -799,8 +812,8 @@
 												<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
 											{:else}
 												<Accordion.Item value="appliedControl">
-													{#snippet control()}
-														<p class="flex items-center space-x-2">
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 items-center space-x-2 text-left">
 															<span>{m.appliedControl()}</span>
 															{#key addedMeasure}
 																{#if requirementAssessment.applied_controls != null}
@@ -810,8 +823,21 @@
 																{/if}
 															{/key}
 														</p>
-													{/snippet}
-													{#snippet panel()}
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<div class="flex flex-row space-x-2 items-center">
 															{#if !shallow && !isReadOnly}
 																<button
@@ -847,7 +873,7 @@
 																{/each}
 															{/key}
 														</div>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 
@@ -857,8 +883,8 @@
 												</p>
 											{:else}
 												<Accordion.Item value="evidence">
-													{#snippet control()}
-														<p class="flex items-center space-x-2">
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 items-center space-x-2 text-left">
 															<span>{m.evidence()}</span>
 															{#key addedEvidence}
 																{#if requirementAssessment.evidences != null}
@@ -870,8 +896,21 @@
 																{/if}
 															{/key}
 														</p>
-													{/snippet}
-													{#snippet panel()}
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<div class="flex flex-row space-x-2 items-center">
 															{#if !shallow && !isReadOnly}
 																<button
@@ -910,7 +949,7 @@
 																{/each}
 															{/key}
 														</div>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 										</Accordion>

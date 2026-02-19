@@ -508,6 +508,7 @@
 							{/if}
 							<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
 							<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
+							<Tabs.Indicator />
 						</Tabs.List>
 						<Tabs.Content value="applied_controls">
 							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
@@ -603,8 +604,8 @@
 									hideFilters={true}
 									URLModel="evidences"
 									expectedCount={countMasked(page.data.requirementAssessment.evidences)}
-									baseEndpoint="/evidences?requirement_assessments={page.data
-										.requirementAssessment.id}"
+									baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
+										.id}"
 								/>
 							</div>
 						</Tabs.Content>

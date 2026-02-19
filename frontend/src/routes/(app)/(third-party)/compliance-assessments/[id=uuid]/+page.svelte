@@ -681,51 +681,54 @@
 							</span>
 						</Popover.Trigger>
 						<Popover.Positioner>
-							<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+							<Popover.Content
+								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+							>
 								<div>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-								{#if !page.data.user.is_third_party}
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+									{#if !page.data.user.is_third_party}
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asCSV()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asXLSX()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asWord()}</a
+										>
+									{/if}
 									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+										href="/compliance-assessments/{data.compliance_assessment.id}/export"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asCSV()}</a
+										>... {m.asZIP()}</a
 									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asXLSX()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asWord()}</a
-									>
-								{/if}
-								<a
-									href="/compliance-assessments/{data.compliance_assessment.id}/export"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
-								>
-								{#if !page.data.user.is_third_party}
-									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/csv"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asCSV()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asXLSX()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/pdf"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asPDF()}</a
-									>
-								{/if}
+									{#if !page.data.user.is_third_party}
+										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/csv"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asCSV()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/xlsx"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asXLSX()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/pdf"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asPDF()}</a
+										>
+									{/if}
 								</div>
 							</Popover.Content>
 						</Popover.Positioner>
@@ -911,92 +914,94 @@
 					{/if}
 				</Popover.Trigger>
 				<Popover.Positioner>
-					<Popover.Content class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10">
+					<Popover.Content
+						class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+					>
 						<div>
-						<span class="text-sm font-bold">{m.result()}</span>
-						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-							{#each Object.entries(complianceResultColorMap) as [result, color]}
-								<button
-									type="button"
-									onclick={() => toggleResult(result)}
-									class="px-2 py-1 rounded-md font-bold"
-									style="background-color: {selectedResults.includes(result)
-										? color
-										: 'grey'}; color: {selectedResults.includes(result)
-										? result === 'not_applicable'
-											? 'white'
-											: 'black'
-										: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-								>
-									{safeTranslate(result)}
-								</button>
-							{/each}
-						</div>
-					</div>
-					{#if data.compliance_assessment.progress_status_enabled}
-						<div>
-							<span class="text-sm font-bold">{m.status()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							<span class="text-sm font-bold">{m.result()}</span>
+							<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceResultColorMap) as [result, color]}
 									<button
 										type="button"
-										onclick={() => toggleStatus(status)}
+										onclick={() => toggleResult(result)}
 										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedStatus.includes(status)
-											? color + '44'
-											: 'grey'}; color: {selectedStatus.includes(status)
-											? darkenColor(color, 0.3)
-											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-									>
-										{safeTranslate(status)}
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/if}
-					{#if data.compliance_assessment.extended_result_enabled}
-						<div>
-							<span class="text-sm font-bold">{m.extendedResult()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
-									<button
-										type="button"
-										onclick={() => toggleExtendedResult(extendedResult)}
-										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedExtendedResults.includes(extendedResult)
+										style="background-color: {selectedResults.includes(result)
 											? color
-											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
-											extendedResult
-										)
-											? 1
-											: 0.3};"
+											: 'grey'}; color: {selectedResults.includes(result)
+											? result === 'not_applicable'
+												? 'white'
+												: 'black'
+											: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
 									>
-										{safeTranslate(extendedResult)}
+										{safeTranslate(result)}
 									</button>
 								{/each}
 							</div>
 						</div>
-					{/if}
-					<div>
-						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
-						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
-							<Switch
-								name="questionnaireToggle"
-								class="flex flex-row items-center justify-center"
-								active="bg-primary-500"
-								onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
-								onclick={() => {
-									displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
-									auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
-								}}
-							>
-								{#if displayOnlyAssessableNodes}
-									<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
-								{:else}
-									<span class="font-bold text-xs text-gray-500">{m.no()}</span>
-								{/if}
-							</Switch>
-						</div>
+						{#if data.compliance_assessment.progress_status_enabled}
+							<div>
+								<span class="text-sm font-bold">{m.status()}</span>
+								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceStatusColorMap) as [status, color]}
+										<button
+											type="button"
+											onclick={() => toggleStatus(status)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedStatus.includes(status)
+												? color + '44'
+												: 'grey'}; color: {selectedStatus.includes(status)
+												? darkenColor(color, 0.3)
+												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+										>
+											{safeTranslate(status)}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+						{#if data.compliance_assessment.extended_result_enabled}
+							<div>
+								<span class="text-sm font-bold">{m.extendedResult()}</span>
+								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+										<button
+											type="button"
+											onclick={() => toggleExtendedResult(extendedResult)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedExtendedResults.includes(extendedResult)
+												? color
+												: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+												extendedResult
+											)
+												? 1
+												: 0.3};"
+										>
+											{safeTranslate(extendedResult)}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+						<div>
+							<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+							<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+								<Switch
+									name="questionnaireToggle"
+									class="flex flex-row items-center justify-center"
+									active="bg-primary-500"
+									onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
+									onclick={() => {
+										displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
+										auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
+									}}
+								>
+									{#if displayOnlyAssessableNodes}
+										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+									{:else}
+										<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+									{/if}
+								</Switch>
+							</div>
 						</div>
 					</Popover.Content>
 				</Popover.Positioner>

@@ -305,10 +305,7 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-					>
+					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
 						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
@@ -317,30 +314,33 @@
 						<Popover.Positioner>
 							<Popover.Content>
 								<div class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asCSV()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asXLSX()}</a
-								>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-									class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
-									>... {m.asXLSX()}</a
-								>
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.riskAssessment()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/pdf"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/csv"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/xlsx"
+										class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
+										class="block px-4 py-2 text-sm text-gray-800 border-b hover:bg-gray-200"
+										>... {m.asXLSX()}</a
+									>
 								</div>
 							</Popover.Content>
 						</Popover.Positioner>

@@ -166,6 +166,7 @@
 								>
 							{/if}
 						</Tabs.Trigger>
+						<Tabs.Indicator />
 					</Tabs.List>
 					<Tabs.Content value="compliance_assessments">
 						<ul class="list-none pl-4 text-sm space-y-2">
@@ -196,9 +197,7 @@
 								<div class="flex flex-col space-y-3">
 									{#if aggregatedErrors.length > 0}
 										<div class="space-y-2">
-											<div
-												class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2"
-											>
+											<div class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2">
 												<i class="fa-solid fa-bug text-lg"></i>
 												<span class="font-bold text-lg">{aggregatedErrors.length}</span>
 												<span
@@ -208,9 +207,7 @@
 												>
 												<span class="text-sm opacity-75 ml-auto">
 													{quality_check.errors.length}
-													{quality_check.errors.length === 1
-														? m.xRaysFinding()
-														: m.xRaysFindings()}
+													{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
 												</span>
 											</div>
 											<ul class="list-none pl-2 text-sm space-y-4">
@@ -377,9 +374,7 @@
 								<div class="flex flex-col space-y-3">
 									{#if aggregatedErrors.length > 0}
 										<div class="space-y-2">
-											<div
-												class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2"
-											>
+											<div class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2">
 												<i class="fa-solid fa-bug text-lg"></i>
 												<span class="font-bold text-lg">{aggregatedErrors.length}</span>
 												<span
@@ -389,9 +384,7 @@
 												>
 												<span class="text-sm opacity-75 ml-auto">
 													{quality_check.errors.length}
-													{quality_check.errors.length === 1
-														? m.xRaysFinding()
-														: m.xRaysFindings()}
+													{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
 												</span>
 											</div>
 											<ul class="list-none pl-2 text-sm space-y-4">

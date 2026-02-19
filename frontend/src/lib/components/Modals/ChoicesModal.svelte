@@ -72,17 +72,18 @@
 							}}
 							>{safeTranslate(choice.name)}
 							{#if choice.description}
-								<Tooltip
-									positioning={{ placement: 'top' }}
-									openDelay={50}
-								>
+								<Tooltip positioning={{ placement: 'top' }} openDelay={50}>
 									<Tooltip.Trigger>
 										{#snippet child({ props })}
-											<span {...props} class="underline"><i class="fa-solid fa-circle-info"></i></span>
+											<span {...props} class="underline"
+												><i class="fa-solid fa-circle-info"></i></span
+											>
 										{/snippet}
 									</Tooltip.Trigger>
 									<Tooltip.Positioner>
-										<Tooltip.Content class="card preset-filled p-4">{safeTranslate(choice.description)}</Tooltip.Content>
+										<Tooltip.Content class="card preset-filled p-4"
+											>{safeTranslate(choice.description)}</Tooltip.Content
+										>
 									</Tooltip.Positioner>
 								</Tooltip>
 							{/if}

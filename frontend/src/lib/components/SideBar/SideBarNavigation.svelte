@@ -60,13 +60,8 @@
 	>
 		{#each items as item}
 			{#if sideBarVisibleItems && sideBarVisibleItems[item.name] !== false}
-				<Accordion.Item
-					value={item.name}
-					id={item.name.toLowerCase().replace(' ', '-')}
-				>
-					<Accordion.ItemTrigger
-						class="flex w-full items-center justify-between cursor-pointer"
-					>
+				<Accordion.Item value={item.name} id={item.name.toLowerCase().replace(' ', '-')}>
+					<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 						<SideBarCategory {item} />
 						<Accordion.ItemIndicator
 							class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
