@@ -126,6 +126,44 @@ class BaseModelSerializer(serializers.ModelSerializer):
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
+    def _check_m2m_visibility(self, validated_data: dict) -> None:
+        """Verify that all M2M linked objects are visible to the requesting user."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        user = request.user
+        root_folder = Folder.get_root_folder()
+        accessible_cache: dict = {}
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list) or not value:
+                continue
+            if not all(isinstance(item, models.Model) for item in value):
+                continue
+            related_model = type(value[0])
+            if related_model not in accessible_cache:
+                try:
+                    ids = RoleAssignment.get_accessible_object_ids(
+                        root_folder, user, related_model
+                    )[0]
+                    accessible_cache[related_model] = {str(i) for i in ids}
+                except (NotImplementedError, Permission.DoesNotExist):
+                    accessible_cache[related_model] = None
+            accessible_ids = accessible_cache[related_model]
+            if accessible_ids is None:
+                continue
+            for item in value:
+                if str(item.id) not in accessible_ids:
+                    raise PermissionDenied(
+                        {
+                            field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                        }
+                    )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_m2m_visibility(data)
+        return data
+
     def delete(self, instance: models.Model) -> None:
         """Enforce delete permission before removing *instance*."""
         self._check_object_perm(instance, "delete")
@@ -510,7 +548,7 @@ class AssetWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return data
+        return super().validate(data)
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
