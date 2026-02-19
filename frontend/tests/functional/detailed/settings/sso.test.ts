@@ -11,10 +11,10 @@ test.describe('SSO settings', () => {
 
 	test('SAML settings', async ({ logedPage, page }) => {
 		await test.step('configure SAML', async () => {
-		await page.waitForTimeout(2000);
-		await page.getByRole('tab', { name: ' SSO' }).click();
-		await page.waitForTimeout(2000);
-		await page.getByTestId('form-input-is-enabled').check();
+			await page.waitForTimeout(2000);
+			await page.getByRole('tab', { name: ' SSO' }).click();
+			await page.waitForTimeout(2000);
+			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').click();
 			await page.getByTestId('form-input-idp-entity-id').fill('http://localhost:8080/realms/test');
 			await page.getByTestId('form-input-sp-entity-id').click();
@@ -47,10 +47,10 @@ test.describe('SSO settings', () => {
 
 	test('OIDC settings', async ({ logedPage, page }) => {
 		await test.step('configure OIDC', async () => {
-		await page.waitForTimeout(2000);
-		await page.getByRole('tab', { name: ' SSO' }).click();
-		await page.waitForTimeout(2000);
-		await page.getByTestId('form-input-is-enabled').check();
+			await page.waitForTimeout(2000);
+			await page.getByRole('tab', { name: ' SSO' }).click();
+			await page.waitForTimeout(2000);
+			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').clear();
 			// await page.getByTestId('form-input-sp-entity-id').clear();
 			await page.getByTestId('form-input-metadata-url').clear();
