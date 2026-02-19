@@ -17,8 +17,7 @@ test('Incidents full flow - creation, validation and cleanup', async ({
 	await test.step('Create folder and incident', async () => {
 		await foldersPage.goto();
 		await foldersPage.createItem({
-			name: 'incidents-folder',
-			create_iam_groups: true
+			name: 'incidents-folder'
 		});
 
 		await redirectToIncidents(page);

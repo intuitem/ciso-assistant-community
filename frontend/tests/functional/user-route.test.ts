@@ -40,11 +40,10 @@ test('user usual routine actions are working correctly', async ({
 		await pages.foldersPage.hasUrl();
 		await pages.foldersPage.hasTitle();
 
-	await pages.foldersPage.createItem({
-		name: vars.folderName,
-		description: vars.description,
-		create_iam_groups: true
-	});
+		await pages.foldersPage.createItem({
+			name: vars.folderName,
+			description: vars.description
+		});
 
 		//TODO assert that the domain data are displayed in the table
 	});

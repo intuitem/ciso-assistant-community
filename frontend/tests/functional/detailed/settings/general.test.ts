@@ -26,12 +26,11 @@ test.describe('General settings', () => {
 	test.beforeAll(async ({ foldersPage, librariesPage, page }) => {
 		await test.step('create required folder', async () => {
 			await foldersPage.goto();
-		await foldersPage.hasUrl();
-		await foldersPage.createItem({
-			name: vars.folderName,
-			description: vars.description,
-			create_iam_groups: true
-		});
+			await foldersPage.hasUrl();
+			await foldersPage.createItem({
+				name: vars.folderName,
+				description: vars.description
+			});
 		});
 		await test.step('import risk matrix', async () => {
 			await librariesPage.goto();

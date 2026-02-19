@@ -23,8 +23,7 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await foldersPage.goto();
 		await foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description,
-			create_iam_groups: true
+			description: vars.description
 		});
 	});
 
