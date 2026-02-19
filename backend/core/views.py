@@ -12098,8 +12098,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             # can be safely garbage-collected on schedule changes.
             existing_nodes = TaskNode.objects.filter(
                 task_template=template,
-                due_date__gte=start_date,
-                due_date__lte=end_date,
+                scheduled_date__gte=start_date,
+                scheduled_date__lte=end_date,
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
