@@ -67,7 +67,7 @@
 	});
 
 	let classesCellText = $derived((backgroundHexColor: string) => {
-		return isDark(backgroundHexColor) ? 'text-white' : '';
+		return isDark(backgroundHexColor) ? 'text-surface-100' : 'text-surface-900';
 	});
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -360,7 +360,7 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+						class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 						style="background-color: {data.scenario.inherent_proba?.name
 							? color_map[data.scenario.inherent_proba.name]
 							: color_map['--']}"
@@ -372,7 +372,7 @@
 				<p class="flex flex-col">
 					<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 					<span
-						class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+						class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 						style="background-color: {data.scenario.inherent_impact?.name
 							? color_map[data.scenario.inherent_impact.name]
 							: color_map['--']}"
@@ -415,7 +415,7 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 					style="background-color: {data.scenario.current_proba?.name
 						? color_map[data.scenario.current_proba.name]
 						: color_map['--']}"
@@ -427,7 +427,7 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 					style="background-color: {data.scenario.current_impact?.name
 						? color_map[data.scenario.current_impact.name]
 						: color_map['--']}"
@@ -465,7 +465,7 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.probability()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 					style="background-color: {data.scenario.residual_proba?.name
 						? color_map[data.scenario.residual_proba.name]
 						: color_map['--']}"
@@ -477,7 +477,7 @@
 			<p class="flex flex-col">
 				<span class="text-sm font-semibold text-surface-400-600">{m.impact()}</span>
 				<span
-					class="inline-block text-xs font-semibold text-center px-2 py-1 rounded min-w-16"
+					class="inline-block text-xs text-surface-900 font-semibold text-center px-2 py-1 rounded min-w-16"
 					style="background-color: {data.scenario.residual_impact?.name
 						? color_map[data.scenario.residual_impact.name]
 						: color_map['--']}"
@@ -491,7 +491,7 @@
 					>{m.residualRiskLevel()}</span
 				>
 				<span
-					class="text-sm text-center font-semibold p-2 rounded-md w-20 {classesCellText(
+					class="text-sm text-center text-surface-900 font-semibold p-2 rounded-md w-20 {classesCellText(
 						data.scenario.residual_level.hexcolor
 					)}"
 					style="background-color: {data.scenario.residual_level.hexcolor}"

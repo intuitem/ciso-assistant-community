@@ -41,7 +41,7 @@
 	const lead = safeTranslate(statusI18n);
 	const leadExtendedResult = extendedResult ? safeTranslate(extendedResult) : null;
 
-	let classesText = $derived(resultColor == '#000000' ? 'text-white' : 'text-gray-900');
+	let classesText = $derived(resultColor == '#000000' ? 'text-surface-100' : 'text-surface-900');
 </script>
 
 {#if assessable}
@@ -55,7 +55,7 @@
 			{leadResult}
 		</span>
 		{#if extendedResultEnabled && leadExtendedResult && extendedResultColor}
-			<span class="badge text-white h-fit" style="background-color: {extendedResultColor};">
+			<span class="badge text-surface-900 h-fit" style="background-color: {extendedResultColor};">
 				{leadExtendedResult}
 			</span>
 		{/if}

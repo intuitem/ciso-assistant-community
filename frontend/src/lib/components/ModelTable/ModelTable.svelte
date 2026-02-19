@@ -899,7 +899,7 @@
 															{/if}
 														{:else if value && value.hexcolor}
 															<p
-																class="flex w-fit min-w-24 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
+																class="flex w-fit min-w-24 text-surface-900 justify-center px-2 py-1 rounded-md ml-2 whitespace-nowrap {classesHexBackgroundText(
 																	value.hexcolor
 																)}"
 																style="background-color: {value.hexcolor}"

@@ -70,7 +70,7 @@
 	{/if}
 	{#if riskLevel}
 		<div
-			class="flex font-medium w-32 justify-center p-2 rounded-base {classesCellText(
+			class="flex font-medium w-32 text-surface-900 justify-center p-2 rounded-base {classesCellText(
 				riskLevel.hexcolor
 			)}"
 			style="background-color: {riskLevel.hexcolor}"

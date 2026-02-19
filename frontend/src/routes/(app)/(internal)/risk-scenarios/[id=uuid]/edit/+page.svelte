@@ -286,6 +286,7 @@
 									form={_form}
 									options={data.probabilityChoices}
 									color_map={probabilityColorMap}
+									class="text-surface-900"
 									field="inherent_proba"
 									label={m.inherentProba()}
 								/>
@@ -297,6 +298,7 @@
 									options={data.impactChoices}
 									color_map={impactColorMap}
 									field="inherent_impact"
+									class="text-surface-900"
 									label={m.inherentImpact()}
 								/>
 							</div>
@@ -361,6 +363,7 @@
 									options={data.probabilityChoices}
 									color_map={probabilityColorMap}
 									field="current_proba"
+									class="text-surface-900"
 									label={m.currentProba()}
 								/>
 							</div>
@@ -371,6 +374,7 @@
 									options={data.impactChoices}
 									color_map={impactColorMap}
 									field="current_impact"
+									class="text-surface-900"
 									label={m.currentImpact()}
 								/>
 							</div>
@@ -430,6 +434,7 @@
 								options={data.probabilityChoices}
 								color_map={probabilityColorMap}
 								field="residual_proba"
+								class="text-surface-900"
 								label={m.residualProba()}
 							/>
 						</div>
@@ -440,6 +445,7 @@
 								options={data.impactChoices}
 								color_map={impactColorMap}
 								field="residual_impact"
+								class="text-surface-900"
 								label={m.residualImpact()}
 							/>
 						</div>

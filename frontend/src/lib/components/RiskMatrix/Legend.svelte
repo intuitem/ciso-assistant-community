@@ -29,14 +29,14 @@
 				{#each parsedRiskMatrix.risk as riskItem}
 					<tr class="col">
 						<td
-							class="w-auto text-center border-4 border-white p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
+							class="w-auto text-center border-4 border-surface-200-800 p-2 font-semibold whitespace-nowrap rounded-l {classesCellText(
 								riskItem.hexcolor
 							)}"
 							style="background-color: {riskItem.hexcolor}"
 						>
 							{riskItem.name}
 						</td>
-						<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-white rounded-r">
+						<td class="col italic pl-3 border-t-4 border-b-4 border-r-4 border-surface-200-800 rounded-r">
 							{riskItem.description}
 						</td>
 					</tr>
