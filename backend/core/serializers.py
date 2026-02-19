@@ -2995,7 +2995,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
         assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
         instance = super().create(validated_data)
-        self._sync_task_node(instance, tasknode_data, False, False)
+        self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
 
         # Send notification to newly assigned users
         if assigned_to_data:
@@ -3084,6 +3084,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             task_node = TaskNode.objects.create(
                 task_template=task_template,
                 due_date=task_template.task_date,
+                scheduled_date=task_template.task_date,
                 folder=task_template.folder,
             )
         else:
@@ -3095,6 +3096,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 task_node = TaskNode.objects.create(
                     task_template=task_template,
                     due_date=task_template.task_date,
+                    scheduled_date=task_template.task_date,
                     folder=task_template.folder,
                 )
 
@@ -3157,7 +3159,7 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
-        exclude = ["task_template", "evidences"]
+        exclude = ["task_template", "evidences", "scheduled_date"]
 
 
 class TerminologyReadSerializer(BaseModelSerializer):

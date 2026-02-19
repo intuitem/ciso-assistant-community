@@ -7716,8 +7716,10 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         if self.schedule and "end_date" in self.schedule:
             end_date = self.schedule["end_date"]
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances that have a due date after the end date
-            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+            # Delete TaskNode instances whose original scheduled date is after the end date
+            TaskNode.objects.filter(
+                task_template=self, scheduled_date__gt=end_date
+            ).delete()
         super().save(*args, **kwargs)
 
 
@@ -7730,6 +7732,12 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     ]
 
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    scheduled_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Scheduled date",
+        help_text="Original date from the recurrence rule. Not user-editable.",
+    )
 
     status = models.CharField(
         max_length=50, default="pending", choices=TASK_STATUS_CHOICES
