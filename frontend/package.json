@@ -20,7 +20,7 @@
 	},
 	"devDependencies": {
 		"@inlang/paraglide-js": "^2.12.0",
-		"@inlang/plugin-message-format": "^2.2.0",
+		"@inlang/plugin-message-format": "^4.3.0",
 		"@playwright/test": "^1.58.2",
 		"@skeletonlabs/skeleton": "^3.2.2",
 		"@skeletonlabs/skeleton-svelte": "^1.5.3",
@@ -60,15 +60,15 @@
 		"vite": "^5.4.21",
 		"vite-plugin-tailwind-purgecss": "^0.3.5",
 		"vitest": "^3.2.4",
-		"zod": "^3.25.76"
+		"zod": "^3.25.76",
+		"@tailwindcss/vite": "^4.2.0",
+		"@typescript-eslint/eslint-plugin": "^8.56.0",
+		"@typescript-eslint/parser": "^8.56.0"
 	},
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.5",
 		"@fortawesome/fontawesome-free": "^6.7.2",
-		"@tailwindcss/vite": "^4.2.0",
-		"@typescript-eslint/eslint-plugin": "^8.56.0",
-		"@typescript-eslint/parser": "^8.56.0",
 		"@unovis/svelte": "1.6.4",
 		"@unovis/ts": "1.6.4",
 		"bits-ui": "^2.16.0",
