@@ -22,7 +22,7 @@ echo.
 echo ==^> [STEP 2] Convert Excel v2 file to YAML...
 call python3 ../../../backend/scripts/convert_library_v2.py ccm-controls-v4-v2.xlsx
 if %errorlevel% neq 0 (
-    echo ==^> [ERROR] Step 3 failed
+    echo ==^> [ERROR] Step 2 failed
     exit /b 1
 )
 echo.
