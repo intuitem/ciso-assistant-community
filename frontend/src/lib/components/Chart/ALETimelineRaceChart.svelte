@@ -317,7 +317,7 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
 
 		// Handle window resize
 		const handleResize = () => {

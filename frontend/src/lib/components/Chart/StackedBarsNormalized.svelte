@@ -39,7 +39,7 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
 		const rawData = data;
 		const auditTotals = rawData.map((audit) => audit.reduce((sum, val) => sum + val, 0));
 		chart.on('click', function (params) {

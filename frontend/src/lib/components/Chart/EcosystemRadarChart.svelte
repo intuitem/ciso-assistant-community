@@ -42,7 +42,7 @@
 	const chart_id = `${name}_div`;
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
 		const getGraphicElements = (chart) => {
 			const chartWidth = chart.getWidth();
 			const chartHeight = chart.getHeight();

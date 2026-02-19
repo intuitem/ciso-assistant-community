@@ -33,7 +33,7 @@
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
+		let chart = echarts.init(document.getElementById(chart_id), document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
 
 		// Prepare indicators with configurable max value and min -1 to avoid distortions with 0-values
 		const indicators = labels.map((label) => ({

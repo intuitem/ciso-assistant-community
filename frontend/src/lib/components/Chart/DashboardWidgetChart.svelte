@@ -185,7 +185,7 @@
 		const container = document.getElementById(chartId);
 		if (!container) return;
 
-		chartInstance = echarts.init(container, null, { renderer: 'svg' });
+		chartInstance = echarts.init(container, document.documentElement.classList.contains('dark') ? 'dark' : null, { renderer: 'svg' });
 
 		const option = getChartOption(echarts);
 		chartInstance.setOption(option);
