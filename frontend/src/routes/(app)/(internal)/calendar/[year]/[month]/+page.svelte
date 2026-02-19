@@ -12,6 +12,22 @@
 	let year = $derived(parseInt(page.params.year));
 	let month = $derived(parseInt(page.params.month));
 
+	function getDate(dateToParse) {
+		let year = parseInt(dateToParse.split('-')[0]);
+		let month = parseInt(dateToParse.split('-')[1]);
+		let day = parseInt(dateToParse.split('-')[2]);
+
+		let date = new Date();
+		date.setFullYear(year);
+		date.setMonth(month - 1);
+		date.setDate(day);
+		date.setHours(0);
+		date.setMinutes(0);
+		date.setSeconds(0);
+		date.setMilliseconds(0);
+		return date;
+	}
+
 	function createCalendarEvents(
 		appliedControls: Record<string, string>[],
 		riskAcceptances: Record<string, string>[],
@@ -42,7 +58,7 @@
 			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,
-				date: new Date(task.due_date),
+				date: getDate(task.due_date),
 				link: !task.is_recurrent
 					? `/task-templates/${task.task_template.id}`
 					: `/task-nodes/${task.id}`,
