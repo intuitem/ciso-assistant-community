@@ -25,12 +25,14 @@ test('user can create findings inside a follow up', async ({
 		await foldersPage.hasUrl();
 		await foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 		// NOTE: creating one more folder not to trip up the autocomplete test utils
 		await foldersPage.createItem({
 			name: vars.folderName + ' foo',
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 	});
 

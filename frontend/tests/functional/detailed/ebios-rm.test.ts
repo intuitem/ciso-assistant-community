@@ -56,7 +56,8 @@ test('ebios rm study', async ({
 		await foldersPage.hasUrl();
 		await foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 	});
 

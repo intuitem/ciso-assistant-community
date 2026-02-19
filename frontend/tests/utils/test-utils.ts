@@ -531,7 +531,8 @@ export class TestContent {
 				modelName: 'folder',
 				build: {
 					name: vars.folderName,
-					description: vars.description
+					description: vars.description,
+					create_iam_groups: true
 				},
 				editParams: {
 					name: '',

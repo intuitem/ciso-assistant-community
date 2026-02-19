@@ -24,12 +24,14 @@ test('user can import mappings', async ({
 		await foldersPage.hasUrl();
 		await foldersPage.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 		// NOTE: creating one more folder not to trip up the autocomplete test utils
 		await foldersPage.createItem({
 			name: vars.folderName + FOLDER_WORKAROUND_SUFFIX,
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 	});
 

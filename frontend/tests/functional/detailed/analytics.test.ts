@@ -32,7 +32,8 @@ test.skip('Analytics full flow - creation, validation and cleanup', async ({
 		await foldersPageCreate.goto();
 		await foldersPageCreate.createItem({
 			name: vars.folderName,
-			description: vars.description
+			description: vars.description,
+			create_iam_groups: true
 		});
 	});
 
