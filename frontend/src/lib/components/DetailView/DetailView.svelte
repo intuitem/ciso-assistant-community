@@ -794,7 +794,12 @@
 
 {#if relatedModels.length > 0 && displayModelTable}
 	<div class="card shadow-lg mt-8 bg-white py-6">
-		<Tabs value={group} onValueChange={(e) => (group = e.value)} orientation="vertical" class="w-full">
+		<Tabs
+			value={group}
+			onValueChange={(e) => (group = e.value)}
+			orientation="vertical"
+			class="w-full"
+		>
 			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
 					<Tabs.Trigger value={urlmodel} class="justify-start">
