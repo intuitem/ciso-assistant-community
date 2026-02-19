@@ -80,8 +80,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
             return
+        request = self.context.get("request")
+        if request is None:
+            return
         if not RoleAssignment.is_access_allowed(
-            user=self.context["request"].user,
+            user=request.user,
             perm=Permission.objects.get(
                 codename=f"{action}_{self.Meta.model._meta.model_name}",
             ),
