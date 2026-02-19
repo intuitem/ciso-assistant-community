@@ -8,7 +8,7 @@
 
 	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
-	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Switch, Progress, Popover } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 
@@ -820,7 +820,7 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<ProgressRing
+								<Progress
 									strokeWidth="16px"
 									meterStroke="stroke-white"
 									size="size-6"
@@ -847,7 +847,7 @@
 					>
 						<span class="mr-2">
 							{#if createAppliedControlsLoading}
-								<ProgressRing
+								<Progress
 									strokeWidth="16px"
 									meterStroke="stroke-white"
 									classes="-ml-2"

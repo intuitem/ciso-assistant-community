@@ -25,7 +25,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import SyncToActionsRiskModal from '$lib/components/Modals/SyncToActionsRiskModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
@@ -191,7 +191,7 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<ProgressRing
+								<Progress
 									strokeWidth="16px"
 									meterStroke="stroke-white"
 									size="size-6"

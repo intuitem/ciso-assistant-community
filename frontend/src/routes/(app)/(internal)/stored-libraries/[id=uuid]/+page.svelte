@@ -11,7 +11,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
@@ -132,7 +132,7 @@
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<ProgressRing size="size-6" meterStroke="stroke-primary-500" />
+						<Progress size="size-6" meterStroke="stroke-primary-500" />
 					{:else}
 						<form
 							method="post"

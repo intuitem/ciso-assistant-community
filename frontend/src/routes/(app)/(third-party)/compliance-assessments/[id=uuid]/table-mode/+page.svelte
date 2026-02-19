@@ -24,7 +24,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Progress, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
 	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
@@ -650,7 +650,7 @@
 											{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 												<div class="flex flex-row items-center space-x-4">
 													<span class="font-medium">{m.score()}</span>
-													<ProgressRing
+													<Progress
 														strokeWidth="20px"
 														meterStroke={displayScoreColor(
 															requirementAssessment.score,
@@ -661,7 +661,7 @@
 															complianceAssessment.max_score
 														)}
 														classes="shrink-0"
-														size="size-10">{requirementAssessment.score}</ProgressRing
+														size="size-10">{requirementAssessment.score}</Progress
 													>
 												</div>
 											{:else if requirementAssessment.result !== 'not_applicable'}
@@ -721,7 +721,7 @@
 										{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.implementationScoreResult()}</span>
-												<ProgressRing
+												<Progress
 													strokeWidth="20px"
 													meterStroke={displayScoreColor(
 														requirementAssessment.score,
@@ -732,9 +732,9 @@
 													size="size-10"
 												>
 													{requirementAssessment.score ?? '--'}
-												</ProgressRing>
+												</Progress>
 												<span>{m.documentationScoreResult()}</span>
-												<ProgressRing
+												<Progress
 													strokeWidth="20px"
 													meterStroke={displayScoreColor(
 														requirementAssessment.documentation_score,
@@ -745,12 +745,12 @@
 													size="size-10"
 												>
 													{requirementAssessment.documentation_score ?? '--'}
-												</ProgressRing>
+												</Progress>
 											</div>
 										{:else if requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.scoreResult()}</span>
-												<ProgressRing
+												<Progress
 													strokeWidth="20px"
 													meterStroke={displayScoreColor(
 														requirementAssessment.score,
@@ -761,7 +761,7 @@
 													size="size-10"
 												>
 													{requirementAssessment.score ?? '--'}
-												</ProgressRing>
+												</Progress>
 											</div>
 										{/if}
 										<Accordion

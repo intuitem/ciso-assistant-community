@@ -13,7 +13,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -531,7 +531,7 @@
 											>
 												<span class="mr-2">
 													{#if createAppliedControlsLoading}
-														<ProgressRing
+														<Progress
 															strokeWidth="16px"
 															meterStroke="stroke-white"
 															classes="-ml-2"
@@ -696,7 +696,7 @@
 					{#if computedScore !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
-							<ProgressRing
+							<Progress
 								strokeWidth="20px"
 								meterStroke={displayScoreColor(
 									computedScore,
@@ -707,7 +707,7 @@
 									page.data.compliance_assessment_score.max_score
 								)}
 								classes="shrink-0"
-								size="size-10">{computedScore}</ProgressRing
+								size="size-10">{computedScore}</Progress
 							>
 						</div>
 					{:else if data.result !== 'not_applicable'}

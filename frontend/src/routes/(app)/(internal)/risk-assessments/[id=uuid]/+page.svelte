@@ -17,7 +17,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Progress } from '@skeletonlabs/skeleton-svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -380,7 +380,7 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<ProgressRing
+								<Progress
 									strokeWidth="16px"
 									meterStroke="stroke-white"
 									size="size-6"

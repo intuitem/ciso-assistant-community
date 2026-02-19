@@ -20,7 +20,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { Accordion, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -531,7 +531,7 @@
 								{#if Object.values(requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 									<div class="flex flex-row items-center space-x-4">
 										<span class="font-medium">{m.score()}</span>
-										<ProgressRing
+										<Progress
 											strokeWidth="20px"
 											meterStroke={displayScoreColor(
 												requirementAssessment.score,
@@ -542,7 +542,7 @@
 												complianceAssessment.max_score
 											)}
 											classes="shrink-0"
-											size="size-10">{requirementAssessment.score}</ProgressRing
+											size="size-10">{requirementAssessment.score}</Progress
 										>
 									</div>
 								{:else if requirementAssessment.result !== 'not_applicable'}

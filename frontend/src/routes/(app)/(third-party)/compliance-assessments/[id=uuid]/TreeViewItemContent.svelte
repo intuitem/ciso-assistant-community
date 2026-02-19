@@ -3,7 +3,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
@@ -396,34 +396,34 @@
 				<div class="flex flex-row space-x-2 items-center">
 					{#if hasParentNode}
 						{#if nodeScore() !== null}
-							<ProgressRing
+							<Progress
 								strokeWidth="20px"
 								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
 								meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeScore()}</ProgressRing
+								size="size-12">{nodeScore()}</Progress
 							>
 							{#if showDocumentationScore}
-								<ProgressRing
+								<Progress
 									strokeWidth="20px"
 									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
 									meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-									size="size-12">{nodeDocumentationScore()}</ProgressRing
+									size="size-12">{nodeDocumentationScore()}</Progress
 								>
 							{/if}
 						{/if}
 					{:else if nodeScore() !== null}
-						<ProgressRing
+						<Progress
 							strokeWidth="20px"
 							value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
 							meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-							size="size-12">{nodeScore()}</ProgressRing
+							size="size-12">{nodeScore()}</Progress
 						>
 						{#if showDocumentationScore}
-							<ProgressRing
+							<Progress
 								strokeWidth="20px"
 								value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
 								meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeDocumentationScore()}</ProgressRing
+								size="size-12">{nodeDocumentationScore()}</Progress
 							>
 						{/if}
 					{/if}

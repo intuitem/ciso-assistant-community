@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { displayScoreColor } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 
 	interface Props {
 		statusI18n: string;
@@ -60,18 +60,18 @@
 			</span>
 		{/if}
 		{#if resultI18n !== 'notApplicable' && isScored}
-			<ProgressRing
+			<Progress
 				strokeWidth="20px"
 				meterStroke={displayScoreColor(score, max_score)}
 				value={(score * 100) / max_score}
-				size="size-12">{score}</ProgressRing
+				size="size-12">{score}</Progress
 			>
 			{#if showDocumentationScore}
-				<ProgressRing
+				<Progress
 					strokeWidth="20px"
 					meterStroke={displayScoreColor(documentationScore, max_score)}
 					value={(documentationScore * 100) / max_score}
-					size="size-12">{documentationScore}</ProgressRing
+					size="size-12">{documentationScore}</Progress
 				>
 			{/if}
 		{/if}

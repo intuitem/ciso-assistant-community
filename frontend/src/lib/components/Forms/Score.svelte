@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface ScoresDefinition {
@@ -96,7 +96,7 @@
 					{...constraints}
 				/>
 			</div>
-			<ProgressRing
+			<Progress
 				meterStroke={displayScoreColor($value, max_score, inversedColors)}
 				value={$value}
 				label={$value}
@@ -106,7 +106,7 @@
 				min={min_score}
 				max={max_score}
 				>{$value}
-			</ProgressRing>
+			</Progress>
 		</div>
 		<div class="flex w-full items-center">
 			<div class="flex space-x-8 w-full justify-center">

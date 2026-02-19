@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
@@ -177,7 +177,7 @@
 			style="backdrop-filter: blur(4px);"
 		>
 			<div class="card bg-white p-8 shadow-xl max-w-md text-center space-y-4">
-				<ProgressRing
+				<Progress
 					strokeWidth="16px"
 					meterStroke="stroke-primary-500"
 					size="size-16"
@@ -378,7 +378,7 @@
 						}}
 					>
 						{#if isSubmitting}
-							<ProgressRing strokeWidth="16px" meterStroke="stroke-white" size="size-6" />
+							<Progress strokeWidth="16px" meterStroke="stroke-white" size="size-6" />
 							<span class="ml-2">{m.converting()}</span>
 						{:else}
 							<i class="fa-solid fa-exchange-alt mr-2"></i>

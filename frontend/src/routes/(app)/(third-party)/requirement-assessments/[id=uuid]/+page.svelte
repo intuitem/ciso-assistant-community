@@ -13,7 +13,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
@@ -105,20 +105,20 @@
 			</div>
 		{/if}
 		{#if data.requirementAssessment.is_scored}
-			<ProgressRing
+			<Progress
 				strokeWidth="20px"
 				meterStroke={displayScoreColor(score, max_score)}
 				value={formatScoreValue(score, max_score)}
 				classes="shrink-0"
-				size="size-10">{score}</ProgressRing
+				size="size-10">{score}</Progress
 			>
 			{#if data.complianceAssessmentScore.show_documentation_score}
-				<ProgressRing
+				<Progress
 					strokeWidth="20px"
 					meterStroke={displayScoreColor(documentationScore, max_score)}
 					value={formatScoreValue(documentationScore, max_score)}
 					classes="shrink-0"
-					size="size-10">{documentationScore}</ProgressRing
+					size="size-10">{documentationScore}</Progress
 				>
 			{/if}
 		{/if}
