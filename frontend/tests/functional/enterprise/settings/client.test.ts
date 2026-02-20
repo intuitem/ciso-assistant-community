@@ -41,8 +41,9 @@ test.describe('Client settings', () => {
 		await settingsPage.goto();
 		await settingsPage.hasUrl();
 		await settingsPage.hasTitle();
-		await page.waitForTimeout(1000); // workaround for flakiness
-		await page.getByRole('tab', { name: ' Client settings' }).click();
+		const clientTab = page.getByRole('tab', { name: /Client settings/ });
+		await clientTab.click();
+		await expect(clientTab).toHaveAttribute('aria-selected', 'true');
 	});
 
 	test('admin can change client name', async ({ page }) => {
