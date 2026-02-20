@@ -45,9 +45,9 @@ test.describe('General settings', () => {
 	});
 
 	test('risk matrices settings', async ({ riskMatricesPage, settingsPage }) => {
-	await test.step('check default matrix disposition', async () => {
-		await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
-		await expect(page.getByTestId('form-input-risk-matrix-swap-axes')).not.toBeChecked();
+		await test.step('check default matrix disposition', async () => {
+			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
+			await expect(page.getByTestId('form-input-risk-matrix-swap-axes')).not.toBeChecked();
 			await expect(page.getByTestId('form-input-risk-matrix-flip-vertical')).not.toBeChecked();
 
 			await riskMatricesPage.goto();
@@ -92,12 +92,12 @@ test.describe('General settings', () => {
 			await expect(page.getByTestId('x-label-flipped')).toBeVisible();
 		});
 
-	await test.step('test change labels', async () => {
-		await settingsPage.goto();
-		await settingsPage.hasUrl();
-		await settingsPage.hasTitle();
-		await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
-		await page.getByLabel('Risk matrix settings −').getByText('Ebios RM').click();
+		await test.step('test change labels', async () => {
+			await settingsPage.goto();
+			await settingsPage.hasUrl();
+			await settingsPage.hasTitle();
+			await page.getByRole('button', { name: ' Risk matrix settings +' }).click();
+			await page.getByLabel('Risk matrix settings −').getByText('Ebios RM').click();
 			await page.getByRole('button', { name: 'Save' }).click();
 			const toast = page.getByTestId('toast');
 			await expect(toast).toBeVisible();
