@@ -121,6 +121,8 @@
 	"selectDomain": "Selecteer domein",
 	"focusMode": "Focusmodus",
 	"focusModeTooltip": "Focus op een specifiek domein",
+	"objectNotReachableFromCurrentFocus": "Dit object is niet bereikbaar vanuit de huidige focus. Omleiden naar de lijstweergave.",
+	"objectNotFound": "Object niet gevonden. Omleiden naar de lijstweergave.",
 	"clearFocus": "Wis focus",
 	"noDomainsAvailable": "Geen domeinen beschikbaar",
 	"urn": "URN",
@@ -2985,6 +2987,7 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"campaignsDescription": "Beheer van auditcampagnes",
 	"libraryFilteringLabels": "Bibliotheeklabels",
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",

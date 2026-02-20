@@ -5,6 +5,7 @@ from ..client import (
     make_patch_request,
     make_delete_request,
     get_paginated_results,
+    fetch_all_results,
 )
 from ..resolvers import (
     resolve_asset_id,
@@ -13,6 +14,7 @@ from ..resolvers import (
     resolve_folder_id,
     resolve_applied_control_id,
     resolve_requirement_assessment_id,
+    resolve_compliance_assessment_id,
     resolve_task_template_id,
 )
 
@@ -381,6 +383,103 @@ async def update_requirement_assessment(
             )
     except Exception as e:
         return f"Error in update_requirement_assessment: {str(e)}"
+
+
+async def update_requirement_assessments(
+    compliance_assessment_id: str,
+    updates: list,
+) -> str:
+    """Batch update requirement assessments of a compliance assessment. Each update targets a requirement by ref_id and sets its own fields. Ideal for importing audit results from files.
+
+    Before calling, normalize result values to: not_assessed | partially_compliant | non_compliant | compliant | not_applicable.
+    Common mappings: Yes/Oui/Conforme/Implemented/Met/Pass → compliant, No/Non/Non-conforme/Not implemented/Not met/Fail → non_compliant, Partial/In progress → partially_compliant, N/A → not_applicable.
+
+    Args:
+        compliance_assessment_id: Compliance assessment ID or name (required)
+        updates: List of update objects. Each object must have "ref_id" (str) to identify the requirement, plus any fields to update: "result" (not_assessed|partially_compliant|non_compliant|compliant|not_applicable), "status" (to_do|in_progress|in_review|done), "observation" (str), "score" (int), "is_scored" (bool), "eta" (YYYY-MM-DD), "due_date" (YYYY-MM-DD), "selected" (bool).
+    """
+    try:
+        if not updates:
+            return "Error: No updates provided"
+
+        # Resolve compliance assessment
+        resolved_ca_id = resolve_compliance_assessment_id(compliance_assessment_id)
+
+        # Fetch all requirement assessments for this compliance assessment once
+        all_ras, error = fetch_all_results(
+            "/requirement-assessments/",
+            params={"compliance_assessment": resolved_ca_id},
+        )
+        if error:
+            return f"Error fetching requirement assessments: {error}"
+
+        # Build a case-insensitive lookup: ref_id (lowered) → RA id
+        # The actual ref_id lives on the nested requirement object, not on the RA itself
+        ref_id_to_ra = {}
+        for ra in all_ras:
+            req_obj = ra.get("requirement") or {}
+            ref = req_obj.get("ref_id") if isinstance(req_obj, dict) else None
+            if not ref:
+                ref = ra.get("ref_id")
+            if ref:
+                ref_id_to_ra[ref.strip().lower()] = ra["id"]
+
+        succeeded = []
+        failed = []
+        not_found = []
+
+        for update in updates:
+            ref_id = update.get("ref_id")
+            if not ref_id:
+                failed.append("Missing ref_id in update entry")
+                continue
+
+            ra_id = ref_id_to_ra.get(ref_id.strip().lower())
+            if not ra_id:
+                not_found.append(ref_id)
+                continue
+
+            # Build payload from allowed fields
+            payload = {}
+            for field in (
+                "status",
+                "result",
+                "observation",
+                "score",
+                "is_scored",
+                "eta",
+                "due_date",
+                "selected",
+            ):
+                if field in update and update[field] is not None:
+                    payload[field] = update[field]
+
+            if not payload:
+                failed.append(f"{ref_id}: no fields to update")
+                continue
+
+            res = make_patch_request(f"/requirement-assessments/{ra_id}/", payload)
+            if res.status_code == 200:
+                succeeded.append(ref_id)
+            else:
+                failed.append(f"{ref_id}: {res.status_code} - {res.text}")
+
+        # Build response
+        total = len(updates)
+        parts = [
+            f"Processed {total} updates: {len(succeeded)} succeeded, {len(failed)} failed, {len(not_found)} not found"
+        ]
+        if not_found:
+            parts.append(
+                f"\nRef IDs not found in compliance assessment:\n"
+                + ", ".join(not_found)
+            )
+        if failed:
+            parts.append(f"\nFailed:\n" + "\n".join(f"  - {f}" for f in failed))
+
+        return "\n".join(parts)
+    except Exception as e:
+        return f"Error in update_requirement_assessments: {str(e)}"
 
 
 async def update_quantitative_risk_study(

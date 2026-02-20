@@ -150,6 +150,8 @@
 	"selectDomain": "ڈومین منتخب کریں",
 	"focusMode": "فوکس موڈ",
 	"focusModeTooltip": "کسی مخصوص ڈومین پر توجہ مرکوز کریں",
+	"objectNotReachableFromCurrentFocus": "یہ آبجیکٹ موجودہ فوکس سے قابل رسائی نہیں ہے۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
+	"objectNotFound": "آبجیکٹ نہیں ملا۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
 	"clearFocus": "فوکس صاف کریں",
 	"noDomainsAvailable": "کوئی ڈومین دستیاب نہیں",
 	"urn": "URN",
@@ -1078,6 +1080,7 @@
 		}
 	],
 	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
+	"campaignsDescription": "آڈٹ مہمات کا انتظام",
 	"libraryFilteringLabels": "لیبریری لیبلز",
 	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں...",
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",
