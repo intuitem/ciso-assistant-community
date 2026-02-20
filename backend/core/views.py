@@ -124,6 +124,7 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -7574,7 +7575,7 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
+                RequirementNode.objects.filter(framework=_framework).prefetch_related("questions", "questions__choices").all(),
                 None,
                 _framework.max_score,
             )
@@ -9081,7 +9082,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related("reference_controls", "threats", "questions", "questions__choices")
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -10355,7 +10356,7 @@ def generate_html(
                     a.question.urn: a.value
                     for a in assessment.answers.select_related("question").all()
                 }
-                node_data["questions_dict"] = requirement_node.questions_json or {}
+                node_data["questions_dict"] = build_questions_dict(requirement_node) or {}
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)

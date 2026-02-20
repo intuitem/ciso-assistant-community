@@ -52,7 +52,6 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    questions_json=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -93,7 +92,6 @@ class RequirementNodeImporter:
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            questions_json=self.requirement_data.get("questions"),
         )
 
         # Create Question + QuestionChoice objects from questions data

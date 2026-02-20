@@ -771,6 +771,69 @@ def update_selected_implementation_groups(compliance_assessment):
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
 
 
+def build_questions_dict(node):
+    """Reconstruct the JSON-format questions dict from relational Question/QuestionChoice models.
+
+    Returns a dict like {urn: {type, text, choices, ...}} or None for unsaved objects
+    or nodes with no questions.
+    """
+    if node.pk is None:
+        return None
+
+    from core.models import Question
+
+    questions_qs = node.questions.all()
+
+    if not questions_qs:
+        return None
+
+    result = {}
+    type_mapping = {
+        "single_choice": "unique_choice",
+        "multiple_choice": "multiple_choice",
+        "text": "text",
+        "number": "number",
+        "boolean": "boolean",
+        "date": "date",
+    }
+    for question in questions_qs:
+        choices = []
+        for choice in question.choices.all():
+            choice_data = {
+                "urn": choice.ref_id,
+                "value": choice.annotation or "",
+            }
+            if choice.add_score is not None:
+                choice_data["add_score"] = choice.add_score
+            if choice.compute_result is not None:
+                choice_data["compute_result"] = choice.compute_result not in (
+                    "false",
+                    "0",
+                    "",
+                )
+            if choice.description:
+                choice_data["description"] = choice.description
+            if choice.color:
+                choice_data["color"] = choice.color
+            if choice.select_implementation_groups:
+                choice_data["select_implementation_groups"] = (
+                    choice.select_implementation_groups
+                )
+            choices.append(choice_data)
+
+        q_data = {
+            "type": type_mapping.get(question.type, question.type),
+            "text": question.annotation or "",
+        }
+        if choices:
+            q_data["choices"] = choices
+        if question.depends_on:
+            q_data["depends_on"] = question.depends_on
+        result[question.urn] = q_data
+
+    return result if result else None
+
+
 def _resolve_auditee_role_ids():
     """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
     from iam.cache_builders import get_roles_state

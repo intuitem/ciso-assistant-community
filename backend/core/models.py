@@ -2311,7 +2311,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
-    questions_json = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     importance = models.CharField(
         max_length=20,
@@ -2366,12 +2365,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("typical_evidence", self.typical_evidence)
-
-    @property
-    def get_questions_translated(self) -> str:
-        translations = self.translations if self.translations else {}
-        locale_translations = translations.get(get_language(), {})
-        return locale_translations.get("questions", self.questions_json)
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -6518,6 +6511,8 @@ class ComplianceAssessment(Assessment):
                 Prefetch("evidences"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
+                "requirement__questions",
+                "requirement__questions__choices",
                 "answers",
                 "answers__question",
             )

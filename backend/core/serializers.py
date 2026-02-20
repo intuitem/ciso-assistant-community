@@ -1650,62 +1650,9 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
     def get_questions(self, obj):
         """Reconstruct the old JSON format from Question/QuestionChoice models
         for backward compatibility with the frontend."""
-        from core.models import Question
+        from core.utils import build_questions_dict
 
-        questions_qs = Question.objects.filter(
-            requirement_node=obj
-        ).prefetch_related("choices").order_by("order")
-
-        if not questions_qs.exists():
-            return obj.get_questions_translated
-
-        result = {}
-        # Map single_choice back to unique_choice for frontend compat
-        type_mapping = {
-            "single_choice": "unique_choice",
-            "multiple_choice": "multiple_choice",
-            "text": "text",
-            "number": "number",
-            "boolean": "boolean",
-            "date": "date",
-        }
-        for question in questions_qs:
-            choices = []
-            for choice in question.choices.all().order_by("order"):
-                choice_data = {
-                    "urn": choice.ref_id,
-                    "value": choice.annotation or "",
-                }
-                if choice.add_score is not None:
-                    choice_data["add_score"] = choice.add_score
-                if choice.compute_result is not None:
-                    # Convert string back to bool for frontend compat
-                    choice_data["compute_result"] = choice.compute_result not in (
-                        "false",
-                        "0",
-                        "",
-                    )
-                if choice.description:
-                    choice_data["description"] = choice.description
-                if choice.color:
-                    choice_data["color"] = choice.color
-                if choice.select_implementation_groups:
-                    choice_data["select_implementation_groups"] = (
-                        choice.select_implementation_groups
-                    )
-                choices.append(choice_data)
-
-            q_data = {
-                "type": type_mapping.get(question.type, question.type),
-                "text": question.annotation or "",
-            }
-            if choices:
-                q_data["choices"] = choices
-            if question.depends_on:
-                q_data["depends_on"] = question.depends_on
-            result[question.urn] = q_data
-
-        return result
+        return build_questions_dict(obj)
 
     class Meta:
         model = RequirementNode
