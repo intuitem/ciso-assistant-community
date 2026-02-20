@@ -982,6 +982,22 @@ def create_library(
                                 if desc and desc != "/":
                                     choices[i]["description"] = desc
 
+                        # Add choices description translations
+                        for lang, tr in answer_translations.items():
+                            translated_desc_lines = _per_choice_lines(
+                                {"description": tr.get("description")},
+                                "description",
+                                len(choices),
+                                answer_id,
+                            )
+                            if not translated_desc_lines:
+                                continue
+                            for i, desc in enumerate(translated_desc_lines):
+                                if desc and desc != "/":
+                                    choices[i].setdefault("translations", {}).setdefault(
+                                        lang, {}
+                                    )["description"] = desc
+
                         # --- Optional: compute_result -----------------------------------------
                         compute_lines = _per_choice_lines(
                             data, "compute_result", len(choices), answer_id
