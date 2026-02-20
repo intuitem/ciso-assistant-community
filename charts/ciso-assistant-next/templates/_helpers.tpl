@@ -67,6 +67,17 @@ app.kubernetes.io/component: {{ .component }}
 {{- end }}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "ciso-assistant.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "ciso-assistant.fullname" .) .Values.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Define complete url based on scheme and domain
 */}}
 {{- define "ciso-assistant.url" -}}
