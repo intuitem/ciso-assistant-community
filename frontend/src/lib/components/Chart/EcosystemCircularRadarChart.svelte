@@ -282,13 +282,17 @@
 	});
 </script>
 
-<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
-	<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
-	<span>{m.stakeholders()} {m.labels()}</span>
-</label>
-<div id={chart_id} class="{width} {height} {classesContainer}"></div>
-{#if data.not_displayed > 0}
-	<div class="text-center">
-		⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+<div class="flex-2">
+	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
+	{#if data.not_displayed > 0}
+		<div class="text-center">
+			⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+		</div>
+	{/if}
+	<div class="m-10">
+		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
+			<span>{m.stakeholders()} {m.labels()}</span>
+		</label>
 	</div>
-{/if}
+</div>
