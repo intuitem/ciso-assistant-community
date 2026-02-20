@@ -5,6 +5,7 @@ import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Union, List, Optional, Literal, Tuple
+from copy import deepcopy
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -2216,9 +2217,34 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> str:
-        translations = self.translations if self.translations else {}
-        locale_translations = translations.get(get_language(), {})
-        return locale_translations.get("questions", self.questions)
+
+        questions = self.questions if self.questions else {}
+        current_lang = get_language()
+        questions_translated = deepcopy(questions)
+        
+        # Copy questions as is
+        # Replace current text wit translated version of current language (if any)
+        
+        for q_urn, q_content in questions.items():
+                
+            # Set question title translation (if any for current locale)
+            q_tr_dict = q_content.get("translations", {})
+            q_tr_text = q_tr_dict.get(current_lang, {}).get("text")
+            
+            if q_tr_text:
+                questions_translated["questions"][q_urn]["text"] = q_tr_text
+            
+            # For each choices, get translations
+            for i, choice in enumerate(q_content.get("choices", [])):
+
+                choice_tr_dict = choice.get("translations", {})
+                choice_tr_value = choice_tr_dict.get(current_lang, {}).get("value")
+
+                # Set choice value translation (if any for current locale)
+                if choice_tr_value:
+                    questions_translated["questions"][q_urn]["choices"][i]["value"] = choice_tr_value
+
+        return questions_translated
 
     class Meta:
         verbose_name = _("RequirementNode")
