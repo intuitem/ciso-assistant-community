@@ -114,7 +114,7 @@ To launch it, open a shell in a command line, and type:
 python convert_v1_to_v2.py your_v1_library_file.xlsx
 ```
 
-This will produce a file named `your_v1_library_file_new.yaml`.
+This will modify your original file (in our case, `your_v1_library_file.xlsx`) and save the original v1 version as `your_v1_library_file_v1.xlsx.old`.
 
 ## About framework Updates
 
