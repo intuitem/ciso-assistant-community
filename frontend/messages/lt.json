@@ -233,6 +233,7 @@
 	"next": "Next",
 	"previous": "Previous",
 	"show": "Show",
+	"show_stakeholders_name": "Show the stakeholders' name",
 	"entries": "entries",
 	"searchPlaceholder": "Search...",
 	"noEntriesFound": "No entries found",

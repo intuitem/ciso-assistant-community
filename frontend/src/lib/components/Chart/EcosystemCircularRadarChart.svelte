@@ -292,7 +292,7 @@
 	<div class="m-10">
 		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
 			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
-			<span>{(m.show() + ' ' + m.stakeholders() + ' ' + m.name()).toLowerCase()}</span>
+			<span>{m.show_stakeholders_name()}</span>
 		</label>
 	</div>
 </div>
