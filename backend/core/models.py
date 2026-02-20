@@ -2239,10 +2239,13 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
                 choice_tr_dict = choice.get("translations", {})
                 choice_tr_value = choice_tr_dict.get(current_lang, {}).get("value")
+                choice_tr_description = choice_tr_dict.get(current_lang, {}).get("description")
 
                 # Set choice value translation (if any for current locale)
                 if choice_tr_value:
                     questions_translated[q_urn]["choices"][i]["value"] = choice_tr_value
+                if choice_tr_description:
+                    questions_translated[q_urn]["choices"][i]["description"] = choice_tr_value
 
         return questions_translated
 
