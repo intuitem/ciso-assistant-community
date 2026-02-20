@@ -43,8 +43,8 @@ export class LoginPage extends BasePage {
 	) {
 		this.email = email;
 		this.password = password;
-		// try avoiding race condition
-		await this.page.waitForLoadState('networkidle');
+		// Wait for SvelteKit hydration before interacting with the form
+		await this.page.locator('body[data-hydrated="true"]').waitFor();
 		await this.usernameInput.fill(email);
 		await this.passwordInput.fill(password);
 		if (
