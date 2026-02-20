@@ -879,6 +879,7 @@ class LibraryImporter:
     def _import_library(self):
         library_object = self.create_or_update_library()
         self.import_objects(library_object)
+
         if dependencies := self._library.dependencies:
             library_object.dependencies.set(
                 LoadedLibrary.objects.filter(urn__in=dependencies)
