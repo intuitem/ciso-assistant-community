@@ -32,6 +32,7 @@ test.describe('SSO settings', () => {
 			await page.getByTestId('logout-button').click();
 			await expect(page).toHaveURL('/login');
 			await expect(page.getByRole('button', { name: 'Login with SSO' })).toBeVisible();
+			await page.locator('body[data-hydrated="true"]').waitFor();
 			await page.getByRole('button', { name: 'Login with SSO' }).click();
 			await expect(page).toHaveURL(/http:\/\/localhost:8080\/realms\/test\/protocol\/saml.*/);
 			await page.getByRole('textbox', { name: 'Username or email' }).click();
@@ -72,6 +73,7 @@ test.describe('SSO settings', () => {
 			await page.getByTestId('logout-button').click();
 			await expect(page).toHaveURL('/login');
 			await expect(page.getByRole('button', { name: 'Login with SSO' })).toBeVisible();
+			await page.locator('body[data-hydrated="true"]').waitFor();
 			await page.getByRole('button', { name: 'Login with SSO' }).click();
 			await expect(page).toHaveURL(
 				/http:\/\/localhost:8080\/realms\/test\/protocol\/openid-connect.*/
