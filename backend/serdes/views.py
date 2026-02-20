@@ -3,12 +3,14 @@ import io
 import json
 import struct
 import sys
+from contextlib import contextmanager
 from datetime import datetime
 
 import structlog
 from django.core import management
 from django.core.management.commands import dumpdata
 from django.core.files.storage import default_storage
+from django.db import connection
 from django.http import HttpResponse, StreamingHttpResponse
 from rest_framework import status
 from rest_framework.parsers import FileUploadParser
@@ -33,6 +35,19 @@ import hashlib
 logger = structlog.get_logger(__name__)
 
 GZIP_MAGIC_NUMBER = b"\x1f\x8b"
+
+
+@contextmanager
+def disable_foreign_keys():
+    """Temporarily disable foreign key constraints (SQLite only)."""
+    vendor = connection.vendor
+    if vendor == "sqlite":
+        connection.cursor().execute("PRAGMA foreign_keys = OFF;")
+    try:
+        yield
+    finally:
+        if vendor == "sqlite":
+            connection.cursor().execute("PRAGMA foreign_keys = ON;")
 
 
 class ExportBackupView(APIView):
@@ -122,7 +137,7 @@ class LoadBackupView(APIView):
 
             # Connect to the post_save signal
             post_save.connect(fixture_callback)
-            with disable_auditlog():
+            with disable_auditlog(), disable_foreign_keys():
                 management.call_command("flush", interactive=False)
                 management.call_command(
                     "loaddata",
@@ -149,7 +164,8 @@ class LoadBackupView(APIView):
             # On failure, restore the original data.
             try:
                 sys.stdin = io.StringIO(current_backup)
-                management.call_command("flush", interactive=False)
+                with disable_foreign_keys():
+                    management.call_command("flush", interactive=False)
                 management.call_command(
                     "loaddata",
                     "-",
@@ -185,7 +201,8 @@ class LoadBackupView(APIView):
                 )
                 try:
                     sys.stdin = io.StringIO(current_backup)
-                    management.call_command("flush", interactive=False)
+                    with disable_foreign_keys():
+                        management.call_command("flush", interactive=False)
                     management.call_command(
                         "loaddata",
                         "-",
