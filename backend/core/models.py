@@ -7759,6 +7759,8 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     )
 
     to_delete = models.BooleanField(default=False)
+    
+    fields_to_check = ["task_template", "due_date"]
 
     def __str__(self):
         return f"{self.task_template.name} ({self.due_date})"
@@ -7794,6 +7796,12 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["task_template", "due_date"],
+                name="unique_template_due_date",
+            )
+        ]
 
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):

@@ -60,6 +60,7 @@ class AbstractBaseModel(models.Model):
                         models.IntegerField,
                         models.FloatField,
                         models.BooleanField,
+                        models.DateField,
                     ),
                 ):
                     filters[f"{field}__exact"] = field_value

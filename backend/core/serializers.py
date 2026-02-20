@@ -3162,6 +3162,20 @@ class TaskNodeWriteSerializer(BaseModelSerializer):
         model = TaskNode
         exclude = ["task_template", "evidences", "scheduled_date"]
 
+    def validate_due_date(self, value):
+        if self.instance and value:
+            exists = (
+                TaskNode.objects.filter(
+                    task_template=self.instance.task_template,
+                    due_date=value,
+                )
+                .exclude(pk=self.instance.pk)
+                .exists()
+            )
+            if exists:
+                raise serializers.ValidationError("taskNodeDuplicateDueDate")
+        return value
+
 
 class TerminologyReadSerializer(BaseModelSerializer):
     field_path = serializers.CharField(source="get_field_path_display", read_only=True)

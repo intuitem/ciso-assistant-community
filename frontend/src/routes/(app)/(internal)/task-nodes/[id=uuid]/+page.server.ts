@@ -136,6 +136,11 @@ export const actions: Actions = {
 			return { success: true };
 		} else {
 			const error = await response.json();
+			const rawMessage = error.due_date
+				? (Array.isArray(error.due_date) ? error.due_date[0] : error.due_date)
+				: error.error || error.detail || 'Failed to update due date';
+			const errorMessage = safeTranslate(rawMessage);
+			setFlash({ type: 'error', message: errorMessage }, cookies);
 			return fail(400, { error });
 		}
 	}
