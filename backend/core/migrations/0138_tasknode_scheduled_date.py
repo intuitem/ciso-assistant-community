@@ -31,4 +31,11 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.RunPython(populate_scheduled_date, migrations.RunPython.noop),
+        migrations.AddConstraint(
+            model_name="tasknode",
+            constraint=models.UniqueConstraint(
+                fields=("task_template", "due_date"),
+                name="unique_template_due_date",
+            ),
+        ),
     ]
