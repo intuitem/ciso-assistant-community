@@ -414,7 +414,7 @@
 	};
 </script>
 
-<div class={baseClass} {hidden}>
+<div class={baseClass} hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
