@@ -124,7 +124,7 @@
 	"objectNotReachableFromCurrentFocus": "Este objeto no es accesible desde el enfoque actual. Redirigiendo a la vista de lista.",
 	"objectNotFound": "Objeto no encontrado. Redirigiendo a la vista de lista.",
 	"autoSync": "Sincronización automática diaria de acciones",
-	"autoSyncHelpText": "Cuando se habilita, una tarea realizará automáticamente la sincronización de acciones diariamente. Las evaluaciones bloqueadas se omiten.",,
+	"autoSyncHelpText": "Cuando se habilita, una tarea realizará automáticamente la sincronización de acciones diariamente. Las evaluaciones bloqueadas se omiten.",
 	"clearFocus": "Limpiar enfoque",
 	"noDomainsAvailable": "No hay dominios disponibles",
 	"urn": "URN",
