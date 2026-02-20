@@ -294,8 +294,8 @@ def get_sorted_requirement_nodes(
                 "documentation_score": req_as.documentation_score if req_as else None,
                 "max_score": max_score if req_as else None,
                 "weight": node.weight if node.weight else 1,
-                "questions": node.questions,
-                "answers": req_as.answers if req_as else None,
+                "questions": node.questions_json,
+                "answers": {a.question.urn: a.value for a in req_as.answers.select_related("question").all()} if req_as else None,
                 "mapping_inference": req_as.mapping_inference if req_as else None,
                 "status_display": req_as.get_status_display() if req_as else None,
                 "status_i18n": camel_case(req_as.status) if req_as else None,
@@ -337,8 +337,8 @@ def get_sorted_requirement_nodes(
                     else None,
                     "max_score": max_score if child_req_as else None,
                     "weight": child.weight if child.weight else 1,
-                    "questions": child.questions,
-                    "answers": child_req_as.answers if child_req_as else None,
+                    "questions": child.questions_json,
+                    "answers": {a.question.urn: a.value for a in child_req_as.answers.select_related("question").all()} if child_req_as else None,
                     "mapping_inference": child_req_as.mapping_inference
                     if child_req_as
                     else None,

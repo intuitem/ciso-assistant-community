@@ -10350,6 +10350,12 @@ def generate_html(
 
             if assessment:
                 node_data["assessments"] = assessment
+                # Pre-compute dicts for template backward compat
+                node_data["answers_dict"] = {
+                    a.question.urn: a.value
+                    for a in assessment.answers.select_related("question").all()
+                }
+                node_data["questions_dict"] = requirement_node.questions_json or {}
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)

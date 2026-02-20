@@ -2311,7 +2311,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
-    questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
+    questions_json = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     importance = models.CharField(
         max_length=20,
@@ -2371,7 +2371,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     def get_questions_translated(self) -> str:
         translations = self.translations if self.translations else {}
         locale_translations = translations.get(get_language(), {})
-        return locale_translations.get("questions", self.questions)
+        return locale_translations.get("questions", self.questions_json)
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -2390,7 +2390,7 @@ class Question(AbstractBaseModel, FolderMixin):
     requirement_node = models.ForeignKey(
         RequirementNode,
         on_delete=models.CASCADE,
-        related_name="question_items",
+        related_name="questions",
         verbose_name=_("Requirement node"),
     )
     urn = models.CharField(max_length=255, unique=True, verbose_name=_("URN"))
@@ -6518,6 +6518,8 @@ class ComplianceAssessment(Assessment):
                 Prefetch("evidences"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
+                "answers",
+                "answers__question",
             )
         )
 
@@ -7359,8 +7361,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.upsert_daily_metrics()
 
     def compute_score_and_result(self):
-        questions_qs = self.requirement.question_items.prefetch_related("choices").all()
-        answers_qs = self.answer_set.select_related("question").all()
+        questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        answers_qs = self.answers.select_related("question").all()
 
         # Build answers lookup: question_id -> answer value
         answers_by_qid = {a.question_id: a.value for a in answers_qs}
@@ -7503,13 +7505,13 @@ class Answer(AbstractBaseModel, FolderMixin):
     requirement_assessment = models.ForeignKey(
         RequirementAssessment,
         on_delete=models.CASCADE,
-        related_name="answer_set",
+        related_name="answers",
         verbose_name=_("Requirement assessment"),
     )
     question = models.ForeignKey(
         Question,
         on_delete=models.CASCADE,
-        related_name="answers",
+        related_name="given_answers",
         verbose_name=_("Question"),
     )
     value = models.JSONField(

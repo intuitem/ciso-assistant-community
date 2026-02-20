@@ -2313,7 +2313,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
-        answers_qs = obj.answer_set.select_related("question").all()
+        answers_qs = obj.answers.select_related("question").all()
         result = {}
         for answer in answers_qs:
             result[answer.question.urn] = answer.value

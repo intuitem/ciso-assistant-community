@@ -722,20 +722,20 @@ def update_selected_implementation_groups(compliance_assessment):
             "requirement", "requirement__framework"
         )
         .prefetch_related(
-            "answer_set",
-            "answer_set__question",
-            "requirement__question_items",
-            "requirement__question_items__choices",
+            "answers",
+            "answers__question",
+            "requirement__questions",
+            "requirement__questions__choices",
         )
         .all()
     )
 
     for ra in requirement_assessments:
-        questions_qs = ra.requirement.question_items.all()
+        questions_qs = ra.requirement.questions.all()
         if not questions_qs:
             continue
 
-        answers_qs = ra.answer_set.all()
+        answers_qs = ra.answers.all()
         answers_by_ref = {}
         answers_by_qid = {}
         questions_by_ref = {}
