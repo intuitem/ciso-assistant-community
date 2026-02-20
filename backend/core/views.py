@@ -5199,6 +5199,8 @@ class RiskScenarioFilter(GenericFilterSet):
             "existing_applied_controls": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
+            "qualifications": ["exact"],
+            "filtering_labels": ["exact"],
         }
 
 
