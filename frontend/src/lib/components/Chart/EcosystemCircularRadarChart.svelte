@@ -289,7 +289,7 @@
 			⚠️ {data.not_displayed} items are not displayed as they are lacking data.
 		</div>
 	{/if}
-	<div class="m-10">
+	<div class="m-10 no-print">
 		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
 			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
 			<span>{m.show_stakeholders_name()}</span>
