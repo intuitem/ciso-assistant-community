@@ -26,6 +26,7 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
+from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
 from collections import Counter
@@ -390,8 +391,8 @@ def inject_questions_into_node(
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                # make a shallow copy so we don't mutate the original dict
-                entry = choice.copy()
+                # deep-copy to avoid shared nested references (which create YAML anchors &idXXX)
+                entry = deepcopy(choice)
                 # overwrite / add the per-question urn
                 entry["urn"] = f"{q_urn}:choice:{j + 1}"
                 choices.append(entry)
@@ -1380,7 +1381,15 @@ def create_library(
                     else:
                         translations = extract_translations_from_row(header, row)
                     if translations:
-                        node["translations"] = translations
+                        # Keep requirement-level translations clean (remove "questions" translations)
+                        # questions[xx] are stored under question_entry["translations"].
+                        node_level_translations = {}
+                        for lang, t in translations.items():
+                            filtered = {k: v for k, v in t.items() if k != "questions"}
+                            if filtered:
+                                node_level_translations[lang] = filtered
+                        if node_level_translations:
+                            node["translations"] = node_level_translations
                     if node.get("urn") in all_urns:
                         raise ValueError(f"urn already used: {node.get('urn')}")
                     all_urns.add(node.get("urn"))
