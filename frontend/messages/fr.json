@@ -3088,6 +3088,7 @@
 	"deleteUserGroup": "Supprimer le groupe d'utilisateurs",
 	"viewUserGroup": "Voir le groupe d'utilisateurs",
 	"dueDateUpdatedSuccessfully": "Date d'échéance mise à jour avec succès",
+	"taskNodeDuplicateDueDate": "Une tâche existe déjà pour ce modèle à la date sélectionnée. Veuillez choisir une autre date.",
 	"taskScheduleInfo": "Les occurrences passées sont protégées des modifications de planification. Seules les tâches à venir seront recalculées.",
 	"addAssetassessment": "Inclure un actif",
 	"addAssetclass": "Ajouter une classe d'actifs",
