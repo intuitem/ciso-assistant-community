@@ -1,46 +1,44 @@
+import hashlib
 import json
 import os
 import re
-import hashlib
+import statistics
+from collections import defaultdict, deque
+from copy import deepcopy
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal, Tuple
-from copy import deepcopy
-import statistics
+from typing import List, Literal, Optional, Self, Tuple, Union
 
-from django.contrib.contenttypes.models import ContentType
-from django.utils import timezone
-from icecream import ic
-from auditlog.registry import auditlog
-
-from django.utils.functional import cached_property
 import yaml
+from auditlog.registry import auditlog
 from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.core.files.storage import default_storage
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models import F, OuterRef, Prefetch, Q, Subquery
 from django.forms.models import model_to_dict
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.html import format_html
+from django.utils.timezone import now
 from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
-from structlog import get_logger
-from django.utils.timezone import now
-
+from global_settings.models import GlobalSettings
 from iam.models import Folder, FolderMixin, PublishInRootFolderMixin, User
-
+from icecream import ic
 from library.helpers import (
     get_referential_translation,
     update_translations,
     update_translations_as_string,
     update_translations_in_object,
 )
+from structlog import get_logger
 
-from global_settings.models import GlobalSettings
-
+from . import dora
 from .base_models import (
     AbstractBaseModel,
     ActorSyncManager,
@@ -49,18 +47,16 @@ from .base_models import (
     NameDescriptionMixin,
 )
 from .utils import (
+    _is_question_visible,
     camel_case,
     sha256,
     update_selected_implementation_groups,
-    _is_question_visible,
 )
 from .validators import (
+    JSONSchemaInstanceValidator,
     validate_file_name,
     validate_file_size,
-    JSONSchemaInstanceValidator,
 )
-from . import dora
-from collections import defaultdict, deque
 
 logger = get_logger(__name__)
 
@@ -4466,8 +4462,8 @@ class AppliedControl(
 
     def _trigger_sync(self, is_new: bool, changed_fields: List[str]):
         """Queue sync tasks for all active integrations"""
-        from integrations.tasks import sync_object_to_integrations
         from integrations.models import IntegrationConfiguration
+        from integrations.tasks import sync_object_to_integrations
 
         # Find all active ITSM integrations for this folder
         configurations = IntegrationConfiguration.objects.filter(
