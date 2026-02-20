@@ -2994,8 +2994,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
-        instance = super().create(validated_data)
-        self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
 
         # Send notification to newly assigned users
         if assigned_to_data:
