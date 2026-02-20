@@ -14,6 +14,17 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Rename old JSON fields before creating models whose FKs use the same related_names
+        migrations.RenameField(
+            model_name='requirementnode',
+            old_name='questions',
+            new_name='questions_json',
+        ),
+        migrations.RenameField(
+            model_name='requirementassessment',
+            old_name='answers',
+            new_name='answers_json',
+        ),
         migrations.AddField(
             model_name='framework',
             name='status',
@@ -36,7 +47,7 @@ class Migration(migrations.Migration):
                 ('weight', models.IntegerField(default=1, verbose_name='Weight')),
                 ('translations', models.JSONField(blank=True, null=True, verbose_name='Translations')),
                 ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
-                ('requirement_node', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='question_items', to='core.requirementnode', verbose_name='Requirement node')),
+                ('requirement_node', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='questions', to='core.requirementnode', verbose_name='Requirement node')),
             ],
             options={
                 'verbose_name': 'Question',
@@ -78,8 +89,8 @@ class Migration(migrations.Migration):
                 ('is_published', models.BooleanField(default=False, verbose_name='published')),
                 ('value', models.JSONField(blank=True, null=True, verbose_name='Value')),
                 ('folder', models.ForeignKey(default=iam.models.Folder.get_root_folder_id, on_delete=django.db.models.deletion.CASCADE, related_name='%(class)s_folder', to='iam.folder')),
-                ('requirement_assessment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answer_set', to='core.requirementassessment', verbose_name='Requirement assessment')),
-                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='core.question', verbose_name='Question')),
+                ('requirement_assessment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='answers', to='core.requirementassessment', verbose_name='Requirement assessment')),
+                ('question', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='given_answers', to='core.question', verbose_name='Question')),
             ],
             options={
                 'verbose_name': 'Answer',

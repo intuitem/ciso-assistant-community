@@ -40,14 +40,14 @@ def migrate_forward(apps, schema_editor):
     question_urn_to_obj = {}  # for later answer migration
 
     nodes_with_questions = RequirementNode.objects.filter(
-        questions__isnull=False
-    ).exclude(questions={})
+        questions_json__isnull=False
+    ).exclude(questions_json={})
 
     for node in nodes_with_questions.iterator(chunk_size=500):
-        if not isinstance(node.questions, dict):
+        if not isinstance(node.questions_json, dict):
             continue
 
-        for order, (q_urn, q_data) in enumerate(node.questions.items()):
+        for order, (q_urn, q_data) in enumerate(node.questions_json.items()):
             if not isinstance(q_data, dict):
                 continue
 
@@ -79,10 +79,10 @@ def migrate_forward(apps, schema_editor):
 
     # Now create choices for each question
     for node in nodes_with_questions.iterator(chunk_size=500):
-        if not isinstance(node.questions, dict):
+        if not isinstance(node.questions_json, dict):
             continue
 
-        for q_urn, q_data in node.questions.items():
+        for q_urn, q_data in node.questions_json.items():
             if not isinstance(q_data, dict):
                 continue
 
@@ -123,14 +123,14 @@ def migrate_forward(apps, schema_editor):
     # 3. Migrate RequirementAssessment.answers → Answer rows
     answer_bulk = []
     ras_with_answers = RequirementAssessment.objects.filter(
-        answers__isnull=False
-    ).exclude(answers={}).select_related("requirement")
+        answers_json__isnull=False
+    ).exclude(answers_json={}).select_related("requirement")
 
     for ra in ras_with_answers.iterator(chunk_size=500):
-        if not isinstance(ra.answers, dict):
+        if not isinstance(ra.answers_json, dict):
             continue
 
-        for q_urn, answer_value in ra.answers.items():
+        for q_urn, answer_value in ra.answers_json.items():
             question = question_urn_to_obj.get(q_urn)
             if question:
                 answer_bulk.append(
