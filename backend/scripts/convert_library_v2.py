@@ -949,8 +949,8 @@ def create_library(
                             {"urn": "", "value": line}
                             for line in _parse_multiline_with_pipe(choices_raw)
                         ]
-                                
-                        # Add choices translations 
+
+                        # Add choices translations
                         answer_translations = extract_translations_from_row(header, row)
 
                         for lang, tr in answer_translations.items():
@@ -968,10 +968,9 @@ def create_library(
                             for i, val in enumerate(lines):
                                 translated_value = val.strip()
                                 if translated_value and translated_value != "/":
-                                    choices[i].setdefault("translations", {}).setdefault(
-                                        lang, {}
-                                    )["value"] = translated_value
-
+                                    choices[i].setdefault(
+                                        "translations", {}
+                                    ).setdefault(lang, {})["value"] = translated_value
 
                         # --- Optional: description ---------------------------
                         description_lines = _per_choice_lines(
@@ -994,9 +993,9 @@ def create_library(
                                 continue
                             for i, desc in enumerate(translated_desc_lines):
                                 if desc and desc != "/":
-                                    choices[i].setdefault("translations", {}).setdefault(
-                                        lang, {}
-                                    )["description"] = desc
+                                    choices[i].setdefault(
+                                        "translations", {}
+                                    ).setdefault(lang, {})["description"] = desc
 
                         # --- Optional: compute_result -----------------------------------------
                         compute_lines = _per_choice_lines(
