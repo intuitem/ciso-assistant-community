@@ -30,5 +30,5 @@ class Migration(migrations.Migration):
                 verbose_name="Scheduled date",
             ),
         ),
-        migrations.RunPython(populate_scheduled_date, migrations.RunPython.noop)
+        migrations.RunPython(populate_scheduled_date, migrations.RunPython.noop),
     ]
