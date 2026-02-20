@@ -2248,7 +2248,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                         choice_tr_value
                     )
 
-        return questions_translated
+        return questions_translated if questions_translated != {} else None
 
     class Meta:
         verbose_name = _("RequirementNode")
