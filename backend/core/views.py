@@ -39,7 +39,7 @@ from django.db.models import (
 )
 from django.db.models.functions import Greatest, Coalesce
 
-from collections import defaultdict
+from collections import defaultdict, deque
 import pytz
 from uuid import UUID
 from itertools import chain, cycle
@@ -1373,27 +1373,29 @@ class BaseModelViewSet(viewsets.ModelViewSet):
             return {}
 
         path_results = {}
-        folders = {f.id: f for f in Folder.objects.all()}
+        folders = {
+            f.id: f for f in Folder.objects.only("id", "name", "parent_folder__id")
+        }
         for obj in initial_objects:
             path = []
             if hasattr(obj, "folder"):
                 queue = deque([obj.folder.id])
-            elif hasattr(obj, "parent_folder") and obj.parent_folder:
-                queue = deque([obj.parent_folder.id])
+            elif hasattr(obj, "parent_folder_id") and obj.parent_folder_id:
+                queue = deque([obj.parent_folder_id])
             else:
                 continue
             while queue:
                 folder_id = queue.popleft()
                 folder = folders[folder_id]
-                if folder.parent_folder:
+                if folder.parent_folder_id:
                     path.append(
                         {
                             "str": str(folder),
                             "id": folder.id,
-                            "parent_id": folder.parent_folder.id,
+                            "parent_id": folder.parent_folder_id,
                         }
                     )
-                    queue.append(folder.parent_folder.id)
+                    queue.append(folder.parent_folder_id)
             path_results[obj.id] = path[::-1]  # Reverse to get root to leaf order
 
         return {
