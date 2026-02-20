@@ -2216,7 +2216,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return locale_translations.get("typical_evidence", self.typical_evidence)
 
     @property
-    def get_questions_translated(self) -> str:
+    def get_questions_translated(self) -> dict:
         questions = self.questions if self.questions else {}
         current_lang = get_language()
         questions_translated = deepcopy(questions)
