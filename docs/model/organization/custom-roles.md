@@ -4,6 +4,13 @@ description: For fine-grained permissions management - PRO feature
 
 # Custom roles
 
+**Notice:**\
+Custom roles allow you to refine access control when very specific permissions need to be granted to a user.
+
+In CISO Assistant, **domains are the primary mechanism for restricting access**. Custom roles should only be created when domain-based restrictions are insufficient.
+
+Keep in mind that custom roles increase IAM complexity and make access reviews more difficult. In most cases, the default roles are sufficient.
+
 ## [Custom roles for CISO Assistant](https://app.guidde.com/playbooks/7f23K23PveNou6UuXdYRFe)
 
 {% embed url="https://app.guidde.com/share/playbooks/7f23K23PveNou6UuXdYRFe" %}
