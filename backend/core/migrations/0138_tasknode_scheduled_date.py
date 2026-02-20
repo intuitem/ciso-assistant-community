@@ -87,7 +87,6 @@ def populate_scheduled_date(apps, schema_editor):
                     g_index += 1
                 else:
                     # Distance increases, stop here
-                    g_index -= 1
                     break
 
             if best_date is not None:
