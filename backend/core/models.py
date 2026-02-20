@@ -2217,7 +2217,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> str:
-
         questions = self.questions if self.questions else {}
         current_lang = get_language()
         questions_translated = deepcopy(questions)
