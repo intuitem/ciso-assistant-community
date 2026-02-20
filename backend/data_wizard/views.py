@@ -1102,22 +1102,24 @@ class LoadFileView(APIView):
     serializer_class = LoadFileSerializer
 
     VULNERABILITY_SEVERITY_MAP = {
-        "Information": 0,
-        "Low": 1,
-        "Medium": 2,
-        "High": 3,
-        "Critical": 4,
+        None: -1,
+        "undefined": -1,
+        "information": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
     }
 
     VULNERABILITY_STATUS_MAP = {
         None: "--",
         "undefined": "--",
-        "Potential": "potential",
-        "Exploitable": "exploitable",
-        "Mitigated": "mitigated",
-        "Fixed": "fixed",
-        "Not exploitable": "not_exploitable",
-        "Unaffected": "unaffected",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
     }
 
     def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
@@ -2482,7 +2484,13 @@ class LoadFileView(APIView):
         )
 
     def _process_vulnerability_record(self, records, folder_id, request):
-        results = {"successfull": 0, "failed": 0, "errors": []}
+        def safe_lowercase(s):
+            if s is None or type(s) is not str:
+                return s
+            else:
+                return s.lower().strip()
+
+        results = {"successful": 0, "failed": 0, "errors": []}
         try:
             for record in records:
                 ref_id = record.get("ref_id", "")
@@ -2490,43 +2498,47 @@ class LoadFileView(APIView):
                 description = record.get("description", "")
 
                 status = self.VULNERABILITY_STATUS_MAP.get(
-                    record.get("status", ""), "--"
+                    safe_lowercase(record.get("status", "")), "--"
                 )
                 severity = self.VULNERABILITY_SEVERITY_MAP.get(
-                    record.get("severity", ""), -1
+                    safe_lowercase(record.get("severity", "")), -1
                 )
 
                 applied_controls = []
                 if record.get("applied_controls"):
-                    applied_controls = [
-                        ap.id
-                        if (
-                            ap := AppliedControl.objects.filter(
-                                name=ap_name, folder_id=folder_id
-                            ).first()
-                        )
-                        else self._add_missing_reference_for_vulnerability(
-                            results, record, "applied_controls", ap_name, folder_id
-                        )
-                        for ap_name in record.get("applied_controls", "").split("\n")
-                    ]
+                    applied_controls = []
+                    for ap_name in record.get("applied_controls", "").split("\n"):
+                        ap_name = ap_name.strip()
+                        if not ap_name:
+                            continue
+                        obj = AppliedControl.objects.filter(
+                            name=ap_name, folder_id=folder_id
+                        ).first()
+                        if obj:
+                            applied_controls.append(obj.id)
+                        else:
+                            self._add_missing_reference_for_vulnerability(
+                                results, record, "applied_controls", ap_name, folder_id
+                            )
                 else:
                     applied_controls = []
 
                 assets = []
                 if record.get("assets"):
-                    assets = [
-                        asset.id
-                        if (
-                            asset := Asset.objects.filter(
-                                name=asset_name, folder_id=folder_id
-                            ).first()
-                        )
-                        else self._add_missing_reference_for_vulnerability(
-                            results, record, "assets", asset_name, folder_id
-                        )
-                        for asset_name in record.get("assets", "").split("\n")
-                    ]
+                    assets = []
+                    for asset_name in record.get("assets", "").split("\n"):
+                        asset_name = asset_name.strip()
+                        if not asset_name:
+                            continue
+                        obj = Asset.objects.filter(
+                            name=asset_name, folder_id=folder_id
+                        ).first()
+                        if obj:
+                            assets.append(obj.id)
+                        else:
+                            self._add_missing_reference_for_vulnerability(
+                                results, record, "assets", asset_name, folder_id
+                            )
 
                 filtering_labels = []
                 if record.get("filtering_labels"):
@@ -2537,18 +2549,24 @@ class LoadFileView(APIView):
                         filtering_labels.append(filtering_label.id)
 
                 if record.get("security_exceptions"):
-                    security_exceptions = [
-                        security_exception.id
-                        if (
-                            security_exception := SecurityException.objects.filter(
-                                name=se_name, folder_id=folder_id
-                            ).first()
-                        )
-                        else self._add_missing_reference_for_vulnerability(
-                            results, record, "security_exceptions", se_name, folder_id
-                        )
-                        for se_name in record.get("security_exceptions", "").split("\n")
-                    ]
+                    security_exceptions = []
+                    for se_name in record.get("security_exceptions", "").split("\n"):
+                        se_name = se_name.strip()
+                        if not se_name:
+                            continue
+                        obj = SecurityException.objects.filter(
+                            name=se_name, folder_id=folder_id
+                        ).first()
+                        if obj:
+                            security_exceptions.append(obj.id)
+                        else:
+                            self._add_missing_reference_for_vulnerability(
+                                results,
+                                record,
+                                "security_exceptions",
+                                se_name,
+                                folder_id,
+                            )
                 else:
                     security_exceptions = []
 
@@ -2571,7 +2589,7 @@ class LoadFileView(APIView):
                 if vuln_serializer.is_valid():
                     try:
                         vuln_serializer.save()
-                        results["successfull"] += 1
+                        results["successful"] += 1
                     except Exception as e:
                         results["failed"] += 1
                         results["errors"].append(
@@ -2599,7 +2617,7 @@ class LoadFileView(APIView):
                 {"details": f"Failed to parse the vulnerability records: {str(e)}"}
             )
             results["failed"] = len(records)
-            results["successfull"] = 0
+            results["successful"] = 0
         return results
 
     def _process_risk_scenario_record(
