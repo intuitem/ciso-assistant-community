@@ -178,8 +178,28 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
+def _parse_multiline_with_pipe(raw: str) -> list[str]:
+    """
+    Parse a multi-line field where lines starting with "|" are continuations
+    of the previous value.
+    """
+    values: list[str] = []
+    for line in str(raw or "").split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("|") and values:
+            values[-1] += "\n" + line[1:].strip()
+        else:
+            values.append(line)
+    return values
+
+
 def inject_questions_into_node(
-    qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict
+    qa_data: dict[str, Any],
+    node: Dict[str, Any],
+    answers_dict: dict,
+    row_translations: dict | None = None,
 ) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
@@ -200,7 +220,7 @@ def inject_questions_into_node(
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
-    question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
+    question_lines = _parse_multiline_with_pipe(raw_question_str)
 
     depends_on_lines = None
     if raw_depends_on_str:
@@ -280,6 +300,29 @@ def inject_questions_into_node(
         }
 
         question_entry["text"] = question_text
+
+        # Optional: per-question translations (new format)
+        # from framework_content columns like: questions[fr], questions[it], ...
+        if row_translations:
+            for lang, tr in row_translations.items():
+                raw_q_translated = tr.get("questions")
+                if not raw_q_translated or not str(raw_q_translated).strip():
+                    continue
+
+                translated_lines = _parse_multiline_with_pipe(raw_q_translated)
+                if len(translated_lines) == 1:
+                    translated_lines *= len(question_lines)
+                if len(translated_lines) != len(question_lines):
+                    raise ValueError(
+                        f"(framework_content) Invalid translated questions count for locale '{lang}' "
+                        f"on node {node.get('urn')}: {len(translated_lines)} values for {len(question_lines)} questions."
+                    )
+
+                translated_text = translated_lines[idx].strip()
+                if translated_text and translated_text != "/":
+                    question_entry.setdefault("translations", {}).setdefault(lang, {})[
+                        "text"
+                    ] = translated_text
 
         # Optional: depends_on
         depends_on_block = {}
@@ -901,16 +944,33 @@ def create_library(
                         if not answer_id or not answer_type or not choices_raw:
                             continue  # Incomplete row
 
-                        choices = []
-                        for line in choices_raw.split("\n"):
-                            line = line.strip()
-                            if not line:
-                                continue
-                            if line.startswith("|") and choices:
-                                # Multi-line value, append to previous
-                                choices[-1]["value"] += "\n" + line[1:].strip()
-                            else:
-                                choices.append({"urn": "", "value": line})
+                        choices = [
+                            {"urn": "", "value": line}
+                            for line in _parse_multiline_with_pipe(choices_raw)
+                        ]
+                                
+                        # Add choices translations 
+                        answer_translations = extract_translations_from_row(header, row)
+
+                        for lang, tr in answer_translations.items():
+                            raw = tr.get("question_choices")
+                            if not raw or not str(raw).strip():
+                                continue  # do not create the language if no translation
+                            lines = _parse_multiline_with_pipe(raw)
+                            if len(lines) == 1:
+                                lines *= len(choices)
+                            if len(lines) != len(choices):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid translated question_choices count for locale '{lang}' "
+                                    f"for answer ID '{answer_id}': {len(lines)} values for {len(choices)} choices."
+                                )
+                            for i, val in enumerate(lines):
+                                translated_value = val.strip()
+                                if translated_value and translated_value != "/":
+                                    choices[i].setdefault("translations", {}).setdefault(
+                                        lang, {}
+                                    )["value"] = translated_value
+
 
                         # --- Optional: description ---------------------------
                         description_lines = _per_choice_lines(
@@ -1310,12 +1370,15 @@ def create_library(
                         if rc:
                             node["reference_controls"] = rc
                     if "questions" in data and data["questions"]:
+                        translations = extract_translations_from_row(header, row)
                         inject_questions_into_node(
                             data,
                             node,
                             answers_dict,
+                            translations,
                         )
-                    translations = extract_translations_from_row(header, row)
+                    else:
+                        translations = extract_translations_from_row(header, row)
                     if translations:
                         node["translations"] = translations
                     if node.get("urn") in all_urns:
