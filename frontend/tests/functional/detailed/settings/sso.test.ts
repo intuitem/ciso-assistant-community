@@ -11,9 +11,9 @@ test.describe('SSO settings', () => {
 
 	test('SAML settings', async ({ logedPage, page }) => {
 		await test.step('configure SAML', async () => {
-			await page.waitForTimeout(2000);
-			await page.getByRole('tab', { name: ' SSO' }).click();
-			await page.waitForTimeout(2000);
+			const ssoTab = page.getByRole('tab', { name: /SSO/ });
+			await ssoTab.click();
+			await expect(ssoTab).toHaveAttribute('aria-selected', 'true');
 			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').click();
 			await page.getByTestId('form-input-idp-entity-id').fill('http://localhost:8080/realms/test');
@@ -32,9 +32,8 @@ test.describe('SSO settings', () => {
 			await page.getByTestId('logout-button').click();
 			await expect(page).toHaveURL('/login');
 			await expect(page.getByRole('button', { name: 'Login with SSO' })).toBeVisible();
-			await page.waitForTimeout(2000);
+			await page.locator('body[data-hydrated="true"]').waitFor();
 			await page.getByRole('button', { name: 'Login with SSO' }).click();
-			await page.waitForTimeout(2000);
 			await expect(page).toHaveURL(/http:\/\/localhost:8080\/realms\/test\/protocol\/saml.*/);
 			await page.getByRole('textbox', { name: 'Username or email' }).click();
 			await page.getByRole('textbox', { name: 'Username or email' }).fill('admin@tests.com');
@@ -49,9 +48,9 @@ test.describe('SSO settings', () => {
 
 	test('OIDC settings', async ({ logedPage, page }) => {
 		await test.step('configure OIDC', async () => {
-			await page.waitForTimeout(2000);
-			await page.getByRole('tab', { name: ' SSO' }).click();
-			await page.waitForTimeout(2000);
+			const ssoTab = page.getByRole('tab', { name: /SSO/ });
+			await ssoTab.click();
+			await expect(ssoTab).toHaveAttribute('aria-selected', 'true');
 			await page.getByTestId('form-input-is-enabled').check();
 			await page.getByTestId('form-input-idp-entity-id').clear();
 			// await page.getByTestId('form-input-sp-entity-id').clear();
@@ -74,9 +73,8 @@ test.describe('SSO settings', () => {
 			await page.getByTestId('logout-button').click();
 			await expect(page).toHaveURL('/login');
 			await expect(page.getByRole('button', { name: 'Login with SSO' })).toBeVisible();
-			await page.waitForTimeout(2000);
+			await page.locator('body[data-hydrated="true"]').waitFor();
 			await page.getByRole('button', { name: 'Login with SSO' }).click();
-			await page.waitForTimeout(2000);
 			await expect(page).toHaveURL(
 				/http:\/\/localhost:8080\/realms\/test\/protocol\/openid-connect.*/
 			);

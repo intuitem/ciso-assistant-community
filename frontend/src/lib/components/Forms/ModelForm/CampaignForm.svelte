@@ -83,7 +83,7 @@
 	cacheLock={cacheLocks['perimeters']}
 	bind:cachedValue={formDataCache['perimeters']}
 	label={m.perimeters()}
-	disabled={initialData.perimeters}
+	disabled={!!initialData.perimeters?.length}
 />
 <TextField
 	type="date"
