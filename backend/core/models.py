@@ -7796,6 +7796,13 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["task_template", "due_date"],
+                condition=models.Q(due_date__isnull=False),
+                name="unique_tasknode_template_due_date",
+            ),
+        ]
 
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
