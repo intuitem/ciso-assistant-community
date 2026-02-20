@@ -2223,16 +2223,16 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         questions_translated = deepcopy(questions)
         
         # Copy questions as is
-        # Replace current text wit translated version of current language (if any)
+        # Then, replace current text with translated version for current language (if any)
         
-        for q_urn, q_content in questions.items():
+        for q_urn, q_content in questions_translated.items():
                 
             # Set question title translation (if any for current locale)
             q_tr_dict = q_content.get("translations", {})
             q_tr_text = q_tr_dict.get(current_lang, {}).get("text")
             
             if q_tr_text:
-                questions_translated["questions"][q_urn]["text"] = q_tr_text
+                questions_translated[q_urn]["text"] = q_tr_text
             
             # For each choices, get translations
             for i, choice in enumerate(q_content.get("choices", [])):
@@ -2242,7 +2242,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
                 # Set choice value translation (if any for current locale)
                 if choice_tr_value:
-                    questions_translated["questions"][q_urn]["choices"][i]["value"] = choice_tr_value
+                    questions_translated[q_urn]["choices"][i]["value"] = choice_tr_value
 
         return questions_translated
 
