@@ -5,7 +5,6 @@ import hashlib
 from datetime import date, datetime
 from pathlib import Path
 from typing import Self, Union, List, Optional, Literal, Tuple
-from copy import deepcopy
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -2216,39 +2215,33 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return locale_translations.get("typical_evidence", self.typical_evidence)
 
     @property
-    def get_questions_translated(self) -> dict:
-        questions = self.questions if self.questions else {}
+    def get_questions_translated(self) -> dict | None:
+        if not self.questions:
+            return None
+
         current_lang = get_language()
-        questions_translated = deepcopy(questions)
 
-        # Copy questions as is
-        # Then, replace current text with translated version for current language (if any)
+        def _translate_choice(choice: dict) -> dict:
+            tr = choice.get("translations", {}).get(current_lang, {})
+            return {
+                **choice,
+                **({} if not tr.get("value") else {"value": tr["value"]}),
+                **({} if not tr.get("description") else {"description": tr["description"]}),
+            }
 
-        for q_urn, q_content in questions_translated.items():
-            # Set question title translation (if any for current locale)
-            q_tr_dict = q_content.get("translations", {})
-            q_tr_text = q_tr_dict.get(current_lang, {}).get("text")
+        def _translate_question(q_content: dict) -> dict:
+            tr = q_content.get("translations", {}).get(current_lang, {})
+            translated = {**q_content}
+            if tr.get("text"):
+                translated["text"] = tr["text"]
+            if "choices" in q_content:
+                translated["choices"] = [_translate_choice(c) for c in q_content["choices"]]
+            return translated
 
-            if q_tr_text:
-                questions_translated[q_urn]["text"] = q_tr_text
-
-            # For each choices, get translations
-            for i, choice in enumerate(q_content.get("choices", [])):
-                choice_tr_dict = choice.get("translations", {})
-                choice_tr_value = choice_tr_dict.get(current_lang, {}).get("value")
-                choice_tr_description = choice_tr_dict.get(current_lang, {}).get(
-                    "description"
-                )
-
-                # Set choice value translation (if any for current locale)
-                if choice_tr_value:
-                    questions_translated[q_urn]["choices"][i]["value"] = choice_tr_value
-                if choice_tr_description:
-                    questions_translated[q_urn]["choices"][i]["description"] = (
-                        choice_tr_value
-                    )
-
-        return questions_translated if questions_translated != {} else None
+        return {
+            q_urn: _translate_question(q_content)
+            for q_urn, q_content in self.questions.items()
+        }
 
     class Meta:
         verbose_name = _("RequirementNode")
