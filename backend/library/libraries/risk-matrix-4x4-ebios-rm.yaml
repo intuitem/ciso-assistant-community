@@ -4,14 +4,17 @@ ref_id: risk-matrix-4x4-ebios-rm
 name: 4x4 risk matrix from EBIOS-RM
 description: based on the official guide of the EBIOS RM approach
 copyright: public domain
-version: 4
+version: 5
 publication_date: 2025-05-02
 provider: intuitem
 packager: intuitem
 translations:
   fr:
     name: Matrice 4x4 EBIOS-RM
-    description: "Bas\xE9e sur le guide officiel de la m\xE9thode EBIOS RM"
+    description: "Basée sur le guide officiel de la méthode EBIOS RM"
+  de:
+    name: 4x4-Risikomatrix nach EBIOS-RM
+    description: Basierend auf dem offiziellen Leitfaden der Methode EBIOS RM
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:risk-matrix-4x4-ebios-rm
@@ -22,101 +25,99 @@ objects:
     - id: 0
       abbreviation: V1
       name: Unlikely
-      description: The source of risk is unlikely to achieve its intended objective
-        under any of the proposed procedures. The likelihood of the scenario is weak.
+      description: The source of risk is unlikely to achieve its intended objective under any of the proposed procedures. The likelihood of the scenario is weak.
       translations:
         fr:
           name: Peu vraisemblable
-          description: "La source de risque a peu de chances d\u2019atteindre son\
-            \ objectif vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9\
-            s. La vraisemblance du sc\xE9nario est faible."
+          description: "La source de risque a peu de chances d’atteindre son objectif visé selon l’un des modes opératoires envisagés. La vraisemblance du scénario est faible."
+        de:
+          name: Unwahrscheinlich
+          description: Die Risikoquelle wird ihr angestrebtes Ziel voraussichtlich unter keinem der vorgesehenen Vorgehensweisen erreichen. Die Eintrittswahrscheinlichkeit des Szenarios ist gering.
       hexcolor: '#FAF7E9'
     - id: 1
       abbreviation: V2
       name: Likely
-      description: ' The source of risk is likely to achieve its intended objective
-        according to one of the operating procedures envisaged. The likelihood of
-        the scenario is significant. '
+      description: The source of risk is likely to achieve its intended objective according to one of the operating procedures envisaged. The likelihood of the scenario is significant.
       translations:
         fr:
           name: Vraisemblable
-          description: "La source de risque est susceptible d\u2019atteindre son objectif\
-            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s. La vraisemblance\
-            \ du sc\xE9nario est significative."
+          description: "La source de risque est susceptible d’atteindre son objectif visé selon l’un des modes opératoires envisagés. La vraisemblance du scénario est significative."
+        de:
+          name: Wahrscheinlich
+          description: Die Risikoquelle wird ihr angestrebtes Ziel wahrscheinlich gemäß einer der vorgesehenen Vorgehensweisen erreichen. Die Eintrittswahrscheinlichkeit des Szenarios ist signifikant.
       hexcolor: '#EEE6BC'
     - id: 2
       abbreviation: V3
       name: Very likely
-      description: The risk source is very likely to achieve its intended objective
-        through one of the anticipated methods of operation. The likelihood of the
-        scenario is high.
+      description: The risk source is very likely to achieve its intended objective through one of the anticipated methods of operation. The likelihood of the scenario is high.
       translations:
         fr:
-          name: "Tr\xE8s vraisemblable"
-          description: "La source de risque va probablement atteindre son objectif\
-            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s. La vraisemblance\
-            \ du sc\xE9nario est \xE9lev\xE9e."
+          name: Très vraisemblable
+          description: "La source de risque va probablement atteindre son objectif visé selon l’un des modes opératoires envisagés. La vraisemblance du scénario est élevée."
+        de:
+          name: Sehr wahrscheinlich
+          description: Die Risikoquelle wird ihr angestrebtes Ziel mit hoher Wahrscheinlichkeit über eine der vorgesehenen Vorgehensweisen erreichen. Die Eintrittswahrscheinlichkeit des Szenarios ist hoch.
       hexcolor: '#DCCC77'
     - id: 3
       abbreviation: V4
       name: Certain
-      description: The risk source will certainly achieve its intended objective through
-        one of the anticipated methods of operation OR such a scenario has already
-        occurred within the organization (incident history).
+      description: The risk source will certainly achieve its intended objective through one of the anticipated methods of operation OR such a scenario has already occurred within the organization (incident history).
       translations:
         fr:
           name: Certain
-          description: "La source de risque va certainement atteindre son objectif\
-            \ vis\xE9 selon l\u2019un des modes op\xE9ratoires envisag\xE9s OU un\
-            \ tel sc\xE9nario s\u2019est d\xE9j\xE0 produit au sein de l\u2019organisation\
-            \ (historique d\u2019incidents)."
+          description: "La source de risque va certainement atteindre son objectif visé selon l’un des modes opératoires envisagés OU un tel scénario s’est déjà produit au sein de l’organisation (historique d’incidents)."
+        de:
+          name: Sicher
+          description: Die Risikoquelle wird ihr angestrebtes Ziel mit Sicherheit über eine der vorgesehenen Vorgehensweisen erreichen ODER ein solches Szenario ist innerhalb der Organisation bereits eingetreten (Vorfallhistorie).
       hexcolor: '#C4AA00'
     impact:
     - id: 0
       abbreviation: G1
       name: Minor
-      description: 'No operational impact on the performance of the activity or on
-        the safety of people and property. '
+      description: No operational impact on the performance of the activity or on the safety of people and property.
       translations:
         fr:
           name: Mineur
-          description: "Aucun impact op\xE9rationnel ni sur les performances de l\u2019\
-            activit\xE9 ni sur la s\xE9curit\xE9 des personnes et des biens."
+          description: "Aucun impact opérationnel ni sur les performances de l’activité ni sur la sécurité des personnes et des biens."
+        de:
+          name: Geringfügig
+          description: Keine operativen Auswirkungen auf die Leistungsfähigkeit der Tätigkeit sowie keine Auswirkungen auf die Sicherheit von Personen und Sachwerten.
       hexcolor: '#42C7C4'
     - id: 1
       abbreviation: G2
       name: Significant
-      description: 'Deterioration in the performance of the activity without impact
-        on the safety of people and property. '
+      description: Deterioration in the performance of the activity without impact on the safety of people and property.
       translations:
         fr:
           name: Significatif
-          description: "D\xE9gradation des performances de l\u2019activit\xE9 sans\
-            \ impacts sur la s\xE9curit\xE9 des personnes et des biens."
+          description: "Dégradation des performances de l’activité sans impacts sur la sécurité des personnes et des biens."
+        de:
+          name: Bedeutend
+          description: Beeinträchtigung der Leistungsfähigkeit der Tätigkeit ohne Auswirkungen auf die Sicherheit von Personen und Sachwerten.
       hexcolor: '#FBF082'
     - id: 2
       abbreviation: G3
       name: Important
-      description: 'Sharp deterioration in the performance of the activity, with possible
-        significant impacts on the safety of people and property. '
+      description: Sharp deterioration in the performance of the activity, with possible significant impacts on the safety of people and property.
       translations:
         fr:
           name: Important
-          description: "Forte d\xE9gradation des performances de l\u2019activit\xE9\
-            , avec d\u2019\xE9ventuels impacts significatifs sur la s\xE9curit\xE9\
-            \ des personnes et des biens."
+          description: "Forte dégradation des performances de l’activité, avec d’éventuellen impacts significatifs sur la sécurité des personnes et des biens."
+        de:
+          name: Erheblich
+          description: Starke Beeinträchtigung der Leistungsfähigkeit der Tätigkeit mit möglichen erheblichen Auswirkungen auf die Sicherheit von Personen und Sachwerten.
       hexcolor: '#FFC586'
     - id: 3
       abbreviation: G4
       name: Critical
-      description: Inability for the company to carry out all or part of its activity,
-        with possible serious impacts on the safety of people and property.
+      description: Inability for the company to carry out all or part of its activity, with possible serious impacts on the safety of people and property.
       translations:
         fr:
           name: Critique
-          description: "Incapacit\xE9 pour la soci\xE9t\xE9 d\u2019assurer tout ou\
-            \ partie de son activit\xE9, avec d\u2019\xE9ventuels impacts graves sur\
-            \ la s\xE9curit\xE9 des personnes et des biens."
+          description: "Incapacité pour la société d’assurer tout ou partie de son activité, avec d’éventuels impacts graves sur la sécurité des personnes et des biens."
+        de:
+          name: Kritisch
+          description: Unfähigkeit des Unternehmens, die Tätigkeit ganz oder teilweise aufrechtzuerhalten, mit möglichen schwerwiegenden Auswirkungen auf die Sicherheit von Personen und Sachwerten.
       hexcolor: '#EE7B86'
     risk:
     - id: 0
@@ -126,32 +127,34 @@ objects:
       translations:
         fr:
           name: Faible
-          description: "Acceptable en l'\xE9tat"
+          description: "Acceptable en l'état"
+        de:
+          name: Niedrig
+          description: In der bestehenden Form akzeptabel.
       hexcolor: '#59BBB2'
     - id: 1
       abbreviation: '2'
       name: Medium
-      description: Tolerable under control. Risk management monitoring must be conducted,
-        and actions should be implemented as part of continuous improvement in the
-        medium and long term.
+      description: Tolerable under control. Risk management monitoring must be conducted, and actions should be implemented as part of continuous improvement in the medium and long term.
       translations:
         fr:
           name: Moyen
-          description: "Tol\xE9rable sous contr\xF4le. Un suivi en termes de gestion\
-            \ du risque est \xE0 mener et des actions sont \xE0 mettre en place dans\
-            \ le cadre d\u2019une am\xE9lioration continue sur le moyen et long terme."
+          description: "Tolérable sous contrôle. Un suivi en termes de gestion du risque est à mener et des actions sont à mettre en place dans le cadre d’une amélioration continue sur le moyen et long terme."
+        de:
+          name: Mittel
+          description: Unter Kontrolle tolerierbar. Eine Überwachung im Rahmen des Risikomanagements ist durchzuführen, und Maßnahmen sind im Zuge der kontinuierlichen Verbesserung mittel- bis langfristig umzusetzen.
       hexcolor: '#F5C481'
     - id: 2
       abbreviation: '3'
       name: High
-      description: Unacceptable. Risk reduction measures must be implemented urgently
-        in the short term. Otherwise, all or part of the activity will be denied.
+      description: Unacceptable. Risk reduction measures must be implemented urgently in the short term. Otherwise, all or part of the activity will be denied.
       translations:
         fr:
-          name: "\xC9lev\xE9"
-          description: "Inacceptable. Des mesures de r\xE9duction du risque doivent\
-            \ imp\xE9rativement \xEAtre prises \xE0 court terme. Dans le cas contraire,\
-            \ tout ou partie de l\u2019activit\xE9 sera refus\xE9e."
+          name: Élevé
+          description: "Inacceptable. Des mesures de réduction du risque doivent impérativement être prises à court terme. Dans le cas contraire, tout ou partie de l’activité sera refusée."
+        de:
+          name: Hoch
+          description: Inakzeptabel. Maßnahmen zur Risikoreduzierung müssen kurzfristig zwingend umgesetzt werden. Andernfalls wird die Tätigkeit ganz oder teilweise untersagt.
       hexcolor: '#E6686D'
     grid:
     - - 0
@@ -173,4 +176,7 @@ objects:
     translations:
       fr:
         name: Matrice 4x4 EBIOS-RM
-        description: "Bas\xE9e sur le guide officiel de la m\xE9thode EBIOS RM"
+        description: "Basée sur le guide officiel de la méthode EBIOS RM"
+      de:
+        name: 4x4-Risikomatrix nach EBIOS-RM
+        description: Basierend auf dem offiziellen Leitfaden der Methode EBIOS RM
