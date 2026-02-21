@@ -2226,7 +2226,11 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             return {
                 **choice,
                 **({} if not tr.get("value") else {"value": tr["value"]}),
-                **({} if not tr.get("description") else {"description": tr["description"]}),
+                **(
+                    {}
+                    if not tr.get("description")
+                    else {"description": tr["description"]}
+                ),
             }
 
         def _translate_question(q_content: dict) -> dict:
@@ -2235,7 +2239,9 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if tr.get("text"):
                 translated["text"] = tr["text"]
             if "choices" in q_content:
-                translated["choices"] = [_translate_choice(c) for c in q_content["choices"]]
+                translated["choices"] = [
+                    _translate_choice(c) for c in q_content["choices"]
+                ]
             return translated
 
         return {
