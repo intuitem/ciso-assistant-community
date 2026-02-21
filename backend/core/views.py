@@ -6845,11 +6845,13 @@ class FolderViewSet(BaseModelViewSet):
         """Create a batch of objects with proper relationship handling."""
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
-            for obj in batch:
-                obj_id = obj.get("id")
-                fields = obj.get("fields", {}).copy()
+            try:
+                objects_creation_data = []
 
-                try:
+                for obj in batch:
+                    obj_id = obj.get("id")
+                    fields = obj.get("fields", {}).copy()
+
                     # Handle library objects
                     if fields.get("library") or model == LoadedLibrary:
                         logger.info(f"Skipping creation of library object {obj_id}")
@@ -6879,22 +6881,66 @@ class FolderViewSet(BaseModelViewSet):
                     logger.debug("Creating object", fields=fields)
 
                     # Create the object
-                    obj_created = model.objects.create(**fields)
+                    objects_creation_data.append(
+                        {
+                            "id": obj_id,
+                            "fields": fields,
+                            "many_to_many_map_ids": many_to_many_map_ids,
+                        }
+                    )
+
+                # Use bulk_create for models without custom save() or for
+                # RequirementAssessment (whose side effects are handled
+                # explicitly below). Fall back to individual create() for
+                # other models with custom save() to preserve their side
+                # effects without double-writing.
+                is_requirement_assessment = model is RequirementAssessment
+                has_save_override = model.save is not models.Model.save
+
+                if has_save_override and not is_requirement_assessment:
+                    created_objects = []
+                    for object_creation_data in objects_creation_data:
+                        obj_created = model.objects.create(
+                            **object_creation_data["fields"]
+                        )
+                        created_objects.append(obj_created)
+                else:
+                    objects_to_create = [
+                        model(**ocd["fields"]) for ocd in objects_creation_data
+                    ]
+                    created_objects = model.objects.bulk_create(objects_to_create)
+
+                if is_requirement_assessment:
+                    seen_cas = set()
+                    for ra in created_objects:
+                        ca_id = ra.compliance_assessment_id
+                        if ca_id not in seen_cas:
+                            seen_cas.add(ca_id)
+                            ra.trigger_compliance_assessment_update_hooks()
+
+                for obj_created, object_creation_data in zip(
+                    created_objects, objects_creation_data
+                ):
+                    obj_id = object_creation_data["id"]
                     link_dump_database_ids[obj_id] = obj_created.id
 
-                    # Handle many-to-many relationships
+                    many_to_many_map_ids = object_creation_data["many_to_many_map_ids"]
                     self._set_many_to_many_relations(
                         model=model,
                         obj=obj_created,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
 
-                except Exception as e:
-                    logger.error("Error creating object", obj=obj, exc_info=True)
-                    # This will trigger a rollback of the entire batch
-                    raise ValidationError(
-                        f"Error creating {model._meta.model_name}: {str(e)}"
-                    )
+            except Exception as e:
+                logger.error(
+                    "Error creating object batch",
+                    model=model._meta.model_name,
+                    exc_info=True,
+                )
+                # This will trigger a rollback of the entire batch
+                raise ValidationError(
+                    f"Error creating {model._meta.model_name}: {str(e)}"
+                )
 
     def _process_model_relationships(
         self,

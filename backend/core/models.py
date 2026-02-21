@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -6359,20 +6359,25 @@ class ComplianceAssessment(Assessment):
             ),
         }
 
-    def get_requirements_status_count(self):
-        requirements_status_count = []
-        for st in RequirementAssessment.Status:
-            requirements_status_count.append(
-                (
-                    RequirementAssessment.objects.filter(status=st)
-                    .filter(compliance_assessment=self)
-                    .count(),
-                    st,
-                )
-            )
+    def get_requirements_status_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Status]]:
+        queryset = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .values("status")
+            .annotate(count=Count("status"))
+        )
+
+        count_by_status = {row["status"]: row["count"] for row in queryset}
+
+        requirements_status_count = [
+            (count_by_status.get(st, 0), st) for st in RequirementAssessment.Status
+        ]
         return requirements_status_count
 
-    def get_requirements_result_count(self):
+    def get_requirements_result_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Result]]:
         requirements_result_count = []
         selected_implementation_groups_set = (
             set(self.selected_implementation_groups)
@@ -7096,13 +7101,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             | Q(applied_controls__requirement_assessments=self)
         ).exists()
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-
+    def trigger_compliance_assessment_update_hooks(self):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
 
-        self.compliance_assessment.upsert_daily_metrics()
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        self.trigger_compliance_assessment_update_hooks()
 
         # Recalculate selected IGs only when answers were updated
         # Use transaction.on_commit to avoid nested save conflicts
