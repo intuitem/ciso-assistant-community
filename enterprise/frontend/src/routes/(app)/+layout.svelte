@@ -176,47 +176,45 @@
 			{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
 		</aside>
 	{/if}
-	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
-		background="bg-white"
-		padding="pb-2 px-4"
-	>
-		{#snippet headline()}
-			<div
-				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-				id="page-title"
-			>
-				{safeTranslate(displayTitle)}
-			</div>
-			{#if displayModelName}
-				<div class="text-sm text-slate-500 font-medium">
-					{safeTranslate(displayModelName)}
+	<AppBar class="relative transition-all duration-300 bg-white {classesSidebarOpen(sidebarOpen)}">
+		<AppBar.Toolbar class="pb-2 px-4">
+			<AppBar.Headline>
+				<div
+					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+					id="page-title"
+				>
+					{safeTranslate(displayTitle)}
 				</div>
-			{/if}
-			{#if displayModelDescription}
-				<div class="text-xs text-slate-400 italic">
-					{safeTranslate(displayModelDescription)}
+				{#if displayModelName}
+					<div class="text-sm text-slate-500 font-medium">
+						{safeTranslate(displayModelName)}
+					</div>
+				{/if}
+				{#if displayModelDescription}
+					<div class="text-xs text-slate-400 italic">
+						{safeTranslate(displayModelDescription)}
+					</div>
+				{/if}
+				<div class="absolute top-6 right-4 flex items-center gap-3">
+					{#if data?.featureflags?.focus_mode}
+						<FocusModeSelector folders={data?.folders ?? []} />
+					{/if}
+					{#if data?.user?.is_admin}
+						<button
+							onclick={modalQuickStart}
+							class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+	ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+	hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+	focus:outline-hidden focus:ring-violet-500"
+						>
+							{m.quickStart()}
+						</button>
+					{/if}
 				</div>
-			{/if}
-			<div class="absolute top-6 right-4 flex items-center gap-3">
-				{#if data?.featureflags?.focus_mode}
-					<FocusModeSelector folders={data?.folders ?? []} />
-				{/if}
-				{#if data?.user?.is_admin}
-					<button
-						onclick={modalQuickStart}
-						class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-		ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-		hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-		focus:outline-hidden focus:ring-violet-500"
-					>
-						{m.quickStart()}
-					</button>
-				{/if}
-			</div>
-			<hr class="w-screen my-1" />
-			<Breadcrumbs />
-		{/snippet}
+				<hr class="w-screen my-1" />
+				<Breadcrumbs />
+			</AppBar.Headline>
+		</AppBar.Toolbar>
 	</AppBar>
 	<!-- Router Slot -->
 	<CommandPalette />
