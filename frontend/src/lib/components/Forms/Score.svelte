@@ -97,7 +97,7 @@
 				/>
 			</div>
 			<div class="shrink-0 relative">
-				<Progress value={$value} min={min_score} max={max_score}>
+				<Progress value={$value} min={min_score} max={max_score} data-testid="progress-ring-svg">
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
 						<Progress.CircleRange class={displayScoreColor($value, max_score, inversedColors)} />

@@ -107,6 +107,18 @@ test.describe('General settings', () => {
 			await expect(page.getByTestId('y-label')).toHaveText('Severity');
 			await expect(page.getByTestId('x-label-flipped')).toHaveText('Likelihood');
 		});
+
+		await test.step('reset to defaults', async () => {
+			await settingsPage.goto();
+			await settingsPage.hasUrl();
+			await settingsPage.hasTitle();
+			await page.getByRole('button', { name: 'Risk matrix settings' }).click();
+			await page.getByTestId('form-input-risk-matrix-swap-axes').uncheck();
+			await page.getByTestId('form-input-risk-matrix-flip-vertical').uncheck();
+			await page.getByLabel('Risk matrix settings').getByText('ISO 27005').click();
+			await page.getByRole('button', { name: 'Save' }).click();
+			await expect(page.getByTestId('toast')).toBeVisible();
+		});
 	});
 
 	test('assets settings', async ({ assetsPage, settingsPage }) => {
@@ -192,6 +204,15 @@ test.describe('General settings', () => {
 				);
 				await expect(page.locator('label:nth-child(3) > .text-base').first()).toHaveText('high');
 				await page.getByTestId('cancel-button').click();
+			});
+
+			await test.step('reset to defaults', async () => {
+				await settingsPage.goto();
+				await settingsPage.hasTitle();
+				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.getByTestId('form-input-security-objective-scale').selectOption('1-4');
+				await page.getByRole('button', { name: 'Save' }).click();
+				await expect(page.getByTestId('toast')).toBeVisible();
 			});
 		});
 	});
