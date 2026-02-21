@@ -124,7 +124,7 @@ test.describe('General settings', () => {
 	test('assets settings', async ({ assetsPage, settingsPage }) => {
 		await test.step('security targets scales', async () => {
 			await test.step('1-4', async () => {
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await expect(page.getByTestId('form-input-security-objective-scale')).toHaveValue('1-4');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -142,7 +142,7 @@ test.describe('General settings', () => {
 			await test.step('0-4', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('0-4');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -158,7 +158,7 @@ test.describe('General settings', () => {
 			await test.step('1-5', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('1-5');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -174,7 +174,7 @@ test.describe('General settings', () => {
 			await test.step('0-3', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('0-3');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -190,7 +190,7 @@ test.describe('General settings', () => {
 			await test.step('FIPS-199', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('FIPS-199');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();
@@ -209,7 +209,7 @@ test.describe('General settings', () => {
 			await test.step('reset to defaults', async () => {
 				await settingsPage.goto();
 				await settingsPage.hasTitle();
-				await page.getByRole('button', { name: 'Assets', exact: true }).click();
+				await page.locator('button[aria-controls$="content:assets"]').click();
 				await page.getByTestId('form-input-security-objective-scale').selectOption('1-4');
 				await page.getByRole('button', { name: 'Save' }).click();
 				await expect(page.getByTestId('toast')).toBeVisible();

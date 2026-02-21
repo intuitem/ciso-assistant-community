@@ -401,6 +401,7 @@
 									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
 									min={0}
 									max={100}
+									data-testid="progress-ring-svg"
 								>
 									<Progress.Circle class="[--size:--spacing(12)]">
 										<Progress.CircleTrack />
@@ -439,6 +440,7 @@
 								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
 								min={0}
 								max={100}
+								data-testid="progress-ring-svg"
 							>
 								<Progress.Circle class="[--size:--spacing(12)]">
 									<Progress.CircleTrack />

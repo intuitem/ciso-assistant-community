@@ -61,7 +61,12 @@
 		{/if}
 		{#if resultI18n !== 'notApplicable' && isScored}
 			<div class="relative">
-				<Progress value={(score * 100) / max_score} min={0} max={100}>
+				<Progress
+					value={(score * 100) / max_score}
+					min={0}
+					max={100}
+					data-testid="progress-ring-svg"
+				>
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
 						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
