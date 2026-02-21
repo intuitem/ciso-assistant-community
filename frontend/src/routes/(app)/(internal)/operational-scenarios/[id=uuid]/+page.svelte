@@ -246,7 +246,7 @@
 					>
 						<Tabs.List>
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Trigger value={urlmodel}>
+								<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 									{safeTranslate(model.info.localNamePlural)}
 									{#if model.table.body.length > 0}
 										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>

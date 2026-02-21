@@ -61,9 +61,9 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('switch').click({ force: true });
+	await page.getByTestId('form-input-is-scored').click({ force: true });
 	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click({ force: true });
 	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
@@ -97,9 +97,9 @@ test('compliance assessments scoring is working properly', async ({
 	await IDAM2TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('switch').click({ force: true });
+	await page.getByTestId('form-input-is-scored').click({ force: true });
 	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click({ force: true });
 	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
@@ -133,9 +133,9 @@ test('compliance assessments scoring is working properly', async ({
 	await IDBE1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('switch').click({ force: true });
+	await page.getByTestId('form-input-is-scored').click({ force: true });
 	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click({ force: true });
 	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
@@ -169,9 +169,9 @@ test('compliance assessments scoring is working properly', async ({
 	await PRAC1TreeViewItem.content.click();
 
 	await page.waitForURL('/requirement-assessments/**');
-	await page.getByTestId('switch').click({ force: true });
+	await page.getByTestId('form-input-is-scored').click({ force: true });
 	if (!page.getByTestId('progress-ring-svg').isVisible()) {
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click({ force: true });
 	}
 	await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 

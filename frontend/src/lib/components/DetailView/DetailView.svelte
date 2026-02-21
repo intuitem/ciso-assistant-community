@@ -802,7 +802,7 @@
 		>
 			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Trigger value={urlmodel} class="justify-start">
+					<Tabs.Trigger value={urlmodel} class="justify-start" data-testid="tabs-control">
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}
 							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>

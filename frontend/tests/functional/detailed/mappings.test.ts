@@ -100,9 +100,9 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await IDAM1TreeViewItem.content.click();
 
 		await page.waitForURL('/requirement-assessments/**');
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click({ force: true });
 		if (!(await page.getByTestId('progress-ring-svg').isVisible())) {
-			await page.getByTestId('switch').click({ force: true });
+			await page.getByTestId('form-input-is-scored').click({ force: true });
 		}
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
 
