@@ -231,6 +231,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
+    chat_mode = serializers.BooleanField(
+        source="value.chat_mode", required=False, default=False
+    )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=False
     )
