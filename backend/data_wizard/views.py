@@ -1136,17 +1136,17 @@ class LoadFileView(APIView):
             match model_type:
                 case ModelType.TPRM:
                     res = self._process_tprm_file(
-                        request, record_file, folders_map, folder_id
+                        request, record_file, folders_map, folder_id, on_conflict
                     )
                 # Special handling for EBIOS RM Study ARM format (multi-sheet)
                 case ModelType.EBIOS_RM_STUDY_ARM:
                     res = self._process_ebios_rm_study_arm(
-                        request, record_file, folder_id, matrix_id
+                        request, record_file, folder_id, matrix_id, on_conflict
                     )
                 # Special handling for EBIOS RM Study Excel export format
                 case ModelType.EBIOS_RM_STUDY_EXCEL:
                     res = self._process_ebios_rm_study_excel(
-                        request, record_file, folder_id, matrix_id
+                        request, record_file, folder_id, matrix_id, on_conflict
                     )
                 case _:
                     is_excel = is_excel_file(record_file)
@@ -1760,7 +1760,12 @@ class LoadFileView(APIView):
         return results
 
     def _process_tprm_file(
-        self, request, excel_file: io.BytesIO, folders_map, folder_id
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folders_map,
+        folder_id,
+        on_conflict=ConflictMode.STOP,
     ):
         """
         Process TPRM multi-sheet Excel file with Entities, Solutions, and Contracts
@@ -1788,9 +1793,11 @@ class LoadFileView(APIView):
                 ).fillna("")
                 entities_records = entities_df.to_dict(orient="records")
                 entities_result, entity_ref_map = self._process_entities(
-                    request, entities_records, folders_map, folder_id
+                    request, entities_records, folders_map, folder_id, on_conflict
                 )
                 overall_results["entities"] = entities_result
+                if entities_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Entities' sheet found in Excel file")
 
@@ -1802,9 +1809,16 @@ class LoadFileView(APIView):
                 ).fillna("")
                 solutions_records = solutions_df.to_dict(orient="records")
                 solutions_result, solution_ref_map = self._process_solutions(
-                    request, solutions_records, folders_map, folder_id, entity_ref_map
+                    request,
+                    solutions_records,
+                    folders_map,
+                    folder_id,
+                    entity_ref_map,
+                    on_conflict,
                 )
                 overall_results["solutions"] = solutions_result
+                if solutions_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Solutions' sheet found in Excel file")
 
@@ -1822,6 +1836,7 @@ class LoadFileView(APIView):
                     folder_id,
                     entity_ref_map,
                     solution_ref_map,
+                    on_conflict,
                 )
                 overall_results["contracts"] = contracts_result
             else:
@@ -1857,9 +1872,17 @@ class LoadFileView(APIView):
                 "contracts": {"successful": 0, "failed": 0, "errors": []},
             }
 
-    def _process_entities(self, request, records, folders_map, folder_id):
+    def _process_entities(
+        self, request, records, folders_map, folder_id, on_conflict=ConflictMode.STOP
+    ):
         """Process entities from TPRM import"""
-        results = {"successful": 0, "failed": 0, "errors": []}
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "skipped": 0,
+            "updated": 0,
+            "errors": [],
+        }
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
@@ -1886,6 +1909,77 @@ class LoadFileView(APIView):
                     domain = folders_map.get(
                         str(record.get("domain")).lower(), folder_id
                     )
+
+                # Check for existing entity by ref_id or name
+                existing_entity = Entity.objects.filter(ref_id=ref_id).first()
+                if not existing_entity:
+                    existing_entity = Entity.objects.filter(
+                        name__iexact=record.get("name"),
+                        folder_id=domain,
+                    ).first()
+
+                if existing_entity:
+                    ref_id_map[ref_id] = str(existing_entity.id)
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            results["skipped"] += 1
+                            continue
+                        case ConflictMode.STOP:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": "Entity already exists (conflict policy: stop)",
+                                }
+                            )
+                            results["stopped"] = True
+                            break
+                        case ConflictMode.UPDATE:
+                            update_data = {
+                                "ref_id": ref_id,
+                                "name": record.get("name"),
+                                "description": record.get("description", ""),
+                                "mission": record.get("mission", ""),
+                                "folder": domain,
+                            }
+                            if record.get("country"):
+                                update_data["country"] = record.get("country")
+                            if record.get("currency"):
+                                update_data["currency"] = record.get("currency")
+                            for field in [
+                                "dependency",
+                                "penetration",
+                                "maturity",
+                                "trust",
+                            ]:
+                                value = record.get(field)
+                                if value != "" and value is not None:
+                                    try:
+                                        update_data[f"default_{field}"] = int(value)
+                                    except (ValueError, TypeError):
+                                        pass
+                            legal_ids = {}
+                            for id_type in ["lei", "euid", "duns", "vat"]:
+                                value = record.get(id_type, "")
+                                if value and str(value).strip():
+                                    legal_ids[id_type.upper()] = str(value).strip()
+                            if legal_ids:
+                                update_data["legal_identifiers"] = legal_ids
+                            serializer = EntityWriteSerializer(
+                                instance=existing_entity,
+                                data=update_data,
+                                partial=True,
+                                context={"request": request},
+                            )
+                            if serializer.is_valid():
+                                serializer.save()
+                                results["updated"] += 1
+                            else:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {"record": record, "errors": serializer.errors}
+                                )
+                            continue
 
                 # Prepare entity data
                 entity_data = {
@@ -1969,10 +2063,22 @@ class LoadFileView(APIView):
         return results, ref_id_map
 
     def _process_solutions(
-        self, request, records, folders_map, folder_id, entity_ref_map
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        on_conflict=ConflictMode.STOP,
     ):
         """Process solutions from TPRM import"""
-        results = {"successful": 0, "failed": 0, "errors": []}
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "skipped": 0,
+            "updated": 0,
+            "errors": [],
+        }
         ref_id_map = {}  # Map ref_id to actual UUID
 
         for record in records:
@@ -2017,6 +2123,62 @@ class LoadFileView(APIView):
                     continue
 
                 provider_entity_id = entity_ref_map[provider_ref_id]
+
+                # Check for existing solution by ref_id or name
+                existing_solution = Solution.objects.filter(ref_id=ref_id).first()
+                if not existing_solution:
+                    existing_solution = Solution.objects.filter(
+                        name__iexact=record.get("name"),
+                    ).first()
+
+                if existing_solution:
+                    ref_id_map[ref_id] = str(existing_solution.id)
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            results["skipped"] += 1
+                            continue
+                        case ConflictMode.STOP:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": "Solution already exists (conflict policy: stop)",
+                                }
+                            )
+                            results["stopped"] = True
+                            break
+                        case ConflictMode.UPDATE:
+                            update_data = {
+                                "ref_id": ref_id,
+                                "name": record.get("name"),
+                                "description": record.get("description", ""),
+                                "provider_entity": provider_entity_id,
+                            }
+                            if (
+                                record.get("criticality") != ""
+                                and record.get("criticality") is not None
+                            ):
+                                try:
+                                    update_data["criticality"] = int(
+                                        record.get("criticality")
+                                    )
+                                except (ValueError, TypeError):
+                                    pass
+                            serializer = SolutionWriteSerializer(
+                                instance=existing_solution,
+                                data=update_data,
+                                partial=True,
+                                context={"request": request},
+                            )
+                            if serializer.is_valid():
+                                serializer.save()
+                                results["updated"] += 1
+                            else:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {"record": record, "errors": serializer.errors}
+                                )
+                            continue
 
                 # Prepare solution data
                 solution_data = {
@@ -2065,10 +2227,23 @@ class LoadFileView(APIView):
         return results, ref_id_map
 
     def _process_contracts(
-        self, request, records, folders_map, folder_id, entity_ref_map, solution_ref_map
+        self,
+        request,
+        records,
+        folders_map,
+        folder_id,
+        entity_ref_map,
+        solution_ref_map,
+        on_conflict=ConflictMode.STOP,
     ):
         """Process contracts from TPRM import"""
-        results = {"successful": 0, "failed": 0, "errors": []}
+        results = {
+            "successful": 0,
+            "failed": 0,
+            "skipped": 0,
+            "updated": 0,
+            "errors": [],
+        }
 
         for record in records:
             try:
@@ -2160,6 +2335,46 @@ class LoadFileView(APIView):
                         pass
                 if record.get("currency"):
                     contract_data["currency"] = record.get("currency")
+
+                # Check for existing contract by ref_id or name
+                existing_contract = Contract.objects.filter(ref_id=ref_id).first()
+                if not existing_contract:
+                    existing_contract = Contract.objects.filter(
+                        name__iexact=record.get("name"),
+                        folder_id=domain,
+                    ).first()
+
+                if existing_contract:
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            results["skipped"] += 1
+                            continue
+                        case ConflictMode.STOP:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": "Contract already exists (conflict policy: stop)",
+                                }
+                            )
+                            results["stopped"] = True
+                            break
+                        case ConflictMode.UPDATE:
+                            serializer = ContractWriteSerializer(
+                                instance=existing_contract,
+                                data=contract_data,
+                                partial=True,
+                                context={"request": request},
+                            )
+                            if serializer.is_valid():
+                                serializer.save()
+                                results["updated"] += 1
+                            else:
+                                results["failed"] += 1
+                                results["errors"].append(
+                                    {"record": record, "errors": serializer.errors}
+                                )
+                            continue
 
                 # Create the contract
                 serializer = ContractWriteSerializer(
@@ -2599,7 +2814,12 @@ class LoadFileView(APIView):
             field.set(control_ids)
 
     def _process_ebios_rm_study_arm(
-        self, request, excel_file: io.BytesIO, folder_id, matrix_id
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folder_id,
+        matrix_id,
+        on_conflict=ConflictMode.STOP,
     ):
         """
         Process EBIOS RM Study import from ARM Excel format.
@@ -2616,8 +2836,14 @@ class LoadFileView(APIView):
             "details": {
                 "study": None,
                 "assets_created": 0,
+                "assets_updated": 0,
+                "assets_skipped": 0,
                 "feared_events_created": 0,
+                "feared_events_updated": 0,
+                "feared_events_skipped": 0,
                 "applied_controls_created": 0,
+                "applied_controls_updated": 0,
+                "applied_controls_skipped": 0,
             },
         }
 
@@ -2644,6 +2870,7 @@ class LoadFileView(APIView):
             # =========================================================
             # Step 1: Create Assets (primary and supporting)
             # =========================================================
+            stopped = False
             asset_name_to_id = {}
             # Track parent relationships to set up after all assets are created
             # Format: {child_name_lower: parent_name}
@@ -2655,9 +2882,49 @@ class LoadFileView(APIView):
             # Create supporting assets first (from dedicated sheet)
             for asset_data in arm_data.get("supporting_assets", []):
                 try:
+                    asset_name = asset_data["name"]
+                    # Check for existing asset with the same name in this folder
+                    existing_asset = Asset.objects.filter(
+                        name__iexact=asset_name,
+                        folder=folder,
+                    ).first()
+
+                    if existing_asset:
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                asset_name_to_id[asset_name.lower()] = existing_asset.id
+                                results["details"]["assets_skipped"] += 1
+                                if asset_data.get("parent_name"):
+                                    supporting_asset_parents[asset_name.lower()] = (
+                                        asset_data["parent_name"]
+                                    )
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "asset": asset_name,
+                                        "error": "Asset already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_asset.description = asset_data.get(
+                                    "description", existing_asset.description
+                                )
+                                existing_asset.type = "SP"
+                                existing_asset.save()
+                                asset_name_to_id[asset_name.lower()] = existing_asset.id
+                                results["details"]["assets_updated"] += 1
+                                if asset_data.get("parent_name"):
+                                    supporting_asset_parents[asset_name.lower()] = (
+                                        asset_data["parent_name"]
+                                    )
+                                continue
+
                     serializer = AssetWriteSerializer(
                         data={
-                            "name": asset_data["name"],
+                            "name": asset_name,
                             "description": asset_data["description"],
                             "type": "SP",
                             "folder": folder_id,
@@ -2666,17 +2933,17 @@ class LoadFileView(APIView):
                     )
                     if serializer.is_valid():
                         asset = serializer.save()
-                        asset_name_to_id[asset_data["name"].lower()] = asset.id
+                        asset_name_to_id[asset_name.lower()] = asset.id
                         results["details"]["assets_created"] += 1
 
                         # Track parent relationship if specified
                         if asset_data.get("parent_name"):
-                            supporting_asset_parents[asset_data["name"].lower()] = (
-                                asset_data["parent_name"]
-                            )
+                            supporting_asset_parents[asset_name.lower()] = asset_data[
+                                "parent_name"
+                            ]
                     else:
                         results["errors"].append(
-                            {"asset": asset_data["name"], "error": serializer.errors}
+                            {"asset": asset_name, "error": serializer.errors}
                         )
                 except Exception as e:
                     results["errors"].append(
@@ -2696,6 +2963,34 @@ class LoadFileView(APIView):
                     # Create any supporting assets mentioned in this primary asset
                     for supporting_name in supporting_names:
                         if supporting_name.lower() not in asset_name_to_id:
+                            # Check for existing asset
+                            existing_sp = Asset.objects.filter(
+                                name__iexact=supporting_name,
+                                folder=folder,
+                            ).first()
+
+                            if existing_sp:
+                                asset_name_to_id[supporting_name.lower()] = (
+                                    existing_sp.id
+                                )
+                                match on_conflict:
+                                    case ConflictMode.SKIP:
+                                        results["details"]["assets_skipped"] += 1
+                                    case ConflictMode.STOP:
+                                        results["errors"].append(
+                                            {
+                                                "asset": supporting_name,
+                                                "error": "Asset already exists (conflict policy: stop)",
+                                            }
+                                        )
+                                        stopped = True
+                                        break
+                                    case ConflictMode.UPDATE:
+                                        existing_sp.type = "SP"
+                                        existing_sp.save()
+                                        results["details"]["assets_updated"] += 1
+                                continue
+
                             serializer = AssetWriteSerializer(
                                 data={
                                     "name": supporting_name,
@@ -2709,10 +3004,49 @@ class LoadFileView(APIView):
                                 asset_name_to_id[supporting_name.lower()] = asset.id
                                 results["details"]["assets_created"] += 1
 
+                    if stopped:
+                        break
+
+                    # Check for existing primary asset
+                    primary_name = asset_data["name"]
+                    existing_primary = Asset.objects.filter(
+                        name__iexact=primary_name,
+                        folder=folder,
+                    ).first()
+
+                    if existing_primary:
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                asset_name_to_id[primary_name.lower()] = (
+                                    existing_primary.id
+                                )
+                                results["details"]["assets_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "asset": primary_name,
+                                        "error": "Asset already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_primary.description = asset_data.get(
+                                    "description", existing_primary.description
+                                )
+                                existing_primary.type = "PR"
+                                existing_primary.save()
+                                asset_name_to_id[primary_name.lower()] = (
+                                    existing_primary.id
+                                )
+                                results["details"]["assets_updated"] += 1
+                                continue
+
                     # Create the primary asset
                     serializer = AssetWriteSerializer(
                         data={
-                            "name": asset_data["name"],
+                            "name": primary_name,
                             "description": asset_data["description"],
                             "type": "PR",
                             "folder": folder_id,
@@ -2721,16 +3055,19 @@ class LoadFileView(APIView):
                     )
                     if serializer.is_valid():
                         asset = serializer.save()
-                        asset_name_to_id[asset_data["name"].lower()] = asset.id
+                        asset_name_to_id[primary_name.lower()] = asset.id
                         results["details"]["assets_created"] += 1
                     else:
                         results["errors"].append(
-                            {"asset": asset_data["name"], "error": serializer.errors}
+                            {"asset": primary_name, "error": serializer.errors}
                         )
                 except Exception as e:
                     results["errors"].append(
                         {"asset": asset_data["name"], "error": str(e)}
                     )
+
+            if stopped:
+                return results
 
             # =========================================================
             # Step 1b: Set up asset parent relationships
@@ -2787,14 +3124,48 @@ class LoadFileView(APIView):
                             f"Supporting asset '{supporting_name}' not found in asset_name_to_id"
                         )
 
+            if stopped:
+                return results
+
             # =========================================================
             # Step 2: Create Applied Controls
             # =========================================================
             for control_data in arm_data.get("applied_controls", []):
                 try:
+                    control_name = control_data["name"]
+                    # Check for existing applied control with the same name in this folder
+                    existing_control = AppliedControl.objects.filter(
+                        name__iexact=control_name,
+                        folder=folder,
+                    ).first()
+
+                    if existing_control:
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["applied_controls_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "control": control_name,
+                                        "error": "Applied control already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_control.description = control_data.get(
+                                    "description", existing_control.description
+                                )
+                                if control_data.get("ref_id"):
+                                    existing_control.ref_id = control_data["ref_id"]
+                                existing_control.save()
+                                results["details"]["applied_controls_updated"] += 1
+                                continue
+
                     serializer = AppliedControlWriteSerializer(
                         data={
-                            "name": control_data["name"],
+                            "name": control_name,
                             "description": control_data["description"],
                             "ref_id": control_data["ref_id"] or None,
                             "folder": folder_id,
@@ -2807,7 +3178,7 @@ class LoadFileView(APIView):
                     else:
                         results["errors"].append(
                             {
-                                "control": control_data["name"],
+                                "control": control_name,
                                 "error": serializer.errors,
                             }
                         )
@@ -2815,6 +3186,9 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {"control": control_data["name"], "error": str(e)}
                     )
+
+            if stopped:
+                return results
 
             # =========================================================
             # Step 3: Create EBIOS RM Study
@@ -2858,6 +3232,7 @@ class LoadFileView(APIView):
                 # =========================================================
                 for fe_data in arm_data.get("feared_events", []):
                     try:
+                        fe_name = fe_data["name"]
                         # Find linked assets
                         linked_asset_ids = []
                         for asset_name in fe_data.get("asset_names", []):
@@ -2865,10 +3240,46 @@ class LoadFileView(APIView):
                             if asset_id:
                                 linked_asset_ids.append(asset_id)
 
+                        # Check for existing feared event
+                        existing_fe = FearedEvent.objects.filter(
+                            ebios_rm_study=study,
+                            name__iexact=fe_name,
+                        ).first()
+
+                        if existing_fe:
+                            match on_conflict:
+                                case ConflictMode.SKIP:
+                                    results["details"]["feared_events_skipped"] += 1
+                                    continue
+                                case ConflictMode.STOP:
+                                    results["errors"].append(
+                                        {
+                                            "feared_event": fe_name,
+                                            "error": "Feared event already exists (conflict policy: stop)",
+                                        }
+                                    )
+                                    stopped = True
+                                    break
+                                case ConflictMode.UPDATE:
+                                    existing_fe.justification = fe_data.get(
+                                        "justification", existing_fe.justification
+                                    )
+                                    existing_fe.gravity = fe_data.get(
+                                        "gravity", existing_fe.gravity
+                                    )
+                                    existing_fe.is_selected = fe_data.get(
+                                        "is_selected", existing_fe.is_selected
+                                    )
+                                    existing_fe.save()
+                                    if linked_asset_ids:
+                                        existing_fe.assets.set(linked_asset_ids)
+                                    results["details"]["feared_events_updated"] += 1
+                                    continue
+
                         # Create feared event
                         feared_event = FearedEvent.objects.create(
                             ebios_rm_study=study,
-                            name=fe_data["name"],
+                            name=fe_name,
                             justification=fe_data.get("justification", ""),
                             gravity=fe_data.get("gravity", -1),
                             is_selected=fe_data.get("is_selected", False),
@@ -2885,15 +3296,26 @@ class LoadFileView(APIView):
                             {"feared_event": fe_data["name"], "error": str(e)}
                         )
 
-                # Mark step 3 (index 2) as done if we created feared events
-                if results["details"]["feared_events_created"] > 0:
+                # Mark step 3 (index 2) as done if we created or updated feared events
+                fe_count = (
+                    results["details"]["feared_events_created"]
+                    + results["details"]["feared_events_updated"]
+                )
+                if fe_count > 0:
                     study.meta["workshops"][0]["steps"][2]["status"] = "done"
                     meta_updated = True
+
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
 
                 # =========================================================
                 # Step 5: Create RoTo Couples (Workshop 2)
                 # =========================================================
                 results["details"]["roto_couples_created"] = 0
+                results["details"]["roto_couples_updated"] = 0
+                results["details"]["roto_couples_skipped"] = 0
 
                 roto_couples_data = arm_data.get("roto_couples", [])
                 logger.info(
@@ -2906,18 +3328,26 @@ class LoadFileView(APIView):
                     try:
                         # Find or create the risk origin terminology
                         risk_origin_name = roto_data["risk_origin"]
+                        normalized_name = risk_origin_name.lower().replace(" ", "_")
 
                         # Try to find existing terminology by name (case-insensitive)
+                        # Check both the original name and the normalized form
                         risk_origin = Terminology.objects.filter(
                             field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
                             name__iexact=risk_origin_name,
                         ).first()
 
                         if not risk_origin:
+                            risk_origin = Terminology.objects.filter(
+                                field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                                name__iexact=normalized_name,
+                            ).first()
+
+                        if not risk_origin:
                             # Create a new terminology entry for this risk origin
                             risk_origin = Terminology.objects.create(
                                 field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
-                                name=risk_origin_name.lower().replace(" ", "_"),
+                                name=normalized_name,
                                 is_visible=True,
                                 builtin=False,
                             )
@@ -2925,22 +3355,71 @@ class LoadFileView(APIView):
                                 f"Created new risk origin terminology: {risk_origin_name}"
                             )
 
-                        # Create the RoTo couple
-                        roto = RoTo.objects.create(
+                        # Check if a RoTo couple already exists for this study + risk_origin + target_objective
+                        existing_roto = RoTo.objects.filter(
                             ebios_rm_study=study,
                             risk_origin=risk_origin,
-                            target_objective=roto_data["target_objective"],
-                            motivation=roto_data.get("motivation", 0),
-                            resources=roto_data.get("resources", 0),
-                            activity=roto_data.get("activity", 0),
-                            is_selected=roto_data.get("is_selected", False),
-                            justification=roto_data.get("justification", ""),
-                        )
+                            target_objective__iexact=roto_data["target_objective"],
+                        ).first()
 
-                        results["details"]["roto_couples_created"] += 1
-                        logger.debug(
-                            f"Created RoTo couple: {risk_origin_name} - {roto_data['target_objective']}"
-                        )
+                        if existing_roto:
+                            match on_conflict:
+                                case ConflictMode.SKIP:
+                                    results["details"]["roto_couples_skipped"] += 1
+                                    logger.info(
+                                        f"[RoTo Import] Skipped existing RoTo couple: "
+                                        f"{risk_origin_name} - {roto_data['target_objective']}"
+                                    )
+                                    continue
+                                case ConflictMode.STOP:
+                                    results["errors"].append(
+                                        {
+                                            "roto_couple": f"{roto_data.get('risk_origin', 'unknown')} - {roto_data.get('target_objective', 'unknown')}",
+                                            "error": "RoTo couple already exists (conflict policy: stop)",
+                                        }
+                                    )
+                                    stopped = True
+                                    break
+                                case ConflictMode.UPDATE:
+                                    existing_roto.motivation = roto_data.get(
+                                        "motivation", existing_roto.motivation
+                                    )
+                                    existing_roto.resources = roto_data.get(
+                                        "resources", existing_roto.resources
+                                    )
+                                    existing_roto.activity = roto_data.get(
+                                        "activity", existing_roto.activity
+                                    )
+                                    existing_roto.is_selected = roto_data.get(
+                                        "is_selected", existing_roto.is_selected
+                                    )
+                                    existing_roto.justification = roto_data.get(
+                                        "justification", existing_roto.justification
+                                    )
+                                    existing_roto.save()
+                                    results["details"]["roto_couples_updated"] += 1
+                                    logger.info(
+                                        f"[RoTo Import] Updated existing RoTo couple: "
+                                        f"{risk_origin_name} - {roto_data['target_objective']}"
+                                    )
+                                    continue
+                        else:
+                            # Create the RoTo couple
+                            RoTo.objects.create(
+                                ebios_rm_study=study,
+                                risk_origin=risk_origin,
+                                target_objective=roto_data["target_objective"],
+                                motivation=roto_data.get("motivation", 0),
+                                resources=roto_data.get("resources", 0),
+                                activity=roto_data.get("activity", 0),
+                                is_selected=roto_data.get("is_selected", False),
+                                justification=roto_data.get("justification", ""),
+                            )
+
+                            results["details"]["roto_couples_created"] += 1
+                            logger.debug(
+                                f"Created RoTo couple: {risk_origin_name} - {roto_data['target_objective']}"
+                            )
 
                     except Exception as e:
                         results["errors"].append(
@@ -2950,8 +3429,12 @@ class LoadFileView(APIView):
                             }
                         )
 
-                # Mark workshop 2 step 1 (index 0) as done if we created RoTo couples
-                if results["details"]["roto_couples_created"] > 0:
+                # Mark workshop 2 step 1 (index 0) as done if we created or updated RoTo couples
+                roto_count = (
+                    results["details"]["roto_couples_created"]
+                    + results["details"]["roto_couples_updated"]
+                )
+                if roto_count > 0:
                     study.meta["workshops"][1]["steps"][0]["status"] = "done"
                     meta_updated = True
                     logger.info(
@@ -2970,11 +3453,18 @@ class LoadFileView(APIView):
                             "Marked workshop 2 step 2 as done (motivation/resources data captured)"
                         )
 
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
+
                 # =========================================================
                 # Step 6: Create Stakeholders (Workshop 3)
                 # =========================================================
                 results["details"]["entities_created"] = 0
                 results["details"]["stakeholders_created"] = 0
+                results["details"]["stakeholders_updated"] = 0
+                results["details"]["stakeholders_skipped"] = 0
 
                 # First, create or find category terminologies
                 category_name_to_terminology = {}
@@ -3048,6 +3538,83 @@ class LoadFileView(APIView):
                             ).first()
 
                         if category:
+                            # Check for existing stakeholder
+                            existing_stakeholder = Stakeholder.objects.filter(
+                                ebios_rm_study=study,
+                                entity=entity,
+                                category=category,
+                            ).first()
+
+                            if existing_stakeholder:
+                                match on_conflict:
+                                    case ConflictMode.SKIP:
+                                        results["details"]["stakeholders_skipped"] += 1
+                                        continue
+                                    case ConflictMode.STOP:
+                                        results["errors"].append(
+                                            {
+                                                "stakeholder": entity_name,
+                                                "error": "Stakeholder already exists (conflict policy: stop)",
+                                            }
+                                        )
+                                        stopped = True
+                                        break
+                                    case ConflictMode.UPDATE:
+                                        existing_stakeholder.is_selected = (
+                                            stakeholder_data.get(
+                                                "is_selected",
+                                                existing_stakeholder.is_selected,
+                                            )
+                                        )
+                                        existing_stakeholder.current_dependency = (
+                                            stakeholder_data.get(
+                                                "current_dependency",
+                                                existing_stakeholder.current_dependency,
+                                            )
+                                        )
+                                        existing_stakeholder.current_penetration = stakeholder_data.get(
+                                            "current_penetration",
+                                            existing_stakeholder.current_penetration,
+                                        )
+                                        existing_stakeholder.current_maturity = (
+                                            stakeholder_data.get(
+                                                "current_maturity",
+                                                existing_stakeholder.current_maturity,
+                                            )
+                                        )
+                                        existing_stakeholder.current_trust = (
+                                            stakeholder_data.get(
+                                                "current_trust",
+                                                existing_stakeholder.current_trust,
+                                            )
+                                        )
+                                        existing_stakeholder.residual_dependency = stakeholder_data.get(
+                                            "residual_dependency",
+                                            existing_stakeholder.residual_dependency,
+                                        )
+                                        existing_stakeholder.residual_penetration = stakeholder_data.get(
+                                            "residual_penetration",
+                                            existing_stakeholder.residual_penetration,
+                                        )
+                                        existing_stakeholder.residual_maturity = (
+                                            stakeholder_data.get(
+                                                "residual_maturity",
+                                                existing_stakeholder.residual_maturity,
+                                            )
+                                        )
+                                        existing_stakeholder.residual_trust = (
+                                            stakeholder_data.get(
+                                                "residual_trust",
+                                                existing_stakeholder.residual_trust,
+                                            )
+                                        )
+                                        existing_stakeholder.save()
+                                        results["details"]["stakeholders_updated"] += 1
+                                        logger.debug(
+                                            f"Updated stakeholder: {entity_name} ({category.name})"
+                                        )
+                                        continue
+
                             # Create the stakeholder
                             stakeholder = Stakeholder.objects.create(
                                 ebios_rm_study=study,
@@ -3097,8 +3664,12 @@ class LoadFileView(APIView):
                             }
                         )
 
-                # Mark workshop 3 step 1 (index 0) as done if we created stakeholders
-                if results["details"]["stakeholders_created"] > 0:
+                # Mark workshop 3 step 1 (index 0) as done if we created or updated stakeholders
+                stakeholder_count = (
+                    results["details"]["stakeholders_created"]
+                    + results["details"]["stakeholders_updated"]
+                )
+                if stakeholder_count > 0:
                     study.meta["workshops"][2]["steps"][0]["status"] = "done"
                     meta_updated = True
                     logger.info(
@@ -3118,10 +3689,17 @@ class LoadFileView(APIView):
                             "Marked workshop 3 step 2 as done (assessment data captured)"
                         )
 
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
+
                 # =========================================================
                 # Step 7: Create Strategic Scenarios and Attack Paths (Workshop 3)
                 # =========================================================
                 results["details"]["strategic_scenarios_created"] = 0
+                results["details"]["strategic_scenarios_updated"] = 0
+                results["details"]["strategic_scenarios_skipped"] = 0
                 results["details"]["attack_paths_created"] = 0
 
                 logger.info(
@@ -3238,6 +3816,66 @@ class LoadFileView(APIView):
                             f"to RoTo id={roto.id} ('{roto.risk_origin.name}' - '{roto.target_objective}')"
                         )
 
+                        # Check if a strategic scenario already exists for this study + name + ref_id
+                        existing_scenario = StrategicScenario.objects.filter(
+                            ebios_rm_study=study,
+                            name__iexact=scenario_name,
+                        ).first()
+
+                        if existing_scenario:
+                            match on_conflict:
+                                case ConflictMode.SKIP:
+                                    results["details"][
+                                        "strategic_scenarios_skipped"
+                                    ] += 1
+                                    logger.info(
+                                        f"[Strategic Scenarios Import] Skipped existing scenario: '{scenario_name}'"
+                                    )
+                                    continue
+                                case ConflictMode.STOP:
+                                    results["errors"].append(
+                                        {
+                                            "strategic_scenario": scenario_name,
+                                            "error": "Strategic scenario already exists (conflict policy: stop)",
+                                        }
+                                    )
+                                    stopped = True
+                                    break
+                                case ConflictMode.UPDATE:
+                                    existing_scenario.ro_to_couple = roto
+                                    existing_scenario.ref_id = scenario_data.get(
+                                        "ref_id", existing_scenario.ref_id
+                                    )
+                                    existing_scenario.save()
+                                    results["details"][
+                                        "strategic_scenarios_updated"
+                                    ] += 1
+                                    logger.info(
+                                        f"[Strategic Scenarios Import] Updated existing scenario: '{scenario_name}'"
+                                    )
+                                    # Still create attack path if missing
+                                    attack_path_name = scenario_data.get(
+                                        "attack_path_name", ""
+                                    )
+                                    if (
+                                        attack_path_name
+                                        and not AttackPath.objects.filter(
+                                            ebios_rm_study=study,
+                                            strategic_scenario=existing_scenario,
+                                            name__iexact=attack_path_name,
+                                        ).exists()
+                                    ):
+                                        AttackPath.objects.create(
+                                            ebios_rm_study=study,
+                                            strategic_scenario=existing_scenario,
+                                            name=attack_path_name,
+                                            ref_id=scenario_data.get(
+                                                "attack_path_ref_id", ""
+                                            ),
+                                        )
+                                        results["details"]["attack_paths_created"] += 1
+                                    continue
+
                         # Create the strategic scenario
                         strategic_scenario = StrategicScenario.objects.create(
                             ebios_rm_study=study,
@@ -3278,8 +3916,12 @@ class LoadFileView(APIView):
                             }
                         )
 
-                # Mark workshop 3 step 3 (index 2) as done if we created strategic scenarios
-                if results["details"]["strategic_scenarios_created"] > 0:
+                # Mark workshop 3 step 3 (index 2) as done if we created or updated strategic scenarios
+                scenario_count = (
+                    results["details"]["strategic_scenarios_created"]
+                    + results["details"]["strategic_scenarios_updated"]
+                )
+                if scenario_count > 0:
                     study.meta["workshops"][2]["steps"][2]["status"] = "done"
                     meta_updated = True
                     logger.info(
@@ -3287,16 +3929,57 @@ class LoadFileView(APIView):
                         f"{results['details']['attack_paths_created']} attack paths"
                     )
 
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
+
                 # =========================================================
                 # Step 8: Create Elementary Actions (Workshop 4)
                 # =========================================================
                 results["details"]["elementary_actions_created"] = 0
+                results["details"]["elementary_actions_updated"] = 0
+                results["details"]["elementary_actions_skipped"] = 0
 
                 for ea_data in arm_data.get("elementary_actions", []):
                     try:
                         ea_name = ea_data["name"]
                         if not ea_name:
                             continue
+
+                        # Check for existing elementary action
+                        existing_ea = ElementaryAction.objects.filter(
+                            name__iexact=ea_name,
+                            folder=folder,
+                        ).first()
+
+                        if existing_ea:
+                            match on_conflict:
+                                case ConflictMode.SKIP:
+                                    results["details"][
+                                        "elementary_actions_skipped"
+                                    ] += 1
+                                    continue
+                                case ConflictMode.STOP:
+                                    results["errors"].append(
+                                        {
+                                            "elementary_action": ea_name,
+                                            "error": "Elementary action already exists (conflict policy: stop)",
+                                        }
+                                    )
+                                    stopped = True
+                                    break
+                                case ConflictMode.UPDATE:
+                                    existing_ea.description = ea_data.get(
+                                        "description", existing_ea.description
+                                    )
+                                    if ea_data.get("ref_id"):
+                                        existing_ea.ref_id = ea_data["ref_id"]
+                                    existing_ea.save()
+                                    results["details"][
+                                        "elementary_actions_updated"
+                                    ] += 1
+                                    continue
 
                         # Create the elementary action
                         elementary_action = ElementaryAction.objects.create(
@@ -3317,8 +4000,12 @@ class LoadFileView(APIView):
                             }
                         )
 
-                # Mark workshop 4 step 1 (index 0) as done if we created elementary actions
-                if results["details"]["elementary_actions_created"] > 0:
+                # Mark workshop 4 step 1 (index 0) as done if we created or updated elementary actions
+                ea_count = (
+                    results["details"]["elementary_actions_created"]
+                    + results["details"]["elementary_actions_updated"]
+                )
+                if ea_count > 0:
                     study.meta["workshops"][3]["steps"][0]["status"] = "done"
                     meta_updated = True
                     logger.info(
@@ -3329,7 +4016,8 @@ class LoadFileView(APIView):
                 if meta_updated:
                     study.save()
 
-                results["successful"] = 1
+                if not stopped:
+                    results["successful"] = 1
 
             else:
                 results["failed"] = 1
@@ -3355,7 +4043,12 @@ class LoadFileView(APIView):
         return results
 
     def _process_ebios_rm_study_excel(
-        self, request, excel_file: io.BytesIO, folder_id, matrix_id
+        self,
+        request,
+        excel_file: io.BytesIO,
+        folder_id,
+        matrix_id,
+        on_conflict=ConflictMode.STOP,
     ):
         """
         Process EBIOS RM Study from the Excel export format.
@@ -3370,14 +4063,32 @@ class LoadFileView(APIView):
             "details": {
                 "study": None,
                 "assets_created": 0,
+                "assets_updated": 0,
+                "assets_skipped": 0,
                 "feared_events_created": 0,
+                "feared_events_updated": 0,
+                "feared_events_skipped": 0,
                 "ro_to_couples_created": 0,
+                "ro_to_couples_updated": 0,
+                "ro_to_couples_skipped": 0,
                 "stakeholders_created": 0,
+                "stakeholders_updated": 0,
+                "stakeholders_skipped": 0,
                 "strategic_scenarios_created": 0,
+                "strategic_scenarios_updated": 0,
+                "strategic_scenarios_skipped": 0,
                 "attack_paths_created": 0,
+                "attack_paths_updated": 0,
+                "attack_paths_skipped": 0,
                 "elementary_actions_created": 0,
+                "elementary_actions_updated": 0,
+                "elementary_actions_skipped": 0,
                 "operational_scenarios_created": 0,
+                "operational_scenarios_updated": 0,
+                "operational_scenarios_skipped": 0,
                 "operating_modes_created": 0,
+                "operating_modes_updated": 0,
+                "operating_modes_skipped": 0,
             },
         }
 
@@ -3412,10 +4123,45 @@ class LoadFileView(APIView):
             if serializer.is_valid():
                 study = serializer.save()
                 results["details"]["study"] = str(study.id)
+                stopped = False
 
                 # Create assets and build name->id mapping
                 asset_name_to_id = {}
                 for asset_data in data.get("assets", []):
+                    existing_asset = Asset.objects.filter(
+                        name__iexact=asset_data["name"],
+                        folder=folder,
+                    ).first()
+
+                    if existing_asset:
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                asset_name_to_id[existing_asset.name] = existing_asset
+                                results["details"]["assets_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "asset": asset_data["name"],
+                                        "error": "Asset already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                if asset_data.get("description"):
+                                    existing_asset.description = asset_data[
+                                        "description"
+                                    ]
+                                if asset_data.get("ref_id"):
+                                    existing_asset.ref_id = asset_data["ref_id"]
+                                if asset_data.get("type"):
+                                    existing_asset.type = asset_data["type"]
+                                existing_asset.save()
+                                asset_name_to_id[existing_asset.name] = existing_asset
+                                results["details"]["assets_updated"] += 1
+                                continue
+
                     asset, created = Asset.objects.get_or_create(
                         name=asset_data["name"],
                         folder=folder,
@@ -3432,16 +4178,61 @@ class LoadFileView(APIView):
                 # Link assets to study
                 study.assets.set(asset_name_to_id.values())
 
+                if stopped:
+                    return results
+
                 # Create feared events and build name lookup
                 feared_event_lookup = {}
                 for fe_data in data.get("feared_events", []):
+                    fe_name = fe_data["name"]
                     # Map gravity display name to value
                     gravity_val = self._map_risk_value(
                         fe_data.get("gravity", ""), matrix_mappings["impact"]
                     )
+
+                    existing_fe = FearedEvent.objects.filter(
+                        ebios_rm_study=study,
+                        name__iexact=fe_name,
+                    ).first()
+
+                    if existing_fe:
+                        feared_event_lookup[existing_fe.name] = existing_fe
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["feared_events_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "feared_event": fe_name,
+                                        "error": "Feared event already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_fe.gravity = gravity_val
+                                existing_fe.is_selected = fe_data.get(
+                                    "is_selected", existing_fe.is_selected
+                                )
+                                existing_fe.justification = fe_data.get(
+                                    "justification", existing_fe.justification
+                                )
+                                existing_fe.description = fe_data.get(
+                                    "description", existing_fe.description
+                                )
+                                existing_fe.save()
+                                for asset_name in fe_data.get("assets", []):
+                                    if asset_name in asset_name_to_id:
+                                        existing_fe.assets.add(
+                                            asset_name_to_id[asset_name]
+                                        )
+                                results["details"]["feared_events_updated"] += 1
+                                continue
+
                     fe = FearedEvent.objects.create(
                         ebios_rm_study=study,
-                        name=fe_data["name"],
+                        name=fe_name,
                         ref_id=fe_data.get("ref_id", ""),
                         description=fe_data.get("description", ""),
                         gravity=gravity_val,
@@ -3455,6 +4246,9 @@ class LoadFileView(APIView):
                             fe.assets.add(asset_name_to_id[asset_name])
                     feared_event_lookup[fe.name] = fe
                     results["details"]["feared_events_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create RO/TO couples
                 roto_lookup = {}
@@ -3476,10 +4270,58 @@ class LoadFileView(APIView):
                                 is_visible=True,
                             )
 
+                    target_objective = roto_data.get("target_objective", "")
+
+                    # Check for existing RoTo couple
+                    existing_roto = (
+                        RoTo.objects.filter(
+                            ebios_rm_study=study,
+                            risk_origin=risk_origin,
+                            target_objective__iexact=target_objective,
+                        ).first()
+                        if risk_origin
+                        else None
+                    )
+
+                    if existing_roto:
+                        key = (
+                            risk_origin_name.lower() if risk_origin_name else "",
+                            target_objective.lower(),
+                        )
+                        roto_lookup[key] = existing_roto
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["ro_to_couples_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "roto_couple": f"{risk_origin_name} - {target_objective}",
+                                        "error": "RoTo couple already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_roto.is_selected = roto_data.get(
+                                    "is_selected", existing_roto.is_selected
+                                )
+                                existing_roto.justification = roto_data.get(
+                                    "justification", existing_roto.justification
+                                )
+                                existing_roto.save()
+                                for fe_name in roto_data.get("feared_events", []):
+                                    if fe_name in feared_event_lookup:
+                                        existing_roto.feared_events.add(
+                                            feared_event_lookup[fe_name]
+                                        )
+                                results["details"]["ro_to_couples_updated"] += 1
+                                continue
+
                     roto = RoTo.objects.create(
                         ebios_rm_study=study,
                         risk_origin=risk_origin,
-                        target_objective=roto_data.get("target_objective", ""),
+                        target_objective=target_objective,
                         is_selected=roto_data.get("is_selected", False),
                         justification=roto_data.get("justification", ""),
                         folder=folder,
@@ -3491,10 +4333,13 @@ class LoadFileView(APIView):
                     # Build lookup key
                     key = (
                         risk_origin_name.lower() if risk_origin_name else "",
-                        roto_data.get("target_objective", "").lower(),
+                        target_objective.lower(),
                     )
                     roto_lookup[key] = roto
                     results["details"]["ro_to_couples_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create stakeholders
                 stakeholder_lookup = {}
@@ -3523,6 +4368,65 @@ class LoadFileView(APIView):
                                 is_visible=True,
                             )
 
+                    # Check for existing stakeholder
+                    existing_sh = None
+                    if entity and category:
+                        existing_sh = Stakeholder.objects.filter(
+                            ebios_rm_study=study,
+                            entity=entity,
+                            category=category,
+                        ).first()
+
+                    if existing_sh:
+                        stakeholder_lookup[str(existing_sh)] = existing_sh
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["stakeholders_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "stakeholder": entity_name,
+                                        "error": "Stakeholder already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                val = sh_data.get("current_dependency")
+                                if val is not None:
+                                    existing_sh.current_dependency = val
+                                val = sh_data.get("current_penetration")
+                                if val is not None:
+                                    existing_sh.current_penetration = val
+                                val = sh_data.get("current_maturity")
+                                if val is not None:
+                                    existing_sh.current_maturity = val
+                                val = sh_data.get("current_trust")
+                                if val is not None:
+                                    existing_sh.current_trust = val
+                                val = sh_data.get("residual_dependency")
+                                if val is not None:
+                                    existing_sh.residual_dependency = val
+                                val = sh_data.get("residual_penetration")
+                                if val is not None:
+                                    existing_sh.residual_penetration = val
+                                val = sh_data.get("residual_maturity")
+                                if val is not None:
+                                    existing_sh.residual_maturity = val
+                                val = sh_data.get("residual_trust")
+                                if val is not None:
+                                    existing_sh.residual_trust = val
+                                existing_sh.is_selected = sh_data.get(
+                                    "is_selected", existing_sh.is_selected
+                                )
+                                existing_sh.justification = sh_data.get(
+                                    "justification", existing_sh.justification
+                                )
+                                existing_sh.save()
+                                results["details"]["stakeholders_updated"] += 1
+                                continue
+
                     stakeholder = Stakeholder.objects.create(
                         ebios_rm_study=study,
                         entity=entity,
@@ -3542,16 +4446,51 @@ class LoadFileView(APIView):
                     stakeholder_lookup[str(stakeholder)] = stakeholder
                     results["details"]["stakeholders_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create strategic scenarios
                 scenario_lookup = {}
                 for ss_data in data.get("strategic_scenarios", []):
                     ro_name = ss_data.get("risk_origin", "").lower()
                     to_name = ss_data.get("target_objective", "").lower()
                     roto = roto_lookup.get((ro_name, to_name))
+                    ss_name = ss_data["name"]
+
+                    existing_ss = StrategicScenario.objects.filter(
+                        ebios_rm_study=study,
+                        name__iexact=ss_name,
+                    ).first()
+
+                    if existing_ss:
+                        scenario_lookup[existing_ss.name] = existing_ss
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["strategic_scenarios_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "strategic_scenario": ss_name,
+                                        "error": "Strategic scenario already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                if roto:
+                                    existing_ss.ro_to_couple = roto
+                                if ss_data.get("ref_id"):
+                                    existing_ss.ref_id = ss_data["ref_id"]
+                                if ss_data.get("description"):
+                                    existing_ss.description = ss_data["description"]
+                                existing_ss.save()
+                                results["details"]["strategic_scenarios_updated"] += 1
+                                continue
 
                     scenario = StrategicScenario.objects.create(
                         ebios_rm_study=study,
-                        name=ss_data["name"],
+                        name=ss_name,
                         ref_id=ss_data.get("ref_id", ""),
                         description=ss_data.get("description", ""),
                         ro_to_couple=roto,
@@ -3560,15 +4499,61 @@ class LoadFileView(APIView):
                     scenario_lookup[scenario.name] = scenario
                     results["details"]["strategic_scenarios_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create attack paths
                 attack_path_lookup = {}
                 for ap_data in data.get("attack_paths", []):
                     scenario_name = ap_data.get("strategic_scenario", "")
                     scenario = scenario_lookup.get(scenario_name)
+                    ap_name = ap_data["name"]
+
+                    existing_ap = AttackPath.objects.filter(
+                        ebios_rm_study=study,
+                        name__iexact=ap_name,
+                    ).first()
+
+                    if existing_ap:
+                        attack_path_lookup[existing_ap.name] = existing_ap
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["attack_paths_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "attack_path": ap_name,
+                                        "error": "Attack path already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                if scenario:
+                                    existing_ap.strategic_scenario = scenario
+                                if ap_data.get("ref_id"):
+                                    existing_ap.ref_id = ap_data["ref_id"]
+                                if ap_data.get("description"):
+                                    existing_ap.description = ap_data["description"]
+                                existing_ap.is_selected = ap_data.get(
+                                    "is_selected", existing_ap.is_selected
+                                )
+                                existing_ap.justification = ap_data.get(
+                                    "justification", existing_ap.justification
+                                )
+                                existing_ap.save()
+                                for sh_str in ap_data.get("stakeholders", []):
+                                    if sh_str in stakeholder_lookup:
+                                        existing_ap.stakeholders.add(
+                                            stakeholder_lookup[sh_str]
+                                        )
+                                results["details"]["attack_paths_updated"] += 1
+                                continue
 
                     attack_path = AttackPath.objects.create(
                         ebios_rm_study=study,
-                        name=ap_data["name"],
+                        name=ap_name,
                         ref_id=ap_data.get("ref_id", ""),
                         description=ap_data.get("description", ""),
                         strategic_scenario=scenario,
@@ -3583,9 +4568,13 @@ class LoadFileView(APIView):
                     attack_path_lookup[attack_path.name] = attack_path
                     results["details"]["attack_paths_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create elementary actions
                 ea_lookup = {}
                 for ea_data in data.get("elementary_actions", []):
+                    ea_name = ea_data["name"]
                     # Map attack_stage display name back to value
                     attack_stage = 0  # Default to KNOW
                     stage_name = ea_data.get("attack_stage", "").lower()
@@ -3596,8 +4585,38 @@ class LoadFileView(APIView):
                     elif "exploit" in stage_name:
                         attack_stage = 3
 
+                    existing_ea = ElementaryAction.objects.filter(
+                        name__iexact=ea_name,
+                        folder=folder,
+                    ).first()
+
+                    if existing_ea:
+                        ea_lookup[existing_ea.name] = existing_ea
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["elementary_actions_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "elementary_action": ea_name,
+                                        "error": "Elementary action already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                if ea_data.get("ref_id"):
+                                    existing_ea.ref_id = ea_data["ref_id"]
+                                if ea_data.get("description"):
+                                    existing_ea.description = ea_data["description"]
+                                existing_ea.attack_stage = attack_stage
+                                existing_ea.save()
+                                results["details"]["elementary_actions_updated"] += 1
+                                continue
+
                     ea = ElementaryAction.objects.create(
-                        name=ea_data["name"],
+                        name=ea_name,
                         ref_id=ea_data.get("ref_id", ""),
                         description=ea_data.get("description", ""),
                         attack_stage=attack_stage,
@@ -3605,6 +4624,9 @@ class LoadFileView(APIView):
                     )
                     ea_lookup[ea.name] = ea
                     results["details"]["elementary_actions_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create operational scenarios
                 # Note: OperationalScenario.name is a computed property from attack_path
@@ -3623,6 +4645,43 @@ class LoadFileView(APIView):
                         os_data.get("likelihood", ""), matrix_mappings["probability"]
                     )
 
+                    # Check for existing operational scenario by attack_path
+                    existing_os = OperationalScenario.objects.filter(
+                        ebios_rm_study=study,
+                        attack_path=attack_path,
+                    ).first()
+
+                    if existing_os:
+                        op_scenario_lookup[existing_os.name] = existing_os
+                        match on_conflict:
+                            case ConflictMode.SKIP:
+                                results["details"]["operational_scenarios_skipped"] += 1
+                                continue
+                            case ConflictMode.STOP:
+                                results["errors"].append(
+                                    {
+                                        "operational_scenario": ap_name,
+                                        "error": "Operational scenario already exists (conflict policy: stop)",
+                                    }
+                                )
+                                stopped = True
+                                break
+                            case ConflictMode.UPDATE:
+                                existing_os.operating_modes_description = os_data.get(
+                                    "operating_modes_description",
+                                    existing_os.operating_modes_description,
+                                )
+                                existing_os.likelihood = likelihood_val
+                                existing_os.is_selected = os_data.get(
+                                    "is_selected", existing_os.is_selected
+                                )
+                                existing_os.justification = os_data.get(
+                                    "justification", existing_os.justification
+                                )
+                                existing_os.save()
+                                results["details"]["operational_scenarios_updated"] += 1
+                                continue
+
                     op_scenario = OperationalScenario.objects.create(
                         ebios_rm_study=study,
                         attack_path=attack_path,
@@ -3637,10 +4696,14 @@ class LoadFileView(APIView):
                     op_scenario_lookup[op_scenario.name] = op_scenario
                     results["details"]["operational_scenarios_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create operating modes
                 for om_data in data.get("operating_modes", []):
                     os_name = om_data.get("operational_scenario", "")
                     op_scenario = op_scenario_lookup.get(os_name)
+                    om_name = om_data["name"]
 
                     if op_scenario:
                         # Map likelihood display name to value
@@ -3649,8 +4712,45 @@ class LoadFileView(APIView):
                             matrix_mappings["probability"],
                         )
 
+                        # Check for existing operating mode
+                        existing_om = OperatingMode.objects.filter(
+                            name__iexact=om_name,
+                            operational_scenario=op_scenario,
+                        ).first()
+
+                        if existing_om:
+                            match on_conflict:
+                                case ConflictMode.SKIP:
+                                    results["details"]["operating_modes_skipped"] += 1
+                                    continue
+                                case ConflictMode.STOP:
+                                    results["errors"].append(
+                                        {
+                                            "operating_mode": om_name,
+                                            "error": "Operating mode already exists (conflict policy: stop)",
+                                        }
+                                    )
+                                    stopped = True
+                                    break
+                                case ConflictMode.UPDATE:
+                                    if om_data.get("ref_id"):
+                                        existing_om.ref_id = om_data["ref_id"]
+                                    if om_data.get("description"):
+                                        existing_om.description = om_data["description"]
+                                    existing_om.likelihood = om_likelihood
+                                    existing_om.save()
+                                    for ea_name in om_data.get(
+                                        "elementary_actions", []
+                                    ):
+                                        if ea_name in ea_lookup:
+                                            existing_om.elementary_actions.add(
+                                                ea_lookup[ea_name]
+                                            )
+                                    results["details"]["operating_modes_updated"] += 1
+                                    continue
+
                         om = OperatingMode.objects.create(
-                            name=om_data["name"],
+                            name=om_name,
                             ref_id=om_data.get("ref_id", ""),
                             description=om_data.get("description", ""),
                             operational_scenario=op_scenario,
@@ -3663,7 +4763,8 @@ class LoadFileView(APIView):
                                 om.elementary_actions.add(ea_lookup[ea_name])
                         results["details"]["operating_modes_created"] += 1
 
-                results["successful"] = 1
+                if not stopped:
+                    results["successful"] = 1
 
             else:
                 results["failed"] = 1
