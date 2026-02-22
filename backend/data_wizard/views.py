@@ -4016,7 +4016,8 @@ class LoadFileView(APIView):
                 if meta_updated:
                     study.save()
 
-                results["successful"] = 1
+                if not stopped:
+                    results["successful"] = 1
 
             else:
                 results["failed"] = 1
@@ -4062,14 +4063,32 @@ class LoadFileView(APIView):
             "details": {
                 "study": None,
                 "assets_created": 0,
+                "assets_updated": 0,
+                "assets_skipped": 0,
                 "feared_events_created": 0,
+                "feared_events_updated": 0,
+                "feared_events_skipped": 0,
                 "ro_to_couples_created": 0,
+                "ro_to_couples_updated": 0,
+                "ro_to_couples_skipped": 0,
                 "stakeholders_created": 0,
+                "stakeholders_updated": 0,
+                "stakeholders_skipped": 0,
                 "strategic_scenarios_created": 0,
+                "strategic_scenarios_updated": 0,
+                "strategic_scenarios_skipped": 0,
                 "attack_paths_created": 0,
+                "attack_paths_updated": 0,
+                "attack_paths_skipped": 0,
                 "elementary_actions_created": 0,
+                "elementary_actions_updated": 0,
+                "elementary_actions_skipped": 0,
                 "operational_scenarios_created": 0,
+                "operational_scenarios_updated": 0,
+                "operational_scenarios_skipped": 0,
                 "operating_modes_created": 0,
+                "operating_modes_updated": 0,
+                "operating_modes_skipped": 0,
             },
         }
 
@@ -4118,6 +4137,7 @@ class LoadFileView(APIView):
                         match on_conflict:
                             case ConflictMode.SKIP:
                                 asset_name_to_id[existing_asset.name] = existing_asset
+                                results["details"]["assets_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4139,6 +4159,7 @@ class LoadFileView(APIView):
                                     existing_asset.type = asset_data["type"]
                                 existing_asset.save()
                                 asset_name_to_id[existing_asset.name] = existing_asset
+                                results["details"]["assets_updated"] += 1
                                 continue
 
                     asset, created = Asset.objects.get_or_create(
@@ -4178,6 +4199,7 @@ class LoadFileView(APIView):
                         feared_event_lookup[existing_fe.name] = existing_fe
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["feared_events_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4205,6 +4227,7 @@ class LoadFileView(APIView):
                                         existing_fe.assets.add(
                                             asset_name_to_id[asset_name]
                                         )
+                                results["details"]["feared_events_updated"] += 1
                                 continue
 
                     fe = FearedEvent.objects.create(
@@ -4268,6 +4291,7 @@ class LoadFileView(APIView):
                         roto_lookup[key] = existing_roto
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["ro_to_couples_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4291,6 +4315,7 @@ class LoadFileView(APIView):
                                         existing_roto.feared_events.add(
                                             feared_event_lookup[fe_name]
                                         )
+                                results["details"]["ro_to_couples_updated"] += 1
                                 continue
 
                     roto = RoTo.objects.create(
@@ -4356,6 +4381,7 @@ class LoadFileView(APIView):
                         stakeholder_lookup[str(existing_sh)] = existing_sh
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["stakeholders_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4398,6 +4424,7 @@ class LoadFileView(APIView):
                                     "justification", existing_sh.justification
                                 )
                                 existing_sh.save()
+                                results["details"]["stakeholders_updated"] += 1
                                 continue
 
                     stakeholder = Stakeholder.objects.create(
@@ -4439,6 +4466,7 @@ class LoadFileView(APIView):
                         scenario_lookup[existing_ss.name] = existing_ss
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["strategic_scenarios_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4457,6 +4485,7 @@ class LoadFileView(APIView):
                                 if ss_data.get("description"):
                                     existing_ss.description = ss_data["description"]
                                 existing_ss.save()
+                                results["details"]["strategic_scenarios_updated"] += 1
                                 continue
 
                     scenario = StrategicScenario.objects.create(
@@ -4489,6 +4518,7 @@ class LoadFileView(APIView):
                         attack_path_lookup[existing_ap.name] = existing_ap
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["attack_paths_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4518,6 +4548,7 @@ class LoadFileView(APIView):
                                         existing_ap.stakeholders.add(
                                             stakeholder_lookup[sh_str]
                                         )
+                                results["details"]["attack_paths_updated"] += 1
                                 continue
 
                     attack_path = AttackPath.objects.create(
@@ -4563,6 +4594,7 @@ class LoadFileView(APIView):
                         ea_lookup[existing_ea.name] = existing_ea
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["elementary_actions_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4580,6 +4612,7 @@ class LoadFileView(APIView):
                                     existing_ea.description = ea_data["description"]
                                 existing_ea.attack_stage = attack_stage
                                 existing_ea.save()
+                                results["details"]["elementary_actions_updated"] += 1
                                 continue
 
                     ea = ElementaryAction.objects.create(
@@ -4622,6 +4655,7 @@ class LoadFileView(APIView):
                         op_scenario_lookup[existing_os.name] = existing_os
                         match on_conflict:
                             case ConflictMode.SKIP:
+                                results["details"]["operational_scenarios_skipped"] += 1
                                 continue
                             case ConflictMode.STOP:
                                 results["errors"].append(
@@ -4645,6 +4679,7 @@ class LoadFileView(APIView):
                                     "justification", existing_os.justification
                                 )
                                 existing_os.save()
+                                results["details"]["operational_scenarios_updated"] += 1
                                 continue
 
                     op_scenario = OperationalScenario.objects.create(
@@ -4686,6 +4721,7 @@ class LoadFileView(APIView):
                         if existing_om:
                             match on_conflict:
                                 case ConflictMode.SKIP:
+                                    results["details"]["operating_modes_skipped"] += 1
                                     continue
                                 case ConflictMode.STOP:
                                     results["errors"].append(
@@ -4710,6 +4746,7 @@ class LoadFileView(APIView):
                                             existing_om.elementary_actions.add(
                                                 ea_lookup[ea_name]
                                             )
+                                    results["details"]["operating_modes_updated"] += 1
                                     continue
 
                         om = OperatingMode.objects.create(
@@ -4726,7 +4763,8 @@ class LoadFileView(APIView):
                                 om.elementary_actions.add(ea_lookup[ea_name])
                         results["details"]["operating_modes_created"] += 1
 
-                results["successful"] = 1
+                if not stopped:
+                    results["successful"] = 1
 
             else:
                 results["failed"] = 1
