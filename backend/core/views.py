@@ -8031,10 +8031,10 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
-        # RBAC: scope queries to objects the user can access
+        # RBAC: scope to objects the user has change permission on (upload is a write)
         accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, Evidence
-        )[0]
+        )[1]
 
         try:
             revision = EvidenceRevision.objects.get(
