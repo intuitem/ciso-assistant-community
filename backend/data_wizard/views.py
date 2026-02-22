@@ -1796,6 +1796,8 @@ class LoadFileView(APIView):
                     request, entities_records, folders_map, folder_id, on_conflict
                 )
                 overall_results["entities"] = entities_result
+                if entities_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Entities' sheet found in Excel file")
 
@@ -1815,6 +1817,8 @@ class LoadFileView(APIView):
                     on_conflict,
                 )
                 overall_results["solutions"] = solutions_result
+                if solutions_result.get("stopped"):
+                    return overall_results
             else:
                 logger.warning("No 'Solutions' sheet found in Excel file")
 
@@ -1928,17 +1932,42 @@ class LoadFileView(APIView):
                                     "error": "Entity already exists (conflict policy: stop)",
                                 }
                             )
+                            results["stopped"] = True
                             break
                         case ConflictMode.UPDATE:
+                            update_data = {
+                                "ref_id": ref_id,
+                                "name": record.get("name"),
+                                "description": record.get("description", ""),
+                                "mission": record.get("mission", ""),
+                                "folder": domain,
+                            }
+                            if record.get("country"):
+                                update_data["country"] = record.get("country")
+                            if record.get("currency"):
+                                update_data["currency"] = record.get("currency")
+                            for field in [
+                                "dependency",
+                                "penetration",
+                                "maturity",
+                                "trust",
+                            ]:
+                                value = record.get(field)
+                                if value != "" and value is not None:
+                                    try:
+                                        update_data[f"default_{field}"] = int(value)
+                                    except (ValueError, TypeError):
+                                        pass
+                            legal_ids = {}
+                            for id_type in ["lei", "euid", "duns", "vat"]:
+                                value = record.get(id_type, "")
+                                if value and str(value).strip():
+                                    legal_ids[id_type.upper()] = str(value).strip()
+                            if legal_ids:
+                                update_data["legal_identifiers"] = legal_ids
                             serializer = EntityWriteSerializer(
                                 instance=existing_entity,
-                                data={
-                                    "ref_id": ref_id,
-                                    "name": record.get("name"),
-                                    "description": record.get("description", ""),
-                                    "mission": record.get("mission", ""),
-                                    "folder": domain,
-                                },
+                                data=update_data,
                                 partial=True,
                                 context={"request": request},
                             )
@@ -2116,16 +2145,28 @@ class LoadFileView(APIView):
                                     "error": "Solution already exists (conflict policy: stop)",
                                 }
                             )
+                            results["stopped"] = True
                             break
                         case ConflictMode.UPDATE:
+                            update_data = {
+                                "ref_id": ref_id,
+                                "name": record.get("name"),
+                                "description": record.get("description", ""),
+                                "provider_entity": provider_entity_id,
+                            }
+                            if (
+                                record.get("criticality") != ""
+                                and record.get("criticality") is not None
+                            ):
+                                try:
+                                    update_data["criticality"] = int(
+                                        record.get("criticality")
+                                    )
+                                except (ValueError, TypeError):
+                                    pass
                             serializer = SolutionWriteSerializer(
                                 instance=existing_solution,
-                                data={
-                                    "ref_id": ref_id,
-                                    "name": record.get("name"),
-                                    "description": record.get("description", ""),
-                                    "provider_entity": provider_entity_id,
-                                },
+                                data=update_data,
                                 partial=True,
                                 context={"request": request},
                             )
@@ -2316,6 +2357,7 @@ class LoadFileView(APIView):
                                     "error": "Contract already exists (conflict policy: stop)",
                                 }
                             )
+                            results["stopped"] = True
                             break
                         case ConflictMode.UPDATE:
                             serializer = ContractWriteSerializer(
@@ -2828,6 +2870,7 @@ class LoadFileView(APIView):
             # =========================================================
             # Step 1: Create Assets (primary and supporting)
             # =========================================================
+            stopped = False
             asset_name_to_id = {}
             # Track parent relationships to set up after all assets are created
             # Format: {child_name_lower: parent_name}
@@ -2863,6 +2906,7 @@ class LoadFileView(APIView):
                                         "error": "Asset already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_asset.description = asset_data.get(
@@ -2939,6 +2983,7 @@ class LoadFileView(APIView):
                                                 "error": "Asset already exists (conflict policy: stop)",
                                             }
                                         )
+                                        stopped = True
                                         break
                                     case ConflictMode.UPDATE:
                                         existing_sp.type = "SP"
@@ -2958,6 +3003,9 @@ class LoadFileView(APIView):
                                 asset = serializer.save()
                                 asset_name_to_id[supporting_name.lower()] = asset.id
                                 results["details"]["assets_created"] += 1
+
+                    if stopped:
+                        break
 
                     # Check for existing primary asset
                     primary_name = asset_data["name"]
@@ -2981,6 +3029,7 @@ class LoadFileView(APIView):
                                         "error": "Asset already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_primary.description = asset_data.get(
@@ -3016,6 +3065,9 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {"asset": asset_data["name"], "error": str(e)}
                     )
+
+            if stopped:
+                return results
 
             # =========================================================
             # Step 1b: Set up asset parent relationships
@@ -3072,6 +3124,9 @@ class LoadFileView(APIView):
                             f"Supporting asset '{supporting_name}' not found in asset_name_to_id"
                         )
 
+            if stopped:
+                return results
+
             # =========================================================
             # Step 2: Create Applied Controls
             # =========================================================
@@ -3096,6 +3151,7 @@ class LoadFileView(APIView):
                                         "error": "Applied control already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_control.description = control_data.get(
@@ -3130,6 +3186,9 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {"control": control_data["name"], "error": str(e)}
                     )
+
+            if stopped:
+                return results
 
             # =========================================================
             # Step 3: Create EBIOS RM Study
@@ -3199,6 +3258,7 @@ class LoadFileView(APIView):
                                             "error": "Feared event already exists (conflict policy: stop)",
                                         }
                                     )
+                                    stopped = True
                                     break
                                 case ConflictMode.UPDATE:
                                     existing_fe.justification = fe_data.get(
@@ -3244,6 +3304,11 @@ class LoadFileView(APIView):
                 if fe_count > 0:
                     study.meta["workshops"][0]["steps"][2]["status"] = "done"
                     meta_updated = True
+
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
 
                 # =========================================================
                 # Step 5: Create RoTo Couples (Workshop 2)
@@ -3313,6 +3378,7 @@ class LoadFileView(APIView):
                                             "error": "RoTo couple already exists (conflict policy: stop)",
                                         }
                                     )
+                                    stopped = True
                                     break
                                 case ConflictMode.UPDATE:
                                     existing_roto.motivation = roto_data.get(
@@ -3386,6 +3452,11 @@ class LoadFileView(APIView):
                         logger.info(
                             "Marked workshop 2 step 2 as done (motivation/resources data captured)"
                         )
+
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
 
                 # =========================================================
                 # Step 6: Create Stakeholders (Workshop 3)
@@ -3486,6 +3557,7 @@ class LoadFileView(APIView):
                                                 "error": "Stakeholder already exists (conflict policy: stop)",
                                             }
                                         )
+                                        stopped = True
                                         break
                                     case ConflictMode.UPDATE:
                                         existing_stakeholder.is_selected = (
@@ -3616,6 +3688,11 @@ class LoadFileView(APIView):
                         logger.info(
                             "Marked workshop 3 step 2 as done (assessment data captured)"
                         )
+
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
 
                 # =========================================================
                 # Step 7: Create Strategic Scenarios and Attack Paths (Workshop 3)
@@ -3762,6 +3839,7 @@ class LoadFileView(APIView):
                                             "error": "Strategic scenario already exists (conflict policy: stop)",
                                         }
                                     )
+                                    stopped = True
                                     break
                                 case ConflictMode.UPDATE:
                                     existing_scenario.ro_to_couple = roto
@@ -3851,6 +3929,11 @@ class LoadFileView(APIView):
                         f"{results['details']['attack_paths_created']} attack paths"
                     )
 
+                if stopped:
+                    if meta_updated:
+                        study.save()
+                    return results
+
                 # =========================================================
                 # Step 8: Create Elementary Actions (Workshop 4)
                 # =========================================================
@@ -3884,6 +3967,7 @@ class LoadFileView(APIView):
                                             "error": "Elementary action already exists (conflict policy: stop)",
                                         }
                                     )
+                                    stopped = True
                                     break
                                 case ConflictMode.UPDATE:
                                     existing_ea.description = ea_data.get(
@@ -4020,6 +4104,7 @@ class LoadFileView(APIView):
             if serializer.is_valid():
                 study = serializer.save()
                 results["details"]["study"] = str(study.id)
+                stopped = False
 
                 # Create assets and build name->id mapping
                 asset_name_to_id = {}
@@ -4041,6 +4126,7 @@ class LoadFileView(APIView):
                                         "error": "Asset already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 if asset_data.get("description"):
@@ -4071,6 +4157,9 @@ class LoadFileView(APIView):
                 # Link assets to study
                 study.assets.set(asset_name_to_id.values())
 
+                if stopped:
+                    return results
+
                 # Create feared events and build name lookup
                 feared_event_lookup = {}
                 for fe_data in data.get("feared_events", []):
@@ -4097,6 +4186,7 @@ class LoadFileView(APIView):
                                         "error": "Feared event already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_fe.gravity = gravity_val
@@ -4133,6 +4223,9 @@ class LoadFileView(APIView):
                             fe.assets.add(asset_name_to_id[asset_name])
                     feared_event_lookup[fe.name] = fe
                     results["details"]["feared_events_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create RO/TO couples
                 roto_lookup = {}
@@ -4183,6 +4276,7 @@ class LoadFileView(APIView):
                                         "error": "RoTo couple already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_roto.is_selected = roto_data.get(
@@ -4218,6 +4312,9 @@ class LoadFileView(APIView):
                     )
                     roto_lookup[key] = roto
                     results["details"]["ro_to_couples_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create stakeholders
                 stakeholder_lookup = {}
@@ -4267,6 +4364,7 @@ class LoadFileView(APIView):
                                         "error": "Stakeholder already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 val = sh_data.get("current_dependency")
@@ -4321,6 +4419,9 @@ class LoadFileView(APIView):
                     stakeholder_lookup[str(stakeholder)] = stakeholder
                     results["details"]["stakeholders_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create strategic scenarios
                 scenario_lookup = {}
                 for ss_data in data.get("strategic_scenarios", []):
@@ -4346,6 +4447,7 @@ class LoadFileView(APIView):
                                         "error": "Strategic scenario already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 if roto:
@@ -4367,6 +4469,9 @@ class LoadFileView(APIView):
                     )
                     scenario_lookup[scenario.name] = scenario
                     results["details"]["strategic_scenarios_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create attack paths
                 attack_path_lookup = {}
@@ -4392,6 +4497,7 @@ class LoadFileView(APIView):
                                         "error": "Attack path already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 if scenario:
@@ -4431,6 +4537,9 @@ class LoadFileView(APIView):
                     attack_path_lookup[attack_path.name] = attack_path
                     results["details"]["attack_paths_created"] += 1
 
+                if stopped:
+                    return results
+
                 # Create elementary actions
                 ea_lookup = {}
                 for ea_data in data.get("elementary_actions", []):
@@ -4462,6 +4571,7 @@ class LoadFileView(APIView):
                                         "error": "Elementary action already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 if ea_data.get("ref_id"):
@@ -4481,6 +4591,9 @@ class LoadFileView(APIView):
                     )
                     ea_lookup[ea.name] = ea
                     results["details"]["elementary_actions_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create operational scenarios
                 # Note: OperationalScenario.name is a computed property from attack_path
@@ -4517,6 +4630,7 @@ class LoadFileView(APIView):
                                         "error": "Operational scenario already exists (conflict policy: stop)",
                                     }
                                 )
+                                stopped = True
                                 break
                             case ConflictMode.UPDATE:
                                 existing_os.operating_modes_description = os_data.get(
@@ -4546,6 +4660,9 @@ class LoadFileView(APIView):
                     )
                     op_scenario_lookup[op_scenario.name] = op_scenario
                     results["details"]["operational_scenarios_created"] += 1
+
+                if stopped:
+                    return results
 
                 # Create operating modes
                 for om_data in data.get("operating_modes", []):
@@ -4577,6 +4694,7 @@ class LoadFileView(APIView):
                                             "error": "Operating mode already exists (conflict policy: stop)",
                                         }
                                     )
+                                    stopped = True
                                     break
                                 case ConflictMode.UPDATE:
                                     if om_data.get("ref_id"):
