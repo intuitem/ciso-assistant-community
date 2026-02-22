@@ -8062,13 +8062,9 @@ class UploadAttachmentView(APIView):
                 revision.attachment = attachment
                 try:
                     revision.full_clean()
-                except ValidationError as e:
+                except ValidationError:
                     return Response(
-                        {
-                            "detail": e.message_dict
-                            if hasattr(e, "message_dict")
-                            else str(e)
-                        },
+                        {"detail": "File too large or unsupported format."},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 revision.save()
