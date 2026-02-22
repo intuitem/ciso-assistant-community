@@ -13,6 +13,7 @@ from rest_framework.decorators import action, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from iam.models import Folder, RoleAssignment
 from integrations.models import (
     IntegrationConfiguration,
     IntegrationProvider,
@@ -182,7 +183,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
         Generic endpoint for interactive integration commands.
         Payload: { "action": "get_tables", "params": { ... } }
         """
-        config = get_object_or_404(IntegrationConfiguration, pk=pk)
+        config = self.get_object()
 
         action_name = request.data.get("action")
         params = request.data.get("params", {})
@@ -248,6 +249,13 @@ class IntegrationWebhookView(View):
         self, request: HttpRequest, config_id: uuid.UUID, *args, **kwargs
     ) -> HttpResponse:
         try:
+            viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
+                folder=Folder.get_root_folder(),
+                user=request.user,
+                object_type=IntegrationConfiguration,
+            )
+            if config_id not in viewable_objects:
+                return Response(status=status.HTTP_403_FORBIDDEN)
             config = get_object_or_404(
                 IntegrationConfiguration, pk=config_id, is_active=True
             )
