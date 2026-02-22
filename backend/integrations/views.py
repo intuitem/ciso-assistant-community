@@ -3,17 +3,16 @@ import uuid
 
 import structlog
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import action, permission_classes
+from rest_framework import filters, generics, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from iam.models import Folder, RoleAssignment
+from core.views import BaseModelViewSet
 from integrations.models import (
     IntegrationConfiguration,
     IntegrationProvider,
@@ -22,7 +21,6 @@ from integrations.models import (
 from integrations.registry import IntegrationRegistry
 from integrations.serializers import (
     ConnectionTestSerializer,
-    IntegrationConfigurationSerializer,
     IntegrationProviderSerializer,
     SyncMappingSerializer,
 )
@@ -100,26 +98,15 @@ class IntegrationProviderListView(generics.ListAPIView):
     filterset_fields = ["provider_type", "name"]
 
 
-class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
+class IntegrationConfigurationViewSet(BaseModelViewSet):
     """
     API endpoint for creating, viewing, updating, and deleting Integration Configurations.
     """
 
-    filter_backends = [
-        DjangoFilterBackend,
-        filters.SearchFilter,
-        filters.OrderingFilter,
-    ]
-
-    queryset = IntegrationConfiguration.objects.select_related(
-        "provider", "folder"
-    ).all()
-    serializer_class = IntegrationConfigurationSerializer
+    model = IntegrationConfiguration
+    serializers_module = "integrations.serializers"
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
-
-    def get_queryset(self):
-        return super().get_queryset()
 
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
@@ -128,7 +115,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
         URL: /api/integrations/configs/{id}/test-connection/
         """
         logger.info(f"Testing connection for integration config: {pk}")
-        instance = IntegrationConfiguration.objects.get(pk=pk)
+        instance = self.get_object()
 
         try:
             # Use the registry to get the correct client implementation
@@ -161,7 +148,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
-        instance = IntegrationConfiguration.objects.get(pk=pk)
+        instance = self.get_object()
         try:
             client = IntegrationRegistry.get_client(instance)
             remote_objects = client.list_remote_objects()
@@ -244,44 +231,37 @@ class IntegrationWebhookView(View):
     for authentication.
     """
 
-    @permission_classes([permissions.AllowAny])
     def post(
         self, request: HttpRequest, config_id: uuid.UUID, *args, **kwargs
     ) -> HttpResponse:
+        # Use a generic rejection response to avoid leaking config existence
+        rejection = JsonResponse({"error": "Webhook rejected"}, status=403)
+
         try:
-            viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
-                folder=Folder.get_root_folder(),
-                user=request.user,
-                object_type=IntegrationConfiguration,
-            )
-            if config_id not in viewable_objects:
-                return Response(status=status.HTTP_403_FORBIDDEN)
-            config = get_object_or_404(
-                IntegrationConfiguration, pk=config_id, is_active=True
-            )
-        except Exception:
+            config = IntegrationConfiguration.objects.get(pk=config_id, is_active=True)
+        except IntegrationConfiguration.DoesNotExist:
             logger.warning(
                 f"Webhook received for unknown or inactive config ID: {config_id}"
             )
-            return JsonResponse({"error": "Configuration not found"}, status=404)
+            return rejection
 
         # Instantiate the correct orchestrator
         try:
             orchestrator = IntegrationRegistry.get_orchestrator(config)
         except Exception as e:
             logger.error(f"Failed to load orchestrator for config {config_id}: {e}")
-            return JsonResponse({"error": "Internal configuration error"}, status=500)
+            return rejection
 
         # Delegate authentication/validation
         # The orchestrator checks headers, secrets, signatures etc.
         try:
             if not orchestrator.validate_webhook_request(request):
-                return JsonResponse({"error": "Authentication failed"}, status=401)
+                return rejection
         except Exception:
             logger.warning(
                 "Webhook validation failed", config_id=config_id, exc_info=True
             )
-            return JsonResponse({"error": "Webhook validation failed"}, status=403)
+            return rejection
 
         # Parse payload
         try:

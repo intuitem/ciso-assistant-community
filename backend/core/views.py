@@ -8031,12 +8031,19 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
+        # RBAC: scope queries to objects the user can access
+        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )[0]
+
         try:
-            revision = EvidenceRevision.objects.get(pk=pk)
+            revision = EvidenceRevision.objects.get(
+                pk=pk, evidence__id__in=accessible_evidence_ids
+            )
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk)
+                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -8053,6 +8060,17 @@ class UploadAttachmentView(APIView):
                 if revision.attachment:
                     revision.attachment.delete()
                 revision.attachment = attachment
+                try:
+                    revision.full_clean()
+                except ValidationError as e:
+                    return Response(
+                        {
+                            "detail": e.message_dict
+                            if hasattr(e, "message_dict")
+                            else str(e)
+                        },
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
                 revision.save()
 
         return Response(status=status.HTTP_200_OK)

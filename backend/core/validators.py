@@ -48,6 +48,10 @@ def validate_file_name(value):
         "xlsx",
         "csv",
         "pdf",
+        "json",
+        "yaml",
+        "yml",
+        "toml",
     ]
     parts = value.name.split(".")
     extension = parts[-1]
