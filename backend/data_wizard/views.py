@@ -2929,12 +2929,21 @@ class LoadFileView(APIView):
                                 asset_name_to_id[supporting_name.lower()] = (
                                     existing_sp.id
                                 )
-                                if on_conflict == ConflictMode.SKIP:
-                                    results["details"]["assets_skipped"] += 1
-                                elif on_conflict == ConflictMode.UPDATE:
-                                    existing_sp.type = "SP"
-                                    existing_sp.save()
-                                    results["details"]["assets_updated"] += 1
+                                match on_conflict:
+                                    case ConflictMode.SKIP:
+                                        results["details"]["assets_skipped"] += 1
+                                    case ConflictMode.STOP:
+                                        results["errors"].append(
+                                            {
+                                                "asset": supporting_name,
+                                                "error": "Asset already exists (conflict policy: stop)",
+                                            }
+                                        )
+                                        break
+                                    case ConflictMode.UPDATE:
+                                        existing_sp.type = "SP"
+                                        existing_sp.save()
+                                        results["details"]["assets_updated"] += 1
                                 continue
 
                             serializer = AssetWriteSerializer(
@@ -3508,22 +3517,22 @@ class LoadFileView(APIView):
                                             )
                                         )
                                         existing_stakeholder.residual_dependency = stakeholder_data.get(
-                                            "current_dependency",
+                                            "residual_dependency",
                                             existing_stakeholder.residual_dependency,
                                         )
                                         existing_stakeholder.residual_penetration = stakeholder_data.get(
-                                            "current_penetration",
+                                            "residual_penetration",
                                             existing_stakeholder.residual_penetration,
                                         )
                                         existing_stakeholder.residual_maturity = (
                                             stakeholder_data.get(
-                                                "current_maturity",
+                                                "residual_maturity",
                                                 existing_stakeholder.residual_maturity,
                                             )
                                         )
                                         existing_stakeholder.residual_trust = (
                                             stakeholder_data.get(
-                                                "current_trust",
+                                                "residual_trust",
                                                 existing_stakeholder.residual_trust,
                                             )
                                         )
@@ -4260,38 +4269,30 @@ class LoadFileView(APIView):
                                 )
                                 break
                             case ConflictMode.UPDATE:
-                                existing_sh.current_dependency = (
-                                    sh_data.get("current_dependency")
-                                    or existing_sh.current_dependency
-                                )
-                                existing_sh.current_penetration = (
-                                    sh_data.get("current_penetration")
-                                    or existing_sh.current_penetration
-                                )
-                                existing_sh.current_maturity = (
-                                    sh_data.get("current_maturity")
-                                    or existing_sh.current_maturity
-                                )
-                                existing_sh.current_trust = (
-                                    sh_data.get("current_trust")
-                                    or existing_sh.current_trust
-                                )
-                                existing_sh.residual_dependency = (
-                                    sh_data.get("residual_dependency")
-                                    or existing_sh.residual_dependency
-                                )
-                                existing_sh.residual_penetration = (
-                                    sh_data.get("residual_penetration")
-                                    or existing_sh.residual_penetration
-                                )
-                                existing_sh.residual_maturity = (
-                                    sh_data.get("residual_maturity")
-                                    or existing_sh.residual_maturity
-                                )
-                                existing_sh.residual_trust = (
-                                    sh_data.get("residual_trust")
-                                    or existing_sh.residual_trust
-                                )
+                                val = sh_data.get("current_dependency")
+                                if val is not None:
+                                    existing_sh.current_dependency = val
+                                val = sh_data.get("current_penetration")
+                                if val is not None:
+                                    existing_sh.current_penetration = val
+                                val = sh_data.get("current_maturity")
+                                if val is not None:
+                                    existing_sh.current_maturity = val
+                                val = sh_data.get("current_trust")
+                                if val is not None:
+                                    existing_sh.current_trust = val
+                                val = sh_data.get("residual_dependency")
+                                if val is not None:
+                                    existing_sh.residual_dependency = val
+                                val = sh_data.get("residual_penetration")
+                                if val is not None:
+                                    existing_sh.residual_penetration = val
+                                val = sh_data.get("residual_maturity")
+                                if val is not None:
+                                    existing_sh.residual_maturity = val
+                                val = sh_data.get("residual_trust")
+                                if val is not None:
+                                    existing_sh.residual_trust = val
                                 existing_sh.is_selected = sh_data.get(
                                     "is_selected", existing_sh.is_selected
                                 )
