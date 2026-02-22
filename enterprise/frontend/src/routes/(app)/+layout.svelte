@@ -176,7 +176,7 @@
 			{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
 		</aside>
 	{/if}
-	<AppBar class="relative transition-all duration-300 bg-white {classesSidebarOpen(sidebarOpen)}">
+	<AppBar class="transition-all duration-300 bg-white {classesSidebarOpen(sidebarOpen)}">
 		<AppBar.Toolbar class="pb-2 px-4">
 			<AppBar.Headline>
 				<div
@@ -195,7 +195,9 @@
 						{safeTranslate(displayModelDescription)}
 					</div>
 				{/if}
-				<div class="absolute top-6 right-4 flex items-center gap-3">
+			</AppBar.Headline>
+			<AppBar.Trail>
+				<div class="flex items-center gap-3">
 					{#if data?.featureflags?.focus_mode}
 						<FocusModeSelector folders={data?.folders ?? []} />
 					{/if}
@@ -211,10 +213,12 @@
 						</button>
 					{/if}
 				</div>
-				<hr class="w-screen my-1" />
-				<Breadcrumbs />
-			</AppBar.Headline>
+			</AppBar.Trail>
 		</AppBar.Toolbar>
+		<div class="px-4">
+			<hr class="my-1" />
+			<Breadcrumbs />
+		</div>
 	</AppBar>
 	<!-- Router Slot -->
 	<CommandPalette />
