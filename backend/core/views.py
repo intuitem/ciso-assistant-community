@@ -8057,16 +8057,18 @@ class UploadAttachmentView(APIView):
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
             if not revision.attachment or revision.attachment != attachment:
-                if revision.attachment:
-                    revision.attachment.delete()
+                old_attachment = revision.attachment
                 revision.attachment = attachment
                 try:
                     revision.full_clean()
                 except ValidationError:
+                    revision.attachment = old_attachment
                     return Response(
                         {"detail": "File too large or unsupported format."},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
+                if old_attachment:
+                    old_attachment.delete()
                 revision.save()
 
         return Response(status=status.HTTP_200_OK)
