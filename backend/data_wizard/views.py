@@ -2694,7 +2694,7 @@ class LoadFileView(APIView):
         results["errors"].append(
             {
                 "record": record,
-                "details": f"No object '{object_name}' named '{name}' exists in folder {folder_id}.",
+                "error": f"No object '{object_name}' named '{name}' exists in folder {folder_id}.",
             }
         )
 
@@ -2719,9 +2719,10 @@ class LoadFileView(APIView):
                     safe_lowercase(record.get("severity", "")), -1
                 )
 
+                failed_record_reference = False
+
                 applied_controls = []
                 if record.get("applied_controls"):
-                    applied_controls = []
                     for ap_name in record.get("applied_controls", "").split("\n"):
                         ap_name = ap_name.strip()
                         if not ap_name:
@@ -2732,6 +2733,7 @@ class LoadFileView(APIView):
                         if obj:
                             applied_controls.append(obj.id)
                         else:
+                            failed_record_reference = True
                             self._add_missing_reference_for_vulnerability(
                                 results, record, "applied_controls", ap_name, folder_id
                             )
@@ -2740,7 +2742,6 @@ class LoadFileView(APIView):
 
                 assets = []
                 if record.get("assets"):
-                    assets = []
                     for asset_name in record.get("assets", "").split("\n"):
                         asset_name = asset_name.strip()
                         if not asset_name:
@@ -2751,6 +2752,7 @@ class LoadFileView(APIView):
                         if obj:
                             assets.append(obj.id)
                         else:
+                            failed_record_reference = True
                             self._add_missing_reference_for_vulnerability(
                                 results, record, "assets", asset_name, folder_id
                             )
@@ -2758,13 +2760,16 @@ class LoadFileView(APIView):
                 filtering_labels = []
                 if record.get("filtering_labels"):
                     for filter_name in record.get("filtering_labels", "").split("\n"):
+                        filter_name = filter_name.strip()
+                        if not filter_name:
+                            continue
                         filtering_label, _ = FilteringLabel.objects.get_or_create(
                             label=filter_name, folder=folder_id
                         )
                         filtering_labels.append(filtering_label.id)
 
+                security_exceptions = []
                 if record.get("security_exceptions"):
-                    security_exceptions = []
                     for se_name in record.get("security_exceptions", "").split("\n"):
                         se_name = se_name.strip()
                         if not se_name:
@@ -2775,6 +2780,7 @@ class LoadFileView(APIView):
                         if obj:
                             security_exceptions.append(obj.id)
                         else:
+                            failed_record_reference = True
                             self._add_missing_reference_for_vulnerability(
                                 results,
                                 record,
@@ -2782,8 +2788,6 @@ class LoadFileView(APIView):
                                 se_name,
                                 folder_id,
                             )
-                else:
-                    security_exceptions = []
 
                 vuln_data = {
                     "ref_id": ref_id,
@@ -2801,7 +2805,7 @@ class LoadFileView(APIView):
                 vuln_serializer = VulnerabilityWriteSerializer(
                     data=vuln_data, context={"request": request}
                 )
-                if vuln_serializer.is_valid():
+                if vuln_serializer.is_valid() and not failed_record_reference:
                     try:
                         vuln_serializer.save()
                         results["successful"] += 1
@@ -2822,7 +2826,7 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {
                             "record": record,
-                            "details": "Failed to save vulnerability record",
+                            "details": "Failed to save vulnerability record: "+vuln_serializer.errors,
                         }
                     )
 
