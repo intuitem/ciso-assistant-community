@@ -478,8 +478,7 @@
 										positioning={{ placement: 'right' }}
 										openDelay={200}
 										closeDelay={100}
-										portalled
-									>
+										>
 										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
@@ -740,7 +739,6 @@
 						positioning={{ placement: 'top' }}
 						openDelay={200}
 						closeDelay={100}
-						portalled
 					>
 						<Tooltip.Trigger
 							onclick={() => {
