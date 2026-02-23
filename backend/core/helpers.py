@@ -1206,9 +1206,6 @@ def get_metrics(user: User, folder_id):
     viewable_evidences = viewable_items(Evidence, folder_id)
     viewable_requirement_assessments = viewable_items(RequirementAssessment, folder_id)
     controls_count = viewable_controls.count()
-    progress_avg = math.ceil(
-        mean([x.get_progress() for x in viewable_compliance_assessments] or [0])
-    )
     missed_eta_count = (
         viewable_controls.filter(
             eta__lt=date.today(),
@@ -1249,12 +1246,29 @@ def get_metrics(user: User, folder_id):
             "non_compliant_items": viewable_requirement_assessments.filter(
                 result="non_compliant"
             ).count(),
-            "progress_avg": progress_avg,
         },
-        "audits_stats": build_audits_stats(user, folder_id),
         "csf_functions": csf_functions(user, folder_id),
     }
     return data
+
+
+def get_audits_metrics(user: User, folder_id=None):
+    scoped_folder = (
+        Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+    )
+    (object_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+        scoped_folder, user, ComplianceAssessment
+    )
+    viewable_compliance_assessments = ComplianceAssessment.objects.filter(
+        id__in=object_ids
+    )
+    progress_avg = math.ceil(
+        mean([x.progress for x in viewable_compliance_assessments] or [0])
+    )
+    return {
+        "progress_avg": progress_avg,
+        "audits_stats": build_audits_stats(user, folder_id),
+    }
 
 
 def get_compliance_analytics(user: User, folder_id=None):
@@ -1317,12 +1331,6 @@ def get_compliance_analytics(user: User, folder_id=None):
                 )
                 & Q(requirement_assessments__requirement__assessable=True),
                 distinct=True,
-            ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
             ),
         )
     )

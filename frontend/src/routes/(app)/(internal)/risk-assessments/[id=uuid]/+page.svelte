@@ -478,6 +478,7 @@
 					matrixName={'current'}
 					data={currentCluster}
 					dataItemComponent={RiskScenarioItem}
+					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>
@@ -489,7 +490,6 @@
 					matrixName={'residual'}
 					data={residualCluster}
 					dataItemComponent={RiskScenarioItem}
-					showLegend={showRisks}
 					{useBubbles}
 				/>
 			</div>

@@ -730,7 +730,7 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 		label: 'assigned_to',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'task-templates/assigned_to',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1049,7 +1049,7 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'applied-controls/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1060,7 +1060,7 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'findings/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1205,7 +1205,7 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 		label: 'owner',
 		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'evidences/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1286,13 +1286,23 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		head: [
+			'ref_id',
+			'name',
+			'riskMatrix',
+			'status',
+			'riskScenarios',
+			'folder',
+			'perimeter',
+			'updatedAt'
+		],
 		body: [
 			'ref_id',
 			'str',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
+			'folder',
 			'perimeter',
 			'updated_at'
 		],
@@ -1612,6 +1622,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'reviewProgress',
 			'createdAt',
@@ -1622,6 +1633,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'progress',
 			'created_at',
@@ -2197,8 +2209,26 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter', 'folder'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings',
+			'treatmentProgress',
+			'folder',
+			'perimeter'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings_count',
+			'treatment_progress',
+			'folder',
+			'perimeter'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2267,7 +2297,8 @@ export const listViewFields = {
 			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
-			severity: INCIDENT_SEVERITY_FILTER
+			severity: INCIDENT_SEVERITY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'timeline-entries': {
@@ -2693,6 +2724,413 @@ export const contextMenuActions = {
 	'operational-scenarios': [{ component: SelectObject, props: {} }],
 	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
+
+// Batch action configuration
+export interface BatchActionConfig {
+	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	label: string;
+	icon: string;
+	field?: string;
+	optionsEndpoint?: string;
+	multiSelect?: boolean;
+}
+
+export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	'applied-controls': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'applied-controls/status'
+		},
+		{
+			type: 'change_field',
+			label: 'batchChangePriority',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'priority',
+			optionsEndpoint: 'applied-controls/priority'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	policies: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'policies/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	evidences: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'evidences/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	incidents: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'incidents/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-scenarios': [
+		{
+			type: 'change_field',
+			label: 'changeTreatment',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'treatment',
+			optionsEndpoint: 'risk-scenarios/treatment'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'risk-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'compliance-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'compliance-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'business-impact-analysis': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'business-impact-analysis/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	findings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-nodes': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'task-nodes/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'requirement-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeResult',
+			icon: 'fa-solid fa-clipboard-check',
+			field: 'result',
+			optionsEndpoint: 'requirement-assessments/result'
+		}
+	],
+	'organisation-objectives': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-templates': [
+		{
+			type: 'change_m2m',
+			label: 'changeAssignee',
+			icon: 'fa-solid fa-user-pen',
+			field: 'assigned_to',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	assets: [
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-exceptions': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'security-exceptions/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	vulnerabilities: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'vulnerabilities/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	campaigns: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'campaigns/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	contracts: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'contracts/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'organisation-issues': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'validation-flows': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'quantitative-risk-studies': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'ebios-rm': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	entities: [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	processings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'processings/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'findings-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'metric-instances': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'metric-instances/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	]
+};
+
+export function getBatchActions(model: urlModel): BatchActionConfig[] {
+	return batchActions[model] ?? [];
+}
 
 export function getListViewFields({
 	key,

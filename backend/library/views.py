@@ -1,5 +1,6 @@
 from itertools import chain
 import json
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import F, Q, IntegerField, OuterRef, Subquery, Exists
 from django.db import models
@@ -463,16 +464,24 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
                 if library is not None:
                     logger.info("Attempting to load newly uploaded library")
+                    # Check if a LoadedLibrary already exists for this urn/locale.
+                    # If so, this is an update scenario: the StoredLibrary must be
+                    # kept so the user can trigger the update via the _update endpoint.
+                    already_loaded = LoadedLibrary.objects.filter(
+                        urn=library.urn
+                    ).exists()
+
                     try:
                         load_error = library.load()
-                    except ValueError as load_exc:
+                    except (ValueError, ValidationError) as load_exc:
                         validation_detail = load_exc.args[0] if load_exc.args else None
                         logger.error(
-                            "Validation error while loading newly uploaded library, removing stored entry",
+                            "Validation error while loading newly uploaded library",
                             urn=library.urn,
                             error=validation_detail,
                         )
-                        library.delete()
+                        if not already_loaded:
+                            library.delete()
                         return HttpResponse(
                             json.dumps(
                                 {
@@ -485,10 +494,11 @@ class StoredLibraryViewSet(BaseModelViewSet):
                         )
                     except Exception as load_exc:
                         logger.exception(
-                            "Unexpected exception while loading newly uploaded library, removing stored entry",
+                            "Unexpected exception while loading newly uploaded library",
                             urn=library.urn,
                         )
-                        library.delete()
+                        if not already_loaded:
+                            library.delete()
                         return HttpResponse(
                             json.dumps(
                                 {
@@ -500,21 +510,34 @@ class StoredLibraryViewSet(BaseModelViewSet):
                         )
 
                     if load_error is not None:
-                        logger.error(
-                            "Failed to load newly uploaded library, removing stored entry",
-                            error=load_error,
-                            urn=library.urn,
-                        )
-                        library.delete()
-                        return HttpResponse(
-                            json.dumps(
+                        if not already_loaded:
+                            logger.error(
+                                "Failed to load newly uploaded library, removing stored entry",
+                                error=load_error,
+                                urn=library.urn,
+                            )
+                            library.delete()
+                            return HttpResponse(
+                                json.dumps(
+                                    {
+                                        "error": "libraryLoadFailed",
+                                        "detail": load_error,
+                                    }
+                                ),
+                                status=HTTP_422_UNPROCESSABLE_ENTITY,
+                            )
+                        else:
+                            logger.info(
+                                "Library already loaded, stored new version for update",
+                                urn=library.urn,
+                            )
+                            return Response(
                                 {
-                                    "error": "libraryLoadFailed",
-                                    "detail": load_error,
-                                }
-                            ),
-                            status=HTTP_422_UNPROCESSABLE_ENTITY,
-                        )
+                                    **StoredLibrarySerializer(library).data,
+                                    "warning": "libraryStoredForUpdate",
+                                },
+                                status=HTTP_201_CREATED,
+                            )
 
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
@@ -522,7 +545,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
-                if library is not None:
+                if (
+                    library is not None
+                    and not LoadedLibrary.objects.filter(urn=library.urn).exists()
+                ):
                     library.delete()
                 return HttpResponse(
                     json.dumps({"error": "Failed to store library content."}),
@@ -536,7 +562,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
             )
         except Exception:
             logger.exception("Upload library failed")
-            if library is not None:
+            if (
+                library is not None
+                and not LoadedLibrary.objects.filter(urn=library.urn).exists()
+            ):
                 library.delete()
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),

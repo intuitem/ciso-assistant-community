@@ -288,6 +288,10 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
 
+    def validate_entity(self, value):
+        self._ensure_immutable("entity", value)
+        return value
+
     def _create_or_update_user(self, instance, user):
         if not user:
             return
@@ -301,12 +305,17 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     email=instance.email,
                     first_name=instance.first_name,
                     last_name=instance.last_name,
+                    is_third_party=True,
+                    keep_local_login=True,
                 )
             except Exception as e:
                 logger.error(e)
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
-                    user.is_third_party = True
+                    if not user.is_third_party:
+                        raise serializers.ValidationError(
+                            {"email": "errorUserAlreadyExistsAsInternal"}
+                        )
                     user.keep_local_login = True
                     user.save()
                     instance.user = user
@@ -323,8 +332,11 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
-            user.is_third_party = True
-            user.keep_local_login = True
+        if not user.is_third_party:
+            raise serializers.ValidationError(
+                {"email": "errorUserAlreadyExistsAsInternal"}
+            )
+        user.keep_local_login = True
         user.save()
         instance.user = user
         instance.save()
@@ -360,6 +372,10 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    def validate_provider_entity(self, value):
+        self._ensure_immutable("provider_entity", value)
+        return value
+
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
         dora_char_fields = [

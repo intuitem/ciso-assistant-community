@@ -1,6 +1,7 @@
 import { handleErrorResponse, nestedWriteFormAction } from '$lib/utils/actions';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName } from '$lib/utils/crud';
+import { safeTranslate } from '$lib/utils/i18n';
 import { getSecureRedirect } from '$lib/utils/helpers';
 import { modelSchema } from '$lib/utils/schemas';
 import { headData } from '$lib/utils/table';
@@ -44,11 +45,25 @@ export const load = (async ({ fetch, params }) => {
 		}
 	});
 
+	// Fetch ordered assessable requirement assessments to find next/previous
+	const requirementsListData = await fetchJson(
+		`${baseUrl}/compliance-assessments/${requirementAssessment.compliance_assessment.id}/requirements_list/?assessable=true`
+	);
+	let nextRequirementAssessmentId: string | null = null;
+	if (requirementsListData?.requirement_assessments) {
+		const raIds = requirementsListData.requirement_assessments.map((ra: any) => ra.id);
+		const currentIndex = raIds.indexOf(params.id);
+		if (currentIndex !== -1 && currentIndex < raIds.length - 1) {
+			nextRequirementAssessmentId = raIds[currentIndex + 1];
+		}
+	}
+
 	const schema = modelSchema(URLModel);
 	object.evidences = object.evidences.map((evidence) => evidence.id);
 	object.applied_controls = object.applied_controls.map((applied_control) => applied_control.id);
 	object.security_exceptions =
 		object.security_exceptions?.map((security_exception) => security_exception.id) ?? [];
+	object.nextRequirementAssessmentId = nextRequirementAssessmentId;
 	const form = await superValidate(object, zod(schema), { errors: true });
 
 	const selectOptions: Record<string, any> = {};
@@ -177,7 +192,8 @@ export const load = (async ({ fetch, params }) => {
 		evidenceCreateForm,
 		securityExceptionModel,
 		securityExceptionCreateForm,
-		tables
+		tables,
+		nextRequirementAssessmentId
 	};
 }) satisfies PageServerLoad;
 
@@ -204,9 +220,19 @@ export const actions: Actions = {
 		if (!response.ok) return handleErrorResponse({ event, response, form });
 
 		const object = await response.json();
-		const model: string = urlParamModelVerboseName(URLModel);
+		const model: string = safeTranslate(urlParamModelVerboseName(URLModel));
 		setFlash({ type: 'success', message: m.successfullySavedObject({ object: model }) }, event);
 		if (formData.noRedirect) return;
+
+		// If there's a next requirement assessment, redirect to it
+		if (formData.nextRequirementAssessmentId) {
+			const nextParam = getSecureRedirect(event.url.searchParams.get('next'));
+			redirect(
+				302,
+				`/requirement-assessments/${formData.nextRequirementAssessmentId}/edit${nextParam ? `?next=${nextParam}` : ''}`
+			);
+		}
+
 		redirect(
 			302,
 			getSecureRedirect(event.url.searchParams.get('next')) ||

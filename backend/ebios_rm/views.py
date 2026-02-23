@@ -1,4 +1,5 @@
 import io
+import uuid
 
 import django_filters as df
 import pandas as pd
@@ -6,7 +7,6 @@ from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
-from iam.models import RoleAssignment
 from openpyxl.styles import Alignment
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
@@ -26,6 +26,7 @@ from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from django.shortcuts import get_object_or_404
@@ -254,7 +255,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     "eta": assessment.eta,
                     "due_date": assessment.due_date,
                     "status": assessment.status,
-                    "progress": assessment.get_progress(),
+                    "progress": assessment.progress,
                     "result_counts": result_counts,
                 }
             )
@@ -267,7 +268,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
@@ -761,15 +764,14 @@ class FearedEventViewSet(BaseModelViewSet):
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify study exists and user has access
-            if not RoleAssignment.is_object_readable(
-                request.user, EbiosRMStudy, study_id
-            ):
+            # Verify study exists
+            try:
+                study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
+            except (ValueError, AttributeError, EbiosRMStudy.DoesNotExist):
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
                 )
-            study = EbiosRMStudy.objects.get(id=study_id)
 
             # Parse the feared events text
             lines = [
@@ -796,7 +798,7 @@ class FearedEventViewSet(BaseModelViewSet):
 
                 # Check if feared event already exists in the study
                 existing_feared_event = FearedEvent.objects.filter(
-                    name=feared_event_name, ebios_rm_study=study_id
+                    name=feared_event_name, ebios_rm_study=study
                 ).first()
 
                 if existing_feared_event:
@@ -813,7 +815,7 @@ class FearedEventViewSet(BaseModelViewSet):
                 # Create new feared event using the serializer to respect IAM
                 feared_event_data = {
                     "name": feared_event_name,
-                    "ebios_rm_study": study_id,
+                    "ebios_rm_study": str(study.id),
                 }
 
                 if ref_id:
@@ -824,7 +826,13 @@ class FearedEventViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    feared_event = serializer.save()
+                    try:
+                        feared_event = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=http_status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_feared_events.append(
                         {

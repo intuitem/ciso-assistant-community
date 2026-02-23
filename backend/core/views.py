@@ -92,7 +92,7 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from iam.models import Folder, RoleAssignment, User, UserGroup
 from rest_framework import filters, generics, permissions, status, viewsets
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, get_language
 from rest_framework.decorators import (
     action,
     api_view,
@@ -126,6 +126,7 @@ from core.models import (
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
     compare_schema_versions,
+    get_auditee_filtered_folder_ids,
     _generate_occurrences,
     _create_task_dict,
 )
@@ -911,75 +912,13 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         dispatch_webhook_event(instance, "updated", serializer=serializer)
         return instance
 
-    def _validate_folder_change(self, request: Request, instance) -> None:
-        if not hasattr(instance, "folder"):
-            return
-        if "folder" not in request.data:
-            return
-        folder_value = request.data.get("folder")
-        if isinstance(folder_value, list):
-            if not folder_value:
-                return
-            folder_value = folder_value[0]
-        if isinstance(folder_value, dict):
-            folder_value = folder_value.get("id")
-        if not folder_value:
-            return
+    def perform_destroy(self, instance):
+        serializer = self.get_serializer(instance)
+        serializer.delete(instance)
         try:
-            target_id = UUID(str(folder_value))
-        except (TypeError, ValueError):
-            return
-        if instance.folder_id and instance.folder_id == target_id:
-            return
-        target_folder = Folder.objects.filter(id=target_id).first()
-        if not target_folder:
-            return
-        model = self.model or instance.__class__
-        perm = Permission.objects.get(
-            codename=f"add_{model._meta.model_name}",
-            content_type__app_label=model._meta.app_label,
-            content_type__model=model._meta.model_name,
-        )
-        if not RoleAssignment.is_access_allowed(
-            user=request.user,
-            perm=perm,
-            folder=target_folder,
-        ):
-            raise PermissionDenied(
-                {
-                    "folder": "You do not have permission to create objects in this folder"
-                }
-            )
-
-    def _validate_parent_field_change(self, request: Request, instance) -> None:
-        """Block updates to immutable parent fields on indirect-parent models."""
-        parent_fields = {
-            "RiskScenario": "risk_assessment",
-            "Representative": "entity",
-            "Solution": "provider_entity",
-        }
-        parent_field_name = parent_fields.get(instance.__class__.__name__)
-        if not parent_field_name or parent_field_name not in request.data:
-            return
-
-        new_parent_value = request.data.get(parent_field_name)
-        if isinstance(new_parent_value, list):
-            new_parent_value = new_parent_value[0] if new_parent_value else None
-        if isinstance(new_parent_value, dict):
-            new_parent_value = new_parent_value.get("id")
-        if not new_parent_value:
-            return
-
-        try:
-            new_parent_id = UUID(str(new_parent_value))
-        except (TypeError, ValueError):
-            raise PermissionDenied({parent_field_name: "Invalid value"})
-
-        current_parent_id = getattr(instance, f"{parent_field_name}_id", None)
-        if current_parent_id and current_parent_id == new_parent_id:
-            return
-
-        raise PermissionDenied({parent_field_name: "This field is immutable"})
+            dispatch_webhook_event(instance, "deleted")
+        except Exception:
+            logger.error("Webhook dispatch failed on delete", exc_info=True)
 
     def create(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
@@ -996,9 +935,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def update(self, request: Request, *args, **kwargs) -> Response:
-        instance = self.get_object()
-        self._validate_folder_change(request, instance)
-        self._validate_parent_field_change(request, instance)
         # Experimental: process evidences on TaskTemplate update
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
@@ -1034,20 +970,163 @@ class BaseModelViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def partial_update(self, request: Request, *args, **kwargs) -> Response:
-        instance = self.get_object()
-        self._validate_folder_change(request, instance)
-        self._validate_parent_field_change(request, instance)
         self._process_request_data(request)
         return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request: Request, *args, **kwargs) -> Response:
         self._process_request_data(request)
-        instance = self.get_object()
-        try:
-            dispatch_webhook_event(instance, "deleted")
-        except Exception:
-            logger.error("Webhook dispatch failed on delete", exc_info=True)
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=False, methods=["post"], url_path="batch-action")
+    def batch_action(self, request):
+        """
+        Perform a batch action on multiple objects.
+        Uses the IAM-filtered queryset and serializers to respect permissions
+        and validation, mirroring the standard partial_update / destroy flows.
+
+        Payload: { "action": "delete"|"change_field"|"change_m2m"|"change_folder",
+                   "ids": [...], "field": "<field_name>", "value": ... }
+        """
+        action_type = request.data.get("action")
+        ids = request.data.get("ids", [])
+        value = request.data.get("value")
+        field_name = request.data.get("field")
+
+        valid_actions = ("delete", "change_field", "change_m2m", "change_folder")
+        if action_type not in valid_actions:
+            return Response(
+                {"error": "Invalid action type"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not ids:
+            return Response(
+                {"error": "No ids provided"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        BATCH_SIZE_LIMIT = 100
+        if len(ids) > BATCH_SIZE_LIMIT:
+            return Response(
+                {"error": f"Too many ids (max {BATCH_SIZE_LIMIT})"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Use the IAM-filtered queryset (same as get_object() in update/destroy)
+        queryset = self.get_queryset()
+        objects_by_id = {str(o.id): o for o in queryset.filter(id__in=ids)}
+
+        # Resolve the required permission for the action type
+        perm_codename = (
+            f"delete_{self.model._meta.model_name}"
+            if action_type == "delete"
+            else f"change_{self.model._meta.model_name}"
+        )
+        required_perm = Permission.objects.get(codename=perm_codename)
+
+        # Resolve the write serializer once for all update operations
+        if action_type != "delete":
+            serializer_class = self.get_serializer_class(action="partial_update")
+
+        succeeded = []
+        failed = []
+
+        for obj_id in ids:
+            obj = objects_by_id.get(str(obj_id))
+            if obj is None:
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "error": "Object not found or access denied",
+                    }
+                )
+                continue
+
+            if not RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=required_perm,
+                folder=Folder.get_folder(obj),
+            ):
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Permission denied",
+                    }
+                )
+                continue
+
+            try:
+                if action_type == "delete":
+                    if getattr(obj, "builtin", False) or getattr(obj, "urn", None):
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": "Cannot delete builtin object",
+                            }
+                        )
+                        continue
+                    try:
+                        dispatch_webhook_event(obj, "deleted")
+                    except Exception:
+                        logger.error(
+                            "Webhook dispatch failed on batch delete", exc_info=True
+                        )
+                    obj.delete()
+
+                else:
+                    # Build data dict for the serializer
+                    if action_type == "change_folder":
+                        data = {"folder": value}
+                    elif action_type == "change_m2m":
+                        actor_ids = value if isinstance(value, list) else [value]
+                        data = {field_name: actor_ids}
+                    else:  # change_field
+                        data = {field_name: value}
+
+                    # Go through the serializer for validation + save,
+                    # and perform_update for webhook dispatch
+                    serializer = serializer_class(
+                        obj,
+                        data=data,
+                        partial=True,
+                        context=self.get_serializer_context(),
+                    )
+                    if not serializer.is_valid():
+                        failed.append(
+                            {
+                                "id": str(obj_id),
+                                "name": str(obj),
+                                "error": serializer.errors,
+                            }
+                        )
+                        continue
+                    self.perform_update(serializer)
+
+                succeeded.append({"id": str(obj_id), "name": str(obj)})
+
+            except PermissionDenied as e:
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": e.detail
+                        if hasattr(e, "detail")
+                        else "Permission denied",
+                    }
+                )
+            except Exception:
+                logger.error("Batch action failed for %s", obj_id, exc_info=True)
+                failed.append(
+                    {
+                        "id": str(obj_id),
+                        "name": str(obj),
+                        "error": "Unexpected error",
+                    }
+                )
+
+        return Response({"succeeded": succeeded, "failed": failed})
 
     @action(detail=True, methods=["get"], url_path="cascade-info")
     def cascade_info(self, request, pk=None):
@@ -2042,13 +2121,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
@@ -2092,7 +2171,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
                 # Check if asset already exists in the folder
                 existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder_id
+                    name=asset_name, folder=folder
                 ).first()
 
                 if existing_asset:
@@ -2120,7 +2199,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     asset_data = {
                         "name": asset_name,
                         "type": asset_type,
-                        "folder": folder_id,
+                        "folder": str(folder.id),
                     }
 
                     # Add parent relationship if exists
@@ -2132,7 +2211,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     )
 
                     if serializer.is_valid():
-                        asset = serializer.save()
+                        try:
+                            asset = serializer.save()
+                        except PermissionDenied as e:
+                            return Response(
+                                {"error": e.detail},
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
 
                         # Add to stack for potential children
                         depth_stack.append(asset)
@@ -2248,19 +2333,25 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get risk level choices")
     def risk(self, request):
+        current_language = get_language()
         viewable_matrices: list[RiskMatrix] = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskMatrix
         )[0]
         undefined = {-1: "--"}
         options = undefined
         for matrix in RiskMatrix.objects.filter(id__in=viewable_matrices):
-            _choices = {
-                i: name
-                for i, name in enumerate(
-                    x["name"] for x in matrix.json_definition["risk"]
-                )
-            }
+            _choices = {}
+            for i, risk in enumerate(matrix.json_definition["risk"]):
+                translations = risk.get("translations")
+                if not isinstance(translations, dict):
+                    translations = {}
+                translated = translations.get(current_language, {})
+
+                # Use the translated name if available, otherwise fall back to the default name
+                name = translated.get("name") or risk.get("name", "")
+                _choices[risk.get("id", i)] = name
             options = options | _choices
+
         res = [{"value": k, "label": v} for k, v in options.items()]
         return Response(res)
 
@@ -6194,7 +6285,7 @@ class FolderViewSet(BaseModelViewSet):
         audits_count = audits.count()
         if audits_count > 0:
             for audit in audits:
-                sum += audit.get_progress()
+                sum += audit.progress
             avg_progress = int(sum / audits.count())
 
         controls = (
@@ -7391,6 +7482,17 @@ def get_metrics_view(request):
 
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
+def get_audits_metrics_view(request):
+    """
+    API endpoint that returns the expensive audit metrics (progress avg + audits stats).
+    Split from get_metrics to allow independent streaming.
+    """
+    folder_id = request.query_params.get("folder", None)
+    return Response({"results": get_audits_metrics(request.user, folder_id)})
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
 def get_combined_assessments_status_view(request):
     """
     API endpoint that returns combined assessment counts per status
@@ -8172,6 +8274,14 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     ]
     search_fields = ["name", "description", "ref_id", "framework__name"]
 
+    def get_serializer_class(self, **kwargs):
+        action = kwargs.get("action", self.action)
+        if action == "list":
+            from core.serializers import ComplianceAssessmentListSerializer
+
+            return ComplianceAssessmentListSerializer
+        return super().get_serializer_class(**kwargs)
+
     def get_queryset(self):
         """Optimize queries for table view and serializer, with conditional annotations for sorting"""
         qs = (
@@ -8182,16 +8292,36 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "framework",  # Displayed in table
                 "perimeter",  # Displayed in table
+            )
+        )
+
+        if self.action == "list":
+            # List view: lightweight prefetch for progress with implementation groups
+            qs = qs.prefetch_related(
+                Prefetch(
+                    "requirement_assessments",
+                    queryset=RequirementAssessment.objects.filter(
+                        requirement__assessable=True
+                    ).select_related("requirement"),
+                ),
+            )
+        else:
+            # Detail/other views: full prefetches for the read serializer
+            qs = qs.select_related(
+                "framework__library",  # For framework.has_update property
                 "perimeter__folder",  # FieldsRelatedField(["id", "folder"]) optimization
                 "campaign",  # Serialized as FieldsRelatedField
-            )
-            .prefetch_related(
+            ).prefetch_related(
                 "assets",  # ManyToManyField serialized as FieldsRelatedField
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "authors",  # ManyToManyField from Assessment parent class
                 "reviewers",  # ManyToManyField from Assessment parent class
+                "requirement_assessments",
+                Prefetch(
+                    "validationflow_set",
+                    queryset=ValidationFlow.objects.select_related("approver"),
+                ),
             )
-        )
 
         qs = qs.annotate(
             total_requirements=Count(
@@ -8202,20 +8332,25 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             assessed_requirements=Count(
                 "requirement_assessments",
                 filter=Q(
-                    ~Q(
-                        requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
-                    ),
+                    Q(
+                        ~Q(
+                            requirement_assessments__result=RequirementAssessment.Result.NOT_ASSESSED
+                        )
+                    )
+                    | Q(requirement_assessments__score__isnull=False),
                     requirement_assessments__requirement__assessable=True,
                 ),
                 distinct=True,
             ),
-            progress=ExpressionWrapper(
-                F("assessed_requirements")
-                * 100
-                / Greatest(Coalesce(F("total_requirements"), Value(0)), Value(1)),
-                output_field=IntegerField(),
-            ),
         )
+
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(requirement_assignments__actor__in=user_actors)
+            ).distinct()
 
         return qs
 
@@ -8660,14 +8795,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if EMAIL_HOST or EMAIL_HOST_RESCUE:
             for author in instance.authors.all():
                 try:
-                    author.mailing(
-                        email_template_name="tprm/third_party_email.html",
-                        subject=_(
-                            "CISO Assistant: A questionnaire has been assigned to you"
-                        ),
-                        object="compliance-assessments",
-                        object_id=instance.id,
-                    )
+                    specific = author.specific
+                    if hasattr(specific, "mailing"):
+                        specific.mailing(
+                            email_template_name="tprm/third_party_email.html",
+                            subject=_(
+                                "CISO Assistant: A questionnaire has been assigned to you"
+                            ),
+                            object="compliance-assessments",
+                            object_id=instance.id,
+                        )
+                    else:
+                        logger.warning(
+                            f"Actor {author} (type: {type(specific).__name__}) has no mailing method, skipping email"
+                        )
                 except Exception as primary_exception:
                     logger.error(
                         f"Failed to send email to {author}: {primary_exception}"
@@ -8999,6 +9140,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments = [
+                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+            ]
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -9038,6 +9192,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
+        # Auditee filtering: only show assigned requirement assessments
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            assigned_ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+            requirement_assessments_objects = [
+                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+            ]
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -9125,8 +9292,73 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def donut_data(self, request, pk):
-        compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        compliance_assessment = self.get_object()
         return Response(compliance_assessment.donut_render())
+
+    @action(detail=True, methods=["get"], url_path="is-auditee")
+    def is_auditee(self, request, pk):
+        """Returns whether the current user is an auditee for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        is_auditee = bool(
+            auditee_folders and compliance_assessment.folder_id in auditee_folders
+        )
+        return Response({"is_auditee": is_auditee})
+
+    @action(detail=False, methods=["get"], url_path="auditee-dashboard")
+    def auditee_dashboard(self, request):
+        """Returns aggregated progress data for the auditee's assigned audits."""
+        user_actors = Actor.get_all_for_user(request.user)
+        assignments = (
+            RequirementAssignment.objects.filter(actor__in=user_actors)
+            .select_related(
+                "compliance_assessment",
+                "compliance_assessment__framework",
+                "compliance_assessment__folder",
+            )
+            .prefetch_related("requirement_assessments")
+        )
+
+        # Only include compliance assessments the user can view
+        (viewable_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, ComplianceAssessment
+        )
+
+        # Group by compliance assessment
+        ca_map = defaultdict(list)
+        for assignment in assignments:
+            if assignment.compliance_assessment_id in viewable_ca_ids:
+                ca_map[assignment.compliance_assessment_id].append(assignment)
+
+        dashboard_data = []
+        for ca_id, group in ca_map.items():
+            ca = group[0].compliance_assessment
+            ra_ids = set()
+            for assignment in group:
+                ra_ids.update(
+                    assignment.requirement_assessments.values_list("id", flat=True)
+                )
+
+            ras = RequirementAssessment.objects.filter(
+                id__in=ra_ids, requirement__assessable=True
+            )
+            total = ras.count()
+            done = ras.exclude(result="not_assessed").count()
+
+            dashboard_data.append(
+                {
+                    "id": str(ca.id),
+                    "name": ca.name,
+                    "folder": ca.folder.name if ca.folder else None,
+                    "framework": ca.framework.name if ca.framework else None,
+                    "status": ca.status,
+                    "total_requirements": total,
+                    "assessed_requirements": done,
+                    "progress_percent": round(done / total * 100) if total > 0 else 0,
+                }
+            )
+
+        return Response(dashboard_data)
 
     @action(detail=True, methods=["get"])
     def comparable_audits(self, request, pk):
@@ -9465,10 +9697,19 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         return Response(comparison_data)
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         compliance_assessment = ComplianceAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
+        if request.method == "GET":
+            dry_run = True
+        if request.method == "GET":
+            dry_run = True
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
@@ -9479,7 +9720,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         controls = []
         for requirement_assessment in requirement_assessments:
             controls.append(
-                requirement_assessment.create_applied_controls_from_suggestions()
+                requirement_assessment.create_applied_controls_from_suggestions(
+                    dry_run=dry_run
+                )
             )
         return Response(
             AppliedControlReadSerializer(chain.from_iterable(controls), many=True).data,
@@ -9608,7 +9851,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries for table view and serializer - high-impact due to many nested relationships"""
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related(
@@ -9625,6 +9868,14 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
             )
         )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders)
+                | Q(assignments__actor__in=user_actors)
+            ).distinct()
+        return qs
 
     def update(self, request, *args, **kwargs):
         response = super().update(request, *args, **kwargs)
@@ -9712,17 +9963,24 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         return Response(dict(RequirementAssessment.ExtendedResult.choices))
 
     @staticmethod
-    @api_view(["POST"])
+    @api_view(["GET", "POST"])
     @renderer_classes([JSONRenderer])
     def create_suggested_applied_controls(request, pk):
         requirement_assessment = RequirementAssessment.objects.get(id=pk)
+        dry_run = str(request.query_params.get("dry_run", "false")).lower() in {
+            "true",
+            "1",
+            "yes",
+        }
         if not RoleAssignment.is_access_allowed(
             user=request.user,
             perm=Permission.objects.get(codename="add_appliedcontrol"),
             folder=requirement_assessment.folder,
         ):
             return Response(status=status.HTTP_403_FORBIDDEN)
-        controls = requirement_assessment.create_applied_controls_from_suggestions()
+        controls = requirement_assessment.create_applied_controls_from_suggestions(
+            dry_run=dry_run
+        )
         return Response(
             AppliedControlReadSerializer(controls, many=True).data,
             status=status.HTTP_200_OK,
@@ -10434,6 +10692,12 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
     search_fields = ["name", "description", "ref_id"]
 
     def get_queryset(self):
+        dealt_with_statuses = [
+            Finding.Status.MITIGATED,
+            Finding.Status.RESOLVED,
+            Finding.Status.DISMISSED,
+            Finding.Status.CLOSED,
+        ]
         return (
             super()
             .get_queryset()
@@ -10441,6 +10705,19 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "evidences",
                 "authors",
+            )
+            .annotate(
+                _total_findings=Count("findings"),
+                _dealt_findings=Count(
+                    "findings",
+                    filter=Q(findings__status__in=dealt_with_statuses),
+                    distinct=True,
+                ),
+                treatment_progress=Case(
+                    When(_total_findings=0, then=Value(0)),
+                    default=100 * F("_dealt_findings") / F("_total_findings"),
+                    output_field=IntegerField(),
+                ),
             )
         )
 
@@ -11036,6 +11313,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "owners",
         "entities",
         "assets",
+        "filtering_labels",
     ]
 
     export_config = {
@@ -11097,6 +11375,13 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
                 ),
             },
             "link": {"source": "link", "label": "link", "escape": True},
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
         },
         "filename": "incidents_export",
         "select_related": ["folder"],
@@ -12405,3 +12690,38 @@ class TerminologyViewSet(BaseModelViewSet):
     @action(detail=False, name="Get class name choices")
     def field_path(self, request):
         return Response(dict(Terminology.FieldPath.choices))
+
+
+class RequirementAssignmentViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows requirement assignments to be viewed or edited.
+    Requirement assignments delegate groups of requirement assessments to specific actors.
+    """
+
+    model = RequirementAssignment
+    filterset_fields = [
+        "folder",
+        "compliance_assessment",
+        "actor",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "compliance_assessment",
+            )
+            .prefetch_related(
+                "actor",
+                "requirement_assessments",
+            )
+        )
+        auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
+        if auditee_folders:
+            user_actors = Actor.get_all_for_user(self.request.user)
+            qs = qs.filter(
+                ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
+            ).distinct()
+        return qs

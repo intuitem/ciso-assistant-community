@@ -388,7 +388,37 @@
 	}
 	let createAppliedControlsLoading = $state(false);
 
-	function modalConfirmCreateSuggestedControls(id: string, name: string, action: string): void {
+	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
+		let previewItems: string[] = [];
+		try {
+			const previewResponse = await fetch(
+				`/compliance-assessments/${id}/suggestions/applied-controls?dry_run=true`
+			);
+			if (previewResponse.ok) {
+				const previewData: any[] = await previewResponse.json();
+				previewItems = previewData.map(
+					(control) =>
+						control?.name ||
+						control?.reference_control?.str ||
+						control?.reference_control?.name ||
+						control?.ref_id ||
+						''
+				);
+			} else {
+				throw new Error(await previewResponse.text());
+			}
+		} catch (error) {
+			console.error('Unable to fetch suggested controls preview', error);
+			previewItems = data.compliance_assessment.framework.reference_controls.map(
+				(control) =>
+					control?.name ||
+					control?.reference_control?.str ||
+					control?.reference_control?.name ||
+					control?.ref_id ||
+					''
+			);
+		}
+
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -399,7 +429,7 @@
 				formAction: action,
 				bodyComponent: List,
 				bodyProps: {
-					items: data.compliance_assessment.framework.reference_controls,
+					items: previewItems,
 					message: m.theFollowingControlsWillBeAddedColon()
 				}
 			}
@@ -410,7 +440,7 @@
 			// Data
 			title: m.suggestControls(),
 			body: m.createAppliedControlsFromSuggestionsConfirmMessage({
-				count: data.compliance_assessment.framework.reference_controls.length
+				count: previewItems.length
 			}),
 			response: (r: boolean) => {
 				createAppliedControlsLoading = r;
@@ -486,12 +516,20 @@
 					if (key === 'selected_implementation_groups' && (!data.compliance_assessment.framework.implementation_groups_definition || !Array.isArray(data.compliance_assessment.framework.implementation_groups_definition) || data.compliance_assessment.framework.implementation_groups_definition.length === 0)) return false;
 					return true;
 				}) as [key, value]}
+					{@const isUpdatableFramework = key === 'framework' && value.has_update}
 					<div class="flex flex-col">
 						<div
 							class="text-sm font-medium text-gray-800 capitalize-first"
 							data-testid={key.replaceAll('_', '-') + '-field-title'}
 						>
+							{#if isUpdatableFramework}
+								<i title={m.updateAvailable()} class="fa-solid fa-circle-up text-success-600-400"
+								></i>
+							{/if}
 							{safeTranslate(key)}
+							{#if isUpdatableFramework}
+								({m.updateAvailable()})
+							{/if}
 						</div>
 						<ul class="text-sm">
 							<li
@@ -833,6 +871,17 @@
 							<span>{m.potentialThreats()}</span>
 						</div>
 					</button>
+				{/if}
+				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
+					<Anchor
+						breadcrumbAction="push"
+						href={`${page.url.pathname}/assignments`}
+						class="btn text-gray-100 bg-linear-to-r from-lime-500 to-green-600 h-fit"
+						data-testid="assignments-button"
+					>
+						<i class="fa-solid fa-user-tag mr-2"></i>
+						{m.assignments?.() ?? 'Assignments'}
+					</Anchor>
 				{/if}
 			</div>
 		</div>

@@ -183,7 +183,7 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
@@ -193,7 +193,7 @@
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
@@ -207,7 +207,9 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+							{operationalScenario.ro_to.target_objective}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -256,11 +258,7 @@
 						{#snippet content()}
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
+									<div class="py-2"></div>
 									{#if model.table}
 										<ModelTable
 											source={model.table}

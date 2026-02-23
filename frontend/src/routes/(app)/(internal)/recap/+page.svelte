@@ -24,6 +24,11 @@
 	}
 
 	let { data }: Props = $props();
+
+	const foldersWithAssessments = $derived(
+		(data?.folders ?? []).filter((f) => (f?.compliance_assessments?.length ?? 0) > 0)
+	);
+
 	const model = URL_MODEL_MAP['folders'];
 	const canEditObject = (folder): boolean =>
 		canPerformAction({
@@ -34,12 +39,23 @@
 		});
 </script>
 
-<div class="p-4 space-y-6 bg-gray-50 min-h-screen">
+<div class="p-4 space-y-6 bg-gray-50 min-h-screen card">
 	<h2 class="text-2xl font-extrabold text-gray-800 mb-4">{m.overallCompliance()}</h2>
 
 	<div class="space-y-6">
-		{#each data.folders as folder}
-			{#if folder.compliance_assessments?.length > 0}
+		{#if foldersWithAssessments.length === 0}
+			<div class="flex items-center justify-center min-h-[60vh]">
+				<div class="text-center max-w-lg">
+					<p class="text-xl font-bold text-gray-800">
+						{m.createYourFirstAuditToSeeRecapPage()}
+					</p>
+					<p class="mt-2 text-sm text-gray-600">
+						{m.AuditExistsYoullSeeOverallCompliance()}
+					</p>
+				</div>
+			</div>
+		{:else}
+			{#each foldersWithAssessments as folder}
 				<div
 					class="bg-white shadow-lg rounded-xl border border-gray-200 overflow-hidden transition hover:shadow-xl transform w-full"
 				>
@@ -50,6 +66,7 @@
 							{folder.name}
 						</a>
 					</div>
+
 					{#if folder.overallCompliance?.values?.length > 0}
 						<div class="px-4 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-b-lg">
 							<p class="text-sm font-semibold text-primary-700 mb-2">{m.globalOverall()}</p>
@@ -58,11 +75,11 @@
 									<div
 										class="flex justify-center items-center text-xs font-semibold"
 										style="
-						width: {sp.percentage}%;
-						background-color: {sp.itemStyle.color};
-						color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
-						box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
-					"
+										width: {sp.percentage}%;
+										background-color: {sp.itemStyle.color};
+										color: {sp.itemStyle.color === '#000000' ? 'white' : 'black'};
+										box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
+									"
 									>
 										{Number(sp.percentage) > 5 ? `${sp.percentage}%` : ''}
 									</div>
@@ -143,7 +160,7 @@
 						{/each}
 					</div>
 				</div>
-			{/if}
-		{/each}
+			{/each}
+		{/if}
 	</div>
 </div>

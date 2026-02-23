@@ -76,6 +76,10 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
+	let isReadOnly = $derived(
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+	);
+
 	const hasQuestions = $derived(
 		requirementAssessments.some(
 			(requirementAssessment) => requirementAssessment.requirement.questions
@@ -198,19 +202,17 @@
 	);
 
 	async function updateScore(requirementAssessment: Record<string, any>) {
-		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
-		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
+		requirementAssessmentScores[requirementAssessment.id] = [
+			requirementAssessment.is_scored,
+			score,
+			documentationScore
+		];
 		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
-			if (
-				isScored === currentScoreValue[0] &&
-				score === currentScoreValue[1] &&
-				documentationScore === currentScoreValue[2]
-			) {
+			if (score === currentScoreValue[1] && documentationScore === currentScoreValue[2]) {
 				await updateBulk(requirementAssessment, {
-					is_scored: isScored,
 					score: score,
 					documentation_score: documentationScore
 				});
@@ -393,6 +395,19 @@
 				{/if}
 			</div>
 		{/if}
+		<!-- Read-only banner -->
+		{#if isReadOnly}
+			<div
+				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+			>
+				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+				<p class="text-yellow-800 font-medium">
+					{complianceAssessment.is_locked
+						? m.lockedAssessmentMessage()
+						: m.assessmentInReviewMessage()}
+				</p>
+			</div>
+		{/if}
 		<ul data-testid="requirement-assessments">
 			{#each requirementAssessments as requirementAssessment, i}
 				<li class="list-none">
@@ -550,26 +565,33 @@
 								>
 									{#if !questionnaireMode}
 										<div class="flex flex-row w-full space-x-2 my-4">
-											<div class="flex flex-col items-center w-1/2">
-												<p class="flex items-center font-semibold text-blue-600 italic">
-													{m.status()}
-												</p>
-												<RadioGroup
-													possibleOptions={status_options}
-													key="id"
-													labelKey="label"
-													field="status"
-													colorMap={complianceStatusTailwindColorMap}
-													initialValue={requirementAssessment.status}
-													onChange={(newValue) => {
-														const newStatus =
-															requirementAssessment.status === newValue ? 'to_do' : newValue;
-														requirementAssessment.status = newStatus;
-														update(requirementAssessment, 'status');
-													}}
-												/>
-											</div>
-											<div class="flex flex-col items-center w-1/2">
+											{#if complianceAssessment.progress_status_enabled}
+												<div class="flex flex-col items-center w-1/2">
+													<p class="flex items-center font-semibold text-blue-600 italic">
+														{m.status()}
+													</p>
+													<RadioGroup
+														possibleOptions={status_options}
+														key="id"
+														labelKey="label"
+														field="status"
+														colorMap={complianceStatusTailwindColorMap}
+														disabled={isReadOnly}
+														initialValue={requirementAssessment.status}
+														onChange={(newValue) => {
+															const newStatus =
+																requirementAssessment.status === newValue ? 'to_do' : newValue;
+															requirementAssessment.status = newStatus;
+															update(requirementAssessment, 'status');
+														}}
+													/>
+												</div>
+											{/if}
+											<div
+												class="flex flex-col items-center {complianceAssessment.progress_status_enabled
+													? 'w-1/2'
+													: 'w-full'}"
+											>
 												<p class="flex items-center font-semibold text-purple-600 italic">
 													{m.result()}
 												</p>
@@ -589,6 +611,7 @@
 														labelKey="label"
 														field="result"
 														colorMap={complianceResultTailwindColorMap}
+														disabled={isReadOnly}
 														initialValue={requirementAssessment.result}
 														onChange={(newValue) => {
 															const newResult =
@@ -609,6 +632,7 @@
 												questions={requirementAssessment.requirement.questions}
 												initialValue={requirementAssessment.answers}
 												field="answers"
+												disabled={isReadOnly}
 												{shallow}
 												onChange={(urn, newAnswer) => {
 													requirementAssessment.answers[urn] = newAnswer;
@@ -617,7 +641,11 @@
 											/>
 										</div>
 									{/if}
-									<div class="flex flex-col w-full place-items-center">
+									<div
+										class="flex flex-col w-full place-items-center {isReadOnly
+											? 'pointer-events-none opacity-60'
+											: ''}"
+									>
 										{#if !shallow}
 											{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 												<div class="flex flex-row items-center space-x-4">
@@ -636,7 +664,7 @@
 														size="size-10">{requirementAssessment.score}</ProgressRing
 													>
 												</div>
-											{:else}
+											{:else if requirementAssessment.result !== 'not_applicable'}
 												<Score
 													form={scoreForms[requirementAssessment.id]}
 													min_score={complianceAssessment.min_score}
@@ -651,22 +679,21 @@
 														requirementAssessment.score = newScore;
 														updateScore(requirementAssessment);
 													}}
-													disabled={!requirementAssessment.is_scored ||
-														requirementAssessment.result === 'not_applicable'}
+													disabled={!requirementAssessment.is_scored}
 												>
 													{#snippet left()}
 														<div>
 															<Checkbox
 																form={isScoredForms[requirementAssessment.id]}
 																field="is_scored"
+																disabled={isReadOnly}
 																label={''}
 																helpText={m.scoringHelpText()}
 																checkboxComponent="switch"
 																classes="h-full flex flex-row items-center justify-center my-1"
 																classesContainer="h-full flex flex-row items-center space-x-4"
-																onChange={async () => {
-																	requirementAssessment.is_scored =
-																		!requirementAssessment.is_scored;
+																onChange={async (newValue) => {
+																	requirementAssessment.is_scored = newValue;
 																	await update(requirementAssessment, 'is_scored');
 																}}
 															/>
@@ -687,8 +714,7 @@
 															requirementAssessment.documentation_score = newScore;
 															updateScore(requirementAssessment);
 														}}
-														disabled={!requirementAssessment.is_scored ||
-															requirementAssessment.result === 'not_applicable'}
+														disabled={!requirementAssessment.is_scored}
 													/>
 												{/if}
 											{/if}
@@ -759,6 +785,7 @@
 													{#snippet panel()}
 														<TableMarkdownField
 															bind:value={requirementAssessment.observation}
+															disabled={isReadOnly}
 															onSave={async (newValue) => {
 																await update(requirementAssessment, 'observation');
 																requirementAssessment.observationBuffer = newValue;
@@ -786,7 +813,7 @@
 													{/snippet}
 													{#snippet panel()}
 														<div class="flex flex-row space-x-2 items-center">
-															{#if !shallow}
+															{#if !shallow && !isReadOnly}
 																<button
 																	class="btn preset-filled-primary-500 self-start"
 																	onclick={() =>
@@ -846,7 +873,7 @@
 													{/snippet}
 													{#snippet panel()}
 														<div class="flex flex-row space-x-2 items-center">
-															{#if !shallow}
+															{#if !shallow && !isReadOnly}
 																<button
 																	class="btn preset-filled-primary-500 self-start"
 																	onclick={() =>
