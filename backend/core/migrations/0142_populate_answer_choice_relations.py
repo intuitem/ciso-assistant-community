@@ -2,6 +2,7 @@
 Data migration: populate Answer.selected_choice (FK) and Answer.selected_choices (M2M)
 from the legacy Answer.value JSONField, then clear value for choice-type answers.
 """
+
 import logging
 
 from django.db import migrations
@@ -48,10 +49,9 @@ def forwards(apps, schema_editor):
         Answer.objects.bulk_update(batch, ["selected_choice", "value"])
 
     # --- MULTIPLE_CHOICE: resolve value list → M2M ---
-    multi_choice_qs = (
-        Answer.objects.filter(question__type="multiple_choice")
-        .select_related("question")
-    )
+    multi_choice_qs = Answer.objects.filter(
+        question__type="multiple_choice"
+    ).select_related("question")
 
     batch = []
     for answer in multi_choice_qs.iterator(chunk_size=BATCH_SIZE):
@@ -107,7 +107,6 @@ def backwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0141_answer_selected_choice_selected_choices"),
     ]

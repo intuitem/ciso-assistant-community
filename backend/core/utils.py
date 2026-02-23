@@ -683,7 +683,13 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
     - answers_by_ref: dict of {question.ref_id: answer_value}
     - questions_by_ref: dict of {question.ref_id: Question} (optional, for lookups)
     """
-    depends_on = question.depends_on if hasattr(question, "depends_on") else question.get("depends_on") if isinstance(question, dict) else None
+    depends_on = (
+        question.depends_on
+        if hasattr(question, "depends_on")
+        else question.get("depends_on")
+        if isinstance(question, dict)
+        else None
+    )
     if not depends_on:
         return True
 
@@ -778,14 +784,10 @@ def update_selected_implementation_groups(compliance_assessment):
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0
             else:
-                has_answer_by_qid[a.question_id] = (
-                    a.value is not None and a.value != ""
-                )
+                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
             # For depends_on resolution, pass ref_id strings
             if a.question.ref_id:
-                answers_by_ref[a.question.ref_id] = (
-                    a.get_choice_ref_ids() or a.value
-                )
+                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
 
         for question in questions_qs:
             if not _is_question_visible(question, answers_by_ref, questions_by_ref):
@@ -797,9 +799,7 @@ def update_selected_implementation_groups(compliance_assessment):
             selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
                 if choice.id in selected_pks:
-                    igs_to_select.update(
-                        choice.select_implementation_groups or []
-                    )
+                    igs_to_select.update(choice.select_implementation_groups or [])
 
         if ra.requirement.framework.implementation_groups_definition:
             for ig in ra.requirement.framework.implementation_groups_definition:

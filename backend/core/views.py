@@ -7012,9 +7012,7 @@ class FolderViewSet(BaseModelViewSet):
                 # Store M2M ref_ids for post-create
                 choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
                 if choice_ref_ids:
-                    many_to_many_map_ids[
-                        "selected_choices_ref_ids"
-                    ] = choice_ref_ids
+                    many_to_many_map_ids["selected_choices_ref_ids"] = choice_ref_ids
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -7317,9 +7315,7 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "answer":
-                if ref_ids := many_to_many_map_ids.get(
-                    "selected_choices_ref_ids"
-                ):
+                if ref_ids := many_to_many_map_ids.get("selected_choices_ref_ids"):
                     choices = QuestionChoice.objects.filter(
                         question=obj.question, ref_id__in=ref_ids
                     )
@@ -7610,7 +7606,9 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).prefetch_related("questions", "questions__choices").all(),
+                RequirementNode.objects.filter(framework=_framework)
+                .prefetch_related("questions", "questions__choices")
+                .all(),
                 None,
                 _framework.max_score,
             )
@@ -9139,7 +9137,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats", "questions", "questions__choices")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -10410,11 +10410,13 @@ def generate_html(
                 node_data["assessments"] = assessment
                 # Pre-compute dicts for template backward compat
                 node_data["answers_dict"] = build_answers_dict(
-                    assessment.answers.select_related(
-                        "question", "selected_choice"
-                    ).prefetch_related("selected_choices").all()
+                    assessment.answers.select_related("question", "selected_choice")
+                    .prefetch_related("selected_choices")
+                    .all()
                 )
-                node_data["questions_dict"] = build_questions_dict(requirement_node) or {}
+                node_data["questions_dict"] = (
+                    build_questions_dict(requirement_node) or {}
+                )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)
@@ -12749,11 +12751,7 @@ class QuestionChoiceViewSet(BaseModelViewSet):
     ]
 
     def get_queryset(self):
-        return (
-            super()
-            .get_queryset()
-            .select_related("question", "folder")
-        )
+        return super().get_queryset().select_related("question", "folder")
 
 
 class AnswerViewSet(BaseModelViewSet):

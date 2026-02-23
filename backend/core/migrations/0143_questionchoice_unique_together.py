@@ -5,6 +5,7 @@ This must come after the data migration so any duplicate (question, ref_id)
 rows are handled first. The deduplication step merges duplicates by keeping
 the first row and updating any FK references.
 """
+
 import logging
 
 from django.db import migrations
@@ -38,9 +39,7 @@ def deduplicate_question_choices(apps, schema_editor):
                 selected_choice=keeper
             )
             # Re-point M2M references
-            for answer in Answer.objects.filter(
-                selected_choices=old_choice
-            ):
+            for answer in Answer.objects.filter(selected_choices=old_choice):
                 answer.selected_choices.remove(old_choice)
                 answer.selected_choices.add(keeper)
 
@@ -60,7 +59,6 @@ def noop(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0142_populate_answer_choice_relations"),
     ]

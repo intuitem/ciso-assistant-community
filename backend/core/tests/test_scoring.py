@@ -305,14 +305,24 @@ class TestScoring:
             is_published=True,
         )
         QuestionChoice.objects.create(
-            question=q1, ref_id="DC1A", annotation="Yes",
-            add_score=10, compute_result="true", order=0,
-            folder=folder, is_published=True,
+            question=q1,
+            ref_id="DC1A",
+            annotation="Yes",
+            add_score=10,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
         )
         choice_no = QuestionChoice.objects.create(
-            question=q1, ref_id="DC1B", annotation="No",
-            add_score=0, compute_result="true", order=1,
-            folder=folder, is_published=True,
+            question=q1,
+            ref_id="DC1B",
+            annotation="No",
+            add_score=0,
+            compute_result="true",
+            order=1,
+            folder=folder,
+            is_published=True,
         )
 
         # Q2: depends on Q1 answer being "DC1A"
@@ -331,14 +341,24 @@ class TestScoring:
             is_published=True,
         )
         QuestionChoice.objects.create(
-            question=q2, ref_id="DC2A", annotation="Sub-Yes",
-            add_score=5, compute_result="true", order=0,
-            folder=folder, is_published=True,
+            question=q2,
+            ref_id="DC2A",
+            annotation="Sub-Yes",
+            add_score=5,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
         )
         QuestionChoice.objects.create(
-            question=q2, ref_id="DC2B", annotation="Sub-No",
-            add_score=0, compute_result="false", order=1,
-            folder=folder, is_published=True,
+            question=q2,
+            ref_id="DC2B",
+            annotation="Sub-No",
+            add_score=0,
+            compute_result="false",
+            order=1,
+            folder=folder,
+            is_published=True,
         )
 
         from core.models import Perimeter
@@ -404,14 +424,24 @@ class TestScoring:
             is_published=True,
         )
         c1 = QuestionChoice.objects.create(
-            question=q, ref_id="MC1", annotation="A",
-            add_score=5, compute_result="true", order=0,
-            folder=folder, is_published=True,
+            question=q,
+            ref_id="MC1",
+            annotation="A",
+            add_score=5,
+            compute_result="true",
+            order=0,
+            folder=folder,
+            is_published=True,
         )
         c2 = QuestionChoice.objects.create(
-            question=q, ref_id="MC2", annotation="B",
-            add_score=3, compute_result="true", order=1,
-            folder=folder, is_published=True,
+            question=q,
+            ref_id="MC2",
+            annotation="B",
+            add_score=3,
+            compute_result="true",
+            order=1,
+            folder=folder,
+            is_published=True,
         )
 
         from core.models import Perimeter
@@ -419,15 +449,23 @@ class TestScoring:
         perimeter = Perimeter.objects.create(name="Multi Perim", folder=folder)
         ca = ComplianceAssessment.objects.create(
             name="Multi CA",
-            framework=fw, folder=folder, perimeter=perimeter,
-            is_published=True, min_score=0, max_score=100,
+            framework=fw,
+            folder=folder,
+            perimeter=perimeter,
+            is_published=True,
+            min_score=0,
+            max_score=100,
         )
         ra = RequirementAssessment.objects.create(
-            compliance_assessment=ca, requirement=rn, folder=folder,
+            compliance_assessment=ca,
+            requirement=rn,
+            folder=folder,
         )
 
         answer = Answer.objects.create(
-            requirement_assessment=ra, question=q, folder=folder,
+            requirement_assessment=ra,
+            question=q,
+            folder=folder,
         )
         answer.selected_choices.set([c1, c2])
 

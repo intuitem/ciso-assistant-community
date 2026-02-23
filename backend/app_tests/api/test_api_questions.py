@@ -160,9 +160,7 @@ class TestQuestionEndpoints:
             folder=folder,
             is_published=True,
         )
-        response = authenticated_client.delete(
-            reverse("questions-detail", args=[q.id])
-        )
+        response = authenticated_client.delete(reverse("questions-detail", args=[q.id]))
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Question.objects.filter(id=q.id).exists()
 

@@ -156,9 +156,7 @@ class RequirementNodeImporter:
             logger.info(
                 f"Parsing the threats for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.threats.add(
-                Threat.objects.get(urn=threat.lower())
-            )
+            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
         for reference_control in self.requirement_data.get("reference_controls", []):
             logger.info(

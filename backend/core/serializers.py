@@ -2308,9 +2308,11 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
         from core.utils import build_answers_dict
 
-        answers_qs = obj.answers.select_related(
-            "question", "selected_choice"
-        ).prefetch_related("selected_choices").all()
+        answers_qs = (
+            obj.answers.select_related("question", "selected_choice")
+            .prefetch_related("selected_choices")
+            .all()
+        )
         return build_answers_dict(answers_qs)
 
     class Meta:
@@ -2454,11 +2456,16 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
         # Check if any choice has scoring or result logic
         from core.models import QuestionChoice
 
-        has_score_or_result = QuestionChoice.objects.filter(
-            question__requirement_node=instance.requirement,
-        ).filter(
-            models.Q(add_score__isnull=False) | models.Q(compute_result__isnull=False)
-        ).exists()
+        has_score_or_result = (
+            QuestionChoice.objects.filter(
+                question__requirement_node=instance.requirement,
+            )
+            .filter(
+                models.Q(add_score__isnull=False)
+                | models.Q(compute_result__isnull=False)
+            )
+            .exists()
+        )
 
         if has_score_or_result:
             instance.compute_score_and_result()
@@ -2480,7 +2487,9 @@ class QuestionChoiceReadSerializer(BaseModelSerializer):
 
 class QuestionChoiceWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
-        question = attrs.get("question") or (self.instance.question if self.instance else None)
+        question = attrs.get("question") or (
+            self.instance.question if self.instance else None
+        )
         if question:
             framework = question.requirement_node.framework
             if framework and framework.status == Framework.Status.PUBLISHED:
@@ -2587,9 +2596,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 # Direct FK: validate choice belongs to question
                 if selected_choice and selected_choice not in question.choices.all():
                     raise serializers.ValidationError(
-                        {
-                            "selected_choice": "Choice does not belong to this question."
-                        }
+                        {"selected_choice": "Choice does not belong to this question."}
                     )
                 if selected_choice:
                     attrs["value"] = None
@@ -2603,9 +2610,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                         )
                     if value:
                         choices = question.choices.filter(ref_id__in=value)
-                        found_refs = set(
-                            choices.values_list("ref_id", flat=True)
-                        )
+                        found_refs = set(choices.values_list("ref_id", flat=True))
                         invalid = [v for v in value if v not in found_refs]
                         if invalid:
                             raise serializers.ValidationError(
@@ -2618,9 +2623,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
 
                 # Direct M2M PKs: validate all belong to question
                 if selected_choices_list is not None:
-                    valid_pks = set(
-                        question.choices.values_list("id", flat=True)
-                    )
+                    valid_pks = set(question.choices.values_list("id", flat=True))
                     for c in selected_choices_list:
                         if c.id not in valid_pks:
                             raise serializers.ValidationError(
@@ -2644,9 +2647,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                         datetime.strptime(value, "%Y-%m-%d")
                     except ValueError:
                         raise serializers.ValidationError(
-                            {
-                                "value": "Date answers must be in YYYY-MM-DD format."
-                            }
+                            {"value": "Date answers must be in YYYY-MM-DD format."}
                         )
 
         return super().validate(attrs)

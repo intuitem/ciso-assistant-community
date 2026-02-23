@@ -122,9 +122,11 @@ def migrate_forward(apps, schema_editor):
 
     # 3. Migrate RequirementAssessment.answers → Answer rows
     answer_bulk = []
-    ras_with_answers = RequirementAssessment.objects.filter(
-        answers_json__isnull=False
-    ).exclude(answers_json={}).select_related("requirement")
+    ras_with_answers = (
+        RequirementAssessment.objects.filter(answers_json__isnull=False)
+        .exclude(answers_json={})
+        .select_related("requirement")
+    )
 
     for ra in ras_with_answers.iterator(chunk_size=500):
         if not isinstance(ra.answers_json, dict):
@@ -165,7 +167,6 @@ def migrate_backward(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0138_framework_status_question_questionchoice_answer"),
     ]
