@@ -167,7 +167,7 @@
 			sidebarOpen
 		)}"
 	>
-		<div class="flex items-start justify-between px-4 pb-2">
+		<div class="flex items-start justify-between px-4">
 			<div>
 				<div
 					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
