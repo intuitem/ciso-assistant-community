@@ -2826,7 +2826,8 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {
                             "record": record,
-                            "details": "Failed to save vulnerability record: "+vuln_serializer.errors,
+                            "details": "Failed to save vulnerability record: "
+                            + vuln_serializer.errors,
                         }
                     )
 
