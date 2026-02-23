@@ -12,7 +12,7 @@
 	let year = $derived(parseInt(page.params.year));
 	let month = $derived(parseInt(page.params.month));
 
-	function getDate(dateToParse) {
+	function parseDate(dateToParse) {
 		try {
 			let splited = dateToParse.split('-');
 			let year = parseInt(splited[0]);
@@ -56,7 +56,7 @@
 			})),
 			...tasks.map((task: Record<string, string>) => ({
 				label: `TA: ${task.name}`,
-				date: getDate(task.due_date),
+				date: parseDate(task.due_date),
 				link: !task.is_recurrent
 					? `/task-templates/${task.task_template.id}`
 					: `/task-nodes/${task.id}`,
