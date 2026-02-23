@@ -202,7 +202,6 @@
 								>
 									{m.tasks()}
 								</th>
-								<th class="px-2 py-3 text-center font-semibold w-16">{m.frequency()}</th>
 								{#each monthsToDisplay as monthInfo}
 									<th class="px-2 py-3 text-center font-semibold w-16">
 										{monthInfo.label}
@@ -218,9 +217,7 @@
 								<tr class="border-b hover:bg-gray-50">
 									<td class="px-4 py-3 sticky left-0 bg-white z-10">
 										{#if task.ref_id}
-											<div class="">
-												<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
-											</div>
+											<span class="text-xs bg-slate-200 p-1 rounded">{task.ref_id}</span>
 										{/if}
 										<a
 											href="/task-templates/{task.id}"
@@ -238,13 +235,6 @@
 												<span class="font-medium">{m.appliedControls()}:</span>
 												{task.applied_controls.map((control) => control.str).join(', ')}
 											</div>
-										{/if}
-									</td>
-									<td class="px-2 py-3 text-center text-xs">
-										{#if task.schedule && task.schedule.frequency}
-											<span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded">
-												{task.schedule.frequency.charAt(0)}
-											</span>
 										{/if}
 									</td>
 									{#each monthsToDisplay as monthInfo}

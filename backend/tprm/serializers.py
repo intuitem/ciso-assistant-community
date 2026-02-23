@@ -308,7 +308,10 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                 logger.error(e)
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
-                    user.is_third_party = True
+                    if not user.is_third_party:
+                        raise serializers.ValidationError(
+                            {"email": "errorUserAlreadyExistsAsInternal"}
+                        )
                     user.keep_local_login = True
                     user.save()
                     instance.user = user
@@ -325,7 +328,10 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
-        user.is_third_party = True
+        if not user.is_third_party:
+            raise serializers.ValidationError(
+                {"email": "errorUserAlreadyExistsAsInternal"}
+            )
         user.keep_local_login = True
         user.save()
         instance.user = user

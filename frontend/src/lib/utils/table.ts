@@ -1363,8 +1363,8 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
-			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
-			effort: APPLIED_CONTROL_EFFORT_FILTER
+			qualifications: QUALIFICATION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -2209,8 +2209,26 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'folder', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'folder', 'perimeter'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings',
+			'treatmentProgress',
+			'folder',
+			'perimeter'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings_count',
+			'treatment_progress',
+			'folder',
+			'perimeter'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,

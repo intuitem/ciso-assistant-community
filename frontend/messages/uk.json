@@ -152,6 +152,8 @@
 	"selectDomain": "Вибрати домен",
 	"focusMode": "Режим фокусу",
 	"focusModeTooltip": "Зосередитися на певному домені",
+	"objectNotReachableFromCurrentFocus": "Цей об'єкт недоступний з поточного фокусу. Перенаправлення до перегляду списку.",
+	"objectNotFound": "Об'єкт не знайдено. Перенаправлення до перегляду списку.",
 	"clearFocus": "Очистити фокус",
 	"noDomainsAvailable": "Немає доступних доменів",
 	"urn": "URN",
@@ -1621,6 +1623,7 @@
 	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
 	"libraryFilteringLabels": "Мітки бібліотеки",
+	"campaignsDescription": "Керування кампаніями аудиту",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],
