@@ -1,0 +1,467 @@
+#!/usr/bin/env python3
+"""Construit un fichier Excel depuis questionnaire_repo.json et mesures_repo.json."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+from openpyxl import Workbook
+
+FRAMEWORK_HEADERS = [
+    "assessable",
+    "depth",
+    "ref_id",
+    "urn_id",
+    "name",
+    "description",
+    "annotation",
+    "typical_evidence",
+    "implementation_groups",
+    "questions",
+    "answer",
+    "reference_controls",
+    "depends_on",
+    "condition",
+]
+
+IMP_GRP_HEADERS = ["ref_id", "name", "description", "default_selected"]
+ANSW_HEADERS = ["id", "question_type", "question_choices", "description", "select_implementation_groups"]
+REF_CTRL_HEADERS = ["ref_id", "name", "category", "csf_function", "description", "annotation"]
+
+PERIMETRE_LABELS = {
+    "SYSTEME-INDUSTRIEL": "SYSTÈME INDUSTRIEL",
+    "ATTAQUE-CIBLEE": "ATTAQUE CIBLÉE",
+}
+
+QUESTION_TYPE_MAP = {
+    "choixMultiple": "multiple_choice",
+    "choixUnique": "unique_choice",
+}
+
+
+@dataclass
+class AnswerRow:
+    qid: str
+    question_type: str
+    response_labels: list[str]
+    response_ids: list[str]
+    first_order: int
+    select_groups: list[str] = field(default_factory=list)
+
+    def ensure_line_count(self) -> None:
+        if not self.select_groups:
+            self.select_groups = ["/" for _ in self.response_labels]
+        if len(self.select_groups) < len(self.response_labels):
+            self.select_groups.extend("/" for _ in range(len(self.response_labels) - len(self.select_groups)))
+
+    def _line_index_from_ordre(self, ordre: int) -> int:
+        base = ordre if self.first_order > 0 else ordre + 1
+        idx = max(base - 1, 0)
+        if idx >= len(self.response_labels):
+            idx = len(self.response_labels) - 1
+        return idx
+
+    def add_group_at_ordre(self, ordre: int, group: str) -> None:
+        if not self.response_labels:
+            return
+        self.ensure_line_count()
+        idx = self._line_index_from_ordre(ordre)
+        self._merge_group_at_index(idx, group)
+
+    def add_group_except_response_id(self, group: str, response_id_to_skip: str) -> None:
+        if not self.response_labels:
+            return
+        self.ensure_line_count()
+        for idx, rid in enumerate(self.response_ids):
+            if rid == response_id_to_skip:
+                continue
+            self._merge_group_at_index(idx, group)
+
+    def _merge_group_at_index(self, idx: int, group: str) -> None:
+        current = self.select_groups[idx]
+        if current == "/" or current == "":
+            self.select_groups[idx] = group
+            return
+        parts = [p.strip() for p in current.split(",") if p.strip()]
+        if group in parts:
+            return
+        parts.append(group)
+        self.select_groups[idx] = ", ".join(parts)
+
+
+@dataclass
+class Context:
+    framework_rows: list[dict[str, str]] = field(default_factory=list)
+    imp_grp_rows: list[dict[str, str]] = field(default_factory=list)
+    ref_ctrl_rows: list[dict[str, str]] = field(default_factory=list)
+    answer_rows: dict[str, AnswerRow] = field(default_factory=dict)
+    imp_grp_seen: set[str] = field(default_factory=set)
+    theme_counter: int = 0
+    question_counter: int = 0
+    question_number_by_id: dict[str, int] = field(default_factory=dict)
+    framework_index_by_urn: dict[str, int] = field(default_factory=dict)
+
+
+def as_text(value: Any) -> str:
+    if value is None:
+        return ""
+    return str(value)
+
+
+def load_json(path: Path) -> dict[str, Any]:
+    with path.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def ensure_imp_group(ctx: Context, ref_id: str, name: str, description: str = "", default_selected: str = "") -> None:
+    if ref_id in ctx.imp_grp_seen:
+        return
+    ctx.imp_grp_seen.add(ref_id)
+    ctx.imp_grp_rows.append(
+        {
+            "ref_id": ref_id,
+            "name": name,
+            "description": description,
+            "default_selected": default_selected,
+        }
+    )
+
+
+def map_annotation_from_perimetre(perimetre: str | None) -> str:
+    if not perimetre:
+        return ""
+    return PERIMETRE_LABELS.get(perimetre, "")
+
+
+def implementation_groups_for_question(perimetre: str | None, base_group: str) -> str:
+    parts = [base_group]
+    if perimetre:
+        parts.append(perimetre)
+    return "\n".join(parts)
+
+
+def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
+    refs: list[str] = []
+    seen: set[str] = set()
+    for rep in reponses:
+        for mesure in rep.get("mesures", []) or []:
+            if not isinstance(mesure, dict):
+                continue
+            identifiant = mesure.get("identifiant")
+            niveau = mesure.get("niveau")
+            if identifiant is None or niveau is None:
+                continue
+            value = f"1:{identifiant}_niveau{niveau}"
+            if value not in seen:
+                seen.add(value)
+                refs.append(value)
+    return ", ".join(refs)
+
+
+def build_answer_row_for_question(question: dict[str, Any]) -> AnswerRow:
+    reponses = question.get("reponsesPossibles", []) or []
+    response_labels = [as_text(r.get("libelle")) for r in reponses if isinstance(r, dict)]
+    response_ids = [as_text(r.get("identifiant")) for r in reponses if isinstance(r, dict)]
+    first_order = 0
+    if reponses and isinstance(reponses[0], dict):
+        try:
+            first_order = int(reponses[0].get("ordre", 0))
+        except (TypeError, ValueError):
+            first_order = 0
+    return AnswerRow(
+        qid=as_text(question.get("identifiant")),
+        question_type=QUESTION_TYPE_MAP.get(as_text(question.get("type")), ""),
+        response_labels=response_labels,
+        response_ids=response_ids,
+        first_order=first_order,
+    )
+
+
+def append_framework_row(ctx: Context, row: dict[str, str]) -> int:
+    idx = len(ctx.framework_rows)
+    ctx.framework_rows.append(row)
+    urn = row.get("urn_id", "")
+    if urn:
+        ctx.framework_index_by_urn[urn] = idx
+    return idx
+
+
+def process_question(
+    ctx: Context,
+    theme_num: int,
+    theme_description: str,
+    question: dict[str, Any],
+    *,
+    parent_question_id: str | None = None,
+    parent_question_number: int | None = None,
+    parent_response: dict[str, Any] | None = None,
+) -> None:
+    ctx.question_counter += 1
+    current_question_number = ctx.question_counter
+
+    qid = as_text(question.get("identifiant"))
+    ctx.question_number_by_id[qid.lower()] = current_question_number
+
+    perimetre = as_text(question.get("perimetre")) or None
+    annotation = map_annotation_from_perimetre(perimetre)
+
+    if parent_question_id:
+        depends_group = f"_DEPENDS_ON_{parent_question_id}"
+        implementation_groups = implementation_groups_for_question(perimetre, depends_group)
+        if parent_question_number is None:
+            parent_question_number = 0
+        ensure_imp_group(
+            ctx,
+            depends_group,
+            f"Question dépendant de la Question {parent_question_number}",
+        )
+        if parent_response is not None:
+            parent_answ = ctx.answer_rows.get(parent_question_id)
+            if parent_answ is not None:
+                ordre = int(parent_response.get("ordre", 0) or 0)
+                parent_answ.add_group_at_ordre(ordre, depends_group)
+    else:
+        implementation_groups = implementation_groups_for_question(perimetre, "MAIN")
+
+    if perimetre:
+        ensure_imp_group(ctx, perimetre, PERIMETRE_LABELS.get(perimetre, ""))
+
+    depends_on = ""
+    condition = ""
+    if parent_question_id and parent_response is not None:
+        depends_on = parent_question_id
+        condition = as_text(parent_response.get("identifiant"))
+
+    framework_row = {
+        "assessable": "",
+        "depth": "2",
+        "ref_id": f"{theme_num}.{current_question_number}",
+        "urn_id": qid.lower(),
+        "name": f"Question {current_question_number}",
+        "description": theme_description,
+        "annotation": annotation,
+        "typical_evidence": "",
+        "implementation_groups": implementation_groups,
+        "questions": as_text(question.get("libelle")),
+        "answer": qid,
+        "reference_controls": measures_to_reference_controls(question.get("reponsesPossibles", []) or []),
+        "depends_on": depends_on,
+        "condition": condition,
+    }
+    append_framework_row(ctx, framework_row)
+
+    answer_row = build_answer_row_for_question(question)
+    if qid:
+        ctx.answer_rows[qid] = answer_row
+
+    for rep in question.get("reponsesPossibles", []) or []:
+        if not isinstance(rep, dict):
+            continue
+        for child in rep.get("questions", []) or []:
+            if not isinstance(child, dict):
+                continue
+            process_question(
+                ctx,
+                theme_num,
+                theme_description,
+                child,
+                parent_question_id=qid,
+                parent_question_number=current_question_number,
+                parent_response=rep,
+            )
+
+
+def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
+    ensure_imp_group(ctx, "MAIN", "Éléments principaux", default_selected="x")
+
+    for theme_key, theme_obj in referentiel.items():
+        if theme_key.startswith("_"):
+            continue
+        if not isinstance(theme_obj, dict):
+            continue
+
+        ctx.theme_counter += 1
+        theme_num = ctx.theme_counter
+        theme_description = as_text(theme_obj.get("description"))
+
+        append_framework_row(
+            ctx,
+            {
+                "assessable": "",
+                "depth": "1",
+                "ref_id": as_text(theme_num),
+                "urn_id": theme_key.lower(),
+                "name": as_text(theme_obj.get("libelle")),
+                "description": theme_description,
+                "annotation": "",
+                "typical_evidence": "",
+                "implementation_groups": "",
+                "questions": "",
+                "answer": "",
+                "reference_controls": "",
+                "depends_on": "",
+                "condition": "",
+            },
+        )
+
+        for question in theme_obj.get("questions", []) or []:
+            if isinstance(question, dict):
+                process_question(ctx, theme_num, theme_description, question)
+
+
+def remove_main_and_add_groups(existing: str, groups: list[str]) -> str:
+    parts = [p.strip() for p in existing.split("\n") if p.strip()] if existing else []
+    parts = [p for p in parts if p != "MAIN"]
+    for grp in groups:
+        if grp not in parts:
+            parts.append(grp)
+    return "\n".join(parts)
+
+
+def apply_conditions_perimetre_second_pass(ctx: Context, referentiel: dict[str, Any]) -> None:
+    conditions = referentiel.get("_conditionsPerimetre")
+    if not isinstance(conditions, dict):
+        return
+
+    for target_question_id, rule_obj in conditions.items():
+        target_idx = ctx.framework_index_by_urn.get(as_text(target_question_id).lower())
+        if target_idx is None:
+            continue
+        if not isinstance(rule_obj, dict):
+            continue
+        contexte_obj = rule_obj.get("contexte")
+        if not isinstance(contexte_obj, dict):
+            continue
+
+        groups_to_add: list[str] = []
+        for context_question_id, expected_response_id in contexte_obj.items():
+            dep_group = f"_DEPENDS_ON_{context_question_id}"
+            groups_to_add.append(dep_group)
+
+            q_number = ctx.question_number_by_id.get(as_text(context_question_id).lower(), "")
+            ensure_imp_group(
+                ctx,
+                dep_group,
+                f"Question dépendant de la Question {q_number}",
+            )
+
+            answ_row = ctx.answer_rows.get(as_text(context_question_id))
+            if answ_row is not None:
+                answ_row.add_group_except_response_id(dep_group, as_text(expected_response_id))
+
+        row = ctx.framework_rows[target_idx]
+        row["implementation_groups"] = remove_main_and_add_groups(row.get("implementation_groups", ""), groups_to_add)
+
+
+def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
+    mesures = mesures_json.get("mesures") if isinstance(mesures_json, dict) else None
+    if not isinstance(mesures, dict):
+        return
+
+    for mesure_id, mesure_obj in mesures.items():
+        if not isinstance(mesure_obj, dict):
+            continue
+        for level_key, level_obj in mesure_obj.items():
+            if not str(level_key).startswith("niveau"):
+                continue
+            if not isinstance(level_obj, dict):
+                continue
+            title = as_text(level_obj.get("titre"))
+            pourquoi = as_text(level_obj.get("pourquoi"))
+            comment = as_text(level_obj.get("comment"))
+            description = f"# Pourquoi ?\\n{pourquoi}\\n\\n#Comment ?\\n{comment}"
+            ctx.ref_ctrl_rows.append(
+                {
+                    "ref_id": f"{mesure_id}_{level_key}",
+                    "name": title,
+                    "category": "",
+                    "csf_function": "",
+                    "description": description,
+                    "annotation": "",
+                }
+            )
+
+
+def answer_rows_to_output(answer_rows: dict[str, AnswerRow]) -> list[dict[str, str]]:
+    out: list[dict[str, str]] = []
+    for qid, row in answer_rows.items():
+        select = "\n".join(row.select_groups) if row.select_groups else ""
+        out.append(
+            {
+                "id": qid,
+                "question_type": row.question_type,
+                "question_choices": "\n".join(row.response_labels),
+                "description": "",
+                "select_implementation_groups": select,
+            }
+        )
+    return out
+
+
+def write_sheet(wb: Workbook, title: str, headers: list[str], rows: list[dict[str, str]]) -> None:
+    ws = wb.create_sheet(title)
+    ws.append(headers)
+    for line in rows:
+        values = [as_text(line.get(h, "")) for h in headers]
+        ws.append(values)
+
+    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=len(headers)):
+        for cell in row:
+            if cell.value is None:
+                cell.value = ""
+            else:
+                cell.value = as_text(cell.value)
+            cell.number_format = "@"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Construit un XLSX depuis questionnaire_repo.json et mesures_repo.json")
+    parser.add_argument("--questionnaire", default="questionnaire_repo.json", help="Chemin du questionnaire JSON")
+    parser.add_argument("--mesures", default="mesures_repo.json", help="Chemin du JSON mesures")
+    parser.add_argument("--output", default="mon_aide_cyber.xlsx", help="Fichier XLSX de sortie")
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+
+    q_path = Path(args.questionnaire)
+    m_path = Path(args.mesures)
+    out_path = Path(args.output)
+
+    questionnaire = load_json(q_path)
+    mesures = load_json(m_path)
+
+    referentiel = questionnaire.get("referentiel")
+    if not isinstance(referentiel, dict):
+        raise ValueError("Le fichier questionnaire ne contient pas d'objet 'referentiel' valide")
+
+    ctx = Context()
+    process_referentiel(ctx, referentiel)
+    build_ref_controls_rows(ctx, mesures)
+    apply_conditions_perimetre_second_pass(ctx, referentiel)
+
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    write_sheet(wb, "framework_content", FRAMEWORK_HEADERS, ctx.framework_rows)
+    write_sheet(wb, "imp_grp_content", IMP_GRP_HEADERS, ctx.imp_grp_rows)
+    write_sheet(wb, "answ_content", ANSW_HEADERS, answer_rows_to_output(ctx.answer_rows))
+    write_sheet(wb, "ref_ctrl_content", REF_CTRL_HEADERS, ctx.ref_ctrl_rows)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(out_path)
+
+    print(f"Excel généré: {out_path}")
+    print(f"- framework_content: {len(ctx.framework_rows)} ligne(s)")
+    print(f"- imp_grp_content: {len(ctx.imp_grp_rows)} ligne(s)")
+    print(f"- answ_content: {len(ctx.answer_rows)} ligne(s)")
+    print(f"- ref_ctrl_content: {len(ctx.ref_ctrl_rows)} ligne(s)")
+
+
+if __name__ == "__main__":
+    main()
