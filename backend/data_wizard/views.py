@@ -2830,7 +2830,7 @@ class LoadFileView(APIView):
                         {
                             "record": record,
                             "error": "Failed to save vulnerability record: "
-                            + vuln_serializer.errors,
+                            + str(vuln_serializer.errors),
                         }
                     )
 
