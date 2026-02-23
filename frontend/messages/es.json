@@ -144,7 +144,7 @@
 	"next": "Siguiente",
 	"previous": "Anterior",
 	"show": "Mostrar",
-	"show_stakeholders_name": "Mostrar el nombre de las partes interesadas",
+	"showStakeholdersName": "Mostrar el nombre de las partes interesadas",
 	"entries": "entradas",
 	"searchPlaceholder": "Buscar...",
 	"noEntriesFound": "No se encontraron entradas",

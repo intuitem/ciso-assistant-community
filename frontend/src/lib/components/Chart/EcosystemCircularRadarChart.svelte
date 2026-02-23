@@ -45,7 +45,7 @@
 
 	function getStakeholderLabel(value: unknown): string {
 		if (typeof value !== 'string') return '';
-		return value.split('-')[0] || '';
+		return value.split('-').slice(0, -1).join('-') || '';
 	}
 
 	onMount(async () => {
@@ -292,7 +292,7 @@
 	<div class="m-10 no-print">
 		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
 			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
-			<span>{m.show_stakeholders_name()}</span>
+			<span>{m.showStakeholdersName()}</span>
 		</label>
 	</div>
 </div>

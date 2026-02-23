@@ -144,7 +144,7 @@
 	"next": "Avanti",
 	"previous": "Indietro",
 	"show": "Mostra",
-	"show_stakeholders_name": "Mostra il nome degli stakeholder",
+	"showStakeholdersName": "Mostra il nome degli stakeholder",
 	"entries": "voci",
 	"searchPlaceholder": "Cerca...",
 	"noEntriesFound": "Nessuna voce trovata",

@@ -173,7 +173,7 @@
 	"next": "Næste",
 	"previous": "Forrige",
 	"show": "Vis",
-	"show_stakeholders_name": "Vis navn på interessenter",
+	"showStakeholdersName": "Vis navn på interessenter",
 	"entries": "poster",
 	"searchPlaceholder": "Søg...",
 	"noEntriesFound": "Ingen poster fundet",

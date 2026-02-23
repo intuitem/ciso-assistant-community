@@ -230,7 +230,7 @@
 	"next": "下一步",
 	"previous": "上一步",
 	"show": "显示",
-	"show_stakeholders_name": "显示利益相关者名称",
+	"showStakeholdersName": "显示利益相关者名称",
 	"entries": "条目",
 	"searchPlaceholder": "搜索...",
 	"noEntriesFound": "未找到条目",

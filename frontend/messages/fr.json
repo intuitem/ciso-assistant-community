@@ -195,7 +195,7 @@
 	"next": "Suivant",
 	"previous": "Précédent",
 	"show": "Afficher",
-	"show_stakeholders_name": "Afficher le nom des parties prenantes",
+	"showStakeholdersName": "Afficher le nom des parties prenantes",
 	"entries": "entrées",
 	"searchPlaceholder": "Rechercher...",
 	"noEntriesFound": "Aucune entrée trouvée",

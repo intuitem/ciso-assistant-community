@@ -173,7 +173,7 @@
 	"next": "Következő",
 	"previous": "Előző",
 	"show": "Mutat",
-	"show_stakeholders_name": "Mutat az érdekelt felek neve",
+	"showStakeholdersName": "Mutat az érdekelt felek neve",
 	"entries": "Bejegyzések",
 	"searchPlaceholder": "Keresés...",
 	"noEntriesFound": "Nincs találat",

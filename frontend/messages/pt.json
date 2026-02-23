@@ -173,7 +173,7 @@
 	"next": "Próximo",
 	"previous": "Anterior",
 	"show": "Mostrar",
-	"show_stakeholders_name": "Mostrar o nome dos interessados",
+	"showStakeholdersName": "Mostrar o nome dos interessados",
 	"entries": "entradas",
 	"searchPlaceholder": "Pesquisar...",
 	"noEntriesFound": "Nenhuma entrada encontrada",
