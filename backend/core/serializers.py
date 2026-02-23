@@ -2575,7 +2575,7 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                     }
                 )
 
-        return attrs
+        return super().validate(attrs)
 
     class Meta:
         model = RequirementAssignment
