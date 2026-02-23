@@ -342,6 +342,7 @@
 				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
+		history.replaceState(history.state, '', page.url.pathname + page.url.search);
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
