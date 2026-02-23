@@ -2261,11 +2261,12 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
     def get_answers(self, obj):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
-        answers_qs = obj.answers.select_related("question").all()
-        result = {}
-        for answer in answers_qs:
-            result[answer.question.urn] = answer.value
-        return result
+        from core.utils import build_answers_dict
+
+        answers_qs = obj.answers.select_related(
+            "question", "selected_choice"
+        ).prefetch_related("selected_choices").all()
+        return build_answers_dict(answers_qs)
 
     class Meta:
         model = RequirementAssessment
@@ -2375,12 +2376,35 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             }
             for q_urn, answer_value in answers_data.items():
                 question = questions_by_urn.get(q_urn)
-                if question:
-                    Answer.objects.update_or_create(
-                        requirement_assessment=instance,
-                        question=question,
-                        defaults={"value": answer_value, "folder": instance.folder},
+                if not question:
+                    continue
+
+                answer, _created = Answer.objects.update_or_create(
+                    requirement_assessment=instance,
+                    question=question,
+                    defaults={"folder": instance.folder},
+                )
+
+                if question.type == Question.Type.SINGLE_CHOICE:
+                    choice = (
+                        question.choices.filter(ref_id=answer_value).first()
+                        if answer_value
+                        else None
                     )
+                    answer.selected_choice = choice
+                    answer.value = None
+                    answer.save(update_fields=["selected_choice", "value"])
+                elif question.type == Question.Type.MULTIPLE_CHOICE:
+                    if isinstance(answer_value, list) and answer_value:
+                        choices = question.choices.filter(ref_id__in=answer_value)
+                        answer.selected_choices.set(choices)
+                    else:
+                        answer.selected_choices.clear()
+                    answer.value = None
+                    answer.save(update_fields=["value"])
+                else:
+                    answer.value = answer_value
+                    answer.save(update_fields=["value"])
 
         # Check if any choice has scoring or result logic
         from core.models import QuestionChoice
@@ -2472,6 +2496,8 @@ class QuestionWriteSerializer(BaseModelSerializer):
 
 class AnswerReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
+    selected_choice = FieldsRelatedField(allow_null=True)
+    selected_choices = FieldsRelatedField(many=True)
 
     class Meta:
         model = Answer
@@ -2479,56 +2505,123 @@ class AnswerReadSerializer(BaseModelSerializer):
 
 
 class AnswerWriteSerializer(BaseModelSerializer):
-    def validate(self, attrs):
-        question = attrs.get("question") or (self.instance.question if self.instance else None)
-        value = attrs.get("value")
+    # Accept selected_choices as list of PKs for M2M
+    selected_choices = serializers.PrimaryKeyRelatedField(
+        queryset=QuestionChoice.objects.all(), many=True, required=False
+    )
 
-        if question and value is not None:
+    def validate(self, attrs):
+        question = attrs.get("question") or (
+            self.instance.question if self.instance else None
+        )
+        value = attrs.get("value")
+        selected_choice = attrs.get("selected_choice")
+        selected_choices_list = attrs.get("selected_choices")
+
+        if question:
             q_type = question.type
+
             if q_type == Question.Type.SINGLE_CHOICE:
-                if isinstance(value, list):
-                    raise serializers.ValidationError(
-                        {"value": "Single choice answers must be a string, not a list."}
-                    )
-                if value:
-                    valid_refs = set(
-                        question.choices.values_list("ref_id", flat=True)
-                    )
-                    if value not in valid_refs:
+                # Legacy: value is a ref_id string → resolve to FK
+                if value is not None:
+                    if isinstance(value, list):
                         raise serializers.ValidationError(
-                            {"value": f"Invalid choice '{value}'."}
+                            {
+                                "value": "Single choice answers must be a string, not a list."
+                            }
                         )
+                    if value:
+                        choice = question.choices.filter(ref_id=value).first()
+                        if not choice:
+                            raise serializers.ValidationError(
+                                {"value": f"Invalid choice '{value}'."}
+                            )
+                        attrs["selected_choice"] = choice
+                    attrs["value"] = None
+
+                # Direct FK: validate choice belongs to question
+                if selected_choice and selected_choice not in question.choices.all():
+                    raise serializers.ValidationError(
+                        {
+                            "selected_choice": "Choice does not belong to this question."
+                        }
+                    )
+                if selected_choice:
+                    attrs["value"] = None
+
             elif q_type == Question.Type.MULTIPLE_CHOICE:
-                if not isinstance(value, list):
-                    raise serializers.ValidationError(
-                        {"value": "Multiple choice answers must be a list."}
-                    )
-                if value:
-                    valid_refs = set(
-                        question.choices.values_list("ref_id", flat=True)
-                    )
-                    invalid = [v for v in value if v not in valid_refs]
-                    if invalid:
+                # Legacy: value is a list of ref_id strings → resolve to M2M
+                if value is not None:
+                    if not isinstance(value, list):
                         raise serializers.ValidationError(
-                            {"value": f"Invalid choices: {invalid}"}
+                            {"value": "Multiple choice answers must be a list."}
                         )
+                    if value:
+                        choices = question.choices.filter(ref_id__in=value)
+                        found_refs = set(
+                            choices.values_list("ref_id", flat=True)
+                        )
+                        invalid = [v for v in value if v not in found_refs]
+                        if invalid:
+                            raise serializers.ValidationError(
+                                {"value": f"Invalid choices: {invalid}"}
+                            )
+                        attrs["_m2m_choices"] = list(choices)
+                    else:
+                        attrs["_m2m_choices"] = []
+                    attrs["value"] = None
+
+                # Direct M2M PKs: validate all belong to question
+                if selected_choices_list is not None:
+                    valid_pks = set(
+                        question.choices.values_list("id", flat=True)
+                    )
+                    for c in selected_choices_list:
+                        if c.id not in valid_pks:
+                            raise serializers.ValidationError(
+                                {
+                                    "selected_choices": f"Choice {c.id} does not belong to this question."
+                                }
+                            )
+                    attrs["_m2m_choices"] = selected_choices_list
+                    attrs["value"] = None
+
             elif q_type == Question.Type.BOOLEAN:
-                if not isinstance(value, bool):
+                if value is not None and not isinstance(value, bool):
                     raise serializers.ValidationError(
                         {"value": "Boolean answers must be true or false."}
                     )
             elif q_type == Question.Type.DATE:
-                if isinstance(value, str):
+                if value is not None and isinstance(value, str):
                     try:
                         from datetime import datetime
 
                         datetime.strptime(value, "%Y-%m-%d")
                     except ValueError:
                         raise serializers.ValidationError(
-                            {"value": "Date answers must be in YYYY-MM-DD format."}
+                            {
+                                "value": "Date answers must be in YYYY-MM-DD format."
+                            }
                         )
 
         return super().validate(attrs)
+
+    def create(self, validated_data):
+        m2m_choices = validated_data.pop("_m2m_choices", None)
+        # Remove selected_choices from validated_data since M2M can't be set on create
+        validated_data.pop("selected_choices", None)
+        instance = super().create(validated_data)
+        if m2m_choices is not None:
+            instance.selected_choices.set(m2m_choices)
+        return instance
+
+    def update(self, instance, validated_data):
+        m2m_choices = validated_data.pop("_m2m_choices", None)
+        validated_data.pop("selected_choices", None)
+        instance = super().update(instance, validated_data)
+        if m2m_choices is not None:
+            instance.selected_choices.set(m2m_choices)
+        return instance
 
     class Meta:
         model = Answer
@@ -2654,6 +2747,13 @@ class AnswerImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     requirement_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
     question = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    selected_choice_ref_id = serializers.CharField(
+        source="selected_choice.ref_id", read_only=True, allow_null=True, default=None
+    )
+    selected_choices_ref_ids = serializers.SerializerMethodField()
+
+    def get_selected_choices_ref_ids(self, obj):
+        return list(obj.selected_choices.values_list("ref_id", flat=True))
 
     class Meta:
         model = Answer
@@ -2664,6 +2764,8 @@ class AnswerImportExportSerializer(BaseModelSerializer):
             "requirement_assessment",
             "question",
             "value",
+            "selected_choice_ref_id",
+            "selected_choices_ref_ids",
         ]
 
 

@@ -124,6 +124,7 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    build_answers_dict,
     build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
@@ -6997,9 +6998,22 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["requirement_assessment"] = RequirementAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["requirement_assessment"])
                 )
-                _fields["question"] = Question.objects.get(
-                    urn=_fields.get("question")
-                )
+                question = Question.objects.get(urn=_fields.get("question"))
+                _fields["question"] = question
+
+                # Resolve selected_choice from ref_id
+                ref_id = _fields.pop("selected_choice_ref_id", None)
+                if ref_id:
+                    _fields["selected_choice"] = QuestionChoice.objects.filter(
+                        question=question, ref_id=ref_id
+                    ).first()
+
+                # Store M2M ref_ids for post-create
+                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
+                if choice_ref_ids:
+                    many_to_many_map_ids[
+                        "selected_choices_ref_ids"
+                    ] = choice_ref_ids
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -7300,6 +7314,15 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
+
+            case "answer":
+                if ref_ids := many_to_many_map_ids.get(
+                    "selected_choices_ref_ids"
+                ):
+                    choices = QuestionChoice.objects.filter(
+                        question=obj.question, ref_id__in=ref_ids
+                    )
+                    obj.selected_choices.set(choices)
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
@@ -10379,10 +10402,11 @@ def generate_html(
             if assessment:
                 node_data["assessments"] = assessment
                 # Pre-compute dicts for template backward compat
-                node_data["answers_dict"] = {
-                    a.question.urn: a.value
-                    for a in assessment.answers.select_related("question").all()
-                }
+                node_data["answers_dict"] = build_answers_dict(
+                    assessment.answers.select_related(
+                        "question", "selected_choice"
+                    ).prefetch_related("selected_choices").all()
+                )
                 node_data["questions_dict"] = build_questions_dict(requirement_node) or {}
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
@@ -12743,7 +12767,9 @@ class AnswerViewSet(BaseModelViewSet):
                 "requirement_assessment__compliance_assessment",
                 "question",
                 "folder",
+                "selected_choice",
             )
+            .prefetch_related("selected_choices")
         )
         # Allow filtering by compliance assessment
         ca_id = self.request.query_params.get("compliance_assessment")

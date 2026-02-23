@@ -1032,15 +1032,9 @@ class LibraryUpdater:
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
-                                default_val = (
-                                    []
-                                    if q.type == Question.Type.MULTIPLE_CHOICE
-                                    else None
-                                )
                                 Answer.objects.create(
                                     requirement_assessment=ra,
                                     question=q,
-                                    value=default_val,
                                     folder=ra.folder,
                                 )
                                 answers_changed_ca_ids.add(
@@ -1049,35 +1043,36 @@ class LibraryUpdater:
                             else:
                                 # Existing question: validate answer against new choices
                                 answer = existing_answers[q.urn]
-                                valid_refs = {
-                                    c.ref_id for c in q.choices.all()
-                                }
+                                valid_pks = set(
+                                    q.choices.values_list("id", flat=True)
+                                )
                                 changed = False
                                 if q.type == Question.Type.MULTIPLE_CHOICE:
-                                    if isinstance(answer.value, list):
-                                        filtered = [
-                                            v
-                                            for v in answer.value
-                                            if v in valid_refs
-                                        ]
-                                        if filtered != answer.value:
-                                            answer.value = filtered
-                                            changed = True
-                                    else:
-                                        answer.value = []
+                                    current_pks = set(
+                                        answer.selected_choices.values_list(
+                                            "id", flat=True
+                                        )
+                                    )
+                                    invalid_pks = current_pks - valid_pks
+                                    if invalid_pks:
+                                        answer.selected_choices.remove(
+                                            *QuestionChoice.objects.filter(
+                                                id__in=invalid_pks
+                                            )
+                                        )
                                         changed = True
                                 elif q.type == Question.Type.SINGLE_CHOICE:
-                                    if isinstance(answer.value, list):
-                                        answer.value = None
-                                        changed = True
-                                    elif (
-                                        answer.value
-                                        and answer.value not in valid_refs
+                                    if (
+                                        answer.selected_choice_id
+                                        and answer.selected_choice_id
+                                        not in valid_pks
                                     ):
-                                        answer.value = None
+                                        answer.selected_choice = None
+                                        answer.save(
+                                            update_fields=["selected_choice"]
+                                        )
                                         changed = True
                                 if changed:
-                                    answer.save()
                                     answers_changed_ca_ids.add(
                                         ra.compliance_assessment_id
                                     )
@@ -2453,6 +2448,7 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
 
     class Meta:
         ordering = ["order"]
+        unique_together = [("question", "ref_id")]
         verbose_name = _("Question choice")
         verbose_name_plural = _("Question choices")
 
@@ -6245,14 +6241,10 @@ class ComplianceAssessment(Assessment):
         for question in questions:
             ra = ra_by_req.get(question.requirement_node_id)
             if ra:
-                default_value = (
-                    [] if question.type == Question.Type.MULTIPLE_CHOICE else None
-                )
                 answers_to_create.append(
                     Answer(
                         requirement_assessment=ra,
                         question=question,
-                        value=default_value,
                         folder_id=self.folder.id,
                     )
                 )
@@ -7357,17 +7349,40 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def compute_score_and_result(self):
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
-        answers_qs = self.answers.select_related("question").all()
+        answers_qs = self.answers.select_related(
+            "question", "selected_choice"
+        ).prefetch_related("selected_choices").all()
 
-        # Build answers lookup: question_id -> answer value
-        answers_by_qid = {a.question_id: a.value for a in answers_qs}
-        # Build answers lookup by ref_id for depends_on resolution
+        # Build lookup: question_id → set of selected choice PKs
+        selected_choice_pks_by_qid = {}
         answers_by_ref = {}
         questions_by_ref = {}
+        has_answer_by_qid = {}
+
+        for a in answers_qs:
+            q_type = a.question.type
+            if q_type == Question.Type.SINGLE_CHOICE:
+                selected_choice_pks_by_qid[a.question_id] = (
+                    {a.selected_choice_id} if a.selected_choice_id else set()
+                )
+                has_answer_by_qid[a.question_id] = a.selected_choice_id is not None
+            elif q_type == Question.Type.MULTIPLE_CHOICE:
+                pks = set(a.selected_choices.values_list("id", flat=True))
+                selected_choice_pks_by_qid[a.question_id] = pks
+                has_answer_by_qid[a.question_id] = len(pks) > 0
+            else:
+                has_answer_by_qid[a.question_id] = (
+                    a.value is not None and a.value != ""
+                )
+
+            # For depends_on resolution, pass ref_id strings
+            if a.question.ref_id:
+                answers_by_ref[a.question.ref_id] = (
+                    a.get_choice_ref_ids() or a.value
+                )
+
         for q in questions_qs:
             questions_by_ref[q.ref_id] = q
-            if q.id in answers_by_qid:
-                answers_by_ref[q.ref_id] = answers_by_qid[q.id]
 
         total_score = 0
         total_weight = 0
@@ -7398,20 +7413,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 continue
 
             visible_questions += 1
-            answer_value = answers_by_qid.get(question.id)
-
-            if not answer_value:
+            if not has_answer_by_qid.get(question.id):
                 continue
 
             answered_visible_questions += 1
 
-            # Handle both single and multiple choice questions
-            selected_refs = (
-                answer_value if isinstance(answer_value, list) else [answer_value]
-            )
-
+            selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
-                if choice.ref_id in selected_refs:
+                if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
                         self.is_scored = True
@@ -7512,6 +7521,20 @@ class Answer(AbstractBaseModel, FolderMixin):
     value = models.JSONField(
         blank=True, null=True, verbose_name=_("Value")
     )
+    selected_choice = models.ForeignKey(
+        "QuestionChoice",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="single_choice_answers",
+        verbose_name=_("Selected choice"),
+    )
+    selected_choices = models.ManyToManyField(
+        "QuestionChoice",
+        blank=True,
+        related_name="multiple_choice_answers",
+        verbose_name=_("Selected choices"),
+    )
 
     class Meta:
         unique_together = [("requirement_assessment", "question")]
@@ -7520,6 +7543,14 @@ class Answer(AbstractBaseModel, FolderMixin):
 
     def __str__(self) -> str:
         return f"Answer to {self.question} for {self.requirement_assessment}"
+
+    def get_choice_ref_ids(self):
+        """Return list of selected choice ref_ids for choice-type questions."""
+        if self.question.type == Question.Type.SINGLE_CHOICE:
+            return [self.selected_choice.ref_id] if self.selected_choice_id else []
+        elif self.question.type == Question.Type.MULTIPLE_CHOICE:
+            return list(self.selected_choices.values_list("ref_id", flat=True))
+        return []
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

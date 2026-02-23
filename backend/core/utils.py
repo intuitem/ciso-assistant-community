@@ -711,6 +711,29 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
     return True
 
 
+def build_answers_dict(answers_qs):
+    """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
+
+    For choice-type questions, returns ref_id strings (single choice) or lists
+    of ref_id strings (multiple choice). For other types, returns the raw value.
+    """
+    from core.models import Question
+
+    result = {}
+    for a in answers_qs:
+        if a.question.type == Question.Type.SINGLE_CHOICE:
+            result[a.question.urn] = (
+                a.selected_choice.ref_id if a.selected_choice else None
+            )
+        elif a.question.type == Question.Type.MULTIPLE_CHOICE:
+            result[a.question.urn] = list(
+                a.selected_choices.values_list("ref_id", flat=True)
+            )
+        else:
+            result[a.question.urn] = a.value
+    return result
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
     from core.models import Answer, Question
@@ -724,6 +747,8 @@ def update_selected_implementation_groups(compliance_assessment):
         .prefetch_related(
             "answers",
             "answers__question",
+            "answers__selected_choice",
+            "answers__selected_choices",
             "requirement__questions",
             "requirement__questions__choices",
         )
@@ -737,27 +762,41 @@ def update_selected_implementation_groups(compliance_assessment):
 
         answers_qs = ra.answers.all()
         answers_by_ref = {}
-        answers_by_qid = {}
+        selected_choice_pks_by_qid = {}
+        has_answer_by_qid = {}
         questions_by_ref = {}
         for q in questions_qs:
             questions_by_ref[q.ref_id] = q
         for a in answers_qs:
-            answers_by_qid[a.question_id] = a.value
+            if a.question.type == Question.Type.SINGLE_CHOICE:
+                selected_choice_pks_by_qid[a.question_id] = (
+                    {a.selected_choice_id} if a.selected_choice_id else set()
+                )
+                has_answer_by_qid[a.question_id] = a.selected_choice_id is not None
+            elif a.question.type == Question.Type.MULTIPLE_CHOICE:
+                pks = set(a.selected_choices.values_list("id", flat=True))
+                selected_choice_pks_by_qid[a.question_id] = pks
+                has_answer_by_qid[a.question_id] = len(pks) > 0
+            else:
+                has_answer_by_qid[a.question_id] = (
+                    a.value is not None and a.value != ""
+                )
+            # For depends_on resolution, pass ref_id strings
             if a.question.ref_id:
-                answers_by_ref[a.question.ref_id] = a.value
+                answers_by_ref[a.question.ref_id] = (
+                    a.get_choice_ref_ids() or a.value
+                )
 
         for question in questions_qs:
             if not _is_question_visible(question, answers_by_ref, questions_by_ref):
                 continue
 
-            answer_value = answers_by_qid.get(question.id)
-            if not answer_value:
+            if not has_answer_by_qid.get(question.id):
                 continue
-            if not isinstance(answer_value, list):
-                answer_value = [answer_value]
 
+            selected_pks = selected_choice_pks_by_qid.get(question.id, set())
             for choice in question.choices.all():
-                if choice.ref_id in answer_value:
+                if choice.id in selected_pks:
                     igs_to_select.update(
                         choice.select_implementation_groups or []
                     )

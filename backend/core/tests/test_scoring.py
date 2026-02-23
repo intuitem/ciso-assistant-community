@@ -44,7 +44,7 @@ def scoring_setup(db):
         folder=folder,
         is_published=True,
     )
-    QuestionChoice.objects.create(
+    choice_good = QuestionChoice.objects.create(
         question=q1,
         ref_id="SC1A",
         annotation="Good",
@@ -54,7 +54,7 @@ def scoring_setup(db):
         folder=folder,
         is_published=True,
     )
-    QuestionChoice.objects.create(
+    choice_bad = QuestionChoice.objects.create(
         question=q1,
         ref_id="SC1B",
         annotation="Bad",
@@ -86,6 +86,8 @@ def scoring_setup(db):
         "framework": fw,
         "requirement_node": rn,
         "question": q1,
+        "choice_good": choice_good,
+        "choice_bad": choice_bad,
         "ca": ca,
         "ra": ra,
         "folder": folder,
@@ -103,7 +105,7 @@ class TestScoring:
         Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            value="SC1A",  # Good choice, score=10, result=true
+            selected_choice=data["choice_good"],  # score=10, result=true
             folder=folder,
         )
 
@@ -123,7 +125,7 @@ class TestScoring:
         Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            value="SC1B",  # Bad choice, score=0, result=false
+            selected_choice=data["choice_bad"],  # score=0, result=false
             folder=folder,
         )
 
@@ -134,7 +136,7 @@ class TestScoring:
         assert ra.result == "non_compliant"
 
     def test_no_visible_questions_gives_not_applicable(self, db):
-        """A requirement node with no questions → not_applicable."""
+        """A requirement node with no questions -> not_applicable."""
         folder = Folder.get_root_folder()
         fw = Framework.objects.create(
             name="Empty Q FW",
@@ -172,17 +174,16 @@ class TestScoring:
         assert ra.result == "not_applicable"
 
     def test_unanswered_questions_gives_not_assessed(self, scoring_setup):
-        """When not all visible questions are answered → not_assessed."""
+        """When not all visible questions are answered -> not_assessed."""
         data = scoring_setup
         ra = data["ra"]
         q = data["question"]
         folder = data["folder"]
 
-        # Create answer with no value
+        # Create answer with no selected_choice (unanswered single choice)
         Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            value=None,
             folder=folder,
         )
 
@@ -221,7 +222,7 @@ class TestScoring:
             folder=folder,
             is_published=True,
         )
-        QuestionChoice.objects.create(
+        choice_yes = QuestionChoice.objects.create(
             question=q1,
             ref_id="WC1A",
             annotation="Yes",
@@ -263,7 +264,7 @@ class TestScoring:
         Answer.objects.create(
             requirement_assessment=ra,
             question=q1,
-            value="WC1A",  # score=10, weight=3 → total_score = 30
+            selected_choice=choice_yes,  # score=10, weight=3 -> total_score=30
             folder=folder,
         )
 
@@ -308,7 +309,7 @@ class TestScoring:
             add_score=10, compute_result="true", order=0,
             folder=folder, is_published=True,
         )
-        QuestionChoice.objects.create(
+        choice_no = QuestionChoice.objects.create(
             question=q1, ref_id="DC1B", annotation="No",
             add_score=0, compute_result="true", order=1,
             folder=folder, is_published=True,
@@ -358,9 +359,12 @@ class TestScoring:
             folder=folder,
         )
 
-        # Answer Q1 with "DC1B" → Q2 should be hidden
+        # Answer Q1 with "DC1B" -> Q2 should be hidden
         Answer.objects.create(
-            requirement_assessment=ra, question=q1, value="DC1B", folder=folder
+            requirement_assessment=ra,
+            question=q1,
+            selected_choice=choice_no,
+            folder=folder,
         )
 
         ra.compute_score_and_result()
@@ -368,4 +372,72 @@ class TestScoring:
 
         # Only Q1 is visible (answered "No"), Q2 is hidden
         # result = compliant (Q1 compute_result is true)
+        assert ra.result == "compliant"
+
+    def test_multiple_choice_scoring(self, db):
+        """Test scoring with multiple choice questions using M2M."""
+        folder = Folder.get_root_folder()
+        fw = Framework.objects.create(
+            name="Multi FW",
+            folder=folder,
+            status=Framework.Status.PUBLISHED,
+            is_published=True,
+            min_score=0,
+            max_score=100,
+        )
+        rn = RequirementNode.objects.create(
+            framework=fw,
+            urn="urn:test:multi:req:001",
+            ref_id="MULTI-REQ",
+            assessable=True,
+            folder=folder,
+            is_published=True,
+        )
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:multi:q1",
+            ref_id="MQ1",
+            type=Question.Type.MULTIPLE_CHOICE,
+            order=0,
+            weight=1,
+            folder=folder,
+            is_published=True,
+        )
+        c1 = QuestionChoice.objects.create(
+            question=q, ref_id="MC1", annotation="A",
+            add_score=5, compute_result="true", order=0,
+            folder=folder, is_published=True,
+        )
+        c2 = QuestionChoice.objects.create(
+            question=q, ref_id="MC2", annotation="B",
+            add_score=3, compute_result="true", order=1,
+            folder=folder, is_published=True,
+        )
+
+        from core.models import Perimeter
+
+        perimeter = Perimeter.objects.create(name="Multi Perim", folder=folder)
+        ca = ComplianceAssessment.objects.create(
+            name="Multi CA",
+            framework=fw, folder=folder, perimeter=perimeter,
+            is_published=True, min_score=0, max_score=100,
+        )
+        ra = RequirementAssessment.objects.create(
+            compliance_assessment=ca, requirement=rn, folder=folder,
+        )
+
+        answer = Answer.objects.create(
+            requirement_assessment=ra, question=q, folder=folder,
+        )
+        answer.selected_choices.set([c1, c2])
+
+        ra.compute_score_and_result()
+        ra.refresh_from_db()
+
+        # Both choices selected: add_score 5 + 3 = 8 total, weight 1+1=2
+        # But weight is per-question, not per-choice. Each choice adds
+        # score * weight, but total_weight only increments once per choice match.
+        # Actually looking at the code: each choice match adds score*weight and weight.
+        # So total_score = 5*1 + 3*1 = 8, total_weight = 1+1 = 2, mean = 4
+        assert ra.score == 4
         assert ra.result == "compliant"
