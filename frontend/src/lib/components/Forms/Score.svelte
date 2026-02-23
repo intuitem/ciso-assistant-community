@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { displayScoreColor } from '$lib/utils/helpers';
+	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
@@ -34,6 +34,7 @@
 		label = undefined,
 		field,
 		isDoc = false,
+		fullDonut = false,
 		inversedColors = false,
 		styles = '',
 		min_score = 0,
@@ -97,7 +98,12 @@
 				/>
 			</div>
 			<div class="shrink-0 relative">
-				<Progress value={$value} min={min_score} max={max_score} data-testid="progress-ring-svg">
+				<Progress
+					value={formatScoreValue($value, max_score, fullDonut)}
+					min={0}
+					max={100}
+					data-testid="progress-ring-svg"
+				>
 					<Progress.Circle class="[--size:--spacing(12)]">
 						<Progress.CircleTrack />
 						<Progress.CircleRange class={displayScoreColor($value, max_score, inversedColors)} />

@@ -176,9 +176,9 @@
 			{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
 		</aside>
 	{/if}
-	<AppBar class="transition-all duration-300 bg-white {classesSidebarOpen(sidebarOpen)}">
-		<AppBar.Toolbar class="pb-2 px-4">
-			<AppBar.Headline>
+	<AppBar class="transition-all duration-300 bg-white w-auto {classesSidebarOpen(sidebarOpen)}">
+		<div class="flex items-start justify-between px-4 pb-2">
+			<div>
 				<div
 					class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
 					id="page-title"
@@ -195,26 +195,24 @@
 						{safeTranslate(displayModelDescription)}
 					</div>
 				{/if}
-			</AppBar.Headline>
-			<AppBar.Trail>
-				<div class="flex items-center gap-3">
-					{#if data?.featureflags?.focus_mode}
-						<FocusModeSelector folders={data?.folders ?? []} />
-					{/if}
-					{#if data?.user?.is_admin}
-						<button
-							onclick={modalQuickStart}
-							class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+			</div>
+			<div class="flex items-center gap-3 shrink-0">
+				{#if data?.featureflags?.focus_mode}
+					<FocusModeSelector folders={data?.folders ?? []} />
+				{/if}
+				{#if data?.user?.is_admin}
+					<button
+						onclick={modalQuickStart}
+						class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
 	ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
 	hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
 	focus:outline-hidden focus:ring-violet-500"
-						>
-							{m.quickStart()}
-						</button>
-					{/if}
-				</div>
-			</AppBar.Trail>
-		</AppBar.Toolbar>
+					>
+						{m.quickStart()}
+					</button>
+				{/if}
+			</div>
+		</div>
 		<div class="px-4">
 			<hr class="my-1" />
 			<Breadcrumbs />
