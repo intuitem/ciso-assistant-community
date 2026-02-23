@@ -50,17 +50,32 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|Ref|Name|Current|Residual|Domain|\n"
-        result += "|---|---|---|---|---|\n"
+        result += "|Ref|Name|Assets|Threats|Current|Residual|\n"
+        result += "|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
             ref_id = rs.get("ref_id") or "N/A"
             name = rs.get("name", "N/A")
-            current_level = rs.get("current_level", "N/A")
-            residual_level = rs.get("residual_level", "N/A")
-            domain = (rs.get("folder") or {}).get("str", "N/A")
+            current_level = (rs.get("current_level") or {}).get("name", "--")
+            residual_level = (rs.get("residual_level") or {}).get("name", "--")
 
-            result += f"|{ref_id}|{name}|{current_level}|{residual_level}|{domain}|\n"
+            # Extract asset names
+            assets = rs.get("assets", [])
+            asset_names = (
+                ", ".join(a.get("name", a.get("str", "?")) for a in assets)
+                if assets
+                else "-"
+            )
+
+            # Extract threat names
+            threats = rs.get("threats", [])
+            threat_names = (
+                ", ".join(t.get("name", t.get("str", "?")) for t in threats)
+                if threats
+                else "-"
+            )
+
+            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{current_level}|{residual_level}|\n"
 
         return success_response(
             result,
@@ -108,8 +123,8 @@ async def get_applied_controls(folder: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|UUID|Ref|Name|Status|ETA|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
-        result += "|---|---|---|---|---|---|---|---|---|---|---|---|\n"
+        result += "|UUID|Ref|Name|Status|ETA|Owner|Domain|Category|CSF Function|Effort|Impact|Priority|Cost|\n"
+        result += "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n"
 
         for item in controls:
             uuid = item.get("id")
@@ -117,6 +132,15 @@ async def get_applied_controls(folder: str = None):
             name = item.get("name", "N/A")
             status = item.get("status", "N/A")
             eta = item.get("eta") or "N/A"
+            owners = item.get("owner") or []
+            owner_str = (
+                ", ".join(
+                    o.get("str", str(o)) if isinstance(o, dict) else str(o)
+                    for o in owners
+                )
+                if owners
+                else "N/A"
+            )
             domain = (item.get("folder") or {}).get("str", "N/A")
             category = item.get("category", "N/A")
             csf_function = item.get("csf_function", "N/A")
@@ -125,7 +149,7 @@ async def get_applied_controls(folder: str = None):
             priority = item.get("priority", "N/A")
             cost = item.get("cost", 0)
 
-            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
+            result += f"|{uuid}|{ref_id}|{name}|{status}|{eta}|{owner_str}|{domain}|{category}|{csf_function}|{effort}|{impact}|{priority}|{cost}|\n"
 
         return success_response(
             result,
@@ -141,15 +165,26 @@ async def get_applied_controls(folder: str = None):
         )
 
 
-async def get_audits_progress(folder: str = None, perimeter: str = None):
+async def get_audits_progress(
+    folder: str = None,
+    perimeter: str = None,
+    status: str = None,
+    framework: str = None,
+):
     """List compliance assessments (audits) with progress metrics
 
     Args:
         folder: Folder ID/name
         perimeter: Perimeter ID/name
+        status: Filter by status: created | in_progress | in_review | done | deprecated
+        framework: Framework ID/name to filter by
     """
     try:
-        from ..resolvers import resolve_folder_id, resolve_perimeter_id
+        from ..resolvers import (
+            resolve_folder_id,
+            resolve_perimeter_id,
+            resolve_framework_id,
+        )
 
         params = {}
         filters = {}
@@ -164,6 +199,14 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
             params["perimeter"] = resolve_perimeter_id(perimeter)
             filters["perimeter"] = perimeter
 
+        if status:
+            params["status"] = status
+            filters["status"] = status
+
+        if framework:
+            params["framework"] = resolve_framework_id(framework)
+            filters["framework"] = framework
+
         res = make_get_request("/compliance-assessments/", params=params)
 
         if res.status_code != 200:
@@ -175,7 +218,12 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
         if not audits:
             return empty_response("audits", filters)
 
-        result = f"Found {len(audits)} audits"
+        total_count = (
+            data.get("count", len(audits)) if isinstance(data, dict) else len(audits)
+        )
+        result = f"Found {total_count} audits"
+        if total_count > len(audits):
+            result += f" (showing first {len(audits)}, use filters to narrow down)"
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
@@ -184,12 +232,12 @@ async def get_audits_progress(folder: str = None, perimeter: str = None):
 
         for item in audits:
             name = item.get("name", "N/A")
-            framework = (item.get("framework") or {}).get("str", "N/A")
-            status = item.get("status", "N/A")
+            fw = (item.get("framework") or {}).get("str", "N/A")
+            st = item.get("status", "N/A")
             progress = item.get("progress", "N/A")
             domain = (item.get("folder") or {}).get("str", "N/A")
 
-            result += f"|{name}|{framework}|{status}|{progress}|{domain}|\n"
+            result += f"|{name}|{fw}|{st}|{progress}|{domain}|\n"
 
         return success_response(
             result,

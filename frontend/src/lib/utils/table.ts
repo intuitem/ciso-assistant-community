@@ -12,6 +12,7 @@ import TaskNodeChangeStatus from '$lib/components/ContextMenu/task-nodes/ChangeS
 import { getModelInfo } from './crud';
 import SelectObject from '$lib/components/ContextMenu/ebios-rm/SelectObject.svelte';
 import ChangePriority from '$lib/components/ContextMenu/applied-controls/ChangePriority.svelte';
+import ChangeAttackStage from '$lib/components/ContextMenu/elementary-actions/ChangeAttackStage.svelte';
 
 export function tableSourceMapper(source: any[], keys: string[]): any[] {
 	return source.map((row) => {
@@ -471,6 +472,39 @@ export const ORGANISATION_OBJECTIVE_HEALTH_FILTER: ListViewFilterConfig = {
 		multiple: true
 	}
 };
+export const ORGANISATION_ISSUE_STATUS_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/status',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'status',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_CATEGORY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/category',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'category',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
+export const ORGANISATION_ISSUE_ORIGIN_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		optionsEndpoint: 'organisation-issues/origin',
+		optionsLabelField: 'label',
+		optionsValueField: 'value',
+		label: 'origin',
+		browserCache: 'force-cache',
+		multiple: true
+	}
+};
 export const TREATMENT_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
@@ -605,7 +639,7 @@ export const QUALIFICATION_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'qualification',
-		optionsEndpoint: 'qualifications',
+		optionsEndpoint: 'terminologies?field_path=qualifications',
 		multiple: true
 	}
 };
@@ -635,7 +669,7 @@ export const SOLUTION_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
 		optionsEndpoint: 'solutions/owner',
 		multiple: true
@@ -694,9 +728,9 @@ export const TASK_TEMPLATE_ASSIGNED_TO_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'assigned_to',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'task-templates/assigned_to',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -764,6 +798,15 @@ export const ENTITY_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'entity',
+		optionsEndpoint: 'entities',
+		multiple: true
+	}
+};
+
+export const PARENT_ENTITY_FILTER: ListViewFilterConfig = {
+	component: AutocompleteSelect,
+	props: {
+		label: 'parentEntity',
 		optionsEndpoint: 'entities',
 		multiple: true
 	}
@@ -1004,9 +1047,9 @@ export const OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'applied-controls/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1015,9 +1058,9 @@ export const FINDINGS_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'findings/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1160,9 +1203,9 @@ export const EVIDENCE_OWNER_FILTER: ListViewFilterConfig = {
 	component: AutocompleteSelect,
 	props: {
 		label: 'owner',
-		optionsLabelField: 'email',
+		optionsLabelField: 'str',
 		optionsValueField: 'id',
-		optionsEndpoint: 'evidences/owner',
+		optionsEndpoint: 'actors',
 		multiple: true
 	}
 };
@@ -1243,13 +1286,23 @@ export const listViewFields = {
 		}
 	},
 	'risk-assessments': {
-		head: ['ref_id', 'name', 'riskMatrix', 'status', 'riskScenarios', 'perimeter', 'updatedAt'],
+		head: [
+			'ref_id',
+			'name',
+			'riskMatrix',
+			'status',
+			'riskScenarios',
+			'folder',
+			'perimeter',
+			'updatedAt'
+		],
 		body: [
 			'ref_id',
 			'str',
 			'risk_matrix',
 			'status',
 			'risk_scenarios_count',
+			'folder',
 			'perimeter',
 			'updated_at'
 		],
@@ -1310,8 +1363,8 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
-			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
-			effort: APPLIED_CONTROL_EFFORT_FILTER
+			qualifications: QUALIFICATION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -1534,6 +1587,10 @@ export const listViewFields = {
 			is_third_party: USER_IS_THIRD_PARTY_FILTER
 		}
 	},
+	teams: {
+		head: ['name', 'description', 'teamEmail'],
+		body: ['name', 'description', 'team_email']
+	},
 	'user-groups': {
 		head: ['name'],
 		body: ['localization_dict'],
@@ -1565,6 +1622,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'reviewProgress',
 			'createdAt',
@@ -1575,6 +1633,7 @@ export const listViewFields = {
 			'name',
 			'version',
 			'framework',
+			'folder',
 			'perimeter',
 			'progress',
 			'created_at',
@@ -1599,8 +1658,8 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'file', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'attachment', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
+		body: ['name', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -1690,13 +1749,31 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
-			parent_entity: ENTITY_FILTER,
+			parent_entity: PARENT_ENTITY_FILTER,
 			relationship: ENTITY_RELATIONSHIP_FILTER
 		}
 	},
 	'entity-assessments': {
-		head: ['name', 'entity', 'perimeter', 'status', 'dueDate', 'criticality', 'conclusion'],
-		body: ['name', 'entity', 'perimeter', 'status', 'due_date', 'criticality', 'conclusion'],
+		head: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'dueDate',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
+		body: [
+			'name',
+			'entity',
+			'perimeter',
+			'status',
+			'due_date',
+			'criticality',
+			'conclusion',
+			'folder'
+		],
 		filters: {
 			perimeter: PERIMETER_FILTER,
 			entity: ENTITY_FILTER,
@@ -1752,8 +1829,8 @@ export const listViewFields = {
 		}
 	},
 	'business-impact-analysis': {
-		head: ['name', 'perimeter', 'status'],
-		body: ['name', 'perimeter', 'status'],
+		head: ['name', 'perimeter', 'folder', 'status'],
+		body: ['name', 'perimeter', 'folder', 'status'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -1795,6 +1872,15 @@ export const listViewFields = {
 		body: ['ref_id', 'name', 'description', 'status', 'nature', 'filtering_labels', 'folder'],
 		filters: {
 			folder: DOMAIN_FILTER,
+			assigned_to: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'processings/assigned_to',
+					optionsLabelField: 'str',
+					label: 'assignedTo',
+					multiple: true
+				}
+			},
 			status: PROCESSING_STATUS_FILTER,
 			nature: PROCESSING_NATURE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1814,6 +1900,15 @@ export const listViewFields = {
 		],
 		filters: {
 			folder: DOMAIN_FILTER,
+			owner: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'right-requests/owner',
+					optionsLabelField: 'str',
+					label: 'owner',
+					multiple: true
+				}
+			},
 			request_type: {
 				component: AutocompleteSelect,
 				props: {
@@ -1908,42 +2003,45 @@ export const listViewFields = {
 		}
 	},
 	purposes: {
-		head: ['name', 'description', 'legalBasis', 'processing'],
-		body: ['name', 'description', 'legal_basis', 'processing'],
+		head: ['legalBasis', 'description', 'customName', 'processing'],
+		body: ['legal_basis', 'description', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			legal_basis: LEGAL_BASIS_FILTER
 		}
 	},
 	'personal-data': {
-		head: ['processing', 'name', 'category', 'isSensitive', 'retention', 'deletionPolicy'],
-		body: ['processing', 'name', 'category', 'is_sensitive', 'retention', 'deletion_policy'],
+		head: ['category', 'isSensitive', 'retention', 'deletionPolicy', 'customName', 'processing'],
+		body: ['category', 'is_sensitive', 'retention', 'deletion_policy', 'name', 'processing'],
 		filters: {
 			processing: PROCESSING_FILTER,
 			category: PERSONAL_DATA_CATEGORY_FILTER
 		}
 	},
 	'data-subjects': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-recipients': {
-		head: ['name', 'description', 'category'],
-		body: ['name', 'description', 'category']
+		head: ['category', 'description', 'customName'],
+		body: ['category', 'description', 'name']
 	},
 	'data-contractors': {
-		head: ['name', 'description', 'entity', 'relationshipType', 'country', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'relationship_type', 'country', 'documentation_link']
+		head: ['entity', 'relationshipType', 'country', 'customName', 'documentationLink'],
+		body: ['entity', 'relationship_type', 'country', 'name', 'documentation_link']
 	},
 	'data-transfers': {
-		head: ['name', 'description', 'entity', 'country', 'legalBasis', 'documentationLink'],
-		body: ['name', 'description', 'entity', 'country', 'legal_basis', 'documentation_link']
+		head: ['entity', 'country', 'transferMechanism', 'customName', 'documentationLink'],
+		body: ['entity', 'country', 'transfer_mechanism', 'name', 'documentation_link']
 	},
 	'ebios-rm': {
 		head: ['name', 'description', 'domain', 'quotationMethod', 'createdAt', 'updatedAt'],
 		body: ['name', 'description', 'folder', 'quotation_method', 'created_at', 'updated_at'],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'feared-events': {
@@ -2063,7 +2161,17 @@ export const listViewFields = {
 	},
 	'elementary-actions': {
 		head: ['ref_id', 'folder', '', 'name', 'attack_stage', 'threat'],
-		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat']
+		body: ['ref_id', 'folder', 'icon_fa_class', 'name', 'attack_stage', 'threat'],
+		filters: {
+			attack_stage: {
+				component: AutocompleteSelect,
+				props: {
+					optionsEndpoint: 'elementary-actions/attack_stage',
+					label: 'attackStage',
+					multiple: true
+				}
+			}
+		}
 	},
 	'operating-modes': {
 		head: ['ref_id', 'name', 'likelihood'],
@@ -2101,8 +2209,26 @@ export const listViewFields = {
 		}
 	},
 	'findings-assessments': {
-		head: ['ref_id', 'name', 'category', 'evidences', 'findings', 'perimeter'],
-		body: ['ref_id', 'name', 'category', 'evidences', 'findings_count', 'perimeter'],
+		head: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings',
+			'treatmentProgress',
+			'folder',
+			'perimeter'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'evidences',
+			'findings_count',
+			'treatment_progress',
+			'folder',
+			'perimeter'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			perimeter: PERIMETER_FILTER,
@@ -2171,7 +2297,8 @@ export const listViewFields = {
 			entities: ENTITY_FILTER,
 			status: INCIDENT_STATUS_FILTER,
 			detection: INCIDENT_DETECTION_FILTER,
-			severity: INCIDENT_SEVERITY_FILTER
+			severity: INCIDENT_SEVERITY_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'timeline-entries': {
@@ -2187,8 +2314,8 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'due_date', 'assigned_to'],
+		head: ['refId', 'name', 'domain', 'status', 'health', 'eta', 'dueDate', 'assignee'],
+		body: ['ref_id', 'name', 'folder', 'status', 'health', 'eta', 'due_date', 'assigned_to'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
@@ -2196,10 +2323,31 @@ export const listViewFields = {
 		}
 	},
 	'organisation-issues': {
-		head: ['refId', 'name', 'category', 'origin', 'domain'],
-		body: ['ref_id', 'name', 'category', 'origin', 'folder'],
+		head: [
+			'refId',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'startDate',
+			'expirationDate',
+			'domain'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'category',
+			'origin',
+			'status',
+			'start_date',
+			'expiration_date',
+			'folder'
+		],
 		filters: {
-			folder: DOMAIN_FILTER
+			folder: DOMAIN_FILTER,
+			category: ORGANISATION_ISSUE_CATEGORY_FILTER,
+			origin: ORGANISATION_ISSUE_ORIGIN_FILTER,
+			status: ORGANISATION_ISSUE_STATUS_FILTER
 		}
 	},
 	'quantitative-risk-studies': {
@@ -2394,8 +2542,28 @@ export const listViewFields = {
 		}
 	},
 	'metric-instances': {
-		head: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
-		body: ['ref_id', 'name', 'metric_definition', 'current_value', 'status', 'folder'],
+		head: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'rawValue',
+			'target_value',
+			'unit',
+			'status',
+			'lastRefresh',
+			'folder'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'metric_definition',
+			'raw_value',
+			'target_value',
+			'unit',
+			'status',
+			'last_refresh',
+			'folder'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			metric_definition: {
@@ -2420,8 +2588,8 @@ export const listViewFields = {
 			owner: {
 				component: AutocompleteSelect,
 				props: {
-					optionsEndpoint: 'users',
-					optionsLabelField: 'email',
+					optionsEndpoint: 'actors',
+					optionsLabelField: 'str',
 					label: 'owner',
 					multiple: true
 				}
@@ -2517,6 +2685,10 @@ export const listViewFields = {
 			}
 		}
 	},
+	actors: {
+		head: ['name', 'type'],
+		body: ['specific', 'type']
+	},
 	extra: {
 		filters: {
 			risk: undefined,
@@ -2549,8 +2721,416 @@ export const contextMenuActions = {
 	'ro-to': [{ component: SelectObject, props: {} }],
 	stakeholders: [{ component: SelectObject, props: {} }],
 	'attack-paths': [{ component: SelectObject, props: {} }],
-	'operational-scenarios': [{ component: SelectObject, props: {} }]
+	'operational-scenarios': [{ component: SelectObject, props: {} }],
+	'elementary-actions': [{ component: ChangeAttackStage, props: {} }]
 };
+
+// Batch action configuration
+export interface BatchActionConfig {
+	type: 'delete' | 'change_field' | 'change_m2m' | 'change_folder';
+	label: string;
+	icon: string;
+	field?: string;
+	optionsEndpoint?: string;
+	multiSelect?: boolean;
+}
+
+export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
+	'applied-controls': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'applied-controls/status'
+		},
+		{
+			type: 'change_field',
+			label: 'batchChangePriority',
+			icon: 'fa-solid fa-arrow-up-wide-short',
+			field: 'priority',
+			optionsEndpoint: 'applied-controls/priority'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	policies: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'policies/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	evidences: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'evidences/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	incidents: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'incidents/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-scenarios': [
+		{
+			type: 'change_field',
+			label: 'changeTreatment',
+			icon: 'fa-solid fa-shield-halved',
+			field: 'treatment',
+			optionsEndpoint: 'risk-scenarios/treatment'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'risk-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'risk-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'compliance-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'compliance-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'business-impact-analysis': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'business-impact-analysis/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	findings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-nodes': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'task-nodes/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'requirement-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeResult',
+			icon: 'fa-solid fa-clipboard-check',
+			field: 'result',
+			optionsEndpoint: 'requirement-assessments/result'
+		}
+	],
+	'organisation-objectives': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'task-templates': [
+		{
+			type: 'change_m2m',
+			label: 'changeAssignee',
+			icon: 'fa-solid fa-user-pen',
+			field: 'assigned_to',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	assets: [
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'security-exceptions': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'security-exceptions/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	vulnerabilities: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'vulnerabilities/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	campaigns: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'campaigns/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	contracts: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'contracts/status'
+		},
+		{
+			type: 'change_m2m',
+			label: 'changeOwner',
+			icon: 'fa-solid fa-user-pen',
+			field: 'owner',
+			optionsEndpoint: 'actors',
+			multiSelect: true
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'organisation-issues': [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'validation-flows': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'quantitative-risk-studies': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'ebios-rm': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	entities: [
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	representatives: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	solutions: [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	'entity-assessments': [{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }],
+	processings: [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'processings/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'findings-assessments': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'findings-assessments/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	],
+	'metric-instances': [
+		{
+			type: 'change_field',
+			label: 'changeStatus',
+			icon: 'fa-solid fa-arrow-right-arrow-left',
+			field: 'status',
+			optionsEndpoint: 'metric-instances/status'
+		},
+		{
+			type: 'change_folder',
+			label: 'changeDomain',
+			icon: 'fa-solid fa-folder',
+			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
+		},
+		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+	]
+};
+
+export function getBatchActions(model: urlModel): BatchActionConfig[] {
+	return batchActions[model] ?? [];
+}
 
 export function getListViewFields({
 	key,

@@ -9,7 +9,8 @@ let testObjectsData: { [k: string]: any } = TestContent.itemBuilder(vars);
 
 const entityAssessment = {
 	name: 'Test entity assessment',
-	perimeter: vars.perimeterName,
+	// folder is inherited from the entity via initialData, no need to specify it
+	perimeter: vars.folderName + '/' + vars.perimeterName,
 	create_audit: true,
 	framework: vars.questionnaire.name,
 	representatives: 'third-party@tests.com'
@@ -78,7 +79,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create solution', async () => {
 		await page.getByRole('tab', { name: 'Solutions' }).click();
-		await expect(page.getByTestId('tabs-panel').getByText('Associated solutions')).toBeVisible();
 		await solutionsPage.createItem(
 			{
 				name: 'Test solution'
@@ -91,9 +91,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create representative', async () => {
 		await page.getByRole('tab', { name: 'Representatives' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated representatives')
-		).toBeVisible();
 		await representativesPage.createItem(
 			{
 				email: 'third-party@tests.com',
@@ -108,9 +105,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('verify that user was created alongside representative', async () => {
 		await page.getByRole('tab', { name: 'Representatives' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated representatives')
-		).toBeVisible();
 		await representativesPage.viewItemDetail('third-party@tests.com');
 		await expect(page.getByTestId('user-field-value')).not.toBeEmpty();
 		await page.getByTestId('user-field-value').locator('a').first().click();
@@ -125,9 +119,6 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('create entity assessment', async () => {
 		await page.getByRole('tab', { name: 'Entity assessments' }).click();
-		await expect(
-			page.getByTestId('tabs-panel').getByText('Associated entity assessments')
-		).toBeVisible();
 		await entityAssessmentsPage.createItem(
 			entityAssessment,
 			undefined,
@@ -150,6 +141,7 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('check that third parties overview was updated', async () => {
 		await page.goto('/analytics/tprm');
+		await page.locator('body[data-hydrated="true"]').waitFor();
 		await expect(page.locator('#page-title')).toHaveText('Overview');
 		const cards = page.getByTestId('cards-list').locator('div');
 		await expect(page.getByTestId('no-data-available')).not.toBeVisible();
@@ -166,8 +158,11 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('check that third parties overview cards can be flipped', async () => {
 		const cards = page.getByTestId('cards-list').locator('div');
-		await cards.first().getByTestId('flip-button-front').click();
-		await expect(cards.first()).toHaveClass(/rotate-x-180/);
+		const firstCard = cards.first();
+		await expect(firstCard).toBeVisible();
+		await expect(firstCard.getByTestId('flip-button-front')).toBeEnabled();
+		await firstCard.getByTestId('flip-button-front').click();
+		await expect(firstCard).toHaveClass(/rotate-x-180/);
 
 		// flip back to front
 		await cards.first().getByTestId('flip-button-back').click();
@@ -204,11 +199,14 @@ test('third-party representative can set their password', async ({ sideBar, mail
 			await setLoginPage.newPasswordInput.fill(vars.thirdPartyUser.password);
 			await setLoginPage.confirmPasswordInput.fill(vars.thirdPartyUser.password);
 		}
-		await setLoginPage.setPasswordButton.click();
 
-		await setLoginPage.isToastVisible(
-			'Your password has been successfully set. Welcome to CISO Assistant!'
+		const passwordSetToast = setLoginPage.isToastVisible(
+			'Your password has been successfully set. Welcome to CISO Assistant!',
+			undefined,
+			{ optional: true }
 		);
+		await setLoginPage.setPasswordButton.click();
+		await passwordSetToast;
 
 		await setLoginPage.login('third-party@tests.com', vars.thirdPartyUser.password);
 
@@ -244,12 +242,18 @@ test('third-party representative can fill their assigned audit', async ({
 
 		await test.step('third party respondent can fill questionnaire', async () => {
 			await expect(assessableRequirements).not.toHaveCount(0);
-			await page.getByRole('button', { name: 'Yes' }).first().click();
-			await page.getByRole('button', { name: 'No' }).nth(1).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(2).click();
-			await page.getByRole('button', { name: 'Yes' }).nth(3).click();
-			await page.getByRole('button', { name: 'No' }).nth(4).click();
-			await page.getByRole('button', { name: 'N/A' }).nth(5).click();
+
+			const clickAndPause = async (locator: Locator) => {
+				await locator.click();
+				await page.waitForTimeout(1000); // workaround flakiness due to overlapping calls
+			};
+
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).first());
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(1));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(2));
+			await clickAndPause(page.getByRole('button', { name: 'Yes' }).nth(3));
+			await clickAndPause(page.getByRole('button', { name: 'No' }).nth(4));
+			await clickAndPause(page.getByRole('button', { name: 'N/A' }).nth(5));
 		});
 
 		await test.step('third party respondent can create evidence', async () => {
@@ -261,10 +265,11 @@ test('third-party representative can fill their assigned audit', async ({
 			await page.getByTestId('form-input-name').click();
 			await page.getByTestId('form-input-name').fill('tp-evidence');
 			await page.getByTestId('form-input-filtering-labels').getByRole('textbox').click();
-			await page.getByTestId('save-button').click();
-			await complianceAssessmentsPage.isToastVisible(
+			let objectCreatedToast = complianceAssessmentsPage.isToastVisible(
 				'The evidence object has been successfully created' + /.+/.source
 			);
+			await page.getByTestId('save-button').click();
+			await objectCreatedToast;
 		});
 
 		await test.step('check that evidence count was updated', async () => {

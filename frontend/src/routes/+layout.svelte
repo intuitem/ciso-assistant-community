@@ -1,11 +1,16 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
+	import { onMount } from 'svelte';
 
 	// Most of the app wide CSS should be put in this file
 	import '../app.css';
 	import '@fortawesome/fontawesome-free/css/all.min.css';
 
 	import { browser } from '$app/environment';
+
+	onMount(() => {
+		document.body.dataset.hydrated = 'true';
+	});
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
 	import Modal from '$lib/components/Modals/Modal.svelte';
@@ -41,21 +46,34 @@
 	interface FlashMessage {
 		message: string;
 		type: 'success' | 'error' | 'warning' | 'info';
+		timeout?: number;
+		autohide?: boolean;
 	}
 
 	function handleToast(flash: FlashMessage | undefined) {
 		if (!flash) return;
 
-		toast(flash.message, {
-			background:
-				flash.type == 'success'
-					? 'preset-filled-success-500'
-					: flash.type === 'error'
-						? 'preset-filled-error-500'
-						: flash.type == 'warning'
-							? 'preset-filled-warning-500'
-							: 'preset-filled-primary-500'
-		});
+		const background =
+			flash.type == 'success'
+				? 'preset-filled-success-500'
+				: flash.type === 'error'
+					? 'preset-filled-error-500'
+					: flash.type == 'warning'
+						? 'preset-filled-warning-500'
+						: 'preset-filled-primary-500';
+
+		const toastOptions: ToastSettings = {
+			background
+		};
+
+		if (flash.timeout !== undefined) {
+			toastOptions.timeout = flash.timeout;
+		}
+		if (flash.autohide !== undefined) {
+			toastOptions.autohide = flash.autohide;
+		}
+
+		toast(flash.message, toastOptions);
 	}
 
 	clientSideToast.subscribe((flash) => {

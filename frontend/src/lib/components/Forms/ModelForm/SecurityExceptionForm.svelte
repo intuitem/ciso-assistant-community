@@ -90,7 +90,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 <TextField
 	{form}
@@ -102,8 +101,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owners"
 	cacheLock={cacheLocks['owners']}
 	bind:cachedValue={formDataCache['owners']}
@@ -181,6 +184,7 @@
 		<div class="mt-4">
 			<button
 				class="btn bg-gray-300 h-10 w-10"
+				aria-label={m.addAppliedControl()}
 				onclick={(_) => modalAppliedControlCreateForm('applied_controls')}
 				type="button"><i class="fa-solid fa-plus text-sm"></i></button
 			>

@@ -6,6 +6,8 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 
+	import Dropdown from '$lib/components/Dropdown/Dropdown.svelte';
+
 	interface Props {
 		form: SuperValidated<any>;
 		model: ModelInfo;
@@ -47,7 +49,7 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO"
+	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
@@ -82,8 +84,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owner"
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
@@ -91,11 +97,33 @@
 />
 <AutocompleteSelect
 	{form}
-	multiple
-	optionsEndpoint="filtering-labels"
-	optionsLabelField="label"
-	field="filtering_labels"
-	cacheLock={cacheLocks['filtering_labels']}
-	bind:cachedValue={formDataCache['filtering_labels']}
-	label={m.labels()}
+	optionsEndpoint="evidences"
+	optionsLabelField="auto"
+	optionsExtraFields={[['folder', 'str']]}
+	field="evidences"
+	cacheLock={cacheLocks['evidences']}
+	bind:cachedValue={formDataCache['evidences']}
+	label={m.evidence()}
 />
+<Dropdown open={false} class="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="organisation-objectives"
+		optionsLabelField="auto"
+		field="organisation_objectives"
+		cacheLock={cacheLocks['organisation_objectives']}
+		bind:cachedValue={formDataCache['organisation_objectives']}
+		label={m.organisationObjectives()}
+	/>
+	<AutocompleteSelect
+		{form}
+		multiple
+		optionsEndpoint="filtering-labels"
+		optionsLabelField="label"
+		field="filtering_labels"
+		cacheLock={cacheLocks['filtering_labels']}
+		bind:cachedValue={formDataCache['filtering_labels']}
+		label={m.labels()}
+	/>
+</Dropdown>

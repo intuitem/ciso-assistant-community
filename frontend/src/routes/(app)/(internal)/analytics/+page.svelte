@@ -186,11 +186,25 @@
 											href="/compliance-assessments/"
 											emphasis={true}
 										/>
-										<SimpleCard
-											count="{metrics.compliance.progress_avg}%"
-											label={m.sumpageAvgProgress()}
-											href="/compliance-assessments/"
-										/>
+										{#await data.stream.auditsMetrics}
+											<SimpleCard
+												count="..."
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:then auditsMetrics}
+											<SimpleCard
+												count="{auditsMetrics?.progress_avg ?? 0}%"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{:catch}
+											<SimpleCard
+												count="-"
+												label={m.sumpageAvgProgress()}
+												href="/compliance-assessments/"
+											/>
+										{/await}
 										<SimpleCard
 											count={metrics.compliance.non_compliant_items}
 											label={m.sumpageNonCompliantItems()}
@@ -212,14 +226,30 @@
 
 								<!-- Audits Chart (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-										<StackedBarsNormalized
-											names={metrics.audits_stats.names}
-											data={metrics.audits_stats.data}
-											uuids={metrics.audits_stats.uuids}
-											title={m.recentlyUpdatedAudits()}
-										/>
-									</div>
+									{#await data.stream.auditsMetrics}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center"
+										>
+											<LoadingSpinner />
+										</div>
+									{:then auditsMetrics}
+										<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
+											{#if auditsMetrics?.audits_stats}
+												<StackedBarsNormalized
+													names={auditsMetrics.audits_stats.names}
+													data={auditsMetrics.audits_stats.data}
+													uuids={auditsMetrics.audits_stats.uuids}
+													title={m.recentlyUpdatedAudits()}
+												/>
+											{/if}
+										</div>
+									{:catch}
+										<div
+											class="bg-white rounded-lg p-4 h-96 border border-gray-200 flex items-center justify-center text-red-500"
+										>
+											<p>Error loading audits data</p>
+										</div>
+									{/await}
 								</div>
 							</div>
 							<!-- Risk Section + Charts Row -->
@@ -253,24 +283,32 @@
 
 								<!-- Risk Charts (3/5 of width) -->
 								<div class="xl:col-span-3">
-									<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="current_h"
-												title={m.sumpageTitleCurrentRisks()}
-												values={data.risks_count_per_level.current}
-												colors={data.risks_count_per_level.current.map((object) => object.color)}
-											/>
+									{#await data.stream.risksCountPerLevel}
+										<div class="flex items-center justify-center h-80">
+											<LoadingSpinner />
 										</div>
-										<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
-											<HalfDonutChart
-												name="residual_h"
-												title={m.sumpageTitleResidualRisks()}
-												values={data.risks_count_per_level.residual}
-												colors={data.risks_count_per_level.residual.map((object) => object.color)}
-											/>
+									{:then risksCountPerLevel}
+										<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+												<HalfDonutChart
+													name="current_h"
+													title={m.sumpageTitleCurrentRisks()}
+													values={risksCountPerLevel.current}
+													colors={risksCountPerLevel.current.map((object) => object.color)}
+												/>
+											</div>
+											<div class="bg-white rounded-lg p-4 h-80 border border-gray-200">
+												<HalfDonutChart
+													name="residual_h"
+													title={m.sumpageTitleResidualRisks()}
+													values={risksCountPerLevel.residual}
+													colors={risksCountPerLevel.residual.map((object) => object.color)}
+												/>
+											</div>
 										</div>
-									</div>
+									{:catch}
+										<div class="text-red-500">Error loading risk level data</div>
+									{/await}
 								</div>
 							</div>
 						</section>
@@ -395,20 +433,30 @@
 								{m.appliedControlsStatus()}
 							</h3>
 							<div class="h-80">
-								{#if data.applied_control_status}
-									<DonutChart
-										name="applied_controls_status"
-										values={data.applied_control_status.values.map((v, i) => ({
-											...v,
-											name: safeTranslate(data.applied_control_status.labels?.[i] || '')
-										}))}
-										colors={data.applied_control_status.values?.map((v) => v.itemStyle.color)}
-									/>
-								{:else}
-									<div class="flex items-center justify-center h-full text-gray-500">
-										<p>No applied controls data available</p>
+								{#await data.stream.appliedControlStatus}
+									<div class="flex items-center justify-center h-full">
+										<LoadingSpinner />
 									</div>
-								{/if}
+								{:then applied_control_status}
+									{#if applied_control_status}
+										<DonutChart
+											name="applied_controls_status"
+											values={applied_control_status.values.map((v, i) => ({
+												...v,
+												name: safeTranslate(applied_control_status.labels?.[i] || '')
+											}))}
+											colors={applied_control_status.values?.map((v) => v.itemStyle.color)}
+										/>
+									{:else}
+										<div class="flex items-center justify-center h-full text-gray-500">
+											<p>No applied controls data available</p>
+										</div>
+									{/if}
+								{:catch}
+									<div class="flex items-center justify-center h-full text-red-500">
+										<p>Error loading data</p>
+									</div>
+								{/await}
 							</div>
 						</div>
 
@@ -499,87 +547,95 @@
 					<!-- Risk tab -->
 
 					<section>
-						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-							{#if data.threats_count.results.labels.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-									<h3 class="text-lg font-semibold text-gray-900 mb-2">
-										{m.threatRadarChart()}
-									</h3>
-									<div class="h-96">
-										<RadarChart
-											name="threatRadar"
-											title=""
-											labels={data.threats_count.results.labels}
-											values={data.threats_count.results.values}
-										/>
+						{#await Promise.all( [data.stream.threatsCount, data.stream.qualificationsCount, data.stream.risksCountPerLevel] )}
+							<div class="flex items-center justify-center py-12">
+								<LoadingSpinner />
+							</div>
+						{:then [threatsCount, qualificationsCount, risksCountPerLevel]}
+							<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+								{#if threatsCount.results.labels.length > 0}
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+										<h3 class="text-lg font-semibold text-gray-900 mb-2">
+											{m.threatRadarChart()}
+										</h3>
+										<div class="h-96">
+											<RadarChart
+												name="threatRadar"
+												title=""
+												labels={threatsCount.results.labels}
+												values={threatsCount.results.values}
+											/>
+										</div>
 									</div>
-								</div>
-							{:else}
-								<div
-									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
-								>
-									<p class="text-gray-500">{m.noThreatsMapped()}</p>
-								</div>
-							{/if}
-							{#if data.qualifications_count.results.labels.length > 0}
-								<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-									<h3 class="text-lg font-semibold text-gray-900 mb-4">
-										{m.qualificationsChartTitle()}
-									</h3>
-									<div class="h-80">
-										<BarChart
-											name="qualificationsBar"
-											title=""
-											labels={localizeChartLabels(data.qualifications_count.results.labels)}
-											values={data.qualifications_count.results.values}
-											horizontal={true}
-										/>
-									</div>
-								</div>
-							{:else}
-								<div
-									class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
-								>
-									<p class="text-gray-500">{m.noQualificationsFoundOnRiskScenarios()}</p>
-								</div>
-							{/if}
-						</div>
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-							<div class="flex flex-wrap lg:flex-nowrap gap-6">
-								{#if page.data?.featureflags?.inherent_risk}
-									<div class="h-96 flex-col grow lg:flex-1">
-										<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
-
-										<DonutChart
-											s_label={m.inherentRisk()}
-											name="inherent_risk_level"
-											values={data.risks_count_per_level.inherent}
-											colors={data.risks_count_per_level.inherent?.map((object) => object.color)}
-										/>
+								{:else}
+									<div
+										class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+									>
+										<p class="text-gray-500">{m.noThreatsMapped()}</p>
 									</div>
 								{/if}
-								<div class="h-96 flex-col grow lg:flex-1">
-									<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
+								{#if qualificationsCount.results.labels.length > 0}
+									<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+										<h3 class="text-lg font-semibold text-gray-900 mb-4">
+											{m.qualificationsChartTitle()}
+										</h3>
+										<div class="h-80">
+											<BarChart
+												name="qualificationsBar"
+												title=""
+												labels={localizeChartLabels(qualificationsCount.results.labels)}
+												values={qualificationsCount.results.values}
+												horizontal={true}
+											/>
+										</div>
+									</div>
+								{:else}
+									<div
+										class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex items-center justify-center"
+									>
+										<p class="text-gray-500">{m.noQualificationsFoundOnRiskScenarios()}</p>
+									</div>
+								{/if}
+							</div>
+							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+								<div class="flex flex-wrap lg:flex-nowrap gap-6">
+									{#if page.data?.featureflags?.inherent_risk}
+										<div class="h-96 flex-col grow lg:flex-1">
+											<span class="text-sm font-semibold">{m.inherentRiskLevelPerScenario()}</span>
 
-									<DonutChart
-										s_label={cur_rsk_label}
-										name="current_risk_level"
-										values={data.risks_count_per_level.current}
-										colors={data.risks_count_per_level.current?.map((object) => object.color)}
-									/>
-								</div>
-								<div class="h-96 flex-col grow lg:flex-1">
-									<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
+											<DonutChart
+												s_label={m.inherentRisk()}
+												name="inherent_risk_level"
+												values={risksCountPerLevel.inherent}
+												colors={risksCountPerLevel.inherent?.map((object) => object.color)}
+											/>
+										</div>
+									{/if}
+									<div class="h-96 flex-col grow lg:flex-1">
+										<span class="text-sm font-semibold">{m.currentRiskLevelPerScenario()}</span>
 
-									<DonutChart
-										s_label={rsd_rsk_label}
-										name="residual_risk_level"
-										values={data.risks_count_per_level.residual}
-										colors={data.risks_count_per_level.residual?.map((object) => object.color)}
-									/>
+										<DonutChart
+											s_label={cur_rsk_label}
+											name="current_risk_level"
+											values={risksCountPerLevel.current}
+											colors={risksCountPerLevel.current?.map((object) => object.color)}
+										/>
+									</div>
+									<div class="h-96 flex-col grow lg:flex-1">
+										<span class="text-sm font-semibold">{m.residualRiskLevelPerScenario()}</span>
+
+										<DonutChart
+											s_label={rsd_rsk_label}
+											name="residual_risk_level"
+											values={risksCountPerLevel.residual}
+											colors={risksCountPerLevel.residual?.map((object) => object.color)}
+										/>
+									</div>
 								</div>
 							</div>
-						</div>
+						{:catch}
+							<div class="text-red-500">Error loading risk data</div>
+						{/await}
 						<!-- Vulnerability Sankey -->
 						{#await data.stream.vulnerabilitySankeyData}
 							<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -630,159 +686,170 @@
 							</a>
 						</div>
 
-						{#if data.complianceAnalytics && Object.keys(data.complianceAnalytics).length > 0}
-							<div class="space-y-6">
-								{#each Object.entries(data.complianceAnalytics) as [frameworkName, frameworkData]}
-									<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-										<!-- Framework Header -->
+						{#await data.stream.complianceAnalytics}
+							<div class="flex items-center justify-center py-12">
+								<LoadingSpinner />
+							</div>
+						{:then complianceAnalytics}
+							{#if complianceAnalytics && Object.keys(complianceAnalytics).length > 0}
+								<div class="space-y-6">
+									{#each Object.entries(complianceAnalytics) as [frameworkName, frameworkData]}
 										<div
-											class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+											class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
 										>
-											<div class="flex justify-between items-center">
-												<div class="flex items-center gap-3">
-													<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-													<h3 class="text-lg font-semibold text-gray-900">{frameworkName}</h3>
-												</div>
-												<div class="flex items-center gap-2">
-													<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
-													<div
-														class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
-													>
-														<div class="w-32 bg-gray-200 rounded-full h-1.5">
-															<div
-																class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
-																style="width: {frameworkData.framework_average}%"
-															></div>
+											<!-- Framework Header -->
+											<div
+												class="bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100"
+											>
+												<div class="flex justify-between items-center">
+													<div class="flex items-center gap-3">
+														<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+														<h3 class="text-lg font-semibold text-gray-900">{frameworkName}</h3>
+													</div>
+													<div class="flex items-center gap-2">
+														<span class="text-sm text-gray-600">{m.averageProgress()}:</span>
+														<div
+															class="flex items-center gap-2 px-3 py-1 bg-white rounded-full shadow-sm"
+														>
+															<div class="w-32 bg-gray-200 rounded-full h-1.5">
+																<div
+																	class="bg-gradient-to-r from-blue-500 to-indigo-500 h-1.5 rounded-full transition-all duration-500"
+																	style="width: {frameworkData.framework_average}%"
+																></div>
+															</div>
+															<span class="font-semibold text-blue-600 text-sm min-w-[2.5rem]">
+																{frameworkData.framework_average}%
+															</span>
 														</div>
-														<span class="font-semibold text-blue-600 text-sm min-w-[2.5rem]">
-															{frameworkData.framework_average}%
-														</span>
 													</div>
 												</div>
 											</div>
-										</div>
 
-										<!-- Domains -->
-										<div class="p-6 space-y-5">
-											{#each frameworkData.domains as domain}
-												<div class="relative">
-													<!-- Domain Header -->
-													<div
-														class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
-													>
-														<div class="flex items-center gap-2">
-															<i class="fas fa-folder text-amber-500 text-sm"></i>
-															<h4 class="font-medium text-gray-800">{domain.domain}</h4>
-														</div>
-														<div class="flex items-center gap-2">
-															<span class="text-xs text-gray-500">{m.averageProgress()}:</span>
+											<!-- Domains -->
+											<div class="p-6 space-y-5">
+												{#each frameworkData.domains as domain}
+													<div class="relative">
+														<!-- Domain Header -->
+														<div
+															class="flex justify-between items-center mb-3 pb-2 border-b border-gray-100"
+														>
 															<div class="flex items-center gap-2">
-																<div class="w-8 bg-gray-200 rounded-full h-1">
-																	<div
-																		class="bg-gradient-to-r from-amber-400 to-orange-500 h-1 rounded-full transition-all duration-300"
-																		style="width: {domain.domain_average}%"
-																	></div>
+																<i class="fas fa-folder text-amber-500 text-sm"></i>
+																<h4 class="font-medium text-gray-800">{domain.domain}</h4>
+															</div>
+															<div class="flex items-center gap-2">
+																<span class="text-xs text-gray-500">{m.averageProgress()}:</span>
+																<div class="flex items-center gap-2">
+																	<div class="w-8 bg-gray-200 rounded-full h-1">
+																		<div
+																			class="bg-gradient-to-r from-amber-400 to-orange-500 h-1 rounded-full transition-all duration-300"
+																			style="width: {domain.domain_average}%"
+																		></div>
+																	</div>
+																	<span class="font-medium text-amber-600 text-xs">
+																		{domain.domain_average}%
+																	</span>
 																</div>
-																<span class="font-medium text-amber-600 text-xs">
-																	{domain.domain_average}%
-																</span>
 															</div>
 														</div>
-													</div>
 
-													<!-- Assessments Grid -->
-													<div class="grid gap-3">
-														{#each domain.assessments as assessment}
-															<div
-																class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
-															>
-																<div class="flex justify-between items-start gap-4">
-																	<div class="flex-1 min-w-0">
-																		<div class="font-medium text-gray-900 mb-1 truncate">
-																			{assessment.assessment_name}
-																		</div>
-																		<div class="flex items-center gap-3 text-xs text-gray-500">
-																			<div class="flex items-center gap-1">
-																				<i class="fas fa-cubes text-gray-400"></i>
-																				<span>{assessment.perimeter}</span>
+														<!-- Assessments Grid -->
+														<div class="grid gap-3">
+															{#each domain.assessments as assessment}
+																<div
+																	class="group border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
+																>
+																	<div class="flex justify-between items-start gap-4">
+																		<div class="flex-1 min-w-0">
+																			<div class="font-medium text-gray-900 mb-1 truncate">
+																				{assessment.assessment_name}
 																			</div>
-																			<div class="flex items-center gap-1">
-																				<div
-																					class="w-2 h-2 rounded-full {assessment.status === 'done'
-																						? 'bg-green-400'
-																						: assessment.status === 'in_progress'
-																							? 'bg-blue-400'
-																							: assessment.status === 'in_review'
-																								? 'bg-yellow-400'
-																								: 'bg-gray-400'}"
-																				></div>
-																				<span class="capitalize"
-																					>{assessment.status?.replace('_', ' ') ||
-																						'No status'}</span
-																				>
+																			<div class="flex items-center gap-3 text-xs text-gray-500">
+																				<div class="flex items-center gap-1">
+																					<i class="fas fa-cubes text-gray-400"></i>
+																					<span>{assessment.perimeter}</span>
+																				</div>
+																				<div class="flex items-center gap-1">
+																					<div
+																						class="w-2 h-2 rounded-full {assessment.status ===
+																						'done'
+																							? 'bg-green-400'
+																							: assessment.status === 'in_progress'
+																								? 'bg-blue-400'
+																								: assessment.status === 'in_review'
+																									? 'bg-yellow-400'
+																									: 'bg-gray-400'}"
+																					></div>
+																					<span class="capitalize"
+																						>{assessment.status?.replace('_', ' ') ||
+																							'No status'}</span
+																					>
+																				</div>
 																			</div>
 																		</div>
-																	</div>
-																	<div class="flex items-center gap-3">
-																		<!-- Progress Bar -->
-																		<div class="flex items-center gap-2">
-																			<div class="w-20 bg-gray-200 rounded-full h-2">
-																				<div
-																					class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
+																		<div class="flex items-center gap-3">
+																			<!-- Progress Bar -->
+																			<div class="flex items-center gap-2">
+																				<div class="w-20 bg-gray-200 rounded-full h-2">
+																					<div
+																						class="h-2 rounded-full transition-all duration-500 {assessment.progress >=
+																						80
+																							? 'bg-gradient-to-r from-green-400 to-emerald-500'
+																							: assessment.progress >= 50
+																								? 'bg-gradient-to-r from-blue-400 to-cyan-500'
+																								: assessment.progress >= 25
+																									? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+																									: 'bg-gradient-to-r from-red-400 to-pink-500'}"
+																						style="width: {assessment.progress}%"
+																					></div>
+																				</div>
+																				<span
+																					class="font-semibold text-sm min-w-[3rem] text-right {assessment.progress >=
 																					80
-																						? 'bg-gradient-to-r from-green-400 to-emerald-500'
+																						? 'text-green-600'
 																						: assessment.progress >= 50
-																							? 'bg-gradient-to-r from-blue-400 to-cyan-500'
+																							? 'text-blue-600'
 																							: assessment.progress >= 25
-																								? 'bg-gradient-to-r from-yellow-400 to-orange-500'
-																								: 'bg-gradient-to-r from-red-400 to-pink-500'}"
-																					style="width: {assessment.progress}%"
-																				></div>
+																								? 'text-orange-600'
+																								: 'text-red-600'}"
+																				>
+																					{assessment.progress}%
+																				</span>
 																			</div>
-																			<span
-																				class="font-semibold text-sm min-w-[3rem] text-right {assessment.progress >=
-																				80
-																					? 'text-green-600'
-																					: assessment.progress >= 50
-																						? 'text-blue-600'
-																						: assessment.progress >= 25
-																							? 'text-orange-600'
-																							: 'text-red-600'}"
-																			>
-																				{assessment.progress}%
-																			</span>
 																		</div>
 																	</div>
 																</div>
-															</div>
-														{/each}
+															{/each}
+														</div>
 													</div>
-												</div>
-											{/each}
+												{/each}
+											</div>
 										</div>
-									</div>
-								{/each}
-							</div>
-						{:else}
-							<div
-								class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
-							>
-								<div class="text-gray-400 mb-4">
-									<i class="fas fa-chart-bar text-6xl"></i>
+									{/each}
 								</div>
-								<div class="text-gray-600">
-									<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
-									<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
-								</div>
-								<a
-									href="/compliance-assessments"
-									class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+							{:else}
+								<div
+									class="text-center py-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-dashed border-gray-300"
 								>
-									<i class="fas fa-plus text-sm"></i>
-									{m.createAssessment()}
-								</a>
-							</div>
-						{/if}
+									<div class="text-gray-400 mb-4">
+										<i class="fas fa-chart-bar text-6xl"></i>
+									</div>
+									<div class="text-gray-600">
+										<p class="text-xl font-semibold mb-2">{m.noComplianceData()}</p>
+										<p class="text-sm text-gray-500">{m.createComplianceAssessment()}</p>
+									</div>
+									<a
+										href="/compliance-assessments"
+										class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+									>
+										<i class="fas fa-plus text-sm"></i>
+										{m.createAssessment()}
+									</a>
+								</div>
+							{/if}
+						{:catch}
+							<div class="text-red-500">Error loading compliance data</div>
+						{/await}
 					</section>
 				</Tabs.Panel>
 				<Tabs.Panel value="operations">
@@ -826,20 +893,30 @@
 											{m.tasksStatus()}
 										</h3>
 										<div class="h-96">
-											{#if data.task_template_status}
-												<DonutChart
-													name="task_templates_status"
-													values={data.task_template_status.values.map((v, i) => ({
-														...v,
-														localName: data.task_template_status.localLables[i]
-													}))}
-													colors={data.task_template_status.values?.map((v) => v.itemStyle.color)}
-												/>
-											{:else}
-												<div class="flex items-center justify-center h-full text-gray-500">
-													<p>No tasks data available</p>
+											{#await data.stream.taskTemplateStatus}
+												<div class="flex items-center justify-center h-full">
+													<LoadingSpinner />
 												</div>
-											{/if}
+											{:then task_template_status}
+												{#if task_template_status}
+													<DonutChart
+														name="task_templates_status"
+														values={task_template_status.values.map((v, i) => ({
+															...v,
+															localName: task_template_status.localLables[i]
+														}))}
+														colors={task_template_status.values?.map((v) => v.itemStyle.color)}
+													/>
+												{:else}
+													<div class="flex items-center justify-center h-full text-gray-500">
+														<p>No tasks data available</p>
+													</div>
+												{/if}
+											{:catch}
+												<div class="flex items-center justify-center h-full text-red-500">
+													<p>Error loading data</p>
+												</div>
+											{/await}
 										</div>
 									</div>
 								</div>

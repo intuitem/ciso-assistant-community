@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
+from core.models import OrganisationObjective
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from core.serializer_fields import FieldsRelatedField, PathField
 from metrology.models import (
@@ -26,7 +27,7 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     library = FieldsRelatedField(["name", "id"])
     unit = FieldsRelatedField(["name", "id"])
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
         model = MetricDefinition
@@ -35,6 +36,21 @@ class MetricDefinitionReadSerializer(ReferentialSerializer):
 
 # MetricInstance serializers
 class MetricInstanceWriteSerializer(BaseModelSerializer):
+    organisation_objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
+        required=False,
+    )
+
+    def update(self, instance, validated_data):
+        # Check if folder is being changed
+        new_folder = validated_data.get("folder")
+        if new_folder and new_folder != instance.folder:
+            # Cascade folder change to all child CustomMetricSamples
+            instance.samples.update(folder=new_folder)
+
+        return super().update(instance, validated_data)
+
     class Meta:
         model = MetricInstance
         fields = "__all__"
@@ -55,37 +71,47 @@ class MetricInstanceReadSerializer(BaseModelSerializer):
         ]
     )
     owner = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    organisation_objectives = FieldsRelatedField(many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
+    evidences = FieldsRelatedField(["name", "id"])
     status = serializers.CharField(source="get_status_display", read_only=True)
     collection_frequency = serializers.CharField(
         source="get_collection_frequency_display", read_only=True
     )
     current_value = serializers.SerializerMethodField()
+    raw_value = serializers.SerializerMethodField()
     unit = serializers.SerializerMethodField()
+    last_refresh = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = MetricInstance
         fields = "__all__"
 
     def get_current_value(self, obj):
-        """Get the current value from the latest sample"""
+        """Get the current value (formatted with unit) from the latest sample"""
         return obj.current_value()
+
+    def get_raw_value(self, obj):
+        """Get the raw numeric/index value from the latest sample (without unit)"""
+        return obj.raw_value()
 
     def get_unit(self, obj):
         """Get the unit from the metric definition"""
-        if obj.metric_definition and obj.metric_definition.unit:
+        if obj.unit:
             return {
-                "id": str(obj.metric_definition.unit.id),
-                "name": obj.metric_definition.unit.name,
+                "id": str(obj.unit.id),
+                "name": obj.unit.name,
             }
         return None
 
 
 # CustomMetricSample serializers
 class CustomMetricSampleWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = CustomMetricSample
-        fields = "__all__"
+    def create(self, validated_data):
+        # Set folder from metric_instance before the permission check in parent class
+        if "metric_instance" in validated_data and validated_data["metric_instance"]:
+            validated_data["folder"] = validated_data["metric_instance"].folder
+        return super().create(validated_data)
 
     def validate_timestamp(self, value):
         """Prevent creating samples with future timestamps"""
@@ -97,19 +123,31 @@ class CustomMetricSampleWriteSerializer(BaseModelSerializer):
             )
         return value
 
+    class Meta:
+        model = CustomMetricSample
+        exclude = ["folder"]
+
 
 class CustomMetricSampleReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
-    metric_instance = FieldsRelatedField(["name", "ref_id", "id"])
+    metric_instance = FieldsRelatedField(
+        ["name", "ref_id", "id", {"evidences": ["id", "name"]}]
+    )
+    evidence_revision = FieldsRelatedField(["id", "name", "version"])
     display_value = serializers.SerializerMethodField()
+    raw_value = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomMetricSample
         fields = "__all__"
 
     def get_display_value(self, obj):
-        """Get the human-readable display value"""
+        """Get the human-readable display value (with unit)"""
         return obj.display_value()
+
+    def get_raw_value(self, obj):
+        """Get the raw numeric/index value (without unit)"""
+        return obj.raw_value()
 
 
 # Dashboard serializers
@@ -122,7 +160,7 @@ class DashboardWriteSerializer(BaseModelSerializer):
 class DashboardReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     widget_count = serializers.IntegerField(read_only=True)
 
     class Meta:

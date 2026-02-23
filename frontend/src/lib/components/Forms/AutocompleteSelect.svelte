@@ -71,6 +71,7 @@
 		includeAllOptionFields?: boolean;
 		mount?: (value: any) => void;
 		optionSnippet?: import('svelte').Snippet<[Record<string, any>]>;
+		placeholder?: string;
 	}
 
 	let {
@@ -116,7 +117,8 @@
 		cachedValue = $bindable(),
 		cachedOptions = $bindable(),
 		mount = () => null,
-		optionSnippet = undefined
+		optionSnippet = undefined,
+		placeholder = ''
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -412,7 +414,7 @@
 	};
 </script>
 
-<div class={baseClass} {hidden}>
+<div class={baseClass} hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
@@ -457,6 +459,7 @@
 			duplicates={false}
 			key={JSON.stringify}
 			filterFunc={fastFilter}
+			{placeholder}
 		>
 			{#snippet option({ option })}
 				{#if optionSnippet}

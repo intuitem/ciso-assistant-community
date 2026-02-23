@@ -48,6 +48,10 @@ router.register(
 router.register(r"assets", AssetViewSet, basename="assets")
 router.register(r"asset-class", AssetClassViewSet, basename="asset-class")
 
+router.register(r"actors", ActorViewSet, basename="actors")
+
+router.register(r"teams", TeamViewSet, basename="teams")
+
 router.register(r"users", UserViewSet, basename="users")
 router.register(r"user-groups", UserGroupViewSet, basename="user-groups")
 router.register(r"role-assignments", RoleAssignmentViewSet, basename="role-assignments")
@@ -81,6 +85,11 @@ router.register(
     r"requirement-assessments",
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
+)
+router.register(
+    r"requirement-assignments",
+    RequirementAssignmentViewSet,
+    basename="requirement-assignments",
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
@@ -154,6 +163,9 @@ urlpatterns = [
     ),
     path("get_counters/", get_counters_view, name="get_counters_view"),
     path("get_metrics/", get_metrics_view, name="get_metrics_view"),
+    path(
+        "get_audits_metrics/", get_audits_metrics_view, name="get_audits_metrics_view"
+    ),
     path(
         "get_combined_assessments_status/",
         get_combined_assessments_status_view,

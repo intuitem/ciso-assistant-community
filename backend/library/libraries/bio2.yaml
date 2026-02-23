@@ -1,0 +1,2147 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:bio2
+locale: en
+ref_id: bio2
+name: Baseline Information Security for Government 2 (BIO2)
+description: 'Baseline Information Security for Government 2 (BIO2)
+
+  24 September 2025, version 1.2 final
+
+  The BIO2 is the successor of the BIO 1.04zv. It is the renewed basic standard for
+  information security within the Dutch government. The BIO2 offers a uniform approach
+  and a common framework of standards for information security within the government,
+  in which risk management is central.'
+copyright: "The Baseline Information Security for Government 2 (BIO2) is entirely\
+  \ structured in accordance with NEN-EN-ISO/IEC 27001, Annex A and NEN-EN-ISO/IEC\
+  \ 27002. The Netherlands Standardisation Forum has included these standards in the\
+  \ \u2018comply-or-explain\u2019 list with compulsory standards for the public sector,\
+  \ in accordance with the comply-or-explain principle. This means that the government\
+  \ will apply these standards unless there are explicitly formulated reasons not\
+  \ to do so. The BIO2 describes the concrete details of the latest version of NEN-EN-ISO/IEC\
+  \ 27001 and NEN-EN-ISO/IEC 27002 for the government. It does not replace these two\
+  \ standards. The BIO2 only includes specific government measures. NEN-EN-ISO/IEC\
+  \ 27001 and NEN-EN-ISO/IEC 27002 describe the details for implementation (guidelines)\
+  \ and requirements for process structure (the ISMS from NEN-EN-ISO/IEC 27001). The\
+  \ structure of the management system for information security must comply with ISO\
+  \ 27001. Where the BIO2 does not specifically prescribe certain rules, both ISO\
+  \ documents must be used to ensure a solid risk management structure. The ISO documents\
+  \ therefore provide the application details that are not described in the BIO2 but\
+  \ which are nevertheless necessary for its proper implementation. The use of NEN-EN-ISO/IEC\
+  \ standards 27001 and 27002 in the BIO is copyright protected. The use of texts\
+  \ from these standards in the BIO is subject to permission by the Netherlands Standardization\
+  \ Institute. For more information about NEN and the use of their products, see:\
+  \ www.nen.nl."
+version: 1
+publication_date: 2026-01-25
+provider: Rijksoverheid
+packager: intuitem
+translations:
+  nl:
+    name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+    description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
+
+      24 september 2025, versie 1.2 definitief
+
+      De BIO2 is de opvolger van de BIO 1.04zv. Het is de vernieuwde basisnorm voor
+      informatiebeveiliging binnen de Nederlandse overheid. De BIO2 biedt een uniforme
+      aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging binnen
+      de overheid, waarbij risicomanagement centraal staat.'
+    copyright: "\"De Baseline Informatiebeveiliging Overheid 2 (BIO2) is geheel gestructureerd\
+      \ volgens NEN-EN-ISO/IEC 27001, bijlage A en NEN-EN-ISO/IEC 27002. Forum Standaardisatie\
+      \ heeft deze normen opgenomen in de \u2018pas-toe-of-leg-uit\u2019-lijst met\
+      \ verplichte standaarden voor de publieke sector, volgens het pas-toe-of-leg-uit\
+      \ principe. Dit betekent dat de overheid deze normen toepast tenzij er expliciet\
+      \ geformuleerde redenen zijn om dat niet te doen. De BIO2 beschrijft de invulling\
+      \ van de laatste versie van de NEN-EN-ISO/IEC 27001 en de NEN-EN-ISO/IEC 27002\
+      \ voor de overheid. De BIO2 vervangt deze twee normen niet. In de BIO2 zijn\
+      \ alleen specifieke overheidsmaatregelen opgenomen. NEN-EN-ISO/IEC 27001 en\
+      \ NEN-EN-ISO/IEC 27002 beschrijven de details voor implementatie (richtlijnen)\
+      \ en eisen voor de procesinrichting (het ISMS uit NEN-EN-ISO/IEC 27001). Het\
+      \ volgen van ISO 27001 is verplicht voor het inrichten van het managementsysteem\
+      \ voor informatiebeveiliging. Daar waar de BIO2 niet expliciet iets voorschrijft,\
+      \ moeten beide ISO-documenten gebruikt worden om te komen tot een goede inrichting\
+      \ voor risicomanagement. De ISO-documenten geven dus de details voor de toepassing,\
+      \ die niet in de BIO2 zijn beschreven en die nodig blijven voor een goede implementatie\
+      \ van de BIO2. Het gebruik van NEN-EN-ISO/IEC-normen 27001 en 27002 in de BIO\
+      \ is auteursrechtelijk beschermd. Het gebruik van teksten uit deze normen in\
+      \ de BIO geschiedt met toestemming van het Nederlands Normalisatie Instituut.\
+      \ Voor meer informatie over de NEN en het gebruik van hun producten zie: www.nen.nl.\""
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:bio2
+    ref_id: bio2
+    name: Baseline Information Security for Government 2 (BIO2)
+    description: 'Baseline Information Security for Government 2 (BIO2)
+
+      24 September 2025, version 1.2 final
+
+      The BIO2 is the successor of the BIO 1.04zv. It is the renewed basic standard
+      for information security within the Dutch government. The BIO2 offers a uniform
+      approach and a common framework of standards for information security within
+      the government, in which risk management is central.'
+    translations:
+      nl:
+        name: Baseline Informatiebeveiliging Overheid 2 (BIO2)
+        description: 'Baseline Informatiebeveiliging Overheid 2 (BIO2)
+
+          24 september 2025, versie 1.2 definitief
+
+          De BIO2 is de opvolger van de BIO 1.04zv. Het is de vernieuwde basisnorm
+          voor informatiebeveiliging binnen de Nederlandse overheid. De BIO2 biedt
+          een uniforme aanpak en een gemeenschappelijk normenkader voor informatiebeveiliging
+          binnen de overheid, waarbij risicomanagement centraal staat.'
+    implementation_groups_definition:
+    - ref_id: "Basishygi\xEBne"
+      name: Baseline hygiene
+      description: null
+      translations:
+        nl:
+          name: "Basishygi\xEBne"
+    - ref_id: "ketenhygi\xEBne"
+      name: Hygiene in the chain
+      description: null
+      translations:
+        nl:
+          name: "ketenhygi\xEBne"
+    - ref_id: Overheidsrisico
+      name: Government risk
+      description: null
+      translations:
+        nl:
+          name: Overheidsrisico
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:bio2:5.01.01
+      assessable: true
+      depth: 1
+      ref_id: 5.01.01
+      description: "Responsibilities and interrelationships for information security,\
+        \ the security of operational technology (OT), and the responsibilities relating\
+        \ to the continuity of the organisation's task execution (business continuity\
+        \ management (BCM)) shall have been described and established.\nThe allocation\
+        \ of responsibility for chains of information systems to line managers. The\
+        \ organisation shall have drawn up an information security policy, which has\
+        \ been formally approved by the organisation\u2019s management. This policy\
+        \ shall contain at least the following elements:\n1. the strategic principles\
+        \ and preconditions applied by the organisation for the purpose of information\
+        \ security, in particular the integration into and alignment with the overall\
+        \ security policy and the information management policy;\n2. the organisation\
+        \ of the information security function, including responsibilities, tasks\
+        \ and authorities;\n3. the allocation of responsibilities and interrelationships\
+        \ for information security in chains of information systems, the security\
+        \ of OT, privacy protection and the responsibilities relating to the continuity\
+        \ of the organisation\u2019s task execution (BCM) to line managers;\n4. the\
+        \ common reliability requirements and standards applicable to the organisation;\n\
+        5. the frequency with which the information security policy is evaluated;\n\
+        6. the promotion of security awareness."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Verantwoordelijkheden en samenhang voor informatiebeveiliging,\
+            \ de beveiliging van operationele technologie (OT) en de verantwoordelijkheden\
+            \ met betrekking tot de continu\xEFteit van de taakuitvoering van de organisatie,\
+            \ bedrijfscontinu\xEFteitsmanagement (BCM) zijn beschreven en vastgesteld.\n\
+            De toewijzing van verantwoordelijkheid voor ketens van informatiesystemen\
+            \ aan lijnmanagers. De organisatie heeft een informatiebeveiligingsbeleid\
+            \ opgesteld en vastgesteld door de leiding van de organisatie. Dit beleid\
+            \ bevat ten minste de volgende punten:\n1. De strategische uitgangspunten\
+            \ en randvoorwaarden die de organisatie hanteert voor informatiebeveiliging\
+            \ en in het bijzonder de inbedding in en afstemming op het algemene beveiligingsbeleid\
+            \ en het informatievoorzieningsbeleid.\n2. De organisatie van de informatiebeveiligingsfunctie,\
+            \ waaronder verantwoordelijkheden, taken en bevoegdheden.\n3. De toewijzing\
+            \ van de verantwoordelijkheden en samenhang van informatiebeveiliging\
+            \ voor ketens van informatiesystemen, de beveiliging van OT, privacybescherming\
+            \ en de verantwoordelijkheden met betrekking tot de continu\xEFteit van\
+            \ de taakuitvoering van organisatie (BCM) aan lijnmanagers.\n4. De gemeenschappelijke\
+            \ betrouwbaarheidseisen en normen die op de organisatie van toepassing\
+            \ zijn.\n5. De frequentie waarmee het informatiebeveiligingsbeleid wordt\
+            \ ge\xEBvalueerd.\n6. De bevordering van het beveiligingsbewustzijn."
+    - urn: urn:intuitem:risk:req_node:bio2:5.01.02
+      assessable: true
+      depth: 1
+      ref_id: 5.01.02
+      description: The information security policy shall be reviewed at least annually,
+        in alignment with the (existing) governance and Planning & Control (P&C) cycles
+        and external developments, and adjusted where necessary.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het informatiebeveiligingsbeleid wordt minimaal jaarlijks en
+            in aansluiting bij de (bestaande) bestuurs- en Planning & Control (P&C)-cycli
+            en externe ontwikkelingen beoordeeld en zo nodig bijgesteld.
+    - urn: urn:intuitem:risk:req_node:bio2:5.02.01
+      assessable: true
+      depth: 1
+      ref_id: 5.02.01
+      description: "The organisation\u2019s management shall have defined the responsibilities\
+        \ and roles for information security (including OT, BCM and privacy protection)\
+        \ within the organisation, with specific attention to responsibilities and\
+        \ roles relating to the effective handling of incidents.\nLine managers and\
+        \ process owners who are responsible for organisational assets shall also\
+        \ be responsible for addressing the risks applicable to those assets."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "De leiding van de organisatie heeft vastgelegd wat de verantwoordelijkheden\
+            \ en rollen zijn voor informatiebeveiliging (ook voor OT, BCM en privacybescherming)\
+            \ binnen haar organisatie. Hierbij is specifieke aandacht voor de verantwoordelijkheden\
+            \ en rollen voor het adequaat afhandelen van incidenten.\nLijnmanagers\
+            \ en proceseigenaren die verantwoordelijk zijn voor bedrijfsmiddelen zijn\
+            \ ook verantwoordelijk voor de behandeling van risico\u2019s die op die\
+            \ bedrijfsmiddelen van toepassing zijn."
+    - urn: urn:intuitem:risk:req_node:bio2:5.02.02
+      assessable: true
+      depth: 1
+      ref_id: 5.02.02
+      description: A CISO shall be appointed who is authorised to provide independent
+        advice and report on information security to the board and/or the regulating
+        body.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een CISO aangesteld die bevoegd is om onafhankelijk en
+            zelfstandig te adviseren en te rapporteren aan het bestuur en of het controlerend
+            orgaan over informatiebeveiliging.
+    - urn: urn:intuitem:risk:req_node:bio2:5.04.01
+      assessable: true
+      depth: 1
+      ref_id: 5.04.01
+      description: 'The board and employees shall regularly undergo training to recognise
+        and prevent cybersecurity risks, and to know what actions to take in the event
+        of an information security incident.
+
+        In addition, board members shall demonstrate that they possess sufficient
+        knowledge and skills to assess the impact of information security risks on
+        the services and/or products supplied by the organisation.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Bestuur en werknemers moeten regelmatig, scholing volgen om\
+            \ cyberbeveiligingsrisico\u2019s te herkennen en te voorkomen en te weten\
+            \ wat men moet doen als er een informatiebeveiligingsincident is.\nDaarbij\
+            \ tonen bestuurders aan dat zij voldoende kennis en vaardigheden hebben\
+            \ om de gevolgen van informatiebeveiligingsrisico\u2019s te beoordelen\
+            \ op de diensten en/of producten die de organisatie levert."
+    - urn: urn:intuitem:risk:req_node:bio2:5.04.02
+      assessable: true
+      depth: 1
+      ref_id: 5.04.02
+      description: The rules of conduct for the use of organisational assets shall
+        be laid down in the contracts for external staff and volunteers, in accordance
+        with the house rules or internal code of conduct.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: De gedragsregels voor het gebruik van bedrijfsmiddelen zijn
+            voor extern personeel en vrijwilligers in het contract vastgelegd volgens
+            de huisregels of interne gedragsregels.
+    - urn: urn:intuitem:risk:req_node:bio2:5.04.03
+      assessable: true
+      depth: 1
+      ref_id: 5.04.03
+      description: All employees shall have been formally made aware of the code of
+        conduct for the use of organisational assets.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Alle medewerkers zijn aantoonbaar gewezen op de gedragsregels
+            voor het gebruik van bedrijfsmiddelen.
+    - urn: urn:intuitem:risk:req_node:bio2:5.05.01
+      assessable: true
+      depth: 1
+      ref_id: 5.05.01
+      description: 'The organisation has defined which officials have formal contacts
+        with which (government or other) agencies and regulators regarding information
+        security.
+
+        This overview shall be updated at least annually.'
+      implementation_groups:
+      - "Ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'De organisatie heeft uitgewerkt welke functionarissen met
+            welke (overheids)instanties en toezichthouders formele contacten hebben
+            over informatiebeveiliging.
+
+            Dit overzicht wordt ten minste jaarlijks geactualiseerd.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.08.01
+      assessable: true
+      depth: 1
+      ref_id: 5.08.01
+      description: For new information systems, as well as for significant modifications
+        to existing systems, an explicit risk assessment must be conducted in accordance
+        with the organisation's established risk management methodology. This ensures
+        that risks are identified and appropriately managed, and that security requirements
+        are properly defined.
+      implementation_groups:
+      - "Ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Bij nieuwe informatiesystemen en bij significante wijzigingen\
+            \ op bestaande informatiesystemen moet een expliciete risicoafweging op\
+            \ basis van de door de organisatie vastgestelde risicomanagementmethodiek\
+            \ worden uitgevoerd, om risico\u2019s te identificeren en in voldoende\
+            \ mate te beheersen en ook voor het vaststellen van de beveiligingseisen."
+    - urn: urn:intuitem:risk:req_node:bio2:5.09.01
+      assessable: true
+      depth: 1
+      ref_id: 5.09.01
+      description: "An inventory of organisational assets relevant to information\
+        \ processing, including OT, shall be in place.\nThe inventory shall include\
+        \ all attributes necessary for management and maintenance. It shall also cover\
+        \ remote assets, cloud environments and assets that are regularly connected\
+        \ to the network infrastructure but are not under the organisation\u2019s\
+        \ control.\nThe completeness and accuracy of the inventory shall be periodically\
+        \ verified at intervals commensurate with the frequency of changes."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Er is een inventaris van bedrijfsmiddelen die van belang zijn
+            voor informatieverwerking, met inbegrip van OT.
+
+            De inventaris omvat alle eigenschappen die nodig zijn voor het beheer
+            en onderhoud. In de inventaris zijn ook opgenomen: bedrijfsmiddelen op
+            afstand, cloud-omgevingen en bedrijfsmiddelen die regelmatig zijn verbonden
+            met de netwerkinfrastructuur maar niet onder controle van de organisatie
+            staan.
+
+            De volledigheid en actualiteit van de inventaris wordt periodiek gecontroleerd
+            met tussenpozen die passend zijn voor de frequentie waarmee wijzigingen
+            optreden.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.12.01
+      assessable: true
+      depth: 1
+      ref_id: 5.12.01
+      description: 'The information within all information systems shall be classified
+        on the basis of an explicit risk assessment.
+
+        A defined impact classification methodology, which forms part of the established
+        risk management methodology, shall be applied for this purpose.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Informatie in alle informatiesystemen is door middel van een
+            expliciete risicoafweging geclassificeerd.
+
+            Hierbij wordt gebruik gemaakt van een vastgestelde impactclassificatiemethodiek
+            die onderdeel is van de vastgestelde risicomanagementmethodiek.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.14.01
+      assessable: true
+      depth: 1
+      ref_id: 5.14.01
+      description: 'Internet-facing information systems and email communications shall
+        be compliant at all times with the mandatory standards as published on the
+        website of the Netherlands Standardisation Forum.
+
+        Compliance shall be monitored using the measurements provided by internet.nl.
+
+        All components shall be configured to ensure optimal security without compromising
+        the functionality of the service provided.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Internetfacing-informatiesystemen en e-mail-berichtenverkeer
+            moeten blijvend voldoen aan de verplichte standaarden, zie hiervoor de
+            website van het Forum Standaardisatie.
+
+            Hierop wordt gestuurd met de metingen van internet.nl.
+
+            Daarbij dienen alle onderdelen te worden ingesteld zodat een optimale
+            beveiliging wordt bereikt zonder afbreuk te doen aan de functionaliteit
+            van de geboden dienst.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.14.02
+      assessable: true
+      depth: 1
+      ref_id: 5.14.02
+      description: 'For public web traffic involving sensitive data, at least publicly
+        trusted Organisation Validated (OV) certificates shall be used.
+
+        For internal web traffic involving sensitive data, at least publicly trusted
+        Organisation OV certificates or private PKIo certificates shall be used. More
+        stringent certificate requirements may arise from a risk assessment, connection
+        conditions or applicable legislation.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Maak bij openbaar webverkeer van gevoelige gegevens gebruik
+            van ten minste publiek vertrouwde Organization Validated (OV)-certificaten.
+
+            Maak bij intern webverkeer voor gevoelige gegevens gebruik van ten minste
+            publieke vertrouwde OV-certificaten of private PKIo-certificaten. Hogere
+            eisen aan certificaten kunnen voortvloeien uit een risicoanalyse, aansluitvoorwaarden
+            of wetgeving.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.14.03
+      assessable: true
+      depth: 1
+      ref_id: 5.14.03
+      description: Advanced and/or qualified electronic signatures shall comply with
+        Advanced Electronic Signatures (AdES Baseline Profiles) as included in the
+        open standards list of the Netherlands Standardisation Forum.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Geavanceerde en/of gekwalificeerde elektronische handtekeningen
+            moeten voldoen aan de Advanced Electronic Signatures (AdES Baseline Profiles),
+            zoals opgenomen in de Lijst open standaarden van Forum Standaardisatie.
+    - urn: urn:intuitem:risk:req_node:bio2:5.14.04
+      assessable: true
+      depth: 1
+      ref_id: 5.14.04
+      description: Up-to-date records shall be kept of all Internet-facing information
+        systems, web applications, IP addresses and APIs.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Van alle internetfacing-informatiesystemen, webapplicaties,\
+            \ IP-adressen en API\u2019s is een actuele registratie."
+    - urn: urn:intuitem:risk:req_node:bio2:5.14.05
+      assessable: true
+      depth: 1
+      ref_id: 5.14.05
+      description: 'Publicly accessible websites shall be published via the Government
+        Register of Internet Domains.
+
+        This information shall be updated at least every six months.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Publiek toegankelijke websites worden bekend gemaakt via Register
+            Internetdomeinen Overheid.
+
+            Deze informatie wordt ten minste iedere zes maanden geactualiseerd.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.15.01
+      assessable: true
+      depth: 1
+      ref_id: 5.15.01
+      description: 'Access to a trusted zone shall be permitted in two situations:
+
+        1. from authenticated devices, or
+
+        2. from software operating within a secure enclave.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Toegang tot een vertrouwde zone is toegestaan in twee situaties:
+
+            1. vanaf geauthentiseerde apparatuur of;
+
+            2. vanuit programmatuur die draait binnen een veilige schil.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.16.01
+      assessable: true
+      depth: 1
+      ref_id: 5.16.01
+      description: A comprehensive formal registration and de-registration procedure
+        shall be in place for the management of user identities.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een sluitende formele registratie- en afmeldprocedure
+            voor het beheren van gebruikersidentificaties.
+    - urn: urn:intuitem:risk:req_node:bio2:5.16.02
+      assessable: true
+      depth: 1
+      ref_id: 5.16.02
+      description: The use of group accounts shall not be permitted unless motivated,
+        recorded and coordinated with the CISO by the process owner.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het gebruiken van groepsaccounts is niet toegestaan, tenzij
+            de proceseigenaar dit motiveert, vastlegt en afstemt met de CISO.
+    - urn: urn:intuitem:risk:req_node:bio2:5.17.01
+      assessable: true
+      depth: 1
+      ref_id: 5.17.01
+      description: "Multi-factor authentication (MFA) shall, at a minimum, be applied\
+        \ for primary logon to the digital workplace, for accounts providing access\
+        \ to Internet-facing services, for accounts with administrative privileges\
+        \ and in other situations where the risk analysis indicates that this is an\
+        \ appropriate solution.\nThese two forms of MFA shall be used:\n1.  Passwordless\
+        \ access, such as a PIN in combination with a hardware token or a personally\
+        \ unique certificate (passkey).\n2. Password-protected access combined with\
+        \ at least a second factor.\nIf MFA is not possible for these accounts, other\
+        \ mitigating measures shall be taken. The CISO must be involved and the measures\
+        \ must be approved by the process owner.\nWhere it is possible and safe to\
+        \ do so, MFA shall be combined with federative authentication tools such as\
+        \ Single Sign On and a Stepping Stone solution.\nFor the management and monitoring\
+        \ of authentication data:\n\u2212 authentication information shall be issued\
+        \ only through formally established procedures and not until the user\u2019\
+        s identity has been verified with sufficient assurance.\n\u2212 Use Cases\
+        \ for the misuse of authentication data shall be defined and monitored, and\
+        \ appropriate action shall be taken if such events occur. Such Use Cases include,\
+        \ at a minimum, login attempts from unusual locations and spikes in failed\
+        \ login attempts."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Pas multi-factorauthenticatie (MFA) ten minste toe voor het
+            primaire aanloggen op de digitale werkomgeving, bij accounts voor via
+            het internet bereikbare voorzieningen en accounts die beheerrechten hebben
+            en in andere situaties waar uit de risicoanalyse blijkt dat dit een passende
+            oplossing is.
+
+            Pas MFA toe in deze twee vormen:
+
+            1. Wachtwoordloze toegang, zoals een pincode in combinatie met een hardware
+            token of persoonlijk uniek certificaat (passkey).
+
+            2. Wachtwoordtoegang in combinatie met minimaal een tweede factor.
+
+            Indien MFA niet mogelijk is voor deze accounts, neem andere mitigerende
+            maatregelen. Betrek de CISO hierbij en laat ze goedkeuren door de proceseigenaar.
+
+            Combineer waar mogelijk en veilig, MFA met federatieve authenticatievoorzieningen
+            zoals Single Sign On en een Stepping Stone-oplossing.
+
+            Voor beheer en monitoring van authenticatiegegevens:
+
+            - geef authenticatie-informatie uit met formele vastgestelde procedures
+            en pas nadat de identiteit van de gebruiker met voldoende zekerheid is
+            vastgesteld;
+
+            - definieer Use Cases voor misbruik van authenticatiegegevens, monitor
+            deze en neem passende actie bij het optreden ervan. Deze Use Cases omvatten
+            in ieder geval inlogpogingen van ongebruikelijke plekken en pieken in
+            mislukte inlogpogingen.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.17.02
+      assessable: true
+      depth: 1
+      ref_id: 5.17.02
+      description: The organisation shall provide all employees access to a password
+        manager or equivalent solution.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De organisatie biedt aan alle medewerkers een wachtwoordmanager
+            of vergelijkbare oplossing aan.
+    - urn: urn:intuitem:risk:req_node:bio2:5.17.03
+      assessable: true
+      depth: 1
+      ref_id: 5.17.03
+      description: Enforcement of password requirements shall be automated.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De eisen aan wachtwoorden moeten geautomatiseerd worden afgedwongen.
+    - urn: urn:intuitem:risk:req_node:bio2:5.18.01
+      assessable: true
+      depth: 1
+      ref_id: 5.18.01
+      description: The creation of and modifications to accounts with special privileges
+        shall be monitored. If such a change is found to be unauthorised, this qualifies
+        as a security incident and shall be recorded and handled accordingly.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het maken en aanpassen van accounts met bijzondere rechten
+            wordt gemonitord. Indien deze wijzigingen ongeautoriseerd zijn, is dit
+            een informatiebeveiligingsincident en wordt als zodanig vastgelegd en
+            afgehandeld.
+    - urn: urn:intuitem:risk:req_node:bio2:5.18.02
+      assessable: true
+      depth: 1
+      ref_id: 5.18.02
+      description: All access rights issued shall be assessed at least once a year.
+        A risk assessment shall be made to determine whether a higher frequency is
+        required.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Alle uitgegeven toegangsrechten worden minimaal eenmaal per
+            jaar beoordeeld. Een risicoafweging bepaalt of dit sneller moet.
+    - urn: urn:intuitem:risk:req_node:bio2:5.19.01
+      assessable: true
+      depth: 1
+      ref_id: 5.19.01
+      description: 'For requests for a proposal where information or information systems
+        are involved, information security requirements (availability, integrity and
+        confidentiality) shall be included as part of the complete set of procurement
+        requirements.
+
+        The information security requirements shall be based on an explicit risk assessment.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Bij offerteaanvragen waar informatie(voorziening) een rol
+            speelt, zijn informatiebeveiligingseisen (beschikbaarheid, integriteit
+            en vertrouwelijkheid) onderdeel van het hele pakket aan inkoopeisen.
+
+            De informatiebeveiligingseisen zijn gebaseerd op een expliciete risicoafweging.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.01
+      assessable: true
+      depth: 1
+      ref_id: 5.20.01
+      description: The security requirements arising from the request for a proposal
+        shall be explicitly included in (procurement) contracts that involve information
+        processing.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: De beveiligingseisen uit de offerteaanvraag worden expliciet
+            opgenomen in de (inkoop)contracten waar de verwerking van informatie een
+            rol speelt.
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.02
+      assessable: true
+      depth: 1
+      ref_id: 5.20.02
+      description: 'Where possible, the general terms and conditions of suppliers
+        shall be explicitly excluded and where appropriate, additional conditions
+        shall be included. If conditions cannot be excluded, an assessment shall be
+        made of the associated risks.
+
+        When entering into the agreement, it shall be explicitly defined which consequences
+        are acceptable, which must be mitigated and which conditions will not or may
+        never be accepted.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Sluit waar mogelijk algemene voorwaarden van leveranciers\
+            \ expliciet uit en neem eventueel aanvullende voorwaarden op. Als uitsluiten\
+            \ niet mogelijk is, beoordeel dan de risico\u2019s.\nExpliciet is gemaakt\
+            \ welke consequenties geaccepteerd worden, welke gemitigeerd moeten zijn\
+            \ en welke voorwaarden niet of nooit geaccepteerd mogen worden bij het\
+            \ aangaan van de overeenkomst."
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.03
+      assessable: true
+      depth: 1
+      ref_id: 5.20.03
+      description: 'The procurement contract shall include a requirement for the supplier
+        to demonstrate that it meets all specified requirements concerning set-up,
+        existence and operation, based on assessments by independent third parties.
+
+        The scope of those independent assessments shall cover the full range of the
+        services under the contract. Explicit attention shall be given to the supply
+        chain and how the supplier has organised its supplier management, in accordance
+        with government measure 5.21.01.
+
+        The supplier shall demonstrate this on an annual basis.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'In het inkoopcontract wordt opgenomen dat de leverancier aantoont
+            dat hij aan alle gestelde eisen voldoet in opzet, bestaan en werking,
+            op basis van onderzoeken van onafhankelijke derden.
+
+            Deze onderzoeken hebben een scope die dekkend is voor de gecontracteerde
+            dienstverlening. Hierbij is expliciet aandacht voor de toeleveringsketen
+            en hoe de leverancier zijn leveranciersmanagement ingeregeld heeft, zie
+            overheidsmaatregel 5.21.01.
+
+            Dit toont de leverancier jaarlijks opnieuw aan.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.04
+      assessable: true
+      depth: 1
+      ref_id: 5.20.04
+      description: 'The government organisation shall conduct its own independent
+        investigations, also to validate the reports provided by the supplier.
+
+        To that end, the possibility to commission an external audit shall be explicitly
+        included in the contract.
+
+        The government organisation shall control any residual risks arising from
+        the foregoing by applying its adopted risk management methodology.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "De overheidsorganisatie voert zelfstandig onderzoek uit, ook\
+            \ ter validatie van de rapportages die de leverancier aanlevert.\nOm dit\
+            \ mogelijk te maken, wordt expliciet opgenomen dat er een mogelijkheid\
+            \ is voor een externe audit.\nIndien uit het voorgaande restrisico\u2019\
+            s volgen, beheerst de overheidsorganisatie deze door het toepassen van\
+            \ zijn vastgestelde risicomanagementmethodiek."
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.05
+      assessable: true
+      depth: 1
+      ref_id: 5.20.05
+      description: The parties shall agree, among other things, that the supplier
+        is transparent about the vulnerabilities in its services and about information
+        security incidents, including data leaks. This enables the government organisation
+        to respond appropriately, for example by reporting the incident and taking
+        mitigating measures.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Onderdeel van de afspraken is dat de leverancier transparant
+            is over kwetsbaarheden in de dienstverlening en informatiebeveiligingsincidenten
+            waaronder datalekken. Dit stelt de overheidsorganisatie in staat om passend
+            te reageren onder meer door te rapporteren en mitigerende maatregelen
+            te nemen.
+    - urn: urn:intuitem:risk:req_node:bio2:5.20.06
+      assessable: true
+      depth: 1
+      ref_id: 5.20.06
+      description: 'Before a contract is concluded, a risk assessment shall determine
+        whether the dependency on a particular supplier is manageable.
+
+        An explicit and detailed definition of the exit strategy shall be a standard
+        component of the contract.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Voordat een contract wordt afgesloten, wordt in een risicoafweging
+            bepaald of de afhankelijkheid van een leverancier beheersbaar is.
+
+            Een vast onderdeel van het contract is een expliciete uitwerking van de
+            exit-strategie.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.21.01
+      assessable: true
+      depth: 1
+      ref_id: 5.21.01
+      description: The contract shall stipulate that the supplier is responsible for
+        ensuring compliance, by its subcontractors, with the specified requirements.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: In het contract is opgenomen dat de leverancier verantwoordelijk
+            is voor het borgen van de gestelde eisen bij de toeleveranciers.
+    - urn: urn:intuitem:risk:req_node:bio2:5.21.02
+      assessable: true
+      depth: 1
+      ref_id: 5.21.02
+      description: Before the contract is concluded, the supplier shall provide insight
+        into the chain of subcontractors and any risks involved. The government organisation
+        shall then assess whether those risks are acceptable.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Voorafgaand aan het afsluiten van de overeenkomst geeft de\
+            \ leverancier inzicht in de keten van toeleveranciers en eventuele risico\u2019\
+            s daarin. De overheidsorganisatie beoordeelt of de risico\u2019s acceptabel\
+            \ zijn."
+    - urn: urn:intuitem:risk:req_node:bio2:5.21.03
+      assessable: true
+      depth: 1
+      ref_id: 5.21.03
+      description: "The government organisation shall guarantee that the security\
+        \ requirements imposed on the supplier equally and fully apply to the chain\
+        \ of subcontractors, unless those requirements are not relevant in view of\
+        \ the nature of the supplier\u2019s services."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'De overheidsorganisatie borgt dat de beveiligingseisen aan
+            de leverancier onverminderd van toepassing zijn op de keten van toeleveranciers,
+            tenzij die eisen niet relevant zijn gezien de aard van de dienstverlening
+            door de toeleverancier.
+
+            Indien informatiebeveiligingseisen zijn uitgesloten, maakt de leverancier
+            dat inzichtelijk, inclusief een onderbouwing.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.21.04
+      assessable: true
+      depth: 1
+      ref_id: 5.21.04
+      description: During the term of the contract the supplier shall communicate
+        changes in the chain of subcontractors, including the associated risks. At
+        minimum, this shall cover vulnerabilities and information security incidents
+        that can affect services to the government organisation.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Gedurende de looptijd geeft de leverancier veranderingen in\
+            \ de keten van toeleveranciers door, inclusief risico\u2019s daarin. Dit\
+            \ omvat minimaal kwetsbaarheden en informatiebeveiligingsincidenten die\
+            \ de dienstverlening aan de overheidsorganisatie kunnen raken."
+    - urn: urn:intuitem:risk:req_node:bio2:5.22.01
+      assessable: true
+      depth: 1
+      ref_id: 5.22.01
+      description: Based on the evidence provided by the supplier, see government
+        measure 5.20.03, the process owner shall be responsible for an annual assessment
+        of the extent to which the supplier meets the information security requirements
+        in place, for identifying any security risks, for taking or commissioning
+        mitigating measures and for accepting residual risks.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Op basis van het door de leverancier aangeleverde bewijsmateriaal,\
+            \ zie overheidsmaatregel 5.20.03, is de proceseigenaar verantwoordelijk\
+            \ voor het jaarlijks beoordelen dat leverancier voldoet aan de gestelde\
+            \ informatiebeveiligingseisen, het vaststellen van eventuele beveiligingsrisico\u2019\
+            s, het (laten) nemen van mitigerende maatregelen en het accepteren van\
+            \ rest-risico\u2019s."
+    - urn: urn:intuitem:risk:req_node:bio2:5.22.02
+      assessable: true
+      depth: 1
+      ref_id: 5.22.02
+      description: An up-to-date register of suppliers and existing contracts shall
+        be kept.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Er is een actuele registratie van leveranciers en afgesloten
+            contracten.
+    - urn: urn:intuitem:risk:req_node:bio2:5.23.01
+      assessable: true
+      depth: 1
+      ref_id: 5.23.01
+      description: 'Policies shall be put in place that cover the identification,
+        classification, selection, assessment and management of Cloud Service Providers
+        (CSPs), as well as the termination of services provided by CSPs.
+
+        Those policies shall be implemented and shall be reviewed at least once every
+        three years.
+
+        Each contract shall identify the situations that may give rise to its termination.
+
+        In the event of major changes with the supplier, the associated risks shall
+        be assessed and suitable measures shall be taken.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Stel beleid op dat toeziet op het inventariseren, classificeren,\
+            \ selecteren, beoordelen en managen van Cloud Service Providers (CSP)\
+            \ en het be\xEBindigen van dienstverlening door CSP\u2019s.\nImplementeer\
+            \ het beleid.\nHerzie dit beleid minimaal eens per drie jaar.\nNeem in\
+            \ de contracten op welke situaties aanleiding kunnen zijn tot ontbinding\
+            \ van het contract.\nWanneer zich belangrijke wijzigingen bij de leverancier\
+            \ optreden, beoordeel de risico\u2019s daarvan en neem passende maatregelen."
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.01
+      assessable: true
+      depth: 1
+      ref_id: 5.24.01
+      description: All internal and external employees shall have access to a low-threshold
+        notification desk where they can report and register information security
+        incidents.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Er is voor alle interne en externe medewerkers een toegankelijk
+            meldloket waar informatiebeveiligingsincidenten kunnen worden gemeld en
+            geregistreerd.
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.02
+      assessable: true
+      depth: 1
+      ref_id: 5.24.02
+      description: The tasks and responsibilities of the notification desk shall be
+        laid down in an incident reporting procedure.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een meldprocedure waarin de taken en verantwoordelijkheden
+            van het meldloket staan beschreven.
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.03
+      assessable: true
+      depth: 1
+      ref_id: 5.24.03
+      description: The process owner shall be responsible for resolving information
+        security incidents.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De proceseigenaar is verantwoordelijk voor het oplossen van
+            informatiebeveiligingsincidenten.
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.04
+      assessable: true
+      depth: 1
+      ref_id: 5.24.04
+      description: On a monthly basis, the process owner shall report on the follow-up
+        of information security incidents to the person with ultimate responsibility
+        for operations.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De proceseigenaar rapporteert maandelijks de opvolging van
+            informatiebeveiligingsincidenten aan de eindverantwoordelijke voor de
+            bedrijfsvoering.
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.05
+      assessable: true
+      depth: 1
+      ref_id: 5.24.05
+      description: The procedure for information security incidents shall include
+        a link to crisis management.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: In de procedure voor informatiebeveiligingsincidenten is er
+            een koppeling gemaakt met crisisbeheersing.
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.06
+      assessable: true
+      depth: 1
+      ref_id: 5.24.06
+      description: "Supply chain security shall be included in the risk analysis for\
+        \ the organisation. The risk analysis shall include a focus on the following\
+        \ aspects:\n\u2212 specific vulnerabilities of each direct supplier and service\
+        \ provider;\n\u2212 the overall quality of the products;\n\u2212 the cybersecurity\
+        \ practices of their suppliers and service providers, including their secure\
+        \ development procedures."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'De beveiliging van toeleveringsketens is onderdeel van de
+            risicoanalyse voor de organisatie. In de risicoanalyse wordt rekening
+            gehouden met:
+
+            - specifieke kwetsbaarheden van elke rechtstreekse leverancier en dienstverlener;
+
+            - de algemene kwaliteit van de producten;
+
+            - de cyberbeveiligingspraktijken van hun leveranciers en dienstverleners,
+            met inbegrip van hun veilige ontwikkelingsprocedures.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.24.07
+      assessable: true
+      depth: 1
+      ref_id: 5.24.07
+      description: "The incident reporting procedure shall be designed to:\n\u2212\
+        \ report information security incidents to the national Cyber Security Incident\
+        \ Response Team (CSIRT) within the statutory time limit;\n\u2212 receive and\
+        \ assess notifications from the national CSIRT and incorporate them into risk\
+        \ management;\n\u2212 inform the parties involved about the incident within\
+        \ the statutory time limit."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'De incidentprocedure is er op ingericht om:
+
+            - binnen de wettelijke termijn informatiebeveiligingsincidenten te melden
+            bij het nationale Cyber Security Incident Responce Team (CSIRT);
+
+            - meldingen van het nationale CSIRT te ontvangen, te beoordelen en op
+            te nemen in de risicobehandeling;
+
+            - betrokkenen binnen de wettelijke termijn op de hoogte te stellen van
+            het incident.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.25.01
+      assessable: true
+      depth: 1
+      ref_id: 5.25.01
+      description: Information security incidents shall be handled via the incident
+        management process. If relevant, such incidents shall be reported to regulatory
+        authorities pursuant to the statutory provisions involved, such as the Cyber
+        Security Act, the Public Records Act and the General Data Protection Regulation
+        (GDPR).
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - overheidsrisico
+      translations:
+        nl:
+          description: Informatiebeveiligingsincidenten worden afgedaan via het incidentbeheerproces.
+            Ze worden indien relevant gemeld bij toezichthouders volgens de bepalingen
+            uit de betrokken wet- en regelgeving zoals de Cbw, de Archiefwet en de
+            Algemene verordening gegevensbescherming (AVG).
+    - urn: urn:intuitem:risk:req_node:bio2:5.27.01
+      assessable: true
+      depth: 1
+      ref_id: 5.27.01
+      description: Information security incidents shall be analysed in order to establish
+        the root causes and realise improvements with the aim to prevent future incidents.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Informatiebeveiligingsincidenten worden geanalyseerd om achterliggende
+            oorzaken vast te stellen, verbeteringen te realiseren, om zo toekomstige
+            incidenten te voorkomen.
+    - urn: urn:intuitem:risk:req_node:bio2:5.27.02
+      assessable: true
+      depth: 1
+      ref_id: 5.27.02
+      description: The information security incident analysis reports, including the
+        root causes and improvements, shall be shared widely among relevant partners
+        in order to prevent similar and future incidents.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De analyses van informatiebeveiligingsincidenten, inclusief
+            de achterliggende oorzaken en de verbeteringen worden breed gedeeld met
+            relevante partners om herhaling en toekomstige incidenten te voorkomen.
+    - urn: urn:intuitem:risk:req_node:bio2:5.28.01
+      assessable: true
+      depth: 1
+      ref_id: 5.28.01
+      description: The retention period for a (suspected) information security incident
+        and all information required to analyse and resolve it shall be at least three
+        years. This includes, among other things, the information required for the
+        analysis (including logging), the resolution and recommendations.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De bewaartermijn van een (vermoedelijk) informatiebeveiligingsincident
+            en alle informatie om het incident te analyseren en op te lossen, is minimaal
+            drie jaar. Dit betreft onder meer de informatie benodigd voor de analyse
+            (waaronder logging), de oplossing en het advies.
+    - urn: urn:intuitem:risk:req_node:bio2:5.30.01
+      assessable: true
+      depth: 1
+      ref_id: 5.30.01
+      description: Every year, the process owner shall test continuity plans for effectiveness,
+        completeness and current relevance with a view to improving them.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: "De proceseigenaar test jaarlijks continu\xEFteitsplannen op\
+            \ werking, volledigheid en actualiteit, om de plannen te verbeteren."
+    - urn: urn:intuitem:risk:req_node:bio2:5.30.02
+      assessable: true
+      depth: 1
+      ref_id: 5.30.02
+      description: As part of the inventory under control measure 5.12, the process
+        owner shall identify critical systems on the basis of the established risk
+        management methodology and an explicit risk assessment. The process owner
+        shall update this overview at least once every three years.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: "Binnen de inventarisatie van beheersmaatregel 5.12, identificeert\
+            \ de proceseigenaar kritieke systemen op basis van de vastgestelde risicomanagementmethodiek\
+            \ en een expliciete risicoafweging. \nDe proceseigenaar actualiseert dit\
+            \ overzicht ten minste eens per drie jaar."
+    - urn: urn:intuitem:risk:req_node:bio2:5.33.01
+      assessable: true
+      depth: 1
+      ref_id: 5.33.01
+      description: "The process owner shall have included the retention periods for\
+        \ all information and information systems in selection lists, with due regard\
+        \ for the organisation\u2019s own objectives and for laws and regulations,\
+        \ such as the Public Records Act and privacy regulations.\nAdditionally, the\
+        \ process owner shall have implemented these retention periods in practice\
+        \ and shall periodically test their effectiveness."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'De proceseigenaar heeft voor alle informatie(systemen) in
+            selectielijsten de bewaartermijn vastgelegd, rekening houdend met de eigen
+            bedrijfsdoelstellingen en wet- en regeling, zoals de archiefwet en privacywetgeving.
+
+            De proceseigenaar heeft deze termijnen ook praktisch ingeregeld en toetst
+            periodiek de werking hiervan.'
+    - urn: urn:intuitem:risk:req_node:bio2:5.35.01
+      assessable: true
+      depth: 1
+      ref_id: 5.35.01
+      description: There shall be an operational ISMS in place in accordance with
+        NEN-EN-ISO/IEC ISO 27001.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een werkend ISMS volgens NEN-EN-ISO/IEC ISO 27001.
+    - urn: urn:intuitem:risk:req_node:bio2:5.35.02
+      assessable: true
+      depth: 1
+      ref_id: 5.35.02
+      description: An established audit plan shall be in place, in which annual decisions
+        are made regarding which systems will undergo which type of security audit.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een vastgesteld auditplan waarin jaarlijks keuzes worden
+            gemaakt voor welke systemen welk soort beveiligingsaudits worden uitgevoerd.
+    - urn: urn:intuitem:risk:req_node:bio2:5.36.01
+      assessable: true
+      depth: 1
+      ref_id: 5.36.01
+      description: "Within the planning and control (P&C) cycle, and as part of the\
+        \ plan-do-check-act (PDCA) cycle, reporting on information security shall\
+        \ take place under the coordination of the CISO. This shall result in an annual\
+        \ In Control Statement (ICV), or a comparable instrument, covering the organisation\u2019\
+        s entire information security system. The ICV or the comparable instrument\
+        \ can also be part of the formal accountability procedure."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "In de P&C-cyclus en als onderdeel van de plan-do-check-act\
+            \ (PDCA)-cyclus wordt gerapporteerd over informatiebeveiliging onder co\xF6\
+            rdinatie van de CISO. Dit resulteert in een jaarlijks af te geven In Control\
+            \ Verklaring (ICV), of een vergelijkbaar instrument, over de gehele informatiebeveiliging\
+            \ van de overheidsorganisatie. De ICV of het vergelijkbare instrument\
+            \ kan ook onderdeel zijn van de formele verantwoording."
+    - urn: urn:intuitem:risk:req_node:bio2:6.01.01
+      assessable: true
+      depth: 1
+      ref_id: 6.01.01
+      description: 'Every organisation shall have its own established screening policy.
+
+        Upon commencement of employment and in the event of a job change, a Certificate
+        of Conduct (VOG) may be requested based on a risk assessment.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - overheidsrisico
+      translations:
+        nl:
+          description: 'Elke organisatie heeft een vastgesteld screeningsbeleid.
+
+            Bij indiensttreding en bij functiewijziging kan op basis van een risicoafweging
+            een Verklaring Omtrent het Gedrag (VOG) gevraagd worden.'
+    - urn: urn:intuitem:risk:req_node:bio2:6.02.01
+      assessable: true
+      depth: 1
+      ref_id: 6.02.01
+      description: 'All internal and external employees, upon commencement of employment
+        or in the event of a job change, shall have been made aware of their responsibilities
+        for information security.
+
+        They shall have easy access to the information security regulations and instructions
+        that apply to them.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Alle medewerkers (intern en extern) zijn bij hun aanstelling
+            of functiewisseling gewezen op hun verantwoordelijkheden voor informatiebeveiliging.
+
+            De voor hen geldende regelingen en instructies voor informatiebeveiliging
+            zijn eenvoudig toegankelijk.'
+    - urn: urn:intuitem:risk:req_node:bio2:6.03.01
+      assessable: true
+      depth: 1
+      ref_id: 6.03.01
+      description: All employees, line managers and board members shall share responsibility
+        for protecting business information. Everybody shall know the rules and obligations
+        concerning information security and, where relevant, any special requirements
+        for classified environments.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Alle medewerkers, lijnmanagers en bestuurders hebben de verantwoordelijkheid
+            bedrijfsinformatie te beschermen. Iedereen kent de regels van en verplichtingen
+            voor informatiebeveiliging en daar waar relevant de speciale eisen voor
+            gerubriceerde omgevingen.
+    - urn: urn:intuitem:risk:req_node:bio2:6.03.02
+      assessable: true
+      depth: 1
+      ref_id: 6.03.02
+      description: "All employees and contractors who use the information systems\
+        \ and services shall have successfully completed an \u2018I-awareness\u2019\
+        \ training course within three months after their appointment."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Alle medewerkers en contractanten die gebruikmaken van de informatiesystemen
+            en -diensten hebben binnen drie maanden na indiensttreding aantoonbaar
+            een training I-bewustzijn succesvol gevolgd.
+    - urn: urn:intuitem:risk:req_node:bio2:6.03.03
+      assessable: true
+      depth: 1
+      ref_id: 6.03.03
+      description: Upon appointment, internal transfer and, for example, during team
+        meetings or performance reviews, management shall emphasise to its employees
+        and contractors the importance of education and training in the field of information
+        security. Management shall actively encourage them to periodically attend
+        such training.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het management benadrukt bij aanstelling en interne overplaatsing
+            en bijvoorbeeld in werkoverleggen of in personeelsgesprekken bij zijn
+            medewerkers en contractanten het belang van opleiding en training op het
+            gebied van informatiebeveiliging. Het management stimuleert hen actief
+            deze periodiek te volgen.
+    - urn: urn:intuitem:risk:req_node:bio2:6.08.01
+      assessable: true
+      depth: 1
+      ref_id: 6.08.01
+      description: All internal and external employees shall have demonstrably taken
+        note of the notification procedure for information security incidents.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Alle medewerkers (intern en extern) hebben aantoonbaar kennisgenomen
+            van de meldingsprocedure van informatiebeveiligingsincidenten.
+    - urn: urn:intuitem:risk:req_node:bio2:7.01.01
+      assessable: true
+      depth: 1
+      ref_id: 7.01.01
+      description: Secure zones shall be set up based on standards.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er wordt voor het inrichten van beveiligde zones gebruik gemaakt
+            van standaarden.
+    - urn: urn:intuitem:risk:req_node:bio2:7.01.02
+      assessable: true
+      depth: 1
+      ref_id: 7.01.02
+      description: Critical information or information systems shall never be accessible
+        via a single secure zone.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Kritieke informatie of informatiesystemen zijn nooit via \xE9\
+            \xE9n beveiligde zone te bereiken."
+    - urn: urn:intuitem:risk:req_node:bio2:7.02.01
+      assessable: true
+      depth: 1
+      ref_id: 7.02.01
+      description: "In the event of specific security risks, warnings shall be sent,\
+        \ in accordance with mutual agreements, to the relevant colleagues within\
+        \ the government\u2019s security domain."
+      implementation_groups:
+      - "Ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "In geval van concrete beveiligingsrisico\u2019s worden waarschuwingen,\
+            \ volgens onderlinge afspraken, verzonden aan de relevante collega\u2019\
+            s binnen het beveiligingsdomein van de overheid."
+    - urn: urn:intuitem:risk:req_node:bio2:7.07.01
+      assessable: true
+      depth: 1
+      ref_id: 7.07.01
+      description: When a chip card token is used for access to systems, the access
+        security lock shall be automatically activated upon removal of the token.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Bij het gebruik van een chipcardtoken voor toegang tot systemen
+            wordt bij het verwijderen van het token de toegangsbeveiligingsvergrendeling
+            automatisch geactiveerd.
+    - urn: urn:intuitem:risk:req_node:bio2:7.10.01
+      assessable: true
+      depth: 1
+      ref_id: 7.10.01
+      description: A deletion instruction shall be in place pursuant to which any
+        business-sensitive content on removable media that are reusable and leave
+        the organisation shall have been irretrievably deleted.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Er is een verwijderinstructie waarin is opgenomen dat van verwijderbare
+            media die herbruikbaar zijn en die de organisatie verlaten, de bedrijfsgevoelige
+            inhoud onherstelbaar verwijderd is.
+    - urn: urn:intuitem:risk:req_node:bio2:7.10.02
+      assessable: true
+      depth: 1
+      ref_id: 7.10.02
+      description: "For the purpose of erasing all data on the medium, data shall\
+        \ be irretrievably deleted or made inaccessible.\nA check shall be carried\
+        \ out to ensure that all data has been irretrievably deleted.\nA report shall\
+        \ be made of this. \nPreferably, products shall be used for which the Resilience\
+        \ Unit of the National Communications Security Agency (NBV) has issued a positive\
+        \ deployment recommendation."
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: 'Voor het wissen van alle data op het medium, wordt data onherstelbaar
+            verwijderd of onbeschikbaar gemaakt.
+
+            Er wordt gecontroleerd of alle data onherstelbaar verwijderd is.
+
+            Hiervan wordt verslag gemaakt.
+
+            Er wordt bij voorkeur gebruik gemaakt van producten waarvoor de Unit Weerbaarheid
+            van het Nationaal Bureau voor Verbindingsbeveiliging (NBV) een positief
+            inzetadvies afgegeven heeft.'
+    - urn: urn:intuitem:risk:req_node:bio2:7.10.03
+      assessable: true
+      depth: 1
+      ref_id: 7.10.03
+      description: The use of couriers or forwarders for the transport of classified
+        information shall meet predefined reliability requirements.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Het gebruik van koeriers of transporteurs voor transport van
+            geclassificeerde informatie voldoet aan vooraf opgestelde betrouwbaarheidseisen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.01.01
+      assessable: true
+      depth: 1
+      ref_id: 8.01.01
+      description: "Mobile equipment shall be set up in such a way that business information\
+        \ is not stored on user devices as standard (\u2018zero footprint\u2019).\
+        \ If a (near) zero footprint is not (yet) achievable, a mobile device (such\
+        \ as a laptop, tablet or smartphone) shall provide the option to protect access\
+        \ with an access security mechanism that includes, at a minimum, data encryption.\n\
+        Mobile equipment shall include \u2018remote deletion\u2019 functionality."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Mobiele apparatuur is zo ingericht dat bedrijfsinformatie\
+            \ niet standaard op het gebruikersdevice wordt opgeslagen (\u2018zero\
+            \ footprint\u2019). Als (near) zero footprint (nog) niet realiseerbaar\
+            \ is, biedt een mobiel apparaat (zoals een laptop, tablet en smartphone)\
+            \ de mogelijkheid om de toegang te beschermen met een toegangsbeveiligingsmechanisme\
+            \ met minimaal versleuteling van de gegevens.\nOp mobiele apparatuur moet\
+            \ \u2018wissen op afstand\u2019 mogelijk zijn."
+    - urn: urn:intuitem:risk:req_node:bio2:8.01.02
+      assessable: true
+      depth: 1
+      ref_id: 8.01.02
+      description: "When mobile equipment is used, the following implementations shall\
+        \ have been effected, at a minimum:\n\u2212 Awareness-building programmes\
+        \ address behavioural aspects of safe mobile working.\n\u2212 The device is\
+        \ subject to patch management and hardening.\n\u2212 Mobile Device Management\
+        \ (MDM) or Mobile Application Management (MAM) solutions are used.\n\u2212\
+        \ Users sign a mobile working agreement. By doing so, they acknowledge that\
+        \ they are aware of the risks of mobile working and declare that they will\
+        \ do so safely. This acknowledgement applies to all mobile devices that the\
+        \ employee uses for business purposes.\nCompliance with the provisions in\
+        \ sections 1., 2. and 3. shall be checked periodically."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Bij de inzet van mobiele apparatuur zijn minimaal de volgende\
+            \ aspecten ge\xEFmplementeerd:\n- In bewustwordingsprogramma\u2019s komen\
+            \ gedragsaspecten van veilig mobiel werken aan de orde.\n- Het apparaat\
+            \ maakt deel uit van patchmanagement en hardening.\n- Er wordt gebruik\
+            \ gemaakt van Mobile Device Management (MDM)- of Mobile Application Management\
+            \ (MAM)-oplossingen.\n- Gebruikers tekenen een gebruikersovereenkomst\
+            \ voor mobiel werken, waarmee zij verklaren zich bewust te zijn van de\
+            \ gevaren van mobiel werken en verklaren dit veilig te zullen doen. Deze\
+            \ verklaring heeft betrekking op alle mobiele apparatuur die de medewerker\
+            \ zakelijk gebruikt.\nPeriodiek wordt getoetst of de punten in lid 1.,\
+            \ 2. en 3. worden nageleefd."
+    - urn: urn:intuitem:risk:req_node:bio2:8.02.01
+      assessable: true
+      depth: 1
+      ref_id: 8.02.01
+      description: The assigned or exercised special privileges shall be assessed
+        at least on a quarterly basis in terms of their set-up, existence and operation.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De toegewezen of gebruikte speciale bevoegdheden worden in
+            opzet, bestaan en werking minimaal ieder kwartaal beoordeeld.
+    - urn: urn:intuitem:risk:req_node:bio2:8.03.01
+      assessable: true
+      depth: 1
+      ref_id: 8.03.01
+      description: Measures shall be in place to safeguard the physical and/or logical
+        isolation of information of specific importance.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er zijn maatregelen genomen die het fysiek en/of logisch isoleren
+            van informatie met specifiek belang waarborgen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.03.02
+      assessable: true
+      depth: 1
+      ref_id: 8.03.02
+      description: Users shall only be able to view and process the information of
+        specific importance they need to perform their duties.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Gebruikers kunnen alleen die informatie met specifiek belang
+            inzien en verwerken die ze nodig hebben voor de uitoefening van hun taak.
+    - urn: urn:intuitem:risk:req_node:bio2:8.05.01
+      assessable: true
+      depth: 1
+      ref_id: 8.05.01
+      description: The granting of network access to external suppliers shall be preceded
+        by a risk assessment to determine the conditions under which, and for how
+        long, the suppliers are granted access. A register shall be kept to show how
+        rights have been assigned.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Voor het verlenen van toegang tot het netwerk aan externe leveranciers
+            wordt vooraf een risicoafweging gemaakt. De risicoafweging bepaalt onder
+            welke voorwaarden en voor hoelang de leveranciers toegang krijgen. Uit
+            een registratie blijkt hoe de rechten zijn toegekend.
+    - urn: urn:intuitem:risk:req_node:bio2:8.07.01
+      assessable: true
+      depth: 1
+      ref_id: 8.07.01
+      description: 'The downloading of files shall be controlled and restricted based
+        on risk and need-to-use.
+
+        The antimalware software shall always screen all downloads.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Het downloaden van bestanden is beheerst en beperkt op basis
+            van het risico en need-of-use.
+
+            De antimalware-software moet altijd alle downloads beoordelen.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.07.02
+      assessable: true
+      depth: 1
+      ref_id: 8.07.02
+      description: Users shall have been informed about the risk of surfing behaviour
+        and of clicking unknown links.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Gebruikers zijn voorgelicht over de risico\u2019s van surfgedrag\
+            \ en het klikken op onbekende links."
+    - urn: urn:intuitem:risk:req_node:bio2:8.07.03
+      assessable: true
+      depth: 1
+      ref_id: 8.07.03
+      description: The antimalware software and associated recovery software shall
+        be up to date and supported by periodic updates.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De gebruikte antimalware-software en bijbehorende herstelsoftware
+            zijn actueel en wordt ondersteund door periodieke updates.
+    - urn: urn:intuitem:risk:req_node:bio2:8.07.04
+      assessable: true
+      depth: 1
+      ref_id: 8.07.04
+      description: "The malware scan shall be performed on:\n\u2212 all environments,\
+        \ such as (mail) servers, (desktop) computers and when granting access to\
+        \ the organisation\u2019s network;\n\u2212 all downloaded content prior to\
+        \ execution or storage;\n\u2212 all files received via networks or any form\
+        \ of storage medium, before use or storage within the organisation\u2019s\
+        \ own environment."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "De malwarescan wordt uitgevoerd op:\n- alle omgevingen, bijvoorbeeld\
+            \ op (mail)servers, (desktop)computers en bij de toegangsverlening tot\
+            \ het netwerk van de organisatie;\n- alle gedownloade content voorafgaand\
+            \ aan executie of opslag;\n- alle bestanden die via netwerken of via elke\
+            \ vorm van opslagmedium zijn ontvangen, v\xF3\xF3r gebruik of opslag in\
+            \ de eigen omgeving."
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.01
+      assessable: true
+      depth: 1
+      ref_id: 8.08.01
+      description: If both the likelihood of misuse and the expected damage are high
+        (for example, according to the NCSC Escalation Matrix for Security Advice
+        or supplier security recommendations), appropriate mitigating measures shall
+        be implemented as quickly as possible, but no later than within one week.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Als de kans op misbruik en de verwachte schade beide hoog zijn
+            (bijvoorbeeld met de NCSC-Inschalingsmatrix beveiligingsadviezen of leveranciersbeveiligingsadviezen),
+            worden passende mitigerende maatregelen zo snel mogelijk, maar uiterlijk
+            binnen een week getroffen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.02
+      assessable: true
+      depth: 1
+      ref_id: 8.08.02
+      description: How mitigating measures will be implemented shall be based on an
+        explicit risk assessment.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Op basis van een expliciete risicoafweging wordt bepaald op
+            welke wijze mitigerende maatregelen getroffen worden.
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.03
+      assessable: true
+      depth: 1
+      ref_id: 8.08.03
+      description: In the meantime, or if installation cannot be realised within a
+        week, mitigating measures shall be taken on the basis of an explicit risk
+        assessment.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: In de tussentijd of als installatie binnen een week niet mogelijk
+            is, worden op basis van een expliciete risicoafweging mitigerende maatregelen
+            getroffen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.04
+      assessable: true
+      depth: 1
+      ref_id: 8.08.04
+      description: Information systems shall preferably undergo annual tests for technical
+        compliance with security standards and actual safety risks, for example by
+        means of (automated) vulnerability analyses, penetration tests or red-teaming
+        tests. Internet-facing information systems shall be tested, preferably continuously,
+        for weaknesses and vulnerabilities.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Informatiesystemen worden bij voorkeur jaarlijks gecontroleerd\
+            \ op technische naleving van beveiligingsnormen en risico\u2019s van de\
+            \ feitelijke veiligheid. Dit kan bijvoorbeeld door (geautomatiseerde)\
+            \ kwetsbaarheidsanalyses, penetratietesten of red-teamingstesten. Internetfacing-informatiesystemen\
+            \ worden bij voorkeur continue getest op zwakheden en kwetsbaarheden."
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.05
+      assessable: true
+      depth: 1
+      ref_id: 8.08.05
+      description: 'Internet-facing information systems shall undergo a mandatory
+        (preferably automated) penetration test upon every new release or major update.
+
+        If those tests identify any high-risk issues that cannot be mitigated in any
+        other way, the system shall not be allowed to be taken into operation.
+
+        All Internet-facing information systems shall be tested at least once a year
+        for weaknesses and vulnerabilities.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Internetfacing-informatiesystemen hebben een verplichte (bij
+            voorkeur geautomatiseerde) penetratietest bij iedere nieuwe release of
+            major update.
+
+            Als daar bevindingen met een hoog risico uitkomen die niet op een andere
+            manier gemitigeerd kunnen worden, mag het systeem niet in productie.
+
+            Alle internetfacing-informatiesystemen worden minimaal jaarlijks getest
+            op zwakheden en kwetsbaarheden.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.08.06
+      assessable: true
+      depth: 1
+      ref_id: 8.08.06
+      description: 'A Coordinated Vulnerability Disclosure (CVD) procedure shall be
+        designed and published in accordance with the NCSC guideline or NEN-EN-ISO/IEC
+        29147:2020 Vulnerability disclosure.
+
+        Information arising from Coordinated Vulnerability Disclosure (CVD) reports
+        shall be included in the incident report.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Een Coordinated Vulnerability Disclosure (CVD)-procedure is
+            ingericht en gepubliceerd volgens de NCSC-leidraad of NEN-EN-ISO/IEC 29147:2020
+            Vulnerability disclosure.
+
+            Informatie afkomstig uit de Coordinated Vulnerability Disclosure (CVD)-meldingen
+            is onderdeel van de incidentrapportage.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.13.01
+      assessable: true
+      depth: 1
+      ref_id: 8.13.01
+      description: A backup policy shall be in place in which the requirements for
+        retention and protection are defined and established. This shall include a
+        special focus on protecting the back-up against ransomware attacks and on
+        measures taken to preserve the integrity of the back-up.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Er is een back-upbeleid waarin de eisen voor het bewaren en
+            beschermen zijn gedefinieerd en vastgesteld. Er moet speciale aandacht
+            zijn voor het beschermen van de back-up tegen ransomware-aanvallen en
+            genomen maatregelen om de integriteit van de back-up te behouden.
+    - urn: urn:intuitem:risk:req_node:bio2:8.13.02
+      assessable: true
+      depth: 1
+      ref_id: 8.13.02
+      description: The maximum permissible data loss and the maximum recovery time
+        following an incident shall have been determined based on an explicit risk
+        assessment.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Op basis van een expliciete risicoafweging is bepaald wat het
+            maximaal toegestane dataverlies is en wat de maximale hersteltijd is na
+            een incident.
+    - urn: urn:intuitem:risk:req_node:bio2:8.13.03
+      assessable: true
+      depth: 1
+      ref_id: 8.13.03
+      description: The back-up process shall provide for the location-based storage
+        of the back-up in such a way that an incident at one location cannot result
+        in damage at another location.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Het back-upproces voorziet in de opslag van de back-up op een
+            locatie, waarbij een incident op de ene locatie niet kan leiden tot schade
+            op de andere.
+    - urn: urn:intuitem:risk:req_node:bio2:8.13.04
+      assessable: true
+      depth: 1
+      ref_id: 8.13.04
+      description: The recovery procedure shall be tested at least annually or following
+        a major change, to ensure its proper functioning in case of an emergency.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: De herstelprocedure wordt minimaal jaarlijks getest of na een
+            grote wijziging, om de goede werking te waarborgen als deze in noodgevallen
+            uitgevoerd moet worden.
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.01
+      assessable: true
+      depth: 1
+      ref_id: 8.15.01
+      description: "A log entry shall contain at a minimum:\n\u2212 Action: the event\
+        \ or operation that occurred.\n\u2212 Object: the item affected by the event\
+        \ or operation (for example, which file, process, or system).\n\u2212 Result:\
+        \ the result of the event or operation.\n\u2212 Origin: the device or network\
+        \ location from where the event or operation originated.\n\u2212 Actor: identification\
+        \ of the person who or the process that made the event happen.\n\u2212 Time\
+        \ stamp: the date and time at which the event or operation took place."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Een logregel bevat minimaal:
+
+            - Actie: de gebeurtenis of handeling die heeft plaatsgevonden.
+
+            - Object: waarop de gebeurtenis of handeling effect had (bijvoorbeeld
+            welk bestand, proces of systeem).
+
+            - Resultaat: het resultaat van de gebeurtenis of handeling.
+
+            - Oorsprong: het apparaat of de netwerklocatie van waaruit de gebeurtenis
+            of handeling in gang is gezet.
+
+            - Actor: identificatie van de persoon die of het proces dat de gebeurtenis
+            in gang heeft gezet.
+
+            - Tijdstempel: datum en tijdstip waarop de gebeurtenis of handeling plaatsvond.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.02
+      assessable: true
+      depth: 1
+      ref_id: 8.15.02
+      description: A log entry shall never contain data that could lead to a security
+        breach.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Een logregel bevat nooit gegevens die tot het doorbreken van
+            de beveiliging kunnen leiden.
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.03
+      assessable: true
+      depth: 1
+      ref_id: 8.15.03
+      description: There shall be a list of log files that are generated.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Er is een overzicht van logbestanden die worden gegenereerd.
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.04
+      assessable: true
+      depth: 1
+      ref_id: 8.15.04
+      description: The retention period of log files and data in the Security Incident
+        and Event Monitoring (SIEM) system shall be determined on the basis of risk,
+        taking into account scenarios in which attackers remain undetected for an
+        extended period.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De bewaartermijn van logbestanden en gegevens in het Security
+            Incident en Event Monitoring (SIEM) worden risicogericht bepaald, rekening
+            houdend met het scenario dat aanvallers langdurig binnen zijn.
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.05
+      assessable: true
+      depth: 1
+      ref_id: 8.15.05
+      description: Improper modification or deletion (or attempts thereof) of log
+        data shall be reported as an information security incident as quickly as possible,
+        following the information security incident procedure in accordance with control
+        measure 5.24.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Oneigenlijk wijzigen, verwijderen of pogingen daartoe van loggegevens
+            worden zo snel mogelijk gemeld als informatiebeveiligingsincident via
+            de procedure voor informatiebeveiligingsincidenten volgens beheersmaatregel
+            5.24.
+    - urn: urn:intuitem:risk:req_node:bio2:8.15.06
+      assessable: true
+      depth: 1
+      ref_id: 8.15.06
+      description: 'Based on an explicit risk assessment, the organisation shall determine
+        the periodic verification of the integrity of log files throughout the retention
+        period.
+
+        The verification shall be carried out by an independent official (separate
+        from operations).'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Op basis van een expliciete risicoafweging bepaalt de organisatie
+            de periodieke toetsing op het ongewijzigd bestaan van logbestanden gedurende
+            de bewaartermijn.
+
+            Toetsing wordt uitgevoerd door een onafhankelijke functionaris (ten opzichte
+            van de uitvoering).'
+    - urn: urn:intuitem:risk:req_node:bio2:8.16.01
+      assessable: true
+      depth: 1
+      ref_id: 8.16.01
+      description: Any new threats (attacks) discovered under government measure 8.16.3
+        shall be shared with the designated Computer Emergency Response Team (CERT)
+        within the applicable legal framework.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - overheidsrisico
+      translations:
+        nl:
+          description: Bij ontdekte nieuwe dreigingen (aanvallen) via overheidsmaatregel
+            8.16.3 worden deze binnen geldende juridische kaders verplicht gedeeld
+            met de daarvoor aangewezen Computer Emergency Response Team (CERT).
+    - urn: urn:intuitem:risk:req_node:bio2:8.16.02
+      assessable: true
+      depth: 1
+      ref_id: 8.16.02
+      description: The SIEM and/or SOC monitoring processes shall include clear rules
+        about when to report an incident to the managers responsible.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het SIEM- en/of het SOC-monitoring-proces hebben eenduidige
+            regels over wanneer een incident moet worden gerapporteerd aan het verantwoordelijke
+            management.
+    - urn: urn:intuitem:risk:req_node:bio2:8.16.03
+      assessable: true
+      depth: 1
+      ref_id: 8.16.03
+      description: The information processing environment shall be monitored using
+        a detection and response solution that enables detection of attacks and an
+        effective and timely response to any anomalous event.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: De informatieverwerkende omgeving wordt gemonitord met een
+            detectie- en response-oplossing, waarmee aanvallen kunnen worden gedetecteerd
+            en afwijkingen adequaat en tijdig worden behandeld.
+    - urn: urn:intuitem:risk:req_node:bio2:8.16.04
+      assessable: true
+      depth: 1
+      ref_id: 8.16.04
+      description: Active network components shall include logging (and log monitoring)
+        functionality in order to detect and respond to anomalous events.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Actieve netwerkcomponenten zijn voorzien van logging en monitoring
+            van die logging om afwijkende gebeurtenissen te kunnen waarnemen en daarop
+            te reageren.
+    - urn: urn:intuitem:risk:req_node:bio2:8.18.01
+      assessable: true
+      depth: 1
+      ref_id: 8.18.01
+      description: Access to system utilities shall be restricted to authorised staff
+        members, who shall only have access when strictly necessary.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Alleen bevoegd personeel heeft op die momenten dat toegang
+            strikt noodzakelijk is toegang tot systeemhulpmiddelen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.18.02
+      assessable: true
+      depth: 1
+      ref_id: 8.18.02
+      description: 'The use of system utilities shall be logged.
+
+        The logging data shall remain available for investigation for six months.'
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: 'Het gebruik van systeemhulpmiddelen wordt gelogd.
+
+            De logging is een halfjaar beschikbaar voor onderzoek.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.19.01
+      assessable: true
+      depth: 1
+      ref_id: 8.19.01
+      description: Controls must be in place to prevent users from installing non-authorised
+        software.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Het risico van installatie door gebruikers van niet geautoriseerde
+            software moet worden beheerst.
+    - urn: urn:intuitem:risk:req_node:bio2:8.20.01
+      assessable: true
+      depth: 1
+      ref_id: 8.20.01
+      description: At a minimum, network components shall comply with the confidentiality
+        level of the network of which they form part.
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Netwerkcomponenten moeten minimaal voldoen aan het vertrouwelijkheidsniveau
+            van het netwerk waarvan ze onderdeel zijn.
+    - urn: urn:intuitem:risk:req_node:bio2:8.20.02
+      assessable: true
+      depth: 1
+      ref_id: 8.20.02
+      description: Access to management interfaces of network components shall be
+        separated from the user network (as far as possible and in a risk-based manner).
+      implementation_groups:
+      - Overheidsrisico
+      translations:
+        nl:
+          description: Toegang tot beheerinterfaces van netwerkcomponenten moet (zo
+            veel als mogelijk en risicogericht) gescheiden zijn van het gebruikersnetwerk.
+    - urn: urn:intuitem:risk:req_node:bio2:8.21.01
+      assessable: true
+      depth: 1
+      ref_id: 8.21.01
+      description: At connection points with external or untrusted zones, and due
+        to network segmentation, measures shall have been implemented to detect and
+        mitigate possible attacks that could adversely affect the availability of
+        information, such as DDoS (Distributed Denial of Service) attacks.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "In koppelpunten met externe of onvertrouwde zones en vanwege\
+            \ netwerksegmentatie zijn maatregelen getroffen om mogelijke aanvallen\
+            \ die de beschikbaarheid van de informatievoorziening negatief be\xEF\
+            nvloeden (bijvoorbeeld DDoS-aanvallen, Distributed Denial of Service attacks)\
+            \ te signaleren en te mitigeren."
+    - urn: urn:intuitem:risk:req_node:bio2:8.21.02
+      assessable: true
+      depth: 1
+      ref_id: 8.21.02
+      description: Detection tools shall be in place to monitor/analyse data traffic
+        to and from the trusted environment for the presence of any suspicious traffic.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Het dataverkeer van of naar de vertrouwde omgeving, wordt bewaakt/geanalyseerd
+            op verdacht verkeer met detectievoorzieningen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.21.03
+      assessable: true
+      depth: 1
+      ref_id: 8.21.03
+      description: Any new threats identified under government measure 8.21.02 shall
+        be passed on and shared within the government, with due regard for the applicable
+        legal frameworks.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Bij ontdekte nieuwe dreigingen vanuit overheidsmaatregel 8.21.02
+            worden deze doorgeleid, rekening houdend met de geldende juridische kaders
+            gedeeld binnen de overheid.
+    - urn: urn:intuitem:risk:req_node:bio2:8.21.04
+      assessable: true
+      depth: 1
+      ref_id: 8.21.04
+      description: 'When data are transmitted over wireless connections such as Wi-Fi
+        and over wired connections outside the controlled area, the data shall be
+        encrypted, with the exception of metadata that are necessary to establish
+        the transmission.
+
+        The configuration of the encryption shall be risk-based and shall take into
+        account the required duration and level of protection.
+
+        Preferably, encryption tools shall be used for which the Resilience Unit of
+        the General Intelligence and Security Service (AIVD) has issued a positive
+        deployment recommendation.
+
+        If the Resilience Unit does not have any recommended encryption tools, a different
+        encryption method shall be selected and set up in consultation with the CISO.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Bij transport van gegevens over draadloze verbindingen zoals
+            wifi en bij bedrade verbindingen buiten het gecontroleerd gebied worden
+            de gegevens versleuteld met uitzondering van metagegevens die noodzakelijk
+            zijn om het transport tot stand te laten komen.
+
+            De inrichting van de versleuteling is risicogericht en houdt rekening
+            met de noodzakelijke beschermingstermijn en -niveau.
+
+            Hierbij wordt bij voorkeur gebruik gemaakt van encryptiemiddelen waarvoor
+            de Unit Weerbaarheid van de Algemene Inlichtingen en Veiligheidsdienst
+            (AIVD) een positief inzetadvies heeft afgegeven.
+
+            Heeft de Unit Weerbaarheid geen geadviseerde encryptiemiddelen, wordt
+            in overleg met de CISO een andere geschikte versleutelingsmethodiek gekozen
+            en ingericht.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.22.01
+      assessable: true
+      depth: 1
+      ref_id: 8.22.01
+      description: Each segregated group shall have its own security level.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Alle gescheiden groepen hebben een gedefinieerd beveiligingsniveau.
+    - urn: urn:intuitem:risk:req_node:bio2:8.24.01
+      assessable: true
+      depth: 1
+      ref_id: 8.24.01
+      description: "The cryptography policy shall cover at least the following topics:\n\
+        \u2212 when cryptography is used;\n\u2212 who is responsible for implementation;\n\
+        \u2212 who is responsible for key management;\n\u2212 how it is recorded which\
+        \ cryptography is applied, and where;\n\u2212 which standards serve as the\
+        \ basis for cryptography and how the standards of the Netherlands Standardisation\
+        \ Forum are applied;\n\u2212 how the level of protection is established.\n\
+        \u2212 In communication between organisations, the policy shall be determined\
+        \ in mutual consultation."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "In het cryptografiebeleid zijn minimaal de volgende onderwerpen\
+            \ uitgewerkt: \n- Wanneer cryptografie ingezet wordt.\n- Wie verantwoordelijk\
+            \ is voor de implementatie.\n- Wie verantwoordelijk is voor het sleutelbeheer.\n\
+            - Hoe geregistreerd wordt waar welke cryptografie toegepast wordt.\n-\
+            \ Welke normen als basis dienen voor cryptografie en de wijze waarop de\
+            \ normen van het Forum Standaardisatie worden toegepast.\n- De wijze waarop\
+            \ het beschermingsniveau vastgesteld wordt.\n- Bij communicatie tussen\
+            \ organisaties wordt het beleid onderling vastgesteld."
+    - urn: urn:intuitem:risk:req_node:bio2:8.24.02
+      assessable: true
+      depth: 1
+      ref_id: 8.24.02
+      description: 'Cryptographic control measures shall be included in the inventory
+        of business assets.
+
+        For all cryptographic control measures it shall be established where they
+        are used, who is responsible for them and how they are kept up to date.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: 'Cryptografische beheersmaatregelen zijn opgenomen in de inventaris
+            van de bedrijfsmiddelen.
+
+            Voor alle cryptografische beheersmaatregelen is vastgesteld waar ze worden
+            ingezet, wie er voor verantwoordelijk is en hoe ze actueel worden gehouden.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.24.03
+      assessable: true
+      depth: 1
+      ref_id: 8.24.03
+      description: Cryptographic control measures shall comply with the relevant standards
+        of the Netherlands Standardisation Forum.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Cryptografische toepassingen voldoen aan passende standaarden
+            van het Forum Standaardisatie.
+    - urn: urn:intuitem:risk:req_node:bio2:8.24.04
+      assessable: true
+      depth: 1
+      ref_id: 8.24.04
+      description: The strength of the cryptography shall be based on the current
+        recommendations of the NCSC and the AIVD Resilience Unit.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: De sterkte van de cryptografie wordt gebaseerd op de actuele
+            adviezen van het NCSC en de Unit Weerbaarheid van de AIVD.
+    - urn: urn:intuitem:risk:req_node:bio2:8.24.05
+      assessable: true
+      depth: 1
+      ref_id: 8.24.05
+      description: There shall be (contractual) agreements on backup certificates
+        from an alternative supplier if the risk assessment shows that these are necessary
+        as part of business continuity readiness (control measure 5.30).
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: "Er zijn (contractuele) afspraken over reservecertificaten\
+            \ van een alternatieve leverancier als uit de risicoafweging blijkt dat\
+            \ deze noodzakelijk zijn als onderdeel van gereedheid voor bedrijfscontinu\xEF\
+            teit (beheersmaatregel 5.30)."
+    - urn: urn:intuitem:risk:req_node:bio2:8.27.01
+      assessable: true
+      depth: 1
+      ref_id: 8.27.01
+      description: "Architectural principles such as \u2018security by design\u2019\
+        \ and \u2018security by default\u2019 for the security design of information\
+        \ systems shall be adopted, documented, maintained and applied for all activities\
+        \ involved in the development of information systems."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: "Architectuurprincipes zoals \u2018security by design\u2019\
+            \ en \u2018security by default\u2019 voor het ontwerpen van beveiliging\
+            \ van informatiesystemen worden vastgesteld, gedocumenteerd, onderhouden\
+            \ en toegepast voor alle activiteiten over het ontwikkelen van informatiesystemen."
+    - urn: urn:intuitem:risk:req_node:bio2:8.29.01
+      assessable: true
+      depth: 1
+      ref_id: 8.29.01
+      description: 'Structured test methodologies shall be used for system acceptance
+        testing. The tests shall preferably be carried out in an automated manner.
+
+        The results of the tests shall be included in a report.'
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'Voor acceptatietesten van systemen worden gestructureerde
+            testmethodieken gebruikt. De testen worden bij voorkeur geautomatiseerd
+            uitgevoerd.
+
+            Van de resultaten van de testen wordt verslag gemaakt.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.30.01
+      assessable: true
+      depth: 1
+      ref_id: 8.30.01
+      description: Internal measures for system development shall apply in full to
+        outsourced development, supplemented with the measures arising from outsourcing.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      - "ketenhygi\xEBne"
+      translations:
+        nl:
+          description: Interne maatregelen voor systeemontwikkeling zijn onverkort
+            van toepassing op uitbestede ontwikkeling, aangevuld met maatregelen die
+            volgen vanuit uitbestedingen.
+    - urn: urn:intuitem:risk:req_node:bio2:8.31.01
+      assessable: true
+      depth: 1
+      ref_id: 8.31.01
+      description: No tests shall be carried out in the production environment. Departures
+        from this rule shall be permitted only with the prior approval of the process
+        owner.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: In de productieomgeving wordt niet getest. Alleen met voorafgaande
+            goedkeuring door de proceseigenaar kan hiervan worden afgeweken.
+    - urn: urn:intuitem:risk:req_node:bio2:8.31.02
+      assessable: true
+      depth: 1
+      ref_id: 8.31.02
+      description: Significant changes in the production environment shall always
+        be tested before being put into production. Departures from this rule shall
+        be permitted only with the prior approval of the process owner.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Significante wijzigingen in de productieomgeving worden altijd
+            getest voordat zij in productie gebracht worden. Alleen met voorafgaande
+            goedkeuring door de proceseigenaar kan hiervan worden afgeweken.
+    - urn: urn:intuitem:risk:req_node:bio2:8.32.01
+      assessable: true
+      depth: 1
+      ref_id: 8.32.01
+      description: "At a minimum, the change management process shall focus on:\n\u2212\
+        \ the administration of changes, including the results of the test plan;\n\
+        \u2212 a risk assessment of the potential consequences of the changes, including\
+        \ a written roll-back plan;\n\u2212 the approval procedure for changes."
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: 'In het wijzigingsbeheerproces is minimaal aandacht besteed
+            aan:
+
+            - het administreren van wijzigingen, met de resultaten van het testplan;
+
+            - een risicoafweging van mogelijke gevolgen van de wijzigingen, inclusief
+            een beschreven rollbackplan;
+
+            - de goedkeuringsprocedure voor wijzigingen.'
+    - urn: urn:intuitem:risk:req_node:bio2:8.32.02
+      assessable: true
+      depth: 1
+      ref_id: 8.32.02
+      description: Change management shall be conducted on the basis of a generally
+        accepted management framework.
+      implementation_groups:
+      - "Basishygi\xEBne"
+      translations:
+        nl:
+          description: Wijzigingsbeheer vindt plaats op basis van een algemeen geaccepteerd
+            beheerraamwerk.

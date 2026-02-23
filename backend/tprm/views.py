@@ -1,3 +1,4 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
@@ -11,6 +12,7 @@ from rest_framework.response import Response
 
 from django.utils.formats import date_format
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.db.models import Sum, F, FloatField, Case, When, Value
 from django.db.models.functions import Cast, Greatest, Coalesce, Round
 
@@ -33,6 +35,7 @@ from core.dora import (
 
 import csv
 import io
+import uuid
 import zipfile
 from datetime import datetime
 
@@ -592,13 +595,13 @@ class EntityViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the entities text
             lines = [line.strip() for line in entities_text.split("\n") if line.strip()]
@@ -623,7 +626,7 @@ class EntityViewSet(BaseModelViewSet):
 
                 # Check if entity already exists in the folder
                 existing_entity = Entity.objects.filter(
-                    name=entity_name, folder=folder_id
+                    name=entity_name, folder=folder
                 ).first()
 
                 if existing_entity:
@@ -640,7 +643,7 @@ class EntityViewSet(BaseModelViewSet):
                 # Create new entity using the serializer to respect IAM
                 entity_data = {
                     "name": entity_name,
-                    "folder": folder_id,
+                    "folder": str(folder.id),
                 }
 
                 if ref_id:
@@ -651,7 +654,13 @@ class EntityViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    entity = serializer.save()
+                    try:
+                        entity = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_entities.append(
                         {
@@ -743,10 +752,16 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             object_type=EntityAssessment,
         )
 
-        for ea in EntityAssessment.objects.filter(id__in=viewable_items):
+        for ea in EntityAssessment.objects.filter(id__in=viewable_items).select_related(
+            "folder", "entity"
+        ):
+            # Use entity assessment's folder for grouping
+            folder = ea.folder
             entry = {
                 "entity_assessment_id": ea.id,
                 "provider": ea.entity.name,
+                "folder_id": str(folder.id) if folder else None,
+                "folder_name": folder.name if folder else None,
                 "solutions": ",".join([sol.name for sol in ea.solutions.all()])
                 if len(ea.solutions.all()) > 0
                 else "-",
@@ -761,7 +776,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment_id": ea.compliance_assessment.id
                 if ea.compliance_assessment
                 else "#",
-                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
@@ -778,9 +793,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
             entry.update({"completion": completion})
 
             review_progress = (
-                ea.compliance_assessment.get_progress()
-                if ea.compliance_assessment
-                else 0
+                ea.compliance_assessment.progress if ea.compliance_assessment else 0
             )
             entry.update({"review_progress": review_progress})
             assessments_data.append(entry)
@@ -792,13 +805,6 @@ class RepresentativeViewSet(BaseModelViewSet):
     """
     API endpoint that allows representatives to be viewed or edited.
     """
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.user:
-            instance.user.delete()
-
-        return super().destroy(request, *args, **kwargs)
 
     model = Representative
     filterset_fields = ["entity", "ref_id", "filtering_labels"]

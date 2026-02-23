@@ -16,6 +16,7 @@
 		type ModalStore
 	} from '$lib/components/Modals/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -180,10 +181,18 @@
 					<i class="fa-solid fa-user text-purple-500"></i>
 					<span>{m.authors()}</span>
 				</h3>
+				{#if ebiosRmStudy.authors && countMasked(ebiosRmStudy.authors) > 0}
+					<div class="alert text-yellow-700 mb-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span>{m.objectsNotVisible({ count: countMasked(ebiosRmStudy.authors) })}</span>
+					</div>
+				{/if}
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.authors?.length}
 						{#each ebiosRmStudy.authors as author}
-							<li><Anchor class="anchor" href="/users/{author.id}">{author.str}</Anchor></li>
+							{#if author.id && author.str}
+								<li><Anchor class="anchor" href="/users/{author.id}">{author.str}</Anchor></li>
+							{/if}
 						{/each}
 					{:else}
 						<li>{m.noAuthor()}</li>
@@ -195,10 +204,18 @@
 					<i class="fa-solid fa-users text-blue-500"></i>
 					<span>{m.reviewers()}</span>
 				</h3>
+				{#if ebiosRmStudy.reviewers && countMasked(ebiosRmStudy.reviewers) > 0}
+					<div class="alert text-yellow-700 mb-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span>{m.objectsNotVisible({ count: countMasked(ebiosRmStudy.reviewers) })}</span>
+					</div>
+				{/if}
 				<ul class="list-disc list-inside text-gray-600">
 					{#if ebiosRmStudy.reviewers?.length}
 						{#each ebiosRmStudy.reviewers as reviewer}
-							<li><Anchor class="anchor" href="/users/{reviewer.id}">{reviewer.str}</Anchor></li>
+							{#if reviewer.id && reviewer.str}
+								<li><Anchor class="anchor" href="/users/{reviewer.id}">{reviewer.str}</Anchor></li>
+							{/if}
 						{/each}
 					{:else}
 						<li>{m.noReviewer()}</li>
@@ -240,11 +257,7 @@
 						{#snippet content()}
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
 								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
+									<div class="py-2"></div>
 									{#if model.table}
 										<ModelTable
 											source={model.table}

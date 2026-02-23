@@ -1,5 +1,6 @@
 import hashlib
 from enum import Enum
+
 import json
 from re import sub
 from typing import Literal
@@ -12,6 +13,7 @@ from rest_framework.exceptions import ValidationError
 import structlog
 import calendar
 from dateutil import relativedelta as rd
+from uuid import UUID
 
 logger = structlog.get_logger(__name__)
 
@@ -48,6 +50,7 @@ class RoleCodename(Enum):
     APPROVER = "BI-RL-APP"
     READER = "BI-RL-AUD"
     THIRD_PARTY_RESPONDENT = "BI-RL-TPR"
+    AUDITEE = "BI-RL-ADE"
 
     def __str__(self) -> str:
         return self.value
@@ -57,11 +60,13 @@ class UserGroupCodename(Enum):
     ADMINISTRATOR = "BI-UG-ADM"
     GLOBAL_READER = "BI-UG-GAD"
     GLOBAL_APPROVER = "BI-UG-GAP"
+    GLOBAL_AUDITEE = "BI-UG-GAE"
     DOMAIN_MANAGER = "BI-UG-DMA"
     ANALYST = "BI-UG-ANA"
     APPROVER = "BI-UG-APP"
     READER = "BI-UG-AUD"
     THIRD_PARTY_RESPONDENT = "BI-UG-TPR"
+    AUDITEE = "BI-UG-ADE"
 
     def __str__(self) -> str:
         return self.value
@@ -74,17 +79,20 @@ BUILTIN_ROLE_CODENAMES = {
     str(RoleCodename.APPROVER): _("Approver"),
     str(RoleCodename.READER): _("Reader"),
     str(RoleCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
+    str(RoleCodename.AUDITEE): _("Auditee"),
 }
 
 BUILTIN_USERGROUP_CODENAMES = {
     str(UserGroupCodename.ADMINISTRATOR): _("Administrator"),
     str(UserGroupCodename.GLOBAL_READER): _("Reader"),
     str(UserGroupCodename.GLOBAL_APPROVER): _("Approver"),
+    str(UserGroupCodename.GLOBAL_AUDITEE): _("Auditee"),
     str(UserGroupCodename.DOMAIN_MANAGER): _("Domain manager"),
     str(UserGroupCodename.ANALYST): _("Analyst"),
     str(UserGroupCodename.APPROVER): _("Approver"),
     str(UserGroupCodename.READER): _("Reader"),
     str(UserGroupCodename.THIRD_PARTY_RESPONDENT): _("Third-party respondent"),
+    str(UserGroupCodename.AUDITEE): _("Auditee"),
 }
 
 # NOTE: This is set to "Main" now, but will be changed to a unique identifier
@@ -723,3 +731,69 @@ def update_selected_implementation_groups(compliance_assessment):
 
     compliance_assessment.selected_implementation_groups = list(igs_to_select)
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
+
+
+def _resolve_auditee_role_ids():
+    """Resolve role IDs for auditee + higher roles via IAM snapshot cache."""
+    from iam.cache_builders import get_roles_state
+
+    role_id_by_name = get_roles_state().role_id_by_name
+    auditee_id = role_id_by_name.get(RoleCodename.AUDITEE.value)
+    higher_ids = frozenset(
+        role_id_by_name[rc.value]
+        for rc in (
+            RoleCodename.ANALYST,
+            RoleCodename.DOMAIN_MANAGER,
+            RoleCodename.ADMINISTRATOR,
+        )
+        if rc.value in role_id_by_name
+    )
+    return auditee_id, higher_ids
+
+
+def get_auditee_filtered_folder_ids(user) -> set:
+    """Return folder IDs where *user* holds the auditee role but NO higher role.
+
+    "Higher" means analyst, domain-manager or administrator — any role that
+    already grants full access to compliance data. For those folders the
+    normal queryset is sufficient; only the returned set needs assignment
+    filtering.
+
+    Uses the IAM snapshot caches exclusively (no extra DB queries).
+    """
+    from iam.models import _iter_assignment_lites_for_user
+    from iam.cache_builders import (
+        get_folder_state,
+        iter_descendant_ids,
+    )
+
+    auditee_role_id, higher_role_ids = _resolve_auditee_role_ids()
+    if auditee_role_id is None:
+        return set()
+
+    state = get_folder_state()
+
+    # folder_id -> set of role_ids the user has on that folder
+    folder_roles: dict[UUID, set] = {}
+
+    for a in _iter_assignment_lites_for_user(user):
+        role_id = a.role_id
+        if role_id != auditee_role_id and role_id not in higher_role_ids:
+            continue  # irrelevant role
+
+        # expand perimeter folders
+        for pf_id in a.perimeter_folder_ids:
+            if a.is_recursive:
+                target_ids = iter_descendant_ids(state, pf_id, include_start=True)
+            else:
+                target_ids = (pf_id,)
+
+            for fid in target_ids:
+                folder_roles.setdefault(fid, set()).add(role_id)
+
+    # Return only folders where user is auditee and has NO higher role
+    return {
+        fid
+        for fid, role_ids in folder_roles.items()
+        if auditee_role_id in role_ids and role_ids.isdisjoint(higher_role_ids)
+    }

@@ -73,12 +73,16 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
+	disabled={object.builtin}
 />
 {#if !object.builtin}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="terminologies?field_path=entity.relationship"
+		optionsEndpoint="terminologies"
+		optionsDetailedUrlParameters={[
+			['field_path', 'entity.relationship'],
+			['is_visible', 'true']
+		]}
 		field="relationship"
 		cacheLock={cacheLocks['relationship']}
 		bind:cachedValue={formDataCache['relationship']}

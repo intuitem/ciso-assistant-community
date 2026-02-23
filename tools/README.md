@@ -101,6 +101,28 @@ The resulting YAML file adheres to the CISO Assistant schema and can be directly
 
 When the `--compat` flag is omitted or when the compatibility mode is different from `1`, URNs for nodes without a `ref_id` are constructed using the `parent_urn`. This format is simpler to understand and maintain compared to the legacy `nodeXXX` suffix system.
 
+### > `convert_v1_to_v2.py`
+
+Usage:
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+This will modify your original file (in our case, `your_v1_library_file.xlsx`) and save the original v1 version as `your_v1_library_file_v1.xlsx.old`.
+
+## About framework Updates
+
+If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
+
+
+<details>
+<summary>[Deprecated] convert_library_v1.py</summary>
 
 ### > `convert_library_v1.py`
 
@@ -122,26 +144,7 @@ This will produce a file named `your_library_file.yaml`.
 
 The `--compat` flag is recommended only to maintain libraries that have been generated prior or up to release `1.9.20`. Without the compat flag, URNs generated for nodes without `ref_id` are constructed using the `parent_urn`. These generated URNs are much simpler to understand and maintain if required, compared to the previous system using `nodeXXX` suffix.
 
-
-### > `convert_v1_to_v2.py`
-
-Usage:
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-To launch it, open a shell in a command line, and type:
-
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-This will produce a file named `your_v1_library_file_new.yaml`.
-
-## About framework Updates
-
-If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
-
+</details>
 
 ## Format of Excel files
 

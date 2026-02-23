@@ -16,6 +16,7 @@
 	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 
 	interface Props {
 		data: PageData;
@@ -329,6 +330,7 @@
 								source={data.tables['applied-controls']}
 								hideFilters={true}
 								URLModel="applied-controls"
+								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
 								baseEndpoint="/applied-controls?requirement_assessments={page.data
 									.requirementAssessment.id}"
 							/>
@@ -345,6 +347,7 @@
 							source={data.tables['evidences']}
 							hideFilters={true}
 							URLModel="evidences"
+							expectedCount={countMasked(data.requirementAssessment.evidences)}
 							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
 						/>
 					</div>

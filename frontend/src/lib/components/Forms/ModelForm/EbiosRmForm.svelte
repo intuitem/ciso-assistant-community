@@ -76,13 +76,12 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO"
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
-		hidden={initialData.folder}
 	/>
 	<AutocompleteSelect
 		{form}
@@ -149,8 +148,12 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="authors"
 			cacheLock={cacheLocks['authors']}
 			bind:cachedValue={formDataCache['authors']}
@@ -159,8 +162,12 @@
 		<AutocompleteSelect
 			multiple
 			{form}
-			optionsEndpoint="users?is_third_party=false"
-			optionsLabelField="email"
+			optionsEndpoint="actors"
+			optionsLabelField="str"
+			optionsInfoFields={{
+				fields: [{ field: 'type', translate: true }],
+				position: 'prefix'
+			}}
 			field="reviewers"
 			cacheLock={cacheLocks['reviewers']}
 			bind:cachedValue={formDataCache['reviewers']}
@@ -213,7 +220,7 @@
 		multiple
 		{form}
 		optionsEndpoint="compliance-assessments"
-		optionsExtraFields={[['perimeter', 'str']]}
+		optionsExtraFields={[['folder', 'str']]}
 		optionsLabelField="auto"
 		field="compliance_assessments"
 		cacheLock={cacheLocks['compliance_assessments']}

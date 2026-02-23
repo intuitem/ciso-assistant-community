@@ -74,7 +74,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             email_address = next(
                 (v for v in extra.values() if isinstance(v, str) and "@" in v), None
             )
-
+        if isinstance(email_address, list):
+            # We assume the first email is the primary one
+            email_address = email_address[0] if email_address else None
         if not email_address:
             logger.error(
                 "pre_social_login: no email found in extra_data",

@@ -1,91 +1,92 @@
 """Analysis MCP tools for CISO Assistant"""
 
-import sys
-from rich import print as rprint
 from ..client import make_get_request, fetch_all_results
 from ..utils.response_formatter import (
     success_response,
     error_response,
-    http_error_response,
 )
 
 
-async def get_all_audits_with_metrics():
-    """List all audits with compliance metrics breakdown (uses 'result' field for compliance outcome, not 'status')"""
+async def get_all_audits_with_metrics(
+    folder: str = None,
+    perimeter: str = None,
+    status: str = None,
+    framework: str = None,
+):
+    """List audits with compliance metrics breakdown (uses 'result' field for compliance outcome, not 'status'). Use filters to avoid large responses.
+
+    Args:
+        folder: Folder ID/name
+        perimeter: Perimeter ID/name
+        status: Filter by status: created | in_progress | in_review | done | deprecated
+        framework: Framework ID/name
+    """
     try:
-        # Get all compliance assessments (with pagination)
-        audits, error = fetch_all_results("/compliance-assessments/")
+        from ..resolvers import (
+            resolve_folder_id,
+            resolve_perimeter_id,
+            resolve_framework_id,
+        )
+
+        params = {}
+        if folder:
+            params["folder"] = resolve_folder_id(folder)
+        if perimeter:
+            params["perimeter"] = resolve_perimeter_id(perimeter)
+        if status:
+            params["status"] = status
+        if framework:
+            params["framework"] = resolve_framework_id(framework)
+
+        # Get compliance assessments (with pagination)
+        audits, error = fetch_all_results("/compliance-assessments/", params=params)
         if error:
             return error
 
         if not audits:
-            return "No audits found"
+            return "No audits found matching the given filters"
 
-        # Fetch all requirement assessments (with pagination)
-        all_requirements, error = fetch_all_results("/requirement-assessments/")
-        if error:
-            return f"Error fetching requirements: {error}"
-
-        # Group requirements by compliance assessment
-        req_by_audit = {}
-        for req in all_requirements:
-            # compliance_assessment is returned as an object with id, name, etc.
-            compliance_assessment = req.get("compliance_assessment")
-            if compliance_assessment:
-                # Extract the ID from the compliance_assessment object
-                audit_id = (
-                    compliance_assessment.get("id")
-                    if isinstance(compliance_assessment, dict)
-                    else compliance_assessment
-                )
-                if audit_id:
-                    if audit_id not in req_by_audit:
-                        req_by_audit[audit_id] = []
-                    req_by_audit[audit_id].append(req)
-
-        # Build summary for each audit
-        result = "# All Compliance Assessments - Summary\n\n"
+        # Fetch requirement assessments per audit (not globally)
+        result = "# Compliance Assessments - Summary\n\n"
         result += f"Total Audits: {len(audits)}\n\n"
 
         for audit in audits:
             audit_id = audit.get("id")
             audit_name = audit.get("name", "N/A")
-            framework = (audit.get("framework") or {}).get("str", "N/A")
-            status = audit.get("status", "N/A")
+            fw = (audit.get("framework") or {}).get("str", "N/A")
+            audit_status = audit.get("status", "N/A")
             progress = audit.get("progress", "N/A")
             domain = (audit.get("folder") or {}).get("str", "N/A")
 
-            requirements = req_by_audit.get(audit_id, [])
+            # Fetch requirements for this specific audit
+            requirements, req_error = fetch_all_results(
+                "/requirement-assessments/",
+                params={"compliance_assessment": audit_id},
+            )
+            if req_error:
+                result += (
+                    f"## {audit_name}\n- Error fetching requirements: {req_error}\n\n"
+                )
+                continue
+
             total = len(requirements)
 
-            # Count by compliance result (not status)
-            # result = actual compliance outcome
-            compliant = sum(
-                1 for r in requirements if r.get("result", "").lower() == "compliant"
-            )
-            non_compliant = sum(
-                1
-                for r in requirements
-                if r.get("result", "").lower() == "non_compliant"
-            )
-            partially_compliant = sum(
-                1
-                for r in requirements
-                if r.get("result", "").lower() == "partially_compliant"
-            )
-            not_applicable = sum(
-                1
-                for r in requirements
-                if r.get("result", "").lower() == "not_applicable"
-            )
-            not_assessed = sum(
-                1 for r in requirements if r.get("result", "").lower() == "not_assessed"
-            )
+            # Count by compliance result
+            counts = {}
+            for r in requirements:
+                res_val = (r.get("result") or "not_assessed").lower()
+                counts[res_val] = counts.get(res_val, 0) + 1
+
+            compliant = counts.get("compliant", 0)
+            non_compliant = counts.get("non_compliant", 0)
+            partially_compliant = counts.get("partially_compliant", 0)
+            not_applicable = counts.get("not_applicable", 0)
+            not_assessed = counts.get("not_assessed", 0)
 
             result += f"## {audit_name}\n"
-            result += f"- **Framework:** {framework}\n"
+            result += f"- **Framework:** {fw}\n"
             result += f"- **Domain:** {domain}\n"
-            result += f"- **Audit Status:** {status}\n"
+            result += f"- **Audit Status:** {audit_status}\n"
             result += f"- **Progress:** {progress}%\n"
             result += f"- **Total Requirements:** {total}\n"
 
@@ -97,12 +98,11 @@ async def get_all_audits_with_metrics():
                 result += f"  - Not Assessed: {not_assessed} ({not_assessed * 100 // total}%)\n"
                 result += f"  - Not Applicable: {not_applicable} ({not_applicable * 100 // total}%)\n"
 
-                # Add gap indicator
                 gaps = non_compliant + not_assessed
                 if gaps > 0:
-                    result += f"  - **⚠️ Gaps:** {gaps} requirements need attention\n"
+                    result += f"  - Gaps: {gaps} requirements need attention\n"
                 else:
-                    result += f"  - **✅ No gaps**\n"
+                    result += f"  - No gaps\n"
             else:
                 result += f"  - No requirements found\n"
 
@@ -117,31 +117,32 @@ async def get_audit_gap_analysis(audit_name: str):
     """Perform gap analysis on audit: identify non-compliant and not-assessed requirements (uses 'result' not 'status')
 
     Args:
-        audit_name: Audit/compliance assessment name
+        audit_name: Audit/compliance assessment name or ID
     """
-    # First, find the compliance assessment by name (with pagination)
-    audits, error = fetch_all_results("/compliance-assessments/")
-    if error:
+    from ..resolvers import resolve_compliance_assessment_id
+
+    # Resolve audit name to ID
+    try:
+        audit_id = resolve_compliance_assessment_id(audit_name)
+    except ValueError as e:
+        return error_response(
+            "Not Found",
+            str(e),
+            "Use get_audits_progress() to see available audits",
+            retry_allowed=True,
+        )
+
+    # Fetch the audit details
+    audit_res = make_get_request(f"/compliance-assessments/{audit_id}/")
+    if audit_res.status_code != 200:
         return error_response(
             "API Error",
-            "Unable to fetch audits. Check credentials.",
+            f"Unable to fetch audit: {audit_res.status_code}",
             "Verify API token configuration",
             retry_allowed=False,
         )
 
-    audit = None
-    for item in audits:
-        if item.get("name") == audit_name:
-            audit = item
-            break
-
-    if not audit:
-        return error_response(
-            "Not Found",
-            f"Audit '{audit_name}' does not exist",
-            "Use get_audits_progress() to see available audits",
-            retry_allowed=True,
-        )
+    audit = audit_res.json()
 
     # Get all requirement assessments for this compliance assessment (with pagination)
     params = {"compliance_assessment": audit["id"]}

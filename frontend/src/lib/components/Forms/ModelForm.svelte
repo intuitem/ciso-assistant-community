@@ -28,6 +28,7 @@
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
+	import TeamForm from './ModelForm/TeamForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
@@ -470,7 +471,8 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
-				{data}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
@@ -491,6 +493,8 @@
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}
 			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
+		{:else if URLModel === 'teams'}
+			<TeamForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
 		{:else if URLModel === 'sso-settings'}
 			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'general-settings'}
@@ -858,7 +862,9 @@
 				{...rest}
 			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+		>
 			{#if closeModal}
 				<button
 					class="btn bg-gray-400 text-white font-semibold w-full"
