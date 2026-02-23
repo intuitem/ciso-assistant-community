@@ -29,6 +29,11 @@
 	"addComplianceAssessment": "Новий аудит",
 	"addEvidence": "Додати докази",
 	"addDomain": "Додати домен",
+	"createIamGroups": "Створити групи IAM",
+	"iamGroups": "Групи IAM",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "Групи IAM використовуються для призначення ролей користувачам",
+	"globalFolderMustKeepIamGroupsEnabled": "Глобальна папка має залишати групи IAM увімкненими.",
+	"cannotDisableIamGroupsAssignedUsers": "Неможливо вимкнути групи IAM, поки вони призначені користувачам.",
 	"addPerimeter": "Додати периметр",
 	"addUser": "Додати користувача",
 	"addPolicy": "Додати політику",
@@ -1623,6 +1628,7 @@
 	],
 	"cascadeAffectedHint": "Елементи нижче залишаються в системі, але їхні посилання на цей об'єкт будуть видалені.",
 	"libraryFilteringLabels": "Мітки бібліотеки",
+	"campaignsDescription": "Керування кампаніями аудиту",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

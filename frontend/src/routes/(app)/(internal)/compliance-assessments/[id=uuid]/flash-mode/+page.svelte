@@ -11,6 +11,10 @@
 
 	let { data }: Props = $props();
 
+	let isReadOnly = $derived(
+		data.compliance_assessment.is_locked || data.compliance_assessment.status === 'in_review'
+	);
+
 	const possible_options = [
 		{ id: 'not_assessed', label: m.notAssessed() },
 		{ id: 'non_compliant', label: m.nonCompliant() },
@@ -196,6 +200,20 @@
 				</div>
 			</div>
 
+			<!-- Read-only banner -->
+			{#if isReadOnly}
+				<div
+					class="bg-yellow-50 border border-yellow-300 px-4 py-2 rounded-lg flex items-center space-x-3 my-2"
+				>
+					<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+					<p class="text-yellow-800 font-medium text-sm">
+						{data.compliance_assessment.is_locked
+							? m.lockedAssessmentMessage()
+							: m.assessmentInReviewMessage()}
+					</p>
+				</div>
+			{/if}
+
 			<!-- Main content area -->
 			<div class="flex flex-col flex-1 justify-center overflow-hidden">
 				<div class="flex flex-col items-center text-center space-y-6 h-full">
@@ -229,6 +247,7 @@
 								initialValue={currentRequirementAssessment.result}
 								classes="w-full"
 								colorMap={complianceResultTailwindColorMap}
+								disabled={isReadOnly}
 								field="result"
 								onChange={(newValue) => {
 									const newResult = result === newValue ? 'not_assessed' : newValue;

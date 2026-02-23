@@ -32,6 +32,11 @@
 	"addComplianceAssessment": "Νέος έλεγχος",
 	"addEvidence": "Προσθήκη αποδεικτικού",
 	"addDomain": "Προσθήκη τομέα",
+	"createIamGroups": "Δημιουργία ομάδων IAM",
+	"iamGroups": "Ομάδες IAM",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "Οι ομάδες IAM χρησιμοποιούνται για την ανάθεση ρόλων σε χρήστες",
+	"globalFolderMustKeepIamGroupsEnabled": "Ο καθολικός φάκελος πρέπει να διατηρεί τις ομάδες IAM ενεργές.",
+	"cannotDisableIamGroupsAssignedUsers": "Δεν μπορείτε να απενεργοποιήσετε τις ομάδες IAM όσο είναι ανατεθειμένες σε χρήστες.",
 	"addPerimeter": "Προσθήκη ορίου",
 	"addUser": "Προσθήκη χρήστη",
 	"addPolicy": "Προσθήκη πολιτικής",
@@ -1802,6 +1807,7 @@
 	],
 	"cascadeAffectedHint": "Τα παρακάτω αντικείμενα παραμένουν στο σύστημα αλλά οι σύνδεσμοι τους με αυτό το αντικείμενο θα αφαιρεθούν.",
 	"libraryFilteringLabels": "Ετικέτες βιβλιοθήκης",
+	"campaignsDescription": "Διαχείριση εκστρατειών ελέγχου",
 	"objectsNotVisible": [
 		{
 			"declarations": ["input count", "local countPlural = count: plural"],

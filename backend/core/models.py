@@ -1052,7 +1052,13 @@ class LibraryUpdater:
                     # Ensure all needed fields are included
                     fields_to_update = sorted(
                         all_fields_to_update.union(
-                            {"name", "description", "order_id", "questions"}
+                            {
+                                "name",
+                                "description",
+                                "order_id",
+                                "questions",
+                                "implementation_groups",
+                            }
                         )
                     )
                     RequirementNode.objects.bulk_update(
@@ -2209,10 +2215,39 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         return locale_translations.get("typical_evidence", self.typical_evidence)
 
     @property
-    def get_questions_translated(self) -> str:
-        translations = self.translations if self.translations else {}
-        locale_translations = translations.get(get_language(), {})
-        return locale_translations.get("questions", self.questions)
+    def get_questions_translated(self) -> dict | None:
+        if not self.questions:
+            return None
+
+        current_lang = get_language()
+
+        def _translate_choice(choice: dict) -> dict:
+            tr = choice.get("translations", {}).get(current_lang, {})
+            return {
+                **choice,
+                **({} if not tr.get("value") else {"value": tr["value"]}),
+                **(
+                    {}
+                    if not tr.get("description")
+                    else {"description": tr["description"]}
+                ),
+            }
+
+        def _translate_question(q_content: dict) -> dict:
+            tr = q_content.get("translations", {}).get(current_lang, {})
+            translated = {**q_content}
+            if tr.get("text"):
+                translated["text"] = tr["text"]
+            if "choices" in q_content:
+                translated["choices"] = [
+                    _translate_choice(c) for c in q_content["choices"]
+                ]
+            return translated
+
+        return {
+            q_urn: _translate_question(q_content)
+            for q_urn, q_content in self.questions.items()
+        }
 
     class Meta:
         verbose_name = _("RequirementNode")

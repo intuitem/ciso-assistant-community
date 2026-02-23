@@ -75,6 +75,7 @@ export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	parent_folder: z.string(),
+	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional()
 });
 
@@ -533,6 +534,7 @@ export const FeatureFlagsSchema = z.object({
 	scoring_assistant: z.boolean().optional(),
 	vulnerabilities: z.boolean().optional(),
 	compliance: z.boolean().optional(),
+	campaigns: z.boolean().optional(),
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
