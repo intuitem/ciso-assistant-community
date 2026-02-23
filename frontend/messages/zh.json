@@ -2938,6 +2938,7 @@
 	"lastRefresh": "上次刷新",
 	"librariesCanOnlyBeLoadedByAdmin": "只有管理员可以加载库",
 	"libraryFilteringLabels": "库标签",
+	"campaignsDescription": "审计活动管理",
 	"licenseAboutToExpireWarning": "您的许可证还有 {days_left} 天到期。",
 	"licenseExpiredMessage": "您的许可证已过期。写入操作已禁用。请联系您的管理员续订。",
 	"likelihoodHelpText": "风险发生的可行性或概率估计",

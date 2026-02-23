@@ -1083,6 +1083,7 @@
 	"errorUnloadingLibrary": "خطأ في تفريغ المكتبة",
 	"librarySuccessfullyUnloaded": "تم إلغاء تحميل المكتبة بنجاح",
 	"libraryFilteringLabels": "العلامات المكتبية",
+	"campaignsDescription": "إدارة حملات التدقيق",
 	"appliedControlsPlaceholder": "حدد عناصر التحكم المطبقة...",
 	"assignmentSettings": "التعيينات",
 	"allowAssignmentsToEntities": "السماح بإسناد المهام إلى الكيانات",

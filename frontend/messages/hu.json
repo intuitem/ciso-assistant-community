@@ -1115,6 +1115,7 @@
 	],
 	"cascadeAffectedHint": "Az alábbi elemek a rendszerben maradnak, de a kapcsolataik ebben az objektumban törlődnek.",
 	"libraryFilteringLabels": "Könyvtári címkék",
+	"campaignsDescription": "Auditkampányok kezelése",
 	"appliedControlsPlaceholder": "Alkalmazott kontrollok kiválasztása...",
 	"assignmentSettings": "Hozzárendelési beállítások",
 	"allowAssignmentsToEntities": "Engedélyezze a hozzárendelést entitásokhoz",

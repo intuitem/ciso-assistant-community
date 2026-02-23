@@ -1105,6 +1105,7 @@
 		}
 	],
 	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"campaignsDescription": "Hantering av revisionskampanjer",
 	"libraryFilteringLabels": "Etiketter för bibliotek",
 	"appliedControlsPlaceholder": "Välj tillämpade kontroller...",
 	"assignmentSettings": "Tilldelningsinställningar",

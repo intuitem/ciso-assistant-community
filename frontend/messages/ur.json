@@ -1082,6 +1082,7 @@
 		}
 	],
 	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
+	"campaignsDescription": "آڈٹ مہمات کا انتظام",
 	"libraryFilteringLabels": "لیبریری لیبلز",
 	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں...",
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",

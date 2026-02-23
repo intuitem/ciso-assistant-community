@@ -2988,6 +2988,7 @@
 	],
 	"cascadeAffectedHint": "Los elementos a continuación permanecen en el sistema pero se eliminarán sus enlaces a este objeto.",
 	"libraryFilteringLabels": "Etiquetas de la biblioteca",
+	"campaignsDescription": "Gestión de campañas de auditoría",
 	"actual": "Actual",
 	"orderedEntryListAddButton": "Añadir",
 	"addMetricInstance": "Añadir instancia de métrica",

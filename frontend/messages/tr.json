@@ -1852,6 +1852,7 @@
 	],
 	"cascadeAffectedHint": "Aşağıdaki öğeler sistemde kalacak ancak bu nesneye olan bağlantılar kaldırılacaktır.",
 	"libraryFilteringLabels": "Kütüphane etiketleri",
+	"campaignsDescription": "Denetim kampanyaları yönetimi",
 	"appliedControlsPlaceholder": "Uygulanan kontrolleri seçin...",
 	"assignmentSettings": "Atama ayarları",
 	"allowAssignmentsToEntities": "Varlıklara atamalara izin ver",

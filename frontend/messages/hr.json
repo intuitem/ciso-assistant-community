@@ -2084,6 +2084,7 @@
 	],
 	"cascadeAffectedHint": "Stavke ispod ostaju u sustavu, ali njihovi linkovi na ovaj objekt će biti uklonjeni.",
 	"libraryFilteringLabels": "Oznake knjižnice",
+	"campaignsDescription": "Upravljanje kampanjama revizije",
 	"appliedControlsPlaceholder": "Odaberi primijenjene kontrole...",
 	"assignmentSettings": "Postavke dodjele",
 	"allowAssignmentsToEntities": "Dopusti dodjele entitetima",

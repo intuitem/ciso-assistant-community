@@ -2120,13 +2120,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the assets text with indentation (2 spaces per level)
             lines = [line.rstrip() for line in assets_text.split("\n") if line.strip()]
@@ -2170,7 +2170,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
                 # Check if asset already exists in the folder
                 existing_asset = Asset.objects.filter(
-                    name=asset_name, folder=folder_id
+                    name=asset_name, folder=folder
                 ).first()
 
                 if existing_asset:
@@ -2198,7 +2198,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     asset_data = {
                         "name": asset_name,
                         "type": asset_type,
-                        "folder": folder_id,
+                        "folder": str(folder.id),
                     }
 
                     # Add parent relationship if exists
@@ -2210,7 +2210,13 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                     )
 
                     if serializer.is_valid():
-                        asset = serializer.save()
+                        try:
+                            asset = serializer.save()
+                        except PermissionDenied as e:
+                            return Response(
+                                {"error": e.detail},
+                                status=status.HTTP_403_FORBIDDEN,
+                            )
 
                         # Add to stack for potential children
                         depth_stack.append(asset)
@@ -5193,6 +5199,8 @@ class RiskScenarioFilter(GenericFilterSet):
             "existing_applied_controls": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
+            "qualifications": ["exact"],
+            "filtering_labels": ["exact"],
         }
 
 
@@ -8023,12 +8031,19 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
+        # RBAC: scope to objects the user has change permission on (upload is a write)
+        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )[1]
+
         try:
-            revision = EvidenceRevision.objects.get(pk=pk)
+            revision = EvidenceRevision.objects.get(
+                pk=pk, evidence__id__in=accessible_evidence_ids
+            )
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk)
+                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -8042,9 +8057,18 @@ class UploadAttachmentView(APIView):
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
             if not revision.attachment or revision.attachment != attachment:
-                if revision.attachment:
-                    revision.attachment.delete()
+                old_attachment = revision.attachment
                 revision.attachment = attachment
+                try:
+                    revision.full_clean()
+                except ValidationError:
+                    revision.attachment = old_attachment
+                    return Response(
+                        {"detail": "File too large or unsupported format."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if old_attachment:
+                    old_attachment.delete()
                 revision.save()
 
         return Response(status=status.HTTP_200_OK)
