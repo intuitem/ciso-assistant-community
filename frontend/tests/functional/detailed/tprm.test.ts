@@ -165,8 +165,8 @@ test('user can create representatives, solutions and entity assessments inside e
 		await expect(firstCard).toHaveClass(/rotate-x-180/);
 
 		// flip back to front
-		await cards.first().getByTestId('flip-button-back').click();
-		await expect(cards.first()).not.toHaveClass(/rotate-x-180/);
+		await firstCard.getByTestId('flip-button-back').click();
+		await expect(firstCard).not.toHaveClass(/rotate-x-180/);
 	});
 });
 
