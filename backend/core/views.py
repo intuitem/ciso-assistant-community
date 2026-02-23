@@ -7668,8 +7668,14 @@ class FrameworkViewSet(BaseModelViewSet):
         try:
             framework.publish()
         except ValidationError as e:
+            logger.warning(
+                "Validation error while publishing framework",
+                framework_id=str(framework.id),
+                error=str(e),
+                exc_info=True,
+            )
             return Response(
-                {"error": e.messages if hasattr(e, "messages") else str(e)},
+                {"error": "Framework validation failed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response({"status": "published"}, status=status.HTTP_200_OK)
