@@ -250,13 +250,17 @@
 										</p>
 										<p class="whitespace-pre-line py-1">
 											<span class="italic">{m.mapping()}</span>
-											<a
-												class="anchor badge h-fit"
-												href="/requirement-mapping-sets/{source_requirement_assessment
-													.used_mapping_set?.id}"
-											>
-												{source_requirement_assessment.used_mapping_set?.name}
-											</a>
+											{#if source_requirement_assessment.used_mapping_set}
+												<a
+													class="anchor badge h-fit"
+													href="/requirement-mapping-sets/{source_requirement_assessment
+														.used_mapping_set?.id}"
+												>
+													{source_requirement_assessment.used_mapping_set?.name}
+												</a>
+											{:else}
+												<span class="text-gray-500">--</span>
+											{/if}
 										</p>
 										<p class="whitespace-pre-line py-1">
 											<span class="italic">{m.coverageColon()}</span>
