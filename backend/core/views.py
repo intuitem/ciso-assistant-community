@@ -7002,15 +7002,12 @@ class FolderViewSet(BaseModelViewSet):
                 question = Question.objects.get(urn=_fields.get("question"))
                 _fields["question"] = question
 
-                # Resolve selected_choice from ref_id
-                ref_id = _fields.pop("selected_choice_ref_id", None)
-                if ref_id:
-                    _fields["selected_choice"] = QuestionChoice.objects.filter(
-                        question=question, ref_id=ref_id
-                    ).first()
-
-                # Store M2M ref_ids for post-create
-                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
+                # Collect all choice ref_ids into a single M2M list
+                # Support legacy selected_choice_ref_id from old backups
+                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None) or []
+                legacy_ref_id = _fields.pop("selected_choice_ref_id", None)
+                if legacy_ref_id and legacy_ref_id not in choice_ref_ids:
+                    choice_ref_ids.append(legacy_ref_id)
                 if choice_ref_ids:
                     many_to_many_map_ids["selected_choices_ref_ids"] = choice_ref_ids
 
@@ -10410,7 +10407,7 @@ def generate_html(
                 node_data["assessments"] = assessment
                 # Pre-compute dicts for template backward compat
                 node_data["answers_dict"] = build_answers_dict(
-                    assessment.answers.select_related("question", "selected_choice")
+                    assessment.answers.select_related("question")
                     .prefetch_related("selected_choices")
                     .all()
                 )
@@ -12772,7 +12769,6 @@ class AnswerViewSet(BaseModelViewSet):
                 "requirement_assessment__compliance_assessment",
                 "question",
                 "folder",
-                "selected_choice",
             )
             .prefetch_related("selected_choices")
         )

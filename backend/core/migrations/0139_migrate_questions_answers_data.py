@@ -1,12 +1,19 @@
-"""Data migration: JSON questions/answers → relational Question/QuestionChoice/Answer models.
+"""Data migration: questionnaire data.
 
 1. Set all existing frameworks to status="published"
-2. Migrate RequirementNode.questions JSON → Question + QuestionChoice rows
-3. Migrate RequirementAssessment.answers JSON → Answer rows
-4. Normalize scores_definition from list to dict format
+2. Migrate RequirementNode.questions_json → Question + QuestionChoice rows
+3. Deduplicate QuestionChoice (question, ref_id) before unique constraint
+4. Migrate RequirementAssessment.answers_json → Answer rows
+5. Populate Answer.selected_choices M2M from Answer.value for choice-type questions
+6. Normalize scores_definition from list to dict format
 """
 
+import logging
+
 from django.db import migrations
+from django.db.models import Count
+
+logger = logging.getLogger(__name__)
 
 TYPE_MAPPING = {
     "unique_choice": "single_choice",
@@ -17,6 +24,8 @@ TYPE_MAPPING = {
     "boolean": "boolean",
     "date": "date",
 }
+
+BATCH_SIZE = 1000
 
 
 def migrate_forward(apps, schema_editor):
@@ -120,7 +129,37 @@ def migrate_forward(apps, schema_editor):
 
     QuestionChoice.objects.bulk_create(choice_bulk, batch_size=1000)
 
-    # 3. Migrate RequirementAssessment.answers → Answer rows
+    # 3. Deduplicate QuestionChoice (question, ref_id) before unique constraint
+    duplicates = (
+        QuestionChoice.objects.values("question", "ref_id")
+        .annotate(cnt=Count("id"))
+        .filter(cnt__gt=1)
+    )
+
+    for dup in duplicates:
+        choices = QuestionChoice.objects.filter(
+            question_id=dup["question"], ref_id=dup["ref_id"]
+        ).order_by("order", "pk")
+        keeper = choices.first()
+        to_remove = choices.exclude(pk=keeper.pk)
+
+        # Re-point M2M references to the keeper
+        for old_choice in to_remove:
+            for answer in Answer.objects.filter(selected_choices=old_choice):
+                answer.selected_choices.remove(old_choice)
+                answer.selected_choices.add(keeper)
+
+        removed_count = to_remove.count()
+        to_remove.delete()
+        if removed_count:
+            logger.info(
+                "Deduplicated %d QuestionChoice rows for question=%s ref_id=%s",
+                removed_count,
+                dup["question"],
+                dup["ref_id"],
+            )
+
+    # 4. Migrate RequirementAssessment.answers → Answer rows
     answer_bulk = []
     ras_with_answers = (
         RequirementAssessment.objects.filter(answers_json__isnull=False)
@@ -146,7 +185,71 @@ def migrate_forward(apps, schema_editor):
 
     Answer.objects.bulk_create(answer_bulk, batch_size=1000, ignore_conflicts=True)
 
-    # 4. Normalize scores_definition: list → {"scale": list}
+    # 5. Populate selected_choices M2M from value for choice-type answers
+
+    # SINGLE_CHOICE: resolve value string → M2M
+    single_choice_qs = (
+        Answer.objects.filter(question__type="single_choice")
+        .exclude(value__isnull=True)
+        .select_related("question")
+    )
+
+    batch = []
+    for answer in single_choice_qs.iterator(chunk_size=BATCH_SIZE):
+        if not answer.value:
+            continue
+        choice = QuestionChoice.objects.filter(
+            question=answer.question, ref_id=answer.value
+        ).first()
+        if choice:
+            answer.selected_choices.set([choice])
+            answer.value = None
+            batch.append(answer)
+        else:
+            logger.warning(
+                "Answer %s: could not resolve single-choice ref_id '%s' "
+                "for question %s",
+                answer.pk,
+                answer.value,
+                answer.question_id,
+            )
+        if len(batch) >= BATCH_SIZE:
+            Answer.objects.bulk_update(batch, ["value"])
+            batch = []
+    if batch:
+        Answer.objects.bulk_update(batch, ["value"])
+
+    # MULTIPLE_CHOICE: resolve value list → M2M
+    multi_choice_qs = Answer.objects.filter(
+        question__type="multiple_choice"
+    ).select_related("question")
+
+    batch = []
+    for answer in multi_choice_qs.iterator(chunk_size=BATCH_SIZE):
+        if isinstance(answer.value, list) and answer.value:
+            choices = QuestionChoice.objects.filter(
+                question=answer.question, ref_id__in=answer.value
+            )
+            found_refs = set(choices.values_list("ref_id", flat=True))
+            missing = set(answer.value) - found_refs
+            if missing:
+                logger.warning(
+                    "Answer %s: could not resolve multiple-choice ref_ids %s "
+                    "for question %s",
+                    answer.pk,
+                    missing,
+                    answer.question_id,
+                )
+            answer.selected_choices.set(choices)
+        answer.value = None
+        batch.append(answer)
+        if len(batch) >= BATCH_SIZE:
+            Answer.objects.bulk_update(batch, ["value"])
+            batch = []
+    if batch:
+        Answer.objects.bulk_update(batch, ["value"])
+
+    # 6. Normalize scores_definition: list → {"scale": list}
     for fw in Framework.objects.filter(scores_definition__isnull=False):
         if isinstance(fw.scores_definition, list):
             fw.scores_definition = {"scale": fw.scores_definition}
@@ -154,11 +257,33 @@ def migrate_forward(apps, schema_editor):
 
 
 def migrate_backward(apps, schema_editor):
-    """Reverse: delete all Question/QuestionChoice/Answer rows, reset framework status."""
+    """Reverse: copy M2M back to value, delete all Question/QuestionChoice/Answer rows, reset framework status."""
+    Answer = apps.get_model("core", "Answer")
     Question = apps.get_model("core", "Question")
     QuestionChoice = apps.get_model("core", "QuestionChoice")
-    Answer = apps.get_model("core", "Answer")
     Framework = apps.get_model("core", "Framework")
+
+    # Restore value from M2M for choice-type answers
+    for answer in (
+        Answer.objects.filter(question__type="single_choice")
+        .prefetch_related("selected_choices")
+        .iterator(chunk_size=BATCH_SIZE)
+    ):
+        refs = list(answer.selected_choices.values_list("ref_id", flat=True))
+        if refs:
+            answer.value = refs[0]
+            answer.selected_choices.clear()
+            answer.save(update_fields=["value"])
+
+    for answer in (
+        Answer.objects.filter(question__type="multiple_choice")
+        .prefetch_related("selected_choices")
+        .iterator(chunk_size=BATCH_SIZE)
+    ):
+        refs = list(answer.selected_choices.values_list("ref_id", flat=True))
+        answer.value = refs if refs else []
+        answer.selected_choices.clear()
+        answer.save(update_fields=["value"])
 
     Answer.objects.all().delete()
     QuestionChoice.objects.all().delete()

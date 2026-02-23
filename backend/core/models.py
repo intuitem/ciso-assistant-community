@@ -1041,7 +1041,10 @@ class LibraryUpdater:
                                 answer = existing_answers[q.urn]
                                 valid_pks = set(q.choices.values_list("id", flat=True))
                                 changed = False
-                                if q.type == Question.Type.MULTIPLE_CHOICE:
+                                if q.type in (
+                                    Question.Type.SINGLE_CHOICE,
+                                    Question.Type.MULTIPLE_CHOICE,
+                                ):
                                     current_pks = set(
                                         answer.selected_choices.values_list(
                                             "id", flat=True
@@ -1054,14 +1057,6 @@ class LibraryUpdater:
                                                 id__in=invalid_pks
                                             )
                                         )
-                                        changed = True
-                                elif q.type == Question.Type.SINGLE_CHOICE:
-                                    if (
-                                        answer.selected_choice_id
-                                        and answer.selected_choice_id not in valid_pks
-                                    ):
-                                        answer.selected_choice = None
-                                        answer.save(update_fields=["selected_choice"])
                                         changed = True
                                 if changed:
                                     answers_changed_ca_ids.add(
@@ -7372,7 +7367,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     def compute_score_and_result(self):
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
         answers_qs = (
-            self.answers.select_related("question", "selected_choice")
+            self.answers.select_related("question")
             .prefetch_related("selected_choices")
             .all()
         )
@@ -7385,12 +7380,10 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         for a in answers_qs:
             q_type = a.question.type
-            if q_type == Question.Type.SINGLE_CHOICE:
-                selected_choice_pks_by_qid[a.question_id] = (
-                    {a.selected_choice_id} if a.selected_choice_id else set()
-                )
-                has_answer_by_qid[a.question_id] = a.selected_choice_id is not None
-            elif q_type == Question.Type.MULTIPLE_CHOICE:
+            if q_type in (
+                Question.Type.SINGLE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ):
                 pks = set(a.selected_choices.values_list("id", flat=True))
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0
@@ -7539,18 +7532,10 @@ class Answer(AbstractBaseModel, FolderMixin):
         verbose_name=_("Question"),
     )
     value = models.JSONField(blank=True, null=True, verbose_name=_("Value"))
-    selected_choice = models.ForeignKey(
-        "QuestionChoice",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="single_choice_answers",
-        verbose_name=_("Selected choice"),
-    )
     selected_choices = models.ManyToManyField(
         "QuestionChoice",
         blank=True,
-        related_name="multiple_choice_answers",
+        related_name="choice_answers",
         verbose_name=_("Selected choices"),
     )
 
@@ -7564,9 +7549,10 @@ class Answer(AbstractBaseModel, FolderMixin):
 
     def get_choice_ref_ids(self):
         """Return list of selected choice ref_ids for choice-type questions."""
-        if self.question.type == Question.Type.SINGLE_CHOICE:
-            return [self.selected_choice.ref_id] if self.selected_choice_id else []
-        elif self.question.type == Question.Type.MULTIPLE_CHOICE:
+        if self.question.type in (
+            Question.Type.SINGLE_CHOICE,
+            Question.Type.MULTIPLE_CHOICE,
+        ):
             return list(self.selected_choices.values_list("ref_id", flat=True))
         return []
 

@@ -201,14 +201,14 @@ class TestAnswerEndpoints:
         )
         assert response.status_code == status.HTTP_201_CREATED
         answer = Answer.objects.get(requirement_assessment=ra, question=q)
-        # Legacy value is resolved to FK
-        assert answer.selected_choice == data["choice_a"]
+        # Legacy value is resolved to M2M
+        assert set(answer.selected_choices.all()) == {data["choice_a"]}
         assert answer.value is None
 
-    def test_create_answer_with_selected_choice(
+    def test_create_answer_with_selected_choices(
         self, authenticated_client, framework_with_questions
     ):
-        """Create single-choice answer using selected_choice FK (UUID)."""
+        """Create single-choice answer using selected_choices M2M (list of UUIDs)."""
         data = framework_with_questions
         ra = data["requirement_assessment"]
         q = data["question"]
@@ -219,14 +219,14 @@ class TestAnswerEndpoints:
             {
                 "requirement_assessment": str(ra.id),
                 "question": str(q.id),
-                "selected_choice": str(data["choice_b"].id),
+                "selected_choices": [str(data["choice_b"].id)],
                 "folder": str(folder.id),
             },
             format="json",
         )
         assert response.status_code == status.HTTP_201_CREATED
         answer = Answer.objects.get(requirement_assessment=ra, question=q)
-        assert answer.selected_choice == data["choice_b"]
+        assert set(answer.selected_choices.all()) == {data["choice_b"]}
 
     def test_unique_together_constraint(
         self, authenticated_client, framework_with_questions
@@ -237,12 +237,12 @@ class TestAnswerEndpoints:
         folder = Folder.get_root_folder()
 
         # Create first answer
-        Answer.objects.create(
+        answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            selected_choice=data["choice_a"],
             folder=folder,
         )
+        answer.selected_choices.set([data["choice_a"]])
 
         # Try to create duplicate
         response = authenticated_client.post(
@@ -266,9 +266,9 @@ class TestAnswerEndpoints:
         answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            selected_choice=data["choice_a"],
             folder=folder,
         )
+        answer.selected_choices.set([data["choice_a"]])
 
         response = authenticated_client.patch(
             reverse("answers-detail", args=[answer.id]),
@@ -277,8 +277,8 @@ class TestAnswerEndpoints:
         )
         assert response.status_code == status.HTTP_200_OK
         answer.refresh_from_db()
-        # Legacy value update resolves to FK
-        assert answer.selected_choice == data["choice_b"]
+        # Legacy value update resolves to M2M
+        assert set(answer.selected_choices.all()) == {data["choice_b"]}
         assert answer.value is None
 
     def test_answer_validation_single_choice_rejects_list(
@@ -321,10 +321,10 @@ class TestAnswerEndpoints:
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_selected_choice_must_belong_to_question(
+    def test_selected_choices_must_belong_to_question(
         self, authenticated_client, framework_with_questions
     ):
-        """selected_choice FK must reference a choice that belongs to the answer's question."""
+        """selected_choices must reference choices that belong to the answer's question."""
         data = framework_with_questions
         ra = data["requirement_assessment"]
         q = data["question"]
@@ -355,7 +355,7 @@ class TestAnswerEndpoints:
             {
                 "requirement_assessment": str(ra.id),
                 "question": str(q.id),
-                "selected_choice": str(other_choice.id),
+                "selected_choices": [str(other_choice.id)],
                 "folder": str(folder.id),
             },
             format="json",
@@ -386,6 +386,30 @@ class TestAnswerEndpoints:
         assert answer.value is None
         selected = set(answer.selected_choices.values_list("ref_id", flat=True))
         assert selected == {"MC1", "MC3"}
+
+    def test_single_choice_rejects_multiple_selections(
+        self, authenticated_client, framework_with_questions
+    ):
+        """Single-choice questions reject more than one selection via selected_choices."""
+        data = framework_with_questions
+        ra = data["requirement_assessment"]
+        q = data["question"]
+        folder = Folder.get_root_folder()
+
+        response = authenticated_client.post(
+            reverse("answers-list"),
+            {
+                "requirement_assessment": str(ra.id),
+                "question": str(q.id),
+                "selected_choices": [
+                    str(data["choice_a"].id),
+                    str(data["choice_b"].id),
+                ],
+                "folder": str(folder.id),
+            },
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_create_multiple_choice_with_selected_choices(
         self, authenticated_client, framework_with_multi_choice

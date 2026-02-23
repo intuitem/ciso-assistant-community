@@ -728,9 +728,8 @@ def build_answers_dict(answers_qs):
     result = {}
     for a in answers_qs:
         if a.question.type == Question.Type.SINGLE_CHOICE:
-            result[a.question.urn] = (
-                a.selected_choice.ref_id if a.selected_choice else None
-            )
+            refs = list(a.selected_choices.values_list("ref_id", flat=True))
+            result[a.question.urn] = refs[0] if refs else None
         elif a.question.type == Question.Type.MULTIPLE_CHOICE:
             result[a.question.urn] = list(
                 a.selected_choices.values_list("ref_id", flat=True)
@@ -753,7 +752,6 @@ def update_selected_implementation_groups(compliance_assessment):
         .prefetch_related(
             "answers",
             "answers__question",
-            "answers__selected_choice",
             "answers__selected_choices",
             "requirement__questions",
             "requirement__questions__choices",
@@ -774,12 +772,10 @@ def update_selected_implementation_groups(compliance_assessment):
         for q in questions_qs:
             questions_by_ref[q.ref_id] = q
         for a in answers_qs:
-            if a.question.type == Question.Type.SINGLE_CHOICE:
-                selected_choice_pks_by_qid[a.question_id] = (
-                    {a.selected_choice_id} if a.selected_choice_id else set()
-                )
-                has_answer_by_qid[a.question_id] = a.selected_choice_id is not None
-            elif a.question.type == Question.Type.MULTIPLE_CHOICE:
+            if a.question.type in (
+                Question.Type.SINGLE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ):
                 pks = set(a.selected_choices.values_list("id", flat=True))
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0

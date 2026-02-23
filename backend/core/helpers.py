@@ -296,7 +296,7 @@ def get_sorted_requirement_nodes(
                 "weight": node.weight if node.weight else 1,
                 "questions": build_questions_dict(node),
                 "answers": build_answers_dict(
-                    req_as.answers.select_related("question", "selected_choice")
+                    req_as.answers.select_related("question")
                     .prefetch_related("selected_choices")
                     .all()
                 )
@@ -345,9 +345,7 @@ def get_sorted_requirement_nodes(
                     "weight": child.weight if child.weight else 1,
                     "questions": build_questions_dict(child),
                     "answers": build_answers_dict(
-                        child_req_as.answers.select_related(
-                            "question", "selected_choice"
-                        )
+                        child_req_as.answers.select_related("question")
                         .prefetch_related("selected_choices")
                         .all()
                     )

@@ -102,12 +102,12 @@ class TestScoring:
         q = data["question"]
         folder = data["folder"]
 
-        Answer.objects.create(
+        answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            selected_choice=data["choice_good"],  # score=10, result=true
             folder=folder,
         )
+        answer.selected_choices.set([data["choice_good"]])  # score=10, result=true
 
         ra.compute_score_and_result()
         ra.refresh_from_db()
@@ -122,12 +122,12 @@ class TestScoring:
         q = data["question"]
         folder = data["folder"]
 
-        Answer.objects.create(
+        answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q,
-            selected_choice=data["choice_bad"],  # score=0, result=false
             folder=folder,
         )
+        answer.selected_choices.set([data["choice_bad"]])  # score=0, result=false
 
         ra.compute_score_and_result()
         ra.refresh_from_db()
@@ -180,7 +180,7 @@ class TestScoring:
         q = data["question"]
         folder = data["folder"]
 
-        # Create answer with no selected_choice (unanswered single choice)
+        # Create answer with no selected choices (unanswered single choice)
         Answer.objects.create(
             requirement_assessment=ra,
             question=q,
@@ -261,12 +261,14 @@ class TestScoring:
             folder=folder,
         )
 
-        Answer.objects.create(
+        answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q1,
-            selected_choice=choice_yes,  # score=10, weight=3 -> total_score=30
             folder=folder,
         )
+        answer.selected_choices.set(
+            [choice_yes]
+        )  # score=10, weight=3 -> total_score=30
 
         ra.compute_score_and_result()
         ra.refresh_from_db()
@@ -380,12 +382,12 @@ class TestScoring:
         )
 
         # Answer Q1 with "DC1B" -> Q2 should be hidden
-        Answer.objects.create(
+        answer = Answer.objects.create(
             requirement_assessment=ra,
             question=q1,
-            selected_choice=choice_no,
             folder=folder,
         )
+        answer.selected_choices.set([choice_no])
 
         ra.compute_score_and_result()
         ra.refresh_from_db()
