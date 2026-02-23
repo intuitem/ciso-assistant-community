@@ -988,6 +988,7 @@
 								<Switch
 									name="questionnaireToggle"
 									class="flex flex-row items-center justify-center"
+									checked={displayOnlyAssessableNodes}
 									onCheckedChange={(e) => {
 										displayOnlyAssessableNodes = e.checked;
 										auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
