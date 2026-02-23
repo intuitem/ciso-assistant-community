@@ -321,7 +321,7 @@
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 	});
 
-	function syncFiltersAndInvalidate() {
+	$effect(() => {
 		for (const field of filteredFields) {
 			const filterValue = filterValues[field];
 			const overrideFilterValue = overrideFilters[field];
@@ -342,21 +342,10 @@
 				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
-		onFilterChange(filterValues);
-		handler.invalidate();
-	}
-
-	// Initial filter sync on mount
-	for (const field of filteredFields) {
-		const filterValue = filterValues[field];
-		const overrideFilterValue = overrideFilters[field];
-		const finalFilterValue = overrideFilterValue || filterValue;
-
-		const fieldFilterParams = finalFilterValue
-			? finalFilterValue.map((v: Record<string, any>) => v.value)
-			: [];
-		handler.filter(fieldFilterParams, field);
-	}
+		setTimeout(() => {
+			handler.invalidate();
+		}, 10);
+	});
 
 	const filterInitialData: Record<string, string[]> = {};
 	// convert URL search params and default filters to filter initial data
@@ -391,7 +380,6 @@
 			handler.invalidate();
 		}
 	});
-
 
 	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
 	let canCreateObject = $derived(
@@ -673,7 +661,6 @@
 													);
 
 													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-													syncFiltersAndInvalidate();
 												}}
 											/>
 										{/if}
@@ -701,7 +688,7 @@
 			</div>
 		{/if}
 	</header>
-	{@render quickFilters?.(filterValues, _form, syncFiltersAndInvalidate)}
+	{@render quickFilters?.(filterValues, _form, () => {})}
 	{#if hiddenRowCount > 0}
 		<div
 			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
