@@ -247,9 +247,11 @@ export const loadDetail = async ({ event, model, id }) => {
 					try {
 						let countUrl: string;
 						if (e.endpointUrl?.startsWith('./')) {
-							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${e.endpointUrl.slice(2)}?limit=1`;
+							const relPath = e.endpointUrl.slice(2);
+							const sep = relPath.includes('?') ? '&' : '?';
+							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${relPath}${sep}limit=1`;
 						} else {
-							countUrl = `${BASE_API_URL}/${e.urlModel}/?${e.field}=${id}&limit=1`;
+							countUrl = `${BASE_API_URL}/${e.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
 						}
 						const countRes = await event.fetch(countUrl);
 						if (countRes.ok) {
