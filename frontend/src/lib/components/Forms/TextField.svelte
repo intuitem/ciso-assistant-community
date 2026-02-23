@@ -111,7 +111,7 @@
 	});
 </script>
 
-<div class={classesContainer} {hidden}>
+<div class={classesContainer} hidden={hidden || undefined}>
 	<div class={classesDisabled(disabled)}>
 		{#if label !== undefined && !hidden}
 			{#if $constraints?.required || required}

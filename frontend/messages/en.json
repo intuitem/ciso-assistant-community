@@ -3097,6 +3097,7 @@
 	"requirementMappingSetsDescription": "Mappings between different frameworks and standards",
 	"riskMatricesDescription": "Risk matrices for probability and impact assessment",
 	"businessImpactAnalysisDescription": "Business impact analysis and continuity planning",
+	"campaignsDescription": "Audit campaigns management",
 	"incidentsDescription": "Security incidents and their management",
 	"taskTemplatesDescription": "One-shot or periodic tasks to organise your controls",
 	"policiesDescription": "Organizational policies and procedures",
