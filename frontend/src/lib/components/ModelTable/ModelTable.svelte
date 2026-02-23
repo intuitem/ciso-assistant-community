@@ -250,7 +250,6 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(false);
 
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
@@ -322,11 +321,13 @@
 		hideFilters = hideFilters || !Object.entries(filters).some(([_, filter]) => !filter.hide);
 	});
 
-	$effect(() => {
+	function syncFiltersAndInvalidate() {
+		console.log('[syncFiltersAndInvalidate] called, filteredFields:', filteredFields, 'filterValues:', JSON.stringify(filterValues));
 		for (const field of filteredFields) {
 			const filterValue = filterValues[field];
 			const overrideFilterValue = overrideFilters[field];
 			const finalFilterValue = overrideFilterValue || filterValue;
+			console.log('[syncFiltersAndInvalidate] field:', field, 'filterValue:', JSON.stringify(filterValue), 'final:', JSON.stringify(finalFilterValue));
 
 			const fieldFilterParams = finalFilterValue
 				? finalFilterValue.map((v: Record<string, any>) => v.value)
@@ -343,10 +344,21 @@
 				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
-		setTimeout(() => {
-			handler.invalidate();
-		}, 10);
-	});
+		onFilterChange(filterValues);
+		handler.invalidate();
+	}
+
+	// Initial filter sync on mount
+	for (const field of filteredFields) {
+		const filterValue = filterValues[field];
+		const overrideFilterValue = overrideFilters[field];
+		const finalFilterValue = overrideFilterValue || filterValue;
+
+		const fieldFilterParams = finalFilterValue
+			? finalFilterValue.map((v: Record<string, any>) => v.value)
+			: [];
+		handler.filter(fieldFilterParams, field);
+	}
 
 	const filterInitialData: Record<string, string[]> = {};
 	// convert URL search params and default filters to filter initial data
@@ -382,14 +394,6 @@
 		}
 	});
 
-	$effect(() => {
-		if (invalidateTable) {
-			console.debug('Invalidating table due to filter change');
-			handler.invalidate();
-			_goto(page.url);
-			invalidateTable = false;
-		}
-	});
 
 	let fieldComponentMap = $derived(getFieldComponentMap(URLModel));
 	let canCreateObject = $derived(
@@ -671,7 +675,7 @@
 													);
 
 													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-													invalidateTable = true;
+													syncFiltersAndInvalidate();
 												}}
 											/>
 										{/if}
@@ -699,9 +703,7 @@
 			</div>
 		{/if}
 	</header>
-	{@render quickFilters?.(filterValues, _form, () => {
-		invalidateTable = true;
-	})}
+	{@render quickFilters?.(filterValues, _form, syncFiltersAndInvalidate)}
 	{#if hiddenRowCount > 0}
 		<div
 			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
