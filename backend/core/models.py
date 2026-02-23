@@ -150,9 +150,7 @@ def _create_questions_from_data(requirement_node, questions_data):
                 order=c_order,
                 description=choice.get("description"),
                 color=choice.get("color"),
-                select_implementation_groups=choice.get(
-                    "select_implementation_groups"
-                ),
+                select_implementation_groups=choice.get("select_implementation_groups"),
                 folder=requirement_node.folder,
                 is_published=True,
                 translations=choice.get("translations"),
@@ -1037,15 +1035,11 @@ class LibraryUpdater:
                                     question=q,
                                     folder=ra.folder,
                                 )
-                                answers_changed_ca_ids.add(
-                                    ra.compliance_assessment_id
-                                )
+                                answers_changed_ca_ids.add(ra.compliance_assessment_id)
                             else:
                                 # Existing question: validate answer against new choices
                                 answer = existing_answers[q.urn]
-                                valid_pks = set(
-                                    q.choices.values_list("id", flat=True)
-                                )
+                                valid_pks = set(q.choices.values_list("id", flat=True))
                                 changed = False
                                 if q.type == Question.Type.MULTIPLE_CHOICE:
                                     current_pks = set(
@@ -1064,13 +1058,10 @@ class LibraryUpdater:
                                 elif q.type == Question.Type.SINGLE_CHOICE:
                                     if (
                                         answer.selected_choice_id
-                                        and answer.selected_choice_id
-                                        not in valid_pks
+                                        and answer.selected_choice_id not in valid_pks
                                     ):
                                         answer.selected_choice = None
-                                        answer.save(
-                                            update_fields=["selected_choice"]
-                                        )
+                                        answer.save(update_fields=["selected_choice"])
                                         changed = True
                                 if changed:
                                     answers_changed_ca_ids.add(
@@ -1082,9 +1073,7 @@ class LibraryUpdater:
                         for urn, answer in existing_answers.items():
                             if urn not in new_question_urns:
                                 answer.delete()
-                                answers_changed_ca_ids.add(
-                                    ra.compliance_assessment_id
-                                )
+                                answers_changed_ca_ids.add(ra.compliance_assessment_id)
 
                     # update threats linked to the requirement_node
                     for threat_urn in requirement_node.get("threats", []):
@@ -2172,10 +2161,14 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return node_dict
 
     def is_dynamic(self) -> bool:
-        return QuestionChoice.objects.filter(
-            question__requirement_node__framework=self,
-            select_implementation_groups__isnull=False,
-        ).exclude(select_implementation_groups=[]).exists()
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=self,
+                select_implementation_groups__isnull=False,
+            )
+            .exclude(select_implementation_groups=[])
+            .exists()
+        )
 
     def publish(self):
         """Validate and publish a draft framework."""
@@ -2361,6 +2354,41 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         locale_translations = translations.get(get_language(), {})
         return locale_translations.get("typical_evidence", self.typical_evidence)
 
+    @property
+    def get_questions_translated(self) -> dict | None:
+        if not self.questions:
+            return None
+
+        current_lang = get_language()
+
+        def _translate_choice(choice: dict) -> dict:
+            tr = choice.get("translations", {}).get(current_lang, {})
+            return {
+                **choice,
+                **({} if not tr.get("value") else {"value": tr["value"]}),
+                **(
+                    {}
+                    if not tr.get("description")
+                    else {"description": tr["description"]}
+                ),
+            }
+
+        def _translate_question(q_content: dict) -> dict:
+            tr = q_content.get("translations", {}).get(current_lang, {})
+            translated = {**q_content}
+            if tr.get("text"):
+                translated["text"] = tr["text"]
+            if "choices" in q_content:
+                translated["choices"] = [
+                    _translate_choice(c) for c in q_content["choices"]
+                ]
+            return translated
+
+        return {
+            q_urn: _translate_question(q_content)
+            for q_urn, q_content in self.questions.items()
+        }
+
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
@@ -2385,9 +2413,7 @@ class Question(AbstractBaseModel, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
-    annotation = models.TextField(
-        blank=True, null=True, verbose_name=_("Annotation")
-    )
+    annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
     type = models.CharField(
         max_length=20,
         choices=Type.choices,
@@ -2395,9 +2421,7 @@ class Question(AbstractBaseModel, FolderMixin):
         verbose_name=_("Type"),
     )
     config = models.JSONField(blank=True, null=True, verbose_name=_("Config"))
-    depends_on = models.JSONField(
-        blank=True, null=True, verbose_name=_("Depends on")
-    )
+    depends_on = models.JSONField(blank=True, null=True, verbose_name=_("Depends on"))
     order = models.IntegerField(default=0, verbose_name=_("Order"))
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     translations = models.JSONField(
@@ -2423,19 +2447,13 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
-    annotation = models.TextField(
-        blank=True, null=True, verbose_name=_("Annotation")
-    )
-    add_score = models.IntegerField(
-        blank=True, null=True, verbose_name=_("Add score")
-    )
+    annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
+    add_score = models.IntegerField(blank=True, null=True, verbose_name=_("Add score"))
     compute_result = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Compute result")
     )
     order = models.IntegerField(default=0, verbose_name=_("Order"))
-    description = models.TextField(
-        blank=True, null=True, verbose_name=_("Description")
-    )
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
     color = models.CharField(
         max_length=50, blank=True, null=True, verbose_name=_("Color")
     )
@@ -7099,10 +7117,14 @@ class ComplianceAssessment(Assessment):
         total_questions_count = Answer.objects.filter(
             requirement_assessment_id__in=ra_ids,
         ).count()
-        answered_questions_count = Answer.objects.filter(
-            requirement_assessment_id__in=ra_ids,
-            value__isnull=False,
-        ).exclude(value__in=[None, [], ""]).count()
+        answered_questions_count = (
+            Answer.objects.filter(
+                requirement_assessment_id__in=ra_ids,
+                value__isnull=False,
+            )
+            .exclude(value__in=[None, [], ""])
+            .count()
+        )
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
@@ -7349,9 +7371,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
     def compute_score_and_result(self):
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
-        answers_qs = self.answers.select_related(
-            "question", "selected_choice"
-        ).prefetch_related("selected_choices").all()
+        answers_qs = (
+            self.answers.select_related("question", "selected_choice")
+            .prefetch_related("selected_choices")
+            .all()
+        )
 
         # Build lookup: question_id → set of selected choice PKs
         selected_choice_pks_by_qid = {}
@@ -7371,15 +7395,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0
             else:
-                has_answer_by_qid[a.question_id] = (
-                    a.value is not None and a.value != ""
-                )
+                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 
             # For depends_on resolution, pass ref_id strings
             if a.question.ref_id:
-                answers_by_ref[a.question.ref_id] = (
-                    a.get_choice_ref_ids() or a.value
-                )
+                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
 
         for q in questions_qs:
             questions_by_ref[q.ref_id] = q
@@ -7518,9 +7538,7 @@ class Answer(AbstractBaseModel, FolderMixin):
         related_name="given_answers",
         verbose_name=_("Question"),
     )
-    value = models.JSONField(
-        blank=True, null=True, verbose_name=_("Value")
-    )
+    value = models.JSONField(blank=True, null=True, verbose_name=_("Value"))
     selected_choice = models.ForeignKey(
         "QuestionChoice",
         on_delete=models.SET_NULL,
