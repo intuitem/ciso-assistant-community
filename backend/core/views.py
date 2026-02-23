@@ -7002,12 +7002,8 @@ class FolderViewSet(BaseModelViewSet):
                 question = Question.objects.get(urn=_fields.get("question"))
                 _fields["question"] = question
 
-                # Collect all choice ref_ids into a single M2M list
-                # Support legacy selected_choice_ref_id from old backups
-                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None) or []
-                legacy_ref_id = _fields.pop("selected_choice_ref_id", None)
-                if legacy_ref_id and legacy_ref_id not in choice_ref_ids:
-                    choice_ref_ids.append(legacy_ref_id)
+                # Store M2M ref_ids for post-create
+                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
                 if choice_ref_ids:
                     many_to_many_map_ids["selected_choices_ref_ids"] = choice_ref_ids
 
