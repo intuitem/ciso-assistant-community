@@ -322,12 +322,10 @@
 	});
 
 	function syncFiltersAndInvalidate() {
-		console.log('[syncFiltersAndInvalidate] called, filteredFields:', filteredFields, 'filterValues:', JSON.stringify(filterValues));
 		for (const field of filteredFields) {
 			const filterValue = filterValues[field];
 			const overrideFilterValue = overrideFilters[field];
 			const finalFilterValue = overrideFilterValue || filterValue;
-			console.log('[syncFiltersAndInvalidate] field:', field, 'filterValue:', JSON.stringify(filterValue), 'final:', JSON.stringify(finalFilterValue));
 
 			const fieldFilterParams = finalFilterValue
 				? finalFilterValue.map((v: Record<string, any>) => v.value)
