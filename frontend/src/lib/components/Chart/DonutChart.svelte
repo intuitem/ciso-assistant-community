@@ -41,6 +41,11 @@
 		}
 	}
 	const chart_id = `${name}_div`;
+	const formatDonutLabel = (params) => {
+		const percent = params.percent?.toFixed(1) ?? '0.0';
+		const value = params.value ?? params.data?.value ?? 0;
+		return `${percent}% (${value})`;
+	};
 	onMount(async () => {
 		const echarts = await import('echarts');
 		let chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
@@ -79,7 +84,7 @@
 					name: s_label,
 					type: 'pie',
 					radius: showPercentage ? ['30%', '55%'] : ['40%', '70%'],
-					center: ['50%', '45%'],
+					center: ['50%', '55%'],
 					avoidLabelOverlap: true,
 					itemStyle: {
 						borderRadius: 10,
@@ -90,46 +95,26 @@
 						? {
 								show: true,
 								position: 'outside',
-								formatter: '{d}%',
-								fontSize: 10,
+								formatter: formatDonutLabel,
+								fontSize: 16,
 								fontWeight: 'bold',
-								distanceToLabelLine: 2
+								distanceToLabelLine: 2,
+								overflow: 'break'
 							}
 						: {
 								show: false,
 								position: 'center'
 							},
 					emphasis: {
-						label: {
-							show: true,
-							fontSize: 20,
-							fontWeight: 'bold',
-							formatter: function (params) {
-								// Calculate the total value
-								const total =
-									params.data.value +
-									values
-										.filter((item) => item.name !== params.data.name)
-										.reduce((sum, item) => sum + item.value, 0);
-
-								// Calculate percentage
-								const percent = ((params.data.value / total) * 100).toFixed(1);
-
-								// Return formatted center label with just the name and percentage
-								return `{value|${percent}%}`;
-							},
-							rich: {
-								name: {
+						scale: false,
+						label: showPercentage
+							? {
+									show: true,
+									formatter: formatDonutLabel,
 									fontSize: 16,
-									fontWeight: 'bold',
-									lineHeight: 30
-								},
-								value: {
-									fontSize: 14,
-									lineHeight: 20
+									fontWeight: 'bold'
 								}
-							}
-						}
+							: { show: false }
 					},
 					labelLine: {
 						show: showPercentage,
