@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 from typing import List, Type, Set, Dict, Optional
 
 from core.models import (
+    Answer,
     Asset,
     AppliedControl,
     Evidence,
@@ -42,6 +43,7 @@ from ebios_rm.models import (
 from tprm.models import Entity
 
 from core.serializers import (
+    AnswerImportExportSerializer,
     FolderImportExportSerializer,
     AssetImportExportSerializer,
     AppliedControlImportExportSerializer,
@@ -148,6 +150,7 @@ def app_dot_model(model: Model) -> str:
 def import_export_serializer_class(model: Model) -> serializers.Serializer:
     model_serializer_map = {
         Folder: FolderImportExportSerializer,
+        Answer: AnswerImportExportSerializer,
         Asset: AssetImportExportSerializer,
         AppliedControl: AppliedControlImportExportSerializer,
         Evidence: EvidenceImportExportSerializer,
@@ -413,6 +416,9 @@ def get_domain_export_objects(domain: Folder):
     requirement_assessments = RequirementAssessment.objects.filter(
         compliance_assessment__in=compliance_assessments
     ).distinct()
+    answers = Answer.objects.filter(
+        requirement_assessment__in=requirement_assessments
+    ).distinct()
     frameworks = Framework.objects.filter(
         Q(folder__in=folders) | Q(complianceassessment__in=compliance_assessments)
     ).distinct()
@@ -496,6 +502,7 @@ def get_domain_export_objects(domain: Folder):
         "perimeter": perimeters,
         "complianceassessment": compliance_assessments,
         "requirementassessment": requirement_assessments,
+        "answer": answers,
         "ebiosrmstudy": ebios_rm_studies,
         "riskassessment": risk_assessments,
         "riskscenario": risk_scenarios,

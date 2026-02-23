@@ -2645,9 +2645,25 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answers",
             "evidences",
             "applied_controls",
+        ]
+
+
+class AnswerImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    requirement_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    question = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+
+    class Meta:
+        model = Answer
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "requirement_assessment",
+            "question",
+            "value",
         ]
 
 

@@ -6981,6 +6981,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["compliance_assessment"])
                 )
+                _fields.pop("answers", None)
                 many_to_many_map_ids.update(
                     {
                         "applied_controls": get_mapped_ids(
@@ -6990,6 +6991,14 @@ class FolderViewSet(BaseModelViewSet):
                             _fields.pop("evidences", []), link_dump_database_ids
                         ),
                     }
+                )
+
+            case "answer":
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                _fields["question"] = Question.objects.get(
+                    urn=_fields.get("question")
                 )
 
             case "vulnerability":
