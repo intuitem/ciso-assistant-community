@@ -177,7 +177,7 @@
 			style="backdrop-filter: blur(4px);"
 		>
 			<div class="card bg-white p-8 shadow-xl max-w-md text-center space-y-4">
-				<Progress>
+				<Progress value={null}>
 					<Progress.Circle class="[--size:--spacing(16)] mx-auto">
 						<Progress.CircleTrack />
 						<Progress.CircleRange class="stroke-primary-500" />
@@ -378,7 +378,7 @@
 						}}
 					>
 						{#if isSubmitting}
-							<Progress>
+							<Progress value={null}>
 								<Progress.Circle class="[--size:--spacing(6)]">
 									<Progress.CircleTrack />
 									<Progress.CircleRange class="stroke-white" />

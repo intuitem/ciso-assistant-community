@@ -80,7 +80,7 @@
 				>
 					<span class="mr-2">
 						{#if simulationIsLoading}
-							<Progress>
+							<Progress value={null}>
 								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
 									<Progress.CircleTrack />
 									<Progress.CircleRange class="stroke-white" />
