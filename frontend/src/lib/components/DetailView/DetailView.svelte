@@ -474,11 +474,7 @@
 								{#if getFieldConfig(key)?.tooltip}
 									{@const tooltipKey = getFieldConfig(key)?.tooltip}
 									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-									<Tooltip
-										positioning={{ placement: 'right' }}
-										openDelay={200}
-										closeDelay={100}
-										>
+									<Tooltip positioning={{ placement: 'right' }} openDelay={200} closeDelay={100}>
 										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
