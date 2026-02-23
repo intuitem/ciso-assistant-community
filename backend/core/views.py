@@ -6099,8 +6099,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         Create the default user groups after domain creation
         """
-        serializer.save()
-        folder = Folder.objects.get(id=serializer.data["id"])
+        folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
 
     def list(self, request, *args, **kwargs):
@@ -6687,7 +6686,9 @@ class FolderViewSet(BaseModelViewSet):
             with transaction.atomic():
                 # Create base folder and store its ID
                 base_folder = Folder.objects.create(
-                    name=domain_name, content_type=Folder.ContentType.DOMAIN
+                    name=domain_name,
+                    content_type=Folder.ContentType.DOMAIN,
+                    create_iam_groups=True,
                 )
                 link_dump_database_ids["base_folder"] = base_folder
                 Folder.create_default_ug_and_ra(base_folder)
