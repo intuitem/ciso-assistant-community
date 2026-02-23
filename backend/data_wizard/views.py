@@ -2712,7 +2712,7 @@ class LoadFileView(APIView):
                 name = record.get("name", "")
                 description = record.get("description", "")
 
-                status = self.VULNERABILITY_STATUS_MAP.get(
+                status_value = self.VULNERABILITY_STATUS_MAP.get(
                     safe_lowercase(record.get("status", "")), "--"
                 )
                 severity = self.VULNERABILITY_SEVERITY_MAP.get(
@@ -2737,6 +2737,7 @@ class LoadFileView(APIView):
                             self._add_missing_reference_for_vulnerability(
                                 results, record, "applied_controls", ap_name, folder_id
                             )
+                            break
                 else:
                     applied_controls = []
 
@@ -2756,6 +2757,7 @@ class LoadFileView(APIView):
                             self._add_missing_reference_for_vulnerability(
                                 results, record, "assets", asset_name, folder_id
                             )
+                            break
 
                 filtering_labels = []
                 if record.get("filtering_labels"):
@@ -2788,12 +2790,13 @@ class LoadFileView(APIView):
                                 se_name,
                                 folder_id,
                             )
+                            break
 
                 vuln_data = {
                     "ref_id": ref_id,
                     "name": name,
                     "description": description,
-                    "status": status,
+                    "status": status_value,
                     "severity": severity,
                     "applied_controls": applied_controls,
                     "assets": assets,
@@ -2814,7 +2817,7 @@ class LoadFileView(APIView):
                         results["errors"].append(
                             {
                                 "record": record,
-                                "details": f"Failed to save vulnerability record {str(e)}",
+                                "error": f"Failed to save vulnerability record {str(e)}",
                             }
                         )
 
@@ -2826,7 +2829,7 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {
                             "record": record,
-                            "details": "Failed to save vulnerability record: "
+                            "error": "Failed to save vulnerability record: "
                             + vuln_serializer.errors,
                         }
                     )
