@@ -483,6 +483,10 @@
 						{#if field === 'ro_to_couple'}
 							{@const [firstPart, ...restParts] = option.label.split(' - ')}
 							{safeTranslate(firstPart)} - {restParts.join(' - ')}
+						{:else if option.suggested}
+							<span class="text-indigo-500">
+								{option.translatedLabel}
+							</span>
 						{:else}
 							{option.translatedLabel}
 						{/if}
