@@ -8156,7 +8156,7 @@ objects:
       - E
       - EK
       reference_controls:
-      - urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.10
+      - urn:intuitem:risk:reference_control:ccb-cyfun2025:d.am-08.10
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.11
       assessable: true
       depth: 4
