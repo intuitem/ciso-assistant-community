@@ -2710,6 +2710,12 @@ class LoadFileView(APIView):
             for record in records:
                 ref_id = record.get("ref_id", "")
                 name = record.get("name", "")
+                if not name:
+                    results["failed"] += 1
+                    results["errors"].append(
+                        {"record": record, "error": "Name field is mandatory"}
+                    )
+                    continue
                 description = record.get("description", "")
 
                 status_value = self.VULNERABILITY_STATUS_MAP.get(
@@ -2804,11 +2810,13 @@ class LoadFileView(APIView):
                     "security_exceptions": security_exceptions,
                     "filtering_labels": filtering_labels,
                 }
+                if failed_record_reference:
+                    continue
 
                 vuln_serializer = VulnerabilityWriteSerializer(
                     data=vuln_data, context={"request": request}
                 )
-                if vuln_serializer.is_valid() and not failed_record_reference:
+                if vuln_serializer.is_valid():
                     try:
                         vuln_serializer.save()
                         results["successful"] += 1
@@ -2837,7 +2845,7 @@ class LoadFileView(APIView):
         except Exception as e:
             logger.warning("Failed to save vulnerabily records")
             results["errors"].append(
-                {"details": f"Failed to parse the vulnerability records: {str(e)}"}
+                {"error": f"Failed to parse the vulnerability records: {str(e)}"}
             )
             results["failed"] = len(records)
             results["successful"] = 0
