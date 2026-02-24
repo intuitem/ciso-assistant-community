@@ -237,6 +237,17 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |
 | `documentation_score` | No | |
+| `score` | No | Single-score mode (when no documentation_score) |
+| `Q: <question text>` | No | Flattened questionnaire answers (see below) |
+
+**Dynamic Questionnaire Support (Q: columns):**
+
+For frameworks using dynamic questionnaires, the export/import supports flattened question columns:
+
+- **Export:** Each question appears as a column header `Q: <question text>`. Cell values are human-readable choice texts. Multiple-choice answers are pipe-separated (`choice1 | choice2`). Text/date answers appear as-is.
+- **Import:** The importer matches `Q: ` column headers to the requirement's question texts, reverse-maps choice values to URNs, and builds the `answers` JSON. The existing `compute_score_and_result()` then automatically computes score and compliance result from the imported answers.
+- Columns only appear when the framework has questions. Non-questionnaire frameworks are unaffected.
+- Conditional question visibility (`depends_on`) is handled automatically during score/result computation.
 
 **Missing RequirementAssessment Fields:**
 | Field | Type | Priority |

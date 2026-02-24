@@ -1743,6 +1743,80 @@ class LoadFileView(APIView):
                                 )
                             else:
                                 requirement_data.update({"is_scored": False})
+
+                            # Build answers from the "answers" cell
+                            answers_cell = record.get("answers")
+                            if (
+                                answers_cell not in (None, "")
+                                and ReqNode
+                                and ReqNode.questions
+                            ):
+                                text_to_question = {}
+                                for q_urn, qdef in ReqNode.questions.items():
+                                    q_text = qdef.get("text", "")
+                                    if q_text:
+                                        text_to_question[q_text] = (
+                                            q_urn,
+                                            qdef,
+                                        )
+
+                                answers = requirement_assessment.answers or {}
+                                has_any_answer = False
+
+                                for line in str(answers_cell).split("\n"):
+                                    line = line.strip()
+                                    if ">>" not in line:
+                                        continue
+                                    q_part, _, a_part = line.partition(">>")
+                                    q_text = q_part.replace("(multiple)", "").strip()
+                                    a_value = a_part.strip()
+                                    # Skip template hints
+                                    if a_value.startswith("[") and a_value.endswith(
+                                        "]"
+                                    ):
+                                        continue
+                                    if not a_value:
+                                        continue
+
+                                    matched = text_to_question.get(q_text)
+                                    if not matched:
+                                        continue
+                                    q_urn, qdef = matched
+                                    q_type = qdef.get("type")
+
+                                    if q_type in ("text", "date"):
+                                        answers[q_urn] = a_value
+                                        has_any_answer = True
+                                    elif q_type == "multiple_choice":
+                                        selected = [
+                                            v.strip()
+                                            for v in a_value.split("|")
+                                            if v.strip()
+                                        ]
+                                        value_to_urn = {
+                                            c.get("value", ""): c["urn"]
+                                            for c in qdef.get("choices", [])
+                                        }
+                                        choice_urns = [
+                                            value_to_urn[v]
+                                            for v in selected
+                                            if v in value_to_urn
+                                        ]
+                                        if choice_urns:
+                                            answers[q_urn] = choice_urns
+                                            has_any_answer = True
+                                    elif q_type == "unique_choice":
+                                        value_to_urn = {
+                                            c.get("value", ""): c["urn"]
+                                            for c in qdef.get("choices", [])
+                                        }
+                                        if a_value in value_to_urn:
+                                            answers[q_urn] = value_to_urn[a_value]
+                                            has_any_answer = True
+
+                                if has_any_answer:
+                                    requirement_data["answers"] = answers
+
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
