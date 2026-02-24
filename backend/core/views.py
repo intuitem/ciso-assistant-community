@@ -11459,7 +11459,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
         incident = (
             Incident.objects.select_related("folder")
-            .prefetch_related("owners", "entities", "assets", "threats")
+            .prefetch_related(
+                "owners", "entities", "assets", "threats", "qualifications"
+            )
             .get(id=pk)
         )
 
