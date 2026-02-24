@@ -13,7 +13,7 @@
 	import { toCamelCase } from '$lib/utils/locales';
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
-	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
@@ -105,21 +105,29 @@
 			</div>
 		{/if}
 		{#if data.requirementAssessment.is_scored}
-			<ProgressRing
-				strokeWidth="20px"
-				meterStroke={displayScoreColor(score, max_score)}
-				value={formatScoreValue(score, max_score)}
-				classes="shrink-0"
-				size="size-10">{score}</ProgressRing
-			>
+			<div class="shrink-0 relative">
+				<Progress value={formatScoreValue(score, max_score)} min={0} max={100}>
+					<Progress.Circle class="[--size:--spacing(10)]">
+						<Progress.CircleTrack />
+						<Progress.CircleRange class={displayScoreColor(score, max_score)} />
+					</Progress.Circle>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-xs font-bold">{score}</span>
+					</div>
+				</Progress>
+			</div>
 			{#if data.complianceAssessmentScore.show_documentation_score}
-				<ProgressRing
-					strokeWidth="20px"
-					meterStroke={displayScoreColor(documentationScore, max_score)}
-					value={formatScoreValue(documentationScore, max_score)}
-					classes="shrink-0"
-					size="size-10">{documentationScore}</ProgressRing
-				>
+				<div class="shrink-0 relative">
+					<Progress value={formatScoreValue(documentationScore, max_score)} min={0} max={100}>
+						<Progress.Circle class="[--size:--spacing(10)]">
+							<Progress.CircleTrack />
+							<Progress.CircleRange class={displayScoreColor(documentationScore, max_score)} />
+						</Progress.Circle>
+						<div class="absolute inset-0 flex items-center justify-center">
+							<span class="text-xs font-bold">{documentationScore}</span>
+						</div>
+					</Progress>
+				</div>
 			{/if}
 		{/if}
 	</div>
@@ -273,47 +281,46 @@
 				group = e.value;
 			}}
 		>
-			{#snippet list()}
+			<Tabs.List>
 				{#if !page.data.user.is_third_party}
-					<Tabs.Control value="applied_controls">{m.appliedControls()}</Tabs.Control>
+					<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
 				{/if}
-				<Tabs.Control value="evidence">{m.evidences()}</Tabs.Control>
-			{/snippet}
-			{#snippet content()}
-				<Tabs.Panel value="applied_controls">
-					{#if !page.data.user.is_third_party}
-						<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-							<i class="fa-solid fa-info-circle"></i>
-							<p>{m.requirementAppliedControlHelpText()}</p>
-						</div>
-						<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-							<ModelTable
-								source={data.tables['applied-controls']}
-								hideFilters={true}
-								URLModel="applied-controls"
-								expectedCount={countMasked(data.requirementAssessment.applied_controls)}
-								baseEndpoint="/applied-controls?requirement_assessments={page.data
-									.requirementAssessment.id}"
-							/>
-						</div>
-					{/if}
-				</Tabs.Panel>
-				<Tabs.Panel value="evidence">
+				<Tabs.Trigger value="evidence">{m.evidences()}</Tabs.Trigger>
+				<Tabs.Indicator />
+			</Tabs.List>
+			<Tabs.Content value="applied_controls">
+				{#if !page.data.user.is_third_party}
 					<div class="flex items-center mb-2 px-2 text-xs space-x-2">
 						<i class="fa-solid fa-info-circle"></i>
-						<p>{m.requirementEvidenceHelpText()}</p>
+						<p>{m.requirementAppliedControlHelpText()}</p>
 					</div>
 					<div class="h-full flex flex-col space-y-2 rounded-container p-4">
 						<ModelTable
-							source={data.tables['evidences']}
+							source={data.tables['applied-controls']}
 							hideFilters={true}
-							URLModel="evidences"
-							expectedCount={countMasked(data.requirementAssessment.evidences)}
-							baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
+							URLModel="applied-controls"
+							expectedCount={countMasked(data.requirementAssessment.applied_controls)}
+							baseEndpoint="/applied-controls?requirement_assessments={page.data
+								.requirementAssessment.id}"
 						/>
 					</div>
-				</Tabs.Panel>
-			{/snippet}
+				{/if}
+			</Tabs.Content>
+			<Tabs.Content value="evidence">
+				<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+					<i class="fa-solid fa-info-circle"></i>
+					<p>{m.requirementEvidenceHelpText()}</p>
+				</div>
+				<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+					<ModelTable
+						source={data.tables['evidences']}
+						hideFilters={true}
+						URLModel="evidences"
+						expectedCount={countMasked(data.requirementAssessment.evidences)}
+						baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment.id}"
+					/>
+				</div>
+			</Tabs.Content>
 		</Tabs>
 	</div>
 	{#if data.requirementAssessment.requirement.questions != null && Object.keys(data.requirementAssessment.requirement.questions).length !== 0}
