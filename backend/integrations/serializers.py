@@ -190,6 +190,11 @@ class IntegrationConfigurationSerializer(serializers.ModelSerializer):
         return data
 
 
+# Aliases expected by BaseModelViewSet's SerializerFactory
+IntegrationConfigurationReadSerializer = IntegrationConfigurationSerializer
+IntegrationConfigurationWriteSerializer = IntegrationConfigurationSerializer
+
+
 class SyncMappingSerializer(serializers.ModelSerializer):
     """
     Serializer for the SyncMapping model, used for deletion.
