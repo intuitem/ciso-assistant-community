@@ -7385,7 +7385,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 Question.Type.SINGLE_CHOICE,
                 Question.Type.MULTIPLE_CHOICE,
             ):
-                pks = set(a.selected_choices.values_list("id", flat=True))
+                pks = {c.id for c in a.selected_choices.all()}
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0
             else:
@@ -7566,13 +7566,22 @@ class Answer(AbstractBaseModel, FolderMixin):
             update_fields=["updated_at"]
         )
 
-        # If framework is dynamic, trigger IG update
+        # If framework is dynamic, trigger IG update (deduplicated per transaction)
         if self.requirement_assessment.compliance_assessment.framework.is_dynamic():
-            transaction.on_commit(
-                lambda: update_selected_implementation_groups(
-                    self.requirement_assessment.compliance_assessment
-                )
-            )
+            ca = self.requirement_assessment.compliance_assessment
+            conn = transaction.get_connection()
+            pending = getattr(conn, "_pending_ig_updates", None)
+            if pending is None:
+                pending = set()
+                conn._pending_ig_updates = pending
+            if ca.pk not in pending:
+                pending.add(ca.pk)
+
+                def _do_ig_update(ca_ref=ca, pending_ref=pending):
+                    pending_ref.discard(ca_ref.pk)
+                    update_selected_implementation_groups(ca_ref)
+
+                transaction.on_commit(_do_ig_update)
 
 
 class FindingsAssessment(Assessment):
