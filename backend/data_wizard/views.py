@@ -645,6 +645,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             "eta": _parse_date(record.get("eta")),
             "expiry_date": _parse_date(record.get("expiry_date")),
             "start_date": _parse_date(record.get("start_date")),
+            "observation": record.get("observation", ""),
         }
 
         if reference_control_id:
@@ -889,6 +890,17 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
+        # Parse priority (1-4)
+        priority = record.get("priority")
+        if isinstance(priority, (int, float)):
+            priority = int(priority)
+        elif isinstance(priority, str) and priority.isdigit():
+            priority = int(priority)
+        else:
+            priority = None
+        if isinstance(priority, int) and not (1 <= priority <= 4):
+            priority = None
+
         filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
 
         finding_data = {
@@ -899,7 +911,13 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
+            "eta": _parse_date(record.get("eta")),
+            "due_date": _parse_date(record.get("due_date")),
+            "observation": record.get("observation", ""),
         }
+
+        if priority is not None:
+            finding_data["priority"] = priority
 
         return finding_data, None
 
@@ -1692,41 +1710,36 @@ class LoadFileView(APIView):
 
                         if requirement_assessment:
                             # Update the requirement assessment with the data from the record
+                            compliance_result = record.get("compliance_result")
+                            requirement_progress = record.get("requirement_progress")
                             requirement_data = {
-                                "result": record.get("compliance_result")
-                                if record.get("compliance_result") != ""
+                                "result": compliance_result
+                                if compliance_result not in (None, "")
                                 else "not_assessed",
-                                "status": record.get("requirement_progress")
-                                if record.get("requirement_progress") != ""
+                                "status": requirement_progress
+                                if requirement_progress not in (None, "")
                                 else "to_do",
                                 "observation": record.get("observations", ""),
                             }
-                            if (
-                                record.get("implementation_score") != ""
-                                and record.get("documentation_score") != ""
+                            impl_score = record.get("implementation_score")
+                            doc_score = record.get("documentation_score")
+                            score = record.get("score")
+                            enable_doc_score = False
+                            if impl_score not in (None, "") and doc_score not in (
+                                None,
+                                "",
                             ):
-                                if not compliance_assessment.show_documentation_score:
-                                    compliance_assessment.show_documentation_score = (
-                                        True
-                                    )
-                                    compliance_assessment.save(
-                                        update_fields=["show_documentation_score"]
-                                    )
                                 requirement_data.update(
                                     {
-                                        "score": record.get("implementation_score"),
-                                        "documentation_score": record.get(
-                                            "documentation_score"
-                                        ),
+                                        "score": impl_score,
+                                        "documentation_score": doc_score,
                                         "is_scored": True,
                                     }
                                 )
-                            elif (
-                                record.get("score") != ""
-                                and record.get("score") is not None
-                            ):
+                                enable_doc_score = True
+                            elif score not in (None, ""):
                                 requirement_data.update(
-                                    {"score": record.get("score"), "is_scored": True}
+                                    {"score": score, "is_scored": True}
                                 )
                             else:
                                 requirement_data.update({"is_scored": False})
@@ -1737,8 +1750,18 @@ class LoadFileView(APIView):
                                 partial=True,
                                 context={"request": request},
                             )
-                            if req_serializer.is_valid(raise_exception=True):
+                            if req_serializer.is_valid():
                                 req_serializer.save()
+                                if (
+                                    enable_doc_score
+                                    and not compliance_assessment.show_documentation_score
+                                ):
+                                    compliance_assessment.show_documentation_score = (
+                                        True
+                                    )
+                                    compliance_assessment.save(
+                                        update_fields=["show_documentation_score"]
+                                    )
                                 results["successful"] += 1
                             else:
                                 results["failed"] += 1

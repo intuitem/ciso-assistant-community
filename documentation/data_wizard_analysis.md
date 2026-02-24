@@ -82,6 +82,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `control_impact` | No | Integer (1-5), also accepts `impact` |
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
+| `observation` | No | Free text |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -205,21 +206,20 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` | No | Reference ID |
 | `status` | No | |
 | `severity` | No | Mapped: info, low, medium, high, critical |
-| `filtering_labels` | No | Pipe-separated values |
+| `filtering_labels` | No | Pipe- or comma-separated values (created if missing) |
+| `eta` | No | Date (YYYY-MM-DD) |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `priority` | No | Integer (1-4: P1-P4) |
+| `observation` | No | Free text |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `cvss_vector` | CharField | High |
-| `cwe_id` | CharField | High |
-| `purl` | CharField | Medium |
-| `owner` | FK User | High |
-| `eta` | DateField | High |
-| `due_date` | DateField | High |
-| `recommendation` | TextField | Medium |
-| `remediation_link` | URLField | Medium |
+| `owner` | M2M Actor | High |
 | `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
+| `threats` | M2M | Medium |
+| `vulnerabilities` | M2M | Medium |
 
 ---
 
