@@ -14,8 +14,8 @@ description: "The CyberFundamentals Framework is a framework owned by the Centre
   \ 103305-1).\nhttps://cyfun.eu/sites/default/files/2025-10/CyFun2025_Booklet-ESSENTIAL.pdf\n\
   Version 2025-10-01"
 copyright: "\u24B8 Centre for Cybersecurity Belgium (CCB)"
-version: 5
-publication_date: null
+version: 6
+publication_date: 2026-02-24
 provider: CCB
 packager: intuitem
 objects:
@@ -1617,8 +1617,8 @@ objects:
       \ applied before first use.\n\xB7 Ensure Conformance and Compliance: All actions\
       \ should conform to internal procedures and comply with applicable cybersecurity\
       \ regulations and industry standards."
-  - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:d.am-08.10
-    ref_id: D.AM-08.10
+  - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.10
+    ref_id: ID.AM-08.10
     name: Post-maintenance security verification
     description: The organisation shall verify security controls following maintenance
       or repairs/patching, and take action as appropriate.
@@ -6472,7 +6472,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-03
-      ref_id: GV.RR-03-1
+      ref_id: GV.RR-03.1
       description: Sufficient resources shall be allocated in line with the cybersecurity
         risk strategy, roles, responsibilities and policies.
       annotation: "The goal of this control is to ensure that cybersecurity is effectively\
@@ -6497,7 +6497,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:gv.rr-03
-      ref_id: GV.RR-03-2
+      ref_id: GV.RR-03.2
       description: The organisation shall assign roles and responsibilities for reviewing
         and updating response and recovery plans, ensuring they reflect changes in
         the risk environment and remain effective.
@@ -7605,7 +7605,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03
-      ref_id: ID.AM-03-2
+      ref_id: ID.AM-03.2
       description: The organisation's network communication and internal data flows
         shall be mapped, documented, authorised, and updated when changes occur.
       annotation: "The goal of this control is to ensure that internal network communications\
@@ -7632,7 +7632,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-03
-      ref_id: ID.AM-03-3
+      ref_id: ID.AM-03.3
       description: The organisation's network communication and external data flows
         shall be mapped, documented, authorised, and updated when changes occur.
       annotation: "The goal of this control is to ensure that external network communications\
@@ -8131,7 +8131,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08
-      ref_id: D.AM-08.10
+      ref_id: ID.AM-08.10
       description: The organisation shall verify security controls following maintenance
         or repairs/patching, and take action as appropriate.
       annotation: "The goal of this control is to ensure that security controls remain\
@@ -8155,6 +8155,8 @@ objects:
       implementation_groups:
       - E
       - EK
+      reference_controls:
+      - urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.10
     - urn: urn:intuitem:risk:req_node:ccb-cyfun2025:id.am-08.11
       assessable: true
       depth: 4
@@ -12462,7 +12464,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03
-      ref_id: DE.CM-03-1
+      ref_id: DE.CM-03.1
       description: End point and network protection tools to monitor end-user behaviour
         for dangerous activity shall be implemented.
       annotation: "The goal of this control is to ensure that the organisation can\
@@ -12501,7 +12503,7 @@ objects:
       assessable: true
       depth: 4
       parent_urn: urn:intuitem:risk:req_node:ccb-cyfun2025:de.cm-03
-      ref_id: DE.CM-03-2
+      ref_id: DE.CM-03.2
       description: End point and network protection tools that monitor end-user behaviour
         for dangerous activity shall be managed.
       annotation: "This control builds on DE.CM-03.1 by shifting the focus from implementation\
