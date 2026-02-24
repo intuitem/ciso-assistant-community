@@ -193,19 +193,84 @@ def parse_transcripteur(api_src: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     return thematiques, conditions
 
 
-def _line_to_text(line: str) -> tuple[str | None, bool]:
+def _indent_level(line: str) -> int:
+    return len(line) - len(line.lstrip(" "))
+
+
+def _append_text(base: str, chunk: str) -> str:
+    chunk = chunk.strip()
+    if not chunk:
+        return base
+    return f"{base} {chunk}".strip() if base else chunk
+
+
+def _extract_tag_line(line: str) -> tuple[str, str, str]:
+    """Retourne (tag, attrs, inline_text). Si pas un tag valide, tag=''."""
     s = line.strip()
-    if not s or s.startswith("//") or s.startswith("include "):
-        return None, False
-    if s.startswith("|"):
-        return s[1:].strip(), False
     match = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)(\([^)]*\))?(?:\s+(.*))?$", s)
     if not match:
-        return s, False
-    tag, inline = match.group(1), (match.group(3) or "").strip()
-    if tag in {"p", "br"} and not inline:
-        return None, True
-    return (inline, False) if inline else (None, False)
+        return "", "", s
+    tag = match.group(1)
+    attrs = (match.group(2) or "").strip()
+    inline = (match.group(3) or "").strip()
+    return tag, attrs, inline
+
+
+def _render_anchor(lines: list[str], start_idx: int) -> tuple[str, int]:
+    """Rend un tag <a> Pug en texte/Markdown et retourne (texte, next_idx)."""
+    raw = lines[start_idx]
+    indent = _indent_level(raw)
+    tag, attrs, inline = _extract_tag_line(raw)
+    if tag != "a":
+        return "", start_idx + 1
+
+    href = ""
+    if attrs:
+        href_match = re.search(r'href\s*=\s*[\'"]([^\'"]+)[\'"]', attrs)
+        if href_match:
+            href = href_match.group(1).strip()
+
+    label_parts: list[str] = []
+    if inline:
+        label_parts.append(inline)
+
+    i = start_idx + 1
+    while i < len(lines):
+        child_raw = lines[i]
+        child_stripped = child_raw.strip()
+
+        if not child_stripped:
+            i += 1
+            continue
+
+        if _indent_level(child_raw) <= indent:
+            break
+
+        if child_stripped.startswith("|"):
+            child_text = child_stripped[1:].strip()
+            if child_text:
+                label_parts.append(child_text)
+            i += 1
+            continue
+
+        break
+
+    label = " ".join(label_parts).strip()
+    if not href:
+        return label, i
+    if not label:
+        return href, i
+    if label == href:
+        return label, i
+    return f"[{label}]({href})", i
+
+
+def _flush_li(current: str, li_text: str) -> str:
+    li_text = li_text.strip()
+    if not li_text:
+        return current
+    bullet = f"\t• {li_text}"
+    return f"{current}\n{bullet}" if current else bullet
 
 
 def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
@@ -218,8 +283,34 @@ def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
 
     paragraphs: list[str] = []
     current = ""
-    for raw_line in read_text(pug_file).splitlines():
+
+    lines = read_text(pug_file).splitlines()
+    i = 0
+
+    li_indent: int | None = None
+    li_text = ""
+
+    while i < len(lines):
+        raw_line = lines[i]
         stripped = raw_line.strip()
+        indent = _indent_level(raw_line)
+
+        if li_indent is not None and stripped and indent <= li_indent:
+            current = _flush_li(current, li_text)
+            li_indent = None
+            li_text = ""
+
+            # Si on sort d'une liste et qu'on passe a un autre bloc, on force
+            # un nouveau paragraphe pour eviter de coller le texte au dernier <li>.
+            next_tag, _, _ = _extract_tag_line(raw_line)
+            if current and next_tag not in {"li", "ul"} and not stripped.startswith("|"):
+                paragraphs.append(current.strip())
+                current = ""
+
+        if not stripped or stripped.startswith("//"):
+            i += 1
+            continue
+
         if stripped.startswith("include "):
             if current:
                 paragraphs.append(current.strip())
@@ -230,19 +321,65 @@ def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
             included = pug_to_text(include_path, seen)
             if included:
                 paragraphs.extend([p for p in included.split("\n\n") if p.strip()])
+            i += 1
             continue
 
-        text, paragraph_break = _line_to_text(raw_line)
-        if paragraph_break:
+        if stripped.startswith("|"):
+            text = stripped[1:].strip()
+            if li_indent is not None and indent > li_indent:
+                li_text = _append_text(li_text, text)
+            else:
+                current = _append_text(current, text)
+            i += 1
+            continue
+
+        tag, _attrs, inline = _extract_tag_line(raw_line)
+        if not tag:
+            if li_indent is not None and indent > (li_indent or 0):
+                li_text = _append_text(li_text, stripped)
+            else:
+                current = _append_text(current, stripped)
+            i += 1
+            continue
+
+        if tag in {"p", "br"} and not inline:
             if current:
                 paragraphs.append(current.strip())
                 current = ""
+            i += 1
             continue
-        if text:
-            current = f"{current} {text}".strip() if current else text.strip()
+
+        if tag == "li":
+            if li_indent is not None:
+                current = _flush_li(current, li_text)
+            li_indent = indent
+            li_text = inline.strip()
+            i += 1
+            continue
+
+        if tag == "a":
+            link_text, next_i = _render_anchor(lines, i)
+            if li_indent is not None and indent > li_indent:
+                li_text = _append_text(li_text, link_text)
+            else:
+                current = _append_text(current, link_text)
+            i = next_i
+            continue
+
+        if inline:
+            if li_indent is not None and indent > li_indent:
+                li_text = _append_text(li_text, inline)
+            else:
+                current = _append_text(current, inline)
+
+        i += 1
+
+    if li_indent is not None:
+        current = _flush_li(current, li_text)
 
     if current:
         paragraphs.append(current.strip())
+
     return "\n\n".join([p for p in paragraphs if p.strip()])
 
 
