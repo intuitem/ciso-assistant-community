@@ -7377,7 +7377,7 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "entity":
-                if relationship_ids := many_to_many_map_ids["relationship_ids"]:
+                if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
