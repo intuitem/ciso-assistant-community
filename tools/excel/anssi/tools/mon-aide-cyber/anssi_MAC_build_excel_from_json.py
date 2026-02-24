@@ -508,15 +508,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def main() -> None:
-    args = parse_args()
-
-    q_path = Path(args.questionnaire)
-    m_path = Path(args.mesures)
-    out_path = Path(args.output)
-
-    questionnaire = load_json(q_path)
-    mesures = load_json(m_path)
+def build_excel_from_json(
+    questionnaire_path: Path,
+    mesures_path: Path,
+    output_path: Path,
+) -> dict[str, int]:
+    """Point d'entrée unique: construit l'Excel à partir des 2 JSON."""
+    questionnaire = load_json(questionnaire_path)
+    mesures = load_json(mesures_path)
 
     referentiel = questionnaire.get("referentiel")
     if not isinstance(referentiel, dict):
@@ -547,14 +546,35 @@ def main() -> None:
     write_kv_sheet(wb, "urn_pref_meta", URN_PREF_META_ROWS)
     write_sheet(wb, "urn_pref_content", URN_PREF_HEADERS, URN_PREF_ROWS)
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    wb.save(out_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    wb.save(output_path)
+
+    return {
+        "fwk_content": len(ctx.framework_rows),
+        "imp_grp_content": len(ctx.imp_grp_rows),
+        "answ_content": len(ctx.answer_rows),
+        "ref_ctrl_content": len(ctx.ref_ctrl_rows),
+    }
+
+
+def main() -> None:
+    args = parse_args()
+
+    q_path = Path(args.questionnaire)
+    m_path = Path(args.mesures)
+    out_path = Path(args.output)
+
+    stats = build_excel_from_json(
+        questionnaire_path=q_path,
+        mesures_path=m_path,
+        output_path=out_path,
+    )
 
     print(f"Excel généré: {out_path}")
-    print(f"- fwk_content: {len(ctx.framework_rows)} ligne(s)")
-    print(f"- imp_grp_content: {len(ctx.imp_grp_rows)} ligne(s)")
-    print(f"- answ_content: {len(ctx.answer_rows)} ligne(s)")
-    print(f"- ref_ctrl_content: {len(ctx.ref_ctrl_rows)} ligne(s)")
+    print(f"- fwk_content: {stats['fwk_content']} ligne(s)")
+    print(f"- imp_grp_content: {stats['imp_grp_content']} ligne(s)")
+    print(f"- answ_content: {stats['answ_content']} ligne(s)")
+    print(f"- ref_ctrl_content: {stats['ref_ctrl_content']} ligne(s)")
 
 
 if __name__ == "__main__":

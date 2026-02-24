@@ -491,6 +491,44 @@ def dump_json(path: Path, payload: dict[str, Any]) -> None:
         f.write("\n")
 
 
+def export_referentiels_json(
+    api_root: Path,
+    out_dir: Path,
+    questions_file: str = "questionnaire_repo.json",
+    mesures_file: str = "mesures_repo.json",
+) -> tuple[Path, Path]:
+    """Point d'entrée unique: exporte questions+mesures et retourne les chemins de sortie."""
+    api_src = api_root.resolve() / "src"
+    out_dir = out_dir.resolve()
+
+    questions_ref = parse_referentiel_questions(api_src)
+    trans_thematiques, conditions = parse_transcripteur(api_src)
+    enrich_referentiel_with_transcripteur(
+        api_src, questions_ref, trans_thematiques, conditions
+    )
+
+    mesures_ref = parse_referentiel_mesures(api_src)
+    resolve_mesure_texts(api_src, mesures_ref)
+
+    questions_out = out_dir / questions_file
+    mesures_out = out_dir / mesures_file
+    dump_json(
+        questions_out,
+        {
+            "source": "mon-aide-cyber-api/src/diagnostic/referentiel",
+            "referentiel": questions_ref,
+        },
+    )
+    dump_json(
+        mesures_out,
+        {
+            "source": "mon-aide-cyber-api/src/diagnostic/mesures + src/infrastructure/restitution/mesures",
+            "mesures": mesures_ref,
+        },
+    )
+    return questions_out, mesures_out
+
+
 def main() -> None:
     try:
         parser = argparse.ArgumentParser(
@@ -507,21 +545,12 @@ def main() -> None:
         args = parser.parse_args()
 
         script_dir = Path(__file__).resolve().parent
-        api_src = Path(args.api_root).resolve() / "src"
-        out_dir = Path(args.out_dir).resolve()
-
-        questions_ref = parse_referentiel_questions(api_src)
-        trans_thematiques, conditions = parse_transcripteur(api_src)
-        enrich_referentiel_with_transcripteur(api_src, questions_ref, trans_thematiques, conditions)
-
-        mesures_ref = parse_referentiel_mesures(api_src)
-        resolve_mesure_texts(api_src, mesures_ref)
-        mesures_enriched = mesures_ref
-
-        questions_out = out_dir / args.questions_file
-        mesures_out = out_dir / args.mesures_file
-        dump_json(questions_out, {"source": "mon-aide-cyber-api/src/diagnostic/referentiel", "referentiel": questions_ref})
-        dump_json(mesures_out, {"source": "mon-aide-cyber-api/src/diagnostic/mesures + src/infrastructure/restitution/mesures", "mesures": mesures_enriched})
+        questions_out, mesures_out = export_referentiels_json(
+            api_root=Path(args.api_root),
+            out_dir=Path(args.out_dir),
+            questions_file=args.questions_file,
+            mesures_file=args.mesures_file,
+        )
 
         print(f"- Questions: \"{display_path(questions_out, script_dir)}\"")
         print(f"- Mesures:   \"{display_path(mesures_out, script_dir)}\"")
