@@ -56,7 +56,7 @@ export const load = (async ({ fetch, params, cookies, locals }) => {
 
 	const cloneInitialData = {
 		baseline: compliance_assessment.id,
-		framework: compliance_assessment.framework.id,
+		framework: compliance_assessment.framework?.id,
 		perimeter: compliance_assessment.perimeter?.id
 	};
 	const auditCloneForm = await superValidate(cloneInitialData, zod(ComplianceAssessmentSchema), {

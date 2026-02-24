@@ -25,7 +25,7 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
+	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework?.id}/`;
 	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
 	compliance_assessment.framework = framework;
 
