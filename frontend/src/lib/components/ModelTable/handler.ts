@@ -20,7 +20,7 @@ export const loadTableData = async ({
 }: LoadTableDataParams) => {
 	const url = new URL(endpoint, window.location.origin);
 	const params = new URLSearchParams(url.search);
-	const newParams = getParams(state);
+	const newParams = getParams(state, URLModel);
 
 	newParams.forEach((value, key) => params.append(key, value));
 	url.search = params.toString();
@@ -57,7 +57,7 @@ export const loadTableData = async ({
 	});
 };
 
-const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
+const getParams = ({ offset, rowsPerPage, search, sort, filters }: State, URLModel: urlModel) => {
 	const params = new URLSearchParams();
 	params.set('offset', offset.toString() ?? '0');
 	params.set('limit', rowsPerPage.toString() ?? '10');
@@ -65,7 +65,9 @@ const getParams = ({ offset, rowsPerPage, search, sort, filters }: State) => {
 		params.set('search', search);
 	}
 	if (sort) {
-		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${sort.orderBy}`);
+		const mappedOrderBy =
+			URLModel === 'applied-controls' && sort.orderBy === 'assets' ? 'assets__name' : sort.orderBy;
+		params.set('ordering', `${sort.direction === 'desc' ? '-' : ''}${mappedOrderBy}`);
 	}
 	if (filters) {
 		for (const filter of filters) {
