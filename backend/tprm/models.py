@@ -384,7 +384,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         help_text=_("Identification of alternative ICT third-party service providers"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["name", "provider_entity"]
 
     class Meta:
         verbose_name = _("Solution")
