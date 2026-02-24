@@ -774,7 +774,7 @@ def update_selected_implementation_groups(compliance_assessment):
                 Question.Type.SINGLE_CHOICE,
                 Question.Type.MULTIPLE_CHOICE,
             ):
-                pks = set(a.selected_choices.values_list("id", flat=True))
+                pks = {c.id for c in a.selected_choices.all()}
                 selected_choice_pks_by_qid[a.question_id] = pks
                 has_answer_by_qid[a.question_id] = len(pks) > 0
             else:

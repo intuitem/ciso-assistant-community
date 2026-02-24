@@ -7554,7 +7554,7 @@ class Answer(AbstractBaseModel, FolderMixin):
             Question.Type.SINGLE_CHOICE,
             Question.Type.MULTIPLE_CHOICE,
         ):
-            return list(self.selected_choices.values_list("ref_id", flat=True))
+            return [c.ref_id for c in self.selected_choices.all()]
         return []
 
     def save(self, *args, **kwargs) -> None:
