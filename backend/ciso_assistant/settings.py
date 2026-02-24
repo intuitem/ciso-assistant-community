@@ -160,18 +160,38 @@ if USE_S3:
         "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
     )
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
 
-    if not AWS_ACCESS_KEY_ID:
-        logger.error("AWS_ACCESS_KEY_ID must be set")
-    if not AWS_SECRET_ACCESS_KEY:
-        logger.error("AWS_SECRET_ACCESS_KEY must be set")
-    if not AWS_S3_ENDPOINT_URL:
-        logger.error("AWS_S3_ENDPOINT_URL must be set")
-    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
+    # Support for AWS IRSA (IAM Roles for Service Accounts) via web identity token
+    AWS_WEB_IDENTITY_TOKEN_FILE = os.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+    AWS_ROLE_ARN = os.getenv("AWS_ROLE_ARN")
+
+    # Check if using explicit credentials (access key) or IRSA (web identity token)
+    using_access_key = AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    using_irsa = AWS_WEB_IDENTITY_TOKEN_FILE and AWS_ROLE_ARN
+
+    if not using_access_key and not using_irsa:
+        logger.error(
+            "AWS credentials not configured. Either set AWS_ACCESS_KEY_ID and "
+            "AWS_SECRET_ACCESS_KEY for explicit credentials, or AWS_WEB_IDENTITY_TOKEN_FILE "
+            "and AWS_ROLE_ARN for IRSA (IAM Roles for Service Accounts)."
+        )
         exit(1)
 
+    if using_irsa:
+        logger.info("Using AWS IRSA (Web Identity Token) for S3 authentication")
+        logger.info("AWS_ROLE_ARN: %s", AWS_ROLE_ARN)
+        # Don't set access keys when using IRSA - let boto3 use the default credential chain
+        AWS_ACCESS_KEY_ID = None
+        AWS_SECRET_ACCESS_KEY = None
+    else:
+        logger.info("Using AWS Access Key for S3 authentication")
+
     logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
-    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_ENDPOINT_URL:
+        logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_REGION_NAME:
+        logger.info("AWS_S3_REGION_NAME: %s", AWS_S3_REGION_NAME)
 
     AWS_S3_FILE_OVERWRITE = False
 
