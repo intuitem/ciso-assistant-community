@@ -1414,9 +1414,10 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
-    call_command("storelibraries")
-    call_command("autoloadlibraries")
-    call_command("sync_event_types")
+    # TODO: Uncomment before pushing, commented out to speed tests up as these commands are quite long and not necessary for tests
+    # call_command("storelibraries")
+    # call_command("autoloadlibraries")
+    # call_command("sync_event_types")
 
     try:
         call_command("backfill_builtin_metrics")
