@@ -474,22 +474,19 @@
 								{#if getFieldConfig(key)?.tooltip}
 									{@const tooltipKey = getFieldConfig(key)?.tooltip}
 									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-									<Tooltip
-										positioning={{ placement: 'right' }}
-										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
-										openDelay={200}
-										closeDelay={100}
-										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
-									>
-										{#snippet trigger()}
+									<Tooltip positioning={{ placement: 'right' }} openDelay={200} closeDelay={100}>
+										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
 											></i>
-										{/snippet}
-										{#snippet content()}
-											<p class="text-sm">{tooltipText}</p>
-										{/snippet}
+										</Tooltip.Trigger>
+										<Tooltip.Positioner>
+											<Tooltip.Content
+												class="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+											>
+												<p class="text-sm">{tooltipText}</p>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 							</dt>
@@ -736,29 +733,31 @@
 						open={openStateRA && !data.data.approver}
 						onOpenChange={(e) => (openStateRA = e.open)}
 						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-error p-4"
 						openDelay={200}
 						closeDelay={100}
-						arrow
-						arrowBase="arrow preset-tonal-surface border border-error-100"
-						onclick={() => {
-							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						onkeydown={(_: any) => {
-							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						triggerBase={data.data.approver
-							? 'btn preset-filled-primary-500 *:pointer-events-none'
-							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
-						disabled={data.data.approver}
 					>
-						{#snippet trigger()}
+						<Tooltip.Trigger
+							onclick={() => {
+								if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							onkeydown={(_: any) => {
+								if (data.data.approver)
+									return modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							class={data.data.approver
+								? 'btn preset-filled-primary-500 *:pointer-events-none'
+								: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						>
 							<i class="fas fa-paper-plane mr-2"></i>
 							{m.submit()}
-						{/snippet}
-						{#snippet content()}
-							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
-						{/snippet}
+						</Tooltip.Trigger>
+						{#if !data.data.approver}
+							<Tooltip.Positioner>
+								<Tooltip.Content class="card preset-tonal-error p-4">
+									<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						{/if}
 					</Tooltip>
 				{/if}
 
@@ -788,99 +787,94 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
+	<div class="card shadow-lg mt-8 bg-white py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
+			orientation="vertical"
+			class="w-full"
 		>
-			{#snippet list()}
+			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger value={urlmodel} class="justify-start" data-testid="tabs-control">
 						{safeTranslate(model.info.localNamePlural)}
-						{#if model.table.body.length > 0}
-							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+						{#if model.count !== undefined && model.count > 0}
+							<span class="badge preset-tonal-secondary">{model.count}</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						{#key urlmodel}
-							<div class="py-2"></div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse =
-								field?.tableFields ||
-								getListViewFields({
-									key: urlmodel,
-									featureFlags: page.data?.featureflags
-								}).body.filter((v) => v !== field.field)}
-							{#if model.table}
-								<ModelTable
-									baseEndpoint={getReverseForeignKeyEndpoint({
-										parentModel: data.model,
-										targetUrlModel: urlmodel,
-										field: field.field,
-										id: data.data.id,
-										endpointUrl: field.endpointUrl
-									})}
-									source={model.table}
-									disableCreate={disableCreate || model.disableCreate}
-									disableEdit={disableEdit || model.disableEdit}
-									disableDelete={disableDelete || model.disableDelete}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									expectedCount={getExpectedCount(urlmodel, field)}
-									fields={fieldsToUse}
-									defaultFilters={field.defaultFilters || {}}
-								>
-									{#snippet addButton()}
-										{#if canEditObject && field?.addExisting}
-											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-											>
-												<button
-													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-													data-testid="select-existing-button"
-													title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
-													onclick={() => modalSelectExisting(field)}
-												>
-													<i class="fa-solid fa-hand-pointer"></i>
-												</button>
-											</span>
-											<span
-												class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-											>
-												<button
-													class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-													data-testid="add-button"
-													title={safeTranslate('add-' + model.info.localName)}
-													onclick={(_) => modalCreateForm(model)}
-												>
-													<i class="fa-solid fa-file-circle-plus"></i>
-												</button>
-											</span>
-										{:else}
+				<Tabs.Indicator />
+			</Tabs.List>
+			{#each relatedModels as [urlmodel, model]}
+				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
+					{#key urlmodel}
+						<div class="py-2"></div>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse =
+							field?.tableFields ||
+							getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
+						{#if model.table}
+							<ModelTable
+								baseEndpoint={getReverseForeignKeyEndpoint({
+									parentModel: data.model,
+									targetUrlModel: urlmodel,
+									field: field.field,
+									id: data.data.id,
+									endpointUrl: field.endpointUrl
+								})}
+								source={model.table}
+								disableCreate={disableCreate || model.disableCreate}
+								disableEdit={disableEdit || model.disableEdit}
+								disableDelete={disableDelete || model.disableDelete}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								expectedCount={getExpectedCount(urlmodel, field)}
+								fields={fieldsToUse}
+								defaultFilters={field.defaultFilters || {}}
+							>
+								{#snippet addButton()}
+									{#if canEditObject && field?.addExisting}
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 											<button
-												class="btn preset-filled-primary-500 self-end my-auto"
-												data-testid="add-button"
-												onclick={(_) => modalCreateForm(model)}
-												><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
-													'add-' + model.info.localName
-												)}</button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-existing-button"
+												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+												onclick={() => modalSelectExisting(field)}
 											>
-										{/if}
-									{/snippet}
-								</ModelTable>
-							{/if}
-						{/key}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
+												<i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												data-testid="add-button"
+												title={safeTranslate('add-' + model.info.localName)}
+												onclick={(_) => modalCreateForm(model)}
+											>
+												<i class="fa-solid fa-file-circle-plus"></i>
+											</button>
+										</span>
+									{:else}
+										<button
+											class="btn preset-filled-primary-500 self-end my-auto"
+											data-testid="add-button"
+											onclick={(_) => modalCreateForm(model)}
+											><i class="fa-solid fa-plus mr-2 lowercase"></i>{safeTranslate(
+												'add-' + model.info.localName
+											)}</button
+										>
+									{/if}
+								{/snippet}
+							</ModelTable>
+						{/if}
+					{/key}
+				</Tabs.Content>
+			{/each}
 		</Tabs>
 	</div>
 {/if}
