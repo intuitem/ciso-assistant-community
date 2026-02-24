@@ -2843,7 +2843,7 @@ class LoadFileView(APIView):
                     )
 
         except Exception as e:
-            logger.warning("Failed to save vulnerabily records")
+            logger.warning("Failed to save vulnerability records")
             results["errors"].append(
                 {"error": f"Failed to parse the vulnerability records: {str(e)}"}
             )
