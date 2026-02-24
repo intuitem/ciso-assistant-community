@@ -937,10 +937,11 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{#if value?.length > 300}
-																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key) ? (value ?? '-') : safeTranslate(value ?? '-')}
+															{#if displayValue?.length > 300}
+																{displayValue.slice(0, 300)}...
 															{:else}
-																{safeTranslate(value ?? '-')}
+																{displayValue}
 															{/if}
 														{/if}
 														{@render badge?.(key, row)}
