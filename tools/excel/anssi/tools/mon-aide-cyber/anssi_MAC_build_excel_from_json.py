@@ -145,8 +145,21 @@ def implementation_groups_for_question(perimetre: str | None, base_group: str) -
 def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
     refs: list[str] = []
     seen: set[str] = set()
+
     for rep in reponses:
-        for mesure in rep.get("mesures", []) or []:
+        if not isinstance(rep, dict):
+            continue
+
+        mesures_candidates: list[Any] = []
+        # Format actuel du JSON exporté: reponsesPossibles[].resultat.mesures
+        resultat = rep.get("resultat")
+        if isinstance(resultat, dict):
+            mesures_candidates.extend(resultat.get("mesures", []) or [])
+
+        # Fallback robuste si la structure redevient directe dans le futur
+        mesures_candidates.extend(rep.get("mesures", []) or [])
+
+        for mesure in mesures_candidates:
             if not isinstance(mesure, dict):
                 continue
             identifiant = mesure.get("identifiant")
@@ -157,7 +170,8 @@ def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
             if value not in seen:
                 seen.add(value)
                 refs.append(value)
-    return ", ".join(refs)
+
+    return "\n".join(refs)
 
 
 def build_answer_row_for_question(question: dict[str, Any]) -> AnswerRow:
