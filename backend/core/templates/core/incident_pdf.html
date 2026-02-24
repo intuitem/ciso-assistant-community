@@ -240,12 +240,13 @@
             </div>
             <div class="w-1/2">
                 {% if incident.owners.exists %}
-                <p><strong>Owners:</strong> {% for owner in incident.owners.all %}{{ owner.email }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+                <p><strong>Owners:</strong> {% for owner in incident.owners.all %}{{ owner }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
                 {% endif %}
             </div>
         </div>
         <div class="mt-3">
-            <p><strong>Reported On:</strong> {{ incident.created_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
+            <p><strong>Reported On:</strong> {{ incident.reported_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
+            <p><strong>Created:</strong> {{ incident.created_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
             <p><strong>Last Updated:</strong> {{ incident.updated_at|date:"Y-m-d H:i:s"|default:"N/A" }}</p>
         </div>
     </div>
@@ -328,7 +329,7 @@
                 <div class="w-1/4 text-right">
                     <p class="text-sm font-medium">{{ entry.timestamp|date:"Y-m-d H:i:s" }}</p>
                     {% if entry.author %}
-                    <p class="text-xs text-gray-500">by {{ entry.author.email }}</p>
+                    <p class="text-xs text-gray-500">by {{ entry.author }}</p>
                     {% endif %}
                 </div>
             </div>
