@@ -48,13 +48,13 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `reference_link` | No | URL (also accepts `link`) |
 | `observation` | No | Free text |
 | `parent_assets` | No | Comma/pipe-separated ref_ids (linked in second pass) |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | Medium |
 | `asset_class` | FK AssetClass | Medium |
-| `filtering_labels` | M2M | Medium |
 | `security_objectives` | JSONField | Low (complex) |
 | `disaster_recovery_objectives` | JSONField | Low (complex) |
 | DORA-related fields | Various | Low |
@@ -81,6 +81,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `effort` | No | Mapped: XS, S, M, L, XL (or full names) |
 | `control_impact` | No | Integer (1-5), also accepts `impact` |
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -89,7 +90,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
 | `assets` | M2M | Medium |
-| `filtering_labels` | M2M | Medium |
 
 ---
 
@@ -102,13 +102,13 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `description` | No | |
 | `ref_id` | No | Reference ID |
 | `domain` | No | Folder lookup |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `attachment` | FileField | Medium |
 | `link` | URLField | High |
-| `filtering_labels` | M2M | Medium |
 | `expiry_date` | DateField | Medium |
 | `owner` | FK User | Medium |
 
@@ -271,6 +271,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `existing_applied_controls` | No | Newline-separated, creates/finds controls |
 | `additional_controls` | No | Newline-separated |
 | `treatment` | No | Defaults to "open" |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing, set post-save) |
 
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
@@ -281,7 +282,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `threats` | M2M | High |
 | `assets` | M2M | High |
 | `vulnerabilities` | M2M | Medium |
-| `filtering_labels` | M2M | Medium |
 
 ---
 
@@ -369,6 +369,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `expiry_date` | No | Date (YYYY-MM-DD) |
 | `link` | No | URL |
 | `effort` | No | XS, S, M, L, XL |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -376,7 +377,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `owner` | M2M Actor | High |
 | `evidences` | M2M | Medium |
 | `reference_control` | FK | Medium |
-| `filtering_labels` | M2M | Medium |
 | `cost` | IntegerField | Low |
 | `start_date` | DateField | Low |
 
@@ -422,6 +422,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `detection` | No | Mapped: internal/internally_detected, external/externally_detected |
 | `link` | No | URL |
 | `reported_at` | No | DateTime |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -694,6 +695,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 For existing supported models, prioritize adding:
 1. `owner` field (FK to User) - across all models
 2. `eta` and `due_date` fields - for task tracking
-3. `filtering_labels` (M2M) - for organization
+3. ~~`filtering_labels` (M2M) - for organization~~ ✅ Added to Asset, AppliedControl, Evidence, Finding, Policy, Incident, RiskScenario
 4. `applied_controls` and `evidences` (M2M) - for linking
 5. `threats` and `assets` (M2M) - for RiskScenario

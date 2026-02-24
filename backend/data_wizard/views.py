@@ -74,7 +74,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar, Literal
+from typing import Optional, Final, ClassVar
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -141,6 +141,29 @@ def _parse_datetime(value) -> Optional[str]:
     if isinstance(value, datetime):
         return value.isoformat()
     return value
+
+
+def _resolve_filtering_labels(value) -> list[UUID]:
+    """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
+
+    Labels that do not yet exist are created on the fly.
+    """
+    if not value or not isinstance(value, str):
+        return []
+    separator = "|" if "|" in value else ","
+    label_names = [name.strip() for name in value.split(separator) if name.strip()]
+    label_ids: list[UUID] = []
+    for label_name in label_names:
+        label = FilteringLabel.objects.filter(label=label_name).first()
+        if label is None:
+            try:
+                label = FilteringLabel(label=label_name)
+                label.full_clean()
+                label.save()
+            except Exception:
+                continue
+        label_ids.append(label.id)
+    return label_ids
 
 
 class RecordFileType(enum.StrEnum):
@@ -456,7 +479,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "type": asset_type,
@@ -466,7 +489,13 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
     def process_records(self, records: list[dict]) -> Result:
         """
@@ -621,6 +650,10 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if reference_control_id:
             data["reference_control"] = reference_control_id
 
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
         return data, None
 
 
@@ -642,12 +675,18 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class UserRecordConsumer(RecordConsumer[None]):
@@ -798,7 +837,6 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
-    FILTERING_LABEL_SEPARATOR: Final[Literal["|"]] = "|"
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -851,33 +889,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        record_filtering_labels = record.get("filtering_labels")
-        if record_filtering_labels:
-            filtering_label_names = record_filtering_labels.split(
-                self.FILTERING_LABEL_SEPARATOR
-            )
-            filtering_label_names = [
-                label_name.strip() for label_name in filtering_label_names
-            ]
-        else:
-            filtering_label_names = []
-
-        filtering_label_ids: list[UUID] = []
-
-        for label_name in filtering_label_names:
-            filtering_label = FilteringLabel.objects.filter(label=label_name).first()
-            if filtering_label is None:
-                try:
-                    filtering_label = FilteringLabel(label=label_name)
-                    filtering_label.full_clean()
-                    filtering_label.save()
-                except Exception as e:
-                    return {}, Error(
-                        record=record,
-                        error=f"Error while creating filtering labels {repr(label_name)}: {repr(e)}",
-                    )
-
-            filtering_label_ids.append(filtering_label.id)
+        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
 
         finding_data = {
             "name": name,
@@ -923,7 +935,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
         else:
             priority = None
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -935,7 +947,13 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             "expiry_date": _parse_date(record.get("expiry_date")),
             "link": record.get("link", ""),
             "effort": record.get("effort"),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class SecurityExceptionRecordConsumer(RecordConsumer[None]):
@@ -1082,7 +1100,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         else:
             detection_value = "internally_detected"
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -1092,7 +1110,13 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             "detection": detection_value,
             "link": record.get("link", ""),
             "reported_at": _parse_datetime(record.get("reported_at")),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class LoadFileView(APIView):
@@ -2745,6 +2769,13 @@ class LoadFileView(APIView):
                 return None
 
             risk_scenario = scenario_serializer.save()
+
+            # Link filtering labels
+            filtering_label_ids = _resolve_filtering_labels(
+                record.get("filtering_labels")
+            )
+            if filtering_label_ids:
+                risk_scenario.filtering_labels.set(filtering_label_ids)
 
             # Link existing controls
             self._link_controls_to_scenario(
