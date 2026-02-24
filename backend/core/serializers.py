@@ -2401,70 +2401,73 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             )
 
     def update(self, instance, validated_data):
-        # Handle answers if provided in old JSON format
-        answers_data = validated_data.pop("answers", None)
+        with transaction.atomic():
+            # Handle answers if provided in old JSON format
+            answers_data = validated_data.pop("answers", None)
 
-        instance = super().update(instance, validated_data)
+            instance = super().update(instance, validated_data)
 
-        if answers_data and isinstance(answers_data, dict):
-            # Convert incoming answers dict to Answer model updates
-            from core.models import Answer, Question
+            if answers_data and isinstance(answers_data, dict):
+                # Convert incoming answers dict to Answer model updates
+                from core.models import Answer, Question
 
-            questions_by_urn = {
-                q.urn: q
-                for q in Question.objects.filter(
-                    requirement_node=instance.requirement
-                ).prefetch_related("choices")
-            }
-            for q_urn, answer_value in answers_data.items():
-                question = questions_by_urn.get(q_urn)
-                if not question:
-                    continue
+                questions_by_urn = {
+                    q.urn: q
+                    for q in Question.objects.filter(
+                        requirement_node=instance.requirement
+                    ).prefetch_related("choices")
+                }
+                for q_urn, answer_value in answers_data.items():
+                    question = questions_by_urn.get(q_urn)
+                    if not question:
+                        continue
 
-                answer, _created = Answer.objects.update_or_create(
-                    requirement_assessment=instance,
-                    question=question,
-                    defaults={"folder": instance.folder},
+                    answer, _created = Answer.objects.update_or_create(
+                        requirement_assessment=instance,
+                        question=question,
+                        defaults={"folder": instance.folder},
+                    )
+
+                    if question.type == Question.Type.SINGLE_CHOICE:
+                        if answer_value:
+                            choice = question.choices.filter(
+                                ref_id=answer_value
+                            ).first()
+                            answer.selected_choices.set([choice] if choice else [])
+                        else:
+                            answer.selected_choices.clear()
+                        answer.value = None
+                        answer.save(update_fields=["value"])
+                    elif question.type == Question.Type.MULTIPLE_CHOICE:
+                        if isinstance(answer_value, list) and answer_value:
+                            choices = question.choices.filter(ref_id__in=answer_value)
+                            answer.selected_choices.set(choices)
+                        else:
+                            answer.selected_choices.clear()
+                        answer.value = None
+                        answer.save(update_fields=["value"])
+                    else:
+                        answer.value = answer_value
+                        answer.save(update_fields=["value"])
+
+            # Check if any choice has scoring or result logic
+            from core.models import QuestionChoice
+
+            has_score_or_result = (
+                QuestionChoice.objects.filter(
+                    question__requirement_node=instance.requirement,
                 )
-
-                if question.type == Question.Type.SINGLE_CHOICE:
-                    if answer_value:
-                        choice = question.choices.filter(ref_id=answer_value).first()
-                        answer.selected_choices.set([choice] if choice else [])
-                    else:
-                        answer.selected_choices.clear()
-                    answer.value = None
-                    answer.save(update_fields=["value"])
-                elif question.type == Question.Type.MULTIPLE_CHOICE:
-                    if isinstance(answer_value, list) and answer_value:
-                        choices = question.choices.filter(ref_id__in=answer_value)
-                        answer.selected_choices.set(choices)
-                    else:
-                        answer.selected_choices.clear()
-                    answer.value = None
-                    answer.save(update_fields=["value"])
-                else:
-                    answer.value = answer_value
-                    answer.save(update_fields=["value"])
-
-        # Check if any choice has scoring or result logic
-        from core.models import QuestionChoice
-
-        has_score_or_result = (
-            QuestionChoice.objects.filter(
-                question__requirement_node=instance.requirement,
+                .filter(
+                    models.Q(add_score__isnull=False)
+                    | models.Q(compute_result__isnull=False)
+                )
+                .exists()
             )
-            .filter(
-                models.Q(add_score__isnull=False)
-                | models.Q(compute_result__isnull=False)
-            )
-            .exists()
-        )
 
-        if has_score_or_result:
-            instance.compute_score_and_result()
+            if has_score_or_result:
+                instance.compute_score_and_result()
 
-        return instance
+            return instance
 
     class Meta:
         model = RequirementAssessment
