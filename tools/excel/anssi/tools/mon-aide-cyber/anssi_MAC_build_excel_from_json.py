@@ -24,8 +24,6 @@ FRAMEWORK_HEADERS = [
     "questions",
     "answer",
     "reference_controls",
-    "depends_on",
-    "condition",
 ]
 
 IMP_GRP_HEADERS = ["ref_id", "name", "description", "default_selected"]
@@ -101,9 +99,9 @@ class Context:
     answer_rows: dict[str, AnswerRow] = field(default_factory=dict)
     imp_grp_seen: set[str] = field(default_factory=set)
     theme_counter: int = 0
-    question_counter: int = 0
-    question_number_by_id: dict[str, int] = field(default_factory=dict)
+    root_question_counter: int = 0
     framework_index_by_urn: dict[str, int] = field(default_factory=dict)
+    question_name_suffix_by_urn: dict[str, str] = field(default_factory=dict)
 
 
 def as_text(value: Any) -> str:
@@ -184,73 +182,77 @@ def build_answer_row_for_question(question: dict[str, Any]) -> AnswerRow:
 def append_framework_row(ctx: Context, row: dict[str, str]) -> int:
     idx = len(ctx.framework_rows)
     ctx.framework_rows.append(row)
+
     urn = row.get("urn_id", "")
     if urn:
         ctx.framework_index_by_urn[urn] = idx
+
+    name = row.get("name", "")
+    if urn and name.startswith("Question "):
+        ctx.question_name_suffix_by_urn[urn] = name.removeprefix("Question ").strip()
+
     return idx
 
 
 def process_question(
     ctx: Context,
     theme_num: int,
-    theme_description: str,
     question: dict[str, Any],
     *,
     parent_question_id: str | None = None,
-    parent_question_number: int | None = None,
+    parent_question_label: str | None = None,
     parent_response: dict[str, Any] | None = None,
+    parent_ref_prefix: str | None = None,
+    child_index_in_parent: int | None = None,
 ) -> None:
-    ctx.question_counter += 1
-    current_question_number = ctx.question_counter
-
     qid = as_text(question.get("identifiant"))
-    ctx.question_number_by_id[qid.lower()] = current_question_number
-
     perimetre = as_text(question.get("perimetre")) or None
     annotation = map_annotation_from_perimetre(perimetre)
 
-    if parent_question_id:
+    if parent_question_id is None:
+        ctx.root_question_counter += 1
+        global_question_number = ctx.root_question_counter
+        question_label = as_text(global_question_number)
+        ref_id = f"{theme_num}.{global_question_number}"
+        name = f"Question {question_label}"
+        implementation_groups = implementation_groups_for_question(perimetre, "MAIN")
+    else:
+        index_in_parent = child_index_in_parent or 1
+        base_label = parent_question_label or ""
+        question_label = f"{base_label}.{index_in_parent}" if base_label else as_text(index_in_parent)
+        base_ref = parent_ref_prefix or f"{theme_num}"
+        ref_id = f"{base_ref}.{index_in_parent}"
+        name = f"Question {question_label}"
+
         depends_group = f"_DEPENDS_ON_{parent_question_id}"
         implementation_groups = implementation_groups_for_question(perimetre, depends_group)
-        if parent_question_number is None:
-            parent_question_number = 0
         ensure_imp_group(
             ctx,
             depends_group,
-            f"Question dépendant de la Question {parent_question_number}",
+            f"Question dépendant de la Question {parent_question_label or ''}".strip(),
         )
         if parent_response is not None:
             parent_answ = ctx.answer_rows.get(parent_question_id)
             if parent_answ is not None:
                 ordre = int(parent_response.get("ordre", 0) or 0)
                 parent_answ.add_group_at_ordre(ordre, depends_group)
-    else:
-        implementation_groups = implementation_groups_for_question(perimetre, "MAIN")
 
     if perimetre:
         ensure_imp_group(ctx, perimetre, PERIMETRE_LABELS.get(perimetre, ""))
 
-    depends_on = ""
-    condition = ""
-    if parent_question_id and parent_response is not None:
-        depends_on = parent_question_id
-        condition = as_text(parent_response.get("identifiant"))
-
     framework_row = {
-        "assessable": "",
+        "assessable": "x",
         "depth": "2",
-        "ref_id": f"{theme_num}.{current_question_number}",
+        "ref_id": ref_id,
         "urn_id": qid.lower(),
-        "name": f"Question {current_question_number}",
-        "description": theme_description,
+        "name": name,
+        "description": as_text(question.get("description")),
         "annotation": annotation,
         "typical_evidence": "",
         "implementation_groups": implementation_groups,
         "questions": as_text(question.get("libelle")),
         "answer": qid,
         "reference_controls": measures_to_reference_controls(question.get("reponsesPossibles", []) or []),
-        "depends_on": depends_on,
-        "condition": condition,
     }
     append_framework_row(ctx, framework_row)
 
@@ -258,20 +260,23 @@ def process_question(
     if qid:
         ctx.answer_rows[qid] = answer_row
 
+    child_counter = 0
     for rep in question.get("reponsesPossibles", []) or []:
         if not isinstance(rep, dict):
             continue
         for child in rep.get("questions", []) or []:
             if not isinstance(child, dict):
                 continue
+            child_counter += 1
             process_question(
                 ctx,
                 theme_num,
-                theme_description,
                 child,
                 parent_question_id=qid,
-                parent_question_number=current_question_number,
+                parent_question_label=question_label,
                 parent_response=rep,
+                parent_ref_prefix=ref_id,
+                child_index_in_parent=child_counter,
             )
 
 
@@ -286,7 +291,6 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
 
         ctx.theme_counter += 1
         theme_num = ctx.theme_counter
-        theme_description = as_text(theme_obj.get("description"))
 
         append_framework_row(
             ctx,
@@ -296,21 +300,19 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
                 "ref_id": as_text(theme_num),
                 "urn_id": theme_key.lower(),
                 "name": as_text(theme_obj.get("libelle")),
-                "description": theme_description,
+                "description": as_text(theme_obj.get("description")),
                 "annotation": "",
                 "typical_evidence": "",
                 "implementation_groups": "",
                 "questions": "",
                 "answer": "",
                 "reference_controls": "",
-                "depends_on": "",
-                "condition": "",
             },
         )
 
         for question in theme_obj.get("questions", []) or []:
             if isinstance(question, dict):
-                process_question(ctx, theme_num, theme_description, question)
+                process_question(ctx, theme_num, question)
 
 
 def remove_main_and_add_groups(existing: str, groups: list[str]) -> str:
@@ -329,10 +331,9 @@ def apply_conditions_perimetre_second_pass(ctx: Context, referentiel: dict[str, 
 
     for target_question_id, rule_obj in conditions.items():
         target_idx = ctx.framework_index_by_urn.get(as_text(target_question_id).lower())
-        if target_idx is None:
+        if target_idx is None or not isinstance(rule_obj, dict):
             continue
-        if not isinstance(rule_obj, dict):
-            continue
+
         contexte_obj = rule_obj.get("contexte")
         if not isinstance(contexte_obj, dict):
             continue
@@ -342,12 +343,9 @@ def apply_conditions_perimetre_second_pass(ctx: Context, referentiel: dict[str, 
             dep_group = f"_DEPENDS_ON_{context_question_id}"
             groups_to_add.append(dep_group)
 
-            q_number = ctx.question_number_by_id.get(as_text(context_question_id).lower(), "")
-            ensure_imp_group(
-                ctx,
-                dep_group,
-                f"Question dépendant de la Question {q_number}",
-            )
+            urn_c = as_text(context_question_id).lower()
+            q_label = ctx.question_name_suffix_by_urn.get(urn_c, "")
+            ensure_imp_group(ctx, dep_group, f"Question dépendant de la Question {q_label}".strip())
 
             answ_row = ctx.answer_rows.get(as_text(context_question_id))
             if answ_row is not None:
@@ -373,7 +371,7 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             title = as_text(level_obj.get("titre"))
             pourquoi = as_text(level_obj.get("pourquoi"))
             comment = as_text(level_obj.get("comment"))
-            description = f"# Pourquoi ?\\n{pourquoi}\\n\\n#Comment ?\\n{comment}"
+            description = f"# Pourquoi ?\n{pourquoi}\n\n#Comment ?\n{comment}"
             ctx.ref_ctrl_rows.append(
                 {
                     "ref_id": f"{mesure_id}_{level_key}",
