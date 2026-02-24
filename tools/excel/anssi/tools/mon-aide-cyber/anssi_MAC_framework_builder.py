@@ -90,7 +90,7 @@ def download_if_needed(zip_url: str, zip_file: Path) -> bool:
         return True
 
     zip_file.parent.mkdir(parents=True, exist_ok=True)
-    print(f'📥  [DOWN] Downloading ZIP from: "{zip_url}"')
+    print(f'📥 [DOWN] Downloading ZIP from: "{zip_url}"')
 
     with urllib.request.urlopen(zip_url) as response:
         total_size = int(response.headers.get("Content-Length", 0))
