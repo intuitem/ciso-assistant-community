@@ -7363,7 +7363,21 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
 
-        self.compliance_assessment.upsert_daily_metrics()
+        # Defer metrics to on_commit, deduplicated per CA per transaction
+        ca = self.compliance_assessment
+        conn = transaction.get_connection()
+        pending = getattr(conn, "_pending_metrics_updates", None)
+        if pending is None:
+            pending = set()
+            conn._pending_metrics_updates = pending
+        if ca.pk not in pending:
+            pending.add(ca.pk)
+
+            def _do_metrics_update(ca_ref=ca, pending_ref=pending):
+                pending_ref.discard(ca_ref.pk)
+                ca_ref.upsert_daily_metrics()
+
+            transaction.on_commit(_do_metrics_update)
 
     def compute_score_and_result(self):
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
