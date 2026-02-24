@@ -1129,6 +1129,127 @@ class OperatingModeViewSet(BaseModelViewSet):
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
 
+    @action(detail=True, methods=["post"], name="Save graph for Operating Mode")
+    def save_graph(self, request, pk):
+        from django.db import transaction
+
+        mo = self.get_object()
+        kill_chain_steps = request.data.get("kill_chain_steps", [])
+
+        # Validate all steps
+        ea_ids_in_mode = set(
+            mo.elementary_actions.values_list("id", flat=True)
+        )
+        seen_ea_ids = set()
+        errors = []
+
+        for i, step in enumerate(kill_chain_steps):
+            ea_id = step.get("elementary_action")
+            antecedent_ids = step.get("antecedents", [])
+            logic_operator = step.get("logic_operator")
+
+            if not ea_id:
+                errors.append(f"Step {i}: missing elementary_action.")
+                continue
+
+            try:
+                ea_id = uuid.UUID(str(ea_id))
+            except (ValueError, AttributeError):
+                errors.append(f"Step {i}: invalid elementary_action UUID.")
+                continue
+
+            if ea_id not in ea_ids_in_mode:
+                errors.append(
+                    f"Step {i}: elementary action is not part of this operating mode."
+                )
+                continue
+
+            if ea_id in seen_ea_ids:
+                errors.append(
+                    f"Step {i}: duplicate elementary action in kill chain."
+                )
+                continue
+            seen_ea_ids.add(ea_id)
+
+            try:
+                ea = ElementaryAction.objects.get(pk=ea_id)
+            except ElementaryAction.DoesNotExist:
+                errors.append(f"Step {i}: elementary action not found.")
+                continue
+
+            # Validate antecedents
+            parsed_antecedents = []
+            for ant_id in antecedent_ids:
+                try:
+                    ant_uuid = uuid.UUID(str(ant_id))
+                except (ValueError, AttributeError):
+                    errors.append(f"Step {i}: invalid antecedent UUID.")
+                    continue
+
+                if ant_uuid == ea_id:
+                    errors.append(
+                        f"Step {i}: an elementary action cannot be its own antecedent."
+                    )
+                    continue
+
+                if ant_uuid not in ea_ids_in_mode:
+                    errors.append(
+                        f"Step {i}: antecedent is not part of this operating mode."
+                    )
+                    continue
+
+                try:
+                    ant_ea = ElementaryAction.objects.get(pk=ant_uuid)
+                except ElementaryAction.DoesNotExist:
+                    errors.append(f"Step {i}: antecedent not found.")
+                    continue
+
+                if ant_ea.attack_stage > ea.attack_stage:
+                    errors.append(
+                        f"Step {i}: antecedent attack stage must be same or before the action's stage."
+                    )
+                    continue
+
+                parsed_antecedents.append(ant_uuid)
+
+            if ea.attack_stage == ElementaryAction.AttackStage.KNOW and parsed_antecedents:
+                errors.append(
+                    f"Step {i}: reconnaissance stage actions cannot have antecedents."
+                )
+
+            if logic_operator and logic_operator not in ("AND", "OR"):
+                errors.append(
+                    f"Step {i}: logic_operator must be 'AND', 'OR', or null."
+                )
+
+        if errors:
+            return Response({"errors": errors}, status=400)
+
+        # Atomically replace all kill chain steps
+        with transaction.atomic():
+            mo.kill_chain_steps.all().delete()
+
+            for step in kill_chain_steps:
+                ea_id = uuid.UUID(str(step["elementary_action"]))
+                antecedent_ids = [
+                    uuid.UUID(str(a)) for a in step.get("antecedents", [])
+                ]
+                logic_operator = step.get("logic_operator")
+                is_highlighted = step.get("is_highlighted", False)
+
+                kc = KillChain.objects.create(
+                    operating_mode=mo,
+                    elementary_action_id=ea_id,
+                    logic_operator=logic_operator if len(antecedent_ids) > 1 else None,
+                    is_highlighted=is_highlighted,
+                    folder=mo.folder,
+                )
+                if antecedent_ids:
+                    kc.antecedents.set(antecedent_ids)
+
+        # Return updated graph
+        return self.build_graph(request, pk)
+
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
         mo = self.get_object()
