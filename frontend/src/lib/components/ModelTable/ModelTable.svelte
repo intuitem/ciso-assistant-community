@@ -937,7 +937,9 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{@const displayValue = ['name', 'description', 'ref_id'].includes(key) ? (value ?? '-') : safeTranslate(value ?? '-')}
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
 															{#if displayValue?.length > 300}
 																{displayValue.slice(0, 300)}...
 															{:else}
