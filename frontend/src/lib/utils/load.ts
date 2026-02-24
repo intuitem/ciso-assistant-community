@@ -251,7 +251,8 @@ export const loadDetail = async ({ event, model, id }) => {
 							const sep = relPath.includes('?') ? '&' : '?';
 							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${relPath}${sep}limit=1`;
 						} else {
-							countUrl = `${BASE_API_URL}/${e.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
+							const relatedModelInfo = getModelInfo(e.urlModel);
+							countUrl = `${BASE_API_URL}/${relatedModelInfo.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
 						}
 						const countRes = await event.fetch(countUrl);
 						if (countRes.ok) {
