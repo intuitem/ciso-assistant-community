@@ -224,7 +224,7 @@ def process_question(
         ref_id = f"{base_ref}.{index_in_parent}"
         name = f"Question {question_label}"
 
-        depends_group = f"_DEPENDS_ON_{parent_question_id}"
+        depends_group = f"_Q{question_label}_DEPENDS_ON_{parent_question_id}"
         implementation_groups = implementation_groups_for_question(perimetre, depends_group)
         ensure_imp_group(
             ctx,
