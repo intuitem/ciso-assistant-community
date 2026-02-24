@@ -220,15 +220,7 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
         "prefetch_related": ["authors", "reviewers"],
     }
 
-    @action(detail=False, name="Export BIAs with assessments and thresholds")
-    def export_xlsx(self, request):
-        if not self.export_config:
-            return HttpResponse(
-                status=501, content="Export not configured for this model"
-            )
-
-        queryset = self._get_export_queryset()
-
+    def _build_bia_workbook(self, queryset) -> Workbook:
         wb = Workbook()
         wb.remove(wb.active)
 
@@ -338,11 +330,44 @@ class BusinessImpactAnalysisViewSet(BaseModelViewSet, ExportMixin):
                         row=row_idx, column=col_idx
                     ).alignment = wrap_alignment
 
+        return wb
+
+    @action(detail=False, name="Export BIAs with assessments and thresholds")
+    def export_xlsx(self, request):
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        wb = self._build_bia_workbook(self._get_export_queryset())
+
         buffer = io.BytesIO()
         wb.save(buffer)
         buffer.seek(0)
 
         filename = f"{self.export_config.get('filename', 'export')}_multi_sheet.xlsx"
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    @action(detail=True, methods=["get"], name="Export BIA as Excel")
+    def xlsx(self, request, pk):
+        if not self.export_config:
+            return HttpResponse(
+                status=501, content="Export not configured for this model"
+            )
+
+        bia = self.get_object()
+        wb = self._build_bia_workbook(BusinessImpactAnalysis.objects.filter(pk=bia.pk))
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+
+        filename = f"bia-{pk}.xlsx"
         response = HttpResponse(
             buffer.getvalue(),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

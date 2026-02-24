@@ -222,6 +222,7 @@ class Result:
     updated: int = 0
     skipped: int = 0
     failed: int = 0
+    stopped: bool = False
     errors: list[Error] = field(default_factory=list)
     details: dict = field(default_factory=dict)
 
@@ -249,6 +250,7 @@ class Result:
             "updated": self.updated,
             "skipped": self.skipped,
             "failed": self.failed,
+            "stopped": self.stopped,
             "errors": [error.to_dict() for error in self.errors],
             **({"details": self.details} if self.details else {}),
         }
@@ -360,6 +362,7 @@ class RecordConsumer[Context](ABC):
             if error is not None:
                 results.add_error(error)
                 if self.on_conflict == ConflictMode.STOP:
+                    results.stopped = True
                     break
                 continue
 
@@ -381,6 +384,7 @@ class RecordConsumer[Context](ABC):
                         results.add_error(
                             Error(record=record, error="Record already exists")
                         )
+                        results.stopped = True
                         break
                     case ConflictMode.UPDATE:
                         update_data = self._build_update_data(record, record_data)
@@ -415,10 +419,12 @@ class RecordConsumer[Context](ABC):
                 except Exception as e:
                     results.add_error(Error(record=record, error=str(e)))
                     if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
                         break
             else:
                 results.add_error(Error(record=record, error=str(serializer.errors)))
                 if self.on_conflict == ConflictMode.STOP:
+                    results.stopped = True
                     break
 
         logger.info(
