@@ -604,6 +604,6 @@ test('ebios rm study', async ({
 			.getByRole('gridcell', { name: 'test strategic scenario 1 - test attack path 1' })
 			.click();
 		await expect(page).not.toHaveURL(/.*workshop-5.*/);
-		await expect(page.getByText('High').nth(2)).toBeVisible();
+		await expect(page.locator('span:text("High")').first()).toBeVisible();
 	});
 });
