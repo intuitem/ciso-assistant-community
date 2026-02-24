@@ -105,9 +105,7 @@ def parse_content_rows(content_ws):
     rows = list(content_ws.iter_rows())
     if not rows:
         return [], []
-    header = [
-        str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]
-    ]
+    header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
     rows_with_data = []
     for row in rows[1:]:
         if not any(cell.value for cell in row):
@@ -718,7 +716,9 @@ def _handle_reference_controls(obj, library, compat_mode, verbose):
         }
 
         set_optional_fields(
-            entry, data, ["name", "category", "csf_function", "description", "annotation"]
+            entry,
+            data,
+            ["name", "category", "csf_function", "description", "annotation"],
         )
         attach_translations_from_row(entry, header, row)
         controls.append(entry)
@@ -772,15 +772,11 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         answers_sheet = object_blocks[answers_block_name]["content_sheet"]
         rows = list(answers_sheet.iter_rows())
         if rows:
-            header = [
-                str(c.value).strip().lower() if c.value else "" for c in rows[0]
-            ]
+            header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
 
             for row in rows[1:]:
                 data = {
-                    header[i]: row[i].value
-                    for i in range(len(header))
-                    if i < len(row)
+                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
                 }
                 answer_id = str(data.get("id", "")).strip()
                 answer_type = str(data.get("question_type", "")).strip()
@@ -859,23 +855,17 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 if sig_lines:
                     for i, val in enumerate(sig_lines):
                         if val:
-                            groups = [
-                                s.strip() for s in val.split(",") if s.strip()
-                            ]
+                            groups = [s.strip() for s in val.split(",") if s.strip()]
 
                             # If IG for choice == "/undefined", continue
                             if len(groups) == 1 and groups[0].lower() == "/":
                                 continue
 
                             if groups:
-                                choices[i]["select_implementation_groups"] = (
-                                    groups
-                                )
+                                choices[i]["select_implementation_groups"] = groups
 
                 # --- Optional: color ---------------------------------------------------
-                color_lines = _per_choice_lines(
-                    data, "color", len(choices), answer_id
-                )
+                color_lines = _per_choice_lines(data, "color", len(choices), answer_id)
                 if color_lines:
                     for i, val in enumerate(color_lines):
                         if val:
@@ -935,9 +925,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                 ),
             }
             if "description_doc" in data and data["description_doc"]:
-                score_entry["description_doc"] = str(
-                    data["description_doc"]
-                ).strip()
+                score_entry["description_doc"] = str(data["description_doc"]).strip()
             attach_translations_from_row(score_entry, score_header, row)
             score_defs.append(score_entry)
         framework["scores_definition"] = score_defs
@@ -962,9 +950,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             }
 
             if data.get("default_selected") is not None:
-                ig_entry["default_selected"] = bool(
-                    data.get("default_selected")
-                )
+                ig_entry["default_selected"] = bool(data.get("default_selected"))
 
             attach_translations_from_row(ig_entry, ig_header, row)
             ig_defs.append(ig_entry)
@@ -975,9 +961,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
     # counter logic, so we cannot use parse_content_rows here.
     rows = list(content_ws.iter_rows())
     if rows:
-        header = [
-            str(c.value).strip().lower() if c.value else "" for c in rows[0]
-        ]
+        header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
         parent_for_depth = {}
         count_for_depth = {}
         previous_node_urn = None
@@ -988,11 +972,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
         all_urns = set()  # to detect duplicates
         for row in rows[1:]:
             counter += 1
-            data = {
-                header[i]: row[i].value
-                for i in range(len(header))
-                if i < len(row)
-            }
+            data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
             if all(value is None or value == "" for value in data.values()):
                 print(f"empty line {counter}")
                 continue
@@ -1016,14 +996,15 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             if (
                 compat_mode == 1
             ):  # Use legacy URN fallback logic (for requirements without ref_id)
-                skip_count = str(
-                    data.get("skip_count", "")
-                ).strip().lower() in ("1", "true", "yes", "x")
+                skip_count = str(data.get("skip_count", "")).strip().lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                    "x",
+                )
                 if skip_count:
                     counter_fix += 1
-                    ref_id_urn = (
-                        f"node{counter - counter_fix}-{counter_fix + 1}"
-                    )
+                    ref_id_urn = f"node{counter - counter_fix}-{counter_fix + 1}"
                 else:
                     # Adds the ability to use the "node_id" column despite compatibility mode set to "1"
                     if data.get("node_id") and data.get("node_id").strip():
@@ -1074,9 +1055,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     urn = f"{base_urn}:{data.get('node_id').strip()}"
                 elif ref_id:
                     # [+] Compat check
-                    ref_id_clean = clean_urn_suffix(
-                        ref_id, compat_mode=compat_mode
-                    )
+                    ref_id_clean = clean_urn_suffix(ref_id, compat_mode=compat_mode)
                     if verbose and ref_id != ref_id_clean:
                         print(
                             f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'"
@@ -1089,9 +1068,7 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                         urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
                     elif name:
                         # [+] Compat check
-                        name_clean = clean_urn_suffix(
-                            name, compat_mode=compat_mode
-                        )
+                        name_clean = clean_urn_suffix(name, compat_mode=compat_mode)
                         if verbose and name != name_clean:
                             print(
                                 f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'"
@@ -1111,7 +1088,9 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
             if parent_urn:
                 node["parent_urn"] = parent_urn
             set_optional_fields(
-                node, data, ["ref_id", "name", "description", "annotation", "typical_evidence"]
+                node,
+                data,
+                ["ref_id", "name", "description", "annotation", "typical_evidence"],
             )
             # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
             if "importance" in data and data["importance"]:
@@ -1143,13 +1122,9 @@ def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, v
                     raise ValueError(
                         f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
                     )
-            if (
-                "implementation_groups" in data
-                and data["implementation_groups"]
-            ):
+            if "implementation_groups" in data and data["implementation_groups"]:
                 node["implementation_groups"] = [
-                    s.strip()
-                    for s in str(data["implementation_groups"]).split(",")
+                    s.strip() for s in str(data["implementation_groups"]).split(",")
                 ]
             if "threats" in data and data["threats"]:
                 threats = expand_urns_from_prefixed_list(
@@ -1309,9 +1284,7 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         "source_framework_urn": meta.get("target_framework_urn"),
     }
 
-    translations = extract_translations_from_metadata(
-        meta, "requirement_mapping_set"
-    )
+    translations = extract_translations_from_metadata(meta, "requirement_mapping_set")
     if translations:
         requirement_mapping_set["translations"] = translations
         requirement_mapping_set_revert["translations"] = translations
@@ -1353,32 +1326,19 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
                 f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'"
             )
         entry = {
-            "source_requirement_urn": source_node_base_urn
-            + ":"
-            + source_node_id,
-            "target_requirement_urn": target_node_base_urn
-            + ":"
-            + target_node_id,
+            "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
+            "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
             "relationship": data.get("relationship").strip(),
         }
         entry_revert = {
-            "source_requirement_urn": target_node_base_urn
-            + ":"
-            + target_node_id,
-            "target_requirement_urn": source_node_base_urn
-            + ":"
-            + source_node_id,
-            "relationship": revert_relationship(
-                data.get("relationship").strip()
-            ),
+            "source_requirement_urn": target_node_base_urn + ":" + target_node_id,
+            "target_requirement_urn": source_node_base_urn + ":" + source_node_id,
+            "relationship": revert_relationship(data.get("relationship").strip()),
         }
         if "rationale" in data and data["rationale"]:
             entry["rationale"] = data.get("rationale").strip()
             entry_revert["rationale"] = data.get("rationale").strip()
-        if (
-            "strength_of_relationship" in data
-            and data["strength_of_relationship"]
-        ):
+        if "strength_of_relationship" in data and data["strength_of_relationship"]:
             entry["strength_of_relationship"] = int(
                 data.get("strength_of_relationship")
             )
@@ -1388,9 +1348,7 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         requirement_mappings.append(entry)
         requirement_mappings_revert.append(entry_revert)
     requirement_mapping_set["requirement_mappings"] = requirement_mappings
-    requirement_mapping_set_revert["requirement_mappings"] = (
-        requirement_mappings_revert
-    )
+    requirement_mapping_set_revert["requirement_mappings"] = requirement_mappings_revert
     library["objects"]["requirement_mapping_sets"] = [
         requirement_mapping_set,
         requirement_mapping_set_revert,
@@ -1447,27 +1405,19 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
     ]
 
     source_missing_counts = Counter(
-        id
-        for id in used_source_ids
-        if source_sheet_available and id not in source_ids
+        id for id in used_source_ids if source_sheet_available and id not in source_ids
     )
     target_missing_counts = Counter(
-        id
-        for id in used_target_ids
-        if target_sheet_available and id not in target_ids
+        id for id in used_target_ids if target_sheet_available and id not in target_ids
     )
 
     # Print all warnings first (one per ID)
     if source_sheet_available:
         for sid in source_missing_counts:
-            print(
-                f'⚠️  [WARNING] source_node_id "{sid}" not found in sheet "source"'
-            )
+            print(f'⚠️  [WARNING] source_node_id "{sid}" not found in sheet "source"')
     if target_sheet_available:
         for tid in target_missing_counts:
-            print(
-                f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"'
-            )
+            print(f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"')
 
     # Check for duplicate (source, target) pairs in mappings
     mapping_pairs = [
@@ -1483,9 +1433,7 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
     }
     if duplicates_found:
         for (sid, tid), count in duplicates_found.items():
-            print(
-                f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times'
-            )
+            print(f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times')
 
     # Print info about missing IDs that are referenced multiple times
     if source_sheet_available:
@@ -1668,12 +1616,20 @@ def create_library(
 
     # Dispatch table for object type handlers
     handler_map = {
-        "reference_controls": lambda obj: _handle_reference_controls(obj, library, compat_mode, verbose),
+        "reference_controls": lambda obj: _handle_reference_controls(
+            obj, library, compat_mode, verbose
+        ),
         "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
-        "framework": lambda obj: _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, verbose),
-        "metric_definitions": lambda obj: _handle_metric_definitions(obj, library, compat_mode, verbose),
+        "framework": lambda obj: _handle_framework(
+            obj, library, object_blocks, prefix_to_urn, compat_mode, verbose
+        ),
+        "metric_definitions": lambda obj: _handle_metric_definitions(
+            obj, library, compat_mode, verbose
+        ),
         "risk_matrix": lambda obj: _handle_risk_matrix(obj, library, wb),
-        "requirement_mapping_set": lambda obj: _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbose),
+        "requirement_mapping_set": lambda obj: _handle_requirement_mapping_set(
+            obj, library, wb, sheets, compat_mode, verbose
+        ),
     }
 
     for name in sorted_object_names:
