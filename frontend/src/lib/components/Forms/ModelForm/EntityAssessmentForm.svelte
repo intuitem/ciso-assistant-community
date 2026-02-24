@@ -187,6 +187,7 @@
 		multiple
 		optionsEndpoint="solutions"
 		optionsDetailedUrlParameters={[['provider_entity', selectedEntity || '']]}
+		optionsExtraFields={[['provider_entity', 'str']]}
 		field="solutions"
 		cacheLock={cacheLocks['solutions']}
 		bind:cachedValue={formDataCache['solutions']}
