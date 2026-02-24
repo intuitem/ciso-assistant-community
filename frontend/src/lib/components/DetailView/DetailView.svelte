@@ -654,7 +654,7 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
-											{:else if m[toCamelCase(value.str || value.name)]}
+											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
 												{(value.str || value.name) ?? value}
