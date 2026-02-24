@@ -41,6 +41,61 @@ QUESTION_TYPE_MAP = {
 }
 
 
+LIBRARY_META_ROWS: list[tuple[str, str]] = [
+    ("type", "library"),
+    ("urn", "urn:intuitem:risk:library:anssi-monaidecyber"),
+    ("version", "1"),
+    ("locale", "fr"),
+    ("ref_id", "ANSSI-MonAideCyber"),
+    ("name", "ANSSI - Questionnaire MonAideCyber"),
+    (
+        "description",
+        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.",
+    ),
+    ("copyright", "ANSSI"),
+    ("provider", "ANSSI"),
+    ("packager", "intuitem"),
+]
+
+FWK_META_ROWS: list[tuple[str, str]] = [
+    ("type", "framework"),
+    ("base_urn", "urn:intuitem:risk:req_node:anssi-monaidecyber"),
+    ("urn", "urn:intuitem:risk:framework:anssi-monaidecyber"),
+    ("ref_id", "ANSSI-MonAideCyber"),
+    ("name", "ANSSI - Questionnaire MonAideCyber"),
+    (
+        "description",
+        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.",
+    ),
+    ("implementation_groups_definition", "imp_grp"),
+    ("answers_definition", "answ"),
+]
+
+ANSW_META_ROWS: list[tuple[str, str]] = [
+    ("type", "answers"),
+    ("name", "answ"),
+]
+
+IMP_GRP_META_ROWS: list[tuple[str, str]] = [
+    ("type", "implementation_groups"),
+    ("name", "imp_grp"),
+]
+
+REF_CTRL_META_ROWS: list[tuple[str, str]] = [
+    ("type", "reference_controls"),
+    ("base_urn", "urn:intuitem:risk:function:anssi-monaidecyber"),
+]
+
+URN_PREF_META_ROWS: list[tuple[str, str]] = [
+    ("type", "urn_prefix"),
+]
+
+URN_PREF_HEADERS = ["prefix_id", "prefix_value"]
+URN_PREF_ROWS = [
+    {"prefix_id": "1", "prefix_value": "urn:intuitem:risk:function:anssi-monaidecyber"},
+]
+
+
 @dataclass
 class AnswerRow:
     qid: str
@@ -430,6 +485,21 @@ def write_sheet(wb: Workbook, title: str, headers: list[str], rows: list[dict[st
             cell.number_format = "@"
 
 
+def write_kv_sheet(wb: Workbook, title: str, rows: list[tuple[str, str]]) -> None:
+    ws = wb.create_sheet(title)
+    for key, value in rows:
+        ws.append([as_text(key), as_text(value)])
+
+    max_row = ws.max_row if ws.max_row > 0 else 1
+    for row in ws.iter_rows(min_row=1, max_row=max_row, min_col=1, max_col=2):
+        for cell in row:
+            if cell.value is None:
+                cell.value = ""
+            else:
+                cell.value = as_text(cell.value)
+            cell.number_format = "@"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Construit un XLSX depuis questionnaire_repo.json et mesures_repo.json")
     parser.add_argument("--questionnaire", default="questionnaire_repo.json", help="Chemin du questionnaire JSON")
@@ -460,16 +530,28 @@ def main() -> None:
     wb = Workbook()
     wb.remove(wb.active)
 
-    write_sheet(wb, "framework_content", FRAMEWORK_HEADERS, ctx.framework_rows)
-    write_sheet(wb, "imp_grp_content", IMP_GRP_HEADERS, ctx.imp_grp_rows)
+    write_kv_sheet(wb, "library_meta", LIBRARY_META_ROWS)
+
+    write_kv_sheet(wb, "fwk_meta", FWK_META_ROWS)
+    write_sheet(wb, "fwk_content", FRAMEWORK_HEADERS, ctx.framework_rows)
+
+    write_kv_sheet(wb, "answ_meta", ANSW_META_ROWS)
     write_sheet(wb, "answ_content", ANSW_HEADERS, answer_rows_to_output(ctx.answer_rows))
+
+    write_kv_sheet(wb, "imp_grp_meta", IMP_GRP_META_ROWS)
+    write_sheet(wb, "imp_grp_content", IMP_GRP_HEADERS, ctx.imp_grp_rows)
+
+    write_kv_sheet(wb, "ref_ctrl_meta", REF_CTRL_META_ROWS)
     write_sheet(wb, "ref_ctrl_content", REF_CTRL_HEADERS, ctx.ref_ctrl_rows)
+
+    write_kv_sheet(wb, "urn_pref_meta", URN_PREF_META_ROWS)
+    write_sheet(wb, "urn_pref_content", URN_PREF_HEADERS, URN_PREF_ROWS)
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     wb.save(out_path)
 
     print(f"Excel généré: {out_path}")
-    print(f"- framework_content: {len(ctx.framework_rows)} ligne(s)")
+    print(f"- fwk_content: {len(ctx.framework_rows)} ligne(s)")
     print(f"- imp_grp_content: {len(ctx.imp_grp_rows)} ligne(s)")
     print(f"- answ_content: {len(ctx.answer_rows)} ligne(s)")
     print(f"- ref_ctrl_content: {len(ctx.ref_ctrl_rows)} ligne(s)")
