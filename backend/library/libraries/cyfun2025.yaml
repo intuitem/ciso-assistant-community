@@ -494,7 +494,7 @@ objects:
       \ maintain an organisation-wide vision, strategy, and program to ensure that\
       \ information assets and technologies are adequately protected."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-03-1
-    ref_id: GV.RR-03-1
+    ref_id: GV.RR-03.1
     name: Cybersecurity resource allocation
     description: Sufficient resources shall be allocated in line with the cybersecurity
       risk strategy, roles, responsibilities and policies.
@@ -510,7 +510,7 @@ objects:
       \ for OT security to enable collaboration with OT engineers so that alerts are\
       \ interpreted accurately and threats are responded to effectively."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:gv.rr-03-2
-    ref_id: GV.RR-03-2
+    ref_id: GV.RR-03.2
     name: Response and recovery plan maintenance roles
     description: The organisation shall assign roles and responsibilities for reviewing
       and updating response and recovery plans, ensuring they reflect changes in the
@@ -1237,7 +1237,7 @@ objects:
       \ disruption. Passive monitoring, vendor-approved tools, and scheduled scans\
       \ should be considered to ensure safety and system availability."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-03-2
-    ref_id: ID.AM-03-2
+    ref_id: ID.AM-03.2
     name: Internal network and data flow mapping
     description: The organisation's network communication and internal data flows
       shall be mapped, documented, authorised, and updated when changes occur.
@@ -1257,7 +1257,7 @@ objects:
       \ drive or hardcopy) should be maintained to ensure availability during outages\
       \ or incidents."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-03-3
-    ref_id: ID.AM-03-3
+    ref_id: ID.AM-03.3
     name: External network and data flow mapping
     description: The organisation's network communication and external data flows
       shall be mapped, documented, authorised, and updated when changes occur.
@@ -1617,7 +1617,7 @@ objects:
       \ applied before first use.\n\xB7 Ensure Conformance and Compliance: All actions\
       \ should conform to internal procedures and comply with applicable cybersecurity\
       \ regulations and industry standards."
-  - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:id.am-08.10
+  - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:d.am-08.10
     ref_id: ID.AM-08.10
     name: Post-maintenance security verification
     description: The organisation shall verify security controls following maintenance
@@ -4725,7 +4725,7 @@ objects:
       \ should be integrated with broader security operations, allowing alerts to\
       \ be correlated with other physical and digital indicators of compromise."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-03-1
-    ref_id: DE.CM-03-1
+    ref_id: DE.CM-03.1
     name: Endpoint and network behaviour monitoring
     description: End point and network protection tools to monitor end-user behaviour
       for dangerous activity shall be implemented.
@@ -4755,7 +4755,7 @@ objects:
       \ best practices and frameworks such as the Security Operations Centre (SOC)\
       \ Visibility Triad introduced by Gartner."
   - urn: urn:intuitem:risk:reference_control:ccb-cyfun2025:de.cm-03-2
-    ref_id: DE.CM-03-2
+    ref_id: DE.CM-03.2
     name: Endpoint and network protection management
     description: End point and network protection tools that monitor end-user behaviour
       for dangerous activity shall be managed.
