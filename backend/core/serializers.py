@@ -2308,12 +2308,7 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
         """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
         from core.utils import build_answers_dict
 
-        answers_qs = (
-            obj.answers.select_related("question")
-            .prefetch_related("selected_choices")
-            .all()
-        )
-        return build_answers_dict(answers_qs)
+        return build_answers_dict(obj.answers.all())
 
     class Meta:
         model = RequirementAssessment

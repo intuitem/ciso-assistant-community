@@ -728,12 +728,10 @@ def build_answers_dict(answers_qs):
     result = {}
     for a in answers_qs:
         if a.question.type == Question.Type.SINGLE_CHOICE:
-            refs = list(a.selected_choices.values_list("ref_id", flat=True))
+            refs = [c.ref_id for c in a.selected_choices.all()]
             result[a.question.urn] = refs[0] if refs else None
         elif a.question.type == Question.Type.MULTIPLE_CHOICE:
-            result[a.question.urn] = list(
-                a.selected_choices.values_list("ref_id", flat=True)
-            )
+            result[a.question.urn] = [c.ref_id for c in a.selected_choices.all()]
         else:
             result[a.question.urn] = a.value
     return result

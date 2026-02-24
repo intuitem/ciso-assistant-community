@@ -6520,6 +6520,7 @@ class ComplianceAssessment(Assessment):
                 "requirement__questions__choices",
                 "answers",
                 "answers__question",
+                "answers__selected_choices",
             )
         )
 

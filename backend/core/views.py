@@ -9184,7 +9184,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
