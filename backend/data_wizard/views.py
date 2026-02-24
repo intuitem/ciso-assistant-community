@@ -74,7 +74,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar, Literal
+from typing import Optional, Final, ClassVar
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -141,6 +141,29 @@ def _parse_datetime(value) -> Optional[str]:
     if isinstance(value, datetime):
         return value.isoformat()
     return value
+
+
+def _resolve_filtering_labels(value) -> list[UUID]:
+    """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
+
+    Labels that do not yet exist are created on the fly.
+    """
+    if not value or not isinstance(value, str):
+        return []
+    separator = "|" if "|" in value else ","
+    label_names = [name.strip() for name in value.split(separator) if name.strip()]
+    label_ids: list[UUID] = []
+    for label_name in label_names:
+        label = FilteringLabel.objects.filter(label=label_name).first()
+        if label is None:
+            try:
+                label = FilteringLabel(label=label_name)
+                label.full_clean()
+                label.save()
+            except Exception:
+                continue
+        label_ids.append(label.id)
+    return label_ids
 
 
 class RecordFileType(enum.StrEnum):
@@ -456,7 +479,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "type": asset_type,
@@ -466,7 +489,13 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
     def process_records(self, records: list[dict]) -> Result:
         """
@@ -616,10 +645,15 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             "eta": _parse_date(record.get("eta")),
             "expiry_date": _parse_date(record.get("expiry_date")),
             "start_date": _parse_date(record.get("start_date")),
+            "observation": record.get("observation", ""),
         }
 
         if reference_control_id:
             data["reference_control"] = reference_control_id
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
 
         return data, None
 
@@ -642,12 +676,18 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
-        return {
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
             "folder": domain,
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class UserRecordConsumer(RecordConsumer[None]):
@@ -798,7 +838,6 @@ class FindingsAssessmentContext:
 
 class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]):
     SERIALIZER_CLASS = FindingWriteSerializer
-    FILTERING_LABEL_SEPARATOR: Final[Literal["|"]] = "|"
     SEVERITY_MAP: Final[dict[Optional[str], int]] = {
         None: -1,
         "info": 0,
@@ -851,33 +890,18 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         record_severity = record.get("severity")
         severity = self.SEVERITY_MAP.get(record_severity, -1)
 
-        record_filtering_labels = record.get("filtering_labels")
-        if record_filtering_labels:
-            filtering_label_names = record_filtering_labels.split(
-                self.FILTERING_LABEL_SEPARATOR
-            )
-            filtering_label_names = [
-                label_name.strip() for label_name in filtering_label_names
-            ]
+        # Parse priority (1-4)
+        priority = record.get("priority")
+        if isinstance(priority, (int, float)):
+            priority = int(priority)
+        elif isinstance(priority, str) and priority.isdigit():
+            priority = int(priority)
         else:
-            filtering_label_names = []
+            priority = None
+        if isinstance(priority, int) and not (1 <= priority <= 4):
+            priority = None
 
-        filtering_label_ids: list[UUID] = []
-
-        for label_name in filtering_label_names:
-            filtering_label = FilteringLabel.objects.filter(label=label_name).first()
-            if filtering_label is None:
-                try:
-                    filtering_label = FilteringLabel(label=label_name)
-                    filtering_label.full_clean()
-                    filtering_label.save()
-                except Exception as e:
-                    return {}, Error(
-                        record=record,
-                        error=f"Error while creating filtering labels {repr(label_name)}: {repr(e)}",
-                    )
-
-            filtering_label_ids.append(filtering_label.id)
+        filtering_label_ids = _resolve_filtering_labels(record.get("filtering_labels"))
 
         finding_data = {
             "name": name,
@@ -887,7 +911,13 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
             "findings_assessment": context.findings_assessment.id,
             "severity": severity,
             "filtering_labels": filtering_label_ids,
+            "eta": _parse_date(record.get("eta")),
+            "due_date": _parse_date(record.get("due_date")),
+            "observation": record.get("observation", ""),
         }
+
+        if priority is not None:
+            finding_data["priority"] = priority
 
         return finding_data, None
 
@@ -923,7 +953,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
         else:
             priority = None
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -935,7 +965,13 @@ class PolicyRecordConsumer(RecordConsumer[None]):
             "expiry_date": _parse_date(record.get("expiry_date")),
             "link": record.get("link", ""),
             "effort": record.get("effort"),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class SecurityExceptionRecordConsumer(RecordConsumer[None]):
@@ -1082,7 +1118,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         else:
             detection_value = "internally_detected"
 
-        return {
+        data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
             "description": record.get("description", ""),
@@ -1092,7 +1128,13 @@ class IncidentRecordConsumer(RecordConsumer[None]):
             "detection": detection_value,
             "link": record.get("link", ""),
             "reported_at": _parse_datetime(record.get("reported_at")),
-        }, None
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
 
 
 class LoadFileView(APIView):
@@ -1668,44 +1710,113 @@ class LoadFileView(APIView):
 
                         if requirement_assessment:
                             # Update the requirement assessment with the data from the record
+                            compliance_result = record.get("compliance_result")
+                            requirement_progress = record.get("requirement_progress")
                             requirement_data = {
-                                "result": record.get("compliance_result")
-                                if record.get("compliance_result") != ""
+                                "result": compliance_result
+                                if compliance_result not in (None, "")
                                 else "not_assessed",
-                                "status": record.get("requirement_progress")
-                                if record.get("requirement_progress") != ""
+                                "status": requirement_progress
+                                if requirement_progress not in (None, "")
                                 else "to_do",
                                 "observation": record.get("observations", ""),
                             }
-                            if (
-                                record.get("implementation_score") != ""
-                                and record.get("documentation_score") != ""
+                            impl_score = record.get("implementation_score")
+                            doc_score = record.get("documentation_score")
+                            score = record.get("score")
+                            enable_doc_score = False
+                            if impl_score not in (None, "") and doc_score not in (
+                                None,
+                                "",
                             ):
-                                if not compliance_assessment.show_documentation_score:
-                                    compliance_assessment.show_documentation_score = (
-                                        True
-                                    )
-                                    compliance_assessment.save(
-                                        update_fields=["show_documentation_score"]
-                                    )
                                 requirement_data.update(
                                     {
-                                        "score": record.get("implementation_score"),
-                                        "documentation_score": record.get(
-                                            "documentation_score"
-                                        ),
+                                        "score": impl_score,
+                                        "documentation_score": doc_score,
                                         "is_scored": True,
                                     }
                                 )
-                            elif (
-                                record.get("score") != ""
-                                and record.get("score") is not None
-                            ):
+                                enable_doc_score = True
+                            elif score not in (None, ""):
                                 requirement_data.update(
-                                    {"score": record.get("score"), "is_scored": True}
+                                    {"score": score, "is_scored": True}
                                 )
                             else:
                                 requirement_data.update({"is_scored": False})
+
+                            # Build answers from the "answers" cell
+                            answers_cell = record.get("answers")
+                            if (
+                                answers_cell not in (None, "")
+                                and ReqNode
+                                and ReqNode.questions
+                            ):
+                                text_to_question = {}
+                                for q_urn, qdef in ReqNode.questions.items():
+                                    q_text = qdef.get("text", "")
+                                    if q_text:
+                                        text_to_question[q_text] = (
+                                            q_urn,
+                                            qdef,
+                                        )
+
+                                answers = requirement_assessment.answers or {}
+                                has_any_answer = False
+
+                                for line in str(answers_cell).split("\n"):
+                                    line = line.strip()
+                                    if ">>" not in line:
+                                        continue
+                                    q_part, _, a_part = line.partition(">>")
+                                    q_text = q_part.replace("(multiple)", "").strip()
+                                    a_value = a_part.strip()
+                                    # Skip template hints
+                                    if a_value.startswith("[") and a_value.endswith(
+                                        "]"
+                                    ):
+                                        continue
+                                    if not a_value:
+                                        continue
+
+                                    matched = text_to_question.get(q_text)
+                                    if not matched:
+                                        continue
+                                    q_urn, qdef = matched
+                                    q_type = qdef.get("type")
+
+                                    if q_type in ("text", "date"):
+                                        answers[q_urn] = a_value
+                                        has_any_answer = True
+                                    elif q_type == "multiple_choice":
+                                        selected = [
+                                            v.strip()
+                                            for v in a_value.split("|")
+                                            if v.strip()
+                                        ]
+                                        value_to_urn = {
+                                            c.get("value", ""): c["urn"]
+                                            for c in qdef.get("choices", [])
+                                        }
+                                        choice_urns = [
+                                            value_to_urn[v]
+                                            for v in selected
+                                            if v in value_to_urn
+                                        ]
+                                        if choice_urns:
+                                            answers[q_urn] = choice_urns
+                                            has_any_answer = True
+                                    elif q_type == "unique_choice":
+                                        value_to_urn = {
+                                            c.get("value", ""): c["urn"]
+                                            for c in qdef.get("choices", [])
+                                        }
+                                        if a_value in value_to_urn:
+                                            answers[q_urn] = value_to_urn[a_value]
+                                            has_any_answer = True
+
+                                if has_any_answer:
+                                    requirement_data["answers"] = answers
+
                             # Use the serializer for validation and saving
                             req_serializer = RequirementAssessmentWriteSerializer(
                                 instance=requirement_assessment,
@@ -1713,8 +1824,18 @@ class LoadFileView(APIView):
                                 partial=True,
                                 context={"request": request},
                             )
-                            if req_serializer.is_valid(raise_exception=True):
+                            if req_serializer.is_valid():
                                 req_serializer.save()
+                                if (
+                                    enable_doc_score
+                                    and not compliance_assessment.show_documentation_score
+                                ):
+                                    compliance_assessment.show_documentation_score = (
+                                        True
+                                    )
+                                    compliance_assessment.save(
+                                        update_fields=["show_documentation_score"]
+                                    )
                                 results["successful"] += 1
                             else:
                                 results["failed"] += 1
@@ -2745,6 +2866,13 @@ class LoadFileView(APIView):
                 return None
 
             risk_scenario = scenario_serializer.save()
+
+            # Link filtering labels
+            filtering_label_ids = _resolve_filtering_labels(
+                record.get("filtering_labels")
+            )
+            if filtering_label_ids:
+                risk_scenario.filtering_labels.set(filtering_label_ids)
 
             # Link existing controls
             self._link_controls_to_scenario(
