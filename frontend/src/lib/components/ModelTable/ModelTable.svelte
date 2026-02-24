@@ -535,6 +535,10 @@
 
 	// Function to check if a column is multi-value and should not be sortable
 	const isMultiValueColumn = (key: string): boolean => {
+		if (URLModel === 'applied-controls' && key === 'assets') {
+			// sort measures by assets
+			return false;
+		}
 		return (
 			MULTI_VALUE_COLUMNS.includes(key) ||
 			(tableSource.body.length > 0 && Array.isArray(tableSource.body[0][key]))
