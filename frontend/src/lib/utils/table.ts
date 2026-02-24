@@ -1429,6 +1429,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
 			'category',
@@ -1443,6 +1444,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
 			'category',
