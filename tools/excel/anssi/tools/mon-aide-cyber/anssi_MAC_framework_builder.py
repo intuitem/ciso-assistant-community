@@ -1,5 +1,24 @@
 #!/usr/bin/env python3
-"""MonAideCyber full builder (JSON + Excel + YAML), no CLI arguments."""
+"""
+MonAideCyber Framework Builder - Automated Extraction & Conversion Pipeline
+===========================================================================
+
+Automates the full MonAideCyber pipeline:
+1) Download/reuse source ZIP from GitHub
+2) Export JSON referentials
+3) Build framework Excel (v2)
+4) Convert Excel to YAML library
+5) Cleanup temporary extracted files
+
+Artifacts
+---------
+- `anssi-mon_aide_cyber.xlsx`
+- `anssi-mon_aide_cyber.yaml`
+
+Run
+---
+python anssi_MAC_framework_builder.py
+"""
 
 import shutil
 import sys

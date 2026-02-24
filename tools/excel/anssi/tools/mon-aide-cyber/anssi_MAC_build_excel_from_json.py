@@ -1,7 +1,23 @@
 #!/usr/bin/env python3
-"""Construit un fichier Excel depuis questionnaire_repo.json et mesures_repo.json."""
+"""
+MonAideCyber - Excel Framework Builder
+======================================
 
-from __future__ import annotations
+Builds a v2 framework Excel workbook from:
+- `questionnaire_repo.json`
+- `mesures_repo.json`
+
+Workbook includes metadata/content tabs for:
+- framework
+- answers
+- implementation groups
+- reference controls
+- URN prefixes
+
+Run
+---
+python anssi_MAC_build_excel_from_json.py --questionnaire questionnaire_repo.json --mesures mesures_repo.json
+"""
 
 import argparse
 import json
@@ -27,8 +43,21 @@ FRAMEWORK_HEADERS = [
 ]
 
 IMP_GRP_HEADERS = ["ref_id", "name", "description", "default_selected"]
-ANSW_HEADERS = ["id", "question_type", "question_choices", "description", "select_implementation_groups"]
-REF_CTRL_HEADERS = ["ref_id", "name", "category", "csf_function", "description", "annotation"]
+ANSW_HEADERS = [
+    "id",
+    "question_type",
+    "question_choices",
+    "description",
+    "select_implementation_groups",
+]
+REF_CTRL_HEADERS = [
+    "ref_id",
+    "name",
+    "category",
+    "csf_function",
+    "description",
+    "annotation",
+]
 
 PERIMETRE_LABELS = {
     "SYSTEME-INDUSTRIEL": "SYSTÈME INDUSTRIEL",
@@ -109,7 +138,9 @@ class AnswerRow:
         if not self.select_groups:
             self.select_groups = ["/" for _ in self.response_labels]
         if len(self.select_groups) < len(self.response_labels):
-            self.select_groups.extend("/" for _ in range(len(self.response_labels) - len(self.select_groups)))
+            self.select_groups.extend(
+                "/" for _ in range(len(self.response_labels) - len(self.select_groups))
+            )
 
     def _line_index_from_ordre(self, ordre: int) -> int:
         base = ordre if self.first_order > 0 else ordre + 1
@@ -125,7 +156,9 @@ class AnswerRow:
         idx = self._line_index_from_ordre(ordre)
         self._merge_group_at_index(idx, group)
 
-    def add_group_except_response_id(self, group: str, response_id_to_skip: str) -> None:
+    def add_group_except_response_id(
+        self, group: str, response_id_to_skip: str
+    ) -> None:
         if not self.response_labels:
             return
         self.ensure_line_count()
@@ -170,7 +203,13 @@ def load_json(path: Path) -> dict[str, Any]:
         return json.load(f)
 
 
-def ensure_imp_group(ctx: Context, ref_id: str, name: str, description: str = "", default_selected: str = "") -> None:
+def ensure_imp_group(
+    ctx: Context,
+    ref_id: str,
+    name: str,
+    description: str = "",
+    default_selected: str = "",
+) -> None:
     if ref_id in ctx.imp_grp_seen:
         return
     ctx.imp_grp_seen.add(ref_id)
@@ -206,12 +245,12 @@ def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
             continue
 
         mesures_candidates: list[Any] = []
-        # Format actuel du JSON exporté: reponsesPossibles[].resultat.mesures
+        # Current exported JSON format: reponsesPossibles[].resultat.mesures
         resultat = rep.get("resultat")
         if isinstance(resultat, dict):
             mesures_candidates.extend(resultat.get("mesures", []) or [])
 
-        # Fallback robuste si la structure redevient directe dans le futur
+        # Robust fallback if the structure becomes direct again in future updates
         mesures_candidates.extend(rep.get("mesures", []) or [])
 
         for mesure in mesures_candidates:
@@ -231,8 +270,12 @@ def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
 
 def build_answer_row_for_question(question: dict[str, Any]) -> AnswerRow:
     reponses = question.get("reponsesPossibles", []) or []
-    response_labels = [as_text(r.get("libelle")) for r in reponses if isinstance(r, dict)]
-    response_ids = [as_text(r.get("identifiant")) for r in reponses if isinstance(r, dict)]
+    response_labels = [
+        as_text(r.get("libelle")) for r in reponses if isinstance(r, dict)
+    ]
+    response_ids = [
+        as_text(r.get("identifiant")) for r in reponses if isinstance(r, dict)
+    ]
     first_order = 0
     if reponses and isinstance(reponses[0], dict):
         try:
@@ -288,13 +331,19 @@ def process_question(
     else:
         index_in_parent = child_index_in_parent or 1
         base_label = parent_question_label or ""
-        question_label = f"{base_label}.{index_in_parent}" if base_label else as_text(index_in_parent)
+        question_label = (
+            f"{base_label}.{index_in_parent}"
+            if base_label
+            else as_text(index_in_parent)
+        )
         base_ref = parent_ref_prefix or f"{theme_num}"
         ref_id = f"{base_ref}.{index_in_parent}"
         name = f"Question {question_label}"
 
         depends_group = f"_Q{question_label}_DEPENDS_ON_{parent_question_id}"
-        implementation_groups = implementation_groups_for_question(perimetre, depends_group)
+        implementation_groups = implementation_groups_for_question(
+            perimetre, depends_group
+        )
         ensure_imp_group(
             ctx,
             depends_group,
@@ -321,7 +370,9 @@ def process_question(
         "implementation_groups": implementation_groups,
         "questions": as_text(question.get("libelle")),
         "answer": qid,
-        "reference_controls": measures_to_reference_controls(question.get("reponsesPossibles", []) or []),
+        "reference_controls": measures_to_reference_controls(
+            question.get("reponsesPossibles", []) or []
+        ),
     }
     append_framework_row(ctx, framework_row)
 
@@ -393,7 +444,9 @@ def remove_main_and_add_groups(existing: str, groups: list[str]) -> str:
     return "\n".join(parts)
 
 
-def apply_conditions_perimetre_second_pass(ctx: Context, referentiel: dict[str, Any]) -> None:
+def apply_conditions_perimetre_second_pass(
+    ctx: Context, referentiel: dict[str, Any]
+) -> None:
     conditions = referentiel.get("_conditionsPerimetre")
     if not isinstance(conditions, dict):
         return
@@ -414,14 +467,20 @@ def apply_conditions_perimetre_second_pass(ctx: Context, referentiel: dict[str, 
 
             urn_c = as_text(context_question_id).lower()
             q_label = ctx.question_name_suffix_by_urn.get(urn_c, "")
-            ensure_imp_group(ctx, dep_group, f"Question dépendant de la Question {q_label}".strip())
+            ensure_imp_group(
+                ctx, dep_group, f"Question dépendant de la Question {q_label}".strip()
+            )
 
             answ_row = ctx.answer_rows.get(as_text(context_question_id))
             if answ_row is not None:
-                answ_row.add_group_except_response_id(dep_group, as_text(expected_response_id))
+                answ_row.add_group_except_response_id(
+                    dep_group, as_text(expected_response_id)
+                )
 
         row = ctx.framework_rows[target_idx]
-        row["implementation_groups"] = remove_main_and_add_groups(row.get("implementation_groups", ""), groups_to_add)
+        row["implementation_groups"] = remove_main_and_add_groups(
+            row.get("implementation_groups", ""), groups_to_add
+        )
 
 
 def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
@@ -440,7 +499,7 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             title = as_text(level_obj.get("titre"))
             pourquoi = as_text(level_obj.get("pourquoi"))
             comment = as_text(level_obj.get("comment"))
-            description = f"# Pourquoi ?\n{pourquoi}\n\n#Comment ?\n{comment}"
+            description = f"# Why?\n{pourquoi}\n\n#How?\n{comment}"
             ctx.ref_ctrl_rows.append(
                 {
                     "ref_id": f"{mesure_id}_{level_key}",
@@ -469,14 +528,18 @@ def answer_rows_to_output(answer_rows: dict[str, AnswerRow]) -> list[dict[str, s
     return out
 
 
-def write_sheet(wb: Workbook, title: str, headers: list[str], rows: list[dict[str, str]]) -> None:
+def write_sheet(
+    wb: Workbook, title: str, headers: list[str], rows: list[dict[str, str]]
+) -> None:
     ws = wb.create_sheet(title)
     ws.append(headers)
     for line in rows:
         values = [as_text(line.get(h, "")) for h in headers]
         ws.append(values)
 
-    for row in ws.iter_rows(min_row=1, max_row=ws.max_row, min_col=1, max_col=len(headers)):
+    for row in ws.iter_rows(
+        min_row=1, max_row=ws.max_row, min_col=1, max_col=len(headers)
+    ):
         for cell in row:
             if cell.value is None:
                 cell.value = ""
@@ -501,10 +564,20 @@ def write_kv_sheet(wb: Workbook, title: str, rows: list[tuple[str, str]]) -> Non
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Construit un XLSX depuis questionnaire_repo.json et mesures_repo.json")
-    parser.add_argument("--questionnaire", default="questionnaire_repo.json", help="Chemin du questionnaire JSON")
-    parser.add_argument("--mesures", default="mesures_repo.json", help="Chemin du JSON mesures")
-    parser.add_argument("--output", default="mon_aide_cyber.xlsx", help="Fichier XLSX de sortie")
+    parser = argparse.ArgumentParser(
+        description="Build an XLSX file from questionnaire_repo.json and mesures_repo.json"
+    )
+    parser.add_argument(
+        "--questionnaire",
+        default="questionnaire_repo.json",
+        help="Path to questionnaire JSON",
+    )
+    parser.add_argument(
+        "--mesures", default="mesures_repo.json", help="Path to measures JSON"
+    )
+    parser.add_argument(
+        "--output", default="mon_aide_cyber.xlsx", help="Output XLSX file"
+    )
     return parser.parse_args()
 
 
@@ -519,7 +592,9 @@ def build_excel_from_json(
 
     referentiel = questionnaire.get("referentiel")
     if not isinstance(referentiel, dict):
-        raise ValueError("Le fichier questionnaire ne contient pas d'objet 'referentiel' valide")
+        raise ValueError(
+            "Le fichier questionnaire ne contient pas d'objet 'referentiel' valide"
+        )
 
     ctx = Context()
     process_referentiel(ctx, referentiel)
@@ -535,7 +610,9 @@ def build_excel_from_json(
     write_sheet(wb, "fwk_content", FRAMEWORK_HEADERS, ctx.framework_rows)
 
     write_kv_sheet(wb, "answ_meta", ANSW_META_ROWS)
-    write_sheet(wb, "answ_content", ANSW_HEADERS, answer_rows_to_output(ctx.answer_rows))
+    write_sheet(
+        wb, "answ_content", ANSW_HEADERS, answer_rows_to_output(ctx.answer_rows)
+    )
 
     write_kv_sheet(wb, "imp_grp_meta", IMP_GRP_META_ROWS)
     write_sheet(wb, "imp_grp_content", IMP_GRP_HEADERS, ctx.imp_grp_rows)
@@ -570,11 +647,11 @@ def main() -> None:
         output_path=out_path,
     )
 
-    print(f"Excel généré: {out_path}")
-    print(f"- fwk_content: {stats['fwk_content']} ligne(s)")
-    print(f"- imp_grp_content: {stats['imp_grp_content']} ligne(s)")
-    print(f"- answ_content: {stats['answ_content']} ligne(s)")
-    print(f"- ref_ctrl_content: {stats['ref_ctrl_content']} ligne(s)")
+    print(f"Excel generated: {out_path}")
+    print(f"- fwk_content: {stats['fwk_content']} row(s)")
+    print(f"- imp_grp_content: {stats['imp_grp_content']} row(s)")
+    print(f"- answ_content: {stats['answ_content']} row(s)")
+    print(f"- ref_ctrl_content: {stats['ref_ctrl_content']} row(s)")
 
 
 if __name__ == "__main__":

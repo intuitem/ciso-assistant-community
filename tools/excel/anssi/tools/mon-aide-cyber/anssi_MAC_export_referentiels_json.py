@@ -1,9 +1,19 @@
 #!/usr/bin/env python3
-"""Exporte 2 JSON a partir du referentiel MonAideCyber.
+"""
+MonAideCyber - JSON Referential Exporter
+========================================
 
-Sorties:
-- questionnaire_repo.json: thematiques/questions/reponses + metadonnees transcripteur
-- mesures_repo.json: mesures avec textes resolves depuis les .pug
+Exports the MonAideCyber questionnaire/measures data from TypeScript sources
+into two JSON files.
+
+Outputs
+-------
+- `questionnaire_repo.json`
+- `mesures_repo.json`
+
+Run
+---
+python anssi_MAC_export_referentiels_json.py --api-root <path-to-mon-aide-cyber-api>
 """
 
 import argparse
@@ -17,7 +27,7 @@ try:
     import json5
 except ModuleNotFoundError as exc:  # pragma: no cover
     raise ModuleNotFoundError(
-        "Module 'json5' manquant. Installez-le avec: python3 -m pip install json5"
+        "Missing module 'json5'. Install it with: python3 -m pip install json5"
     ) from exc
 
 
@@ -47,7 +57,7 @@ def parse_imports(ts_file: Path) -> dict[str, Path]:
 def extract_object_literal(content: str, start_at: int, label: str) -> str:
     start = content.find("{", start_at)
     if start < 0:
-        raise ValueError(f"Impossible de trouver '{{' pour {label}")
+        raise ValueError(f"Could not find '{{' for {label}")
 
     i = start
     depth = 0
@@ -105,7 +115,7 @@ def extract_object_literal(content: str, start_at: int, label: str) -> str:
                 return content[start : i + 1]
         i += 1
 
-    raise ValueError(f"Objet non ferme pour {label}")
+    raise ValueError(f"Unclosed object for {label}")
 
 
 def parse_const_object(content: str, const_name: str) -> dict[str, Any]:
@@ -113,10 +123,10 @@ def parse_const_object(content: str, const_name: str) -> dict[str, Any]:
     if not decl:
         decl = re.search(rf"\bconst\s+{re.escape(const_name)}\b", content)
     if not decl:
-        raise ValueError(f"Impossible de trouver const {const_name}")
+        raise ValueError(f"Could not find const {const_name}")
     eq_idx = content.find("=", decl.end())
     if eq_idx < 0:
-        raise ValueError(f"Impossible de trouver '=' pour {const_name}")
+        raise ValueError(f"Could not find '=' for {const_name}")
     return json5.loads(extract_object_literal(content, eq_idx, f"const {const_name}"))
 
 
@@ -125,17 +135,17 @@ def parse_const_object_literal(content: str, const_name: str) -> str:
     if not decl:
         decl = re.search(rf"\bconst\s+{re.escape(const_name)}\b", content)
     if not decl:
-        raise ValueError(f"Impossible de trouver const {const_name}")
+        raise ValueError(f"Could not find const {const_name}")
     eq_idx = content.find("=", decl.end())
     if eq_idx < 0:
-        raise ValueError(f"Impossible de trouver '=' pour {const_name}")
+        raise ValueError(f"Could not find '=' for {const_name}")
     return extract_object_literal(content, eq_idx, f"const {const_name}")
 
 
 def parse_field_object(content: str, field_name: str) -> dict[str, Any]:
     field = re.search(rf"\b{re.escape(field_name)}\s*:", content)
     if not field:
-        raise ValueError(f"Impossible de trouver le champ {field_name}")
+        raise ValueError(f"Could not find field {field_name}")
     return json5.loads(
         extract_object_literal(content, field.end(), f"champ {field_name}")
     )
@@ -151,7 +161,7 @@ def parse_referentiel_questions(api_src: Path) -> dict[str, Any]:
     for thematique, symbol in entries:
         src = imports.get(symbol)
         if not src:
-            raise ValueError(f"Import introuvable pour {symbol}")
+            raise ValueError(f"Missing import for {symbol}")
         out[thematique] = parse_const_object(read_text(src), symbol)
     return out
 
@@ -167,7 +177,7 @@ def parse_referentiel_mesures(api_src: Path) -> dict[str, Any]:
     for symbol in symbols:
         src = imports.get(symbol)
         if not src:
-            raise ValueError(f"Import introuvable pour {symbol}")
+            raise ValueError(f"Missing import for {symbol}")
         merged.update(parse_const_object(read_text(src), symbol))
     return merged
 
@@ -181,12 +191,12 @@ def parse_transcripteur(api_src: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     thematiques: dict[str, Any] = {}
     thematiques_field = re.search(r"\bthematiques\s*:", content)
     if not thematiques_field:
-        raise ValueError("Impossible de trouver le champ thematiques")
+        raise ValueError("Could not find 'thematiques' field")
     literal = extract_object_literal(content, thematiques_field.end(), "thematiques")
     for thematique, symbol in KV_SYMBOL_RE.findall(literal):
         src = imports.get(symbol)
         if not src:
-            raise ValueError(f"Import transcripteur introuvable pour {symbol}")
+            raise ValueError(f"Missing transcripteur import for {symbol}")
         thematiques[thematique] = parse_const_object(read_text(src), symbol)
 
     conditions = parse_field_object(content, "conditionsPerimetre")
@@ -205,7 +215,7 @@ def _append_text(base: str, chunk: str) -> str:
 
 
 def _extract_tag_line(line: str) -> tuple[str, str, str]:
-    """Retourne (tag, attrs, inline_text). Si pas un tag valide, tag=''."""
+    """Return (tag, attrs, inline_text). If the tag is invalid, tag=''."""
     s = line.strip()
     match = re.match(r"^([A-Za-z][A-Za-z0-9_-]*)(\([^)]*\))?(?:\s+(.*))?$", s)
     if not match:
@@ -217,7 +227,7 @@ def _extract_tag_line(line: str) -> tuple[str, str, str]:
 
 
 def _render_anchor(lines: list[str], start_idx: int) -> tuple[str, int]:
-    """Rend un tag <a> Pug en texte/Markdown et retourne (texte, next_idx)."""
+    """Render a Pug <a> tag to text/Markdown and return (text, next_idx)."""
     raw = lines[start_idx]
     indent = _indent_level(raw)
     tag, attrs, inline = _extract_tag_line(raw)
@@ -300,8 +310,8 @@ def pug_to_text(pug_file: Path, seen: set[Path] | None = None) -> str:
             li_indent = None
             li_text = ""
 
-            # Si on sort d'une liste et qu'on passe a un autre bloc, on force
-            # un nouveau paragraphe pour eviter de coller le texte au dernier <li>.
+            # If we leave a list and move to another block, force
+            # a new paragraph to avoid appending text to the last <li>.
             next_tag, _, _ = _extract_tag_line(raw_line)
             if current and next_tag not in {"li", "ul"} and not stripped.startswith("|"):
                 paragraphs.append(current.strip())
@@ -471,7 +481,7 @@ def enrich_referentiel_with_transcripteur(
             if isinstance(question, dict):
                 enrich_question_tree(api_src, question, index)
 
-        # Réordonne les clés pour afficher les informations de périmètre en tête.
+        # Reorder keys to keep perimeter-related section fields first.
         ordered: dict[str, Any] = {}
         for field in section_fields:
             if field in bloc:
@@ -497,7 +507,7 @@ def export_referentiels_json(
     questions_file: str = "questionnaire_repo.json",
     mesures_file: str = "mesures_repo.json",
 ) -> tuple[Path, Path]:
-    """Point d'entrée unique: exporte questions+mesures et retourne les chemins de sortie."""
+    """Single entry point: export questions+measures and return output paths."""
     api_src = api_root.resolve() / "src"
     out_dir = out_dir.resolve()
 
@@ -532,14 +542,14 @@ def export_referentiels_json(
 def main() -> None:
     try:
         parser = argparse.ArgumentParser(
-            description="Exporte 2 JSON (questionnaire + mesures) depuis le repo MonAideCyber."
+            description="Export 2 JSON files (questionnaire + measures) from the MonAideCyber repository."
         )
         parser.add_argument(
             "--api-root",
             default=str(Path(__file__).resolve().parents[1]),
-            help="Chemin vers mon-aide-cyber-api",
+            help="Path to mon-aide-cyber-api",
         )
-        parser.add_argument("--out-dir", default=".", help="Dossier de sortie des JSON")
+        parser.add_argument("--out-dir", default=".", help="Output directory for JSON files")
         parser.add_argument("--questions-file", default="questionnaire_repo.json")
         parser.add_argument("--mesures-file", default="mesures_repo.json")
         args = parser.parse_args()
@@ -553,9 +563,9 @@ def main() -> None:
         )
 
         print(f"- Questions: \"{display_path(questions_out, script_dir)}\"")
-        print(f"- Mesures:   \"{display_path(mesures_out, script_dir)}\"")
+        print(f"- Measures:  \"{display_path(mesures_out, script_dir)}\"")
     except KeyboardInterrupt:
-        print("❌ [ERROR] Interrompu par l'utilisateur.", file=sys.stderr)
+        print("❌ [ERROR] Interrupted by user.", file=sys.stderr)
         raise SystemExit(130)
     except Exception as exc:
         print(f"❌ [ERROR] {exc}", file=sys.stderr)
