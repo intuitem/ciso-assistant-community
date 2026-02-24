@@ -390,29 +390,6 @@
         "nameOverride": {
             "type": "string"
         },
-        "serviceAccount": {
-            "type": "object",
-            "properties": {
-                "create": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "annotations": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "labels": {
-                    "type": "object",
-                    "additionalProperties": true
-                },
-                "automountServiceAccountToken": {
-                    "type": "boolean"
-                }
-            },
-            "additionalProperties": false
-        },
         "postgresql": {
             "type": "object",
             "properties": {
@@ -466,6 +443,29 @@
                 }
             },
             "additionalProperties": true
+        },
+        "serviceAccount": {
+            "type": "object",
+            "properties": {
+                "annotations": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "automountServiceAccountToken": {
+                    "type": "boolean"
+                },
+                "create": {
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": true
+                },
+                "name": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": false
