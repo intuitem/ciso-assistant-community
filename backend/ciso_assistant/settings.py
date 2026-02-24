@@ -170,6 +170,15 @@ if USE_S3:
     using_access_key = AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
     using_irsa = AWS_WEB_IDENTITY_TOKEN_FILE and AWS_ROLE_ARN
 
+    if using_access_key and using_irsa:
+        logger.error(
+            "Ambiguous AWS credentials configuration. Both static access keys "
+            "(AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) and IRSA credentials "
+            "(AWS_WEB_IDENTITY_TOKEN_FILE/AWS_ROLE_ARN) are set. "
+            "Please configure only one authentication method."
+        )
+        exit(1)
+
     if not using_access_key and not using_irsa:
         logger.error(
             "AWS credentials not configured. Either set AWS_ACCESS_KEY_ID and "
