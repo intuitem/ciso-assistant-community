@@ -3,11 +3,11 @@
 	import { m } from '$paraglide/messages';
 	interface Props {
 		handler: DataHandler;
+		value?: string;
 	}
 
-	let { handler }: Props = $props();
+	let { handler, value = $bindable('') }: Props = $props();
 
-	let value = $state('');
 	let timeout: any;
 
 	const search = () => {
