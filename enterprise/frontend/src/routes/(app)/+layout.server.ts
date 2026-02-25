@@ -29,7 +29,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
 	if (locals.user && focusModeEnabled) {
 		try {
-			const foldersRes = await fetch(`${BASE_API_URL}/folders?no_focus=true`);
+			const foldersRes = await fetch(`${BASE_API_URL}/folders?no_focus=true&ordering=name`);
 			if (foldersRes.ok) {
 				const data = await foldersRes.json();
 				folders = data.results ?? data ?? [];

@@ -20,10 +20,19 @@
 	const domainFolders = $derived(folders.filter((f) => f.content_type === 'DOMAIN'));
 
 	let isOpen = $state(false);
+	let searchQuery = $state('');
+
+	const filteredDomainFolders = $derived(
+		domainFolders.filter((f) => {
+			if (!searchQuery.trim()) return true;
+			return (f.str || f.name).toLowerCase().includes(searchQuery.trim().toLowerCase());
+		})
+	);
 
 	function handleSelect(folder: Folder) {
 		setFocusMode(folder.id, folder.str || folder.name);
 		isOpen = false;
+		searchQuery = '';
 		// Invalidate all data to refetch with new focus scope
 		invalidateAll();
 	}
@@ -31,11 +40,15 @@
 	function handleClear() {
 		clearFocusMode();
 		isOpen = false;
+		searchQuery = '';
 		// Invalidate all data to refetch without focus scope
 		invalidateAll();
 	}
 
 	function toggleDropdown() {
+		if (isOpen) {
+			searchQuery = '';
+		}
 		isOpen = !isOpen;
 	}
 
@@ -43,6 +56,7 @@
 		const target = event.target as HTMLElement;
 		if (!target.closest('.focus-mode-selector')) {
 			isOpen = false;
+			searchQuery = '';
 		}
 	}
 
@@ -90,10 +104,22 @@
 		<div
 			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-white rounded-lg shadow-lg border border-slate-200 z-50"
 		>
-			<div class="p-2 border-b border-slate-100">
+			<div class="p-2 border-b border-slate-100 space-y-2">
 				<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
 					{m.selectDomain?.() ?? 'Select domain'}
 				</span>
+				<div class="relative">
+					<i
+						class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"
+					></i>
+					<input
+						type="search"
+						class="w-full pl-6 pr-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
+						placeholder={m.searchPlaceholder?.() ?? 'Search...'}
+						bind:value={searchQuery}
+						onclick={(e) => e.stopPropagation()}
+					/>
+				</div>
 			</div>
 			<ul class="py-1">
 				{#if $focusMode.id}
@@ -108,7 +134,7 @@
 					</li>
 					<li class="border-t border-slate-100"></li>
 				{/if}
-				{#each domainFolders as folder (folder.id)}
+				{#each filteredDomainFolders as folder (folder.id)}
 					<li>
 						<button
 							onclick={() => handleSelect(folder)}
@@ -127,6 +153,11 @@
 						</button>
 					</li>
 				{/each}
+				{#if filteredDomainFolders.length === 0}
+					<li class="px-3 py-2 text-sm text-slate-400 text-center">
+						{m.noResults?.() ?? 'No results'}
+					</li>
+				{/if}
 			</ul>
 		</div>
 	{:else if isOpen && domainFolders.length === 0}
