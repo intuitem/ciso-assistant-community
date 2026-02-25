@@ -347,7 +347,7 @@ def process_question(
         ensure_imp_group(
             ctx,
             depends_group,
-            f"Question dépendant de la Question {parent_question_label or ''}".strip(),
+            f"Question {question_label} dépendant de la Question {parent_question_label or ''}".strip(),
         )
         if parent_response is not None:
             parent_answ = ctx.answer_rows.get(parent_question_id)
@@ -468,7 +468,7 @@ def apply_conditions_perimetre_second_pass(
             urn_c = as_text(context_question_id).lower()
             q_label = ctx.question_name_suffix_by_urn.get(urn_c, "")
             ensure_imp_group(
-                ctx, dep_group, f"Question dépendant de la Question {q_label}".strip()
+                ctx, dep_group, f"Questions dépendant de la Question {q_label}".strip()
             )
 
             answ_row = ctx.answer_rows.get(as_text(context_question_id))
@@ -499,7 +499,7 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             title = as_text(level_obj.get("titre"))
             pourquoi = as_text(level_obj.get("pourquoi"))
             comment = as_text(level_obj.get("comment"))
-            description = f"# Why?\n{pourquoi}\n\n#How?\n{comment}"
+            description = f"# Pourquoi ?\n{pourquoi}\n\n# Comment ?\n{comment}"
             ctx.ref_ctrl_rows.append(
                 {
                     "ref_id": f"{mesure_id}_{level_key}",
