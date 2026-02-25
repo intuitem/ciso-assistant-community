@@ -164,6 +164,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+</svelte:head>
+
 <!-- App Shell -->
 <div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
