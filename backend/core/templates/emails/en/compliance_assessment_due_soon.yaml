@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Audit due in ${days_remaining} ${days_text}"
+subject: "CISO Assistant: Audit due in ${days_remaining} day(s)"
 body: |
   Hello,
 
-  You have ${assessment_count} audit(s) due in ${days_remaining} ${days_text}:
+  You have ${assessment_count} audit(s) due in ${days_remaining} day(s):
 
   ${assessment_list}
 

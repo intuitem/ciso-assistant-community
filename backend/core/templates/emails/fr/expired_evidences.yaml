@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Preuve expirée depuis ${expired_since} jour(s)"
+body: |
+  Bonjour,
+
+  Vous avez ${evidence_count} preuve(s) expirée(s) depuis ${expired_since} jour(s) :
+
+  ${evidence_list}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et mettre à jour ces preuves :
+  ${ciso_assistant_url}
+
+  Merci.
