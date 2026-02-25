@@ -22,10 +22,11 @@ python anssi_MAC_framework_builder.py
 
 import shutil
 import sys
-import urllib.request
 import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
+
+import requests
 
 from anssi_MAC_export_referentiels_json import export_referentiels_json
 from anssi_MAC_build_excel_from_json import build_excel_from_json
@@ -101,14 +102,14 @@ def download_if_needed(zip_url: str, zip_file: Path) -> bool:
     if parsed.netloc != "github.com":
         raise ValueError("Unexpected host")
 
-    with urllib.request.urlopen(zip_url) as response:
+    with requests.get(zip_url, stream=True, timeout=60) as response:
+        response.raise_for_status()
         total_size = int(response.headers.get("Content-Length", 0))
         with zip_file.open("wb") as out_file:
             if tqdm is None:
-                while True:
-                    chunk = response.read(1024 * 64)
+                for chunk in response.iter_content(chunk_size=1024 * 64):
                     if not chunk:
-                        break
+                        continue
                     out_file.write(chunk)
             else:
                 with tqdm(
@@ -118,10 +119,9 @@ def download_if_needed(zip_url: str, zip_file: Path) -> bool:
                     unit_divisor=1024,
                     desc="ZIP",
                 ) as progress:
-                    while True:
-                        chunk = response.read(1024 * 64)
+                    for chunk in response.iter_content(chunk_size=1024 * 64):
                         if not chunk:
-                            break
+                            continue
                         out_file.write(chunk)
                         progress.update(len(chunk))
 
