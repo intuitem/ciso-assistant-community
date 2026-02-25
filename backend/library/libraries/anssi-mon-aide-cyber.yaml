@@ -11,7 +11,7 @@ description: "MonAideCyber aide les entit\xE9s publiques et priv\xE9es sensibili
   rielle du num\xE9rique.\n\n Sources :\n\t\u2022 https://github.com/betagouv/mon-aide-cyber\
   \ \n\t\u2022 https://monaide.cyber.gouv.fr/diagnostic-libre-acces"
 copyright: ANSSI
-version: 1
+version: 2
 publication_date: 2026-02-25
 provider: ANSSI
 packager: intuitem
