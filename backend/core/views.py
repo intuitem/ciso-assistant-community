@@ -6047,6 +6047,15 @@ class UserGroupViewSet(BaseModelViewSet):
         filters.SearchFilter,
     ]
 
+    def destroy(self, request, *args, **kwargs):
+        user_group = self.get_object()
+        if user_group.builtin:
+            return Response(
+                {"error": "attemptToDeleteBuiltinUserGroup"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
 class RoleAssignmentViewSet(BaseModelViewSet):
     """
