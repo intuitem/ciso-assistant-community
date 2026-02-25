@@ -1,0 +1,16 @@
+subject: "CISO Assistant: La validation '${validation_ref_id}' a été ${new_status}"
+body: |
+  Bonjour,
+
+  La demande de validation '${validation_ref_id}' a été mise à jour :
+
+  - Nouveau statut : ${new_status}
+  - Mis à jour par : ${actor_name}
+  - Domaine : ${folder_name}
+
+  ${notes_section}
+
+  Consultez la demande de validation :
+  ${validation_url}
+
+  Merci.

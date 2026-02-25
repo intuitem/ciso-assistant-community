@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Task due in ${days_remaining} ${days_text}"
+body: |
+  Hello,
+
+  You have ${task_count} task(s) due in ${days_remaining} ${days_text}:
+
+  ${task_list}
+
+  Please log in to your CISO Assistant portal to review and complete these tasks:
+  ${ciso_assistant_url}
+
+  Thank you.
