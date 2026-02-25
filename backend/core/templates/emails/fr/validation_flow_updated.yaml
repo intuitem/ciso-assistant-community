@@ -7,8 +7,7 @@ body: |
   - Nouveau statut : ${new_status}
   - Mis à jour par : ${actor_name}
   - Domaine : ${folder_name}
-
-  ${notes_section}
+  - Notes : ${event_notes}
 
   Consultez la demande de validation :
   ${validation_url}

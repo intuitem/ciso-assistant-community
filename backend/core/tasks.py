@@ -469,7 +469,6 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
         "task_count": len(task_nodes),
         "task_list": format_task_node_list(task_nodes),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     rendered = render_email_template("task_node_due_soon", context)
@@ -571,7 +570,6 @@ def send_notification_email(subject, message, owner_email):
         )
 
 
-@task()
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
@@ -748,7 +746,6 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
         "assessment_count": len(assessments),
         "assessment_list": format_assessment_list(assessments),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "compliance_assessment_due_soon"
@@ -773,7 +770,6 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         "control_count": len(controls),
         "control_list": format_control_list(controls),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "applied_control_expiring_soon"
@@ -797,7 +793,6 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "expired_since": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     rendered = render_email_template("expired_evidences", context)
@@ -821,7 +816,6 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "evidence_expiring_soon"
@@ -902,10 +896,6 @@ def send_validation_flow_updated_notification(
 
     from .email_utils import render_email_template
 
-    notes_section = ""
-    if event_notes:
-        notes_section = f"Notes: {event_notes}"
-
     context = {
         "validation_ref_id": validation_flow.ref_id,
         "new_status": new_status,
@@ -913,7 +903,7 @@ def send_validation_flow_updated_notification(
         "folder_name": validation_flow.folder.name
         if validation_flow.folder
         else "Unknown",
-        "notes_section": notes_section,
+        "event_notes": event_notes or "",
         "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
     }
 
@@ -940,7 +930,6 @@ def send_validation_deadline_notification(approver_email, validations, days):
 
     context = {
         "days": days,
-        "days_text": "day" if days == 1 else "days",
         "validation_list": format_validation_list(validations),
         "validation_count": len(validations),
         "s": s,

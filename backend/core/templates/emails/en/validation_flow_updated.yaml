@@ -7,8 +7,7 @@ body: |
   - New status: ${new_status}
   - Updated by: ${actor_name}
   - Domain: ${folder_name}
-
-  ${notes_section}
+  - Notes: ${event_notes}
 
   View the validation request:
   ${validation_url}

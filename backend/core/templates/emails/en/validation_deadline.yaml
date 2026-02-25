@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Validation request deadline in ${days} ${days_text}"
+subject: "CISO Assistant: Validation request deadline in ${days} day(s)"
 body: |
   Hello,
 
-  This is a reminder that the following validation request${s} ${are} approaching ${their} deadline in ${days} ${days_text}:
+  This is a reminder that the following validation request${s} ${are} approaching ${their} deadline in ${days} day(s):
 
   ${validation_list}
 

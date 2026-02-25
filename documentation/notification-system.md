@@ -361,9 +361,7 @@ All English templates have a matching French translation. Both directories conta
 
 ## Known Issues and Inconsistencies
 
-1. **`check_email_configuration` is a `@task()`**: This function is decorated as a Huey task but is called synchronously within other tasks. The `@task()` decorator means calling it returns a `Result` object, not a boolean. However, Huey's behavior in "immediate" mode or when called from within another task may vary. This could be a source of bugs.
-
-2. **Daily re-notification for expired evidences and overdue tasks**: `check_evidences_expired` and `check_task_nodes_overdue` run daily and re-notify owners every day. There's no "already notified" tracking.
+1. **Daily re-notification for expired evidences and overdue tasks**: `check_evidences_expired` and `check_task_nodes_overdue` run daily and re-notify owners every day. There's no "already notified" tracking.
 
 ---
 
