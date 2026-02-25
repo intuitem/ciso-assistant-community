@@ -1,49 +1,37 @@
 <script lang="ts">
+	import { Handle, Position } from '@xyflow/svelte';
+
 	interface Props {
 		id: string;
-		x: number;
-		y: number;
-		operator: 'AND' | 'OR';
-		onToggle: (id: string) => void;
+		data: {
+			operator: 'AND' | 'OR';
+			onToggle?: (id: string) => void;
+		};
 	}
 
-	let { id, x, y, operator, onToggle }: Props = $props();
+	let { id, data }: Props = $props();
 
-	const SIZE = 36;
 	let hovered = $state(false);
-
-	const fillColor = $derived(hovered ? '#f3e8ff' : '#ffffff');
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<g
-	transform="translate({x}, {y})"
-	class="logic-gate-node cursor-pointer"
-	onpointerenter={() => (hovered = true)}
-	onpointerleave={() => (hovered = false)}
-	onpointerdown={(e) => {
-		e.stopPropagation();
-		onToggle(id);
-	}}
+<div
+	class="logic-gate-node flex items-center justify-center w-10 h-10 rounded-full border-[1.5px] border-violet-800 cursor-pointer select-none"
+	style="background: {hovered ? '#f3e8ff' : '#ffffff'}"
+	onmouseenter={() => (hovered = true)}
+	onmouseleave={() => (hovered = false)}
+	onclick={() => data.onToggle?.(id)}
 >
-	<circle
-		cx={0}
-		cy={0}
-		r={SIZE / 2}
-		fill={fillColor}
-		stroke="#4D179A"
-		stroke-width="1.5"
+	<span class="text-[11px] font-bold text-violet-800">{data.operator}</span>
+
+	<Handle
+		type="target"
+		position={Position.Left}
+		class="!w-2 !h-2 !bg-white !border-[1.5px] !border-violet-800"
 	/>
-	<text
-		x={0}
-		y={1}
-		font-size="11"
-		font-weight="700"
-		fill="#4D179A"
-		text-anchor="middle"
-		dominant-baseline="middle"
-		class="select-none pointer-events-none"
-	>
-		{operator}
-	</text>
-</g>
+	<Handle
+		type="source"
+		position={Position.Right}
+		class="!w-2 !h-2 !bg-white !border-[1.5px] !border-violet-800"
+	/>
+</div>

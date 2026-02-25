@@ -1,193 +1,99 @@
 <script lang="ts">
+	import { Handle, Position } from '@xyflow/svelte';
+
 	interface Props {
 		id: string;
-		x: number;
-		y: number;
-		label: string;
-		iconClass?: string;
-		stage: number;
-		selected?: boolean;
-		onPointerDownNode: (id: string, e: PointerEvent) => void;
-		onPointerDownOutput: (id: string, e: PointerEvent) => void;
-		onPointerUpInput: (id: string, e: PointerEvent) => void;
-		onDelete: (id: string) => void;
+		data: {
+			label: string;
+			iconClass?: string;
+			stage: number;
+			onDelete?: (id: string) => void;
+			onToggleOperator?: (id: string) => void;
+			logicOperator?: 'AND' | 'OR';
+		};
 	}
 
-	let {
-		id,
-		x,
-		y,
-		label,
-		iconClass = '',
-		stage,
-		selected = false,
-		onPointerDownNode,
-		onPointerDownOutput,
-		onPointerUpInput,
-		onDelete
-	}: Props = $props();
+	let { id, data }: Props = $props();
 
-	const WIDTH = 140;
-	const HEIGHT = 50;
-
-	const STAGE_STROKE: Record<number, string> = {
-		0: '#ec4899', // pink
-		1: '#8b5cf6', // violet
-		2: '#f97316', // orange
-		3: '#ef4444' // red
+	const STAGE_BORDER: Record<number, string> = {
+		0: '#ec4899',
+		1: '#8b5cf6',
+		2: '#f97316',
+		3: '#ef4444'
 	};
 
-	const STAGE_FILL: Record<number, string> = {
-		0: '#fdf2f8', // pink-50
-		1: '#f5f3ff', // violet-50
-		2: '#fff7ed', // orange-50
-		3: '#fef2f2' // red-50
+	const STAGE_BG: Record<number, string> = {
+		0: '#fdf2f8',
+		1: '#f5f3ff',
+		2: '#fff7ed',
+		3: '#fef2f2'
 	};
 
 	let hovered = $state(false);
-
-	const strokeColor = $derived(selected ? '#4D179A' : STAGE_STROKE[stage] ?? '#8b5cf6');
-	const fillColor = $derived(hovered ? '#f8f6ff' : STAGE_FILL[stage] ?? '#ffffff');
-	const strokeWidth = $derived(selected ? 2.5 : 1.5);
-
-	// Handle size
-	const HANDLE_R = 6;
-
-	function wrapLabel(text: string, maxChars: number = 18): string[] {
-		if (!text || text.length <= maxChars) return [text || ''];
-		const words = text.split(' ');
-		const lines: string[] = [];
-		let current = '';
-		for (const w of words) {
-			if (current.length + w.length + 1 > maxChars) {
-				if (current) lines.push(current);
-				current = w;
-			} else {
-				current += (current ? ' ' : '') + w;
-			}
-		}
-		if (current) lines.push(current);
-		return lines;
-	}
-
-	const lines = $derived(wrapLabel(label));
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<g
-	transform="translate({x}, {y})"
-	class="action-node"
-	style="cursor: grab"
-	onpointerdown={(e) => {
-		e.stopPropagation();
-		onPointerDownNode(id, e);
-	}}
-	onpointerenter={() => (hovered = true)}
-	onpointerleave={() => (hovered = false)}
+<div
+	class="action-node relative rounded-md border-[1.5px] px-3 py-2 min-w-[140px] max-w-[180px] text-center select-none"
+	style="background: {STAGE_BG[data.stage] ?? '#fff'}; border-color: {STAGE_BORDER[data.stage] ??
+		'#8b5cf6'};"
+	onmouseenter={() => (hovered = true)}
+	onmouseleave={() => (hovered = false)}
 >
-	<!-- Node body -->
-	<rect
-		x={-WIDTH / 2}
-		y={-HEIGHT / 2}
-		width={WIDTH}
-		height={HEIGHT}
-		rx="6"
-		ry="6"
-		fill={fillColor}
-		stroke={strokeColor}
-		stroke-width={strokeWidth}
-	/>
+	<!-- Stage accent bar -->
+	<div
+		class="absolute left-0 top-0 bottom-0 w-1 rounded-l-md"
+		style="background: {STAGE_BORDER[data.stage] ?? '#8b5cf6'}"
+	></div>
 
-	<!-- Stage accent bar (left side) -->
-	<rect
-		x={-WIDTH / 2}
-		y={-HEIGHT / 2}
-		width="4"
-		height={HEIGHT}
-		rx="2"
-		fill={STAGE_STROKE[stage] ?? '#8b5cf6'}
-	/>
+	<!-- Content -->
+	<div class="flex items-center gap-2">
+		{#if data.iconClass}
+			<i class="{data.iconClass} text-[11px] text-gray-500"></i>
+		{/if}
+		<span class="text-[11px] leading-tight text-slate-800 truncate">{data.label}</span>
+	</div>
 
-	<!-- Icon -->
-	{#if iconClass}
-		<foreignObject x={-WIDTH / 2 + 8} y={-8} width="16" height="16">
-			<i class="{iconClass} text-[10px] text-gray-500"></i>
-		</foreignObject>
+	<!-- Logic operator badge (AND/OR) — shown when node has 2+ incoming edges -->
+	{#if data.logicOperator}
+		<!-- svelte-ignore a11y_no_static_element_interactions -->
+		<span
+			class="absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded text-[9px] font-bold border cursor-pointer select-none hover:brightness-90"
+			style="background: #ede9fe; border-color: #8b5cf6; color: #6d28d9; z-index: 10;"
+			role="button"
+			tabindex="-1"
+			onmousedown={(e) => {
+				e.stopPropagation();
+				data.onToggleOperator?.(id);
+			}}
+		>
+			{data.logicOperator}
+		</span>
 	{/if}
 
-	<!-- Label -->
-	{#each lines as line, i}
-		<text
-			x={iconClass ? -WIDTH / 2 + 28 : 0}
-			y={-((lines.length - 1) * 6) + i * 12 + 4}
-			font-size="11"
-			fill="#1e293b"
-			text-anchor={iconClass ? 'start' : 'middle'}
-			dominant-baseline="middle"
-			class="select-none pointer-events-none"
+	<!-- Delete button on hover -->
+	{#if hovered && data.onDelete}
+		<button
+			class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center hover:bg-red-600 cursor-pointer"
+			onmousedown={(e) => { e.stopPropagation(); data.onDelete?.(id); }}
 		>
-			{line}
-		</text>
-	{/each}
+			✕
+		</button>
+	{/if}
 
-	<!-- Input handle (left) - only for non-KNOW stages -->
-	{#if stage > 0}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<circle
-			cx={-WIDTH / 2}
-			cy={0}
-			r={HANDLE_R}
-			fill="white"
-			stroke="#4D179A"
-			stroke-width="1.5"
-			class="cursor-crosshair"
-			onpointerup={(e) => {
-				e.stopPropagation();
-				onPointerUpInput(id, e);
-			}}
+	<!-- Input handle (left) — hidden for KNOW stage (0) -->
+	{#if data.stage > 0}
+		<Handle
+			type="target"
+			position={Position.Left}
+			class="!w-3 !h-3 !bg-white !border-2 !border-violet-800"
 		/>
 	{/if}
 
 	<!-- Output handle (right) -->
-	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<circle
-		cx={WIDTH / 2}
-		cy={0}
-		r={HANDLE_R}
-		fill="white"
-		stroke="#4D179A"
-		stroke-width="1.5"
-		class="cursor-crosshair"
-		onpointerdown={(e) => {
-			e.stopPropagation();
-			onPointerDownOutput(id, e);
-		}}
+	<Handle
+		type="source"
+		position={Position.Right}
+		class="!w-3 !h-3 !bg-white !border-2 !border-violet-800"
 	/>
-
-	<!-- Delete button (visible on hover/select) -->
-	{#if selected || hovered}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<circle
-			cx={WIDTH / 2 - 4}
-			cy={-HEIGHT / 2 + 4}
-			r="8"
-			fill="#ef4444"
-			class="cursor-pointer"
-			onpointerdown={(e) => {
-				e.stopPropagation();
-				onDelete(id);
-			}}
-		/>
-		<text
-			x={WIDTH / 2 - 4}
-			y={-HEIGHT / 2 + 5}
-			font-size="10"
-			fill="white"
-			text-anchor="middle"
-			dominant-baseline="middle"
-			class="pointer-events-none select-none"
-		>
-			✕
-		</text>
-	{/if}
-</g>
+</div>

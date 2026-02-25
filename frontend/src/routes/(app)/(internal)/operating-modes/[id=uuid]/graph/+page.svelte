@@ -79,7 +79,6 @@
 		elementaryActions={data.elementaryActions}
 		killChainSteps={data.killChainSteps}
 		operatingModeId={data.operatingModeId}
-		graphData={data.data}
 		onSaved={handleSaved}
 	/>
 {:else}

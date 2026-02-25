@@ -12,10 +12,9 @@
 	interface Props {
 		elementaryActions: ElementaryActionItem[];
 		placedNodeIds: Set<string>;
-		onDragStart: (action: ElementaryActionItem, e: PointerEvent) => void;
 	}
 
-	let { elementaryActions, placedNodeIds, onDragStart }: Props = $props();
+	let { elementaryActions, placedNodeIds }: Props = $props();
 
 	let searchQuery = $state('');
 
@@ -33,17 +32,8 @@
 		3: 'border-red-400 bg-red-50'
 	};
 
-	const STAGE_BADGE_COLORS: Record<number, string> = {
-		0: 'bg-pink-200 text-pink-800',
-		1: 'bg-violet-200 text-violet-800',
-		2: 'bg-orange-200 text-orange-800',
-		3: 'bg-red-200 text-red-800'
-	};
-
-	// Map attack_stage display strings to numeric stages
 	function getStageNumber(attackStage: string): number {
-		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance')
-			return 0;
+		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
 		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
 		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
 		if (attackStage.includes('Exploitation') || attackStage === 'ebiosExploitation') return 3;
@@ -56,8 +46,7 @@
 			const stage = getStageNumber(ea.attack_stage);
 			if (!groups[stage]) groups[stage] = [];
 			const matchesSearch =
-				!searchQuery ||
-				ea.name.toLowerCase().includes(searchQuery.toLowerCase());
+				!searchQuery || ea.name.toLowerCase().includes(searchQuery.toLowerCase());
 			if (matchesSearch) {
 				groups[stage].push(ea);
 			}
@@ -75,6 +64,12 @@
 			next.add(stage);
 		}
 		collapsedStages = next;
+	}
+
+	function handleDragStart(event: DragEvent, action: ElementaryActionItem) {
+		if (!event.dataTransfer) return;
+		event.dataTransfer.setData('application/json', JSON.stringify(action));
+		event.dataTransfer.effectAllowed = 'move';
 	}
 </script>
 
@@ -122,10 +117,11 @@
 									{isPlaced
 									? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50'
 									: STAGE_COLORS[stageConfig.stage] + ' cursor-grab hover:shadow-sm'}"
-								role={isPlaced ? 'presentation' : 'button'}
-								onpointerdown={(e) => {
-									if (!isPlaced) onDragStart(action, e);
+								draggable={!isPlaced}
+								ondragstart={(e) => {
+									if (!isPlaced) handleDragStart(e, action);
 								}}
+								role={isPlaced ? 'presentation' : 'listitem'}
 							>
 								{#if action.icon_fa_class}
 									<i class="{action.icon_fa_class} text-[10px]"></i>

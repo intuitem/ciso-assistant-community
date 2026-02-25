@@ -1707,11 +1707,6 @@ export const URL_MODEL_MAP: ModelMap = {
 						classes: 'text-yellow-700'
 					}
 				}
-			},
-			{
-				field: 'operating_mode',
-				urlModel: 'kill-chains',
-				endpointUrl: 'ebios-rm/kill-chains'
 			}
 		],
 		detailViewFields: [
