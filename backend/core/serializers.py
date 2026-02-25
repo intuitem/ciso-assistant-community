@@ -900,6 +900,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
+    risk_origin = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=False
+    )
 
     class Meta:
         model = RiskScenario
@@ -923,6 +926,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "qualifications",
+            "risk_origin",
         ]
 
 
@@ -3351,6 +3355,51 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     FlowEvent.objects.filter(validation_flow=updated_instance).update(
                         folder=updated_instance.folder
                     )
+
+            # Notify the other party about the status change (after commit)
+            def _send_update_notification():
+                try:
+                    from core.tasks import send_validation_flow_updated_notification
+
+                    actor_name = (
+                        f"{request_user.first_name} {request_user.last_name}".strip()
+                        or request_user.email
+                    )
+
+                    # Approver acted → notify requester
+                    if (
+                        request_user == updated_instance.approver
+                        and updated_instance.requester
+                        and updated_instance.requester.email
+                    ):
+                        send_validation_flow_updated_notification(
+                            updated_instance.id,
+                            updated_instance.requester.email,
+                            updated_instance.get_status_display(),
+                            actor_name,
+                            event_notes,
+                        )
+                    # Requester acted → notify approver
+                    elif (
+                        request_user == updated_instance.requester
+                        and updated_instance.approver
+                        and updated_instance.approver.email
+                    ):
+                        send_validation_flow_updated_notification(
+                            updated_instance.id,
+                            updated_instance.approver.email,
+                            updated_instance.get_status_display(),
+                            actor_name,
+                            event_notes,
+                        )
+                except Exception as e:
+                    logger.error(
+                        "Failed to send validation flow update notification",
+                        validation_flow_id=updated_instance.id,
+                        error=str(e),
+                    )
+
+            transaction.on_commit(_send_update_notification)
 
             return updated_instance
 

@@ -51,20 +51,8 @@
 	let yAxisHeaders: typeof rawYAxisHeaders = $state([]);
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
-	let popupHoverY = $derived(
-		yAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-y-${i}`,
-			placement: swapAxes ? 'right' : 'bottom'
-		}))
-	);
-	let popupHoverX = $derived(
-		xAxisHeaders.map((_, i) => ({
-			event: 'hover',
-			target: `popup-${matrixName}-x-${i}`,
-			placement: 'bottom'
-		}))
-	);
+	let popupHoverY = $derived(yAxisHeaders.map(() => ({ open: false })));
+	let popupHoverX = $derived(xAxisHeaders.map(() => ({ open: false })));
 
 	let yAxisType = $derived(swapAxes ? 'impact' : 'probability');
 	let xAxisType = $derived(swapAxes ? 'probability' : 'impact');
@@ -119,29 +107,29 @@
 				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
 				openDelay={0}
 				closeDelay={100}
-				zIndex="9999"
 			>
-				{#snippet content()}
-					<div
-						class="card bg-black p-4 shadow-lg rounded-sm w-max"
-						style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
-					>
-						<p
-							data-testid="x-header-description"
-							class="font-semibold whitespace-pre-line break-words"
-						>
-							{xHeader.description}
-						</p>
-						<div class="arrow bg-black"></div>
-					</div>
-				{/snippet}
-				{#snippet trigger()}
+				<Tooltip.Trigger>
 					<span class="font-semibold p-1 break-all" data-testid="x-header-name">{xHeader.name}</span
 					>
 					{#if xHeader.description}
 						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 					{/if}
-				{/snippet}
+				</Tooltip.Trigger>
+				<Tooltip.Positioner>
+					<Tooltip.Content>
+						<div
+							class="card bg-black p-4 shadow-lg rounded-sm w-max"
+							style="color: {xHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
+						>
+							<p
+								data-testid="x-header-description"
+								class="font-semibold whitespace-pre-line break-words"
+							>
+								{xHeader.description}
+							</p>
+						</div>
+					</Tooltip.Content>
+				</Tooltip.Positioner>
 			</Tooltip>
 		</div>
 	{/each}
@@ -188,28 +176,28 @@
 						openDelay={0}
 						closeDelay={100}
 						positioning={{ placement: 'bottom-end' }}
-						zIndex="9999"
 					>
-						{#snippet content()}
-							<div
-								class="card bg-black p-4 shadow-lg rounded-sm w-max"
-								style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
-							>
-								<p
-									data-testid="y-header-description"
-									class="font-semibold whitespace-pre-line break-words"
-								>
-									{yHeader.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
-						{#snippet trigger()}
+						<Tooltip.Trigger>
 							<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
 							{#if yHeader.description}
 								<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 							{/if}
-						{/snippet}
+						</Tooltip.Trigger>
+						<Tooltip.Positioner>
+							<Tooltip.Content>
+								<div
+									class="card bg-black p-4 shadow-lg rounded-sm w-max"
+									style="color: {yHeader.hexcolor ?? '#FFFFFF'}; max-width: min(28rem, 90vw);"
+								>
+									<p
+										data-testid="y-header-description"
+										class="font-semibold whitespace-pre-line break-words"
+									>
+										{yHeader.description}
+									</p>
+								</div>
+							</Tooltip.Content>
+						</Tooltip.Positioner>
 					</Tooltip>
 				</div>
 

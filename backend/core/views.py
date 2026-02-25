@@ -121,6 +121,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
     AssetClass,
+    Terminology,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -6337,6 +6338,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
+        """Export the domain as a zip file containing a JSON dump of all objects and their relationships"""
         include_attachments = True
         instance = self.get_object()
 
@@ -6613,12 +6615,77 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
+    def _import_terminologies(
+        self,
+        names: str | List[str] | None,
+        field_path: Terminology.FieldPath,
+    ) -> QuerySet[Terminology] | Terminology | None:
+        """
+        Ensure that requested terminologies exist and are visible. If not, create them. If they exist but are not visible, make them visible.
+
+        Args:
+            names: name of the Terminology (str) to import, or list of names for multiple Terminologies.
+            field_path: which Terminology.FieldPath to assign
+
+        Returns:
+            - For single input: Terminology object
+            - For list input: QuerySet of Terminology objects
+            - For None or empty list: None
+        """
+        if not names:
+            return None
+
+        # Convert single value to list
+        single_value = False
+        if isinstance(names, str):  # Foreign key case
+            names = [names]
+            single_value = True
+
+        # Fetch existing
+        existing = Terminology.objects.filter(name__in=names, field_path=field_path)
+        existing_names = set(existing.values_list("name", flat=True))
+
+        # Create missing
+        missing_names = set(names) - existing_names
+        if missing_names:
+            Terminology.objects.bulk_create(
+                [
+                    Terminology(name=name, field_path=field_path, is_visible=True)
+                    for name in missing_names
+                ],
+                ignore_conflicts=True,
+            )
+
+        # Ensure visibility
+        Terminology.objects.filter(
+            name__in=names, field_path=field_path, is_visible=False
+        ).update(is_visible=True)
+
+        result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
+
+        if single_value:
+            return result_qs.first()
+        return result_qs
+
     def _import_objects(
-        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
-    ):
+        self,
+        parsed_data: dict,
+        domain_name: str,
+        load_missing_libraries: bool,
+        user: User,
+    ) -> dict[str, str]:
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
+
+        Args:
+            parsed_data: The data parsed from the uploaded JSON dump.
+            domain_name: The name choosen by the user for the new domain being created.
+            load_missing_libraries: Whether to automatically load missing libraries from stored ones.
+            user: The user performing the import, for permission checks.
+
+        Returns:
+            A dict with success message if no error was encountered.
         """
         validation_errors = []
         required_libraries = []
@@ -6808,10 +6875,23 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids):
-        """Create all objects for a model after validation."""
+    def _create_model_objects(
+        self,
+        model: models.Model,
+        objects: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create all objects for a model after validation. Creation happens in batch of size `self.batch_size`.
+
+        Args:
+            model: Current model for which objects are being created.
+            objects: List of all objects from the dump, used to filter only those relevant for the current model.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         logger.debug("Creating objects for model", model=model)
 
+        # rebuild model name and keep objects only of this model for creation
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
@@ -6842,8 +6922,24 @@ class FolderViewSet(BaseModelViewSet):
                 link_dump_database_ids=link_dump_database_ids,
             )
 
-    def _create_batch(self, model, batch, link_dump_database_ids):
-        """Create a batch of objects with proper relationship handling."""
+    def _create_batch(
+        self,
+        model: models.Model,
+        batch: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create a batch of objects with proper relationship handling in 4 main steps:
+        1. Handle special cases (e.g. library objects, folder reference)
+        2. Process model-specific relationships, separating m2m relationships to be handled in the fourth step, after the object is created (because it requires the database ID of the created object to be set)
+        3. Create the object
+        4. Handle many-to-many relationships
+
+        Args:
+            model: Current model for which objects are being created.
+            batch: Sublist of all objects from the dump to create in this batch.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
             for obj in batch:
@@ -6862,6 +6958,7 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
+                    # Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -6870,16 +6967,15 @@ class FolderViewSet(BaseModelViewSet):
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
 
+                    # Run clean to validate unique constraints
                     try:
-                        # Run clean to validate unique constraints
                         model(**fields).clean()
                     except ValidationError as e:
                         for field, error in e.error_dict.items():
                             fields[field] = f"{fields[field]} {uuid.uuid4()}"
 
-                    logger.debug("Creating object", fields=fields)
-
                     # Create the object
+                    logger.debug("Creating object", fields=fields)
                     obj_created = model.objects.create(**fields)
                     link_dump_database_ids[obj_id] = obj_created.id
 
@@ -6899,12 +6995,25 @@ class FolderViewSet(BaseModelViewSet):
 
     def _process_model_relationships(
         self,
-        model,
-        fields,
-        link_dump_database_ids,
-        many_to_many_map_ids,
+        model: models.Model,
+        fields: dict[str, Any],
+        link_dump_database_ids: dict[str, Any],
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
     ):
-        """Process model-specific relationships."""
+        """
+        Process model-specific relationships:
+         - M2M relationships are removed from `fields` and stored in a separate map to be processed later (see `_set_many_to_many_relations`).
+         - Other relationships are directly converted to their database IDs or instances.
+
+        Args:
+            model: Current model for which the object is being created
+            fields: The fields of the object being created.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+            many_to_many_map_ids: A map to store the IDs, names or QuerySet of related objects for m2m relationships.
+
+        Returns:
+            The updated fields with relationships processed (except for m2m which are removed).
+        """
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -6927,9 +7036,9 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["perimeter"] = Perimeter.objects.get(
+                _fields["perimeter"] = Perimeter.objects.filter(
                     id=link_dump_database_ids.get(_fields["perimeter"])
-                )
+                ).first()  # filter.first to handle when no perimeter on the riskassessment (since it's optional)
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
                 )
@@ -7001,6 +7110,10 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_assessment"] = RiskAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields.get("risk_origin"), Terminology.FieldPath.ROTO_RISK_ORIGIN
+                )
+                # TODO: feels complicated, may be simplified
                 # Process all related _fields at once
                 related__fields = [
                     "threats",
@@ -7017,7 +7130,9 @@ class FolderViewSet(BaseModelViewSet):
                         else f"{field}_ids"
                     )
                     if field == "qualifications":
-                        many_to_many_map_ids[map_key] = _fields.pop(field, [])
+                        many_to_many_map_ids[map_key] = self._import_terminologies(
+                            _fields.pop(field, []), Terminology.FieldPath.QUALIFICATIONS
+                        )
                     else:
                         many_to_many_map_ids[map_key] = get_mapped_ids(
                             _fields.pop(field, []), link_dump_database_ids
@@ -7025,6 +7140,10 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
+                many_to_many_map_ids["relationship_ids"] = self._import_terminologies(
+                    _fields.pop("relationship", []),
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                )  # relationship_ids are in fact names of the relationships
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -7055,7 +7174,10 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualification_ids": _fields.pop("qualifications", []),
+                        "qualification_ids": self._import_terminologies(
+                            _fields.pop("qualifications", []),
+                            Terminology.FieldPath.QUALIFICATIONS,
+                        ),
                         "asset_ids": get_mapped_ids(
                             _fields.pop("assets", []), link_dump_database_ids
                         ),
@@ -7069,10 +7191,11 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
-                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
-                    name=_fields["risk_origin"],
-                    is_visible=True,
-                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields[
+                        "risk_origin"
+                    ],  # risk origin must exist, it's a mandatory field on RoTo
+                    Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -7085,6 +7208,10 @@ class FolderViewSet(BaseModelViewSet):
                             id=link_dump_database_ids.get(_fields["entity"])
                         ),
                     }
+                )
+                _fields["category"] = self._import_terminologies(
+                    _fields["category"],
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,  # category must exist, it's a mandatory field on Stakeholder
                 )
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
                     _fields.pop("applied_controls", []), link_dump_database_ids
@@ -7134,8 +7261,21 @@ class FolderViewSet(BaseModelViewSet):
 
         return _fields
 
-    def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
-        """Set many-to-many relationships after object creation."""
+    def _set_many_to_many_relations(
+        self,
+        model: models.Model,
+        obj: models.Model,
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
+    ) -> None:
+        """
+        Set many-to-many relationships after object creation.
+
+        Args:
+            model: Current model for which the object was created.
+            obj: The created object for which to set the m2m relationships.
+            many_to_many_map_ids: A map containing the IDs, names or QuerySet of related objects for m2m relationships.
+
+        """
         model_name = model._meta.model_name
 
         match model_name:
@@ -7175,37 +7315,8 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
-
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
-
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
                 for field, model_class in {
                     "vulnerability_ids": (Vulnerability, "vulnerabilities"),
@@ -7235,35 +7346,8 @@ class FolderViewSet(BaseModelViewSet):
 
             case "fearedevent":
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))
 
@@ -7291,6 +7375,10 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
+
+            case "entity":
+                if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
+                    obj.relationship.set(relationship_ids)
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
@@ -7641,7 +7729,9 @@ class FrameworkViewSet(BaseModelViewSet):
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
         req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
+        has_questions = any(rn.questions for rn in req_nodes)
         entries = []
+
         for rn in req_nodes:
             entry = {
                 "urn": rn.urn,
@@ -7654,6 +7744,33 @@ class FrameworkViewSet(BaseModelViewSet):
                 "score": "",
                 "observations": "",
             }
+
+            if has_questions:
+                if rn.questions:
+                    lines = []
+                    for q_urn, question in rn.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        if q_type == "multiple_choice":
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(
+                                f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                            )
+                        elif q_type in ("text", "date"):
+                            lines.append(f"{q_text} >> [free text]")
+                        else:
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(f"{q_text} >> [{' / '.join(choice_values)}]")
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         # Create DataFrame from entries
@@ -7669,30 +7786,23 @@ class FrameworkViewSet(BaseModelViewSet):
             # Get the worksheet
             worksheet = writer.sheets["Sheet1"]
 
-            # For text wrapping, we need to define which columns need wrapping
-            # Assuming 'description' and 'observations' columns need text wrapping
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
 
-            # Find the indices of the columns that need wrapping
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
 
-            # Apply text wrapping to those columns
             from openpyxl.styles import Alignment
 
             for col_idx in wrap_indices:
-                for row_idx in range(
-                    2, len(df) + 2
-                ):  # +2 because of header row and 1-indexing
+                for row_idx in range(2, len(df) + 2):
                     cell = worksheet.cell(row=row_idx, column=col_idx)
                     cell.alignment = Alignment(wrap_text=True)
 
-            # Adjust column widths for better readability
             for idx, col in enumerate(df.columns):
-                column_width = 40  # default width
+                column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for wrapped text columns
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -8420,6 +8530,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for node in RequirementNode.objects.filter(id__in=req_node_ids)
         }
 
+        has_questions = any(rn.questions for rn in req_nodes.values())
+
         for req in requirement_assessments:
             req_node = req_nodes.get(req.requirement.id)
             if not req_node:
@@ -8443,6 +8555,62 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["documentation_score"] = req.documentation_score
             else:
                 entry["score"] = req.score
+
+            if has_questions:
+                if req_node.questions:
+                    answers = req.answers or {}
+                    lines = []
+                    for q_urn, question in req_node.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        choices_map = {
+                            c["urn"]: c.get("value", "")
+                            for c in question.get("choices", [])
+                        }
+                        answer_value = answers.get(q_urn)
+                        readable = ""
+                        if answer_value:
+                            if q_type in ("text", "date"):
+                                readable = str(answer_value)
+                            elif q_type == "multiple_choice" and isinstance(
+                                answer_value, list
+                            ):
+                                readable = " | ".join(
+                                    choices_map.get(a, a) for a in answer_value
+                                )
+                            else:
+                                readable = choices_map.get(
+                                    answer_value, str(answer_value)
+                                )
+                        # Show choices hint when no answer
+                        if not readable:
+                            choice_values = list(choices_map.values())
+                            if q_type == "multiple_choice":
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                            elif q_type in ("text", "date"):
+                                lines.append(
+                                    escape_excel_formula(f"{q_text} >> [free text]")
+                                )
+                            else:
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                        else:
+                            lines.append(
+                                escape_excel_formula(f"{q_text} >> {readable}")
+                            )
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -8452,7 +8620,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
@@ -8465,7 +8633,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for idx, col in enumerate(df.columns):
                 column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for compliance assessments
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -11379,7 +11547,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
         incident = (
             Incident.objects.select_related("folder")
-            .prefetch_related("owners", "entities", "assets", "threats")
+            .prefetch_related(
+                "owners", "entities", "assets", "threats", "qualifications"
+            )
             .get(id=pk)
         )
 

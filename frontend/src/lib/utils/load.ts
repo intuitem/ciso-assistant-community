@@ -98,6 +98,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		createForm: SuperValidated<AnyZodObject>;
 		foreignKeys: Record<string, any>;
 		selectOptions: Record<string, any>;
+		count?: number;
 	};
 
 	type RelatedModels = {
@@ -237,6 +238,36 @@ export const loadDetail = async ({ event, model, id }) => {
 				})
 		);
 	}
+	// Fetch counts for each reverse FK tab in parallel
+	if (model.reverseForeignKeyFields) {
+		await Promise.all(
+			model.reverseForeignKeyFields
+				.filter((e) => relatedModels[e.urlModel])
+				.map(async (e) => {
+					try {
+						let countUrl: string;
+						if (e.endpointUrl?.startsWith('./')) {
+							const relPath = e.endpointUrl.slice(2);
+							const sep = relPath.includes('?') ? '&' : '?';
+							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${relPath}${sep}limit=1`;
+						} else {
+							const relatedModelInfo = getModelInfo(e.urlModel);
+							countUrl = `${BASE_API_URL}/${relatedModelInfo.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
+						}
+						const countRes = await event.fetch(countUrl);
+						if (countRes.ok) {
+							const countData = await countRes.json();
+							if (typeof countData.count === 'number') {
+								relatedModels[e.urlModel].count = countData.count;
+							}
+						}
+					} catch {
+						// Graceful degradation — leave count as undefined
+					}
+				})
+		);
+	}
+
 	let title = data.str || data.name || data.email || data.label || data.id;
 	if (model.urlModel === 'reference-controls') {
 		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;

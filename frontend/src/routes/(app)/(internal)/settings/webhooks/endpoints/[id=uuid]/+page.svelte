@@ -7,8 +7,7 @@
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { webhookEndpointSchema } from '$lib/utils/schemas';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
-	import EventTypesSelect from '../EventTypesSelect.svelte';
-	import { onMount } from 'svelte';
+	import ListSelector from '$lib/components/Forms/ListSelector.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/state';
@@ -27,16 +26,10 @@
 
 	let showSecretField = $state(!data.webhookEndpoint?.has_secret);
 
-	let eventTypeOptions = $state([]);
-
 	function cancel(): void {
 		const nextValue = getSecureRedirect(page.url.searchParams.get('next'));
 		if (nextValue) goto(nextValue);
 	}
-
-	onMount(async () => {
-		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
-	});
 </script>
 
 <SuperForm
@@ -89,7 +82,14 @@
 			/>
 		{/if}
 
-		<EventTypesSelect {form} field="event_types" label={m.events()} options={eventTypeOptions} />
+		<ListSelector
+			{form}
+			field="event_types"
+			label={m.events()}
+			optionsEndpoint="settings/webhooks/event-types"
+			optionsLabelField="name"
+			groupBy="model_name"
+		/>
 		<div class="flex flex-row justify-between space-x-4">
 			<button class="btn bg-gray-400 text-white font-semibold w-full" type="button" onclick={cancel}
 				>{m.cancel()}</button
