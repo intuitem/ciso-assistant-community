@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Control is expiring in ${days_remaining} ${days_text}"
+subject: "CISO Assistant: Control expiring in ${days_remaining} day(s)"
 body: |
   Hello,
 
-  You have ${control_count} control(s) expiring in ${days_remaining} ${days_text}:
+  You have ${control_count} control(s) expiring in ${days_remaining} day(s):
 
   ${control_list}
 
