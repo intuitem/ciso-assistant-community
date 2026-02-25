@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
 function sanitizeFileName(name: string): string {
 	return name
 		.normalize('NFKC') // Normalize Unicode
-		.replace(/[\x00-\x1F<>:”/\\|?*\u007F;’`\u2018\u2019\u201C\u201D()\[\]{}]/g, ‘-’) // Remove dangerous characters
+		.replace(/[\x00-\x1F<>:"/\\|?*\u007F;'`’‘“”()\[\]{}]/g, '-') // Remove dangerous characters
 		.replace(/\s+/g, '-') // Replace whitespace with dash
 		.replace(/\.+$/g, '') // Remove trailing dots
 		.replace(/^-+|-+$/g, '') // Trim leading/trailing dashes
