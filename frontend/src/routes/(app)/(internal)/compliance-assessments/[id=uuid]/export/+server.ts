@@ -44,11 +44,14 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
 		return res.blob();
 	});
 
+	// ASCII-safe fallback: strip anything outside printable ASCII
+	const asciiFileName = finalFileName.replace(/[^\x20-\x7E]/g, '-').replace(/-+/g, '-');
+
 	// Return the file with proper headers
 	return new Response(blobData, {
 		headers: {
 			'Content-Type': 'application/zip',
-			'Content-Disposition': `attachment; filename*=utf-8''${urlEncodedFileName}; filename="${finalFileName}"`
+			'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=utf-8''${urlEncodedFileName}`
 		}
 	});
 };
