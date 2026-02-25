@@ -2040,7 +2040,7 @@ objects:
       name: "Questions d\xE9pendantes de la Question"
       description: null
     requirement_nodes:
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       assessable: false
       depth: 1
       ref_id: '1'
@@ -2049,10 +2049,10 @@ objects:
         \ sa position par rapport \xE0 d'autres dans le m\xEAme secteur, \xE0 cerner\
         \ les d\xE9fis cyber propres \xE0 son domaine d'activit\xE9 et en fonction\
         \ du nombre d'employ\xE9s."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.1
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.1'
       name: Question 1
       annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont invit\xE9\
@@ -2061,23 +2061,23 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.1:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite:question:1:
           type: unique_choice
           text: "Quelle est la nature de votre entit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.1:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite:question:1:choice:1
             value: "Entit\xE9 publique (ex : collectivit\xE9, administration, syndicats\
               \ mixte, GIP etc.)"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.1:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite:question:1:choice:2
             value: "Entreprise priv\xE9e (ex : TPE, PME, ETI)"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.1:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite:question:1:choice:3
             value: 'Association (ex : association loi 1901)'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.1:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nature-entite:question:1:choice:4
             value: Autre
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.2'
       name: Question 2
       annotation: "# Des dispositifs adapt\xE9s\n\nSelon le secteur d\u2019activit\xE9\
@@ -2086,309 +2086,309 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:
           type: unique_choice
           text: "Quel est son secteur d'activit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:1
             value: Administration
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:2
             value: Agriculture, sylviculture
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:3
             value: Agroalimentaire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:4
             value: Industrie
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:5
             value: "Industrie de d\xE9fense"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:6
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:6
             value: Construction
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:7
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:7
             value: Tertiaire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:8
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:8
             value: Commerce
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:9
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:9
             value: Transports
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:10
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:10
             value: "H\xE9bergement et restauration"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:11
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:11
             value: Information et communication
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:12
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:12
             value: "Activit\xE9s financi\xE8res et d'assurance"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:13
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:13
             value: "Activit\xE9s immobili\xE8res"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:14
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:14
             value: "Activit\xE9s sp\xE9cialis\xE9es, scientifiques et techniques"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:15
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:15
             value: "Activit\xE9s de services administratifs et de soutien"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:16
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:16
             value: Enseignement
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:17
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:17
             value: "Sant\xE9"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:18
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:18
             value: Recherche, laboratoire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:19
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:19
             value: "M\xE9dico-sociale"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:20
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:20
             value: "Arts, spectacles et activit\xE9s r\xE9cr\xE9atives"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:21
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:21
             value: "Autres activit\xE9s de services"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:22
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:22
             value: "Services aux m\xE9nages"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.2:question:1:choice:23
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-secteur-activite:question:1:choice:23
             value: "Activit\xE9s extra-territoriales"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.3'
       name: Question 3
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:
           type: unique_choice
           text: "Dans quel d\xE9partement, ou DROM-COM, votre si\xE8ge social est-il\
             \ bas\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:1
             value: Ain
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:2
             value: Aisne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:3
             value: Allier
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:4
             value: Alpes-de-Haute-Provence
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:5
             value: Hautes-Alpes
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:6
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:6
             value: Alpes-Maritimes
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:7
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:7
             value: "Ard\xE8che"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:8
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:8
             value: Ardennes
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:9
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:9
             value: "Ari\xE8ge"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:10
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:10
             value: Aube
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:11
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:11
             value: Aude
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:12
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:12
             value: Aveyron
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:13
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:13
             value: "Bouches-du-Rh\xF4ne"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:14
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:14
             value: Calvados
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:15
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:15
             value: Cantal
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:16
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:16
             value: Charente
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:17
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:17
             value: Charente-Maritime
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:18
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:18
             value: Cher
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:19
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:19
             value: "Corr\xE8ze"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:20
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:20
             value: "C\xF4te-d'Or"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:21
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:21
             value: "C\xF4tes-d'Armor"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:22
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:22
             value: Creuse
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:23
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:23
             value: Dordogne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:24
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:24
             value: Doubs
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:25
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:25
             value: "Dr\xF4me"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:26
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:26
             value: Eure
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:27
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:27
             value: Eure-et-Loir
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:28
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:28
             value: "Finist\xE8re"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:29
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:29
             value: Corse-du-Sud
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:30
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:30
             value: Haute-Corse
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:31
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:31
             value: Gard
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:32
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:32
             value: Haute-Garonne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:33
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:33
             value: Gers
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:34
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:34
             value: Gironde
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:35
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:35
             value: "H\xE9rault"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:36
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:36
             value: Ille-et-Vilaine
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:37
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:37
             value: Indre
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:38
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:38
             value: Indre-et-Loire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:39
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:39
             value: "Is\xE8re"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:40
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:40
             value: Jura
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:41
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:41
             value: Landes
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:42
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:42
             value: Loir-et-Cher
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:43
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:43
             value: Loire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:44
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:44
             value: Haute-Loire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:45
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:45
             value: Loire-Atlantique
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:46
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:46
             value: Loiret
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:47
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:47
             value: Lot
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:48
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:48
             value: Lot-et-Garonne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:49
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:49
             value: "Loz\xE8re"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:50
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:50
             value: Maine-et-Loire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:51
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:51
             value: Manche
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:52
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:52
             value: Marne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:53
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:53
             value: Haute-Marne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:54
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:54
             value: Mayenne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:55
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:55
             value: Meurthe-et-Moselle
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:56
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:56
             value: Meuse
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:57
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:57
             value: Morbihan
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:58
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:58
             value: Moselle
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:59
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:59
             value: "Ni\xE8vre"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:60
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:60
             value: Nord
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:61
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:61
             value: Oise
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:62
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:62
             value: Orne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:63
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:63
             value: Pas-de-Calais
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:64
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:64
             value: "Puy-de-D\xF4me"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:65
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:65
             value: "Pyr\xE9n\xE9es-Atlantiques"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:66
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:66
             value: "Hautes-Pyr\xE9n\xE9es"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:67
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:67
             value: "Pyr\xE9n\xE9es-Orientales"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:68
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:68
             value: Bas-Rhin
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:69
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:69
             value: Haut-Rhin
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:70
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:70
             value: "Rh\xF4ne"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:71
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:71
             value: "Haute-Sa\xF4ne"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:72
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:72
             value: "Sa\xF4ne-et-Loire"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:73
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:73
             value: Sarthe
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:74
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:74
             value: Savoie
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:75
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:75
             value: Haute-Savoie
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:76
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:76
             value: Paris
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:77
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:77
             value: Seine-Maritime
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:78
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:78
             value: Seine-et-Marne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:79
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:79
             value: Yvelines
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:80
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:80
             value: "Deux-S\xE8vres"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:81
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:81
             value: Somme
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:82
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:82
             value: Tarn
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:83
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:83
             value: Tarn-et-Garonne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:84
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:84
             value: Var
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:85
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:85
             value: Vaucluse
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:86
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:86
             value: "Vend\xE9e"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:87
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:87
             value: Vienne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:88
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:88
             value: Haute-Vienne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:89
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:89
             value: Vosges
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:90
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:90
             value: Yonne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:91
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:91
             value: Territoire de Belfort
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:92
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:92
             value: Essonne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:93
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:93
             value: Hauts-de-Seine
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:94
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:94
             value: Seine-Saint-Denis
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:95
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:95
             value: Val-de-Marne
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:96
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:96
             value: Val-d'Oise
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:97
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:97
             value: Guadeloupe
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:98
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:98
             value: Martinique
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:99
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:99
             value: Guyane
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:100
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:100
             value: "La R\xE9union"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:101
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:101
             value: Mayotte
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:102
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:102
             value: "Collectivit\xE9 de Saint-Martin"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:103
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:103
             value: "Collectivit\xE9 de Saint-Barth\xE9l\xE9my"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:104
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:104
             value: "Collectivit\xE9 de Saint-Pierre et Miquelon"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:105
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:105
             value: "Collectivit\xE9 de Wallis & Futuna"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:106
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:106
             value: "Collectivit\xE9 de Polyn\xE9sie Fran\xE7aise"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.3:question:1:choice:107
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-departement-tom-siege-social:question:1:choice:107
             value: "Collectivit\xE9 de Nouvelle-Cal\xE9donie"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.4
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.4'
       name: Question 4
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.4:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite:question:1:
           type: unique_choice
           text: "Combien de personnes compte votre entit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.4:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite:question:1:choice:1
             value: Entre 1 et 9
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.4:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite:question:1:choice:2
             value: Entre 10 et 49
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.4:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite:question:1:choice:3
             value: Entre 50 et 249
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.4:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-personnes-dans-entite:question:1:choice:4
             value: Plus de 250
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.5
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.5'
       name: Question 5
       annotation: "# Moins de 9 postes\n\nSi l\u2019entit\xE9 dispose de moins de\
@@ -2397,28 +2397,28 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.5:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite:question:1:
           type: unique_choice
           text: "Combien de postes de travail compte votre entit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.5:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite:question:1:choice:1
             value: Entre 1 et 9
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.5:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite:question:1:choice:2
             value: Entre 10 et 49
             select_implementation_groups:
             - _DEPENDS_ON_contexte-nombre-postes-travail-dans-entite
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.5:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite:question:1:choice:3
             value: Entre 50 et 249
             select_implementation_groups:
             - _DEPENDS_ON_contexte-nombre-postes-travail-dans-entite
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.5:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-nombre-postes-travail-dans-entite:question:1:choice:4
             value: Plus de 250
             select_implementation_groups:
             - _DEPENDS_ON_contexte-nombre-postes-travail-dans-entite
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.6
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-activites-recherche-et-developpement
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.6'
       name: Question 6
       annotation: "# Attaque cibl\xE9e\n\nSi oui, des questions additionnelles li\xE9\
@@ -2431,29 +2431,29 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.6:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-activites-recherche-et-developpement:question:1:
           type: unique_choice
           text: "Estimez-vous que votre entit\xE9, du fait de ses activit\xE9s, puisse\
             \ faire l\u2019objet d\u2019espionnage industriel ou de vol de donn\xE9\
             es cibl\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.6:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-activites-recherche-et-developpement:question:1:choice:1
             value: Je ne sais pas
             select_implementation_groups:
             - _DEPENDS_ON_contexte-activites-recherche-et-developpement
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.6:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-activites-recherche-et-developpement:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.6:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-activites-recherche-et-developpement:question:1:choice:3
             value: Oui
             select_implementation_groups:
             - _DEPENDS_ON_contexte-activites-recherche-et-developpement
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.7
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-opere-systemes-information-industriels
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.7'
       name: Question 7
       annotation: "# Syst\xE8mes industriels\n\nSi oui, des questions d\xE9di\xE9\
@@ -2469,27 +2469,27 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.7:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-opere-systemes-information-industriels:question:1:
           type: unique_choice
           text: "Votre entit\xE9 op\xE8re-t-elle des syst\xE8mes industriels ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.7:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-opere-systemes-information-industriels:question:1:choice:1
             value: Je ne sais pas
             select_implementation_groups:
             - _DEPENDS_ON_contexte-opere-systemes-information-industriels
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.7:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-opere-systemes-information-industriels:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.7:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-opere-systemes-information-industriels:question:1:choice:3
             value: Oui
             select_implementation_groups:
             - _DEPENDS_ON_contexte-opere-systemes-information-industriels
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: '1.8'
       name: Question 8
       annotation: "# Statistiques anonymes\n\nAttention, bien pr\xE9ciser \xE0 l\u2019\
@@ -2499,77 +2499,77 @@ objects:
       implementation_groups:
       - MAIN
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.8:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie:question:1:
           type: unique_choice
           text: "Avez-vous d\xE9j\xE0 subi une cyberattaque ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie:question:1:choice:3
             value: Oui
             select_implementation_groups:
             - _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
             - _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: 1.8.1
       name: Question 8.1
       implementation_groups:
       - _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:
           type: multiple_choice
           text: Si oui, de quel type ?
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:1
             value: "Compromission d'un poste, d'une bo\xEEte mail ou d'un compte Cloud"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:2
             value: "Usurpation d'identit\xE9"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:3
             value: "Ran\xE7ongiciel ou autre maliciel sur plusieurs postes"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:4
             value: "Compromission d'un ou plusieurs acc\xE8s distants"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:5
             value: Compromission d'un ou plusieurs services web
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:6
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:6
             value: "Compromission d'un serveur ou service expos\xE9 sur internet"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:7
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:7
             value: "Compromission d'un ou plusieurs \xE9quipements r\xE9seaux"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:8
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:8
             value: Compromission indirecte via un prestataire ou un partenaire
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.1:question:1:choice:9
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:choice:9
             value: Malveillance interne
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.2
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       ref_id: 1.8.2
       name: Question 8.2
       implementation_groups:
       - _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.2:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte:question:1:
           type: unique_choice
           text: "Si Oui : avez-vous d\xE9pos\xE9 plainte ou r\xE9alis\xE9 un signalement\
             \ aupr\xE8s d'un service judiciaire ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.2:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.2:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:1.8.2:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte:question:1:choice:3
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       assessable: false
       depth: 1
       ref_id: '2'
@@ -2579,10 +2579,10 @@ objects:
         gie de l'entreprise. Cette approche vise \xE0 d\xE9terminer comment le syst\xE8\
         me d'information participe \xE0 la cr\xE9ation de valeur pour l'entreprise\
         \ et pr\xE9cise le r\xF4le des diff\xE9rents acteurs."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.9
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.9'
       name: Question 9
       annotation: "# \xC0 prot\xE9ger en priorit\xE9 \n\nPeuvent \xEAtre jug\xE9es\
@@ -2601,28 +2601,28 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.9:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger:question:1:
           type: unique_choice
           text: "Avez-vous d\xE9termin\xE9 les activit\xE9s et les donn\xE9es \xE0\
             \ prot\xE9ger en priorit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.9:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.9:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.9:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger:question:1:choice:3
             value: "Nous avons une id\xE9e g\xE9n\xE9rale de nos activit\xE9s et donn\xE9\
               es \xE0 prot\xE9ger en priorit\xE9"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.9:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-infos-et-activites-a-proteger:question:1:choice:4
             value: "Il existe une liste pr\xE9cise et maintenue \xE0 jour de toutes\
               \ les activit\xE9s et donn\xE9es m\xE9tiers \xE0 prot\xE9ger en priorit\xE9\
               \ \xE0 l\u2019\xE9chelle de l\u2019entit\xE9"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.10'
       name: Question 10
       annotation: "# Interconnexions ext\xE9rieures\n\nIP publiques, acc\xE8s distants\
@@ -2637,29 +2637,29 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-schema-si-a-jour_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-schema-si-a-jour_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:
           type: unique_choice
           text: "Existe-t-il un plan du syst\xE8me d\u2019information de l\u2019entit\xE9\
             \ ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:choice:3
             value: "Nous avons un plan historique qui n'est pas \xE0 jour"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:choice:4
             value: "Il existe un plan \"macro\" non d\xE9taill\xE9 ou partiellement\
               \ d\xE9taill\xE9 \xE0 jour"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.10:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-a-jour:question:1:choice:5
             value: "Il existe un sch\xE9ma d\xE9taill\xE9 \xE0 jour, incluant la liste\
               \ exhaustive des interconnexions vers l'ext\xE9rieur"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.11'
       name: Question 11
       annotation: "# **SYST\xC8ME INDUSTRIEL**\n\n# Composants\n\n\xC9quipements r\xE9\
@@ -2674,31 +2674,31 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:
           type: unique_choice
           text: "Existe-t-il un plan et un inventaire des syst\xE8mes d'informations\
             \ industriels de l'entit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:choice:4
             value: "Il existe un plan \"macro\" non d\xE9taill\xE9 ou partiellement\
               \ d\xE9taill\xE9 \xE0 jour"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.11:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-schema-si-industriel-a-jour:question:1:choice:5
             value: "Il existe un plan d\xE9taill\xE9, incluant la liste d\xE9taill\xE9\
               e des composants du syst\xE8me d\u2019information et la liste exhaustive\
               \ des interconnexions vers l\u2019ext\xE9rieur"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.12
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.12'
       name: Question 12
       annotation: "# CNIL\n\nAttention \xE0 ne pas tomber dans un contr\xF4le de conformit\xE9\
@@ -2716,28 +2716,28 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-connaissance-rgpd-1_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-connaissance-rgpd-1_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.12:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1:question:1:
           type: unique_choice
           text: "Avez-vous list\xE9 les donn\xE9es personnelles trait\xE9es au sein\
             \ de votre entit\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.12:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.12:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.12:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1:question:1:choice:3
             value: "Oui, nous avons list\xE9 l'ensemble des donn\xE9es personnelles\
               \ trait\xE9es au sein de mon entit\xE9"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.12:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-1:question:1:choice:4
             value: "Oui, nous tenons \xE0 jour un registre des traitements"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.13
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.13'
       name: Question 13
       annotation: "# Utilisation des donn\xE9es personnelles\n\nIl existe une page\
@@ -2750,30 +2750,30 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-connaissance-rgpd-2_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-connaissance-rgpd-2_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.13:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2:question:1:
           type: unique_choice
           text: "Informez-vous les personnes concern\xE9es sur l'utilisation de leurs\
             \ donn\xE9es personnelles et leurs droits ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.13:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.13:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.13:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2:question:1:choice:3
             value: "Oui, j'informe les personnes concern\xE9es sur l\u2019utilisation\
               \ de leurs donn\xE9es personnelles"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.13:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-connaissance-rgpd-2:question:1:choice:4
             value: "Oui, j\u2019informe les personnes concern\xE9es et j\u2019ai mis\
               \ en place les moyens n\xE9cessaires leur permettant d\u2019exercer\
               \ leurs droits (ex : acc\xE8s, rectification, opposition, suppression)"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       ref_id: '2.14'
       name: Question 14
       annotation: "# Contrats des prestataires\n\nCette question suppose que l\u2019\
@@ -2793,28 +2793,28 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:
           type: unique_choice
           text: "Des exigences de cybers\xE9curit\xE9 sont-elles int\xE9gr\xE9es aux\
             \ contrats des prestataires disposant d'acc\xE8s informatiques ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:choice:3
             value: Non, aucune exigence ne figure dans nos contrats de prestation
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:choice:4
             value: "Oui, des exigences de cybers\xE9curit\xE9 sont formalis\xE9es\
               \ et fix\xE9es aux prestataires"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:2.14:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance-exigence-cyber-securite-presta:question:1:choice:5
             value: "Oui, des exigences de cybers\xE9curit\xE9 avec p\xE9nalit\xE9\
               s sont formalis\xE9es et fix\xE9es aux prestataires"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       assessable: false
       depth: 1
       ref_id: '3'
@@ -2823,10 +2823,10 @@ objects:
         es et des renseignements contre tout acc\xE8s, usage, divulgation, alt\xE9\
         ration, perturbation ou destruction non autoris\xE9s. Elle repr\xE9sente une\
         \ pr\xE9occupation essentielle tant pour les individus que pour les organisations."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.15
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.15'
       name: Question 15
       annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
@@ -2845,28 +2845,28 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-outil-gestion-des-comptes_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-outil-gestion-des-comptes_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.15:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes:question:1:
           type: unique_choice
           text: "Un outil de gestion des comptes et des politiques de s\xE9curit\xE9\
             \ centralis\xE9 (ex : Active Directory, Samba-AD, Entra ID, scripts d'administration\
             \ automatis\xE9s, etc.) est-il mis en \u0153uvre ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.15:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.15:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.15:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.15:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-outil-gestion-des-comptes:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.16'
       name: Question 16
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s et comptes prioritaires\n\
@@ -2882,32 +2882,32 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-liste-compte-utilisateurs_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-liste-compte-utilisateurs_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:
           type: unique_choice
           text: "La liste des comptes utilisateurs (prestataires inclus) est-elle\
             \ maintenue \xE0 jour ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:choice:4
             value: "Les comptes des utilisateurs et leurs acc\xE8s sont r\xE9guli\xE8\
               rement revus (ex : liste du personnel vs liste des comptes)"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.16:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-liste-compte-utilisateurs:question:1:choice:5
             value: "La liste des comptes des utilisateurs est mise \xE0 jour en continu\
               \ dans le cadre d'un processus de d\xE9sactivation syst\xE9matique des\
               \ comptes inactifs. Une revue annuelle est \xE9galement r\xE9alis\xE9\
               e"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.17'
       name: Question 17
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s et comptes prioritaires\n\
@@ -2923,31 +2923,31 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:
           type: unique_choice
           text: "Les droits des utilisateurs sont-ils limit\xE9s \xE0 leurs besoins\
             \ m\xE9tiers ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:choice:4
             value: "Des restrictions d\u2019acc\xE8s \xE0 certaines donn\xE9es sont\
               \ ponctuellement mises en place"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.17:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-droits-acces-utilisateurs-limites:question:1:choice:5
             value: "L\u2019acc\xE8s des utilisateurs aux donn\xE9es, aux syst\xE8\
               mes et aux applications sont limit\xE9s aux seuls acc\xE8s n\xE9cessaires\
               \ \xE0 leur activit\xE9"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.18
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.18'
       name: Question 18
       annotation: "# Administration locale des postes\n\nCette question traite du\
@@ -2962,26 +2962,26 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.18:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste:question:1:
           type: unique_choice
           text: Les utilisateurs sont-ils administrateurs de leur poste ?
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.18:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.18:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste:question:1:choice:2
             value: "Oui, les comptes d\u2019acc\xE8s des utilisateurs disposent des\
               \ privil\xE8ges d\u2019administration du poste de travail"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.18:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste:question:1:choice:3
             value: "La suppression de ce privil\xE8ge est en cours de traitement,\
               \ plusieurs utilisateurs sont toujours administrateurs de leur poste"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.18:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-administrateurs-poste:question:1:choice:4
             value: "Non, et les rares exceptions sont justifi\xE9es"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.19
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.19'
       name: Question 19
       annotation: "# Mots de passe \n\nExigences minimales acceptables :\n\t\u2022\
@@ -2996,25 +2996,25 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.19:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp:question:1:
           type: unique_choice
           text: "Des exigences de complexit\xE9 sont-elles impos\xE9es sur les mots\
             \ de passe de session des utilisateurs ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.19:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.19:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.19:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-mesures-securite-robustesse-mdp:question:1:choice:3
             value: "Des contraintes en mati\xE8re de s\xE9curit\xE9 des mots de passe\
               \ sont exig\xE9es par d\xE9faut pour l'acc\xE8s des utilisateurs \xE0\
               \ leur compte"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.20
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.20'
       name: Question 20
       annotation: "# Comptes d\u2019administration\n\nNB : cette question traite des\
@@ -3027,29 +3027,29 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.20:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee:question:1:
           type: unique_choice
           text: "La liste des comptes des administrateurs informatiques (prestataires\
             \ inclus) est-elle suivie et limit\xE9e au strict n\xE9cessaire ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.20:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.20:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.20:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee:question:1:choice:3
             value: "Les comptes des administrateurs sont r\xE9guli\xE8rement revus\
               \ (ex : liste du personnel vs liste des comptes)"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.20:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-informatiques-suivie-et-limitee:question:1:choice:4
             value: "La liste des comptes des administrateurs est mise \xE0 jour en\
               \ continu dans le cadre d'un processus de d\xE9sactivation syst\xE9\
               matique des comptes inactifs. Une revue annuelle est \xE9galement r\xE9\
               alis\xE9e"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.21
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.21'
       name: Question 21
       annotation: "# Comptes d\u2019administration\n\nNB : cette question traite des\
@@ -3069,27 +3069,27 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.21:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee:question:1:
           type: unique_choice
           text: "L'utilisation des comptes administrateurs est-elle bien limit\xE9\
             e aux t\xE2ches d'administration ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.21:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.21:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee:question:1:choice:2
             value: "Non, des utilisateurs disposent de privil\xE8ges d\u2019administration\
               \ sans restriction particuli\xE8re"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.21:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee:question:1:choice:3
             value: "La mise \xE0 disposition des comptes d'administration fait l'objet\
               \ de quelques restrictions"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.21:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisation-comptes-administrateurs-droits-limitee:question:1:choice:4
             value: "Tous les comptes administration sont justifi\xE9s, et d\xE9di\xE9\
               s aux seules t\xE2ches d\u2019administration"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.22'
       name: Question 22
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Donn\xE9es sensibles\n\nNous vous\
@@ -3109,34 +3109,34 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1
+        : type: unique_choice
           text: "L'acc\xE8s des utilisateurs aux ressources et donn\xE9es les plus\
             \ sensibles fait-il l\u2019objet de mesures de s\xE9curit\xE9 additionnelles\
             \ ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1:choice:4
             value: "Oui, des mesures renfor\xE7ant l'acc\xE8s \xE0 ces donn\xE9es\
               \ ont \xE9t\xE9 mises en \u0153uvre"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.22:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-utilisateurs-donnees-sensibles-mesures-securite-additionnelles:question:1:choice:5
             value: "Oui, des mesures renfor\xE7ant l'acc\xE8s \xE0 ces donn\xE9es\
               \ ont \xE9t\xE9 mises en \u0153uvre et les donn\xE9es sont chiffr\xE9\
               es"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.23'
       name: Question 23
       annotation: "# Authentification multifacteur \n\nExemples de facteur d\u2019\
@@ -3152,30 +3152,30 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:
           type: unique_choice
           text: "Le t\xE9l\xE9travail et les acc\xE8s distants (cloud inclus) sont-ils\
             \ prot\xE9g\xE9s par une authentification multifacteur ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:choice:4
             value: "Certaines connexions \xE0 distance sont prot\xE9g\xE9es par une\
               \ authentification multifacteur"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.23:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-teletravail-acces-distants-mesures-particulieres:question:1:choice:5
             value: "Toutes les connexions \xE0 distance sont prot\xE9g\xE9es par une\
               \ authentification multifacteur"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.24'
       name: Question 24
       annotation: "# **SYST\xC8ME INDUSTRIEL**"
@@ -3185,30 +3185,30 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1
+        : type: unique_choice
           text: "Les acc\xE8s distants aux syst\xE8mes industriels sont-ils prot\xE9\
             g\xE9s par une authentification multifacteur ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1:choice:4
             value: "Certaines connexions \xE0 distance sont prot\xE9g\xE9es par une\
               \ authentification multifacteur"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.24:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-si-industriel-teletravail-acces-distants-mesures-particulieres:question:1:choice:5
             value: "Toutes les connexions \xE0 distance sont prot\xE9g\xE9es par une\
               \ authentification multifacteur"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.25
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       ref_id: '3.25'
       name: Question 25
       annotation: "# Authentification renforc\xE9e\n\nPour r\xE9pondre aux exigences\
@@ -3226,27 +3226,27 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:3.25:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques:question:1:
           type: unique_choice
           text: "Les acc\xE8s des administrateurs font-ils l\u2019objet de mesures\
             \ de s\xE9curit\xE9 renforc\xE9es ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.25:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.25:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.25:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques:question:1:choice:3
             value: "Oui, des mesures renfor\xE7ant l'authentification ont \xE9t\xE9\
               \ mises en \u0153uvre"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:3.25:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:acces-administrateurs-si-mesures-specifiques:question:1:choice:4
             value: "Oui, des mesures renfor\xE7ant l'authentification ont \xE9t\xE9\
               \ mises en \u0153uvre et des postes d\xE9di\xE9s \xE0 l'administration\
               \ sont utilis\xE9s"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       assessable: false
       depth: 1
       ref_id: '4'
@@ -3256,10 +3256,10 @@ objects:
         rement via Internet, est crucial. Les risques d'intrusion dans les syst\xE8\
         mes informatiques sont significatifs, et les postes de travail repr\xE9sentent\
         \ l'un des principaux vecteurs d'attaque potentiels."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.26
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.26'
       name: Question 26
       annotation: "# Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
@@ -3287,29 +3287,29 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.26:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees:question:1:
           type: unique_choice
           text: "Les mises \xE0 jour fonctionnelles et de s\xE9curit\xE9 des logiciels\
             \ utilis\xE9s sont-elles d\xE9ploy\xE9es sur les postes de travail des\
             \ utilisateurs et des administrateurs ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.26:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.26:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.26:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees:question:1:choice:3
             value: "Les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement,\
               \ il existe tout de m\xEAme certaines exceptions non trait\xE9es actuellement"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.26:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-maj-fonctionnelles-et-securite-deployees:question:1:choice:4
             value: "Toutes les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement\
               \ d\xE8s que celles-ci sont disponibles et les exceptions font l'objet\
               \ de mesures compl\xE9mentaires"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.27'
       name: Question 27
       annotation: "# **SYST\xC8ME INDUSTRIEL**"
@@ -3320,32 +3320,32 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1
+        : type: unique_choice
           text: "Les mises \xE0 jour fonctionnelles et de s\xE9curit\xE9 sont-elles\
             \ d\xE9ploy\xE9es sur les postes de travail des utilisateurs et des administrateurs\
             \ des syst\xE8mes industriels ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1:choice:4
             value: "Les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement,\
               \ il existe tout de m\xEAme certaines exceptions non trait\xE9es actuellement"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.27:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-maj-fonctionnelles-et-securite-deployees:question:1:choice:5
             value: "Toutes les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement\
               \ d\xE8s que celles-ci sont disponibles et les exceptions font l'objet\
               \ de mesures compl\xE9mentaires"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.28
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.28'
       name: Question 28
       annotation: "# Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
@@ -3360,27 +3360,27 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-antivirus-deploye_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-antivirus-deploye_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.28:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye:question:1:
           type: unique_choice
           text: "Un antivirus \xE0 jour est-il d\xE9ploy\xE9 sur chaque poste de travail\
             \ ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.28:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.28:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.28:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye:question:1:choice:3
             value: "Oui, mais ses alertes ne sont pas toujours trait\xE9es"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.28:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-antivirus-deploye:question:1:choice:4
             value: "Oui et ses alertes sont syst\xE9matiquement trait\xE9es"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.29'
       name: Question 29
       annotation: "# **SYST\xC8ME INDUSTRIEL**"
@@ -3391,30 +3391,30 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:
           type: unique_choice
           text: "Un antivirus \xE0 jour est-il d\xE9ploy\xE9 sur chaque poste de travail\
             \ des syst\xE8mes industriels ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:choice:4
             value: "Oui, mais ses alertes ne sont pas toujours trait\xE9es"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.29:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-si-industriel-antivirus-deploye:question:1:choice:5
             value: "Oui et ses alertes sont syst\xE9matiquement trait\xE9es"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.30
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-pare-feu-local-active
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.30'
       name: Question 30
       annotation: "# Pare-feu local\n\nLe pare-feu local est un logiciel qui permet\
@@ -3431,23 +3431,23 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-pare-feu-local-active_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.30:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-pare-feu-local-active:question:1:
           type: unique_choice
           text: "Un pare-feu local est-il activ\xE9 sur les postes de travail ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.30:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-pare-feu-local-active:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.30:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-pare-feu-local-active:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.30:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-pare-feu-local-active:question:1:choice:3
             value: "Oui, et les flux entrants et sortants sont filtr\xE9s"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.31
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.31'
       name: Question 31
       annotation: "# EDR\n\nUn EDR, Endpoint Detection Response, d\xE9tecte et bloque\
@@ -3459,29 +3459,29 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-outils-complementaires-securisation_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-outils-complementaires-securisation_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.31:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation:question:1:
           type: unique_choice
           text: "En compl\xE9ment de l'antivirus, un outil de type EDR a-t-il \xE9\
             t\xE9 mis en place ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.31:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.31:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.31:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation:question:1:choice:3
             value: "Oui, un outil de type EDR a \xE9t\xE9 mis en place mais ses alertes\
               \ ne sont pas toujours trait\xE9es"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.31:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-outils-complementaires-securisation:question:1:choice:4
             value: "Oui, un outil de type EDR a \xE9t\xE9 mis en place et ses alertes\
               \ sont syst\xE9matiquement trait\xE9es"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.32
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       ref_id: '4.32'
       name: Question 32
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Windows Bitlocker\n\nWindows Bitlocker\
@@ -3498,23 +3498,23 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:4.32:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres:question:1:
           type: unique_choice
           text: "Les disques durs des mat\xE9riels nomades sont-ils chiffr\xE9s ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.32:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.32:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.32:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:4.32:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-poste-r-et-d-disques-chiffres:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       assessable: false
       depth: 1
       ref_id: '5'
@@ -3523,10 +3523,10 @@ objects:
         ger syst\xE8mes, r\xE9seaux et informations contre les menaces num\xE9riques.\
         \ Le pare-feu, le cryptage et la d\xE9tection d'intrusions pour pr\xE9venir,\
         \ d\xE9tecter et limiter les attaques sont entre autres utilis\xE9s."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.33'
       name: Question 33
       annotation: "# Pare-feu\n\nLe pare-feu est l\u2019outil permettant de restreindre\
@@ -3544,27 +3544,27 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.33:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye:question:1:
           type: unique_choice
           text: "La connexion \xE0 Internet est-elle prot\xE9g\xE9e par un pare-feu\
             \ ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye:question:1:choice:3
             value: Oui
             select_implementation_groups:
             - _Q33.1_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
             - _Q33.2_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: 5.33.1
       name: Question 33.1
       implementation_groups:
@@ -3573,28 +3573,28 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-interconnexions-protegees_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-interconnexions-protegees_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees:question:1
+        : type: unique_choice
           text: "Est-ce que seuls les flux entrants et sortants strictement n\xE9\
             cessaires entre Internet et le syst\xE8me d'information (ou autres r\xE9\
             seaux externes) sont autoris\xE9s ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees:question:1:choice:3
             value: Oui
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.1:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees:question:1:choice:4
             value: "Oui et les flux entrants sont prot\xE9g\xE9s par un VPN"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: 5.33.2
       name: Question 33.2
       implementation_groups:
@@ -3602,28 +3602,28 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-logs-stockes_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes:question:1:
           type: unique_choice
           text: "Les journaux des flux entrants, sortants et bloqu\xE9s (g\xE9n\xE9\
             r\xE9s par le pare-feu) sont-ils stock\xE9s ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes:question:1:choice:3
             value: Oui, nous stockons quelques journaux du pare-feu
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.33.2:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-logs-stockes:question:1:choice:4
             value: "Oui, nous stockons les journaux du pare-feu avec une dur\xE9e\
               \ de conservation d'au moins 6 mois"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.34'
       name: Question 34
       annotation: "# **SYST\xC8ME INDUSTRIEL**\n\n# Cloisonnement des syst\xE8mes\
@@ -3642,33 +3642,33 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:
           type: unique_choice
           text: "Des mesures de cloisonnement sp\xE9cifiques des syst\xE8mes industriels\
             \ ont-elles \xE9t\xE9 mise en \u0153uvre ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:choice:4
             value: "Oui, tous les flux r\xE9seau non n\xE9cessaires sont bloqu\xE9\
               s"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.34:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-si-industriel-pare-feu-deploye:question:1:choice:5
             value: "Oui, une segmentation r\xE9seau stricte a \xE9t\xE9 mise en \u0153\
               uvre pour isoler l'environnement industriel de l'environnement bureautique\
               \ (hors besoin m\xE9tier justifi\xE9)"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.35
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.35'
       name: Question 35
       annotation: "# \xC9quipements de s\xE9curit\xE9 \n\nExemples d\u2019\xE9quipements\
@@ -3680,27 +3680,27 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.35:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees:question:1
+        : type: unique_choice
           text: "Les mises \xE0 jour fonctionnelles et de s\xE9curit\xE9 des \xE9\
             quipements de s\xE9curit\xE9 sont-elles d\xE9ploy\xE9es ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.35:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.35:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.35:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.35:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-equipements-securite-deployees:question:1:choice:4
             value: "Toutes les mises \xE0 jour logicielles sont d\xE9ploy\xE9es d\xE8\
               s que celles-ci sont disponibles et fonctionnelles"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.36'
       name: Question 36
       annotation: "# Serveurs et services d\u2019administration \n\nExemples des serveurs\
@@ -3723,32 +3723,32 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1
+        : type: unique_choice
           text: "Les mises \xE0 jour fonctionnelles et de s\xE9curit\xE9 des syst\xE8\
             mes d'exploitation des serveurs, services et logiciels d'administration\
             \ sont-elles d\xE9ploy\xE9es ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1:choice:4
             value: "Les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement,\
               \ il existe tout de m\xEAme certaines exceptions non trait\xE9es actuellement"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.36:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-mises-a-jour-fonctionnelles-securite-systemes-exploitation-securite-deployees:question:1:choice:5
             value: "Toutes les mises \xE0 jour sont d\xE9ploy\xE9es syst\xE9matiquement\
               \ d\xE8s que celles-ci sont disponibles et les exceptions font l'objet\
               \ de mesures compl\xE9mentaires"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.37'
       name: Question 37
       annotation: "# M\xE9canismes de protection \n\nLes m\xE9canismes de protection\
@@ -3769,33 +3769,33 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:
           type: unique_choice
           text: "Des mesures et outils sp\xE9cifiques sont-ils mis en \u0153uvre pour\
             \ s\xE9curiser le syst\xE8me de messagerie ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:choice:4
             value: "Oui, un outil d'anti-spam et d'anti-hame\xE7onnage a \xE9t\xE9\
               \ mis en \u0153uvre"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.37:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-outils-securisation-systeme-messagerie:question:1:choice:5
             value: "Oui, un outil d'anti-spam et d'anti-hame\xE7onnage a \xE9t\xE9\
               \ mis en \u0153uvre et les m\xE9canismes compl\xE9mentaires de protection\
               \ de mails ill\xE9gitimes sont activ\xE9s"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.38'
       name: Question 38
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Chiffrement de connexion \n\nMinimum\
@@ -3811,30 +3811,30 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:
           type: unique_choice
           text: "Les points d\u2019acc\xE8s wifi sont-ils s\xE9curis\xE9s ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:choice:1
             value: Non Applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:choice:4
             value: Oui, le chiffrement de la connexion wifi est robuste
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.38:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-acces-wifi-securises:question:1:choice:5
             value: "Oui, le chiffrement de la connexion wifi est robuste et les visiteurs\
               \ n'ont pas acc\xE8s au r\xE9seau interne"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       ref_id: '5.39'
       name: Question 39
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s aux serveurs\n\nPour s\xE9\
@@ -3851,30 +3851,30 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:
           type: unique_choice
           text: "L'acc\xE8s \xE0 la salle ou \xE0 l'espace d\xE9di\xE9 au stockage\
             \ des serveurs d'administration, baies informatiques et des \xE9quipements\
             \ r\xE9seau est-il prot\xE9g\xE9 par une porte s\xE9curis\xE9e ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:choice:1
             value: Non Applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:choice:4
             value: "Oui, l\u2019acc\xE8s n\u2019est autoris\xE9 qu\u2019aux personnes\
               \ l\xE9gitimes"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:5.39:question:1:choice:5
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-espace-stockage-serveurs:question:1:choice:5
             value: "Oui, l\u2019acc\xE8s n\u2019est autoris\xE9 qu\u2019aux personnes\
               \ l\xE9gitimes et supervis\xE9 par un dispositif de vid\xE9oprotection"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
       assessable: false
       depth: 1
       ref_id: '6'
@@ -3885,10 +3885,10 @@ objects:
         \ Il faut fournir des informations sur les actions entreprises pour g\xE9\
         rer ces risques, ainsi que sur les cons\xE9quences possibles en cas de non-respect\
         \ des directives."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.40
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
       ref_id: '6.40'
       name: Question 40
       annotation: "# Actions de sensibilisation \n\nExemple d'actions de sensibilisation\
@@ -3907,30 +3907,30 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:6.40:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques:question:1
+        : type: unique_choice
           text: "Des actions de sensibilisation \xE0 la menace et aux bonnes pratiques\
             \ cyber sont-elles r\xE9alis\xE9es ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.40:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.40:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.40:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques:question:1:choice:3
             value: "Oui, nous avons d\xE9j\xE0 men\xE9 des actions de sensibilisation\
               \ ces derni\xE8res ann\xE9es"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.40:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-actions-sensibilisation-menace-et-bonnes-pratiques:question:1:choice:4
             value: "Oui, nous menons chaque ann\xE9e des actions de sensibilisation\
               \ \xE0 l\u2019attention du personnel et ciblant des populations sp\xE9\
               cifiques (ex : services supports, services m\xE9tiers)"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.41
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
       ref_id: '6.41'
       name: Question 41
       annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Passeport de conseils cyber aux voyageurs\n\
@@ -3942,27 +3942,27 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:6.41:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d:question:1:
           type: unique_choice
           text: "Menez-vous des actions de sensibilisation ciblant sp\xE9cifiquement\
             \ les collaborateurs effectuant des missions \xE0 l'\xE9tranger ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.41:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.41:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.41:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.41:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-risque-espionnage-industriel-r-et-d:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.42
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
       ref_id: '6.42'
       name: Question 42
       implementation_groups:
@@ -3972,25 +3972,25 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:6.42:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises:question:1
+        : type: unique_choice
           text: "Le respect d\u2019une charte d\u2019utilisation des moyens informatiques\
             \ et des outils num\xE9riques est-il exig\xE9 au personnel ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.42:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.42:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.42:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises:question:1:choice:3
             value: "Oui, une charte est communiqu\xE9e aux collaborateurs"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:6.42:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation-collaborateurs-soumis-obligations-usages-securises:question:1:choice:4
             value: "Oui, une charte est sign\xE9e par chaque collaborateur et elle\
               \ est annex\xE9e au r\xE8glement int\xE9rieur"
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       assessable: false
       depth: 1
       ref_id: '7'
@@ -4000,10 +4000,10 @@ objects:
         \ \xE9ventuelles anomalies qui sont associ\xE9es. L'objectif principal est\
         \ d'\xE9tablir une vision aussi pr\xE9cise que possible de la situation en\
         \ cours."
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.43
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: '7.43'
       name: Question 43
       annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
@@ -4022,25 +4022,25 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.43:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles:question:1:
           type: unique_choice
           text: "Un suivi des alertes de cybers\xE9curit\xE9 et des vuln\xE9rabilit\xE9\
             s publi\xE9es pouvant vous affecter est-il r\xE9alis\xE9 ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.43:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.43:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.43:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles:question:1:choice:3
             value: "Un suivi ponctuel est r\xE9alis\xE9"
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.43:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-surveillance-veille-vulnerabilites-potentielles:question:1:choice:4
             value: "Une veille proactive et exhaustive est r\xE9alis\xE9e"
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: '7.44'
       name: Question 44
       annotation: "# Jeu de sauvegarde isol\xE9 \n\nLe jeu de sauvegarde isol\xE9\
@@ -4064,32 +4064,32 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.44:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:
           type: unique_choice
           text: "Des sauvegardes r\xE9guli\xE8res des donn\xE9es sont-elles r\xE9\
             alis\xE9es ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:3
             value: "Des sauvegardes des donn\xE9es sont r\xE9alis\xE9es ponctuellement"
             select_implementation_groups:
             - _Q44.1_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
             - _Q44.2_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:4
             value: "Des sauvegardes des donn\xE9es sont r\xE9alis\xE9es de mani\xE8\
               re automatique et r\xE9guli\xE8re"
             select_implementation_groups:
             - _Q44.3_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
             - _Q44.4_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: 7.44.1
       name: Question 44.1
       implementation_groups:
@@ -4097,28 +4097,28 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole:question:1
+        : type: unique_choice
           text: "Existe-t-il au moins un jeu de sauvegarde des donn\xE9es critiques\
             \ stock\xE9es dans un environnement isol\xE9 du r\xE9seau bureautique\
             \ interne ou \"hors ligne\" ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.1:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: 7.44.2
       name: Question 44.2
       implementation_groups:
@@ -4126,27 +4126,27 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement:question:1
+        : type: unique_choice
           text: "Si \"Oui\" : La restauration des sauvegardes de toutes vos donn\xE9\
             es critiques est-elle test\xE9e r\xE9guli\xE8rement ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.2:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: 7.44.3
       name: Question 44.3
       implementation_groups:
@@ -4154,28 +4154,28 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1
+        : type: unique_choice
           text: "Existe-t-il au moins un jeu de sauvegarde des donn\xE9es critiques\
             \ stock\xE9es dans un environnement isol\xE9 du r\xE9seau bureautique\
             \ interne ou \"hors ligne\""
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.3:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: 7.44.4
       name: Question 44.4
       implementation_groups:
@@ -4183,27 +4183,27 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement_niveau1
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4:question:1:
-          type: unique_choice
+        ? urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement:question:1
+        : type: unique_choice
           text: "La restauration des sauvegardes de toutes vos donn\xE9es critiques\
             \ est-elle test\xE9e r\xE9guli\xE8rement ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement:question:1:choice:1
             value: Non applicable
             color: '#000000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement:question:1:choice:2
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement:question:1:choice:3
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.44.4:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement:question:1:choice:4
             value: Oui
             color: '#209226'
-    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.45
+    - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini
       assessable: true
       depth: 2
-      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7
+      parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       ref_id: '7.45'
       name: Question 45
       annotation: "# Organisation de gestion de crise\n\nUne organisation de gestion\
@@ -4219,20 +4219,20 @@ objects:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini_niveau2
       questions:
-        urn:intuitem:risk:req_node:anssi-monaidecyber:7.45:question:1:
+        urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini:question:1:
           type: unique_choice
           text: "Savez-vous comment r\xE9agir en cas de cyberattaque ?"
           choices:
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.45:question:1:choice:1
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini:question:1:choice:1
             value: Je ne sais pas
             color: '#555555'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.45:question:1:choice:2
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini:question:1:choice:2
             value: Non
             color: '#8B0000'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.45:question:1:choice:3
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini:question:1:choice:3
             value: "Oui, nous avons formalis\xE9 une fiche r\xE9flexe d\xE9di\xE9e"
             color: '#209226'
-          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:7.45:question:1:choice:4
+          - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-dispositif-gestion-crise-adapte-defini:question:1:choice:4
             value: "Oui, une organisation de gestion de crise d\u2019origine cyber\
               \ a \xE9t\xE9 d\xE9finie"
             color: '#209226'
