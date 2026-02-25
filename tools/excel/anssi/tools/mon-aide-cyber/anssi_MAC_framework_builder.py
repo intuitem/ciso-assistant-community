@@ -185,7 +185,7 @@ def print_results(zip_reused: bool) -> None:
         print("⚠️  [WARNING] Existing ZIP was reused (no fresh download).")
 
     print(
-        "ℹ️  [NOTE] Some question annotations may require some manual formatting (e.g. Questions 2 & 7)"
+        "ℹ️  [NOTE] Some question annotations may require some manual formatting (e.g. Questions 2, 7, 21, 22 & 25)"
     )
 
 
