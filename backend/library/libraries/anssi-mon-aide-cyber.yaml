@@ -8,7 +8,8 @@ description: "MonAideCyber aide les entit\xE9s publiques et priv\xE9es sensibili
   es \xE0 la s\xE9curit\xE9 informatique \xE0 passer \xE0 l\u2019action. Le dispositif\
   \ MonAideCyber est d\xE9velopp\xE9 par l'Agence Nationale de la S\xE9curit\xE9 des\
   \ Syst\xE8mes d'Information, en lien avec BetaGouv et la Direction interminist\xE9\
-  rielle du num\xE9rique."
+  rielle du num\xE9rique.\n\n Sources :\n\t\u2022 https://github.com/betagouv/mon-aide-cyber\
+  \ \n\t\u2022 https://monaide.cyber.gouv.fr/diagnostic-libre-acces"
 copyright: ANSSI
 version: 1
 publication_date: 2026-02-25
@@ -1989,7 +1990,8 @@ objects:
       es \xE0 la s\xE9curit\xE9 informatique \xE0 passer \xE0 l\u2019action. Le dispositif\
       \ MonAideCyber est d\xE9velopp\xE9 par l'Agence Nationale de la S\xE9curit\xE9\
       \ des Syst\xE8mes d'Information, en lien avec BetaGouv et la Direction interminist\xE9\
-      rielle du num\xE9rique."
+      rielle du num\xE9rique.\n\n Sources :\n\t\u2022 https://github.com/betagouv/mon-aide-cyber\
+      \ \n\t\u2022 https://monaide.cyber.gouv.fr/diagnostic-libre-acces"
     implementation_groups_definition:
     - ref_id: MAIN
       name: "\xC9l\xE9ments principaux"

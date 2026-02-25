@@ -95,7 +95,7 @@ LIBRARY_META_ROWS: list[tuple[str, str]] = [
     ("name", "ANSSI - Questionnaire MonAideCyber"),
     (
         "description",
-        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.",
+        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.\n\n Sources :\n\t• https://github.com/betagouv/mon-aide-cyber \n\t• https://monaide.cyber.gouv.fr/diagnostic-libre-acces",
     ),
     ("copyright", "ANSSI"),
     ("provider", "ANSSI"),
@@ -110,7 +110,7 @@ FWK_META_ROWS: list[tuple[str, str]] = [
     ("name", "ANSSI - Questionnaire MonAideCyber"),
     (
         "description",
-        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.",
+        "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.\n\n Sources :\n\t• https://github.com/betagouv/mon-aide-cyber \n\t• https://monaide.cyber.gouv.fr/diagnostic-libre-acces",
     ),
     ("implementation_groups_definition", "imp_grp"),
     ("answers_definition", "answ"),
