@@ -21,7 +21,9 @@ python anssi_MAC_build_excel_from_json.py --questionnaire questionnaire_repo.jso
 
 import argparse
 import json
+import re
 from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
 from typing import Any
 
@@ -68,6 +70,11 @@ QUESTION_TYPE_MAP = {
     "choixMultiple": "multiple_choice",
     "choixUnique": "unique_choice",
 }
+
+
+class JoinSeparator(str, Enum):
+    DEFAULT_NEWLINE = "\n"
+    IMPLEMENTATION_GROUPS = ",\n"
 
 
 LIBRARY_META_ROWS: list[tuple[str, str]] = [
@@ -233,7 +240,7 @@ def implementation_groups_for_question(perimetre: str | None, base_group: str) -
     parts = [base_group]
     if perimetre:
         parts.append(perimetre)
-    return "\n".join(parts)
+    return JoinSeparator.IMPLEMENTATION_GROUPS.join(parts)
 
 
 def measures_to_reference_controls(reponses: list[dict[str, Any]]) -> str:
@@ -436,12 +443,12 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
 
 
 def remove_main_and_add_groups(existing: str, groups: list[str]) -> str:
-    parts = [p.strip() for p in existing.split("\n") if p.strip()] if existing else []
+    parts = [p.strip() for p in re.split(r",?\n", existing) if p.strip()] if existing else []
     parts = [p for p in parts if p != "MAIN"]
     for grp in groups:
         if grp not in parts:
             parts.append(grp)
-    return "\n".join(parts)
+    return JoinSeparator.IMPLEMENTATION_GROUPS.join(parts)
 
 
 def apply_conditions_perimetre_second_pass(
