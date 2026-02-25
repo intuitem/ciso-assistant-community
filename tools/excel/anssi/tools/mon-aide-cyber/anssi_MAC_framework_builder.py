@@ -25,6 +25,7 @@ import sys
 import urllib.request
 import zipfile
 from pathlib import Path
+from urllib.parse import urlparse
 
 from anssi_MAC_export_referentiels_json import export_referentiels_json
 from anssi_MAC_build_excel_from_json import build_excel_from_json
@@ -91,6 +92,14 @@ def download_if_needed(zip_url: str, zip_file: Path) -> bool:
 
     zip_file.parent.mkdir(parents=True, exist_ok=True)
     print(f'📥 [DOWN] Downloading ZIP from: "{zip_url}"')
+
+    # Security (For CodeFactor)
+    parsed = urlparse(zip_url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError("Unsupported URL scheme")
+
+    if parsed.netloc != "github.com":
+        raise ValueError("Unexpected host")
 
     with urllib.request.urlopen(zip_url) as response:
         total_size = int(response.headers.get("Content-Length", 0))
