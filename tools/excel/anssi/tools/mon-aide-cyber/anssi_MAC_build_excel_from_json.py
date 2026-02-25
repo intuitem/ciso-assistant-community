@@ -242,7 +242,66 @@ def ensure_imp_group(
 def map_annotation_from_perimetre(perimetre: str | None) -> str:
     if not perimetre:
         return ""
-    return PERIMETRE_LABELS.get(perimetre, "")
+    return (
+        "# **" + PERIMETRE_LABELS.get(perimetre, "") + "**"
+        if PERIMETRE_LABELS.get(perimetre, "")
+        else ""
+    )
+
+
+def prepend_h1_markdown(text: str) -> str:
+    stripped = text.lstrip()
+    if stripped.startswith("# "):
+        return text
+    return f"# {text}"
+
+
+def insert_double_newline_before_title_word(text: str, limit_index: int) -> str:
+    matches = list(
+        re.finditer(r"[A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ'-]*", text[:limit_index])
+    )
+    for match in reversed(matches):
+        word = match.group(0)
+        # Keep words that start with uppercase but are not fully uppercase.
+        if word[0].isupper() and not word.isupper():
+            return text[: match.start()] + "\n\n" + text[match.start() :]
+    return text
+
+
+def format_info_bulle_text(text: str) -> str:
+    value = as_text(text)
+    first_double_newline = value.find("\n\n")
+    first_newline_tab = value.find("\n\t")
+
+    # Special case: '\n\t' appears before first '\n\n'
+    if first_newline_tab != -1 and (
+        first_double_newline == -1 or first_newline_tab < first_double_newline
+    ):
+        value = insert_double_newline_before_title_word(value, first_newline_tab)
+        return prepend_h1_markdown(value)
+
+    # Generic case: if header-like part has at most 10 words, prefix with '# '
+    header_part = value[:first_double_newline] if first_double_newline != -1 else value
+    word_count = len(re.findall(r"\S+", header_part))
+    if word_count <= 10:
+        return prepend_h1_markdown(value)
+
+    return value
+
+
+def build_annotation(perimetre: str | None, info_bulles_textes: list[Any]) -> str:
+    parts: list[str] = []
+
+    perimetre_annotation = map_annotation_from_perimetre(perimetre)
+    if perimetre_annotation:
+        parts.append(perimetre_annotation)
+
+    for info in info_bulles_textes:
+        formatted = format_info_bulle_text(as_text(info))
+        if formatted:
+            parts.append(formatted)
+
+    return "\n\n".join(parts)
 
 
 def implementation_groups_for_question(perimetre: str | None, base_group: str) -> str:
@@ -335,7 +394,10 @@ def process_question(
 ) -> None:
     qid = as_text(question.get("identifiant"))
     perimetre = as_text(question.get("perimetre")) or None
-    annotation = map_annotation_from_perimetre(perimetre)
+    info_bulles_textes = question.get("info-bulles-textes", []) or []
+    if not isinstance(info_bulles_textes, list):
+        info_bulles_textes = []
+    annotation = build_annotation(perimetre, info_bulles_textes)
 
     if parent_question_id is None:
         ctx.root_question_counter += 1
