@@ -359,9 +359,9 @@ All English templates have a matching French translation. Both directories conta
 
 ---
 
-## Known Issues and Inconsistencies
+## Design Notes
 
-1. **Daily re-notification for expired evidences and overdue tasks**: `check_evidences_expired` and `check_task_nodes_overdue` run daily and re-notify owners every day. There's no "already notified" tracking.
+- **Daily re-notification is intentional**: `check_evidences_expired` and `check_task_nodes_overdue` run daily and re-notify owners every day until the item is resolved. This is by design to keep pressure on overdue items.
 
 ---
 
@@ -389,6 +389,4 @@ All English templates have a matching French translation. Both directories conta
 
 ### Low Effort / Quick Wins
 
-9. **Add "already notified" tracking**: For daily periodic tasks like `check_evidences_expired` and `check_task_nodes_overdue`, add a flag or timestamp to avoid re-notifying every day for the same items.
-
-10. **Additional locales**: The template system supports any locale. Add templates for other supported languages (e.g., `de/`, `es/`, `pt/`, `ar/`) as the user base grows.
+9. **Additional locales**: The template system supports any locale. Add templates for other supported languages (e.g., `de/`, `es/`, `pt/`, `ar/`) as the user base grows.
