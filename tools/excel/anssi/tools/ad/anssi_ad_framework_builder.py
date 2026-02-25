@@ -70,7 +70,7 @@ from openpyxl.utils.dataframe import dataframe_to_rows
 from anssi_ad_web_scraper import main as framework_extractor
 
 # Import helper to create base Excel file from YAML (Step 2)
-parent_dir = Path(__file__).resolve().parent.parent.parent.parent
+parent_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
 sys.path.insert(0, str(parent_dir))
 from prepare_framework_v2 import create_excel_from_yaml
 
