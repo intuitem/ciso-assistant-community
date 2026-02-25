@@ -164,60 +164,66 @@
 	});
 </script>
 
+<svelte:head>
+	<title>CISO Assistant | {safeTranslate(displayTitle)}</title>
+</svelte:head>
+
 <!-- App Shell -->
-<div class="overflow-x-hidden">
+<div class="overflow-x-clip">
 	<SideBar bind:open={sidebarOpen} {sideBarVisibleItems} />
-	{#if data.licenseStatus.status === 'expired'}
-		<aside class="preset-tonal-warning text-center w-full items-center py-2">
-			{m.licenseExpiredMessage()}
-		</aside>
-	{:else if licenseAboutToExpire}
-		<aside class="preset-tonal-warning text-center w-full items-center py-2">
-			{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
-		</aside>
-	{/if}
-	<AppBar
-		base="relative transition-all duration-300 {classesSidebarOpen(sidebarOpen)}"
-		background="bg-white"
-		padding="pb-2 px-4"
-	>
-		{#snippet headline()}
-			<div
-				class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
-				id="page-title"
-			>
-				{safeTranslate(displayTitle)}
-			</div>
-			{#if displayModelName}
-				<div class="text-sm text-slate-500 font-medium">
-					{safeTranslate(displayModelName)}
-				</div>
-			{/if}
-			{#if displayModelDescription}
-				<div class="text-xs text-slate-400 italic">
-					{safeTranslate(displayModelDescription)}
-				</div>
-			{/if}
-			<div class="absolute top-6 right-4 flex items-center gap-3">
-				{#if data?.featureflags?.focus_mode}
-					<FocusModeSelector folders={data?.folders ?? []} />
-				{/if}
-				{#if data?.user?.is_admin}
-					<button
-						onclick={modalQuickStart}
-						class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
-		ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
-		hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-		focus:outline-hidden focus:ring-violet-500"
+	<div class="sticky top-0 z-50 transition-all duration-300 {classesSidebarOpen(sidebarOpen)}">
+		{#if data.licenseStatus.status === 'expired'}
+			<aside class="preset-tonal-warning text-center w-full items-center py-2">
+				{m.licenseExpiredMessage()}
+			</aside>
+		{:else if licenseAboutToExpire}
+			<aside class="preset-tonal-warning text-center w-full items-center py-2">
+				{m.licenseAboutToExpireWarning({ days_left: licenseStatus.days_left })}
+			</aside>
+		{/if}
+		<AppBar class="border-b border-slate-200 bg-white w-auto">
+			<div class="flex items-start justify-between px-4">
+				<div>
+					<div
+						class="text-2xl font-bold pb-1 bg-linear-to-r from-pink-500 to-violet-600 bg-clip-text text-transparent"
+						id="page-title"
 					>
-						{m.quickStart()}
-					</button>
-				{/if}
+						{safeTranslate(displayTitle)}
+					</div>
+					{#if displayModelName}
+						<div class="text-sm text-slate-500 font-medium">
+							{safeTranslate(displayModelName)}
+						</div>
+					{/if}
+					{#if displayModelDescription}
+						<div class="text-xs text-slate-400 italic">
+							{safeTranslate(displayModelDescription)}
+						</div>
+					{/if}
+				</div>
+				<div class="flex items-center gap-3 shrink-0">
+					{#if data?.featureflags?.focus_mode}
+						<FocusModeSelector folders={data?.folders ?? []} />
+					{/if}
+					{#if data?.user?.is_admin}
+						<button
+							onclick={modalQuickStart}
+							class="p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+	ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
+	hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
+	focus:outline-hidden focus:ring-violet-500"
+						>
+							{m.quickStart()}
+						</button>
+					{/if}
+				</div>
 			</div>
-			<hr class="w-screen my-1" />
-			<Breadcrumbs />
-		{/snippet}
-	</AppBar>
+			<div class="px-4">
+				<hr class="my-1" />
+				<Breadcrumbs />
+			</div>
+		</AppBar>
+	</div>
 	<!-- Router Slot -->
 	<CommandPalette />
 	<main

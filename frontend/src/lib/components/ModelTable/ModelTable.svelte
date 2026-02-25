@@ -250,7 +250,6 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(false);
 
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
@@ -343,6 +342,7 @@
 				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
+		history.replaceState(history.state, '', page.url.pathname + page.url.search);
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
@@ -379,15 +379,6 @@
 		if (page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
 			handler.invalidate();
-		}
-	});
-
-	$effect(() => {
-		if (invalidateTable) {
-			console.debug('Invalidating table due to filter change');
-			handler.invalidate();
-			_goto(page.url);
-			invalidateTable = false;
 		}
 	});
 
@@ -638,47 +629,47 @@
 					open={openState}
 					onOpenChange={(e) => (openState = e.open)}
 					positioning={{ placement: 'bottom-start' }}
-					triggerBase="btn preset-filled-primary-500 self-end relative"
-					contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-					zIndex="1000"
 					autoFocus={false}
 					onPointerDownOutside={() => (openState = false)}
 					closeOnInteractOutside={false}
 				>
-					{#snippet trigger()}
+					<Popover.Trigger class="btn preset-filled-primary-500 self-end relative">
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
 							<span class="text-sm">{filterCount}</span>
 						{/if}
-					{/snippet}
-					{#snippet content()}
-						<SuperForm {_form} validators={zod(z.object({}))}>
-							{#snippet children({ form })}
-								{#each filteredFields as field}
-									{#if filters[field]?.component}
-										{@const FilterComponent = filters[field].component}
-										<FilterComponent
-											{form}
-											{field}
-											{...filters[field].props}
-											fieldContext="filter"
-											label={safeTranslate(filters[field].props?.label)}
-											onChange={(value) => {
-												const arrayValue = Array.isArray(value) ? value : [value];
-												const sanitizedArrayValue = arrayValue.filter(
-													(v) => v !== null && v !== undefined
-												);
+					</Popover.Trigger>
+					<Popover.Positioner class="z-50!">
+						<Popover.Content
+							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+						>
+							<SuperForm {_form} validators={zod(z.object({}))}>
+								{#snippet children({ form })}
+									{#each filteredFields as field}
+										{#if filters[field]?.component}
+											{@const FilterComponent = filters[field].component}
+											<FilterComponent
+												{form}
+												{field}
+												{...filters[field].props}
+												fieldContext="filter"
+												label={safeTranslate(filters[field].props?.label)}
+												onChange={(value) => {
+													const arrayValue = Array.isArray(value) ? value : [value];
+													const sanitizedArrayValue = arrayValue.filter(
+														(v) => v !== null && v !== undefined
+													);
 
-												filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-												invalidateTable = true;
-											}}
-										/>
-									{/if}
-								{/each}
-							{/snippet}
-						</SuperForm>
-					{/snippet}
+													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+												}}
+											/>
+										{/if}
+									{/each}
+								{/snippet}
+							</SuperForm>
+						</Popover.Content>
+					</Popover.Positioner>
 				</Popover>
 			{/if}
 			{#if search}
@@ -698,9 +689,7 @@
 			</div>
 		{/if}
 	</header>
-	{@render quickFilters?.(filterValues, _form, () => {
-		invalidateTable = true;
-	})}
+	{@render quickFilters?.(filterValues, _form, () => {})}
 	{#if hiddenRowCount > 0}
 		<div
 			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
@@ -948,10 +937,13 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{#if value?.length > 300}
-																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
+															{#if displayValue?.length > 300}
+																{displayValue.slice(0, 300)}...
 															{:else}
-																{safeTranslate(value ?? '-')}
+																{displayValue}
 															{/if}
 														{/if}
 														{@render badge?.(key, row)}

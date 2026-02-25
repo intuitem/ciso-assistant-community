@@ -16,7 +16,7 @@ Arguments:
     --bulk         Enable bulk mode to process all .xlsx files in a directory.
     --output-dir   Destination directory for YAML files (only valid with --bulk).
 
-Note: the "urn_id" column can be defined to force an urn suffix. This can be useful to fix "ref_id" errors
+Note: the "node_id" column can be defined to force an urn suffix. This can be useful to fix "ref_id" errors
 """
 
 import sys
@@ -26,7 +26,6 @@ import datetime
 import argparse
 import unicodedata
 import openpyxl
-from copy import deepcopy
 from typing import Any, Dict, List
 from pathlib import Path
 from collections import Counter
@@ -92,6 +91,30 @@ def parse_key_value_sheet(sheet):
     return result
 
 
+def parse_content_rows(content_ws):
+    """Parse a content worksheet into a header list and list of (raw_row, data_dict) pairs.
+
+    Returns:
+        tuple: (header, rows_with_data) where:
+            - header: list[str] of normalized column names
+            - rows_with_data: list[tuple[Row, dict]] of (original_row, data_dict) pairs,
+              skipping empty rows. The original row is preserved for cases that need
+              cell-level access (translations, colors, row numbers).
+        Returns ([], []) if the worksheet has no rows.
+    """
+    rows = list(content_ws.iter_rows())
+    if not rows:
+        return [], []
+    header = [str(cell.value).strip().lower() if cell.value else "" for cell in rows[0]]
+    rows_with_data = []
+    for row in rows[1:]:
+        if not any(cell.value for cell in row):
+            continue
+        data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+        rows_with_data.append((row, data))
+    return header, rows_with_data
+
+
 # --- URN cleaning utility -----------------------------------------------------
 def clean_urn_suffix(value: str, compat_mode: int = 0):
     """
@@ -119,6 +142,50 @@ def clean_urn_suffix(value: str, compat_mode: int = 0):
         value = re.sub(r"[^a-z0-9_\-\.\[\]\(\):]", "_", value)
 
     return value
+
+
+# --- Common helpers -----------------------------------------------------------
+
+
+def set_optional_fields(entry: dict, data: dict, fields: list) -> None:
+    """Copy non-empty string fields from data to entry."""
+    for field in fields:
+        val = data.get(field)
+        if val:
+            entry[field] = str(val).strip()
+
+
+def extend_or_set(objects: dict, key: str, items: list) -> None:
+    """Extend existing list in objects[key], or set it if absent."""
+    if objects.get(key):
+        objects[key].extend(items)
+    else:
+        objects[key] = items
+
+
+def clean_ref_id_for_urn(
+    ref_id_raw: str, compat_mode: int, verbose: bool, context: str
+) -> tuple:
+    """Clean a ref_id for URN usage, returning (display_ref_id, urn_ref_id).
+
+    In compat modes 1-2, only lowercases. Otherwise, applies full URN cleaning.
+    """
+    ref_id_raw = ref_id_raw.strip()
+    if 1 <= compat_mode <= 2:
+        return ref_id_raw, ref_id_raw.lower()
+    ref_id_clean = clean_urn_suffix(ref_id_raw, compat_mode=0)
+    if verbose and ref_id_raw != ref_id_clean:
+        print(
+            f"💬 ⚠️  [WARNING] ({context}) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'"
+        )
+    return ref_id_raw, ref_id_clean
+
+
+def attach_translations_from_row(entry: dict, header: list, row) -> None:
+    """Attach translations to entry if any exist in the row."""
+    translations = extract_translations_from_row(header, row)
+    if translations:
+        entry["translations"] = translations
 
 
 # --- urn expansion ------------------------------------------------------------
@@ -179,28 +246,8 @@ def expand_urns_from_prefixed_list(
 # --- question management ------------------------------------------------------------
 
 
-def _parse_multiline_with_pipe(raw: str) -> list[str]:
-    """
-    Parse a multi-line field where lines starting with "|" are continuations
-    of the previous value.
-    """
-    values: list[str] = []
-    for line in str(raw or "").split("\n"):
-        line = line.strip()
-        if not line:
-            continue
-        if line.startswith("|") and values:
-            values[-1] += "\n" + line[1:].strip()
-        else:
-            values.append(line)
-    return values
-
-
 def inject_questions_into_node(
-    qa_data: dict[str, Any],
-    node: Dict[str, Any],
-    answers_dict: dict,
-    row_translations: dict | None = None,
+    qa_data: dict[str, Any], node: Dict[str, Any], answers_dict: dict
 ) -> None:
     """
     Injects parsed questions and their metadata into a requirement node.
@@ -221,7 +268,7 @@ def inject_questions_into_node(
 
     allowed_types = {"unique_choice", "multiple_choice", "text", "date"}
 
-    question_lines = _parse_multiline_with_pipe(raw_question_str)
+    question_lines = [q.strip() for q in str(raw_question_str).split("\n") if q.strip()]
 
     depends_on_lines = None
     if raw_depends_on_str:
@@ -302,29 +349,6 @@ def inject_questions_into_node(
 
         question_entry["text"] = question_text
 
-        # Optional: per-question translations (new format)
-        # from framework_content columns like: questions[fr], questions[it], ...
-        if row_translations:
-            for lang, tr in row_translations.items():
-                raw_q_translated = tr.get("questions")
-                if not raw_q_translated or not str(raw_q_translated).strip():
-                    continue
-
-                translated_lines = _parse_multiline_with_pipe(raw_q_translated)
-                if len(translated_lines) == 1:
-                    translated_lines *= len(question_lines)
-                if len(translated_lines) != len(question_lines):
-                    raise ValueError(
-                        f"(framework_content) Invalid translated questions count for locale '{lang}' "
-                        f"on node {node.get('urn')}: {len(translated_lines)} values for {len(question_lines)} questions."
-                    )
-
-                translated_text = translated_lines[idx].strip()
-                if translated_text and translated_text != "/":
-                    question_entry.setdefault("translations", {}).setdefault(lang, {})[
-                        "text"
-                    ] = translated_text
-
         # Optional: depends_on
         depends_on_block = {}
         depends_on_question_urn = ""
@@ -391,8 +415,8 @@ def inject_questions_into_node(
         if qtype in {"unique_choice", "multiple_choice"}:
             choices = []
             for j, choice in enumerate(answer_meta["choices"]):
-                # deep-copy to avoid shared nested references (which create YAML anchors &idXXX)
-                entry = deepcopy(choice)
+                # make a shallow copy so we don't mutate the original dict
+                entry = choice.copy()
                 # overwrite / add the per-question urn
                 entry["urn"] = f"{q_urn}:choice:{j + 1}"
                 choices.append(entry)
@@ -651,6 +675,793 @@ def _per_choice_lines(data: dict, col: str, n_choices: int, answer_id: str):
     return lines
 
 
+# --- Object type handlers -----------------------------------------------------
+
+_SKIPPED_TYPES = {"answers", "implementation_groups", "scores", "urn_prefix"}
+
+
+def _handle_reference_controls(obj, library, compat_mode, verbose):
+    """Process a reference_controls object block into the library."""
+    controls = []
+    base_urn = obj["meta"].get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id_raw = str(data.get("ref_id", "")).strip()
+        default_ref_id, ref_id_for_urn = clean_ref_id_for_urn(
+            ref_id_raw, compat_mode, verbose, "reference_controls"
+        )
+
+        if not default_ref_id:
+            continue
+
+        # node_id override: if a node_id column exists and cell is not empty, use it for the URN suffix
+        node_id_raw = data.get("node_id")
+        if node_id_raw and str(node_id_raw).strip():
+            node_id_val = str(node_id_raw).strip()
+            if 1 <= compat_mode <= 2:
+                ref_id_for_urn = node_id_val.lower()
+            else:
+                ref_id_for_urn = clean_urn_suffix(node_id_val, compat_mode=0)
+                if verbose and node_id_val != ref_id_for_urn:
+                    print(
+                        f"💬 ⚠️  [WARNING] (reference_controls) Cleaned node_id (for use in URN) '{node_id_val}' → '{ref_id_for_urn}'"
+                    )
+
+        entry = {
+            "urn": f"{base_urn}:{ref_id_for_urn}",
+            "ref_id": default_ref_id,
+        }
+
+        set_optional_fields(
+            entry,
+            data,
+            ["name", "category", "csf_function", "description", "annotation"],
+        )
+        attach_translations_from_row(entry, header, row)
+        controls.append(entry)
+
+    extend_or_set(library["objects"], "reference_controls", controls)
+
+
+def _handle_threats(obj, library, compat_mode, verbose):
+    """Process a threats object block into the library."""
+    threats = []
+    base_urn = obj["meta"].get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        # node_id override: if a node_id column exists and cell is not empty, use it for the URN suffix
+        node_id_raw = data.get("node_id")
+        if node_id_raw and str(node_id_raw).strip():
+            urn_suffix = str(node_id_raw).strip().lower()
+        else:
+            urn_suffix = ref_id.lower()
+
+        entry = {"urn": f"{base_urn}:{urn_suffix}", "ref_id": ref_id}
+        set_optional_fields(entry, data, ["name", "description"])
+        attach_translations_from_row(entry, header, row)
+        threats.append(entry)
+
+    extend_or_set(library["objects"], "threats", threats)
+
+
+def _handle_framework(obj, library, object_blocks, prefix_to_urn, compat_mode, verbose):
+    """Process a framework object block into the library."""
+    meta = obj["meta"]
+    content_ws = obj["content_sheet"]
+    base_urn = obj["meta"].get("base_urn")
+
+    # --- Retrieve answers block if declared ---
+    answers_dict = {}
+    answers_block_name = meta.get("answers_definition")
+    answer_sheet = None
+
+    if answers_block_name:
+        if answers_block_name not in object_blocks:
+            raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
+
+        answers_sheet = object_blocks[answers_block_name]["content_sheet"]
+        rows = list(answers_sheet.iter_rows())
+        if rows:
+            header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
+
+            for row in rows[1:]:
+                data = {
+                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
+                }
+                answer_id = str(data.get("id", "")).strip()
+                answer_type = str(data.get("question_type", "")).strip()
+                choices_raw = str(data.get("question_choices", "")).strip()
+
+                if not answer_id or not answer_type or not choices_raw:
+                    continue  # Incomplete row
+
+                choices = []
+                for line in choices_raw.split("\n"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    if line.startswith("|") and choices:
+                        # Multi-line value, append to previous
+                        choices[-1]["value"] += "\n" + line[1:].strip()
+                    else:
+                        choices.append({"urn": "", "value": line})
+
+                # --- Optional: description ---------------------------
+                description_lines = _per_choice_lines(
+                    data, "description", len(choices), answer_id
+                )
+                if description_lines:
+                    for i, desc in enumerate(description_lines):
+                        if desc and desc != "/":
+                            choices[i]["description"] = desc
+
+                # --- Optional: compute_result -----------------------------------------
+                compute_lines = _per_choice_lines(
+                    data, "compute_result", len(choices), answer_id
+                )
+                if compute_lines:
+                    for i, val in enumerate(compute_lines):
+                        v = val.lower()
+                        if v not in ("true", "false", "/", ""):
+                            raise ValueError(
+                                f"(answers_definition) Invalid compute_result value '{val}' "
+                                f"for answer ID '{answer_id}', choice #{i + 1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
+                            )
+
+                        # Use Boolean instead of string
+                        if v == "/" or v == "":
+                            v = None
+                        elif v == "true":
+                            v = True
+                        elif v == "false":
+                            v = False
+
+                        if v is not None:
+                            choices[i]["compute_result"] = v
+
+                # --- Optional: add_score ----------------------------------------------
+                score_lines = _per_choice_lines(
+                    data, "add_score", len(choices), answer_id
+                )
+                if score_lines:
+                    for i, val in enumerate(score_lines):
+                        if val:
+                            try:
+                                score_to_add = int(val)
+                                choices[i]["add_score"] = score_to_add
+                            except (TypeError, ValueError):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid add_score value '{val}' "
+                                    f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
+                                )
+
+                # --- Optional: select_implementation_groups ---------------------------
+                sig_lines = _per_choice_lines(
+                    data,
+                    "select_implementation_groups",
+                    len(choices),
+                    answer_id,
+                )
+                if sig_lines:
+                    for i, val in enumerate(sig_lines):
+                        if val:
+                            groups = [s.strip() for s in val.split(",") if s.strip()]
+
+                            # If IG for choice == "/undefined", continue
+                            if len(groups) == 1 and groups[0].lower() == "/":
+                                continue
+
+                            if groups:
+                                choices[i]["select_implementation_groups"] = groups
+
+                # --- Optional: color ---------------------------------------------------
+                color_lines = _per_choice_lines(data, "color", len(choices), answer_id)
+                if color_lines:
+                    for i, val in enumerate(color_lines):
+                        if val:
+                            if (
+                                not re.fullmatch(r"#([0-9a-fA-F]{6})", val)
+                                and val.lower() != "/"
+                            ):
+                                raise ValueError(
+                                    f"(answers_definition) Invalid color value '{val}' "
+                                    f"for answer ID '{answer_id}', choice #{i + 1}. Must match #RRGGBB, be '/' (= 'undefined') or the cell must be empty."
+                                )
+
+                            if val.lower() != "/":
+                                choices[i]["color"] = val.upper()
+
+                answers_dict[answer_id] = {
+                    "type": answer_type,
+                    "choices": choices,
+                }
+    else:
+        if verbose:
+            print(f'💬 ℹ️  No "Answers Definition" found')
+
+    framework = {
+        "urn": meta.get("urn"),
+        "ref_id": meta.get("ref_id"),
+        "name": meta.get("name"),
+        "description": meta.get("description"),
+    }
+
+    translations = extract_translations_from_metadata(meta, "framework")
+    if translations:
+        framework["translations"] = translations
+    else:
+        if verbose:
+            print(f'💬 ℹ️  No "Translation" found')
+
+    if "min_score" in meta:
+        framework["min_score"] = int(meta["min_score"])
+    if "max_score" in meta:
+        framework["max_score"] = int(meta["max_score"])
+
+    score_name = meta.get("scores_definition")
+    if score_name and score_name in object_blocks:
+        score_header, score_rows_data = parse_content_rows(
+            object_blocks[score_name]["content_sheet"]
+        )
+        score_defs = []
+        for row, data in score_rows_data:
+            score_entry = {
+                "score": int(data.get("score")),
+                "name": str(data.get("name", "")).strip(),
+                "description": (
+                    str(data.get("description", "")).strip()
+                    if data.get("description", "") is not None
+                    else None
+                ),
+            }
+            if "description_doc" in data and data["description_doc"]:
+                score_entry["description_doc"] = str(data["description_doc"]).strip()
+            attach_translations_from_row(score_entry, score_header, row)
+            score_defs.append(score_entry)
+        framework["scores_definition"] = score_defs
+    else:
+        if verbose:
+            print(f'💬 ℹ️  No "Score Definition" found')
+
+    # [CONTENT] Implementation Groups
+    ig_name = meta.get("implementation_groups_definition")
+    if ig_name and ig_name in object_blocks:
+        ig_header, ig_rows_data = parse_content_rows(
+            object_blocks[ig_name]["content_sheet"]
+        )
+        ig_defs = []
+        for row, data in ig_rows_data:
+            ig_entry = {
+                "ref_id": str(data.get("ref_id", "")).strip(),
+                "name": str(data.get("name", "")).strip(),
+                "description": str(data.get("description", "")).strip()
+                if data.get("description")
+                else None,
+            }
+
+            if data.get("default_selected") is not None:
+                ig_entry["default_selected"] = bool(data.get("default_selected"))
+
+            attach_translations_from_row(ig_entry, ig_header, row)
+            ig_defs.append(ig_entry)
+
+        framework["implementation_groups_definition"] = ig_defs
+
+    # NOTE: The requirement_nodes loop counts ALL rows (including empty) for its
+    # counter logic, so we cannot use parse_content_rows here.
+    rows = list(content_ws.iter_rows())
+    if rows:
+        header = [str(c.value).strip().lower() if c.value else "" for c in rows[0]]
+        parent_for_depth = {}
+        count_for_depth = {}
+        previous_node_urn = None
+        previous_depth = 0
+        counter = 0
+        counter_fix = -1
+        requirement_nodes = []
+        all_urns = set()  # to detect duplicates
+        for row in rows[1:]:
+            counter += 1
+            data = {header[i]: row[i].value for i in range(len(header)) if i < len(row)}
+            if all(value is None or value == "" for value in data.values()):
+                print(f"empty line {counter}")
+                continue
+            depth = int(data.get("depth", 1))
+            ref_id = data.get("ref_id")
+            ref_id = str(ref_id).strip() if ref_id is not None else None
+            name = data.get("name")
+            name = str(name).strip() if name is not None else None
+
+            if depth == previous_depth + 1:
+                parent_for_depth[depth] = previous_node_urn
+                count_for_depth[depth] = 1
+            elif depth <= previous_depth:
+                pass
+            else:
+                raise ValueError(
+                    f"Invalid depth jump from {previous_depth} to {depth} at row {counter}"
+                )
+
+            # calculate urn
+            if (
+                compat_mode == 1
+            ):  # Use legacy URN fallback logic (for requirements without ref_id)
+                skip_count = str(data.get("skip_count", "")).strip().lower() in (
+                    "1",
+                    "true",
+                    "yes",
+                    "x",
+                )
+                if skip_count:
+                    counter_fix += 1
+                    ref_id_urn = f"node{counter - counter_fix}-{counter_fix + 1}"
+                else:
+                    # Adds the ability to use the "node_id" column despite compatibility mode set to "1"
+                    if data.get("node_id") and data.get("node_id").strip():
+                        ref_id_urn = data.get("node_id").strip()
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter - counter_fix}"
+                        )
+
+                urn = f"{base_urn}:{ref_id_urn}"
+            elif (
+                compat_mode == 3
+            ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
+                # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
+
+                try:
+                    fix_count = int(data.get("fix_count", ""))
+                except Exception as e:
+                    fix_count = None
+
+                if fix_count:
+                    counter_fix += fix_count
+
+                    # If "ref_id" is already defined, use the defined "ref_id"
+                    if data.get("node_id") and data.get("node_id").strip():
+                        ref_id_urn = data.get("node_id").strip()
+                    # Else if no "ref_id", use the custom node version
+                    else:
+                        ref_id_urn = f"node{counter + counter_fix}"
+
+                else:
+                    # Adds the ability to use the "node_id" column despite compatibility mode set to "3"
+                    if data.get("node_id") and data.get("node_id").strip():
+                        ref_id_urn = data.get("node_id").strip()
+                    else:
+                        ref_id_urn = (
+                            ref_id.lower().replace(" ", "-")
+                            if ref_id
+                            else f"node{counter + counter_fix}"
+                        )
+
+                urn = f"{base_urn}:{ref_id_urn}"
+
+            else:  # If compat mode = {0,2}
+                if data.get("node_id") and data.get("node_id").strip():
+                    urn = f"{base_urn}:{data.get('node_id').strip()}"
+                elif ref_id:
+                    # [+] Compat check
+                    ref_id_clean = clean_urn_suffix(ref_id, compat_mode=compat_mode)
+                    if verbose and ref_id != ref_id_clean:
+                        print(
+                            f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'"
+                        )
+                    urn = f"{base_urn}:{ref_id_clean}"
+                else:
+                    p = parent_for_depth.get(depth)
+                    c = count_for_depth.get(depth, 1)
+                    if p:
+                        urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
+                    elif name:
+                        # [+] Compat check
+                        name_clean = clean_urn_suffix(name, compat_mode=compat_mode)
+                        if verbose and name != name_clean:
+                            print(
+                                f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'"
+                            )
+                        urn = f"{base_urn}:{name_clean}"
+                    else:
+                        urn = f"{base_urn}:node{c}"
+                    count_for_depth[depth] = c + 1
+            previous_node_urn = urn
+            previous_depth = depth
+            parent_urn = parent_for_depth.get(depth)
+            node = {
+                "urn": urn,
+                "assessable": bool(data.get("assessable")),
+                "depth": depth,
+            }
+            if parent_urn:
+                node["parent_urn"] = parent_urn
+            set_optional_fields(
+                node,
+                data,
+                ["ref_id", "name", "description", "annotation", "typical_evidence"],
+            )
+            # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
+            if "importance" in data and data["importance"]:
+                importance = str(data["importance"]).strip().lower()
+
+                if importance not in [
+                    "mandatory",
+                    "recommended",
+                    "nice_to_have",
+                ]:
+                    raise ValueError(
+                        f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice_to_have" or empty cell (= "undefined").'
+                    )
+
+                if importance != "undefined":
+                    node["importance"] = importance
+
+            # Optional: weight (integer)
+            if (
+                "weight" in data
+                and data["weight"] is not None
+                and str(data["weight"]).strip() != ""
+            ):
+                try:
+                    if (w := int(data["weight"])) <= 0:
+                        raise ValueError
+                    node["weight"] = w
+                except (TypeError, ValueError):
+                    raise ValueError(
+                        f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
+                    )
+            if "implementation_groups" in data and data["implementation_groups"]:
+                node["implementation_groups"] = [
+                    s.strip() for s in str(data["implementation_groups"]).split(",")
+                ]
+            if "threats" in data and data["threats"]:
+                threats = expand_urns_from_prefixed_list(
+                    data["threats"],
+                    prefix_to_urn,
+                    compat_mode=compat_mode,
+                    verbose=verbose,
+                )
+                if threats:
+                    node["threats"] = threats
+            if "reference_controls" in data and data["reference_controls"]:
+                rc = expand_urns_from_prefixed_list(
+                    data["reference_controls"],
+                    prefix_to_urn,
+                    compat_mode=compat_mode,
+                    verbose=verbose,
+                )
+                if rc:
+                    node["reference_controls"] = rc
+            if "questions" in data and data["questions"]:
+                inject_questions_into_node(
+                    data,
+                    node,
+                    answers_dict,
+                )
+            attach_translations_from_row(node, header, row)
+            if node.get("urn") in all_urns:
+                raise ValueError(f"urn already used: {node.get('urn')}")
+            all_urns.add(node.get("urn"))
+            requirement_nodes.append(node)
+
+        framework["requirement_nodes"] = requirement_nodes
+
+    library["objects"]["framework"] = framework
+
+
+def _handle_metric_definitions(obj, library, compat_mode, verbose):
+    """Process a metric_definitions object block into the library."""
+    metric_definitions = []
+    base_urn = obj["meta"].get("base_urn")
+    header, rows_with_data = parse_content_rows(obj["content_sheet"])
+    if not header:
+        return
+
+    for row, data in rows_with_data:
+        ref_id = str(data.get("ref_id", "")).strip()
+        if not ref_id:
+            continue
+
+        # Clean ref_id for URN
+        ref_id_for_urn = clean_urn_suffix(ref_id, compat_mode=compat_mode)
+        if verbose and ref_id != ref_id_for_urn:
+            print(
+                f"💬 ⚠️  [WARNING] (metric_definitions) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_for_urn}'"
+            )
+
+        entry = {
+            "urn": f"{base_urn}:{ref_id_for_urn}",
+            "ref_id": ref_id,
+        }
+
+        set_optional_fields(entry, data, ["name", "description"])
+        if "category" in data and data["category"]:
+            category = str(data["category"]).strip().lower()
+            if category not in ("quantitative", "qualitative"):
+                raise ValueError(
+                    f"(metric_definitions) Invalid category '{category}' at row #{row[0].row}. Must be 'quantitative' or 'qualitative'."
+                )
+            entry["category"] = category
+        else:
+            entry["category"] = "quantitative"  # default
+
+        if "unit" in data and data["unit"]:
+            entry["unit"] = str(data["unit"]).strip()
+
+        # higher_is_better: default True, accept true/false/1/0/yes/no
+        if "higher_is_better" in data and data["higher_is_better"] is not None:
+            hib = str(data["higher_is_better"]).strip().lower()
+            entry["higher_is_better"] = hib in ("1", "true", "yes", "x")
+        else:
+            entry["higher_is_better"] = True
+
+        # default_target: numeric value
+        if "default_target" in data and data["default_target"] is not None:
+            try:
+                entry["default_target"] = float(data["default_target"])
+            except (TypeError, ValueError):
+                raise ValueError(
+                    f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
+                )
+
+        # choices_definition for qualitative metrics
+        if entry["category"] == "qualitative":
+            if "choices_definition" in data and data["choices_definition"]:
+                choices = []
+                choices_raw = str(data["choices_definition"]).strip()
+                for line in choices_raw.split("\n"):
+                    line = line.strip()
+                    if not line:
+                        continue
+                    # Format: "name|description" or just "name"
+                    if "|" in line:
+                        parts = line.split("|", 1)
+                        choices.append(
+                            {
+                                "name": parts[0].strip(),
+                                "description": parts[1].strip()
+                                if len(parts) > 1
+                                else "",
+                            }
+                        )
+                    else:
+                        choices.append({"name": line})
+                if choices:
+                    entry["choices_definition"] = choices
+            else:
+                raise ValueError(
+                    f"(metric_definitions) Qualitative metric at row #{row[0].row} requires 'choices_definition' column."
+                )
+
+        attach_translations_from_row(entry, header, row)
+        metric_definitions.append(entry)
+
+    extend_or_set(library["objects"], "metric_definitions", metric_definitions)
+
+
+def _handle_risk_matrix(obj, library, wb):
+    """Process a risk_matrix object block into the library."""
+    matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
+    if matrix:
+        if "risk_matrix" not in library["objects"]:
+            library["objects"]["risk_matrix"] = []
+        library["objects"]["risk_matrix"].append(matrix)
+
+
+def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbose):
+    """Process a requirement_mapping_set object block into the library."""
+    meta = obj["meta"]
+    content_ws = obj["content_sheet"]
+    source_node_base_urn = obj["meta"].get("source_node_base_urn")
+    target_node_base_urn = obj["meta"].get("target_node_base_urn")
+
+    requirement_mapping_set = {
+        "urn": meta.get("urn"),
+        "ref_id": meta.get("ref_id"),
+        "name": meta.get("name"),
+        "description": meta.get("description"),
+        "source_framework_urn": meta.get("source_framework_urn"),
+        "target_framework_urn": meta.get("target_framework_urn"),
+    }
+    requirement_mapping_set_revert = {
+        "urn": meta.get("urn") + "-revert",
+        "ref_id": meta.get("ref_id") + "-revert",
+        "name": meta.get("name"),
+        "description": meta.get("description"),
+        "target_framework_urn": meta.get("source_framework_urn"),
+        "source_framework_urn": meta.get("target_framework_urn"),
+    }
+
+    translations = extract_translations_from_metadata(meta, "requirement_mapping_set")
+    if translations:
+        requirement_mapping_set["translations"] = translations
+        requirement_mapping_set_revert["translations"] = translations
+
+    header, rows_with_data = parse_content_rows(content_ws)
+    if not header:
+        return
+    requirement_mappings = []
+    requirement_mappings_revert = []
+
+    for row, data in rows_with_data:
+        source_node_id_raw = str(data.get("source_node_id", "")).strip()
+        target_node_id_raw = str(data.get("target_node_id", "")).strip()
+
+        # Checks the required fields, cleaning the values first
+        required_fields = ["source_node_id", "target_node_id", "relationship"]
+        missing_fields = []
+
+        for field in required_fields:
+            value = data.get(field)
+            if value is None or str(value).strip() == "":
+                missing_fields.append(field)
+
+        if missing_fields:
+            quoted_fields = [f'"{field}"' for field in missing_fields]
+            raise ValueError(
+                f"(requirement_mapping_set) Missing or empty required field{'s' if len(missing_fields) > 1 else ''} in row #{row[0].row}: {', '.join(quoted_fields)}"
+            )
+
+        # [+] Compat mode set to "2" so it can be compatible with every version of mappings >=v2 without having to choose a specific compat mode
+        source_node_id = clean_urn_suffix(source_node_id_raw, compat_mode=2)
+        target_node_id = clean_urn_suffix(target_node_id_raw, compat_mode=2)
+        if verbose and source_node_id_raw != source_node_id:
+            print(
+                f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'"
+            )
+        if verbose and target_node_id_raw != target_node_id:
+            print(
+                f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'"
+            )
+        entry = {
+            "source_requirement_urn": source_node_base_urn + ":" + source_node_id,
+            "target_requirement_urn": target_node_base_urn + ":" + target_node_id,
+            "relationship": data.get("relationship").strip(),
+        }
+        entry_revert = {
+            "source_requirement_urn": target_node_base_urn + ":" + target_node_id,
+            "target_requirement_urn": source_node_base_urn + ":" + source_node_id,
+            "relationship": revert_relationship(data.get("relationship").strip()),
+        }
+        if "rationale" in data and data["rationale"]:
+            entry["rationale"] = data.get("rationale").strip()
+            entry_revert["rationale"] = data.get("rationale").strip()
+        if "strength_of_relationship" in data and data["strength_of_relationship"]:
+            entry["strength_of_relationship"] = int(
+                data.get("strength_of_relationship")
+            )
+            entry_revert["strength_of_relationship"] = int(
+                data.get("strength_of_relationship")
+            )
+        requirement_mappings.append(entry)
+        requirement_mappings_revert.append(entry_revert)
+    requirement_mapping_set["requirement_mappings"] = requirement_mappings
+    requirement_mapping_set_revert["requirement_mappings"] = requirement_mappings_revert
+    library["objects"]["requirement_mapping_sets"] = [
+        requirement_mapping_set,
+        requirement_mapping_set_revert,
+    ]
+
+    # --- Validate source_node_id and target_node_id from mappings against Excel sheets ---
+    # NOTE: This code simply checks the validity of the "source_node_id" and "target_node_id".
+    #       It doesn't remove them from the created mapping if they aren't found in the Excel file.
+
+    source_ids = set()
+    target_ids = set()
+    source_sheet_available = "source" in sheets
+    target_sheet_available = "target" in sheets
+
+    if source_sheet_available:
+        source_sheet = wb["source"]
+        source_header = [cell.value for cell in source_sheet[1]]
+        if "node_id" in source_header:
+            idx = source_header.index("node_id")
+            for row in source_sheet.iter_rows(min_row=2):
+                if idx < len(row) and row[idx].value:
+                    source_ids.add(str(row[idx].value).strip())
+        else:
+            source_sheet_available = False
+            if verbose:
+                print('💬 ℹ️  "node_id" in "source" sheet header not found')
+    else:
+        if verbose:
+            print('💬 ℹ️  Sheet "source" not found')
+
+    if target_sheet_available:
+        target_sheet = wb["target"]
+        target_header = [cell.value for cell in target_sheet[1]]
+        if "node_id" in target_header:
+            idx = target_header.index("node_id")
+            for row in target_sheet.iter_rows(min_row=2):
+                if idx < len(row) and row[idx].value:
+                    target_ids.add(str(row[idx].value).strip())
+        else:
+            target_sheet_available = False
+            if verbose:
+                print('💬 ℹ️  "node_id" in "target" sheet header not found')
+
+    else:
+        if verbose:
+            print('💬 ℹ️  Sheet "target" not found')
+
+    # Collect all used source/target IDs from mappings (with duplicates)
+    used_source_ids = [
+        m["source_requirement_urn"].split(":")[-1] for m in requirement_mappings
+    ]
+    used_target_ids = [
+        m["target_requirement_urn"].split(":")[-1] for m in requirement_mappings
+    ]
+
+    source_missing_counts = Counter(
+        id for id in used_source_ids if source_sheet_available and id not in source_ids
+    )
+    target_missing_counts = Counter(
+        id for id in used_target_ids if target_sheet_available and id not in target_ids
+    )
+
+    # Print all warnings first (one per ID)
+    if source_sheet_available:
+        for sid in source_missing_counts:
+            print(f'⚠️  [WARNING] source_node_id "{sid}" not found in sheet "source"')
+    if target_sheet_available:
+        for tid in target_missing_counts:
+            print(f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"')
+
+    # Check for duplicate (source, target) pairs in mappings
+    mapping_pairs = [
+        (
+            m["source_requirement_urn"].split(":")[-1],
+            m["target_requirement_urn"].split(":")[-1],
+        )
+        for m in requirement_mappings
+    ]
+    duplicate_pairs = Counter(mapping_pairs)
+    duplicates_found = {
+        pair: count for pair, count in duplicate_pairs.items() if count > 1
+    }
+    if duplicates_found:
+        for (sid, tid), count in duplicates_found.items():
+            print(f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times')
+
+    # Print info about missing IDs that are referenced multiple times
+    if source_sheet_available:
+        for sid, count in source_missing_counts.items():
+            if count > 1:
+                print(
+                    f'ℹ️  [INFO] missing source_node_id "{sid}" is referenced {count} times in mappings'
+                )
+    if target_sheet_available:
+        for tid, count in target_missing_counts.items():
+            if count > 1:
+                print(
+                    f'ℹ️  [INFO] missing target_node_id "{tid}" is referenced {count} times in mappings'
+                )
+
+    # Final summary
+    total_missing_sources = sum(source_missing_counts.values())
+    total_missing_targets = sum(target_missing_counts.values())
+    if total_missing_sources or total_missing_targets:
+        print(
+            f"⚠️  [SUMMARY] Missing usage count - Source: {total_missing_sources}, Target: {total_missing_targets}"
+        )
+        print(
+            f"ℹ️  Please note that these node IDs have been added to the mapping anyway.\
+            \n   If you want to correct them, please do so in your Excel file."
+        )
+
+
 # --- Main logic ---------------------------------------------------------------
 
 
@@ -803,975 +1614,34 @@ def create_library(
         ),
     )
 
+    # Dispatch table for object type handlers
+    handler_map = {
+        "reference_controls": lambda obj: _handle_reference_controls(
+            obj, library, compat_mode, verbose
+        ),
+        "threats": lambda obj: _handle_threats(obj, library, compat_mode, verbose),
+        "framework": lambda obj: _handle_framework(
+            obj, library, object_blocks, prefix_to_urn, compat_mode, verbose
+        ),
+        "metric_definitions": lambda obj: _handle_metric_definitions(
+            obj, library, compat_mode, verbose
+        ),
+        "risk_matrix": lambda obj: _handle_risk_matrix(obj, library, wb),
+        "requirement_mapping_set": lambda obj: _handle_requirement_mapping_set(
+            obj, library, wb, sheets, compat_mode, verbose
+        ),
+    }
+
     for name in sorted_object_names:
         obj = object_blocks[name]
         obj_type = obj["type"]
         print(f"→ Handling {obj_type}: {name}")
 
-        if obj_type == "reference_controls":
-            controls = []
-            base_urn = obj["meta"].get("base_urn")
-            content_ws = obj["content_sheet"]
-            rows = list(content_ws.iter_rows())
-            if not rows:
-                continue
-            header = [
-                str(cell.value).strip().lower() if cell.value else ""
-                for cell in rows[0]
-            ]
-
-            for row in rows[1:]:
-                if not any(cell.value for cell in row):
-                    continue
-                data = {
-                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
-                }
-                default_ref_id = None
-                ref_id_for_urn = None
-
-                # [+] Compat check
-                if 1 <= compat_mode <= 2:
-                    default_ref_id = str(data.get("ref_id", "")).strip()
-                    ref_id_for_urn = default_ref_id.lower()
-                else:  # Default behavior
-                    ref_id_raw = str(data.get("ref_id", "")).strip()
-                    ref_id_clean = clean_urn_suffix(ref_id_raw, compat_mode=0)
-                    if verbose and ref_id_raw != ref_id_clean:
-                        print(
-                            f"💬 ⚠️  [WARNING] (reference_controls) Cleaned ref_id (for use in URN) '{ref_id_raw}' → '{ref_id_clean}'"
-                        )
-
-                    default_ref_id = ref_id_raw
-                    ref_id_for_urn = ref_id_clean
-
-                if not default_ref_id:
-                    continue
-
-                entry = {
-                    "urn": f"{base_urn}:{ref_id_for_urn}",
-                    "ref_id": default_ref_id,
-                }
-
-                if "name" in data and data["name"]:
-                    entry["name"] = str(data["name"]).strip()
-                if "category" in data and data["category"]:
-                    entry["category"] = str(data["category"]).strip()
-                if "csf_function" in data and data["csf_function"]:
-                    entry["csf_function"] = str(data["csf_function"]).strip()
-                if "description" in data and data["description"]:
-                    entry["description"] = str(data["description"]).strip()
-                if "annotation" in data and data["annotation"]:
-                    entry["annotation"] = str(data["annotation"]).strip()
-
-                translations = extract_translations_from_row(header, row)
-                if translations:
-                    entry["translations"] = translations
-
-                controls.append(entry)
-
-            if library["objects"].get("reference_controls"):
-                library["objects"]["reference_controls"].extend(controls)
-            else:
-                library["objects"]["reference_controls"] = controls
-        elif obj_type == "threats":
-            threats = []
-            base_urn = obj["meta"].get("base_urn")
-            content_ws = obj["content_sheet"]
-            rows = list(content_ws.iter_rows())
-            if not rows:
-                continue
-            header = [
-                str(cell.value).strip().lower() if cell.value else ""
-                for cell in rows[0]
-            ]
-
-            for row in rows[1:]:
-                if not any(cell.value for cell in row):
-                    continue
-                data = {
-                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
-                }
-                ref_id = str(data.get("ref_id", "")).strip()
-                if not ref_id:
-                    continue
-                entry = {"urn": f"{base_urn}:{ref_id.lower()}", "ref_id": ref_id}
-                if "name" in data and data["name"]:
-                    entry["name"] = str(data["name"]).strip()
-                if "description" in data and data["description"]:
-                    entry["description"] = str(data["description"]).strip()
-
-                translations = extract_translations_from_row(header, row)
-                if translations:
-                    entry["translations"] = translations
-
-                threats.append(entry)
-
-            if library["objects"].get("threats"):
-                library["objects"]["threats"].extend(threats)
-            else:
-                library["objects"]["threats"] = threats
-
-        elif obj_type == "framework":
-            meta = obj["meta"]
-            content_ws = obj["content_sheet"]
-            base_urn = obj["meta"].get("base_urn")
-
-            # --- Retrieve answers block if declared ---
-            answers_dict = {}
-            answers_block_name = meta.get("answers_definition")
-            answer_sheet = None
-
-            if answers_block_name:
-                if answers_block_name not in object_blocks:
-                    raise ValueError(f"Missing answers sheet: '{answers_block_name}'")
-
-                answers_sheet = object_blocks[answers_block_name]["content_sheet"]
-                rows = list(answers_sheet.iter_rows())
-                if rows:
-                    header = [
-                        str(c.value).strip().lower() if c.value else "" for c in rows[0]
-                    ]
-
-                    for row in rows[1:]:
-                        data = {
-                            header[i]: row[i].value
-                            for i in range(len(header))
-                            if i < len(row)
-                        }
-                        answer_id = str(data.get("id", "")).strip()
-                        answer_type = str(data.get("question_type", "")).strip()
-                        choices_raw = str(data.get("question_choices", "")).strip()
-
-                        if not answer_id or not answer_type or not choices_raw:
-                            continue  # Incomplete row
-
-                        choices = [
-                            {"urn": "", "value": line}
-                            for line in _parse_multiline_with_pipe(choices_raw)
-                        ]
-
-                        # Add choices translations
-                        answer_translations = extract_translations_from_row(header, row)
-
-                        for lang, tr in answer_translations.items():
-                            raw = tr.get("question_choices")
-                            if not raw or not str(raw).strip():
-                                continue  # do not create the language if no translation
-                            lines = _parse_multiline_with_pipe(raw)
-                            if len(lines) == 1:
-                                lines *= len(choices)
-                            if len(lines) != len(choices):
-                                raise ValueError(
-                                    f"(answers_definition) Invalid translated question_choices count for locale '{lang}' "
-                                    f"for answer ID '{answer_id}': {len(lines)} values for {len(choices)} choices."
-                                )
-                            for i, val in enumerate(lines):
-                                translated_value = val.strip()
-                                if translated_value and translated_value != "/":
-                                    choices[i].setdefault(
-                                        "translations", {}
-                                    ).setdefault(lang, {})["value"] = translated_value
-
-                        # --- Optional: description ---------------------------
-                        description_lines = _per_choice_lines(
-                            data, "description", len(choices), answer_id
-                        )
-                        if description_lines:
-                            for i, desc in enumerate(description_lines):
-                                if desc and desc != "/":
-                                    choices[i]["description"] = desc
-
-                        # Add choices description translations
-                        for lang, tr in answer_translations.items():
-                            translated_desc_lines = _per_choice_lines(
-                                {"description": tr.get("description")},
-                                "description",
-                                len(choices),
-                                answer_id,
-                            )
-                            if not translated_desc_lines:
-                                continue
-                            for i, desc in enumerate(translated_desc_lines):
-                                if desc and desc != "/":
-                                    choices[i].setdefault(
-                                        "translations", {}
-                                    ).setdefault(lang, {})["description"] = desc
-
-                        # --- Optional: compute_result -----------------------------------------
-                        compute_lines = _per_choice_lines(
-                            data, "compute_result", len(choices), answer_id
-                        )
-                        if compute_lines:
-                            for i, val in enumerate(compute_lines):
-                                v = val.lower()
-                                if v not in ("true", "false", "/", ""):
-                                    raise ValueError(
-                                        f"(answers_definition) Invalid compute_result value '{val}' "
-                                        f"for answer ID '{answer_id}', choice #{i + 1}. Must be 'true', 'false', '/' (= 'undefined') or empty."
-                                    )
-
-                                # Use Boolean instead of string
-                                if v == "/" or v == "":
-                                    v = None
-                                elif v == "true":
-                                    v = True
-                                elif v == "false":
-                                    v = False
-
-                                if v is not None:
-                                    choices[i]["compute_result"] = v
-
-                        # --- Optional: add_score ----------------------------------------------
-                        score_lines = _per_choice_lines(
-                            data, "add_score", len(choices), answer_id
-                        )
-                        if score_lines:
-                            for i, val in enumerate(score_lines):
-                                if val:
-                                    try:
-                                        score_to_add = int(val)
-                                        choices[i]["add_score"] = score_to_add
-                                    except (TypeError, ValueError):
-                                        raise ValueError(
-                                            f"(answers_definition) Invalid add_score value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i + 1}. Must be an integer"
-                                        )
-
-                        # --- Optional: select_implementation_groups ---------------------------
-                        sig_lines = _per_choice_lines(
-                            data,
-                            "select_implementation_groups",
-                            len(choices),
-                            answer_id,
-                        )
-                        if sig_lines:
-                            for i, val in enumerate(sig_lines):
-                                if val:
-                                    groups = [
-                                        s.strip() for s in val.split(",") if s.strip()
-                                    ]
-
-                                    # If IG for choice == "/undefined", continue
-                                    if len(groups) == 1 and groups[0].lower() == "/":
-                                        continue
-
-                                    if groups:
-                                        choices[i]["select_implementation_groups"] = (
-                                            groups
-                                        )
-
-                        # --- Optional: color ---------------------------------------------------
-                        color_lines = _per_choice_lines(
-                            data, "color", len(choices), answer_id
-                        )
-                        if color_lines:
-                            for i, val in enumerate(color_lines):
-                                if val:
-                                    if (
-                                        not re.fullmatch(r"#([0-9a-fA-F]{6})", val)
-                                        and val.lower() != "/"
-                                    ):
-                                        raise ValueError(
-                                            f"(answers_definition) Invalid color value '{val}' "
-                                            f"for answer ID '{answer_id}', choice #{i + 1}. Must match #RRGGBB, be '/' (= 'undefined') or the cell must be empty."
-                                        )
-
-                                    if val.lower() != "/":
-                                        choices[i]["color"] = val.upper()
-
-                        answers_dict[answer_id] = {
-                            "type": answer_type,
-                            "choices": choices,
-                        }
-            else:
-                if verbose:
-                    print(f'💬 ℹ️  No "Answers Definition" found')
-
-            framework = {
-                "urn": meta.get("urn"),
-                "ref_id": meta.get("ref_id"),
-                "name": meta.get("name"),
-                "description": meta.get("description"),
-            }
-
-            translations = extract_translations_from_metadata(meta, "framework")
-            if translations:
-                framework["translations"] = translations
-            else:
-                if verbose:
-                    print(f'💬 ℹ️  No "Translation" found')
-
-            if "min_score" in meta:
-                framework["min_score"] = int(meta["min_score"])
-            if "max_score" in meta:
-                framework["max_score"] = int(meta["max_score"])
-
-            score_name = meta.get("scores_definition")
-            if score_name and score_name in object_blocks:
-                score_ws = object_blocks[score_name]["content_sheet"]
-                score_rows = list(score_ws.iter_rows())
-                score_header = [
-                    str(c.value).strip().lower() if c.value else ""
-                    for c in score_rows[0]
-                ]
-                score_defs = []
-                for row in score_rows[1:]:
-                    if not any(c.value for c in row):
-                        continue
-                    data = {
-                        score_header[i]: row[i].value
-                        for i in range(len(score_header))
-                        if i < len(row)
-                    }
-                    score_entry = {
-                        "score": int(data.get("score")),
-                        "name": str(data.get("name", "")).strip(),
-                        "description": (
-                            str(data.get("description", "")).strip()
-                            if data.get("description", "") is not None
-                            else None
-                        ),
-                    }
-                    if "description_doc" in data and data["description_doc"]:
-                        score_entry["description_doc"] = str(
-                            data["description_doc"]
-                        ).strip()
-                    translations = extract_translations_from_row(score_header, row)
-                    if translations:
-                        score_entry["translations"] = translations
-                    score_defs.append(score_entry)
-                framework["scores_definition"] = score_defs
-            else:
-                if verbose:
-                    print(f'💬 ℹ️  No "Score Definition" found')
-
-            # [CONTENT] Implementation Groups
-            ig_name = meta.get("implementation_groups_definition")
-            if ig_name and ig_name in object_blocks:
-                ig_content = object_blocks[ig_name]["content_sheet"]
-                ig_rows = list(ig_content.iter_rows())
-                ig_header = [
-                    str(c.value).strip().lower() if c.value else "" for c in ig_rows[0]
-                ]
-                ig_defs = []
-                for row in ig_rows[1:]:
-                    if not any(c.value for c in row):
-                        continue
-                    data = {
-                        ig_header[i]: row[i].value
-                        for i in range(len(ig_header))
-                        if i < len(row)
-                    }
-                    ig_entry = {
-                        "ref_id": str(data.get("ref_id", "")).strip(),
-                        "name": str(data.get("name", "")).strip(),
-                        "description": str(data.get("description", "")).strip()
-                        if data.get("description")
-                        else None,
-                    }
-
-                    if data.get("default_selected") is not None:
-                        ig_entry["default_selected"] = bool(
-                            data.get("default_selected")
-                        )
-
-                    translations = extract_translations_from_row(ig_header, row)
-                    if translations:
-                        ig_entry["translations"] = translations
-                    ig_defs.append(ig_entry)
-
-                framework["implementation_groups_definition"] = ig_defs
-
-            rows = list(content_ws.iter_rows())
-            if rows:
-                header = [
-                    str(c.value).strip().lower() if c.value else "" for c in rows[0]
-                ]
-                parent_for_depth = {}
-                count_for_depth = {}
-                previous_node_urn = None
-                previous_depth = 0
-                counter = 0
-                counter_fix = -1
-                requirement_nodes = []
-                all_urns = set()  # to detect duplicates
-                for row in rows[1:]:
-                    counter += 1
-                    data = {
-                        header[i]: row[i].value
-                        for i in range(len(header))
-                        if i < len(row)
-                    }
-                    if all(value is None or value == "" for value in data.values()):
-                        print(f"empty line {counter}")
-                        continue
-                    depth = int(data.get("depth", 1))
-                    ref_id = data.get("ref_id")
-                    ref_id = str(ref_id).strip() if ref_id is not None else None
-                    name = data.get("name")
-                    name = str(name).strip() if name is not None else None
-
-                    if depth == previous_depth + 1:
-                        parent_for_depth[depth] = previous_node_urn
-                        count_for_depth[depth] = 1
-                    elif depth <= previous_depth:
-                        pass
-                    else:
-                        raise ValueError(
-                            f"Invalid depth jump from {previous_depth} to {depth} at row {counter}"
-                        )
-
-                    # calculate urn
-                    if (
-                        compat_mode == 1
-                    ):  # Use legacy URN fallback logic (for requirements without ref_id)
-                        skip_count = str(
-                            data.get("skip_count", "")
-                        ).strip().lower() in ("1", "true", "yes", "x")
-                        if skip_count:
-                            counter_fix += 1
-                            ref_id_urn = (
-                                f"node{counter - counter_fix}-{counter_fix + 1}"
-                            )
-                        else:
-                            # Adds the ability to use the "urn_id" column despite compatibility mode set to "1"
-                            if data.get("urn_id") and data.get("urn_id").strip():
-                                ref_id_urn = data.get("urn_id").strip()
-                            else:
-                                ref_id_urn = (
-                                    ref_id.lower().replace(" ", "-")
-                                    if ref_id
-                                    else f"node{counter - counter_fix}"
-                                )
-
-                        urn = f"{base_urn}:{ref_id_urn}"
-                    elif (
-                        compat_mode == 3
-                    ):  # Updated version of "[< v2]" (Compat Mode 1). Handling of the new "fix_count" column in order to ADD or SUBTRACT from the counter (replace "skip_count").
-                        # Fixed the URN writing issue when "skip_count" was true and a "ref_id" was defined.
-
-                        try:
-                            fix_count = int(data.get("fix_count", ""))
-                        except Exception as e:
-                            fix_count = None
-
-                        if fix_count:
-                            counter_fix += fix_count
-
-                            # If "ref_id" is already defined, use the defined "ref_id"
-                            if data.get("urn_id") and data.get("urn_id").strip():
-                                ref_id_urn = data.get("urn_id").strip()
-                            # Else if no "ref_id", use the custom node version
-                            else:
-                                ref_id_urn = f"node{counter + counter_fix}"
-
-                        else:
-                            # Adds the ability to use the "urn_id" column despite compatibility mode set to "3"
-                            if data.get("urn_id") and data.get("urn_id").strip():
-                                ref_id_urn = data.get("urn_id").strip()
-                            else:
-                                ref_id_urn = (
-                                    ref_id.lower().replace(" ", "-")
-                                    if ref_id
-                                    else f"node{counter + counter_fix}"
-                                )
-
-                        urn = f"{base_urn}:{ref_id_urn}"
-
-                    else:  # If compat mode = {0,2}
-                        if data.get("urn_id") and data.get("urn_id").strip():
-                            urn = f"{base_urn}:{data.get('urn_id').strip()}"
-                        elif ref_id:
-                            # [+] Compat check
-                            ref_id_clean = clean_urn_suffix(
-                                ref_id, compat_mode=compat_mode
-                            )
-                            if verbose and ref_id != ref_id_clean:
-                                print(
-                                    f"💬 ⚠️  [WARNING] (calculate urn [ref_id]) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_clean}'"
-                                )
-                            urn = f"{base_urn}:{ref_id_clean}"
-                        else:
-                            p = parent_for_depth.get(depth)
-                            c = count_for_depth.get(depth, 1)
-                            if p:
-                                urn = f"{p}:{c}" if p else f"{base_urn}:{c}"
-                            elif name:
-                                # [+] Compat check
-                                name_clean = clean_urn_suffix(
-                                    name, compat_mode=compat_mode
-                                )
-                                if verbose and name != name_clean:
-                                    print(
-                                        f"💬 ⚠️  [WARNING] (calculate urn [name]) Cleaned name (for use in URN) '{name}' → '{name_clean}'"
-                                    )
-                                urn = f"{base_urn}:{name_clean}"
-                            else:
-                                urn = f"{base_urn}:node{c}"
-                            count_for_depth[depth] = c + 1
-                    previous_node_urn = urn
-                    previous_depth = depth
-                    parent_urn = parent_for_depth.get(depth)
-                    node = {
-                        "urn": urn,
-                        "assessable": bool(data.get("assessable")),
-                        "depth": depth,
-                    }
-                    if parent_urn:
-                        node["parent_urn"] = parent_urn
-                    if "ref_id" in data and data["ref_id"]:
-                        node["ref_id"] = str(data["ref_id"]).strip()
-                    if "name" in data and data["name"]:
-                        node["name"] = str(data["name"]).strip()
-                    if "description" in data and data["description"]:
-                        node["description"] = str(data["description"]).strip()
-                    if "annotation" in data and data["annotation"]:
-                        node["annotation"] = str(data["annotation"]).strip()
-                    if "typical_evidence" in data and data["typical_evidence"]:
-                        node["typical_evidence"] = str(data["typical_evidence"]).strip()
-                    # Optional: importance: mandatory/recommended/nice_to_have or empty (= undefined)
-                    if "importance" in data and data["importance"]:
-                        importance = str(data["importance"]).strip().lower()
-
-                        if importance not in [
-                            "mandatory",
-                            "recommended",
-                            "nice_to_have",
-                        ]:
-                            raise ValueError(
-                                f'(framework_content) Invalid "importance" at row #{row[0].row}: "{data["importance"]}". Must be "mandatory"/"recommended"/"nice_to_have" or empty cell (= "undefined").'
-                            )
-
-                        if importance != "undefined":
-                            node["importance"] = importance
-
-                    # Optional: weight (integer)
-                    if (
-                        "weight" in data
-                        and data["weight"] is not None
-                        and str(data["weight"]).strip() != ""
-                    ):
-                        try:
-                            if (w := int(data["weight"])) <= 0:
-                                raise ValueError
-                            node["weight"] = w
-                        except (TypeError, ValueError):
-                            raise ValueError(
-                                f"(framework) Invalid weight at row #{row[0].row}: {data['weight']}. Must be a strictly positive integer."
-                            )
-                    if (
-                        "implementation_groups" in data
-                        and data["implementation_groups"]
-                    ):
-                        node["implementation_groups"] = [
-                            s.strip()
-                            for s in str(data["implementation_groups"]).split(",")
-                        ]
-                    if "threats" in data and data["threats"]:
-                        threats = expand_urns_from_prefixed_list(
-                            data["threats"],
-                            prefix_to_urn,
-                            compat_mode=compat_mode,
-                            verbose=verbose,
-                        )
-                        if threats:
-                            node["threats"] = threats
-                    if "reference_controls" in data and data["reference_controls"]:
-                        rc = expand_urns_from_prefixed_list(
-                            data["reference_controls"],
-                            prefix_to_urn,
-                            compat_mode=compat_mode,
-                            verbose=verbose,
-                        )
-                        if rc:
-                            node["reference_controls"] = rc
-                    if "questions" in data and data["questions"]:
-                        translations = extract_translations_from_row(header, row)
-                        inject_questions_into_node(
-                            data,
-                            node,
-                            answers_dict,
-                            translations,
-                        )
-                    else:
-                        translations = extract_translations_from_row(header, row)
-                    if translations:
-                        # Keep requirement-level translations clean (remove "questions" translations)
-                        # questions[xx] are stored under question_entry["translations"].
-                        node_level_translations = {}
-                        for lang, t in translations.items():
-                            filtered = {k: v for k, v in t.items() if k != "questions"}
-                            if filtered:
-                                node_level_translations[lang] = filtered
-                        if node_level_translations:
-                            node["translations"] = node_level_translations
-                    if node.get("urn") in all_urns:
-                        raise ValueError(f"urn already used: {node.get('urn')}")
-                    all_urns.add(node.get("urn"))
-                    requirement_nodes.append(node)
-
-                framework["requirement_nodes"] = requirement_nodes
-
-            library["objects"]["framework"] = framework
-
-        elif obj_type == "metric_definitions":
-            metric_definitions = []
-            base_urn = obj["meta"].get("base_urn")
-            content_ws = obj["content_sheet"]
-            rows = list(content_ws.iter_rows())
-            if not rows:
-                continue
-            header = [
-                str(cell.value).strip().lower() if cell.value else ""
-                for cell in rows[0]
-            ]
-
-            for row in rows[1:]:
-                if not any(cell.value for cell in row):
-                    continue
-                data = {
-                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
-                }
-                ref_id = str(data.get("ref_id", "")).strip()
-                if not ref_id:
-                    continue
-
-                # Clean ref_id for URN
-                ref_id_for_urn = clean_urn_suffix(ref_id, compat_mode=compat_mode)
-                if verbose and ref_id != ref_id_for_urn:
-                    print(
-                        f"💬 ⚠️  [WARNING] (metric_definitions) Cleaned ref_id (for use in URN) '{ref_id}' → '{ref_id_for_urn}'"
-                    )
-
-                entry = {
-                    "urn": f"{base_urn}:{ref_id_for_urn}",
-                    "ref_id": ref_id,
-                }
-
-                if "name" in data and data["name"]:
-                    entry["name"] = str(data["name"]).strip()
-                if "description" in data and data["description"]:
-                    entry["description"] = str(data["description"]).strip()
-                if "category" in data and data["category"]:
-                    category = str(data["category"]).strip().lower()
-                    if category not in ("quantitative", "qualitative"):
-                        raise ValueError(
-                            f"(metric_definitions) Invalid category '{category}' at row #{row[0].row}. Must be 'quantitative' or 'qualitative'."
-                        )
-                    entry["category"] = category
-                else:
-                    entry["category"] = "quantitative"  # default
-
-                if "unit" in data and data["unit"]:
-                    entry["unit"] = str(data["unit"]).strip()
-
-                # higher_is_better: default True, accept true/false/1/0/yes/no
-                if "higher_is_better" in data and data["higher_is_better"] is not None:
-                    hib = str(data["higher_is_better"]).strip().lower()
-                    entry["higher_is_better"] = hib in ("1", "true", "yes", "x")
-                else:
-                    entry["higher_is_better"] = True
-
-                # default_target: numeric value
-                if "default_target" in data and data["default_target"] is not None:
-                    try:
-                        entry["default_target"] = float(data["default_target"])
-                    except (TypeError, ValueError):
-                        raise ValueError(
-                            f"(metric_definitions) Invalid default_target '{data['default_target']}' at row #{row[0].row}. Must be a number."
-                        )
-
-                # choices_definition for qualitative metrics
-                if entry["category"] == "qualitative":
-                    if "choices_definition" in data and data["choices_definition"]:
-                        choices = []
-                        choices_raw = str(data["choices_definition"]).strip()
-                        for line in choices_raw.split("\n"):
-                            line = line.strip()
-                            if not line:
-                                continue
-                            # Format: "name|description" or just "name"
-                            if "|" in line:
-                                parts = line.split("|", 1)
-                                choices.append(
-                                    {
-                                        "name": parts[0].strip(),
-                                        "description": parts[1].strip()
-                                        if len(parts) > 1
-                                        else "",
-                                    }
-                                )
-                            else:
-                                choices.append({"name": line})
-                        if choices:
-                            entry["choices_definition"] = choices
-                    else:
-                        raise ValueError(
-                            f"(metric_definitions) Qualitative metric at row #{row[0].row} requires 'choices_definition' column."
-                        )
-
-                translations = extract_translations_from_row(header, row)
-                if translations:
-                    entry["translations"] = translations
-
-                metric_definitions.append(entry)
-
-            if library["objects"].get("metric_definitions"):
-                library["objects"]["metric_definitions"].extend(metric_definitions)
-            else:
-                library["objects"]["metric_definitions"] = metric_definitions
-
-        elif obj_type == "risk_matrix":
-            matrix = parse_risk_matrix(obj["meta"], obj["content_sheet"], wb)
-            if matrix:
-                if "risk_matrix" not in library["objects"]:
-                    library["objects"]["risk_matrix"] = []
-                library["objects"]["risk_matrix"].append(matrix)
-
-        elif obj_type == "requirement_mapping_set":
-            meta = obj["meta"]
-            content_ws = obj["content_sheet"]
-            source_node_base_urn = obj["meta"].get("source_node_base_urn")
-            target_node_base_urn = obj["meta"].get("target_node_base_urn")
-
-            requirement_mapping_set = {
-                "urn": meta.get("urn"),
-                "ref_id": meta.get("ref_id"),
-                "name": meta.get("name"),
-                "description": meta.get("description"),
-                "source_framework_urn": meta.get("source_framework_urn"),
-                "target_framework_urn": meta.get("target_framework_urn"),
-            }
-            requirement_mapping_set_revert = {
-                "urn": meta.get("urn") + "-revert",
-                "ref_id": meta.get("ref_id") + "-revert",
-                "name": meta.get("name"),
-                "description": meta.get("description"),
-                "target_framework_urn": meta.get("source_framework_urn"),
-                "source_framework_urn": meta.get("target_framework_urn"),
-            }
-
-            translations = extract_translations_from_metadata(
-                meta, "requirement_mapping_set"
-            )
-            if translations:
-                requirement_mapping_set["translations"] = translations
-                requirement_mapping_set_revert["translations"] = translations
-
-            rows = list(content_ws.iter_rows())
-            if not rows:
-                continue
-            header = [
-                str(cell.value).strip().lower() if cell.value else ""
-                for cell in rows[0]
-            ]
-            requirement_mappings = []
-            requirement_mappings_revert = []
-
-            for row in rows[1:]:
-                if not any(cell.value for cell in row):
-                    continue
-                data = {
-                    header[i]: row[i].value for i in range(len(header)) if i < len(row)
-                }
-                source_node_id_raw = str(data.get("source_node_id", "")).strip()
-                target_node_id_raw = str(data.get("target_node_id", "")).strip()
-
-                # Checks the required fields, cleaning the values first
-                required_fields = ["source_node_id", "target_node_id", "relationship"]
-                missing_fields = []
-
-                for field in required_fields:
-                    value = data.get(field)
-                    if value is None or str(value).strip() == "":
-                        missing_fields.append(field)
-
-                if missing_fields:
-                    quoted_fields = [f'"{field}"' for field in missing_fields]
-                    raise ValueError(
-                        f"(requirement_mapping_set) Missing or empty required field{'s' if len(missing_fields) > 1 else ''} in row #{row[0].row}: {', '.join(quoted_fields)}"
-                    )
-
-                # [+] Compat mode set to "2" so it can be compatible with every version of mappings >=v2 without having to choose a specific compat mode
-                source_node_id = clean_urn_suffix(source_node_id_raw, compat_mode=2)
-                target_node_id = clean_urn_suffix(target_node_id_raw, compat_mode=2)
-                if verbose and source_node_id_raw != source_node_id:
-                    print(
-                        f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned source_node_id '{source_node_id_raw}' → '{source_node_id}'"
-                    )
-                if verbose and target_node_id_raw != target_node_id:
-                    print(
-                        f"💬 ⚠️  [WARNING] (requirement_mapping_set) Cleaned target_node_id '{target_node_id_raw}' → '{target_node_id}'"
-                    )
-                entry = {
-                    "source_requirement_urn": source_node_base_urn
-                    + ":"
-                    + source_node_id,
-                    "target_requirement_urn": target_node_base_urn
-                    + ":"
-                    + target_node_id,
-                    "relationship": data.get("relationship").strip(),
-                }
-                entry_revert = {
-                    "source_requirement_urn": target_node_base_urn
-                    + ":"
-                    + target_node_id,
-                    "target_requirement_urn": source_node_base_urn
-                    + ":"
-                    + source_node_id,
-                    "relationship": revert_relationship(
-                        data.get("relationship").strip()
-                    ),
-                }
-                if "rationale" in data and data["rationale"]:
-                    entry["rationale"] = data.get("rationale").strip()
-                    entry_revert["rationale"] = data.get("rationale").strip()
-                if (
-                    "strength_of_relationship" in data
-                    and data["strength_of_relationship"]
-                ):
-                    entry["strength_of_relationship"] = int(
-                        data.get("strength_of_relationship")
-                    )
-                    entry_revert["strength_of_relationship"] = int(
-                        data.get("strength_of_relationship")
-                    )
-                requirement_mappings.append(entry)
-                requirement_mappings_revert.append(entry_revert)
-            requirement_mapping_set["requirement_mappings"] = requirement_mappings
-            requirement_mapping_set_revert["requirement_mappings"] = (
-                requirement_mappings_revert
-            )
-            library["objects"]["requirement_mapping_sets"] = [
-                requirement_mapping_set,
-                requirement_mapping_set_revert,
-            ]
-
-            # --- Validate source_node_id and target_node_id from mappings against Excel sheets ---
-            # NOTE: This code simply checks the validity of the "source_node_id" and "target_node_id".
-            #       It doesn't remove them from the created mapping if they aren't found in the Excel file.
-
-            source_ids = set()
-            target_ids = set()
-            source_sheet_available = "source" in sheets
-            target_sheet_available = "target" in sheets
-
-            if source_sheet_available:
-                source_sheet = wb["source"]
-                source_header = [cell.value for cell in source_sheet[1]]
-                if "node_id" in source_header:
-                    idx = source_header.index("node_id")
-                    for row in source_sheet.iter_rows(min_row=2):
-                        if idx < len(row) and row[idx].value:
-                            source_ids.add(str(row[idx].value).strip())
-                else:
-                    source_sheet_available = False
-                    if verbose:
-                        print('💬 ℹ️  "node_id" in "source" sheet header not found')
-            else:
-                if verbose:
-                    print('💬 ℹ️  Sheet "source" not found')
-
-            if target_sheet_available:
-                target_sheet = wb["target"]
-                target_header = [cell.value for cell in target_sheet[1]]
-                if "node_id" in target_header:
-                    idx = target_header.index("node_id")
-                    for row in target_sheet.iter_rows(min_row=2):
-                        if idx < len(row) and row[idx].value:
-                            target_ids.add(str(row[idx].value).strip())
-                else:
-                    target_sheet_available = False
-                    if verbose:
-                        print('💬 ℹ️  "node_id" in "target" sheet header not found')
-
-            else:
-                if verbose:
-                    print('💬 ℹ️  Sheet "target" not found')
-
-            # Collect all used source/target IDs from mappings (with duplicates)
-            used_source_ids = [
-                m["source_requirement_urn"].split(":")[-1] for m in requirement_mappings
-            ]
-            used_target_ids = [
-                m["target_requirement_urn"].split(":")[-1] for m in requirement_mappings
-            ]
-
-            source_missing_counts = Counter(
-                id
-                for id in used_source_ids
-                if source_sheet_available and id not in source_ids
-            )
-            target_missing_counts = Counter(
-                id
-                for id in used_target_ids
-                if target_sheet_available and id not in target_ids
-            )
-
-            # Print all warnings first (one per ID)
-            if source_sheet_available:
-                for sid in source_missing_counts:
-                    print(
-                        f'⚠️  [WARNING] source_node_id "{sid}" not found in sheet "source"'
-                    )
-            if target_sheet_available:
-                for tid in target_missing_counts:
-                    print(
-                        f'⚠️  [WARNING] target_node_id "{tid}" not found in sheet "target"'
-                    )
-
-            # Check for duplicate (source, target) pairs in mappings
-            mapping_pairs = [
-                (
-                    m["source_requirement_urn"].split(":")[-1],
-                    m["target_requirement_urn"].split(":")[-1],
-                )
-                for m in requirement_mappings
-            ]
-            duplicate_pairs = Counter(mapping_pairs)
-            duplicates_found = {
-                pair: count for pair, count in duplicate_pairs.items() if count > 1
-            }
-            if duplicates_found:
-                for (sid, tid), count in duplicates_found.items():
-                    print(
-                        f'🔁 [DUPLICATE] mapping "{sid}" -> "{tid}" appears {count} times'
-                    )
-
-            # Print info about missing IDs that are referenced multiple times
-            if source_sheet_available:
-                for sid, count in source_missing_counts.items():
-                    if count > 1:
-                        print(
-                            f'ℹ️  [INFO] missing source_node_id "{sid}" is referenced {count} times in mappings'
-                        )
-            if target_sheet_available:
-                for tid, count in target_missing_counts.items():
-                    if count > 1:
-                        print(
-                            f'ℹ️  [INFO] missing target_node_id "{tid}" is referenced {count} times in mappings'
-                        )
-
-            # Final summary
-            total_missing_sources = sum(source_missing_counts.values())
-            total_missing_targets = sum(target_missing_counts.values())
-            if total_missing_sources or total_missing_targets:
-                print(
-                    f"⚠️  [SUMMARY] Missing usage count - Source: {total_missing_sources}, Target: {total_missing_targets}"
-                )
-                print(
-                    f"ℹ️  Please note that these node IDs have been added to the mapping anyway.\
-                    \n   If you want to correct them, please do so in your Excel file."
-                )
-
-        else:
-            if obj_type not in [
-                "answers",
-                "implementation_groups",
-                "scores",
-                "urn_prefix",
-            ]:
-                print("type not handled:", obj_type)
+        handler = handler_map.get(obj_type)
+        if handler:
+            handler(obj)
+        elif obj_type not in _SKIPPED_TYPES:
+            print("type not handled:", obj_type)
 
     # Step 6: Export to YAML
     print(f'✅ YAML saved as: "{output_file}"')
