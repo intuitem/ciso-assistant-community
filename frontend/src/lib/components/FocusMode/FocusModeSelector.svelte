@@ -21,13 +21,15 @@
 
 	let isOpen = $state(false);
 	let searchQuery = $state('');
+	let sortAsc = $state(true);
 
-	const filteredDomainFolders = $derived(
-		domainFolders.filter((f) => {
+	const filteredDomainFolders = $derived.by(() => {
+		const filtered = domainFolders.filter((f) => {
 			if (!searchQuery.trim()) return true;
 			return (f.str || f.name).toLowerCase().includes(searchQuery.trim().toLowerCase());
-		})
-	);
+		});
+		return sortAsc ? filtered : [...filtered].reverse();
+	});
 
 	function handleSelect(folder: Folder) {
 		setFocusMode(folder.id, folder.str || folder.name);
@@ -105,9 +107,23 @@
 			class="absolute right-0 top-full mt-1 w-64 max-h-80 overflow-y-auto bg-white rounded-lg shadow-lg border border-slate-200 z-50"
 		>
 			<div class="p-2 border-b border-slate-100 space-y-2">
-				<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-					{m.selectDomain?.() ?? 'Select domain'}
-				</span>
+				<div class="flex items-center justify-between">
+					<span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+						{m.selectDomain?.() ?? 'Select domain'}
+					</span>
+					<button
+						type="button"
+						onclick={(e) => {
+							e.stopPropagation();
+							sortAsc = !sortAsc;
+						}}
+						class="flex items-center gap-1 text-xs text-slate-500 hover:text-indigo-600 transition-colors"
+						title={sortAsc ? 'Sort Z → A' : 'Sort A → Z'}
+					>
+						<i class={sortAsc ? 'fa-solid fa-arrow-down-a-z' : 'fa-solid fa-arrow-down-z-a'}></i>
+						<span>{sortAsc ? 'A→Z' : 'Z→A'}</span>
+					</button>
+				</div>
 				<div class="relative">
 					<i
 						class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"
