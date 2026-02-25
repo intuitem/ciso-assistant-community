@@ -49,6 +49,7 @@ ANSW_HEADERS = [
     "id",
     "question_type",
     "question_choices",
+    "color",
     "description",
     "select_implementation_groups",
 ]
@@ -75,6 +76,14 @@ QUESTION_TYPE_MAP = {
 class JoinSeparator(str, Enum):
     DEFAULT_NEWLINE = "\n"
     IMPLEMENTATION_GROUPS = ",\n"
+
+
+class AnswerColor(str, Enum):
+    NOT_APPLICABLE = "#000000"
+    DONT_KNOW = "#555555"
+    NO = "#8B0000"
+    YES = "#209226"
+    EMPTY = "/"
 
 
 LIBRARY_META_ROWS: list[tuple[str, str]] = [
@@ -443,7 +452,11 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
 
 
 def remove_main_and_add_groups(existing: str, groups: list[str]) -> str:
-    parts = [p.strip() for p in re.split(r",?\n", existing) if p.strip()] if existing else []
+    parts = (
+        [p.strip() for p in re.split(r",?\n", existing) if p.strip()]
+        if existing
+        else []
+    )
     parts = [p for p in parts if p != "MAIN"]
     for grp in groups:
         if grp not in parts:
@@ -519,15 +532,49 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             )
 
 
+def color_for_choice(choice: str) -> str:
+    normalized = choice.strip().lower()
+    if normalized == "non applicable":
+        return AnswerColor.NOT_APPLICABLE
+    if normalized == "je ne sais pas":
+        return AnswerColor.DONT_KNOW
+    if normalized == "non":
+        return AnswerColor.NO
+    if normalized.startswith("oui"):
+        return AnswerColor.YES
+    return AnswerColor.EMPTY
+
+
+def build_color_cell_from_choices(choices: list[str]) -> str:
+    if not choices:
+        return ""
+    # Step 1: initialize one "/" per line from question_choices.
+    color_lines = [AnswerColor.EMPTY for _ in choices]
+    # Step 2: replace matching lines with color hex codes.
+    for idx, choice in enumerate(choices):
+        color_lines[idx] = color_for_choice(choice)
+    if all(color == AnswerColor.EMPTY for color in color_lines):
+        return ""
+    return JoinSeparator.DEFAULT_NEWLINE.join(color_lines)
+
+
 def answer_rows_to_output(answer_rows: dict[str, AnswerRow]) -> list[dict[str, str]]:
     out: list[dict[str, str]] = []
     for qid, row in answer_rows.items():
-        select = "\n".join(row.select_groups) if row.select_groups else ""
+        select = (
+            JoinSeparator.DEFAULT_NEWLINE.join(row.select_groups)
+            if row.select_groups
+            else ""
+        )
+        color = build_color_cell_from_choices(row.response_labels)
         out.append(
             {
                 "id": qid,
                 "question_type": row.question_type,
-                "question_choices": "\n".join(row.response_labels),
+                "question_choices": JoinSeparator.DEFAULT_NEWLINE.join(
+                    row.response_labels
+                ),
+                "color": color,
                 "description": "",
                 "select_implementation_groups": select,
             }
