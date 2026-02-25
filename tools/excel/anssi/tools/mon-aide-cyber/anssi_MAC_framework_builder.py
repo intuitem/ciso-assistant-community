@@ -184,6 +184,10 @@ def print_results(zip_reused: bool) -> None:
     if zip_reused:
         print("⚠️  [WARNING] Existing ZIP was reused (no fresh download).")
 
+    print(
+        "ℹ️  [NOTE] Some question annotations may require some manual formatting (e.g. Questions 2 & 7)"
+    )
+
 
 def cleanup() -> None:
     print("\n🗑️  [INFO] Cleaning temporary files...")
