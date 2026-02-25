@@ -10,8 +10,16 @@ description: "MonAideCyber aide les entit\xE9s publiques et priv\xE9es sensibili
   \ Syst\xE8mes d'Information, en lien avec BetaGouv et la Direction interminist\xE9\
   rielle du num\xE9rique.\n\n Sources :\n\t\u2022 https://github.com/betagouv/mon-aide-cyber\
   \ \n\t\u2022 https://monaide.cyber.gouv.fr/diagnostic-libre-acces"
-copyright: ANSSI
-version: 2
+copyright: "Copyright 2023 ANSSI - Agence nationale de la s\xE9curit\xE9 des syst\xE8\
+  mes\n   d'information (https://www.cyber.gouv.fr)\n\n   Licensed under the Apache\
+  \ License, Version 2.0 (the \"License\");\n   you may not use this file except in\
+  \ compliance with the License.\n   You may obtain a copy of the License at\n\n \
+  \      http://www.apache.org/licenses/LICENSE-2.0\n\n   Unless required by applicable\
+  \ law or agreed to in writing, software\n   distributed under the License is distributed\
+  \ on an \"AS IS\" BASIS,\n   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either\
+  \ express or implied.\n   See the License for the specific language governing permissions\
+  \ and\n   limitations under the License."
+version: 4
 publication_date: 2026-02-25
 provider: ANSSI
 packager: intuitem
@@ -2043,7 +2051,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
       assessable: false
       depth: 1
-      ref_id: '1'
       name: Contexte
       description: "Les informations contextuelles d'une entreprise aident \xE0 situer\
         \ sa position par rapport \xE0 d'autres dans le m\xEAme secteur, \xE0 cerner\
@@ -2053,9 +2060,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.1'
-      name: Question 1
-      annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont invit\xE9\
+      annotation: "## Entit\xE9s publiques\n\nLes entit\xE9s publiques sont invit\xE9\
         es \xE0 s'orienter vers le service ANSSI https://club.ssi.gouv.fr/ pour b\xE9\
         n\xE9ficier d'outils gratuits d\u2019audits automatis\xE9s."
       implementation_groups:
@@ -2078,9 +2083,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.2'
-      name: Question 2
-      annotation: "# Des dispositifs adapt\xE9s\n\nSelon le secteur d\u2019activit\xE9\
+      annotation: "## Des dispositifs adapt\xE9s\n\nSelon le secteur d\u2019activit\xE9\
         \ et la r\xE9gion s\xE9lectionn\xE9s, l\u2019entit\xE9 se verra proposer des\
         \ dispositifs adhoc."
       implementation_groups:
@@ -2140,8 +2143,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.3'
-      name: Question 3
       implementation_groups:
       - MAIN
       questions:
@@ -2368,8 +2369,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.4'
-      name: Question 4
       implementation_groups:
       - MAIN
       questions:
@@ -2389,9 +2388,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.5'
-      name: Question 5
-      annotation: "# Moins de 9 postes\n\nSi l\u2019entit\xE9 dispose de moins de\
+      annotation: "## Moins de 9 postes\n\nSi l\u2019entit\xE9 dispose de moins de\
         \ 9 postes, le questionnaire MonAideCyber se verra l\xE9g\xE8rement simplifi\xE9\
         . Ainsi, les questions 12, 33 et 34 seront facultatives."
       implementation_groups:
@@ -2419,9 +2416,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.6'
-      name: Question 6
-      annotation: "# Attaque cibl\xE9e\n\nSi oui, des questions additionnelles li\xE9\
+      annotation: "## Attaque cibl\xE9e\n\nSi oui, des questions additionnelles li\xE9\
         es \xE0 la ma\xEEtrise des acc\xE8s utilisateurs et \xE0 la s\xE9curisation\
         \ des donn\xE9es jug\xE9es sensibles seront abord\xE9es.\n\nExemples d\u2019\
         informations et de donn\xE9es pouvant \xEAtre faire l\u2019objet d\u2019une\
@@ -2454,9 +2449,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.7'
-      name: Question 7
-      annotation: "# Syst\xE8mes industriels\n\nSi oui, des questions d\xE9di\xE9\
+      annotation: "## Syst\xE8mes industriels\n\nSi oui, des questions d\xE9di\xE9\
         es \xE0 la s\xE9curit\xE9 des syst\xE8mes industriels seront abord\xE9es.\n\
         \nExemples de syst\xE8mes industriels : objet ou machine industrielle connect\xE9\
         e, automates programmables, syst\xE8mes num\xE9riques de contr\xF4le-commande,\
@@ -2490,9 +2483,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: '1.8'
-      name: Question 8
-      annotation: "# Statistiques anonymes\n\nAttention, bien pr\xE9ciser \xE0 l\u2019\
+      annotation: "## Statistiques anonymes\n\nAttention, bien pr\xE9ciser \xE0 l\u2019\
         entit\xE9 que cette question est utile \xE0 des fins de statistiques anonymis\xE9\
         es. Aucune action ne sera men\xE9e si jamais elle n\u2019a pas d\xE9pos\xE9\
         \ plainte suite \xE0 une cyberattaque."
@@ -2519,8 +2510,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: 1.8.1
-      name: Question 8.1
       implementation_groups:
       - _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
@@ -2550,8 +2539,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
-      ref_id: 1.8.2
-      name: Question 8.2
       implementation_groups:
       - _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
@@ -2572,7 +2559,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
       assessable: false
       depth: 1
-      ref_id: '2'
       name: Gouvernance
       description: "La gouvernance des syst\xE8mes d\u2019information implique initialement\
         \ l'\xE9tablissement d'objectifs pour ces syst\xE8mes, align\xE9s sur la strat\xE9\
@@ -2583,10 +2569,8 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.9'
-      name: Question 9
-      annotation: "# \xC0 prot\xE9ger en priorit\xE9 \n\nPeuvent \xEAtre jug\xE9es\
-        \ prioritaires :\n\t\u2022 les activit\xE9s critiques, indispensables \xE0\
+      annotation: "## \xC0 prot\xE9ger en priorit\xE9 \n\nPeuvent \xEAtre jug\xE9\
+        es prioritaires :\n\t\u2022 les activit\xE9s critiques, indispensables \xE0\
         \ l\u2019activit\xE9,\n\t\u2022 les informations sensibles, confidentielles\
         \ et/ou ne devant pas \xEAtre vol\xE9es et exfiltr\xE9es\n\nExemples d\u2019\
         activit\xE9s et de donn\xE9es \xE0 prot\xE9ger en priorit\xE9, class\xE9es\
@@ -2623,10 +2607,8 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.10'
-      name: Question 10
-      annotation: "# Interconnexions ext\xE9rieures\n\nIP publiques, acc\xE8s distants\
-        \ ouverts aux prestataires et partenaires, etc.\n\n# Entit\xE9s publiques\n\
+      annotation: "## Interconnexions ext\xE9rieures\n\nIP publiques, acc\xE8s distants\
+        \ ouverts aux prestataires et partenaires, etc.\n\n## Entit\xE9s publiques\n\
         \nLes entit\xE9s publiques sont \xE9ligibles au service gratuit SILENE de\
         \ l\u2019ANSSI qui permet d\u2019identifier la surface d\u2019attaque des\
         \ services expos\xE9s sur Internet.<br /> Pour y acc\xE9der, l\u2019entit\xE9\
@@ -2660,11 +2642,9 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.11'
-      name: Question 11
-      annotation: "# **SYST\xC8ME INDUSTRIEL**\n\n# Composants\n\n\xC9quipements r\xE9\
-        seaux (routeur, switch/commutateur, borne-wifi, pare-feu et autres \xE9quipements\
-        \ de s\xE9curit\xE9), les serveurs (en pr\xE9cisant leurs fonctionnalit\xE9\
+      annotation: "## **SYST\xC8ME INDUSTRIEL**\n\n## Composants\n\n\xC9quipements\
+        \ r\xE9seaux (routeur, switch/commutateur, borne-wifi, pare-feu et autres\
+        \ \xE9quipements de s\xE9curit\xE9), les serveurs (en pr\xE9cisant leurs fonctionnalit\xE9\
         s), les infrastructures de sauvegarde, les postes de travail utilisateurs\
         \ et les supports mobiles interconnect\xE9s au r\xE9seau."
       implementation_groups:
@@ -2699,17 +2679,15 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.12'
-      name: Question 12
-      annotation: "# CNIL\n\nAttention \xE0 ne pas tomber dans un contr\xF4le de conformit\xE9\
-        \ au RGPD, ces informations ne seront pas partag\xE9es \xE0 la CNIL. Si n\xE9\
-        cessaire, rappeler de mani\xE8re p\xE9dagogique que le R\xE8glement G\xE9\
-        n\xE9ral sur Protection des Donn\xE9es est une obligation r\xE9glementaire\
-        \ qui s\u2019applique \xE0 toute entit\xE9, publique et priv\xE9e, qui g\xE8\
-        re et stocke des donn\xE9es personnelles.\n\n# Donn\xE9es personnelles \n\n\
-        Exemples de donn\xE9es personnelles :\n\t\u2022 Donn\xE9es li\xE9es au personnel,\n\
-        \t\u2022 Donn\xE9es des clients ou des usagers,\n\t\u2022 Donn\xE9es des fournisseurs\
-        \ ou partenaires."
+      annotation: "## CNIL\n\nAttention \xE0 ne pas tomber dans un contr\xF4le de\
+        \ conformit\xE9 au RGPD, ces informations ne seront pas partag\xE9es \xE0\
+        \ la CNIL. Si n\xE9cessaire, rappeler de mani\xE8re p\xE9dagogique que le\
+        \ R\xE8glement G\xE9n\xE9ral sur Protection des Donn\xE9es est une obligation\
+        \ r\xE9glementaire qui s\u2019applique \xE0 toute entit\xE9, publique et priv\xE9\
+        e, qui g\xE8re et stocke des donn\xE9es personnelles.\n\n## Donn\xE9es personnelles\
+        \ \n\nExemples de donn\xE9es personnelles :\n\t\u2022 Donn\xE9es li\xE9es\
+        \ au personnel,\n\t\u2022 Donn\xE9es des clients ou des usagers,\n\t\u2022\
+        \ Donn\xE9es des fournisseurs ou partenaires."
       implementation_groups:
       - MAIN
       reference_controls:
@@ -2738,9 +2716,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.13'
-      name: Question 13
-      annotation: "# Utilisation des donn\xE9es personnelles\n\nIl existe une page\
+      annotation: "## Utilisation des donn\xE9es personnelles\n\nIl existe une page\
         \ d\u2019information d\xE9di\xE9e \xE0 l'utilisation des donn\xE9es personnelles\
         \ et la gestion des droits d\u2019informations et les moyens de les exercer\
         \ sur le site de la CNIL : https://www.cnil.fr/fr/respecter-les-droits-des-personnes"
@@ -2774,9 +2750,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:gouvernance
-      ref_id: '2.14'
-      name: Question 14
-      annotation: "# Contrats des prestataires\n\nCette question suppose que l\u2019\
+      annotation: "## Contrats des prestataires\n\nCette question suppose que l\u2019\
         entit\xE9 ait des contrats avec ses prestataires et sait lesquels ont acc\xE8\
         s \xE0 son syst\xE8me d\u2019information, sinon, nous vous invitons \xE0 cocher\
         \ \u201CNon, aucune exigence ne figure dans nos contrats de prestation.\u201D\
@@ -2784,9 +2758,9 @@ objects:
         \ : changement des mots de passe par d\xE9faut ; s\xE9curisation des acc\xE8\
         s distants ; d\xE9lai de d\xE9ploiement des mises \xE0 jour critiques ; signalement\
         \ en cas de cyberattaque ; contractualisation d'un plan d'assurance s\xE9\
-        curit\xE9 (PAS).\n\n# Syst\xE8mes industriels\n\nSi l\u2019entit\xE9 est concern\xE9\
-        e, cette question s\u2019applique \xE9galement pour les prestataires disposant\
-        \ d\u2019acc\xE8s informatiques sur les syst\xE8mes industriels"
+        curit\xE9 (PAS).\n\n## Syst\xE8mes industriels\n\nSi l\u2019entit\xE9 est\
+        \ concern\xE9e, cette question s\u2019applique \xE9galement pour les prestataires\
+        \ disposant d\u2019acc\xE8s informatiques sur les syst\xE8mes industriels"
       implementation_groups:
       - MAIN
       reference_controls:
@@ -2817,7 +2791,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
       assessable: false
       depth: 1
-      ref_id: '3'
       name: "S\xE9curit\xE9 des acc\xE8s au syst\xE8me d'information"
       description: "La s\xE9curit\xE9 de l'information englobe la protection des donn\xE9\
         es et des renseignements contre tout acc\xE8s, usage, divulgation, alt\xE9\
@@ -2827,13 +2800,11 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.15'
-      name: Question 15
-      annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
+      annotation: "## Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
         \ au service gratuit ADS de l\u2019ANSSI qui permet d\u2019analyser le niveau\
         \ de s\xE9curit\xE9 de l\u2019annuaire centralis\xE9. Pour y acc\xE9der, l\u2019\
         entit\xE9 est invit\xE9e \xE0 s\u2019orienter vers le service ANSSI https://club.ssi.gouv.fr/\n\
-        \n# Active Directory, Samba-AD\n\n\xC0 partir d\u2019un parc informatique\
+        \n## Active Directory, Samba-AD\n\n\xC0 partir d\u2019un parc informatique\
         \ d\u2019une dizaine de postes, il est fortement recommand\xE9 de s\u2019\
         appuyer sur une solution de type Active Directory ou Samba-AD, et de ne plus\
         \ s\u2019appuyer sur un r\xE9seau en \u201CWorkgroup\u201D afin d\u2019homog\xE9\
@@ -2867,9 +2838,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.16'
-      name: Question 16
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s et comptes prioritaires\n\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Acc\xE8s et comptes prioritaires\n\
         \nLes acc\xE8s et comptes utilisateurs \xE0 maitriser en priorit\xE9 sont\
         \ ceux permettant d\u2019ouvrir une session sur le poste de travail et ceux\
         \ permettant d\u2019acc\xE9der aux donn\xE9es jug\xE9es les plus sensibles.\
@@ -2908,9 +2877,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.17'
-      name: Question 17
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s et comptes prioritaires\n\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Acc\xE8s et comptes prioritaires\n\
         \nLes acc\xE8s et comptes utilisateurs \xE0 maitriser en priorit\xE9 sont\
         \ ceux permettant d\u2019ouvrir une session sur le poste de travail et ceux\
         \ permettant d\u2019acc\xE9der aux donn\xE9es jug\xE9es les plus sensibles.\
@@ -2948,9 +2915,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.18'
-      name: Question 18
-      annotation: "# Administration locale des postes\n\nCette question traite du\
+      annotation: "## Administration locale des postes\n\nCette question traite du\
         \ privil\xE8ge d'administration local des comptes utilisateurs sur leur poste\
         \ de travail, il permet par exemple aux utilisateurs d'\xEAtre autonome dans\
         \ l'installation d'applications et la configuration de leur machine.\n\nSi\
@@ -2982,9 +2947,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.19'
-      name: Question 19
-      annotation: "# Mots de passe \n\nExigences minimales acceptables :\n\t\u2022\
+      annotation: "## Mots de passe \n\nExigences minimales acceptables :\n\t\u2022\
         \ Longueur de mots de passe \xE0 minima de 12 caract\xE8res si compte non\
         \ administrateur local\n\t\u2022 Longueur de mots de passe \xE0 minima de\
         \ 16 caract\xE8res si compte administrateur local\n\t\u2022 Construction complexe\
@@ -3015,12 +2978,10 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.20'
-      name: Question 20
-      annotation: "# Comptes d\u2019administration\n\nNB : cette question traite des\
-        \ comptes d'administration syst\xE8mes sur les serveurs, infrastructures etc.\
-        \ L'administration locale des postes de travail est trait\xE9e dans la question\
-        \ sur les utilisateurs administrateurs de leurs postes"
+      annotation: "## Comptes d\u2019administration\n\nNB : cette question traite\
+        \ des comptes d'administration syst\xE8mes sur les serveurs, infrastructures\
+        \ etc. L'administration locale des postes de travail est trait\xE9e dans la\
+        \ question sur les utilisateurs administrateurs de leurs postes"
       implementation_groups:
       - MAIN
       reference_controls:
@@ -3050,19 +3011,17 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.21'
-      name: Question 21
-      annotation: "# Comptes d\u2019administration\n\nNB : cette question traite des\
-        \ comptes d'administration syst\xE8mes sur les serveurs, infrastructures etc.\
-        \ L'administration locale des postes de travail est trait\xE9e dans la question\
-        \ sur les utilisateurs administrateurs de leurs postes. \n\nExemple de restrictions\
-        \ :\n\t\u2022 Tous les administrateurs utilisent en parall\xE8le un compte\
-        \ utilisateur sans privil\xE8ges pour les usages du quotidien (ex : surf sur\
-        \ internet, messagerie, etc.)\n\t\u2022 1 seul compte administrateur du domaine\n\
-        \t\u2022 Le compte administrateur du domaine n\u2019est utilis\xE9 qu\u2019\
-        exceptionnellement\n\t\u2022 Le compte d\u2019administration de la solution\
-        \ de sauvegarde diff\xE9rent n\u2019est pas g\xE9r\xE9 via l\u2019annuaire\
-        \ centralis\xE9 (ex : Active Directory, Samba-AD)"
+      annotation: "## Comptes d\u2019administration\n\nNB : cette question traite\
+        \ des comptes d'administration syst\xE8mes sur les serveurs, infrastructures\
+        \ etc. L'administration locale des postes de travail est trait\xE9e dans la\
+        \ question sur les utilisateurs administrateurs de leurs postes. \n\nExemple\
+        \ de restrictions :\n\t\u2022 Tous les administrateurs utilisent en parall\xE8\
+        le un compte utilisateur sans privil\xE8ges pour les usages du quotidien (ex\
+        \ : surf sur internet, messagerie, etc.)\n\t\u2022 1 seul compte administrateur\
+        \ du domaine\n\t\u2022 Le compte administrateur du domaine n\u2019est utilis\xE9\
+        \ qu\u2019exceptionnellement\n\t\u2022 Le compte d\u2019administration de\
+        \ la solution de sauvegarde diff\xE9rent n\u2019est pas g\xE9r\xE9 via l\u2019\
+        annuaire centralis\xE9 (ex : Active Directory, Samba-AD)"
       implementation_groups:
       - MAIN
       reference_controls:
@@ -3090,9 +3049,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.22'
-      name: Question 22
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Donn\xE9es sensibles\n\nNous vous\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Donn\xE9es sensibles\n\nNous vous\
         \ invitons \xE0 vous focaliser sur les ressources et donn\xE9es qui \xE9taient\
         \ jug\xE9es prioritaires lors de la question sur les informations et activit\xE9\
         s \xE0 prot\xE9ger. \n\nExemples de mesures acceptables :\n\t\u2022 Contraintes\
@@ -3137,9 +3094,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.23'
-      name: Question 23
-      annotation: "# Authentification multifacteur \n\nExemples de facteur d\u2019\
+      annotation: "## Authentification multifacteur \n\nExemples de facteur d\u2019\
         authentification :\n\t\u2022 l\u2019usage d\u2019une carte \xE0 puce et d\u2019\
         un code PIN d\u2019authentification ;\n\t\u2022 l\u2019usage d\u2019un token\
         \ physique et d\u2019un code PIN d\u2019authentification ;\n\t\u2022 l\u2019\
@@ -3176,9 +3131,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.24'
-      name: Question 24
-      annotation: "# **SYST\xC8ME INDUSTRIEL**"
+      annotation: "## **SYST\xC8ME INDUSTRIEL**"
       implementation_groups:
       - SYSTEME-INDUSTRIEL
       - _DEPENDS_ON_contexte-opere-systemes-information-industriels
@@ -3209,9 +3162,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteacces
-      ref_id: '3.25'
-      name: Question 25
-      annotation: "# Authentification renforc\xE9e\n\nPour r\xE9pondre aux exigences\
+      annotation: "## Authentification renforc\xE9e\n\nPour r\xE9pondre aux exigences\
         \ de la r\xE9ponse \u201COui, des mesures renfor\xE7ant l\u2019authentification\
         \ ont \xE9t\xE9 mises en \u0153uvre\u201D, l\u2019entit\xE9 doit appliquer\
         \ au moins les premi\xE8res mesures suivantes :\n\t\u2022 Modification des\
@@ -3249,8 +3200,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
       assessable: false
       depth: 1
-      ref_id: '4'
-      name: "S\xE9curit\xE9 des postes"
       description: "Pr\xE9venir les acc\xE8s non autoris\xE9s, l'ex\xE9cution de virus\
         \ par des logiciels malveillants ou le contr\xF4le \xE0 distance, particuli\xE8\
         rement via Internet, est crucial. Les risques d'intrusion dans les syst\xE8\
@@ -3260,18 +3209,16 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.26'
-      name: Question 26
-      annotation: "# Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
+      annotation: "## Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
         Toutes les mises \xE0 jour sont d\xE9ploy\xE9es [\u2026]\u201D, l\u2019entit\xE9\
         \ doit s\u2019assurer que les mises \xE0 jour sont bien install\xE9es.\n\n\
-        # Mesures compl\xE9mentaires \n\nMesures compl\xE9mentaires pouvant \xEAtre\
-        \ men\xE9es pour s\xE9curiser les postes de travail obsol\xE8tes :\n\t\u2022\
+        ## Mesures compl\xE9mentaires \n\nMesures compl\xE9mentaires pouvant \xEA\
+        tre men\xE9es pour s\xE9curiser les postes de travail obsol\xE8tes :\n\t\u2022\
         \ les isoler et les cloisonner du reste du r\xE9seau bureautique (ex : d\xE9\
         connecter de l\u2019annuaire centralis\xE9e), une compromission de ces derniers\
         \ aura ainsi un faible impact\n\t\u2022 mettre en \u0153uvre un outil de protection\
         \ de type EDR en compl\xE9ment de l\u2019antivirus int\xE9grant des r\xE8\
-        gles de s\xE9curit\xE9 sp\xE9cifiques aux postes obsol\xE8tes.\n\n# D\xE9\
+        gles de s\xE9curit\xE9 sp\xE9cifiques aux postes obsol\xE8tes.\n\n## D\xE9\
         ploiement des logiciels et contr\xF4le des mises \xE0 jour \n\nAfin de s\u2019\
         assurer que les mises \xE0 jours sont d\xE9ploy\xE9es, il peut \xEAtre n\xE9\
         cessaire de :\n\t\u2022 faire une v\xE9rification manuelle sur chaque poste\
@@ -3310,9 +3257,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.27'
-      name: Question 27
-      annotation: "# **SYST\xC8ME INDUSTRIEL**"
+      annotation: "## **SYST\xC8ME INDUSTRIEL**"
       implementation_groups:
       - SYSTEME-INDUSTRIEL
       - _DEPENDS_ON_contexte-opere-systemes-information-industriels
@@ -3346,12 +3291,10 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.28'
-      name: Question 28
-      annotation: "# Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
+      annotation: "## Mises \xE0 jour install\xE9es\n\nPour cocher la r\xE9ponse \u201C\
         Oui et ses alertes sont syst\xE9matiquement trait\xE9es [\u2026]\u201D, l\u2019\
         entit\xE9 doit s\u2019assurer que les mises \xE0 jour sont bien install\xE9\
-        es.\n\n# Windows Defender\n\nWindows Defender est l\u2019antivirus int\xE9\
+        es.\n\n## Windows Defender\n\nWindows Defender est l\u2019antivirus int\xE9\
         gr\xE9 gratuitement dans tous les syst\xE8mes d\u2019exploitation Windows\
         \ r\xE9cents."
       implementation_groups:
@@ -3381,9 +3324,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.29'
-      name: Question 29
-      annotation: "# **SYST\xC8ME INDUSTRIEL**"
+      annotation: "## **SYST\xC8ME INDUSTRIEL**"
       implementation_groups:
       - SYSTEME-INDUSTRIEL
       - _DEPENDS_ON_contexte-opere-systemes-information-industriels
@@ -3415,9 +3356,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.30'
-      name: Question 30
-      annotation: "# Pare-feu local\n\nLe pare-feu local est un logiciel qui permet\
+      annotation: "## Pare-feu local\n\nLe pare-feu local est un logiciel qui permet\
         \ de filtrer le trafic entrant et sortant dans le syst\xE8me d\u2019exploitation\
         \ du poste de travail. Un pare-feu local est une fonction int\xE9gr\xE9e \xE0\
         \ la plupart des syst\xE8mes d\u2019exploitation grand public. Par d\xE9faut,\
@@ -3448,9 +3387,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.31'
-      name: Question 31
-      annotation: "# EDR\n\nUn EDR, Endpoint Detection Response, d\xE9tecte et bloque\
+      annotation: "## EDR\n\nUn EDR, Endpoint Detection Response, d\xE9tecte et bloque\
         \ les menaces sur les terminaux en s\u2019appuyant sur l\u2019analyse comportementale\
         \ et la corr\xE9lation d'\xE9v\xE9nements."
       implementation_groups:
@@ -3482,13 +3419,11 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteposte
-      ref_id: '4.32'
-      name: Question 32
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Windows Bitlocker\n\nWindows Bitlocker\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Windows Bitlocker\n\nWindows Bitlocker\
         \ est un outil de chiffrement int\xE9gr\xE9 gratuitement dans tous les syst\xE8\
         mes d\u2019exploitation Windows r\xE9cents.\n\nNB : il est indispensable que\
         \ le d\xE9chiffrement au d\xE9marrage du poste soit soumis \xE0 un mot de\
-        \ passe robuste (ou un token USB).\n\n# Mat\xE9riels nomades \n\nIl s\u2019\
+        \ passe robuste (ou un token USB).\n\n## Mat\xE9riels nomades \n\nIl s\u2019\
         agit des \xE9quipements et mat\xE9riels num\xE9riques transport\xE9s durant\
         \ les d\xE9placements, exemples :\n\t\u2022 ordinateur portable\n\t\u2022\
         \ tablette\n\t\u2022 t\xE9l\xE9phone\n\t\u2022 clefs USB et disques durs"
@@ -3517,7 +3452,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
       assessable: false
       depth: 1
-      ref_id: '5'
       name: "S\xE9curit\xE9 des infrastructures"
       description: "La s\xE9curit\xE9 des infrastructures est vitale pour prot\xE9\
         ger syst\xE8mes, r\xE9seaux et informations contre les menaces num\xE9riques.\
@@ -3527,9 +3461,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.33'
-      name: Question 33
-      annotation: "# Pare-feu\n\nLe pare-feu est l\u2019outil permettant de restreindre\
+      annotation: "## Pare-feu\n\nLe pare-feu est l\u2019outil permettant de restreindre\
         \ les services expos\xE9s sur Internet, et r\xE9alisant le filtrage des communications\
         \ et des flux r\xE9seaux. Afin de r\xE9duire au maximum la surface d\u2019\
         attaque disponible pour les attaquants, il est recommand\xE9 de r\xE9duire\
@@ -3565,8 +3497,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: 5.33.1
-      name: Question 33.1
       implementation_groups:
       - _Q33.1_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
       reference_controls:
@@ -3595,8 +3525,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: 5.33.2
-      name: Question 33.2
       implementation_groups:
       - _Q33.2_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
       reference_controls:
@@ -3624,9 +3552,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.34'
-      name: Question 34
-      annotation: "# **SYST\xC8ME INDUSTRIEL**\n\n# Cloisonnement des syst\xE8mes\
+      annotation: "## **SYST\xC8ME INDUSTRIEL**\n\n## Cloisonnement des syst\xE8mes\
         \ industriels\n\nLe plus s\xE9curis\xE9 est un cloisonnement strict (pas d\u2019\
         interconnexion). De mani\xE8re plus fonctionnelle, les flux r\xE9seaux entre\
         \ les r\xE9seaux bureautique et industriel sont filtr\xE9s strictement (pour\
@@ -3669,9 +3595,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.35'
-      name: Question 35
-      annotation: "# \xC9quipements de s\xE9curit\xE9 \n\nExemples d\u2019\xE9quipements\
+      annotation: "## \xC9quipements de s\xE9curit\xE9 \n\nExemples d\u2019\xE9quipements\
         \ de s\xE9curit\xE9 \xE0 mettre \xE0 jour d\xE8s que possible :\n\t\u2022\
         \ Pare-feu r\xE9seau, pare-feu applicatif (WAF)\n\t\u2022 \xC9quipement VPN\n\
         \t\u2022 Proxy"
@@ -3701,22 +3625,21 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.36'
-      name: Question 36
-      annotation: "# Serveurs et services d\u2019administration \n\nExemples des serveurs\
-        \ et des services d\u2019administration \xE0 mettre \xE0 jour d\xE8s que possible\
-        \ :\n\t\u2022 Serveurs d\u2019infrastructures : Windows Server, Active Directory,\
-        \ serveur gestionnaire de mises \xE0 jour WSUS, serveur de messagerie (exchange,\
-        \ zimbra, etc.), solution de virtualisation, outil de supervision et de t\xE9\
-        l\xE9maintenance, solution de sauvegarde\n\t\u2022 Serveurs m\xE9tiers : base\
-        \ de donn\xE9es, serveur web (Apache, IIS, etc.), serveur d\u2019application,\
-        \ outil de d\xE9veloppement et autres applicatifs etc.\n\n# Mesures compl\xE9\
-        mentaires \n\nMesures compl\xE9mentaires pouvant \xEAtre men\xE9es pour s\xE9\
-        curiser les serveurs obsol\xE8tes :\n\t\u2022 les isoler et les cloisonner\
-        \ du reste du r\xE9seau bureautique (ex : d\xE9connecter de l\u2019annuaire\
-        \ centralis\xE9e)\n\t\u2022 ne pas les interconnecter \xE0 Internet\n\t\u2022\
-        \ mettre en \u0153uvre un outil de protection de type EDR int\xE9grant des\
-        \ r\xE8gles de s\xE9curit\xE9 sp\xE9cifiques aux serveurs obsol\xE8tes."
+      annotation: "## Serveurs et services d\u2019administration \n\nExemples des\
+        \ serveurs et des services d\u2019administration \xE0 mettre \xE0 jour d\xE8\
+        s que possible :\n\t\u2022 Serveurs d\u2019infrastructures : Windows Server,\
+        \ Active Directory, serveur gestionnaire de mises \xE0 jour WSUS, serveur\
+        \ de messagerie (exchange, zimbra, etc.), solution de virtualisation, outil\
+        \ de supervision et de t\xE9l\xE9maintenance, solution de sauvegarde\n\t\u2022\
+        \ Serveurs m\xE9tiers : base de donn\xE9es, serveur web (Apache, IIS, etc.),\
+        \ serveur d\u2019application, outil de d\xE9veloppement et autres applicatifs\
+        \ etc.\n\n## Mesures compl\xE9mentaires \n\nMesures compl\xE9mentaires pouvant\
+        \ \xEAtre men\xE9es pour s\xE9curiser les serveurs obsol\xE8tes :\n\t\u2022\
+        \ les isoler et les cloisonner du reste du r\xE9seau bureautique (ex : d\xE9\
+        connecter de l\u2019annuaire centralis\xE9e)\n\t\u2022 ne pas les interconnecter\
+        \ \xE0 Internet\n\t\u2022 mettre en \u0153uvre un outil de protection de type\
+        \ EDR int\xE9grant des r\xE8gles de s\xE9curit\xE9 sp\xE9cifiques aux serveurs\
+        \ obsol\xE8tes."
       implementation_groups:
       - MAIN
       reference_controls:
@@ -3749,9 +3672,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.37'
-      name: Question 37
-      annotation: "# M\xE9canismes de protection \n\nLes m\xE9canismes de protection\
+      annotation: "## M\xE9canismes de protection \n\nLes m\xE9canismes de protection\
         \ de mails ill\xE9gitimes \xE0 param\xE9trer sur le serveur DNS sont :\n\t\
         \u2022 Sender Policy Framework (SPF) qui permet de sp\xE9cifier les adresses\
         \ IP des serveurs autoris\xE9s \xE0 \xE9mettre les mails d\u2019un domaine\
@@ -3796,9 +3717,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.38'
-      name: Question 38
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Chiffrement de connexion \n\nMinimum\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Chiffrement de connexion \n\nMinimum\
         \ attendu pour cocher la 4\xE8me r\xE9ponse :\n\t\u2022 Mot de passe de 20\
         \ caract\xE8res minimum ;\n\t\u2022 Chiffrement robuste de la connexion wifi,\
         \ a minima WPA2 ;\n\t\u2022 Pas d'acc\xE8s au r\xE9seau interne pour les visiteurs\
@@ -3835,12 +3754,10 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securiteinfrastructure
-      ref_id: '5.39'
-      name: Question 39
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Acc\xE8s aux serveurs\n\nPour s\xE9\
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Acc\xE8s aux serveurs\n\nPour s\xE9\
         lectionner \u201COui\u201D, l\u2019acc\xE8s aux serveurs doit \xEAtre \xE0\
         \ minima prot\xE9g\xE9 par une porte ferm\xE9e \xE0 clef dont la clef n\u2019\
-        est accessible qu\u2019aux personnes l\xE9gitimes.\n\n# R\xE9f\xE9rent s\xFB\
+        est accessible qu\u2019aux personnes l\xE9gitimes.\n\n## R\xE9f\xE9rent s\xFB\
         ret\xE9 de gendarmerie et de police\n\nSi c\u2019est jug\xE9 n\xE9cessaire,\
         \ l\u2019entit\xE9 peut \xEAtre mise en relation avec un r\xE9f\xE9rent s\xFB\
         ret\xE9 physique de la gendarmerie et de la police."
@@ -3877,7 +3794,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
       assessable: false
       depth: 1
-      ref_id: '6'
       name: Sensibilisation des utilisateurs
       description: "Il est important d\u2019\xE9duquer tous les utilisateurs, qu'ils\
         \ fassent partie de l'organisation ou non, qui manipulent des donn\xE9es personnelles,\
@@ -3889,9 +3805,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
-      ref_id: '6.40'
-      name: Question 40
-      annotation: "# Actions de sensibilisation \n\nExemple d'actions de sensibilisation\
+      annotation: "## Actions de sensibilisation \n\nExemple d'actions de sensibilisation\
         \ :\n\t\u2022 Campagne d'affichage, mails d'information, conf\xE9rence de\
         \ sensibilisation\n\t\u2022 Sensibilisation cibl\xE9e du CODIR, sensibilisation\
         \ aux risques d'escroquerie au faux ordre de virement et fraude au pr\xE9\
@@ -3931,11 +3845,10 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
-      ref_id: '6.41'
-      name: Question 41
-      annotation: "# **ATTAQUE CIBL\xC9E**\n\n# Passeport de conseils cyber aux voyageurs\n\
-        \nL\u2019ANSSI a publi\xE9 un guide pour sensibiliser les collaborateurs aux\
-        \ bonnes pratiques de cybers\xE9curit\xE9 durant les d\xE9placements : https://cyber.gouv.fr/publications/bonnes-pratiques-lusage-des-professionnels-en-deplacement"
+      annotation: "## **ATTAQUE CIBL\xC9E**\n\n## Passeport de conseils cyber aux\
+        \ voyageurs\n\nL\u2019ANSSI a publi\xE9 un guide pour sensibiliser les collaborateurs\
+        \ aux bonnes pratiques de cybers\xE9curit\xE9 durant les d\xE9placements :\
+        \ https://cyber.gouv.fr/publications/bonnes-pratiques-lusage-des-professionnels-en-deplacement"
       implementation_groups:
       - ATTAQUE-CIBLEE
       - _DEPENDS_ON_contexte-activites-recherche-et-developpement
@@ -3963,8 +3876,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:sensibilisation
-      ref_id: '6.42'
-      name: Question 42
       implementation_groups:
       - _DEPENDS_ON_contexte-nombre-postes-travail-dans-entite
       - _DEPENDS_ON_contexte-nombre-postes-travail-dans-organisation
@@ -3993,7 +3904,6 @@ objects:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
       assessable: false
       depth: 1
-      ref_id: '7'
       name: "R\xE9action \xE0 une cyberattaque"
       description: "La premi\xE8re phase du traitement d'un incident consiste \xE0\
         \ le qualifier. Cela implique d'identifier les sources d'informations et les\
@@ -4004,13 +3914,11 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: '7.43'
-      name: Question 43
-      annotation: "# Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
+      annotation: "## Entit\xE9s publiques\n\nLes entit\xE9s publiques sont \xE9ligibles\
         \ au service gratuit SILENE de l\u2019ANSSI qui permet d\u2019identifier la\
         \ surface d\u2019attaque des services expos\xE9s sur Internet. Pour y acc\xE9\
         der, l\u2019entit\xE9 est invit\xE9e \xE0 s'orienter vers le service ANSSI\
-        \ https://club.ssi.gouv.fr/.\n\n# Suivi des alertes et des vuln\xE9rabilit\xE9\
+        \ https://club.ssi.gouv.fr/.\n\n## Suivi des alertes et des vuln\xE9rabilit\xE9\
         s\n\nLe suivi des alertes et des vuln\xE9rabilit\xE9s consiste \xE0 se tenir\
         \ inform\xE9 des vuln\xE9rabilit\xE9s techniques de cybers\xE9curit\xE9 critiques\
         \ pouvant affecter son syst\xE8me d\u2019information (selon les \xE9quipements\
@@ -4041,9 +3949,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: '7.44'
-      name: Question 44
-      annotation: "# Jeu de sauvegarde isol\xE9 \n\nLe jeu de sauvegarde isol\xE9\
+      annotation: "## Jeu de sauvegarde isol\xE9 \n\nLe jeu de sauvegarde isol\xE9\
         \ (ou sanctuaris\xE9) peut \xEAtre r\xE9alis\xE9 de plusieurs mani\xE8res\
         \ :\n\t\u2022 sur un p\xE9riph\xE9rique de stockage d\xE9connect\xE9 du r\xE9\
         seau (bandes, disques durs externes, clefs usb),\n\t\u2022 dans un cloud externe\
@@ -4051,10 +3957,10 @@ objects:
         \ authentification sp\xE9cifique,\n\t\u2022 sur un serveur ou m\xE9dia d\xE9\
         connect\xE9 physiquement et/ou logiquement \xE0 l\u2019issue de chaque sauvegarde.\n\
         \nCe jeu de sauvegarde ne doit donc pas \xEAtre accessible via l\u2019Active\
-        \ Directory (ou autre service d'annuaire centralis\xE9).\n\n# Sauvegarde des\
-        \ ressources h\xE9berg\xE9es en cloud\n\nIl convient aussi de s\u2019assurer\
-        \ que les m\xE9canismes de sauvegarde mis en \u0153uvre par l\u2019entit\xE9\
-        \ (ou par son prestataire) / prennent \xE9galement en compte les ressources\
+        \ Directory (ou autre service d'annuaire centralis\xE9).\n\n## Sauvegarde\
+        \ des ressources h\xE9berg\xE9es en cloud\n\nIl convient aussi de s\u2019\
+        assurer que les m\xE9canismes de sauvegarde mis en \u0153uvre par l\u2019\
+        entit\xE9 (ou par son prestataire) / prennent \xE9galement en compte les ressources\
         \ bureautiques et/ou m\xE9tiers qui sont seulement h\xE9berg\xE9es dans des\
         \ environnements cloud."
       implementation_groups:
@@ -4090,8 +3996,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: 7.44.1
-      name: Question 44.1
       implementation_groups:
       - _Q44.1_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
       reference_controls:
@@ -4119,8 +4023,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: 7.44.2
-      name: Question 44.2
       implementation_groups:
       - _Q44.2_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
       reference_controls:
@@ -4147,8 +4049,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: 7.44.3
-      name: Question 44.3
       implementation_groups:
       - _Q44.3_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
       reference_controls:
@@ -4176,8 +4076,6 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: 7.44.4
-      name: Question 44.4
       implementation_groups:
       - _Q44.4_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
       reference_controls:
@@ -4204,9 +4102,7 @@ objects:
       assessable: true
       depth: 2
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction
-      ref_id: '7.45'
-      name: Question 45
-      annotation: "# Organisation de gestion de crise\n\nUne organisation de gestion\
+      annotation: "## Organisation de gestion de crise\n\nUne organisation de gestion\
         \ de crise doit \xE0 minima identifier les priorit\xE9s m\xE9tier \xE0 r\xE9\
         tablir en cas de crise, des fiches r\xE9flexes op\xE9rationnelles garantissant\
         \ la continuit\xE9 d'activit\xE9 au travers de modes d\xE9grad\xE9s d\xE9\
