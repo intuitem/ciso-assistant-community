@@ -1344,7 +1344,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
             return [], None
         resolved = []
         for item in items:
-            asset, error = self._resolve_asset({"asset": item, **record})
+            asset, error = self._resolve_asset({**record, "asset": item})
             if error:
                 return [], error
             resolved.append(asset.id)
