@@ -3,7 +3,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
@@ -396,35 +396,81 @@
 				<div class="flex flex-row space-x-2 items-center">
 					{#if hasParentNode}
 						{#if nodeScore() !== null}
-							<ProgressRing
-								strokeWidth="20px"
-								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
-								meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeScore()}</ProgressRing
-							>
-							{#if showDocumentationScore}
-								<ProgressRing
-									strokeWidth="20px"
-									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
-									meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-									size="size-12">{nodeDocumentationScore()}</ProgressRing
+							<div class="relative">
+								<Progress
+									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
+									data-testid="progress-ring-svg"
 								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeScore()}</span>
+									</div>
+								</Progress>
+							</div>
+							{#if showDocumentationScore}
+								<div class="relative">
+									<Progress
+										value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+										min={0}
+										max={100}
+									>
+										<Progress.Circle class="[--size:--spacing(12)]">
+											<Progress.CircleTrack />
+											<Progress.CircleRange
+												class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+											/>
+										</Progress.Circle>
+										<div class="absolute inset-0 flex items-center justify-center">
+											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+										</div>
+									</Progress>
+								</div>
 							{/if}
 						{/if}
 					{:else if nodeScore() !== null}
-						<ProgressRing
-							strokeWidth="20px"
-							value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
-							meterStroke={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
-							size="size-12">{nodeScore()}</ProgressRing
-						>
-						{#if showDocumentationScore}
-							<ProgressRing
-								strokeWidth="20px"
-								value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
-								meterStroke={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
-								size="size-12">{nodeDocumentationScore()}</ProgressRing
+						<div class="relative">
+							<Progress
+								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+								min={0}
+								max={100}
+								data-testid="progress-ring-svg"
 							>
+								<Progress.Circle class="[--size:--spacing(12)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{nodeScore()}</span>
+								</div>
+							</Progress>
+						</div>
+						{#if showDocumentationScore}
+							<div class="relative">
+								<Progress
+									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
+								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+									</div>
+								</Progress>
+							</div>
 						{/if}
 					{/if}
 				</div>

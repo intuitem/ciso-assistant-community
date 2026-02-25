@@ -80,8 +80,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
             return
+        request = self.context.get("request")
+        if request is None:
+            return
         if not RoleAssignment.is_access_allowed(
-            user=self.context["request"].user,
+            user=request.user,
             perm=Permission.objects.get(
                 codename=f"{action}_{self.Meta.model._meta.model_name}",
             ),
@@ -1542,6 +1545,47 @@ class FolderWriteSerializer(BaseModelSerializer):
             "content_type",
         ]
 
+    def update(self, instance, validated_data):
+        if (
+            instance.content_type == Folder.ContentType.ROOT
+            and "create_iam_groups" in validated_data
+            and validated_data["create_iam_groups"] != instance.create_iam_groups
+        ):
+            raise serializers.ValidationError(
+                {"create_iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
+            )
+
+        create_flag_changed = (
+            instance.content_type == Folder.ContentType.DOMAIN
+            and "create_iam_groups" in validated_data
+            and validated_data["create_iam_groups"] != instance.create_iam_groups
+        )
+        if create_flag_changed:
+            new_value = validated_data["create_iam_groups"]
+            if new_value:
+                with transaction.atomic():
+                    updated_instance = super().update(instance, validated_data)
+                    Folder.create_default_ug_and_ra(updated_instance)
+                return updated_instance
+
+            auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
+            auto_groups_exist = auto_groups.exists()
+            if (
+                auto_groups_exist
+                and User.objects.filter(user_groups__in=auto_groups).exists()
+            ):
+                raise serializers.ValidationError(
+                    {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
+                )
+            with transaction.atomic():
+                updated_instance = super().update(instance, validated_data)
+                if auto_groups_exist:
+                    RoleAssignment.objects.filter(user_group__in=auto_groups).delete()
+                    auto_groups.delete()
+            return updated_instance
+
+        return super().update(instance, validated_data)
+
     def validate_name(self, value):
         """
         Check that the folder name does not contain the character "/"
@@ -1590,6 +1634,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "name",
             "description",
             "content_type",
+            "create_iam_groups",
             "created_at",
             "updated_at",
         ]
@@ -2773,6 +2818,7 @@ class QuickStartSerializer(serializers.Serializer):
         folder_data = {
             "content_type": Folder.ContentType.DOMAIN,
             "name": "Starter",
+            "create_iam_groups": True,
         }
         folder = Folder.objects.filter(**folder_data).first()
         if not folder:

@@ -159,7 +159,11 @@ export const test = base.extend<Fixtures>({
 	},
 
 	foldersPage: async ({ page }, use) => {
-		const fPage = new PageContent(page, '/folders', 'Domains');
+		const fPage = new PageContent(page, '/folders', 'Domains', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'create_iam_groups', type: type.CHECKBOX }
+		]);
 		await use(fPage);
 	},
 
@@ -527,7 +531,8 @@ export class TestContent {
 				modelName: 'folder',
 				build: {
 					name: vars.folderName,
-					description: vars.description
+					description: vars.description,
+					create_iam_groups: true
 				},
 				editParams: {
 					name: '',
