@@ -1282,7 +1282,7 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee_role,
+            role=auditee,
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
