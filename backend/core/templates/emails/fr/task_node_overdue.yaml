@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Vous avez ${task_count} tâche(s) en retard"
+body: |
+  Bonjour,
+
+  Les tâches suivantes sont en retard et toujours en attente :
+
+  ${task_list}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour compléter ou mettre à jour ces tâches :
+  ${ciso_assistant_url}
+
+  Merci.
