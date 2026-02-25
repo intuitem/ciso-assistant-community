@@ -54,8 +54,8 @@ API_ROOT = EXTRACTED_DIR / "mon-aide-cyber-api"
 OUT_DIR = SCRIPT_DIR
 QUESTIONS_FILE = "questionnaire_repo.json"
 MESURES_FILE = "mesures_repo.json"
-EXCEL_FILE = "anssi-mon_aide_cyber.xlsx"
-YAML_FILE = "anssi-mon_aide_cyber.yaml"
+EXCEL_FILE = "anssi-mon-aide-cyber.xlsx"
+YAML_FILE = "anssi-mon-aide-cyber.yaml"
 
 QUESTIONS_OUT = OUT_DIR / QUESTIONS_FILE
 MESURES_OUT = OUT_DIR / MESURES_FILE
