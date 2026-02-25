@@ -88,6 +88,9 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    relationship = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = Entity
@@ -106,6 +109,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "dora_competent_authority",
             "created_at",
             "updated_at",
+            "relationship",
         ]
 
 
