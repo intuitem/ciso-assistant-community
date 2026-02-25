@@ -2417,9 +2417,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         requirement_node=instance.requirement
                     ).prefetch_related("choices")
                 }
+                logger.debug(
+                    "Processing answers update",
+                    ra_id=str(instance.id),
+                    answers_count=len(answers_data),
+                    questions_found=len(questions_by_urn),
+                    answer_urns=list(answers_data.keys())[:3],
+                    question_urns=list(questions_by_urn.keys())[:3],
+                )
                 for q_urn, answer_value in answers_data.items():
                     question = questions_by_urn.get(q_urn)
                     if not question:
+                        logger.warning(
+                            "Question URN not found, skipping answer",
+                            q_urn=q_urn,
+                            available_urns=list(questions_by_urn.keys()),
+                        )
                         continue
 
                     answer, _created = Answer.objects.update_or_create(
