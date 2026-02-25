@@ -5,7 +5,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { m } from '$paraglide/messages';
 	import LossExceedanceCurve from '$lib/components/Chart/LossExceedanceCurve.svelte';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
 	import { run } from 'svelte/legacy';
@@ -147,12 +147,12 @@
 				>
 					<span class="mr-2">
 						{#if retriggerIsLoading}
-							<ProgressRing
-								strokeWidth="16px"
-								meterStroke="stroke-white"
-								size="size-6"
-								classes="-ml-2"
-							/>
+							<Progress value={null}>
+								<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+									<Progress.CircleTrack />
+									<Progress.CircleRange class="stroke-white" />
+								</Progress.Circle>
+							</Progress>
 						{:else}
 							<i class="fa-solid fa-arrows-rotate"></i>
 						{/if}

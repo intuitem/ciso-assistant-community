@@ -17,7 +17,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
-	import { Popover, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Popover, Progress } from '@skeletonlabs/skeleton-svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
@@ -305,47 +305,45 @@
 			</div>
 			<div class="flex flex-col space-y-2 ml-4">
 				<div class="flex flex-row space-x-2">
-					<Popover
-						open={exportPopupOpen}
-						onOpenChange={(e) => (exportPopupOpen = e.open)}
-						triggerClasses="btn preset-filled-primary-500 w-full"
-					>
-						{#snippet trigger()}
+					<Popover open={exportPopupOpen} onOpenChange={(e) => (exportPopupOpen = e.open)}>
+						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 							</span>
-						{/snippet}
-						{#snippet content()}
-							<div class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1">
-								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-									>... {m.asPDF()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/csv"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-									>... {m.asCSV()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/export/xlsx"
-									class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-									>... {m.asXLSX()}</a
-								>
-								<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
-									class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-									>... {m.asPDF()}</a
-								>
-								<a
-									href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
-									class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
-									>... {m.asXLSX()}</a
-								>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content>
+								<div class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1">
+									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.riskAssessment()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/pdf"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/csv"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asCSV()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/export/xlsx"
+										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
+										>... {m.asXLSX()}</a
+									>
+									<p class="block px-4 py-2 text-sm text-surface-950-50">{m.actionPlan()}</p>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/pdf"
+										class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+										>... {m.asPDF()}</a
+									>
+									<a
+										href="/risk-assessments/{risk_assessment.id}/action-plan/export/excel"
+										class="block px-4 py-2 text-sm text-surface-950-50 border-b hover:bg-surface-200-800"
+										>... {m.asXLSX()}</a
+									>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 					{#if canEditObject}
 						<Anchor
@@ -383,12 +381,12 @@
 					>
 						<span class="mr-2">
 							{#if syncingToActionsIsLoading}
-								<ProgressRing
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									size="size-6"
-									classes="-ml-2"
-								/>
+								<Progress value={null}>
+									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+										<Progress.CircleTrack />
+										<Progress.CircleRange class="stroke-white" />
+									</Progress.Circle>
+								</Progress>
 							{:else}
 								<i class="fa-solid fa-arrows-rotate mr-2"></i>
 							{/if}

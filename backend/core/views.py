@@ -5199,6 +5199,8 @@ class RiskScenarioFilter(GenericFilterSet):
             "existing_applied_controls": ["exact"],
             "security_exceptions": ["exact"],
             "owner": ["exact"],
+            "qualifications": ["exact"],
+            "filtering_labels": ["exact"],
         }
 
 
@@ -6097,8 +6099,7 @@ class FolderViewSet(BaseModelViewSet):
         """
         Create the default user groups after domain creation
         """
-        serializer.save()
-        folder = Folder.objects.get(id=serializer.data["id"])
+        folder = serializer.save()
         Folder.create_default_ug_and_ra(folder)
 
     def list(self, request, *args, **kwargs):
@@ -6685,7 +6686,9 @@ class FolderViewSet(BaseModelViewSet):
             with transaction.atomic():
                 # Create base folder and store its ID
                 base_folder = Folder.objects.create(
-                    name=domain_name, content_type=Folder.ContentType.DOMAIN
+                    name=domain_name,
+                    content_type=Folder.ContentType.DOMAIN,
+                    create_iam_groups=True,
                 )
                 link_dump_database_ids["base_folder"] = base_folder
                 Folder.create_default_ug_and_ra(base_folder)
@@ -7638,7 +7641,9 @@ class FrameworkViewSet(BaseModelViewSet):
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
         req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
+        has_questions = any(rn.questions for rn in req_nodes)
         entries = []
+
         for rn in req_nodes:
             entry = {
                 "urn": rn.urn,
@@ -7651,6 +7656,33 @@ class FrameworkViewSet(BaseModelViewSet):
                 "score": "",
                 "observations": "",
             }
+
+            if has_questions:
+                if rn.questions:
+                    lines = []
+                    for q_urn, question in rn.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        if q_type == "multiple_choice":
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(
+                                f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                            )
+                        elif q_type in ("text", "date"):
+                            lines.append(f"{q_text} >> [free text]")
+                        else:
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(f"{q_text} >> [{' / '.join(choice_values)}]")
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         # Create DataFrame from entries
@@ -7666,30 +7698,23 @@ class FrameworkViewSet(BaseModelViewSet):
             # Get the worksheet
             worksheet = writer.sheets["Sheet1"]
 
-            # For text wrapping, we need to define which columns need wrapping
-            # Assuming 'description' and 'observations' columns need text wrapping
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
 
-            # Find the indices of the columns that need wrapping
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
 
-            # Apply text wrapping to those columns
             from openpyxl.styles import Alignment
 
             for col_idx in wrap_indices:
-                for row_idx in range(
-                    2, len(df) + 2
-                ):  # +2 because of header row and 1-indexing
+                for row_idx in range(2, len(df) + 2):
                     cell = worksheet.cell(row=row_idx, column=col_idx)
                     cell.alignment = Alignment(wrap_text=True)
 
-            # Adjust column widths for better readability
             for idx, col in enumerate(df.columns):
-                column_width = 40  # default width
+                column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for wrapped text columns
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -8029,12 +8054,19 @@ class UploadAttachmentView(APIView):
         revision = None
         evidence = None
 
+        # RBAC: scope to objects the user has change permission on (upload is a write)
+        accessible_evidence_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, Evidence
+        )[1]
+
         try:
-            revision = EvidenceRevision.objects.get(pk=pk)
+            revision = EvidenceRevision.objects.get(
+                pk=pk, evidence__id__in=accessible_evidence_ids
+            )
             evidence = revision.evidence
         except EvidenceRevision.DoesNotExist:
             try:
-                evidence = Evidence.objects.get(pk=pk)
+                evidence = Evidence.objects.get(pk=pk, id__in=accessible_evidence_ids)
             except Evidence.DoesNotExist:
                 return Response(
                     {"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND
@@ -8048,9 +8080,18 @@ class UploadAttachmentView(APIView):
         attachment = request.FILES.get("file")
         if attachment and attachment.name != "undefined":
             if not revision.attachment or revision.attachment != attachment:
-                if revision.attachment:
-                    revision.attachment.delete()
+                old_attachment = revision.attachment
                 revision.attachment = attachment
+                try:
+                    revision.full_clean()
+                except ValidationError:
+                    revision.attachment = old_attachment
+                    return Response(
+                        {"detail": "File too large or unsupported format."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                if old_attachment:
+                    old_attachment.delete()
                 revision.save()
 
         return Response(status=status.HTTP_200_OK)
@@ -8401,6 +8442,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for node in RequirementNode.objects.filter(id__in=req_node_ids)
         }
 
+        has_questions = any(rn.questions for rn in req_nodes.values())
+
         for req in requirement_assessments:
             req_node = req_nodes.get(req.requirement.id)
             if not req_node:
@@ -8424,6 +8467,62 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["documentation_score"] = req.documentation_score
             else:
                 entry["score"] = req.score
+
+            if has_questions:
+                if req_node.questions:
+                    answers = req.answers or {}
+                    lines = []
+                    for q_urn, question in req_node.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        choices_map = {
+                            c["urn"]: c.get("value", "")
+                            for c in question.get("choices", [])
+                        }
+                        answer_value = answers.get(q_urn)
+                        readable = ""
+                        if answer_value:
+                            if q_type in ("text", "date"):
+                                readable = str(answer_value)
+                            elif q_type == "multiple_choice" and isinstance(
+                                answer_value, list
+                            ):
+                                readable = " | ".join(
+                                    choices_map.get(a, a) for a in answer_value
+                                )
+                            else:
+                                readable = choices_map.get(
+                                    answer_value, str(answer_value)
+                                )
+                        # Show choices hint when no answer
+                        if not readable:
+                            choice_values = list(choices_map.values())
+                            if q_type == "multiple_choice":
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                            elif q_type in ("text", "date"):
+                                lines.append(
+                                    escape_excel_formula(f"{q_text} >> [free text]")
+                                )
+                            else:
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                        else:
+                            lines.append(
+                                escape_excel_formula(f"{q_text} >> {readable}")
+                            )
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -8433,7 +8532,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
@@ -8446,7 +8545,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for idx, col in enumerate(df.columns):
                 column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for compliance assessments
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -11360,7 +11459,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
         incident = (
             Incident.objects.select_related("folder")
-            .prefetch_related("owners", "entities", "assets", "threats")
+            .prefetch_related(
+                "owners", "entities", "assets", "threats", "qualifications"
+            )
             .get(id=pk)
         )
 

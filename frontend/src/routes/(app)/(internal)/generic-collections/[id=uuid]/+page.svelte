@@ -125,69 +125,63 @@
 			onValueChange={(e) => {
 				group = e.value;
 			}}
-			listJustify="justify-center flex flex-wrap gap-2"
 		>
-			{#snippet list()}
+			<Tabs.List>
 				{#each Object.entries(data.relatedModels).sort( ([a], [b]) => a.localeCompare(b) ) as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}
 							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						<div class="py-2"></div>
-						{#if model.table}
-							{@const field = data.model.reverseForeignKeyFields?.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							<ModelTable
-								source={model.table}
-								deleteForm={model.deleteForm}
-								URLModel={urlmodel}
-								canSelectObject={canEditObject}
-								baseEndpoint="/{urlmodel}?genericcollection={page.params.id}"
-								disableDelete={true}
-							>
-								{#snippet selectButton()}
-									<div>
-										<span
-											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-										>
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-button"
-												title={safeTranslate('select-' + urlmodel)}
-												onclick={(_) => modalUpdateForm(urlmodel)}
-												><i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
-									</div>
-								{/snippet}
-								{#snippet addButton()}
-									<div>
-										<span
-											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-										>
-											<button
-												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-												data-testid="add-button"
-												title={safeTranslate('add-' + model.info.localName)}
-												onclick={(_) => modalCreateForm(model)}
-												><i class="fa-solid fa-file-circle-plus"></i>
-											</button>
-										</span>
-									</div>
-								{/snippet}
-							</ModelTable>
-						{/if}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
+				<Tabs.Indicator />
+			</Tabs.List>
+			{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+				<Tabs.Content value={urlmodel}>
+					<div class="py-2"></div>
+					{#if model.table}
+						{@const field = data.model.reverseForeignKeyFields?.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						<ModelTable
+							source={model.table}
+							deleteForm={model.deleteForm}
+							URLModel={urlmodel}
+							canSelectObject={canEditObject}
+							baseEndpoint="/{urlmodel}?genericcollection={page.params.id}"
+							disableDelete={true}
+						>
+							{#snippet selectButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+										<button
+											class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+											data-testid="select-button"
+											title={safeTranslate('select-' + urlmodel)}
+											onclick={(_) => modalUpdateForm(urlmodel)}
+											><i class="fa-solid fa-hand-pointer"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+							{#snippet addButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+										<button
+											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+											data-testid="add-button"
+											title={safeTranslate('add-' + model.info.localName)}
+											onclick={(_) => modalCreateForm(model)}
+											><i class="fa-solid fa-file-circle-plus"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+						</ModelTable>
+					{/if}
+				</Tabs.Content>
+			{/each}
 		</Tabs>
 	</div>
 {/if}

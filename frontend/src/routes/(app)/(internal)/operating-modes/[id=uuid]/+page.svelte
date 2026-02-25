@@ -105,71 +105,67 @@
 			onValueChange={(e) => {
 				group = e.value;
 			}}
-			listJustify="justify-center"
 		>
-			{#snippet list()}
+			<Tabs.List>
 				{#each Object.entries(data.relatedModels).sort( ([a], [b]) => a.localeCompare(b) ) as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.table.body.length > 0}
 							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						<div class="py-2"></div>
-						{#if model.table}
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							<ModelTable
-								source={model.table}
-								deleteForm={model.deleteForm}
-								URLModel={urlmodel}
-								canSelectObject={canEditObject}
-								baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
-								disableDelete={field?.disableDelete ?? false}
-							>
-								{#snippet selectButton()}
-									{#if urlmodel === 'elementary-actions'}
-										<div>
-											<span
-												class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
-											>
-												<button
-													class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-													data-testid="select-button"
-													title={m.selectElementaryActions()}
-													onclick={(_) => modalUpdateForm()}
-													><i class="fa-solid fa-hand-pointer"></i>
-												</button>
-											</span>
-										</div>
-									{/if}
-								{/snippet}
-								{#snippet addButton()}
+				<Tabs.Indicator />
+			</Tabs.List>
+			{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+				<Tabs.Content value={urlmodel}>
+					<div class="py-2"></div>
+					{#if model.table}
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						<ModelTable
+							source={model.table}
+							deleteForm={model.deleteForm}
+							URLModel={urlmodel}
+							canSelectObject={canEditObject}
+							baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
+							disableDelete={field?.disableDelete ?? false}
+						>
+							{#snippet selectButton()}
+								{#if urlmodel === 'elementary-actions'}
 									<div>
 										<span
 											class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs"
 										>
 											<button
-												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-												data-testid="add-button"
-												title={safeTranslate('add-' + model.info.localName)}
-												onclick={(_) => modalCreateForm(model)}
-												><i class="fa-solid fa-file-circle-plus"></i>
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-button"
+												title={m.selectElementaryActions()}
+												onclick={(_) => modalUpdateForm()}
+												><i class="fa-solid fa-hand-pointer"></i>
 											</button>
 										</span>
 									</div>
-								{/snippet}
-							</ModelTable>
-						{/if}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
+								{/if}
+							{/snippet}
+							{#snippet addButton()}
+								<div>
+									<span class="inline-flex overflow-hidden rounded-md border bg-surface-50-950 shadow-xs">
+										<button
+											class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+											data-testid="add-button"
+											title={safeTranslate('add-' + model.info.localName)}
+											onclick={(_) => modalCreateForm(model)}
+											><i class="fa-solid fa-file-circle-plus"></i>
+										</button>
+									</span>
+								</div>
+							{/snippet}
+						</ModelTable>
+					{/if}
+				</Tabs.Content>
+			{/each}
 		</Tabs>
 	</div>
 {/if}

@@ -33,10 +33,24 @@
 	}: Props = $props();
 
 	const chart_id = `${name}_circular_div`;
+	let chart: any = null;
+	let showStakeholderLabels = $state(true);
+
+	const maturityColors = {
+		'<4': '#E73E51', // red - low maturity
+		'4-5': '#DE8898', // pink - medium-low maturity
+		'6-7': '#BAD9EA', // light blue - medium-high maturity
+		'>7': '#8A8B8A' // gray - high maturity
+	};
+
+	function getStakeholderLabel(value: unknown): string {
+		if (typeof value !== 'string') return '';
+		return value.split('-').slice(0, -1).join('-') || '';
+	}
 
 	onMount(async () => {
 		const echarts = await import('echarts');
-		let chart = echarts.init(
+		chart = echarts.init(
 			document.getElementById(chart_id),
 			document.documentElement.classList.contains('dark') ? 'dark' : null,
 			{ renderer: 'svg' }
@@ -48,14 +62,6 @@
 		const chartMax = data.chart_max || max;
 		const categoryBoundaries = data.category_boundaries || [];
 		const categoryLabelPositions = data.category_label_positions || [];
-
-		// Define colors for maturity groups (matching original radar chart)
-		const maturityColors = {
-			'<4': '#E73E51', // red - low maturity
-			'4-5': '#DE8898', // pink - medium-low maturity
-			'6-7': '#BAD9EA', // light blue - medium-high maturity
-			'>7': '#8A8B8A' // gray - high maturity
-		};
 
 		const option = {
 			title: {
@@ -138,6 +144,18 @@
 					color: maturityColors[group],
 					type: 'scatter',
 					coordinateSystem: 'polar',
+					label: {
+						show: showStakeholderLabels,
+						position: 'right',
+						color: '#4b5563',
+						fontSize: 10,
+						formatter: function (params) {
+							return getStakeholderLabel(params.value[3]);
+						}
+					},
+					labelLayout: {
+						hideOverlap: true
+					},
 					symbolSize: function (val) {
 						// val[2] contains the exposure value (dependency * penetration * 4), range 0-64
 						// Scale with offset to ensure visibility
@@ -252,13 +270,34 @@
 		// Clean up event listener on component unmount
 		return () => {
 			window.removeEventListener('resize', resizeHandler);
+			chart?.dispose();
 		};
+	});
+
+	$effect(() => {
+		showStakeholderLabels;
+		chart?.setOption({
+			series: (data.maturity_groups || ['<4', '4-5', '6-7', '>7']).map((group) => ({
+				name: group,
+				label: {
+					show: showStakeholderLabels
+				}
+			}))
+		});
 	});
 </script>
 
-<div id={chart_id} class="{width} {height} {classesContainer}"></div>
-{#if data.not_displayed > 0}
-	<div class="text-center">
-		⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+<div class="flex-2">
+	<div id={chart_id} class="{width} {height} {classesContainer}"></div>
+	{#if data.not_displayed > 0}
+		<div class="text-center">
+			⚠️ {data.not_displayed} items are not displayed as they are lacking data.
+		</div>
+	{/if}
+	<div class="m-10 no-print">
+		<label class="mb-2 inline-flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+			<input type="checkbox" class="checkbox" bind:checked={showStakeholderLabels} />
+			<span>{m.showStakeholdersName()}</span>
+		</label>
 	</div>
-{/if}
+</div>

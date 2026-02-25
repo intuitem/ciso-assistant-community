@@ -13,7 +13,7 @@
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { getSecureRedirect } from '$lib/utils/helpers';
-	import { ProgressRing, Tabs } from '@skeletonlabs/skeleton-svelte';
+	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { hideSuggestions } from '$lib/utils/stores';
@@ -502,143 +502,142 @@
 							group = e.value;
 						}}
 					>
-						{#snippet list()}
+						<Tabs.List>
 							{#if !page.data.user.is_third_party}
-								<Tabs.Control value="applied_controls">{m.appliedControls()}</Tabs.Control>
+								<Tabs.Trigger value="applied_controls">{m.appliedControls()}</Tabs.Trigger>
 							{/if}
-							<Tabs.Control value="evidences">{m.evidences()}</Tabs.Control>
-							<Tabs.Control value="security_exceptions">{m.securityExceptions()}</Tabs.Control>
-						{/snippet}
-						{#snippet content()}
-							<Tabs.Panel value="applied_controls">
-								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-									<i class="fa-solid fa-info-circle"></i>
-									<p>{m.requirementAppliedControlHelpText()}</p>
-								</div>
-								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-									<span class="flex flex-row justify-end items-center space-x-2">
-										{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
-											<button
-												class="btn text-white bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
-												type="button"
-												onclick={() => {
-													modalConfirmCreateSuggestedControls(
-														page.data.requirementAssessment.id,
-														page.data.requirementAssessment.name,
-														'?/createSuggestedControls'
-													);
-												}}
-											>
-												<span class="mr-2">
-													{#if createAppliedControlsLoading}
-														<ProgressRing
-															strokeWidth="16px"
-															meterStroke="stroke-white"
-															classes="-ml-2"
-															size="size-6"
-														/>
-													{:else}
-														<i class="fa-solid fa-fire-extinguisher"></i>
-													{/if}
-												</span>
-												{m.suggestControls()}
-											</button>
-										{/if}
+							<Tabs.Trigger value="evidences">{m.evidences()}</Tabs.Trigger>
+							<Tabs.Trigger value="security_exceptions">{m.securityExceptions()}</Tabs.Trigger>
+							<Tabs.Indicator />
+						</Tabs.List>
+						<Tabs.Content value="applied_controls">
+							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+								<i class="fa-solid fa-info-circle"></i>
+								<p>{m.requirementAppliedControlHelpText()}</p>
+							</div>
+							<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+								<span class="flex flex-row justify-end items-center space-x-2">
+									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && reference_controls.length > 0}
 										<button
-											class="btn preset-filled-primary-500 self-end"
-											onclick={modalMeasureCreateForm}
+											class="btn text-white bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit whitespace-normal"
 											type="button"
-											><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
+											onclick={() => {
+												modalConfirmCreateSuggestedControls(
+													page.data.requirementAssessment.id,
+													page.data.requirementAssessment.name,
+													'?/createSuggestedControls'
+												);
+											}}
 										>
-									</span>
-									{#key refreshKey}
-										<AutocompleteSelect
-											multiple
-											{form}
-											optionsEndpoint="applied-controls"
-											optionsDetailedUrlParameters={[
-												['scope_folder_id', page.data.requirementAssessment.folder.id]
-											]}
-											optionsExtraFields={[['folder', 'str']]}
-											field="applied_controls"
-											placeholder={m.appliedControlsPlaceholder()}
-										/>
-									{/key}
-									<ModelTable
-										baseEndpoint="/applied-controls?requirement_assessments={page.data
-											.requirementAssessment.id}"
-										source={page.data.tables['applied-controls']}
-										hideFilters={true}
-										URLModel="applied-controls"
-										expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
+											<span class="mr-2">
+												{#if createAppliedControlsLoading}
+													<Progress value={null}>
+														<Progress.Circle class="[--size:--spacing(6)] -ml-2">
+															<Progress.CircleTrack />
+															<Progress.CircleRange class="stroke-white" />
+														</Progress.Circle>
+													</Progress>
+												{:else}
+													<i class="fa-solid fa-fire-extinguisher"></i>
+												{/if}
+											</span>
+											{m.suggestControls()}
+										</button>
+									{/if}
+									<button
+										class="btn preset-filled-primary-500 self-end"
+										onclick={modalMeasureCreateForm}
+										type="button"
+										><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
+									>
+								</span>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="applied-controls"
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', page.data.requirementAssessment.folder.id]
+										]}
+										optionsExtraFields={[['folder', 'str']]}
+										field="applied_controls"
+										placeholder={m.appliedControlsPlaceholder()}
 									/>
-								</div>
-							</Tabs.Panel>
-							<Tabs.Panel value="evidences">
-								<div class="flex items-center mb-2 px-2 text-xs space-x-2">
-									<i class="fa-solid fa-info-circle"></i>
-									<p>{m.requirementEvidenceHelpText()}</p>
-								</div>
-								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-									<span class="flex flex-row justify-end items-center">
-										<button
-											class="btn preset-filled-primary-500 self-end"
-											onclick={modalEvidenceCreateForm}
-											type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
-										>
-									</span>
-									{#key refreshKey}
-										<AutocompleteSelect
-											multiple
-											{form}
-											optionsEndpoint="evidences"
-											optionsExtraFields={[['folder', 'str']]}
-											optionsDetailedUrlParameters={[
-												['scope_folder_id', page.data.requirementAssessment.folder.id]
-											]}
-											field="evidences"
-										/>
-									{/key}
-									<ModelTable
-										source={page.data.tables['evidences']}
-										hideFilters={true}
-										URLModel="evidences"
-										expectedCount={countMasked(page.data.requirementAssessment.evidences)}
-										baseEndpoint="/evidences?requirement_assessments={page.data
-											.requirementAssessment.id}"
+								{/key}
+								<ModelTable
+									baseEndpoint="/applied-controls?requirement_assessments={page.data
+										.requirementAssessment.id}"
+									source={page.data.tables['applied-controls']}
+									hideFilters={true}
+									URLModel="applied-controls"
+									expectedCount={countMasked(page.data.requirementAssessment.applied_controls)}
+								/>
+							</div>
+						</Tabs.Content>
+						<Tabs.Content value="evidences">
+							<div class="flex items-center mb-2 px-2 text-xs space-x-2">
+								<i class="fa-solid fa-info-circle"></i>
+								<p>{m.requirementEvidenceHelpText()}</p>
+							</div>
+							<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+								<span class="flex flex-row justify-end items-center">
+									<button
+										class="btn preset-filled-primary-500 self-end"
+										onclick={modalEvidenceCreateForm}
+										type="button"><i class="fa-solid fa-plus mr-2"></i>{m.addEvidence()}</button
+									>
+								</span>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="evidences"
+										optionsExtraFields={[['folder', 'str']]}
+										optionsDetailedUrlParameters={[
+											['scope_folder_id', page.data.requirementAssessment.folder.id]
+										]}
+										field="evidences"
 									/>
-								</div>
-							</Tabs.Panel>
-							<Tabs.Panel value="security_exceptions">
-								<div class="h-full flex flex-col space-y-2 rounded-container p-4">
-									<span class="flex flex-row justify-end items-center">
-										<button
-											class="btn preset-filled-primary-500 self-end"
-											onclick={modalSecurityExceptionCreateForm}
-											type="button"
-											><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
-										>
-									</span>
-									{#key refreshKey}
-										<AutocompleteSelect
-											multiple
-											{form}
-											optionsEndpoint="security-exceptions"
-											optionsExtraFields={[['folder', 'str']]}
-											field="security_exceptions"
-										/>
-									{/key}
-									<ModelTable
-										source={page.data.tables['security-exceptions']}
-										hideFilters={true}
-										URLModel="security-exceptions"
-										expectedCount={countMasked(page.data.requirementAssessment.security_exceptions)}
-										baseEndpoint="/security-exceptions?requirement_assessments={page.data
-											.requirementAssessment.id}"
+								{/key}
+								<ModelTable
+									source={page.data.tables['evidences']}
+									hideFilters={true}
+									URLModel="evidences"
+									expectedCount={countMasked(page.data.requirementAssessment.evidences)}
+									baseEndpoint="/evidences?requirement_assessments={page.data.requirementAssessment
+										.id}"
+								/>
+							</div>
+						</Tabs.Content>
+						<Tabs.Content value="security_exceptions">
+							<div class="h-full flex flex-col space-y-2 rounded-container p-4">
+								<span class="flex flex-row justify-end items-center">
+									<button
+										class="btn preset-filled-primary-500 self-end"
+										onclick={modalSecurityExceptionCreateForm}
+										type="button"
+										><i class="fa-solid fa-plus mr-2"></i>{m.addSecurityException()}</button
+									>
+								</span>
+								{#key refreshKey}
+									<AutocompleteSelect
+										multiple
+										{form}
+										optionsEndpoint="security-exceptions"
+										optionsExtraFields={[['folder', 'str']]}
+										field="security_exceptions"
 									/>
-								</div>
-							</Tabs.Panel>
-						{/snippet}
+								{/key}
+								<ModelTable
+									source={page.data.tables['security-exceptions']}
+									hideFilters={true}
+									URLModel="security-exceptions"
+									expectedCount={countMasked(page.data.requirementAssessment.security_exceptions)}
+									baseEndpoint="/security-exceptions?requirement_assessments={page.data
+										.requirementAssessment.id}"
+								/>
+							</div>
+						</Tabs.Content>
 					</Tabs>
 				</div>
 				<HiddenInput {form} field="folder" />
@@ -696,19 +695,29 @@
 					{#if computedScore !== null}
 						<div class="flex flex-row items-center space-x-4">
 							<span class="font-medium">{m.score()}</span>
-							<ProgressRing
-								strokeWidth="20px"
-								meterStroke={displayScoreColor(
-									computedScore,
-									page.data.compliance_assessment_score.max_score
-								)}
-								value={formatScoreValue(
-									computedScore || 0,
-									page.data.compliance_assessment_score.max_score
-								)}
-								classes="shrink-0"
-								size="size-10">{computedScore}</ProgressRing
-							>
+							<div class="shrink-0 relative">
+								<Progress
+									value={formatScoreValue(
+										computedScore || 0,
+										page.data.compliance_assessment_score.max_score
+									)}
+									min={0}
+									max={100}
+								>
+									<Progress.Circle class="[--size:--spacing(10)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(
+												computedScore,
+												page.data.compliance_assessment_score.max_score
+											)}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{computedScore}</span>
+									</div>
+								</Progress>
+							</div>
 						</div>
 					{:else if data.result !== 'not_applicable'}
 						<div class="flex flex-col">

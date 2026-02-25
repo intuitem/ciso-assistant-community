@@ -115,13 +115,8 @@
 										{/if}
 									</Anchor>
 								{:else}
-									<Tooltip
-										open={open[i]}
-										onOpenChange={(e) => (open[i] = e.open)}
-										openDelay={0}
-										zIndex="100"
-									>
-										{#snippet trigger()}
+									<Tooltip open={open[i]} onOpenChange={(e) => (open[i] = e.open)} openDelay={0}>
+										<Tooltip.Trigger>
 											<div class="text-surface-300-700 *:pointer-events-none">
 												<span
 													class="absolute flex items-center justify-center w-8 h-8 bg-surface-200-800 rounded-full -start-4 ring-4 ring-white"
@@ -139,59 +134,56 @@
 													<p class="text-sm text-start">{step.title}</p>
 												{/if}
 											</div>
-										{/snippet}
-										{#snippet content()}
-											<div
-												class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300"
-											>
-												<p
-													data-testid="activity-tooltip"
-													class="border-l-4 {borderColor} text-surface-600-400 p-2"
-												>
-													{step.tooltip}
-												</p>
-												<div class="arrow bg-surface-50-950"></div>
-											</div>
-										{/snippet}
+										</Tooltip.Trigger>
+										<Tooltip.Positioner>
+											<Tooltip.Content>
+												<div class="transition card bg-surface-50-950 shadow-lg p-4 z-20 duration-300">
+													<p
+														data-testid="activity-tooltip"
+														class="border-l-4 {borderColor} text-surface-600-400 p-2"
+													>
+														{step.tooltip}
+													</p>
+												</div>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 
 								{#if !step.disabled}
 									<Popover open={actionsOpen[i]} onOpenChange={(e) => (actionsOpen[i] = e.open)}>
-										{#snippet trigger()}
-											<span
-												role="button"
-												tabindex="0"
-												class="btn bg-initial"
-												aria-label="More options"
-												data-testid="sidebar-more-btn"
-											>
-												<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
-											</span>
-										{/snippet}
-										{#snippet content()}
-											<div
-												class="card whitespace-nowrap bg-surface-50-950 border border-surface-300-700 rounded-md py-2 w-fit shadow-lg space-y-1"
-												data-testid="sidebar-more-panel"
-											>
-												<form
-													action="/ebios-rm/{page.params.id}?/changeStepState"
-													method="POST"
-													use:enhance={updateStepStatus(i)}
+										<Popover.Trigger
+											class="btn bg-initial"
+											aria-label="More options"
+											data-testid="sidebar-more-btn"
+										>
+											<i class="fa-solid fa-ellipsis-vertical" aria-hidden="true"></i>
+										</Popover.Trigger>
+										<Popover.Positioner>
+											<Popover.Content>
+												<div
+													class="card whitespace-nowrap bg-surface-50-950 border border-surface-300-700 rounded-md py-2 w-fit shadow-lg space-y-1"
+													data-testid="sidebar-more-panel"
 												>
-													<input type="hidden" name="workshop" value={workshop} />
-													<input type="hidden" name="step" value={getStepNumber(i)} />
-													<input
-														type="hidden"
-														name="status"
-														value={step.status === 'done' ? 'in_progress' : 'done'}
-													/>
-													<button type="submit" class="btn bg-initial">
-														{step.status === 'done' ? m.markAsInProgress() : m.markAsDone()}
-													</button>
-												</form>
-											</div>
-										{/snippet}
+													<form
+														action="/ebios-rm/{page.params.id}?/changeStepState"
+														method="POST"
+														use:enhance={updateStepStatus(i)}
+													>
+														<input type="hidden" name="workshop" value={workshop} />
+														<input type="hidden" name="step" value={getStepNumber(i)} />
+														<input
+															type="hidden"
+															name="status"
+															value={step.status === 'done' ? 'in_progress' : 'done'}
+														/>
+														<button type="submit" class="btn bg-initial">
+															{step.status === 'done' ? m.markAsInProgress() : m.markAsDone()}
+														</button>
+													</form>
+												</div>
+											</Popover.Content>
+										</Popover.Positioner>
 									</Popover>
 								{/if}
 							</li>

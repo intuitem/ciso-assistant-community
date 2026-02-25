@@ -103,7 +103,11 @@
 					<span class="text-xs font-semibold text-surface-700-300">{m.checklistProgress()}</span>
 					<span class="text-xs text-surface-600-400">{checklistProgress}%</span>
 				</div>
-				<Progress value={checklistProgress} max={100} height="h-1.5" meter="bg-primary-500" />
+				<Progress value={checklistProgress} max={100}>
+					<Progress.Track class="h-1.5">
+						<Progress.Range class="bg-primary-500" />
+					</Progress.Track>
+				</Progress>
 			</a>
 		{/if}
 	</div>

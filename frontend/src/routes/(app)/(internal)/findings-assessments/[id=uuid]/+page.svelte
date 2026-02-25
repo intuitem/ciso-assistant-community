@@ -83,35 +83,34 @@
 				open={exportPopupOpen}
 				onOpenChange={(e) => (exportPopupOpen = e.open)}
 				positioning={{ placement: 'bottom' }}
-				triggerBase="btn preset-filled-primary-500 w-full"
-				contentBase="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1"
-				zIndex="1000"
 			>
-				{#snippet trigger()}
+				<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 					<span data-testid="export-button">
 						<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 					</span>
-				{/snippet}
-				{#snippet content()}
-					<div>
-						<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
-						<a
-							href="/findings-assessments/{data.data.id}/export/xlsx"
-							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-							>... {m.asXLSX()}</a
-						>
-						<a
-							href="/findings-assessments/{data.data.id}/export/md"
-							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-							>... {m.asMarkdown()}</a
-						>
-						<a
-							href="/findings-assessments/{data.data.id}/export/pdf"
-							class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
-							>... {m.asPDF()}</a
-						>
-					</div>
-				{/snippet}
+				</Popover.Trigger>
+				<Popover.Positioner>
+					<Popover.Content class="card whitespace-nowrap bg-surface-50-950 py-2 w-fit shadow-lg space-y-1">
+						<div>
+							<p class="block px-4 py-2 text-sm text-surface-950-50">{m.findingsAssessment()}</p>
+							<a
+								href="/findings-assessments/{data.data.id}/export/xlsx"
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asXLSX()}</a
+							>
+							<a
+								href="/findings-assessments/{data.data.id}/export/md"
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asMarkdown()}</a
+							>
+							<a
+								href="/findings-assessments/{data.data.id}/export/pdf"
+								class="block px-4 py-2 text-sm text-surface-950-50 hover:bg-surface-200-800"
+								>... {m.asPDF()}</a
+							>
+						</div>
+					</Popover.Content>
+				</Popover.Positioner>
 			</Popover>
 			<Anchor
 				href={`${page.url.pathname}/action-plan`}

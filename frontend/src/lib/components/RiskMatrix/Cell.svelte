@@ -41,11 +41,9 @@
 	<Popover
 		{open}
 		onOpenChange={(e) => (open = e.open)}
-		triggerBase="w-full h-full"
 		positioning={{ placement: 'top', offset: { mainAxis: 0, crossAxis: 0 } }}
-		arrow
 	>
-		{#snippet trigger()}
+		<Popover.Trigger class="w-full h-full">
 			<div
 				class="flex flex-wrap items-center space-x-1 justify-center w-full h-full cursor-pointer whitespace-normal overflow-y-scroll hide-scrollbar group {classesCellText(
 					cell.level.hexcolor
@@ -60,18 +58,19 @@
 					{cellData.length}
 				</div>
 			</div>
-		{/snippet}
-		{#snippet content()}
-			<div class="card bg-surface-300-700">
-				<div class="p-4 max-h-56 overflow-y-auto">
-					{#each cellData as item}
-						{@const SvelteComponent = dataItemComponent}
-						<SvelteComponent data={item} />
-					{/each}
-					<div class="arrow bg-surface-300-700"></div>
+		</Popover.Trigger>
+		<Popover.Positioner>
+			<Popover.Content>
+				<div class="card bg-surface-300-700">
+					<div class="p-4 max-h-56 overflow-y-auto">
+						{#each cellData as item}
+							{@const SvelteComponent = dataItemComponent}
+							<SvelteComponent data={item} />
+						{/each}
+					</div>
 				</div>
-			</div>
-		{/snippet}
+			</Popover.Content>
+		</Popover.Positioner>
 	</Popover>
 {:else}
 	<div

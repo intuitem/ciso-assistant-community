@@ -95,10 +95,10 @@
 	};
 </script>
 
-<div class="card bg-surface-50-950 p-6 shadow-md rounded-lg flex flex-col space-y-6">
+<div class="card bg-white p-6 shadow-md rounded-lg flex flex-col space-y-6">
 	{#await data.stream.data}
 		<div class="flex flex-col items-center justify-center py-8">
-			<div class="text-sm text-surface-600-400 mb-4">{m.xRaysLoadingData()}</div>
+			<div class="text-sm text-gray-600 mb-4">{m.xRaysLoadingData()}</div>
 			<LoadingSpinner />
 		</div>
 	{:then rawData}
@@ -110,7 +110,7 @@
 			{@const compliance_assessments = Object.values(folder.compliance_assessments.objects)}
 			{@const risk_assessments = Object.values(folder.risk_assessments.objects)}
 			<div
-				class="border border-surface-200-800 rounded-lg p-6 bg-surface-50-950/50 hover:shadow-md transition-shadow"
+				class="border border-gray-200 rounded-lg p-6 bg-gray-50/50 hover:shadow-md transition-shadow"
 			>
 				<div class="flex items-center gap-3 mb-4">
 					<span class="text-3xl">💡</span>
@@ -129,10 +129,9 @@
 						}
 						tabStates[folder.id] = e.value;
 					}}
-					listJustify="justify-center"
 				>
-					{#snippet list()}
-						<Tabs.Control value="compliance_assessments" labelBase="inert px-2"
+					<Tabs.List>
+						<Tabs.Trigger value="compliance_assessments" class="inert px-2"
 							>{m.complianceAssessments()}
 							{#if folder.compliance_assessments.errors.length > 0}
 								<span class="badge preset-tonal-error"
@@ -149,8 +148,8 @@
 									>{folder.compliance_assessments.info.length}</span
 								>
 							{/if}
-						</Tabs.Control>
-						<Tabs.Control value="risk_assessments" labelBase="inert px-2"
+						</Tabs.Trigger>
+						<Tabs.Trigger value="risk_assessments" class="inert px-2"
 							>{m.riskAssessments()}
 							{#if folder.risk_assessments.errors.length > 0}
 								<span class="badge preset-tonal-error">{folder.risk_assessments.errors.length}</span
@@ -166,379 +165,364 @@
 									>{folder.risk_assessments.info.length}</span
 								>
 							{/if}
-						</Tabs.Control>
-					{/snippet}
-					{#snippet content()}
-						<Tabs.Panel value="compliance_assessments">
-							<ul class="list-none pl-4 text-sm space-y-2">
-								{#each compliance_assessments as compliance_assessment, index}
-									<li class="h4 font-semibold mb-1">
-										<Anchor
-											href="/compliance-assessments/{compliance_assessment.object.id}"
-											class="hover:underline text-blue-600"
-											>{compliance_assessment.object.name}</Anchor
-										>
-									</li>
-									{@const quality_check = compliance_assessment.quality_check}
-									{@const aggregatedErrors = aggregateIssuesByType(
-										quality_check.errors,
-										'compliance-assessments',
-										compliance_assessment.object.id
-									)}
-									{@const aggregatedWarnings = aggregateIssuesByType(
-										quality_check.warnings,
-										'compliance-assessments',
-										compliance_assessment.object.id
-									)}
-									{@const aggregatedInfo = aggregateIssuesByType(
-										quality_check.info,
-										'compliance-assessments',
-										compliance_assessment.object.id
-									)}
-									<div class="flex flex-col space-y-3">
-										{#if aggregatedErrors.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2"
+						</Tabs.Trigger>
+						<Tabs.Indicator />
+					</Tabs.List>
+					<Tabs.Content value="compliance_assessments">
+						<ul class="list-none pl-4 text-sm space-y-2">
+							{#each compliance_assessments as compliance_assessment, index}
+								<li class="h4 font-semibold mb-1">
+									<Anchor
+										href="/compliance-assessments/{compliance_assessment.object.id}"
+										class="hover:underline text-blue-600"
+										>{compliance_assessment.object.name}</Anchor
+									>
+								</li>
+								{@const quality_check = compliance_assessment.quality_check}
+								{@const aggregatedErrors = aggregateIssuesByType(
+									quality_check.errors,
+									'compliance-assessments',
+									compliance_assessment.object.id
+								)}
+								{@const aggregatedWarnings = aggregateIssuesByType(
+									quality_check.warnings,
+									'compliance-assessments',
+									compliance_assessment.object.id
+								)}
+								{@const aggregatedInfo = aggregateIssuesByType(
+									quality_check.info,
+									'compliance-assessments',
+									compliance_assessment.object.id
+								)}
+								<div class="flex flex-col space-y-3">
+									{#if aggregatedErrors.length > 0}
+										<div class="space-y-2">
+											<div class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2">
+												<i class="fa-solid fa-bug text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedErrors.length}</span>
+												<span
+													>{aggregatedErrors.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
 												>
-													<i class="fa-solid fa-bug text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedErrors.length}</span>
-													<span
-														>{aggregatedErrors.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.errors.length}
-														{quality_check.errors.length === 1
-															? m.xRaysFinding()
-															: m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedErrors as error}
-														<li class="border-l-4 border-error-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(error.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each error.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
-																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
-																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.errors.length}
+													{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
+												</span>
 											</div>
-										{/if}
-										{#if aggregatedWarnings.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-warning rounded-lg px-4 py-2 flex items-center gap-2"
-												>
-													<i class="fa-solid fa-triangle-exclamation text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedWarnings.length}</span>
-													<span
-														>{aggregatedWarnings.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.warnings.length}
-														{quality_check.warnings.length === 1
-															? m.xRaysFinding()
-															: m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedWarnings as warning}
-														<li class="border-l-4 border-warning-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(warning.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each warning.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedErrors as error}
+													<li class="border-l-4 border-error-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(error.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each error.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
 																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
 																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
-											</div>
-										{/if}
-										{#if aggregatedInfo.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-secondary rounded-lg px-4 py-2 flex items-center gap-2"
-												>
-													<i class="fa-solid fa-circle-info text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedInfo.length}</span>
-													<span
-														>{aggregatedInfo.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.info.length}
-														{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedInfo as info}
-														<li class="border-l-4 border-secondary-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(info.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each info.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
-																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
 																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
-											</div>
-										{/if}
-									</div>
-									{#if index != compliance_assessments.length - 1}
-										<hr />
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
 									{/if}
-								{/each}
-							</ul>
-						</Tabs.Panel>
-						<Tabs.Panel value="risk_assessments">
-							<ul class="list-none pl-4 text-sm space-y-2">
-								{#each risk_assessments as risk_assessment, index}
-									<li class="h4 font-semibold mb-1">
-										<Anchor
-											href="/risk-assessments/{risk_assessment.object.id}"
-											class="hover:underline text-blue-600">{risk_assessment.object.name}</Anchor
-										>
-									</li>
-									{@const quality_check = risk_assessment.quality_check}
-									{@const aggregatedErrors = aggregateIssuesByType(
-										quality_check.errors,
-										'risk-assessments',
-										risk_assessment.object.id
-									)}
-									{@const aggregatedWarnings = aggregateIssuesByType(
-										quality_check.warnings,
-										'risk-assessments',
-										risk_assessment.object.id
-									)}
-									{@const aggregatedInfo = aggregateIssuesByType(
-										quality_check.info,
-										'risk-assessments',
-										risk_assessment.object.id
-									)}
-									<div class="flex flex-col space-y-3">
-										{#if aggregatedErrors.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2"
+									{#if aggregatedWarnings.length > 0}
+										<div class="space-y-2">
+											<div
+												class="preset-tonal-warning rounded-lg px-4 py-2 flex items-center gap-2"
+											>
+												<i class="fa-solid fa-triangle-exclamation text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedWarnings.length}</span>
+												<span
+													>{aggregatedWarnings.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
 												>
-													<i class="fa-solid fa-bug text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedErrors.length}</span>
-													<span
-														>{aggregatedErrors.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.errors.length}
-														{quality_check.errors.length === 1
-															? m.xRaysFinding()
-															: m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedErrors as error}
-														<li class="border-l-4 border-error-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(error.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each error.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
-																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
-																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.warnings.length}
+													{quality_check.warnings.length === 1
+														? m.xRaysFinding()
+														: m.xRaysFindings()}
+												</span>
 											</div>
-										{/if}
-										{#if aggregatedWarnings.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-warning rounded-lg px-4 py-2 flex items-center gap-2"
-												>
-													<i class="fa-solid fa-triangle-exclamation text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedWarnings.length}</span>
-													<span
-														>{aggregatedWarnings.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.warnings.length}
-														{quality_check.warnings.length === 1
-															? m.xRaysFinding()
-															: m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedWarnings as warning}
-														<li class="border-l-4 border-warning-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(warning.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each warning.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedWarnings as warning}
+													<li class="border-l-4 border-warning-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(warning.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each warning.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
 																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
 																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
-											</div>
-										{/if}
-										{#if aggregatedInfo.length > 0}
-											<div class="space-y-2">
-												<div
-													class="preset-tonal-secondary rounded-lg px-4 py-2 flex items-center gap-2"
-												>
-													<i class="fa-solid fa-circle-info text-lg"></i>
-													<span class="font-bold text-lg">{aggregatedInfo.length}</span>
-													<span
-														>{aggregatedInfo.length === 1
-															? m.xRaysIssueType()
-															: m.xRaysIssueTypes()}</span
-													>
-													<span class="text-sm opacity-75 ml-auto">
-														{quality_check.info.length}
-														{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
-													</span>
-												</div>
-												<ul class="list-none pl-2 text-sm space-y-4">
-													{#each aggregatedInfo as info}
-														<li class="border-l-4 border-secondary-500 pl-4 py-2">
-															<div class="font-semibold mb-2 text-base">
-																{safeTranslate(info.msgid)}
-															</div>
-															<div class="space-y-1.5">
-																{#each info.findings as finding, idx}
-																	<div
-																		class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
-																	>
-																		<span
-																			class="text-surface-400-600 text-xs font-mono min-w-[20px]"
-																			>{idx + 1}.</span
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
 																		>
-																		{#if finding.name}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{finding.name}</Anchor
-																			>
-																		{:else}
-																			<Anchor class="anchor text-sm" href={finding.link}
-																				>{m.xRaysView()}</Anchor
-																			>
-																		{/if}
-																	</div>
-																{/each}
-															</div>
-														</li>
-													{/each}
-												</ul>
-											</div>
-										{/if}
-									</div>
-									{#if index != risk_assessments.length - 1}
-										<hr />
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
 									{/if}
-								{/each}
-							</ul>
-						</Tabs.Panel>
-					{/snippet}
+									{#if aggregatedInfo.length > 0}
+										<div class="space-y-2">
+											<div
+												class="preset-tonal-secondary rounded-lg px-4 py-2 flex items-center gap-2"
+											>
+												<i class="fa-solid fa-circle-info text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedInfo.length}</span>
+												<span
+													>{aggregatedInfo.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
+												>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.info.length}
+													{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
+												</span>
+											</div>
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedInfo as info}
+													<li class="border-l-4 border-secondary-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(info.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each info.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
+																	>
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
+																		>
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
+																		>
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+								</div>
+								{#if index != compliance_assessments.length - 1}
+									<hr />
+								{/if}
+							{/each}
+						</ul>
+					</Tabs.Content>
+					<Tabs.Content value="risk_assessments">
+						<ul class="list-none pl-4 text-sm space-y-2">
+							{#each risk_assessments as risk_assessment, index}
+								<li class="h4 font-semibold mb-1">
+									<Anchor
+										href="/risk-assessments/{risk_assessment.object.id}"
+										class="hover:underline text-blue-600">{risk_assessment.object.name}</Anchor
+									>
+								</li>
+								{@const quality_check = risk_assessment.quality_check}
+								{@const aggregatedErrors = aggregateIssuesByType(
+									quality_check.errors,
+									'risk-assessments',
+									risk_assessment.object.id
+								)}
+								{@const aggregatedWarnings = aggregateIssuesByType(
+									quality_check.warnings,
+									'risk-assessments',
+									risk_assessment.object.id
+								)}
+								{@const aggregatedInfo = aggregateIssuesByType(
+									quality_check.info,
+									'risk-assessments',
+									risk_assessment.object.id
+								)}
+								<div class="flex flex-col space-y-3">
+									{#if aggregatedErrors.length > 0}
+										<div class="space-y-2">
+											<div class="preset-tonal-error rounded-lg px-4 py-2 flex items-center gap-2">
+												<i class="fa-solid fa-bug text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedErrors.length}</span>
+												<span
+													>{aggregatedErrors.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
+												>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.errors.length}
+													{quality_check.errors.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
+												</span>
+											</div>
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedErrors as error}
+													<li class="border-l-4 border-error-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(error.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each error.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
+																	>
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
+																		>
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
+																		>
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+									{#if aggregatedWarnings.length > 0}
+										<div class="space-y-2">
+											<div
+												class="preset-tonal-warning rounded-lg px-4 py-2 flex items-center gap-2"
+											>
+												<i class="fa-solid fa-triangle-exclamation text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedWarnings.length}</span>
+												<span
+													>{aggregatedWarnings.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
+												>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.warnings.length}
+													{quality_check.warnings.length === 1
+														? m.xRaysFinding()
+														: m.xRaysFindings()}
+												</span>
+											</div>
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedWarnings as warning}
+													<li class="border-l-4 border-warning-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(warning.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each warning.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
+																	>
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
+																		>
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
+																		>
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+									{#if aggregatedInfo.length > 0}
+										<div class="space-y-2">
+											<div
+												class="preset-tonal-secondary rounded-lg px-4 py-2 flex items-center gap-2"
+											>
+												<i class="fa-solid fa-circle-info text-lg"></i>
+												<span class="font-bold text-lg">{aggregatedInfo.length}</span>
+												<span
+													>{aggregatedInfo.length === 1
+														? m.xRaysIssueType()
+														: m.xRaysIssueTypes()}</span
+												>
+												<span class="text-sm opacity-75 ml-auto">
+													{quality_check.info.length}
+													{quality_check.info.length === 1 ? m.xRaysFinding() : m.xRaysFindings()}
+												</span>
+											</div>
+											<ul class="list-none pl-2 text-sm space-y-4">
+												{#each aggregatedInfo as info}
+													<li class="border-l-4 border-secondary-500 pl-4 py-2">
+														<div class="font-semibold mb-2 text-base">
+															{safeTranslate(info.msgid)}
+														</div>
+														<div class="space-y-1.5">
+															{#each info.findings as finding, idx}
+																<div
+																	class="flex items-center gap-2 hover:bg-surface-100-900 rounded px-2 py-1 transition-colors"
+																>
+																	<span class="text-surface-400-600 text-xs font-mono min-w-[20px]"
+																		>{idx + 1}.</span
+																	>
+																	{#if finding.name}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{finding.name}</Anchor
+																		>
+																	{:else}
+																		<Anchor class="anchor text-sm" href={finding.link}
+																			>{m.xRaysView()}</Anchor
+																		>
+																	{/if}
+																</div>
+															{/each}
+														</div>
+													</li>
+												{/each}
+											</ul>
+										</div>
+									{/if}
+								</div>
+								{#if index != risk_assessments.length - 1}
+									<hr />
+								{/if}
+							{/each}
+						</ul>
+					</Tabs.Content>
 				</Tabs>
 			</div>
 			{#if index != folders.length - 1}
