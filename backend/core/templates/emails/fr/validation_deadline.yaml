@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Échéance de validation dans ${days} jour(s)"
+body: |
+  Bonjour,
+
+  Ceci est un rappel que ${validation_count} demande(s) de validation approche(nt) de leur échéance dans ${days} jour(s) :
+
+  ${validation_list}
+
+  Veuillez examiner et traiter ces demandes avant l'échéance :
+  ${ciso_assistant_url}
+
+  Merci.

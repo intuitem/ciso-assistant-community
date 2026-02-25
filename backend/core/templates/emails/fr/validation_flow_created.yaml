@@ -1,0 +1,15 @@
+subject: "CISO Assistant: Nouvelle demande de validation requiert votre approbation"
+body: |
+  Bonjour,
+
+  Une nouvelle demande de validation vous a été assignée pour approbation :
+
+  - Référence : ${validation_ref_id}
+  - Demandeur : ${requester_name}
+  - Date limite de validation : ${validation_deadline}
+  - Domaine : ${folder_name}
+
+  Veuillez examiner et traiter cette demande de validation :
+  ${validation_url}
+
+  Merci.

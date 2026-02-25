@@ -97,6 +97,7 @@ READER_PERMISSIONS_LIST = [
     "view_dashboardwidget",
     # integrations
     "view_syncmapping",
+    "view_filteringlabel",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
