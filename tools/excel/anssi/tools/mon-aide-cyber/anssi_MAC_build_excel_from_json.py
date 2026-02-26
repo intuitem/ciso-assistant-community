@@ -243,17 +243,17 @@ def map_annotation_from_perimetre(perimetre: str | None) -> str:
     if not perimetre:
         return ""
     return (
-        "# **" + PERIMETRE_LABELS.get(perimetre, "") + "**"
+        "## **" + PERIMETRE_LABELS.get(perimetre, "") + "**"
         if PERIMETRE_LABELS.get(perimetre, "")
         else ""
     )
 
 
-def prepend_h1_markdown(text: str) -> str:
+def prepend_h2_markdown(text: str) -> str:
     stripped = text.lstrip()
-    if stripped.startswith("# "):
+    if stripped.startswith("## "):
         return text
-    return f"# {text}"
+    return f"## {text}"
 
 
 def insert_double_newline_before_title_word(text: str, limit_index: int) -> str:
@@ -278,13 +278,13 @@ def format_info_bulle_text(text: str) -> str:
         first_double_newline == -1 or first_newline_tab < first_double_newline
     ):
         value = insert_double_newline_before_title_word(value, first_newline_tab)
-        return prepend_h1_markdown(value)
+        return prepend_h2_markdown(value)
 
     # Generic case: if header-like part has at most 10 words, prefix with '# '
     header_part = value[:first_double_newline] if first_double_newline != -1 else value
     word_count = len(re.findall(r"\S+", header_part))
     if word_count <= 10:
-        return prepend_h1_markdown(value)
+        return prepend_h2_markdown(value)
 
     return value
 
@@ -583,7 +583,7 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             title = as_text(level_obj.get("titre"))
             pourquoi = as_text(level_obj.get("pourquoi"))
             comment = as_text(level_obj.get("comment"))
-            description = f"# Pourquoi ?\n{pourquoi}\n\n# Comment ?\n{comment}"
+            description = f"## Pourquoi ?\n{pourquoi}\n\n## Comment ?\n{comment}"
             ctx.ref_ctrl_rows.append(
                 {
                     "ref_id": f"{mesure_id}_{level_key}",
