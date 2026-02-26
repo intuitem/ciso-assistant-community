@@ -58,7 +58,6 @@
 	const has_threats = threats.length > 0;
 	const has_reference_controls = reference_controls.length > 0;
 
-
 	// Map implementation group ref_ids to their display names
 	const implementationGroupsDefinition =
 		data.requirementAssessment.compliance_assessment.framework?.implementation_groups_definition ??
@@ -90,7 +89,7 @@
 				debug: false,
 				invalidateAll: false,
 				origin: 'requirement-assessments',
-				suggestions: { reference_control: reference_controls },
+				suggestions: { reference_control: reference_controls }
 			}
 		};
 		const modal: ModalSettings = {
@@ -144,35 +143,38 @@
 
 	let createAppliedControlsLoading = $state(false);
 
-	let applied_controls_options = $state([])
-		
+	let applied_controls_options = $state([]);
+
 	async function fetchAppliedControlsOptions() {
-		console.debug("fetch applied controls")
+		console.debug('fetch applied controls');
 		try {
-			const url = `/applied-controls?scope_folder_id=${page.data.requirementAssessment.folder.id}`;
+			const url = `/applied-controls?scope_folder_id=${page.data.requirementAssessment.folder.id}&limit=0`;
 			const res = await fetch(url);
 			if (!res.ok) {
-				console.error("failed to fetch the applied controls list")
+				console.error('failed to fetch the applied controls list');
 				return;
 			}
 
 			const applied_controls = await res.json();
 			const reference_controls_list = reference_controls.map((rc) => rc.id);
-			applied_controls_options = applied_controls.results.map((t: any) => {
-				const label = `${t.folder.str}/${t.name}`;
-				return {
-					value: t.id,
-					label,
-					translatedLabel: label,
-					suggested: reference_controls_list.includes(t.reference_control?.id),
-					ref: t.reference_control?.id
-				};
-			}).sort((a, b) => {
-				// Show suggested items first
-				if (a.suggested && !b.suggested) return -1;
-				if (!a.suggested && b.suggested) return 1;
-			})
-			console.debug("updated applied_controls_options", $state.snapshot(applied_controls_options));
+			applied_controls_options = applied_controls.results
+				.map((t: any) => {
+					const label = `${t.folder.str}/${t.name}`;
+					return {
+						value: t.id,
+						label,
+						translatedLabel: label,
+						suggested: reference_controls_list.includes(t.reference_control?.id),
+						ref: t.reference_control?.id
+					};
+				})
+				.sort((a, b) => {
+					// Show suggested items first
+					if (a.suggested && !b.suggested) return -1;
+					if (!a.suggested && b.suggested) return 1;
+					return 0;
+				});
+			console.debug('updated applied_controls_options', $state.snapshot(applied_controls_options));
 		} catch (error) {
 			console.error('Unable to fetch applied controls', error);
 		}
@@ -344,7 +346,6 @@
 	onMount(async () => {
 		await fetchAppliedControlsOptions();
 	});
-
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -592,16 +593,16 @@
 										><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 									>
 								</span>
-									{#if applied_controls_options.length}
-										{#key applied_controls_options}
-											<AutocompleteSelect
-												multiple
-												{form}
-												options={applied_controls_options}
-												field="applied_controls"
-											/>
-										{/key}
-									{/if}
+								{#if applied_controls_options.length}
+									{#key applied_controls_options}
+										<AutocompleteSelect
+											multiple
+											{form}
+											options={applied_controls_options}
+											field="applied_controls"
+										/>
+									{/key}
+								{/if}
 								<ModelTable
 									baseEndpoint="/applied-controls?requirement_assessments={page.data
 										.requirementAssessment.id}"
