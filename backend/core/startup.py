@@ -1271,26 +1271,6 @@ def startup(sender: AppConfig, **kwargs):
     )
     auditee.permissions.set(auditee_permissions)
 
-    # Backfill auditee user groups for existing domain folders
-    auditee_role = Role.objects.get(name=RoleCodename.AUDITEE.value)
-    for domain_folder in Folder.objects.filter(content_type=Folder.ContentType.DOMAIN):
-        if not UserGroup.objects.filter(
-            name=str(UserGroupCodename.AUDITEE), folder=domain_folder
-        ).exists():
-            ug = UserGroup.objects.create(
-                name=str(UserGroupCodename.AUDITEE),
-                folder=domain_folder,
-                builtin=True,
-            )
-            ra = RoleAssignment.objects.create(
-                user_group=ug,
-                role=auditee_role,
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra.perimeter_folders.add(domain_folder)
-
     # if global auditees user group does not exist, then create it
     if not UserGroup.objects.filter(
         name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
@@ -1302,7 +1282,7 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee_role,
+            role=auditee,
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
