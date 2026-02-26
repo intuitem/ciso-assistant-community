@@ -149,7 +149,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// Session is invalid
 		if (clonedResponse.status === 410) logoutUser(event);
 
-		if (clonedResponse.status === 401) {
+		if (clonedResponse.status === 401 && request.method !== 'DELETE') {
 			const data = await clonedResponse.json();
 			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
 			console.log(data);
