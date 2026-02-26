@@ -124,10 +124,7 @@
 	}
 
 	// Function to update requirement assessments
-	async function update(
-		requirementAssessment: Record<string, any>,
-		field: string
-	) {
+	async function update(requirementAssessment: Record<string, any>, field: string) {
 		const value = requirementAssessment[field];
 		await updateBulk(requirementAssessment, {
 			[field]: value
