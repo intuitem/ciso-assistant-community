@@ -2698,6 +2698,16 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_associated_objects_count(self, obj):
         """Prefer annotated or prefetched counts to avoid extra DB queries."""
@@ -3572,6 +3582,9 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+    accreditations = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
@@ -3595,6 +3608,9 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
             ("evidences", "has_evidences"),
             ("security_exceptions", "has_security_exceptions"),
             ("policies", "has_policies"),
+            ("processings", "has_processings"),
+            ("accreditations", "has_accreditations"),
+            ("contracts", "has_contracts"),
         ]
         prefetched = getattr(obj, "_prefetched_objects_cache", {})
         for field_name, flag_name in field_map:

@@ -7886,6 +7886,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
         Policy,
         blank=True,
     )
+    processings = models.ManyToManyField(
+        "privacy.Processing",
+        blank=True,
+    )
+    accreditations = models.ManyToManyField(
+        "pmbok.Accreditation",
+        blank=True,
+    )
+    contracts = models.ManyToManyField(
+        "tprm.Contract",
+        blank=True,
+    )
     request_notes = models.TextField(null=True, blank=True)
     requester = models.ForeignKey(
         User,
@@ -7970,6 +7982,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "evidences",
             "security_exceptions",
             "policies",
+            "processings",
+            "accreditations",
+            "contracts",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
