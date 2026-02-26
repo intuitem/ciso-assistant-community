@@ -1,5 +1,5 @@
 import { ALLAUTH_API_URL, BASE_API_URL } from '$lib/utils/constants';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { activateTOTPSchema } from './mfa/utils/schemas';
 import { message, setError, superValidate } from 'sveltekit-superforms';
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async (event) => {
 		.then((res) => res.json());
 	if (authenticatorsResponse.status !== 200) {
 		console.error('Could not get authenticators', authenticatorsResponse);
-		fail(authenticatorsResponse.status, { error: 'Could not get authenticators' });
+		throw error(authenticatorsResponse.status, 'Could not get authenticators');
 	}
 	const authenticators = authenticatorsResponse.data;
 
@@ -28,7 +28,10 @@ export const load: PageServerLoad = async (event) => {
 	const totpResponse = await event.fetch(totpEndpoint).then((res) => res.json());
 	totp = totpResponse.meta;
 
-	if (authenticators.find((auth) => auth.type === 'recovery_codes')) {
+	if (
+		Array.isArray(authenticators) &&
+		authenticators.find((auth) => auth.type === 'recovery_codes')
+	) {
 		const recoveryCodesEndpoint = `${authenticatorsEndpoint}/recovery-codes`;
 		const recoveryCodesResponse = await event
 			.fetch(recoveryCodesEndpoint)
@@ -44,7 +47,7 @@ export const load: PageServerLoad = async (event) => {
 	const personalAccessTokensResponse = await event.fetch(personalAccessTokensEndpoint);
 	if (!personalAccessTokensResponse.ok) {
 		console.error('Could not get personal access tokens', personalAccessTokensResponse);
-		fail(personalAccessTokensResponse.status, { error: 'Could not get personal access tokens' });
+		throw error(personalAccessTokensResponse.status, 'Could not get personal access tokens');
 	}
 	const personalAccessTokens = await personalAccessTokensResponse.json();
 	const personalAccessTokenCreateForm = await superValidate(zod(AuthTokenCreateSchema));
