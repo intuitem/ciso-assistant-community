@@ -32,8 +32,7 @@ from openpyxl import Workbook
 FRAMEWORK_HEADERS = [
     "assessable",
     "depth",
-    "ref_id",
-    "urn_id",
+    "node_id",
     "name",
     "description",
     "annotation",
@@ -370,7 +369,7 @@ def append_framework_row(ctx: Context, row: dict[str, str]) -> int:
     idx = len(ctx.framework_rows)
     ctx.framework_rows.append(row)
 
-    urn = row.get("urn_id", "")
+    urn = row.get("node_id", "")
     if urn:
         ctx.framework_index_by_urn[urn] = idx
 
@@ -439,8 +438,7 @@ def process_question(
     framework_row = {
         "assessable": "x",
         "depth": "2",
-        "ref_id": ref_id,
-        "urn_id": qid.lower(),
+        "node_id": qid.lower(),
         "name": name,
         "description": as_text(question.get("description")),
         "annotation": annotation,
@@ -495,8 +493,7 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
             {
                 "assessable": "",
                 "depth": "1",
-                "ref_id": as_text(theme_num),
-                "urn_id": theme_key.lower(),
+                "node_id": theme_key.lower(),
                 "name": as_text(theme_obj.get("libelle")),
                 "description": as_text(theme_obj.get("description")),
                 "annotation": "",
