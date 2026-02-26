@@ -1,0 +1,8 @@
+# GitHub Archive
+*.zip
+
+# Extracted ZIP folder
+/*/*
+
+# Extracted content 
+*.json
