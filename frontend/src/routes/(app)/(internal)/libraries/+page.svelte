@@ -170,11 +170,6 @@
 
 								const newValues = Array.from(currentValues);
 								filterValues[config.field] = newValues.map((v) => ({ value: v }));
-
-								form.form.update((currentData) => {
-									currentData[config.field] = newValues.length > 0 ? newValues : null;
-									return currentData;
-								});
 							} else if (config.type === 'boolean') {
 								const currentValue = quickFilterValues[config.field] as boolean;
 								const newValue = !currentValue;
@@ -185,14 +180,7 @@
 								} else {
 									delete filterValues[config.field];
 								}
-
-								form.form.update((currentData) => {
-									currentData[config.field] = newValue ? 'true' : null;
-									return currentData;
-								});
 							}
-
-							invalidateTable();
 						}}
 					>
 						<span class="flex items-center gap-2">

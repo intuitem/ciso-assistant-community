@@ -80,8 +80,11 @@ class BaseModelSerializer(serializers.ModelSerializer):
             folder = Folder.get_folder(instance_or_data)
         if folder is None:
             return
+        request = self.context.get("request")
+        if request is None:
+            return
         if not RoleAssignment.is_access_allowed(
-            user=self.context["request"].user,
+            user=request.user,
             perm=Permission.objects.get(
                 codename=f"{action}_{self.Meta.model._meta.model_name}",
             ),
@@ -897,6 +900,9 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
     qualifications = serializers.SlugRelatedField(
         slug_field="name", read_only=True, many=True
     )
+    risk_origin = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=False
+    )
 
     class Meta:
         model = RiskScenario
@@ -920,6 +926,7 @@ class RiskScenarioImportExportSerializer(BaseModelSerializer):
             "created_at",
             "updated_at",
             "qualifications",
+            "risk_origin",
         ]
 
 
@@ -1542,6 +1549,47 @@ class FolderWriteSerializer(BaseModelSerializer):
             "content_type",
         ]
 
+    def update(self, instance, validated_data):
+        if (
+            instance.content_type == Folder.ContentType.ROOT
+            and "create_iam_groups" in validated_data
+            and validated_data["create_iam_groups"] != instance.create_iam_groups
+        ):
+            raise serializers.ValidationError(
+                {"create_iam_groups": "globalFolderMustKeepIamGroupsEnabled"}
+            )
+
+        create_flag_changed = (
+            instance.content_type == Folder.ContentType.DOMAIN
+            and "create_iam_groups" in validated_data
+            and validated_data["create_iam_groups"] != instance.create_iam_groups
+        )
+        if create_flag_changed:
+            new_value = validated_data["create_iam_groups"]
+            if new_value:
+                with transaction.atomic():
+                    updated_instance = super().update(instance, validated_data)
+                    Folder.create_default_ug_and_ra(updated_instance)
+                return updated_instance
+
+            auto_groups = UserGroup.objects.filter(folder=instance, builtin=True)
+            auto_groups_exist = auto_groups.exists()
+            if (
+                auto_groups_exist
+                and User.objects.filter(user_groups__in=auto_groups).exists()
+            ):
+                raise serializers.ValidationError(
+                    {"create_iam_groups": "cannotDisableIamGroupsAssignedUsers"}
+                )
+            with transaction.atomic():
+                updated_instance = super().update(instance, validated_data)
+                if auto_groups_exist:
+                    RoleAssignment.objects.filter(user_group__in=auto_groups).delete()
+                    auto_groups.delete()
+            return updated_instance
+
+        return super().update(instance, validated_data)
+
     def validate_name(self, value):
         """
         Check that the folder name does not contain the character "/"
@@ -1590,6 +1638,7 @@ class FolderImportExportSerializer(BaseModelSerializer):
             "name",
             "description",
             "content_type",
+            "create_iam_groups",
             "created_at",
             "updated_at",
         ]
@@ -2773,6 +2822,7 @@ class QuickStartSerializer(serializers.Serializer):
         folder_data = {
             "content_type": Folder.ContentType.DOMAIN,
             "name": "Starter",
+            "create_iam_groups": True,
         }
         folder = Folder.objects.filter(**folder_data).first()
         if not folder:
@@ -3305,6 +3355,51 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     FlowEvent.objects.filter(validation_flow=updated_instance).update(
                         folder=updated_instance.folder
                     )
+
+            # Notify the other party about the status change (after commit)
+            def _send_update_notification():
+                try:
+                    from core.tasks import send_validation_flow_updated_notification
+
+                    actor_name = (
+                        f"{request_user.first_name} {request_user.last_name}".strip()
+                        or request_user.email
+                    )
+
+                    # Approver acted → notify requester
+                    if (
+                        request_user == updated_instance.approver
+                        and updated_instance.requester
+                        and updated_instance.requester.email
+                    ):
+                        send_validation_flow_updated_notification(
+                            updated_instance.id,
+                            updated_instance.requester.email,
+                            updated_instance.get_status_display(),
+                            actor_name,
+                            event_notes,
+                        )
+                    # Requester acted → notify approver
+                    elif (
+                        request_user == updated_instance.requester
+                        and updated_instance.approver
+                        and updated_instance.approver.email
+                    ):
+                        send_validation_flow_updated_notification(
+                            updated_instance.id,
+                            updated_instance.approver.email,
+                            updated_instance.get_status_display(),
+                            actor_name,
+                            event_notes,
+                        )
+                except Exception as e:
+                    logger.error(
+                        "Failed to send validation flow update notification",
+                        validation_flow_id=updated_instance.id,
+                        error=str(e),
+                    )
+
+            transaction.on_commit(_send_update_notification)
 
             return updated_instance
 

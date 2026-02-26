@@ -106,7 +106,9 @@ def _get_root_folder() -> Folder | None:
     pre-migration checks can instantiate models without failing.
     """
     try:
-        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        return Folder.objects.only("id", "content_type").get(
+            content_type=Folder.ContentType.ROOT
+        )
     except Folder.DoesNotExist:
         return None
     except (OperationalError, ProgrammingError):
@@ -136,7 +138,9 @@ class Folder(NameDescriptionMixin):
             cached_root = state.folders.get(state.root_folder_id)
             if cached_root is not None:
                 return cached_root
-        return Folder.objects.get(content_type=Folder.ContentType.ROOT)
+        return Folder.objects.only("id", "content_type").get(
+            content_type=Folder.ContentType.ROOT
+        )
 
     @staticmethod
     def get_root_folder_id() -> uuid.UUID | None:
@@ -162,6 +166,10 @@ class Folder(NameDescriptionMixin):
         default=_get_root_folder,
     )
     builtin = models.BooleanField(default=False)
+    create_iam_groups = models.BooleanField(
+        default=False,
+        help_text=_("Automatically provision IAM groups for domain folders."),
+    )
 
     filtering_labels = models.ManyToManyField(
         "core.FilteringLabel",
@@ -313,78 +321,66 @@ class Folder(NameDescriptionMixin):
 
     @staticmethod
     def create_default_ug_and_ra(folder: "Folder"):
-        if folder.content_type == Folder.ContentType.DOMAIN:
-            readers = UserGroup.objects.create(
-                name=str(UserGroupCodename.READER), folder=folder, builtin=True
-            )
-            approvers = UserGroup.objects.create(
-                name=str(UserGroupCodename.APPROVER), folder=folder, builtin=True
-            )
-            analysts = UserGroup.objects.create(
-                name=str(UserGroupCodename.ANALYST), folder=folder, builtin=True
-            )
-            managers = UserGroup.objects.create(
-                name=str(UserGroupCodename.DOMAIN_MANAGER), folder=folder, builtin=True
-            )
-            ra1 = RoleAssignment.objects.create(
-                user_group=readers,
-                role=Role.objects.get(name=RoleCodename.READER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra1.perimeter_folders.add(folder)
-            ra2 = RoleAssignment.objects.create(
-                user_group=approvers,
-                role=Role.objects.get(name=RoleCodename.APPROVER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra2.perimeter_folders.add(folder)
-            ra3 = RoleAssignment.objects.create(
-                user_group=analysts,
-                role=Role.objects.get(name=RoleCodename.ANALYST),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra3.perimeter_folders.add(folder)
-            ra4 = RoleAssignment.objects.create(
-                user_group=managers,
-                role=Role.objects.get(name=RoleCodename.DOMAIN_MANAGER),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra4.perimeter_folders.add(folder)
-            auditees = UserGroup.objects.create(
-                name=str(UserGroupCodename.AUDITEE), folder=folder, builtin=True
-            )
-            ra5 = RoleAssignment.objects.create(
-                user_group=auditees,
-                role=Role.objects.get(name=RoleCodename.AUDITEE),
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra5.perimeter_folders.add(folder)
-            # Clear the cache after a new folder is created - purposely clearing everything
+        if (
+            folder.content_type != Folder.ContentType.DOMAIN
+            or not folder.create_iam_groups
+        ):
+            return
 
-            # Create a UG and RA for each non-builtin role (idempotent)
-            with transaction.atomic():
-                for role in Role.objects.filter(builtin=False):
-                    ug, _ = UserGroup.objects.get_or_create(
-                        name=role.name, folder=folder, defaults={"builtin": False}
-                    )
-                    ra, created = RoleAssignment.objects.get_or_create(
-                        user_group=ug,
-                        role=role,
-                        folder=Folder.get_root_folder(),
-                        defaults={"builtin": False, "is_recursive": True},
-                    )
-                    # Ensure perimeter folder link exists
-                    ra.perimeter_folders.add(folder)
+        root_folder = Folder.get_root_folder()
+        builtin_pairs = [
+            (UserGroupCodename.READER, RoleCodename.READER),
+            (UserGroupCodename.APPROVER, RoleCodename.APPROVER),
+            (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
+            (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
+            (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
+        ]
+
+        for ug_codename, role_codename in builtin_pairs:
+            ug, created = UserGroup.objects.get_or_create(
+                name=str(ug_codename),
+                folder=folder,
+                defaults={"builtin": True},
+            )
+            if not created or not ug.builtin:
+                if not ug.builtin:
+                    ug.builtin = True
+                ug.save(update_fields=["builtin"])
+            role = Role.objects.get(name=str(role_codename))
+            ra, _ = RoleAssignment.objects.get_or_create(
+                user_group=ug,
+                role=role,
+                folder=root_folder,
+                defaults={"builtin": True, "is_recursive": True},
+            )
+            Folder._ensure_recursive_assignment(ra)
+            ra.perimeter_folders.add(folder)
+
+        with transaction.atomic():
+            for role in Role.objects.filter(builtin=False):
+                ug, created = UserGroup.objects.get_or_create(
+                    name=role.name,
+                    folder=folder,
+                    defaults={"builtin": True},
+                )
+                if not created or not ug.builtin:
+                    if not ug.builtin:
+                        ug.builtin = True
+                    ug.save(update_fields=["builtin"])
+                ra, _ = RoleAssignment.objects.get_or_create(
+                    user_group=ug,
+                    role=role,
+                    folder=root_folder,
+                    defaults={"builtin": False, "is_recursive": True},
+                )
+                Folder._ensure_recursive_assignment(ra)
+                ra.perimeter_folders.add(folder)
+
+    @staticmethod
+    def _ensure_recursive_assignment(role_assignment: "RoleAssignment") -> None:
+        if not role_assignment.is_recursive:
+            role_assignment.is_recursive = True
+            role_assignment.save(update_fields=["is_recursive"])
 
 
 class FolderMixin(models.Model):
@@ -440,20 +436,19 @@ class UserGroup(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = _("user groups")
 
     def __str__(self) -> str:
-        if self.builtin:
-            return f"{self.folder.name} - {BUILTIN_USERGROUP_CODENAMES.get(self.name)}"
-        return f"{self.folder.name} - {self.name}"
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
+        return f"{self.folder.name} - {resolved_name}"
 
     def get_name_display(self) -> str:
         return self.name
 
     def get_localization_dict(self) -> dict:
-        return {
-            "folder": self.folder.name,
-            "role": BUILTIN_USERGROUP_CODENAMES.get(self.name)
-            if self.builtin
-            else self.name,
-        }
+        resolved_name = (
+            BUILTIN_USERGROUP_CODENAMES.get(self.name) if self.builtin else self.name
+        ) or self.name
+        return {"folder": self.folder.name, "role": resolved_name}
 
     def save(self, *args, **kwargs):
         result = super().save(*args, **kwargs)
