@@ -1837,7 +1837,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA criticality assessment choices")
     def dora_criticality_assessment(self, request):
-        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+        return Response(dict(dora.DORA_YES_NO_ASSESSMENT_CHOICES))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA discontinuing impact choices")
@@ -10868,41 +10868,25 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     "color": "hsl(80deg, 80%, 60%)",
                 },
                 "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
+                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
-            grouped_status_counts = {}
+            status_values = []
 
             for status, count in metrics["status_distribution"].items():
                 mapping_info = status_mapping.get(
-                    status, {"localName": "other", "color": "#CCCCCC"}
+                    status, {"localName": status, "color": "#CCCCCC"}
                 )
-                local_name = mapping_info["localName"]
-                color = mapping_info["color"]
-
-                if local_name in grouped_status_counts:
-                    grouped_status_counts[local_name]["value"] += count
-                else:
-                    grouped_status_counts[local_name] = {
+                status_values.append(
+                    {
                         "value": count,
-                        "localName": local_name,
-                        "itemStyle": {"color": color},
+                        "localName": mapping_info["localName"],
+                        "itemStyle": {"color": mapping_info["color"]},
                     }
-
-            status_values = list(grouped_status_counts.values())
-
-            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
-            for status in expected_statuses:
-                if not any(item["localName"] == status for item in status_values):
-                    status_values.append(
-                        {
-                            "value": 0,
-                            "localName": status,
-                            "itemStyle": {"color": "#CCCCCC"},
-                        }
-                    )
+                )
 
             return {"values": status_values}
 

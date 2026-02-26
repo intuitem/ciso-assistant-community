@@ -2680,7 +2680,7 @@ class Asset(
     )
     dora_criticality_assessment = models.CharField(
         max_length=50,
-        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        choices=dora.DORA_YES_NO_ASSESSMENT_CHOICES,
         blank=True,
         null=True,
         verbose_name=_("DORA Criticality Assessment"),
