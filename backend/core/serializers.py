@@ -3092,8 +3092,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
-        instance = super().create(validated_data)
-        self._sync_task_node(instance, tasknode_data, False, False)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
 
         # Send notification to newly assigned users
         if assigned_to_data:
@@ -3182,6 +3183,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             task_node = TaskNode.objects.create(
                 task_template=task_template,
                 due_date=task_template.task_date,
+                scheduled_date=task_template.task_date,
                 folder=task_template.folder,
             )
         else:
@@ -3193,11 +3195,13 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 task_node = TaskNode.objects.create(
                     task_template=task_template,
                     due_date=task_template.task_date,
+                    scheduled_date=task_template.task_date,
                     folder=task_template.folder,
                 )
 
         task_node.to_delete = False
         task_node.due_date = task_template.task_date
+        task_node.scheduled_date = task_template.task_date
         if tasknode_data.get("status") is not None:
             task_node.status = tasknode_data["status"]
         if tasknode_data.get("observation") is not None:
@@ -3255,7 +3259,21 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
-        exclude = ["task_template", "evidences"]
+        exclude = ["task_template", "evidences", "scheduled_date"]
+
+    def validate_due_date(self, value):
+        if self.instance and value:
+            exists = (
+                TaskNode.objects.filter(
+                    task_template=self.instance.task_template,
+                    due_date=value,
+                )
+                .exclude(pk=self.instance.pk)
+                .exists()
+            )
+            if exists:
+                raise serializers.ValidationError("taskNodeDuplicateDueDate")
+        return value
 
 
 class TerminologyReadSerializer(BaseModelSerializer):
