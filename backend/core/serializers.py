@@ -2417,14 +2417,6 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         requirement_node=instance.requirement
                     ).prefetch_related("choices")
                 }
-                logger.debug(
-                    "Processing answers update",
-                    ra_id=str(instance.id),
-                    answers_count=len(answers_data),
-                    questions_found=len(questions_by_urn),
-                    answer_urns=list(answers_data.keys())[:3],
-                    question_urns=list(questions_by_urn.keys())[:3],
-                )
                 for q_urn, answer_value in answers_data.items():
                     question = questions_by_urn.get(q_urn)
                     if not question:
@@ -2447,6 +2439,12 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                                 ref_id=answer_value
                             ).first()
                             answer.selected_choices.set([choice] if choice else [])
+                            if not choice:
+                                logger.warning(
+                                    "Choice not found for answer",
+                                    q_urn=q_urn,
+                                    ref_id=answer_value,
+                                )
                         else:
                             answer.selected_choices.clear()
                         answer.value = None
