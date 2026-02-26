@@ -2,8 +2,8 @@ import random
 from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from core.models import Incident, Terminology
-from iam.models import Folder, User
+from core.models import Actor, Incident, Terminology
+from iam.models import Folder
 
 
 class Command(BaseCommand):
@@ -54,13 +54,11 @@ class Command(BaseCommand):
         # Get root folder
         root_folder = Folder.get_root_folder()
 
-        # Get active users for random assignment (limit to reasonable number)
-        users = list(User.objects.filter(is_active=True)[:10])
-        if not users:
+        # Get actors for random assignment (limit to reasonable number)
+        actors = list(Actor.objects.filter(user__is_active=True)[:10])
+        if not actors:
             self.stdout.write(
-                self.style.WARNING(
-                    "No active users found. Incidents will be unassigned."
-                )
+                self.style.WARNING("No actors found. Incidents will be unassigned.")
             )
 
         # Get available qualifications
@@ -200,11 +198,11 @@ class Command(BaseCommand):
                 is_published=True,
             )
 
-            # Randomly assign owners (0-3 users)
-            if users:
-                num_owners = random.randint(0, min(3, len(users)))
+            # Randomly assign owners (0-3 actors)
+            if actors:
+                num_owners = random.randint(0, min(3, len(actors)))
                 if num_owners > 0:
-                    owners = random.sample(users, num_owners)
+                    owners = random.sample(actors, num_owners)
                     incident.owners.set(owners)
 
             # Randomly assign qualifications (1-4 qualifications)

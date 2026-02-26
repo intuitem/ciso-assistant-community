@@ -2,7 +2,7 @@ import random
 from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from core.models import SecurityException, Severity
+from core.models import Actor, SecurityException, Severity
 from iam.models import Folder, User
 
 
@@ -54,12 +54,14 @@ class Command(BaseCommand):
         # Get root folder
         root_folder = Folder.get_root_folder()
 
-        # Get active users for random assignment (limit to reasonable number)
+        # Get actors for random assignment (limit to reasonable number)
+        actors = list(Actor.objects.filter(user__is_active=True)[:10])
+        # Also get users for the approver FK (which is still a User FK)
         users = list(User.objects.filter(is_active=True)[:10])
-        if not users:
+        if not actors:
             self.stdout.write(
                 self.style.WARNING(
-                    "No active users found. Security exceptions will be unassigned."
+                    "No actors found. Security exceptions will be unassigned."
                 )
             )
 
@@ -198,10 +200,10 @@ class Command(BaseCommand):
                 is_published=True,
             )
 
-            # Randomly assign owners (1-3 users)
-            if users:
-                num_owners = random.randint(1, min(3, len(users)))
-                owners = random.sample(users, num_owners)
+            # Randomly assign owners (1-3 actors)
+            if actors:
+                num_owners = random.randint(1, min(3, len(actors)))
+                owners = random.sample(actors, num_owners)
                 exception.owners.set(owners)
 
             exceptions_created.append(exception)
