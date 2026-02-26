@@ -5,14 +5,27 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { Progress } from '@skeletonlabs/skeleton-svelte';
-	import type { PageData } from './$types';
+	import type { PageData, ActionData } from './$types';
+	import { page } from '$app/state';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import {
+		getModalStore,
+		type ModalComponent,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
+	import ValidationFlowsSection from '$lib/components/ValidationFlows/ValidationFlowsSection.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	interface Props {
 		data: PageData;
+		form: ActionData;
 	}
 
-	let { data }: Props = $props();
-	const accreditation = data.data;
+	let { data, form }: Props = $props();
+
+	const modalStore: ModalStore = getModalStore();
+	const accreditation = $derived(data.data);
 	const collection = accreditation.collection_data;
 
 	// Collection sections with their labels and URL patterns
@@ -64,16 +77,53 @@
 
 	// Get checklist progress from backend
 	let checklistProgress = $derived(accreditation.checklist_progress ?? 0);
+
+	function modalRequestValidation(): void {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+				}
+			}
+		};
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <DetailView {data}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
-			<!-- Export action button -->
-			<!-- <button class="btn preset-filled-primary-500"> -->
-			<!-- 	<i class="fa-solid hidden fa-download mr-2"></i>{m.exportButton()} -->
-			<!-- </button> -->
+			{#if page.data?.featureflags?.validation_flows}
+				<button
+					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
+					onclick={() => modalRequestValidation()}
+					data-testid="request-validation-button"
+				>
+					<i class="fa-solid fa-check-circle mr-2"></i>
+					{m.requestValidation()}
+				</button>
+			{/if}
 		</div>
+	{/snippet}
+
+	{#snippet widgets()}
+		{#if page.data?.featureflags?.validation_flows && accreditation.validation_flows}
+			{#key accreditation.validation_flows}
+				<ValidationFlowsSection validationFlows={accreditation.validation_flows} />
+			{/key}
+		{/if}
 	{/snippet}
 </DetailView>
 

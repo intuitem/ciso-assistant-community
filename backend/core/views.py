@@ -5774,6 +5774,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         evidence_model = related_model("evidences")
         security_exception_model = related_model("security_exceptions")
         policy_model = related_model("policies")
+        processing_model = related_model("processings")
+        accreditation_model = related_model("accreditations")
+        contract_model = related_model("contracts")
 
         queryset = queryset.select_related("requester", "approver").prefetch_related(
             Prefetch("events", queryset=events_qs),
@@ -5796,6 +5799,18 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "policies",
                 queryset=policy_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "processings",
+                queryset=processing_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "accreditations",
+                queryset=accreditation_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "contracts",
+                queryset=contract_model.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -5809,6 +5824,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_evidences": ValidationFlow.evidences.through,
             "has_security_exceptions": ValidationFlow.security_exceptions.through,
             "has_policies": ValidationFlow.policies.through,
+            "has_processings": ValidationFlow.processings.through,
+            "has_accreditations": ValidationFlow.accreditations.through,
+            "has_contracts": ValidationFlow.contracts.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -5837,6 +5855,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "evidences": "Evidences",
             "security_exceptions": "Security Exceptions",
             "policies": "Policies",
+            "processings": "Processings",
+            "accreditations": "Accreditations",
+            "contracts": "Contracts",
         }
         return Response(model_types)
 
