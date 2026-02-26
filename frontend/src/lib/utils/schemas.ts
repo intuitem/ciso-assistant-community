@@ -511,7 +511,7 @@ export const GeneralSettingsSchema = z.object({
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),
-	notifications_enable_mailing: z.boolean().optional(),
+	notifications_enable_mailing: z.boolean().default(false),
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
