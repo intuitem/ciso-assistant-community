@@ -1,4 +1,4 @@
-from django.db.utils import OperationalError, ProgrammingError
+from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -12263,6 +12263,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
+                if not template.task_date:
+                    continue
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
@@ -12284,53 +12286,110 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             tasks = _generate_occurrences(template, start_date, end_date)
             tasks_list.extend(tasks)
 
-        processed_tasks_identifiers = set()  # Track tasks we've already processed
+            # Preserve TaskNodes manually rescheduled by the user
+            # (due_date != scheduled_date)
+            # Unmodified nodes (due_date == scheduled_date)
+            # can be safely garbage-collected on schedule changes.
+            existing_nodes = TaskNode.objects.filter(
+                task_template=template,
+            ).filter(
+                Q(
+                    scheduled_date__gte=start_date,
+                    scheduled_date__lte=end_date,
+                )
+                | (
+                    Q(due_date__gte=start_date, due_date__lte=end_date)
+                    & ~Q(due_date=F("scheduled_date"))
+                )
+            )
+            generated_scheduled_dates = {t["due_date"] for t in tasks}
+            for node in existing_nodes:
+                if node.scheduled_date not in generated_scheduled_dates:
+                    if (
+                        node.due_date != node.scheduled_date
+                        or node.due_date < datetime.now().date()
+                    ):
+                        # Preserve nodes manually rescheduled or in the past
+                        node.to_delete = False
+                        node.save(update_fields=["to_delete"])
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
 
-        # Sort tasks by due date
+        def _parse_due_date(val):
+            """Normalize due_date to a date object"""
+            if isinstance(val, str):
+                return datetime.strptime(val, "%Y-%m-%d").date()
+            return val
+
+        # Sort tasks by due date, skip entries without a due_date
         sorted_tasks = sorted(
-            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+            [t for t in tasks_list if t.get("due_date")],
+            key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
 
-        # First separate past and future tasks
-        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
-        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+        # Separate past and future tasks, limit future to next 10
+        past_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) <= current_date
+        ]
+        next_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) > current_date
+        ]
 
-        # Combined list of tasks to process (past and next 10)
-        tasks_to_process = past_tasks + next_tasks
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
+        # Only virtual tasks (from _generate_occurrences) need to be materialized;
+        # existing TaskNodes from the DB are already persisted.
+        tasks_to_process_ids = set()
+        for task in past_tasks + next_tasks[:10]:
+            if not task.get("virtual"):
+                continue
+            template_id = task.get("task_template")
+            task_date = task.get("due_date")
+            if template_id and task_date:
+                tasks_to_process_ids.add((template_id, task_date))
 
-        # Directly modify tasks in the original tasks_list
+        processed_tasks_identifiers = set()
+
         for i in range(len(tasks_list)):
             task = tasks_list[i]
-            task_date = task["due_date"]
-            task_template_id = task["task_template"]
+            task_date = task.get("due_date")
+            if not task_date:
+                continue
 
-            # Create a unique identifier for this task to avoid duplication
+            # Already-serialized TaskNodes from the DB don't need processing
+            if not task.get("virtual"):
+                continue
+
+            task_template_id = task["task_template"]
             task_identifier = (task_template_id, task_date)
 
-            # Skip if we've already processed this task
             if task_identifier in processed_tasks_identifiers:
                 continue
 
-            # Check if this task should be processed (is in past or next 10)
-            if task in tasks_to_process:
+            if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                # Get or create the TaskNode
                 task_template = TaskTemplate.objects.get(id=task_template_id)
-                task_node, created = TaskNode.objects.get_or_create(
-                    task_template=task_template,
-                    due_date=task_date,
-                    defaults={
-                        "status": "pending",
-                        "folder": task_template.folder,
-                    },
-                )
+                try:
+                    task_node, created = TaskNode.objects.get_or_create(
+                        task_template=task_template,
+                        scheduled_date=task_date,
+                        defaults={
+                            "due_date": task_date,
+                            "status": "pending",
+                            "folder": task_template.folder,
+                        },
+                    )
+                except IntegrityError:
+                    # Another node for this template already has this due_date
+                    # (e.g. a rescheduled occurrence). Skip materialization.
+                    continue
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
-                # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
         return tasks_list
@@ -12338,9 +12397,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
-                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+                # Soft-delete future TaskNode instances for re-evaluation.
                 TaskNode.objects.filter(
-                    task_template=task_template, due_date__gt=date.today()
+                    task_template=task_template, scheduled_date__gte=date.today()
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
