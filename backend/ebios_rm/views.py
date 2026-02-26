@@ -1051,6 +1051,11 @@ class ElementaryActionFilter(GenericFilterSet):
         method="filter_operating_mode_available_actions",
         label="Operating mode available actions",
     )
+    operating_mode_available_antecedents = df.ModelChoiceFilter(
+        queryset=OperatingMode.objects.all(),
+        method="filter_operating_mode_available_antecedents",
+        label="Operating mode available antecedents",
+    )
 
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
@@ -1063,9 +1068,30 @@ class ElementaryActionFilter(GenericFilterSet):
         used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
         return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
 
+    def filter_operating_mode_available_antecedents(self, queryset, name, value):
+        operating_mode = value
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        action_id = self.data.get("actual_action")
+        action = ElementaryAction.objects.filter(id=action_id).first()
+        used_elementary_actions_ids = kc_qs.values_list("elementary_action", flat=True)
+        used_elementary_actions = ElementaryAction.objects.filter(
+            id__in=used_elementary_actions_ids
+        ).exclude(id=action_id if action else None)
+        if action:
+            precedent_actions = used_elementary_actions.filter(
+                attack_stage__lte=action.attack_stage
+            )
+        else:
+            precedent_actions = used_elementary_actions
+        return value.elementary_actions.filter(id__in=precedent_actions)
+
     class Meta:
         model = ElementaryAction
-        fields = ["operating_modes", "operating_mode_available_actions"]
+        fields = [
+            "operating_modes",
+            "operating_mode_available_actions",
+            "operating_mode_available_antecedents",
+        ]
 
 
 class ElementaryActionViewSet(BaseModelViewSet):

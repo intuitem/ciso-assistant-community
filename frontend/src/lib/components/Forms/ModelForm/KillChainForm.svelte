@@ -76,28 +76,35 @@
 <!-- 	cacheLock={cacheLocks['is_highlighted']} -->
 <!-- 	bind:cachedValue={formDataCache['is_highlighted']} -->
 <!-- /> -->
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_modes', $formStore.operating_mode]]
-		: undefined}
-	optionsInfoFields={{
-		fields: [
-			{
-				field: 'attack_stage',
-				translate: true
-			}
-		],
-		classes: 'text-yellow-700'
-	}}
-	multiple
-	field="antecedents"
-	cacheLock={cacheLocks['antecedents']}
-	helpText={m.antecedentsHelpText()}
-	bind:cachedValue={formDataCache['antecedents']}
-	label={m.antecedents()}
-/>
+{#key $formStore.elementary_action}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="elementary-actions"
+		optionsDetailedUrlParameters={$formStore.operating_mode
+			? [
+					['operating_mode_available_antecedents', $formStore.operating_mode],
+					...($formStore?.elementary_action
+						? [['actual_action', $formStore.elementary_action]]
+						: [])
+				]
+			: undefined}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'attack_stage',
+					translate: true
+				}
+			],
+			classes: 'text-yellow-700'
+		}}
+		multiple
+		field="antecedents"
+		cacheLock={cacheLocks['antecedents']}
+		helpText={m.antecedentsHelpText()}
+		bind:cachedValue={formDataCache['antecedents']}
+		label={m.antecedents()}
+	/>
+{/key}
 <Select
 	{form}
 	options={model.selectOptions['logic_operator']}
@@ -106,5 +113,5 @@
 	helpText={m.logicOperatorHelpText()}
 	cacheLock={cacheLocks['logic_operator']}
 	bind:cachedValue={formDataCache['logic_operator']}
-	disabled={$formStore.antecedents && $formStore.antecedents.length <= 1}
+	disabled={formDataCache['antecedents'] && formDataCache['antecedents'].length <= 1}
 />
