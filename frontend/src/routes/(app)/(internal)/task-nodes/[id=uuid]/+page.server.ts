@@ -141,13 +141,13 @@ export const actions: Actions = {
 					? Array.isArray(error.due_date)
 						? error.due_date[0]
 						: error.due_date
-					: error.error || error.detail || 'Failed to update due date';
+					: error.error || error.detail || m.anErrorOccurred();
 				const errorMessage = safeTranslate(rawMessage);
 				setFlash({ type: 'error', message: errorMessage }, cookies);
 				return fail(400, { error });
 			} catch {
-				setFlash({ type: 'error', message: 'Failed to update due date' }, cookies);
-				return fail(400, { error: 'Failed to update due date' });
+				setFlash({ type: 'error', message: m.anErrorOccurred() }, cookies);
+				return fail(400, { error: m.anErrorOccurred() });
 			}
 		}
 	}

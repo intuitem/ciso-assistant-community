@@ -7742,7 +7742,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
             ]
 
         # Check if there are any TaskNode instances that are not within the date range
-        if self.schedule and self.schedule.get("end_date"):
+        if self.pk and self.schedule and self.schedule.get("end_date"):
             end_date = self.schedule["end_date"]
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
             # Delete TaskNode instances whose scheduled date is after the end date

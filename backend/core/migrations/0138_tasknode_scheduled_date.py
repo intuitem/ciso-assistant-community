@@ -1,6 +1,4 @@
-from datetime import timedelta
 from django.db import migrations, models
-from core.utils import _generate_occurrences
 
 
 def populate_scheduled_date(apps, schema_editor):

@@ -1,4 +1,4 @@
-from django.db.utils import OperationalError, ProgrammingError
+from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -12287,8 +12287,15 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             # can be safely garbage-collected on schedule changes.
             existing_nodes = TaskNode.objects.filter(
                 task_template=template,
-                scheduled_date__gte=start_date,
-                scheduled_date__lte=end_date,
+            ).filter(
+                Q(
+                    scheduled_date__gte=start_date,
+                    scheduled_date__lte=end_date,
+                )
+                | (
+                    Q(due_date__gte=start_date, due_date__lte=end_date)
+                    & ~Q(due_date=F("scheduled_date"))
+                )
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
@@ -12362,15 +12369,20 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 processed_tasks_identifiers.add(task_identifier)
 
                 task_template = TaskTemplate.objects.get(id=task_template_id)
-                task_node, created = TaskNode.objects.get_or_create(
-                    task_template=task_template,
-                    scheduled_date=task_date,
-                    defaults={
-                        "due_date": task_date,
-                        "status": "pending",
-                        "folder": task_template.folder,
-                    },
-                )
+                try:
+                    task_node, created = TaskNode.objects.get_or_create(
+                        task_template=task_template,
+                        scheduled_date=task_date,
+                        defaults={
+                            "due_date": task_date,
+                            "status": "pending",
+                            "folder": task_template.folder,
+                        },
+                    )
+                except IntegrityError:
+                    # Another node for this template already has this due_date
+                    # (e.g. a rescheduled occurrence). Skip materialization.
+                    continue
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
