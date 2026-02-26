@@ -113,9 +113,6 @@ DORA_YES_NO_ASSESSMENT_CHOICES = [
     ("eba_BT:x21", "Assessment not performed"),
 ]
 
-# Backward-compatible alias
-DORA_FUNCTION_CRITICALITY_CHOICES = DORA_YES_NO_ASSESSMENT_CHOICES
-
 DORA_DISCONTINUING_IMPACT_CHOICES = [
     ("eba_ZZ:x791", "Low"),
     ("eba_ZZ:x792", "Medium"),
