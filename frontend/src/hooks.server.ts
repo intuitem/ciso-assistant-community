@@ -159,9 +159,7 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 				logoutUser(event);
 			} else if (
 				// User is authenticated, but needs to reauthenticate to perform a sensitive action
-				data.data.flows.some((flow: Record<string, any>) =>
-					reauthenticationFlows.includes(flow.id)
-				)
+				data.data.flows.some((flow: Record<string, any>) => reauthenticationFlows.includes(flow.id))
 			) {
 				setFlash(
 					{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
