@@ -29,7 +29,7 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
-    DORA_FUNCTION_CRITICALITY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
@@ -880,7 +880,7 @@ class SolutionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get alternative providers identified choices")
     def dora_alternative_providers_identified(self, request):
-        return Response(dict(DORA_FUNCTION_CRITICALITY_CHOICES))
+        return Response(dict(DORA_YES_NO_ASSESSMENT_CHOICES))
 
     def perform_create(self, serializer):
         serializer.save()
