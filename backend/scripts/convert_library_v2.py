@@ -32,6 +32,9 @@ from collections import Counter
 
 SCRIPT_VERSION = "2.1"
 
+# Maximum length for 'name' fields as enforced by the CISO Assistant database.
+NAME_MAX_LENGTH = 200
+
 # --- Compatibility modes definition ------------------------------------------
 # NOTE: No compatibility mode includes another (unless otherwise stated)
 # NOTE: So far, no compatibility mode has an impact on the mapping creation process.
@@ -1462,6 +1465,60 @@ def _handle_requirement_mapping_set(obj, library, wb, sheets, compat_mode, verbo
         )
 
 
+# --- Validation ---------------------------------------------------------------
+
+
+def validate_name_lengths(library: dict) -> list:
+    """Check that all 'name' fields in the library respect NAME_MAX_LENGTH.
+
+    Returns a list of (object_type, urn_or_ref, name_length) tuples for violations.
+    """
+    violations = []
+
+    # Check top-level library name
+    if library.get("name") and len(library["name"]) > NAME_MAX_LENGTH:
+        violations.append(("library", library.get("urn", "?"), len(library["name"])))
+
+    objects = library.get("objects", {})
+
+    # Check framework
+    framework = objects.get("framework")
+    if framework:
+        if framework.get("name") and len(framework["name"]) > NAME_MAX_LENGTH:
+            violations.append(
+                ("framework", framework.get("urn", "?"), len(framework["name"]))
+            )
+        for node in framework.get("requirement_nodes", []):
+            if node.get("name") and len(node["name"]) > NAME_MAX_LENGTH:
+                violations.append(
+                    (
+                        "requirement_node",
+                        node.get("urn") or node.get("ref_id", "?"),
+                        len(node["name"]),
+                    )
+                )
+
+    # Check list-based object types
+    for obj_type in (
+        "threats",
+        "reference_controls",
+        "risk_matrix",
+        "metric_definitions",
+        "requirement_mapping_sets",
+    ):
+        for item in objects.get(obj_type, []):
+            if item.get("name") and len(item["name"]) > NAME_MAX_LENGTH:
+                violations.append(
+                    (
+                        obj_type,
+                        item.get("urn") or item.get("ref_id", "?"),
+                        len(item["name"]),
+                    )
+                )
+
+    return violations
+
+
 # --- Main logic ---------------------------------------------------------------
 
 
@@ -1643,7 +1700,19 @@ def create_library(
         elif obj_type not in _SKIPPED_TYPES:
             print("type not handled:", obj_type)
 
-    # Step 6: Export to YAML
+    # Step 6: Validate name lengths
+    violations = validate_name_lengths(library)
+    if violations:
+        details = "; ".join(
+            f"[{obj_type}] {identifier} ({length} chars)"
+            for obj_type, identifier, length in violations
+        )
+        raise ValueError(
+            f"{len(violations)} object(s) have a 'name' exceeding the {NAME_MAX_LENGTH}-character limit: {details}. "
+            f"Please shorten them in the source file."
+        )
+
+    # Step 7: Export to YAML
     print(f'✅ YAML saved as: "{output_file}"')
     if not verbose:
         print(
