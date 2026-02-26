@@ -154,9 +154,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
 			console.log(data);
 
-			if (
+			if (!data.meta.is_authenticated) {
+				// Allauth session has fully expired — force logout
+				logoutUser(event);
+			} else if (
 				// User is authenticated, but needs to reauthenticate to perform a sensitive action
-				data.meta.is_authenticated &&
 				data.data.flows.filter((flow: Record<string, any>) =>
 					reauthenticationFlows.includes(flow.id)
 				)
