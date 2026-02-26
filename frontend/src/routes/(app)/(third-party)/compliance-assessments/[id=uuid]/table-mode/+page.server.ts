@@ -128,7 +128,8 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-		return { status: res.status, body: await res.json() };
+		const body = await res.json();
+		return { status: res.status, body };
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });
