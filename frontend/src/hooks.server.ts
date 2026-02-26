@@ -152,7 +152,6 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (clonedResponse.status === 401 && request.method !== 'DELETE') {
 			const data = await clonedResponse.json();
 			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
-			console.log(data);
 
 			if (!data.meta.is_authenticated) {
 				// Allauth session has fully expired — force logout
