@@ -192,29 +192,28 @@
 					open={exportPopupOpen}
 					onOpenChange={(e) => (exportPopupOpen = e.open)}
 					positioning={{ placement: 'bottom' }}
-					triggerBase="btn preset-filled-primary-500 w-full"
-					contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-					zIndex="1000"
 				>
-					{#snippet trigger()}
+					<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 						<span data-testid="export-button">
 							<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 						</span>
-					{/snippet}
-					{#snippet content()}
-						<div>
-							<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
-							<a
-								href="/incidents/{data.data.id}/export/md"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-								>... {m.asMarkdown()}</a
-							>
-							<a
-								href="/incidents/{data.data.id}/export/pdf"
-								class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
-							>
-						</div>
-					{/snippet}
+					</Popover.Trigger>
+					<Popover.Positioner>
+						<Popover.Content class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1">
+							<div>
+								<p class="block px-4 py-2 text-sm text-gray-800">{m.incident()}</p>
+								<a
+									href="/incidents/{data.data.id}/export/md"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+									>... {m.asMarkdown()}</a
+								>
+								<a
+									href="/incidents/{data.data.id}/export/pdf"
+									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asPDF()}</a
+								>
+							</div>
+						</Popover.Content>
+					</Popover.Positioner>
 				</Popover>
 			</div>
 		{/snippet}

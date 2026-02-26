@@ -1,8 +1,8 @@
-subject: "CISO Assistant: Evidence is expired since ${expired_since} ${days_text}"
+subject: "CISO Assistant: Evidence expired since ${expired_since} day(s)"
 body: |
   Hello,
 
-  You have ${evidence_count} evidence(s) expired since ${expired_since} ${days_text}:
+  You have ${evidence_count} evidence(s) expired since ${expired_since} day(s):
 
   ${evidence_list}
 

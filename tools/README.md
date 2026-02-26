@@ -101,6 +101,28 @@ The resulting YAML file adheres to the CISO Assistant schema and can be directly
 
 When the `--compat` flag is omitted or when the compatibility mode is different from `1`, URNs for nodes without a `ref_id` are constructed using the `parent_urn`. This format is simpler to understand and maintain compared to the legacy `nodeXXX` suffix system.
 
+### > `convert_v1_to_v2.py`
+
+Usage:
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python convert_v1_to_v2.py your_v1_library_file.xlsx
+```
+
+This will modify your original file (in our case, `your_v1_library_file.xlsx`) and save the original v1 version as `your_v1_library_file_v1.xlsx.old`.
+
+## About framework Updates
+
+If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
+
+
+<details>
+<summary>[Deprecated] convert_library_v1.py</summary>
 
 ### > `convert_library_v1.py`
 
@@ -122,26 +144,7 @@ This will produce a file named `your_library_file.yaml`.
 
 The `--compat` flag is recommended only to maintain libraries that have been generated prior or up to release `1.9.20`. Without the compat flag, URNs generated for nodes without `ref_id` are constructed using the `parent_urn`. These generated URNs are much simpler to understand and maintain if required, compared to the previous system using `nodeXXX` suffix.
 
-
-### > `convert_v1_to_v2.py`
-
-Usage:
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-To launch it, open a shell in a command line, and type:
-
-```bash
-python convert_v1_to_v2.py your_v1_library_file.xlsx
-```
-
-This will produce a file named `your_v1_library_file_new.yaml`.
-
-## About framework Updates
-
-If you want to update a framework, don't forget to increment the version number in the `version` field of the `library_meta` sheet before converting it to YAML. Otherwise, if the version number of the framework file is lower than or equal to the version number of the old version of your already imported framework in CISO Assistant, your framework will not be updated and CISO Assistant will not suggest to update the framework in your loaded libraries.
-
+</details>
 
 ## Format of Excel files
 
@@ -220,7 +223,7 @@ The `_content` tab for a `framework` object contains the following columns:
 - answer: 1 (same for all questions) or n (one answer per question) answers, separated by line breaks
 - depends_on: Format: `question_line:choice_lines`. Set `/` (= undefined) or empty cell if the question depends on nothing. See the cell notes in `example_framework.xlsx`, at lines `41` and `43`, column `depends_on` for better understanding.
 - condition: One among `any`/`all`. Required if `depends_on` is defined for a question. Set to `/` (= undefined) if `depends_on` is undefined for a specific question. `any`: Any answer selected from the `depends_on` list will show the question. `all`: Selecting all answers from the `depends_on` list will show the question. 
-- urn_id (+): this is reserved for specific compatibility issues to force the urn calculation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 - skip_count (+): trick to fix a referential without changing the URNs (subtract `1` from the counter) [Works with Compatibility mode `1` in `convert_library_v2.py`]
 - fix_count (+): negative or positive integer. Better version of `skip_count`  (adds the integer to the counter) [Works with Compatibility mode `3` in `convert_library_v2.py`]
 
@@ -257,6 +260,7 @@ The `_content` tab for a `threats` object contains the following columns:
 - name (*)
 - description
 - annotation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 
 ### Reference controls
 
@@ -271,6 +275,7 @@ The `_content` tab for a `reference_controls` object contains the following colu
 - category: one among `policy`/`process`/`technical`/`physical`/`procedure`
 - csf_function: one among `govern`/`identify`/`protect`/`detect`/`respond`/`recover`
 - annotation
+- node_id (+): this is reserved for specific compatibility issues to force the urn calculation
 
 ### Requirement mapping sets
 

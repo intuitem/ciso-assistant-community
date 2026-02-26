@@ -2,16 +2,14 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
 
 /*
   Add your theme import for your theme: "ciso-theme" here
 */
 @import '../ciso-theme.css';
-@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+@import '@skeletonlabs/skeleton-svelte';
 
 @source './**/*.{html,js,svelte,ts}';
-@source '../node_modules/.pnpm/@skeletonlabs+skeleton@2.10.3_svelte@5.28.6/node_modules/@skeletonlabs/skeleton/dist/**/*.{html,js,svelte,ts}';
 
 @custom-variant dark (&:is(.dark *));
 

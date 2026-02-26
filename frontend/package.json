@@ -22,13 +22,13 @@
 		"@inlang/paraglide-js": "^2.1.0",
 		"@inlang/plugin-message-format": "^2.2.0",
 		"@playwright/test": "^1.55.1",
-		"@skeletonlabs/skeleton": "^3.1.3",
-		"@skeletonlabs/skeleton-svelte": "^1.2.3",
+		"@skeletonlabs/skeleton": "^4.0.0",
+		"@skeletonlabs/skeleton-svelte": "^4.0.0",
 		"@svelte-put/copy": "^3.0.2",
 		"@svelte-put/qr": "^1.2.1",
 		"@sveltejs/adapter-auto": "^3.3.1",
 		"@sveltejs/adapter-node": "^5.2.12",
-		"@sveltejs/kit": "^2.49.5",
+		"@sveltejs/kit": "^2.52.2",
 		"@sveltejs/vite-plugin-svelte": "^4.0.4",
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
@@ -52,7 +52,7 @@
 		"react": "^18.3.1",
 		"react-dom": "^18.3.1",
 		"sv-typewriter": "^4.1.2",
-		"svelte": "^5.34.8",
+		"svelte": "^5.53.0",
 		"svelte-check": "^4.2.2",
 		"sveltekit-flash-message": "^2.4.6",
 		"sveltekit-rate-limiter": "^0.5.2",
@@ -68,7 +68,6 @@
 	"type": "module",
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.1",
-		"nanoid": "^5.1.6",
 		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@unovis/svelte": "1.6.4",
 		"@unovis/ts": "1.6.4",
@@ -79,6 +78,7 @@
 		"frappe-gantt": "^1.0.3",
 		"globals": "^15.15.0",
 		"marked": "^16.1.2",
+		"nanoid": "^5.1.6",
 		"sanitize-html": "^2.17.0",
 		"svelte-multiselect": "^11.1.1",
 		"svelte-persisted-store": "^0.12.0",
@@ -88,7 +88,7 @@
 	"pnpm": {
 		"overrides": {
 			"esbuild": "^0.25.5",
-			"devalue": "^5.6.2",
+			"devalue": "^5.6.3",
 			"glob": "^10.5.0",
 			"valibot": "^1.2.0",
 			"validator": "^13.15.22",
@@ -98,7 +98,8 @@
 			"tar": "^7.5.9",
 			"lodash": "^4.17.23",
 			"lodash-es": "^4.17.23",
-			"minimatch": "^10.2.1"
+			"minimatch": "^10.2.1",
+			"ajv": "^6.14.0"
 		}
 	}
 }
