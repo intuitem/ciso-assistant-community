@@ -122,7 +122,7 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 20
+		lazyLimit = 10
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -164,12 +164,14 @@
 	};
 
 	let isLoading = $state(false);
-	let lazySearchText = $state('');
+	let lazySearchPending = $state(false);
 	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let lazyInputEl = $state<HTMLInputElement | null>(null);
+	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
-	function buildEndpoint(extra?: Record<string, string>) {
-		let endpoint = `/${optionsEndpoint}`;
+	function buildEndpoint(extra?: Record<string, string>, baseOverride?: string) {
+		let endpoint = `/${baseOverride ?? optionsEndpoint}`;
 		const urlParams = new URLSearchParams();
 
 		if (Array.isArray(optionsDetailedUrlParameters)) {
@@ -241,7 +243,8 @@
 		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
 		if (ids.length === 0) return;
 
-		const endpoint = buildEndpoint({ id: ids.join(',') });
+		const lazyBase = lazy ? `${optionsEndpoint}/autocomplete` : undefined;
+		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
 		const response = await fetch(endpoint, { cache: browserCache });
 		if (response.ok) {
 			const data = await response.json().then((res) => res?.results ?? res);
@@ -261,10 +264,14 @@
 
 		isLoading = true;
 		try {
-			const endpoint = buildEndpoint({
-				search: searchTerm,
-				limit: String(lazyLimit)
-			});
+			const lazyBase = `${optionsEndpoint}/autocomplete`;
+			const endpoint = buildEndpoint(
+				{
+					search: searchTerm,
+					limit: String(lazyLimit)
+				},
+				lazyBase
+			);
 			const response = await fetch(endpoint, { cache: 'no-store' });
 			if (response.ok) {
 				const data = await response.json().then((res) => res?.results ?? res);
@@ -462,12 +469,23 @@
 	});
 
 	$effect(() => {
-		if (!lazy) return;
-		const text = lazySearchText;
-		if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
-		lazyDebounceTimer = setTimeout(() => {
-			lazySearch(text);
-		}, 300);
+		if (!lazy || !lazyInputEl) return;
+		const el = lazyInputEl;
+		const handler = () => {
+			const text = el.value;
+			if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
+			if (text.length >= 2) {
+				lazySearchPending = true;
+			} else {
+				lazySearchPending = false;
+			}
+			lazyDebounceTimer = setTimeout(() => {
+				lazySearchPending = false;
+				lazySearch(text);
+			}, 300);
+		};
+		el.addEventListener('input', handler);
+		return () => el.removeEventListener('input', handler);
 	});
 
 	onDestroy(() => {
@@ -541,10 +559,14 @@
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={lazy ? () => true : fastFilter}
-			noMatchingOptionsMsg={lazy && lazySearchText.length < 2 ? m.typeToSearch() : undefined}
+			filterFunc={lazy ? passthroughFilter : fastFilter}
+			noMatchingOptionsMsg={lazy
+				? isLoading || lazySearchPending
+					? m.searching()
+					: m.typeToSearch()
+				: undefined}
 			placeholder={placeholder || (lazy ? m.typeToSearch() : '')}
-			bind:searchText={lazySearchText}
+			bind:input={lazyInputEl}
 		>
 			{#snippet option({ option })}
 				{#if optionSnippet}
