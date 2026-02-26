@@ -49,9 +49,9 @@ ANSW_HEADERS = [
     "id",
     "question_type",
     "question_choices",
-    "color",
     "description",
     "select_implementation_groups",
+    "color",
 ]
 REF_CTRL_HEADERS = [
     "ref_id",
