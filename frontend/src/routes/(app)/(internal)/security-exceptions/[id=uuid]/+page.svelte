@@ -21,7 +21,7 @@
 	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-	const processing = $derived(data.data);
+	const securityException = $derived(data.data);
 
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
@@ -64,9 +64,9 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		{#if page.data?.featureflags?.validation_flows && processing.validation_flows}
-			{#key processing.validation_flows}
-				<ValidationFlowsSection validationFlows={processing.validation_flows} />
+		{#if page.data?.featureflags?.validation_flows && securityException.validation_flows}
+			{#key securityException.validation_flows}
+				<ValidationFlowsSection validationFlows={securityException.validation_flows} />
 			{/key}
 		{/if}
 	{/snippet}
