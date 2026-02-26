@@ -21,7 +21,7 @@
 	let { data, form }: Props = $props();
 
 	const modalStore: ModalStore = getModalStore();
-	const processing = $derived(data.data);
+	const contract = $derived(data.data);
 
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
@@ -64,9 +64,9 @@
 	{/snippet}
 
 	{#snippet widgets()}
-		{#if page.data?.featureflags?.validation_flows && processing.validation_flows}
-			{#key processing.validation_flows}
-				<ValidationFlowsSection validationFlows={processing.validation_flows} />
+		{#if page.data?.featureflags?.validation_flows && contract.validation_flows}
+			{#key contract.validation_flows}
+				<ValidationFlowsSection validationFlows={contract.validation_flows} />
 			{/key}
 		{/if}
 	{/snippet}
