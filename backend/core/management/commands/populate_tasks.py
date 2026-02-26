@@ -2,8 +2,8 @@ import random
 from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from core.models import TaskTemplate, TaskNode
-from iam.models import Folder, User
+from core.models import Actor, TaskTemplate, TaskNode
+from iam.models import Folder
 
 
 class Command(BaseCommand):
@@ -67,11 +67,11 @@ class Command(BaseCommand):
         # Get root folder
         root_folder = Folder.get_root_folder()
 
-        # Get active users for random assignment (limit to reasonable number)
-        users = list(User.objects.filter(is_active=True)[:10])
-        if not users:
+        # Get actors for random assignment (limit to reasonable number)
+        actors = list(Actor.objects.filter(user__is_active=True)[:10])
+        if not actors:
             self.stdout.write(
-                self.style.WARNING("No active users found. Tasks will be unassigned.")
+                self.style.WARNING("No actors found. Tasks will be unassigned.")
             )
 
         # Task name templates
@@ -180,11 +180,11 @@ class Command(BaseCommand):
                 enabled=True,
             )
 
-            # Randomly assign users (0-3 users)
-            if users:
-                num_assignees = random.randint(0, min(3, len(users)))
+            # Randomly assign actors (0-3)
+            if actors:
+                num_assignees = random.randint(0, min(3, len(actors)))
                 if num_assignees > 0:
-                    assignees = random.sample(users, num_assignees)
+                    assignees = random.sample(actors, num_assignees)
                     template.assigned_to.set(assignees)
 
             # Create task node (occurrence)
@@ -287,11 +287,11 @@ class Command(BaseCommand):
                 schedule=schedule,
             )
 
-            # Randomly assign users (0-3 users)
-            if users:
-                num_assignees = random.randint(0, min(3, len(users)))
+            # Randomly assign actors (0-3)
+            if actors:
+                num_assignees = random.randint(0, min(3, len(actors)))
                 if num_assignees > 0:
-                    assignees = random.sample(users, num_assignees)
+                    assignees = random.sample(actors, num_assignees)
                     template.assigned_to.set(assignees)
 
             # Generate TaskNode occurrences for the current year
