@@ -253,6 +253,7 @@
 	"contentType": "Content type",
 	"objectType": "Object type",
 	"type": "Type",
+	"typeToSearch": "Type to search...",
 	"lcStatus": "Status",
 	"internalReference": "Internal reference",
 	"isActive": "Is active",
