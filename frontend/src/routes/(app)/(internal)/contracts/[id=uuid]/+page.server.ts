@@ -7,14 +7,14 @@ import { nestedDeleteFormAction } from '$lib/utils/actions';
 export const load: PageServerLoad = async (event) => {
 	const detailData = await loadDetail({
 		event,
-		model: getModelInfo('processings'),
+		model: getModelInfo('contracts'),
 		id: event.params.id
 	});
 
 	const { validationFlowForm, validationFlowModel } = await loadValidationFlowFormData({
 		event,
 		folderId: detailData.data.folder?.id || detailData.data.folder,
-		targetField: 'processings',
+		targetField: 'contracts',
 		targetIds: [event.params.id]
 	});
 
