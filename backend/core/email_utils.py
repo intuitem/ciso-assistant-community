@@ -260,7 +260,10 @@ def send_templated_notification(
     Returns:
         True if email was queued successfully, False otherwise
     """
-    from .tasks import send_notification_email
+    from .tasks import check_email_configuration, send_notification_email
+
+    if not check_email_configuration(recipient_email, []):
+        return False
 
     rendered = render_email_template(template_name, context, locale)
     if not rendered:
