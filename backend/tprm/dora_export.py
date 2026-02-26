@@ -159,14 +159,14 @@ def generate_b_01_02_entities(
         if entity.currency:
             currency = f"eba_CU:{entity.currency}"
 
-        # Format dates, use 2999-12-31 as default for mandatory fields
+        # Format dates, use 9999-12-31 as default for mandatory fields
         last_update = (
-            format_date(entity.updated_at) if entity.updated_at else "2999-12-31"
+            format_date(entity.updated_at) if entity.updated_at else "9999-12-31"
         )
         integration_date = (
-            format_date(entity.created_at) if entity.created_at else "2999-12-31"
+            format_date(entity.created_at) if entity.created_at else "9999-12-31"
         )
-        deletion_date = "2999-12-31"  # Empty for active entities
+        deletion_date = "9999-12-31"  # Empty for active entities
 
         # LEI of parent entity
         parent_entity_lei = ""
@@ -457,7 +457,7 @@ def generate_b_02_02_ict_services(
                 end_date = (
                     format_date(contract.end_date)
                     if contract.end_date
-                    else "2999-12-31"
+                    else "9999-12-31"
                 )
 
                 # c0090: Termination reason
@@ -710,16 +710,18 @@ def generate_b_03_03_intragroup_providers(
     # Write CSV headers
     csv_writer.writerow(["c0010", "c0020", "c0031"])
 
-    # Get main entity LEI
-    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-
     # Get intra-group contracts
-    intragroup_contracts = contracts.filter(is_intragroup=True)
+    intragroup_contracts = contracts.filter(is_intragroup=True).select_related(
+        "provider_entity"
+    )
 
-    # Write provider data (main entity provides intra-group services)
+    # Write provider data for each intra-group contract
     for contract in intragroup_contracts:
         contract_ref = contract.ref_id or str(contract.id)
-        csv_writer.writerow([contract_ref, main_lei, "true"])
+        provider_lei, _ = get_entity_identifier(
+            contract.provider_entity, priority=["LEI"]
+        )
+        csv_writer.writerow([contract_ref, provider_lei, "true"])
 
     path = (
         f"{folder_prefix}/reports/b_03.03.csv"
@@ -791,8 +793,12 @@ def generate_b_04_01_service_users(
             )
             written_combinations.add(combination)
 
-        # Write rows for branches
+        # Write rows for branches of the beneficiary entity only
         for branch in branches:
+            if branch.parent_entity_id != getattr(
+                contract.beneficiary_entity, "id", None
+            ):
+                continue
             branch_code, _ = get_entity_identifier(branch)
             combination = (contract_ref, beneficiary_lei, branch_code)
             if combination not in written_combinations:
@@ -949,7 +955,7 @@ def generate_b_05_02_supply_chains(
             "c0020",  # ICT service type
             "c0030",  # Provider code
             "c0040",  # Provider code type
-            "c0050",  # Rank (criticality)
+            "c0050",  # Rank in supply chain
             "c0060",  # Recipient code
             "c0070",  # Recipient code type
         ]
@@ -981,15 +987,13 @@ def generate_b_05_02_supply_chains(
                 contract.provider_entity
             )
 
-            # c0050: Rank (criticality)
-            rank = solution.criticality if solution.criticality else ""
+            # c0050: Rank in supply chain (1 = direct provider)
+            # Sub-contracting chains are not modeled, so rank is always 1
+            rank = 1
 
-            # c0060, c0070: Recipient identification (beneficiary entity)
+            # c0060, c0070: Recipient of sub-contracted ICT services
+            # For rank 1 (direct providers), these fields should be empty
             recipient_code, recipient_code_type = "", ""
-            if contract.beneficiary_entity:
-                recipient_code, recipient_code_type = get_entity_identifier(
-                    contract.beneficiary_entity
-                )
 
             csv_writer.writerow(
                 [
@@ -1053,7 +1057,7 @@ def generate_b_06_01_functions(
         criticality = function.dora_criticality_assessment or ""
         criticality_reasons = function.dora_criticality_justification or ""
         last_assessment_date = (
-            format_date(function.updated_at) if function.updated_at else "2999-12-31"
+            format_date(function.updated_at) if function.updated_at else "9999-12-31"
         )
 
         # Extract RTO from disaster_recovery_objectives JSON

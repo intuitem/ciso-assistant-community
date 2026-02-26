@@ -1837,7 +1837,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA criticality assessment choices")
     def dora_criticality_assessment(self, request):
-        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+        return Response(dict(dora.DORA_YES_NO_ASSESSMENT_CHOICES))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA discontinuing impact choices")
