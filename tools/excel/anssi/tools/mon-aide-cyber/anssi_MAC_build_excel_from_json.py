@@ -41,6 +41,7 @@ FRAMEWORK_HEADERS = [
     "questions",
     "answer",
     "reference_controls",
+    "_dev_info",
 ]
 
 IMP_GRP_HEADERS = ["ref_id", "name", "description", "default_selected"]
@@ -382,7 +383,7 @@ def append_framework_row(ctx: Context, row: dict[str, str]) -> int:
     if urn:
         ctx.framework_index_by_urn[urn] = idx
 
-    name = row.get("name", "")
+    name = row.get("name", "") or row.get("_dev_info", "")
     if urn and name.startswith("Question "):
         ctx.question_name_suffix_by_urn[urn] = name.removeprefix("Question ").strip()
 
@@ -450,7 +451,7 @@ def process_question(
         "assessable": "x",
         "depth": depth,
         "node_id": qid.lower(),
-        # "name": name,
+        "name": "",
         "description": as_text(question.get("description")),
         "annotation": annotation,
         "typical_evidence": "",
@@ -460,6 +461,7 @@ def process_question(
         "reference_controls": measures_to_reference_controls(
             question.get("reponsesPossibles", []) or []
         ),
+        "_dev_info": name,
     }
     append_framework_row(ctx, framework_row)
 
@@ -513,6 +515,7 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
                 "questions": "",
                 "answer": "",
                 "reference_controls": "",
+                "_dev_info": "",
             },
         )
 
@@ -704,6 +707,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output", default="mon_aide_cyber.xlsx", help="Output XLSX file"
     )
+    parser.add_argument(
+        "--dev-info",
+        action="store_true",
+        help="Include the _dev_info column in fwk_content",
+    )
     return parser.parse_args()
 
 
@@ -711,6 +719,7 @@ def build_excel_from_json(
     questionnaire_path: Path,
     mesures_path: Path,
     output_path: Path,
+    include_dev_info: bool = False,
 ) -> dict[str, int]:
     """Point d'entrée unique: construit l'Excel à partir des 2 JSON."""
     questionnaire = load_json(questionnaire_path)
@@ -733,7 +742,12 @@ def build_excel_from_json(
     write_kv_sheet(wb, "library_meta", LIBRARY_META_ROWS)
 
     write_kv_sheet(wb, "fwk_meta", FWK_META_ROWS)
-    write_sheet(wb, "fwk_content", FRAMEWORK_HEADERS, ctx.framework_rows)
+    fwk_headers = (
+        FRAMEWORK_HEADERS
+        if include_dev_info
+        else [h for h in FRAMEWORK_HEADERS if h != "_dev_info"]
+    )
+    write_sheet(wb, "fwk_content", fwk_headers, ctx.framework_rows)
 
     write_kv_sheet(wb, "answ_meta", ANSW_META_ROWS)
     write_sheet(
@@ -771,6 +785,7 @@ def main() -> None:
         questionnaire_path=q_path,
         mesures_path=m_path,
         output_path=out_path,
+        include_dev_info=args.dev_info,
     )
 
     print(f"Excel generated: {out_path}")
