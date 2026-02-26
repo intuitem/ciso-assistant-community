@@ -1054,9 +1054,13 @@ class ElementaryActionFilter(GenericFilterSet):
 
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
-        used_elementary_actions = KillChain.objects.filter(
-            operating_mode=operating_mode
-        ).values_list("elementary_action", flat=True)
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        # When editing an existing kill chain step, exclude it from the "used"
+        # list so its elementary action remains available in the dropdown.
+        exclude_kill_chain = self.data.get("exclude_kill_chain")
+        if exclude_kill_chain:
+            kc_qs = kc_qs.exclude(id=exclude_kill_chain)
+        used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
         return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
 
     class Meta:

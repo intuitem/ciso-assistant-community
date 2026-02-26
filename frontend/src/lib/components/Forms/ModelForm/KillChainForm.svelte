@@ -11,6 +11,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -18,7 +19,8 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 
 	const formStore = form.form;
@@ -47,7 +49,10 @@
 	{form}
 	optionsEndpoint="elementary-actions"
 	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_mode_available_actions', $formStore.operating_mode]]
+		? [
+				['operating_mode_available_actions', $formStore.operating_mode],
+				...(object?.id ? [['exclude_kill_chain', object.id]] : [])
+			]
 		: undefined}
 	optionsInfoFields={{
 		fields: [
@@ -101,5 +106,5 @@
 	helpText={m.logicOperatorHelpText()}
 	cacheLock={cacheLocks['logic_operator']}
 	bind:cachedValue={formDataCache['logic_operator']}
-	disabled={formDataCache['antecedents'] && formDataCache['antecedents'].length <= 1}
+	disabled={$formStore.antecedents && $formStore.antecedents.length <= 1}
 />
