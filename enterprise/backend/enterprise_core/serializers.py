@@ -29,6 +29,7 @@ class FolderWriteSerializer(CommunityFolderWriteSerializer):
         """
         Check that the folders graph will not contain cycles
         """
+        parent_folder = super().validate_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
