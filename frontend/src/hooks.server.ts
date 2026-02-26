@@ -150,23 +150,30 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		if (clonedResponse.status === 410) logoutUser(event);
 
 		if (clonedResponse.status === 401 && request.method !== 'DELETE') {
-			const data = await clonedResponse.json();
-			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
+			try {
+				const data = await clonedResponse.json();
+				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
 
-			if (!data.meta.is_authenticated) {
-				// Allauth session has fully expired — force logout
-				logoutUser(event);
-			} else if (
-				// User is authenticated, but needs to reauthenticate to perform a sensitive action
-				data.data.flows.some((flow: Record<string, any>) => reauthenticationFlows.includes(flow.id))
-			) {
-				setFlash(
-					{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
-					event
-				);
-				// NOTE: This is a temporary solution to force the user to reauthenticate
-				// We have to properly implement allauth's reauthentication flow
-				// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
+				if (!data.meta?.is_authenticated) {
+					// Allauth session has fully expired — force logout
+					logoutUser(event);
+				} else if (
+					// User is authenticated, but needs to reauthenticate to perform a sensitive action
+					data.data?.flows?.some((flow: Record<string, any>) =>
+						reauthenticationFlows.includes(flow.id)
+					)
+				) {
+					setFlash(
+						{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
+						event
+					);
+					// NOTE: This is a temporary solution to force the user to reauthenticate
+					// We have to properly implement allauth's reauthentication flow
+					// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
+					logoutUser(event);
+				}
+			} catch {
+				// Malformed response — force logout to be safe
 				logoutUser(event);
 			}
 		}
