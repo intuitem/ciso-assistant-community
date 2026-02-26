@@ -1703,13 +1703,12 @@ def create_library(
     # Step 6: Validate name lengths
     violations = validate_name_lengths(library)
     if violations:
-        print(
-            f"\n❌ [ERROR] {len(violations)} object(s) have a 'name' exceeding {NAME_MAX_LENGTH} characters:"
+        details = "; ".join(
+            f"[{obj_type}] {identifier} ({length} chars)"
+            for obj_type, identifier, length in violations
         )
-        for obj_type, identifier, length in violations:
-            print(f"   - [{obj_type}] {identifier} ({length} chars)")
         raise ValueError(
-            f"{len(violations)} object(s) have a 'name' exceeding the {NAME_MAX_LENGTH}-character limit. "
+            f"{len(violations)} object(s) have a 'name' exceeding the {NAME_MAX_LENGTH}-character limit: {details}. "
             f"Please shorten them in the source file."
         )
 
