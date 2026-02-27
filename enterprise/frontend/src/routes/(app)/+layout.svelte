@@ -203,7 +203,7 @@
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
 					{#if data?.featureflags?.focus_mode}
-						<FocusModeSelector folders={data?.folders ?? []} />
+						<FocusModeSelector orgTree={data?.orgTree} />
 					{/if}
 					{#if data?.user?.is_admin}
 						<button
