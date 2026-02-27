@@ -1,0 +1,12 @@
+subject: "CISO Assistant: You have ${task_count} overdue task(s)"
+body: |
+  Hello,
+
+  The following tasks are overdue and still pending:
+
+  ${task_list}
+
+  Please log in to your CISO Assistant portal to complete or update these tasks:
+  ${ciso_assistant_url}
+
+  Thank you.

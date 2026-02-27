@@ -16,7 +16,8 @@ from privacy.models import (
     ART6_LAWFUL_BASIS_CHOICES,
     TRANSFER_MECHANISM_CHOICES,
 )
-from iam.models import Folder, User
+from core.models import Actor
+from iam.models import Folder
 from tprm.models import Entity
 from core.constants import COUNTRY_CHOICES
 
@@ -85,12 +86,12 @@ class Command(BaseCommand):
         # Get root folder
         root_folder = Folder.get_root_folder()
 
-        # Get active users
-        users = list(User.objects.filter(is_active=True)[:10])
-        if not users:
+        # Get actors for assignment
+        actors = list(Actor.objects.filter(user__is_active=True)[:10])
+        if not actors:
             self.stdout.write(
                 self.style.WARNING(
-                    "No active users found. Using system for assignments."
+                    "No actors found. Skipping owner/author assignments."
                 )
             )
 
@@ -206,17 +207,17 @@ class Command(BaseCommand):
                 folder=root_folder,
                 ref_id=f"TEST-PROC-{i + 1:04d}",
                 status=status,
-                author=random.choice(users).actor if users else None,
+                author=random.choice(actors) if actors else None,
                 dpia_required=dpia_required,
                 dpia_reference=f"DPIA-{i + 1:04d}" if dpia_required else "",
                 has_sensitive_personal_data=False,  # Will be updated if sensitive data added
             )
 
-            # Assign users (0-3)
-            if users:
-                num_assigned = random.randint(0, min(3, len(users)))
+            # Assign actors (0-3)
+            if actors:
+                num_assigned = random.randint(0, min(3, len(actors)))
                 if num_assigned > 0:
-                    assigned = random.sample(users, num_assigned)
+                    assigned = random.sample(actors, num_assigned)
                     processing.assigned_to.set(assigned)
 
             # Assign processing natures (1-4)
@@ -398,11 +399,11 @@ class Command(BaseCommand):
                 observation=f"Test observation for right request #{i + 1}",
             )
 
-            # Assign owners (0-2 users)
-            if users:
-                num_owners = random.randint(0, min(2, len(users)))
+            # Assign owners (0-2 actors)
+            if actors:
+                num_owners = random.randint(0, min(2, len(actors)))
                 if num_owners > 0:
-                    right_request.owner.set(random.sample(users, num_owners))
+                    right_request.owner.set(random.sample(actors, num_owners))
 
             # Associate with 1-3 processings
             num_proc = random.randint(1, min(3, len(processings_created)))
@@ -483,10 +484,10 @@ class Command(BaseCommand):
                 observation=f"Test data breach record #{i + 1} for demonstration purposes.",
             )
 
-            # Assign to users (1-3)
-            if users:
-                num_assigned = random.randint(1, min(3, len(users)))
-                data_breach.assigned_to.set(random.sample(users, num_assigned))
+            # Assign to actors (1-3)
+            if actors:
+                num_assigned = random.randint(1, min(3, len(actors)))
+                data_breach.assigned_to.set(random.sample(actors, num_assigned))
 
             # Associate with 1-2 processings
             num_proc = random.randint(1, min(2, len(processings_created)))

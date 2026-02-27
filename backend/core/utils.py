@@ -415,18 +415,25 @@ def _date_matches_schedule(task, date_to_check):
 
         # Check week of month
         if weeks_of_month:
-            day = date_to_check.day
-            week_of_month = ((day - 1) // 7) + 1
+            first_day = date(date_to_check.year, date_to_check.month, 1)
+            first_matching_day = first_day
+            while first_matching_day.weekday() != weekday:
+                first_matching_day += timedelta(days=1)
+            occurrence = ((date_to_check.day - first_matching_day.day) // 7) + 1
 
             # Check for last week special case (-1)
             if -1 in weeks_of_month:
-                last_day = calendar.monthrange(date_to_check.year, date_to_check.month)[
-                    1
-                ]
-                if last_day - date_to_check.day < 7:
+                last_day_num = calendar.monthrange(
+                    date_to_check.year, date_to_check.month
+                )[1]
+                last_date = date(date_to_check.year, date_to_check.month, last_day_num)
+                last_matching_day = last_date
+                while last_matching_day.weekday() != weekday:
+                    last_matching_day -= timedelta(days=1)
+                if date_to_check == last_matching_day:
                     return True
 
-            return week_of_month in weeks_of_month
+            return occurrence in weeks_of_month
 
         return True
 

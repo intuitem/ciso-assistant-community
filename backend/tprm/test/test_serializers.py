@@ -231,10 +231,17 @@ class EntityAssessmentSerializersTestCase(TestCase):
 
         data = {"name": "Updated Assessment", "representatives": [new_rep.id]}
 
-        serializer = EntityAssessmentWriteSerializer(
-            self.assessment, data=data, partial=True, context={"request": MagicMock()}
-        )
-        self.assertTrue(serializer.is_valid())
+        request = MagicMock()
+        request.user.is_authenticated = True
+
+        with patch(
+            "iam.models.RoleAssignment.get_accessible_object_ids",
+            return_value=([new_rep.id], None),
+        ):
+            serializer = EntityAssessmentWriteSerializer(
+                self.assessment, data=data, partial=True, context={"request": request}
+            )
+            self.assertTrue(serializer.is_valid())
         updated_assessment = serializer.save()
 
         self.assertEqual(updated_assessment.name, "Updated Assessment")

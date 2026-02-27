@@ -29,6 +29,7 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
@@ -371,7 +372,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     )
     dora_alternative_providers_identified = models.CharField(
         max_length=20,
-        choices=DORA_BINARY_CHOICES,
+        choices=DORA_YES_NO_ASSESSMENT_CHOICES,
         blank=True,
         verbose_name=_("Alternative providers identified"),
         help_text=_(
@@ -384,7 +385,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         help_text=_("Identification of alternative ICT third-party service providers"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["name", "provider_entity"]
 
     class Meta:
         verbose_name = _("Solution")

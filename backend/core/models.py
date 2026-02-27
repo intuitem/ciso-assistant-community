@@ -2895,7 +2895,7 @@ class Asset(
     )
     dora_criticality_assessment = models.CharField(
         max_length=50,
-        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        choices=dora.DORA_YES_NO_ASSESSMENT_CHOICES,
         blank=True,
         null=True,
         verbose_name=_("DORA Criticality Assessment"),
@@ -8078,11 +8078,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
             ]
 
         # Check if there are any TaskNode instances that are not within the date range
-        if self.schedule and "end_date" in self.schedule:
+        if self.pk and self.schedule and self.schedule.get("end_date"):
             end_date = self.schedule["end_date"]
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances that have a due date after the end date
-            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+            # Delete TaskNode instances whose scheduled date is after the end date
+            TaskNode.objects.filter(
+                task_template=self, scheduled_date__gt=end_date
+            ).delete()
         super().save(*args, **kwargs)
 
 
@@ -8095,6 +8097,12 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     ]
 
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    scheduled_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Scheduled date",
+        help_text="Original date from the recurrence rule. Not user-editable.",
+    )
 
     status = models.CharField(
         max_length=50, default="pending", choices=TASK_STATUS_CHOICES
@@ -8116,6 +8124,8 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     )
 
     to_delete = models.BooleanField(default=False)
+
+    fields_to_check = ["task_template", "due_date"]
 
     def __str__(self):
         return f"{self.task_template.name} ({self.due_date})"
@@ -8151,6 +8161,13 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["task_template", "due_date"],
+                condition=models.Q(due_date__isnull=False),
+                name="unique_tasknode_template_due_date",
+            ),
+        ]
 
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
@@ -8203,6 +8220,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     policies = models.ManyToManyField(
         Policy,
+        blank=True,
+    )
+    processings = models.ManyToManyField(
+        "privacy.Processing",
+        blank=True,
+    )
+    accreditations = models.ManyToManyField(
+        "pmbok.Accreditation",
+        blank=True,
+    )
+    contracts = models.ManyToManyField(
+        "tprm.Contract",
         blank=True,
     )
     request_notes = models.TextField(null=True, blank=True)
@@ -8289,6 +8318,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "evidences",
             "security_exceptions",
             "policies",
+            "processings",
+            "accreditations",
+            "contracts",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
