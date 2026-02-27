@@ -650,7 +650,6 @@ def generate_b_03_02_ict_providers(
     - c0010: Contractual arrangement reference number
     - c0020: Identification code of ICT third-party service provider
     - c0030: Type of code to identify the ICT third-party service provider
-    - c0045: Link (fill with "true" for each populated row)
 
     Args:
         zip_file: ZIP file object to write to
@@ -660,7 +659,7 @@ def generate_b_03_02_ict_providers(
     csv_writer = csv.writer(csv_buffer)
 
     # Write CSV headers
-    csv_writer.writerow(["c0010", "c0020", "c0030", "c0045"])
+    csv_writer.writerow(["c0010", "c0020", "c0030"])
 
     # Get third-party contracts with providers
     third_party_contracts = contracts.filter(
@@ -677,7 +676,7 @@ def generate_b_03_02_ict_providers(
             provider, priority=["LEI", "EUID", "VAT", "DUNS"]
         )
 
-        csv_writer.writerow([contract_ref, provider_code, code_type, "true"])
+        csv_writer.writerow([contract_ref, provider_code, code_type])
 
     path = (
         f"{folder_prefix}/reports/b_03.02.csv"
