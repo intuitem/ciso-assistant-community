@@ -1119,12 +1119,15 @@ class LibraryUpdater:
                         ["answers", "score", "is_scored", "documentation_score"],
                         batch_size=100,
                     )
-                    # Keep selected_implementation_groups consistent for dynamic frameworks
-                    if new_framework.is_dynamic():
-                        for ca in ComplianceAssessment.objects.filter(
-                            id__in=answers_changed_ca_ids
-                        ):
-                            update_selected_implementation_groups(ca)
+
+                # Keep selected_implementation_groups consistent for dynamic frameworks
+                # This must run even if no RA scalar fields changed, because answer
+                # M2M changes (selected_choices) can affect implementation groups.
+                if answers_changed_ca_ids and new_framework.is_dynamic():
+                    for ca in ComplianceAssessment.objects.filter(
+                        id__in=answers_changed_ca_ids
+                    ):
+                        update_selected_implementation_groups(ca)
 
                 if requirement_assessment_objects_to_create:
                     RequirementAssessment.objects.bulk_create(
@@ -7140,9 +7143,12 @@ class ComplianceAssessment(Assessment):
         answered_questions_count = (
             Answer.objects.filter(
                 requirement_assessment_id__in=ra_ids,
-                value__isnull=False,
             )
-            .exclude(value__in=[None, [], ""])
+            .filter(
+                Q(value__isnull=False) & ~Q(value__in=[None, [], ""])
+                | Q(selected_choices__isnull=False)
+            )
+            .distinct()
             .count()
         )
 

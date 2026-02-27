@@ -88,7 +88,8 @@ def migrate_forward(apps, schema_editor):
     for q in created_questions:
         question_urn_to_obj[q.urn] = q
 
-    # Now create choices for each question
+    # Now create choices for each question (pre-deduplicate by question+ref_id)
+    seen_choice_keys = set()
     for node in nodes_with_questions.iterator(chunk_size=500):
         if not isinstance(node.questions_json, dict):
             continue
@@ -105,6 +106,16 @@ def migrate_forward(apps, schema_editor):
                 c_urn = choice.get("urn", "")
                 c_parts = c_urn.split(":")
                 c_ref_id = c_parts[-1] if c_parts else c_urn
+
+                choice_key = (question.pk, c_ref_id)
+                if choice_key in seen_choice_keys:
+                    logger.warning(
+                        "Skipping duplicate choice ref_id=%s for question %s",
+                        c_ref_id,
+                        question.pk,
+                    )
+                    continue
+                seen_choice_keys.add(choice_key)
 
                 compute_result = choice.get("compute_result")
                 if compute_result is not None:
@@ -185,7 +196,15 @@ def migrate_forward(apps, schema_editor):
                     )
                 )
 
-    Answer.objects.bulk_create(answer_bulk, batch_size=1000, ignore_conflicts=True)
+    created_answers = Answer.objects.bulk_create(
+        answer_bulk, batch_size=1000, ignore_conflicts=True
+    )
+    if len(created_answers) < len(answer_bulk):
+        logger.warning(
+            "Answer bulk_create: %d of %d rows created (duplicates ignored)",
+            len(created_answers),
+            len(answer_bulk),
+        )
 
     # 5. Populate selected_choices M2M from value for choice-type answers
 
@@ -243,8 +262,13 @@ def migrate_forward(apps, schema_editor):
                     answer.question_id,
                 )
             answer.selected_choices.set(choices)
-        answer.value = None
-        batch.append(answer)
+            # Only clear value when all refs were resolved
+            if not missing:
+                answer.value = None
+                batch.append(answer)
+        else:
+            answer.value = None
+            batch.append(answer)
         if len(batch) >= BATCH_SIZE:
             Answer.objects.bulk_update(batch, ["value"])
             batch = []
@@ -259,33 +283,11 @@ def migrate_forward(apps, schema_editor):
 
 
 def migrate_backward(apps, schema_editor):
-    """Reverse: copy M2M back to value, delete all Question/QuestionChoice/Answer rows, reset framework status."""
+    """Reverse: delete all Question/QuestionChoice/Answer rows, reset framework status."""
     Answer = apps.get_model("core", "Answer")
     Question = apps.get_model("core", "Question")
     QuestionChoice = apps.get_model("core", "QuestionChoice")
     Framework = apps.get_model("core", "Framework")
-
-    # Restore value from M2M for choice-type answers
-    for answer in (
-        Answer.objects.filter(question__type="single_choice")
-        .prefetch_related("selected_choices")
-        .iterator(chunk_size=BATCH_SIZE)
-    ):
-        refs = list(answer.selected_choices.values_list("ref_id", flat=True))
-        if refs:
-            answer.value = refs[0]
-            answer.selected_choices.clear()
-            answer.save(update_fields=["value"])
-
-    for answer in (
-        Answer.objects.filter(question__type="multiple_choice")
-        .prefetch_related("selected_choices")
-        .iterator(chunk_size=BATCH_SIZE)
-    ):
-        refs = list(answer.selected_choices.values_list("ref_id", flat=True))
-        answer.value = refs if refs else []
-        answer.selected_choices.clear()
-        answer.save(update_fields=["value"])
 
     Answer.objects.all().delete()
     QuestionChoice.objects.all().delete()
