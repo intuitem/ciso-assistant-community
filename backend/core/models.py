@@ -135,6 +135,7 @@ def _create_questions_from_data(requirement_node, questions_data):
             c_urn = choice.get("urn", "")
             c_parts = c_urn.split(":")
             c_ref_id = c_parts[-1] if c_parts else c_urn
+            c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
 
             # Convert compute_result bool to string
             compute_result = choice.get("compute_result")
@@ -2351,38 +2352,61 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        if not self.questions:
+        questions_qs = self.questions.prefetch_related("choices").all()
+        if not questions_qs:
             return None
 
         current_lang = get_language()
 
-        def _translate_choice(choice: dict) -> dict:
-            tr = choice.get("translations", {}).get(current_lang, {})
-            return {
-                **choice,
-                **({} if not tr.get("value") else {"value": tr["value"]}),
-                **(
-                    {}
-                    if not tr.get("description")
-                    else {"description": tr["description"]}
-                ),
-            }
-
-        def _translate_question(q_content: dict) -> dict:
-            tr = q_content.get("translations", {}).get(current_lang, {})
-            translated = {**q_content}
-            if tr.get("text"):
-                translated["text"] = tr["text"]
-            if "choices" in q_content:
-                translated["choices"] = [
-                    _translate_choice(c) for c in q_content["choices"]
-                ]
-            return translated
-
-        return {
-            q_urn: _translate_question(q_content)
-            for q_urn, q_content in self.questions.items()
+        type_mapping = {
+            "single_choice": "unique_choice",
+            "multiple_choice": "multiple_choice",
+            "text": "text",
+            "number": "number",
+            "boolean": "boolean",
+            "date": "date",
         }
+
+        def _translate_choice(choice):
+            tr = (choice.translations or {}).get(current_lang, {})
+            choice_data = {
+                "urn": choice.ref_id,
+                "value": tr.get("value", choice.annotation or ""),
+            }
+            description = tr.get("description", choice.description)
+            if description:
+                choice_data["description"] = description
+            if choice.add_score is not None:
+                choice_data["add_score"] = choice.add_score
+            if choice.compute_result is not None:
+                choice_data["compute_result"] = choice.compute_result not in (
+                    "false",
+                    "0",
+                    "",
+                )
+            if choice.color:
+                choice_data["color"] = choice.color
+            if choice.select_implementation_groups:
+                choice_data["select_implementation_groups"] = (
+                    choice.select_implementation_groups
+                )
+            return choice_data
+
+        result = {}
+        for question in questions_qs:
+            q_tr = (question.translations or {}).get(current_lang, {})
+            q_data = {
+                "type": type_mapping.get(question.type, question.type),
+                "text": q_tr.get("text", question.annotation or ""),
+            }
+            choices = [_translate_choice(c) for c in question.choices.all()]
+            if choices:
+                q_data["choices"] = choices
+            if question.depends_on:
+                q_data["depends_on"] = question.depends_on
+            result[question.urn] = q_data
+
+        return result if result else None
 
     class Meta:
         verbose_name = _("RequirementNode")
