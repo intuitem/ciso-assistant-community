@@ -16,6 +16,7 @@
 	import '@xyflow/svelte/dist/style.css';
 
 	import ActionNodeComponent from './nodes/ActionNode.svelte';
+	import StageColumnNodeComponent from './nodes/StageColumnNode.svelte';
 	import EditorSidebar from './EditorSidebar.svelte';
 
 	// ---- Types ----
@@ -46,11 +47,27 @@
 
 	// ---- Constants ----
 
-	const STAGE_X: Record<number, number> = { 0: 0, 1: 300, 2: 600, 3: 900 };
-	const NODE_GAP_Y = 100;
+	const COLUMN_GAP = 350;
+	const COLUMN_WIDTH = 280;
+	const COLUMN_HEIGHT = 800;
+	const NODE_GAP_Y = 90;
+	const NODE_PADDING_X = 50;
+	const NODE_PADDING_Y = 60;
+
+	const STAGE_CONFIG = [
+		{ key: 'ebiosReconnaissance', icon: 'fa-magnifying-glass', bg: '#fdf2f8', border: '#ec4899' },
+		{ key: 'ebiosInitialAccess', icon: 'fa-right-to-bracket', bg: '#f5f3ff', border: '#8b5cf6' },
+		{ key: 'ebiosDiscovery', icon: 'fa-lightbulb', bg: '#fff7ed', border: '#f97316' },
+		{ key: 'ebiosExploitation', icon: 'fa-bolt', bg: '#fef2f2', border: '#ef4444' }
+	];
+
+	function stageColumnId(stage: number) {
+		return `stage-col-${stage}`;
+	}
 
 	const nodeTypes = {
-		action: ActionNodeComponent
+		action: ActionNodeComponent,
+		stageColumn: StageColumnNodeComponent
 	};
 
 	// ---- State ----
@@ -60,12 +77,16 @@
 	let logicOps = $state<Map<string, 'AND' | 'OR'>>(new Map());
 	let saving = $state(false);
 	let dirty = $state(false);
+	let dragOverStage = $state<number | null>(null);
 
-	// ---- Context for child components (ActionNode) ----
+	// ---- Context for child components (ActionNode, StageColumnNode) ----
 
 	setContext('killChainEditor', {
 		get logicOps() {
 			return logicOps;
+		},
+		get dragOverStage() {
+			return dragOverStage;
 		},
 		deleteNode: (id: string) => handleDeleteNode(id),
 		toggleOperator: (id: string) => handleToggleOperator(id)
@@ -81,10 +102,27 @@
 		return 0;
 	}
 
+	// ---- Build stage column parent nodes ----
+
+	function buildStageColumnNodes(): Node[] {
+		return STAGE_CONFIG.map((config, stage) => ({
+			id: stageColumnId(stage),
+			type: 'stageColumn',
+			position: { x: stage * COLUMN_GAP, y: 0 },
+			style: `width: ${COLUMN_WIDTH}px; height: ${COLUMN_HEIGHT}px;`,
+			data: { ...config, stage },
+			selectable: true,
+			draggable: false,
+			deletable: false,
+			connectable: false
+		}));
+	}
+
 	// ---- Initialize from existing kill chain ----
 
 	function initFromKillChain() {
-		const flowNodes: Node[] = [];
+		// Parent column nodes must come first in the array
+		const flowNodes: Node[] = buildStageColumnNodes();
 		const flowEdges: Edge[] = [];
 		const ops = new Map<string, 'AND' | 'OR'>();
 		const stageCount: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0 };
@@ -106,16 +144,19 @@
 				ops.set(eaId, step.logic_operator as 'AND' | 'OR');
 			}
 
+			// Position is relative to the parent column node
 			flowNodes.push({
 				id: eaId,
 				type: 'action',
-				position: { x: STAGE_X[stage], y: 80 + count * NODE_GAP_Y },
+				position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + count * NODE_GAP_Y },
+				parentId: stageColumnId(stage),
+				extent: 'parent',
 				data: {
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
 					stage
 				}
-			});
+			} as Node);
 			stageCount[stage] = count + 1;
 
 			for (const ant of antecedents) {
@@ -197,7 +238,6 @@
 	}
 
 	function handleDeleteNode(nodeId: string) {
-		// Collect targets of outgoing edges (they might need logic operator update)
 		const affectedTargets = edges.filter((e) => e.source === nodeId).map((e) => e.target);
 
 		nodes = nodes.filter((n) => n.id !== nodeId);
@@ -207,7 +247,6 @@
 		newOps.delete(nodeId);
 		logicOps = newOps;
 
-		// Update affected targets' logic operators
 		for (const targetId of affectedTargets) {
 			if (nodes.some((n) => n.id === targetId)) {
 				updateNodeLogicData(targetId);
@@ -272,10 +311,19 @@
 		if (event.dataTransfer) {
 			event.dataTransfer.dropEffect = 'move';
 		}
+		const json = event.dataTransfer?.types.includes('application/json');
+		if (json) {
+			dragOverStage = -1;
+		}
+	}
+
+	function handleDragLeave() {
+		dragOverStage = null;
 	}
 
 	function handleDrop(event: DragEvent) {
 		event.preventDefault();
+		dragOverStage = null;
 		if (!event.dataTransfer) return;
 
 		const actionJson = event.dataTransfer.getData('application/json');
@@ -286,23 +334,24 @@
 
 		const stage = getStageNumber(action.attack_stage);
 
-		// Auto-position: next available slot in the stage column
+		// Count existing nodes in this stage column
 		const nodesInStage = nodes.filter(
 			(n) => n.type === 'action' && (n.data as any).stage === stage
 		);
-		const x = STAGE_X[stage];
-		const y = 80 + nodesInStage.length * NODE_GAP_Y;
 
+		// Position relative to the parent column node
 		const newNode: Node = {
 			id: action.id,
 			type: 'action',
-			position: { x, y },
+			position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + nodesInStage.length * NODE_GAP_Y },
+			parentId: stageColumnId(stage),
+			extent: 'parent',
 			data: {
 				label: action.name,
 				iconClass: action.icon_fa_class ?? '',
 				stage
 			}
-		};
+		} as Node;
 
 		nodes = [...nodes, newNode];
 		dirty = true;
@@ -388,7 +437,9 @@
 				ondelete={handleDelete}
 				onedgeclick={handleEdgeClick}
 				ondragover={handleDragOver}
+				ondragleave={handleDragLeave}
 				ondrop={handleDrop}
+				snapGrid={[10, 10]}
 				fitView
 				defaultEdgeOptions={{
 					markerEnd: { type: MarkerType.ArrowClosed, color: '#4D179A' },
