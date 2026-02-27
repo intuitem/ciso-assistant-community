@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { enhance } from '$app/forms';
+	import { setContext } from 'svelte';
 	import {
 		SvelteFlow,
 		Controls,
@@ -60,6 +61,16 @@
 	let saving = $state(false);
 	let dirty = $state(false);
 
+	// ---- Context for child components (ActionNode) ----
+
+	setContext('killChainEditor', {
+		get logicOps() {
+			return logicOps;
+		},
+		deleteNode: (id: string) => handleDeleteNode(id),
+		toggleOperator: (id: string) => handleToggleOperator(id)
+	});
+
 	// ---- Stage helpers ----
 
 	function getStageNumber(attackStage: string): number {
@@ -102,10 +113,7 @@
 				data: {
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
-					stage,
-					onDelete: handleDeleteNode,
-					onToggleOperator: handleToggleOperator,
-					logicOperator: hasLogicOp ? step.logic_operator : undefined
+					stage
 				}
 			});
 			stageCount[stage] = count + 1;
@@ -145,10 +153,8 @@
 		const sourceStage = sourceNode.data.stage as number;
 		const targetStage = targetNode.data.stage as number;
 
-		// Source stage must be <= target stage
+		// Source stage must be <= target stage (same stage allowed)
 		if (sourceStage > targetStage) return false;
-		// KNOW stage can't receive connections
-		if (targetStage === 0) return false;
 		// No self-connections
 		if (connection.source === connection.target) return false;
 		// No duplicates
@@ -170,11 +176,6 @@
 			newOps.delete(nodeId);
 		}
 		logicOps = newOps;
-
-		const operator = incomingCount >= 2 ? (logicOps.get(nodeId) ?? 'AND') : undefined;
-		nodes = nodes.map((n) =>
-			n.id === nodeId ? { ...n, data: { ...n.data, logicOperator: operator } } : n
-		);
 	}
 
 	// ---- Event handlers ----
@@ -220,11 +221,19 @@
 		const current = logicOps.get(nodeId) ?? 'AND';
 		const newOp = current === 'AND' ? 'OR' : 'AND';
 		logicOps = new Map(logicOps).set(nodeId, newOp);
-
-		nodes = nodes.map((n) =>
-			n.id === nodeId ? { ...n, data: { ...n.data, logicOperator: newOp } } : n
-		);
 		dirty = true;
+	}
+
+	function handleDeleteEdge(edgeId: string) {
+		const edge = edges.find((e) => e.id === edgeId);
+		if (!edge) return;
+		edges = edges.filter((e) => e.id !== edgeId);
+		updateNodeLogicData(edge.target);
+		dirty = true;
+	}
+
+	function handleEdgeClick(_event: MouseEvent, edge: Edge) {
+		handleDeleteEdge(edge.id);
 	}
 
 	function handleDelete({
@@ -236,12 +245,10 @@
 	}) {
 		const newOps = new Map(logicOps);
 
-		// Clean up logicOps for deleted nodes
 		for (const node of deletedNodes) {
 			newOps.delete(node.id);
 		}
 
-		// Collect targets affected by deleted edges
 		const targetsToUpdate = new Set<string>();
 		for (const edge of deletedEdges) {
 			targetsToUpdate.add(edge.target);
@@ -249,7 +256,6 @@
 
 		logicOps = newOps;
 
-		// Update affected target nodes' logic operator display
 		for (const targetId of targetsToUpdate) {
 			if (nodes.some((n) => n.id === targetId)) {
 				updateNodeLogicData(targetId);
@@ -294,9 +300,7 @@
 			data: {
 				label: action.name,
 				iconClass: action.icon_fa_class ?? '',
-				stage,
-				onDelete: handleDeleteNode,
-				onToggleOperator: handleToggleOperator
+				stage
 			}
 		};
 
@@ -382,6 +386,7 @@
 				{isValidConnection}
 				onconnect={handleConnect}
 				ondelete={handleDelete}
+				onedgeclick={handleEdgeClick}
 				ondragover={handleDragOver}
 				ondrop={handleDrop}
 				fitView
@@ -405,5 +410,9 @@
 	}
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 1.5;
+	}
+	:global(.svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
+		stroke: #ef4444;
+		cursor: pointer;
 	}
 </style>

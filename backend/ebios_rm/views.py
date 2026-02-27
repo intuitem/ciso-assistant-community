@@ -1242,11 +1242,6 @@ class OperatingModeViewSet(BaseModelViewSet):
 
                 parsed_antecedents.append(ant_uuid)
 
-            if ea.attack_stage == ElementaryAction.AttackStage.KNOW and parsed_antecedents:
-                errors.append(
-                    f"Step {i}: reconnaissance stage actions cannot have antecedents."
-                )
-
             if logic_operator and logic_operator not in ("AND", "OR"):
                 errors.append(
                     f"Step {i}: logic_operator must be 'AND', 'OR', or null."

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Handle, Position } from '@xyflow/svelte';
+	import { getContext } from 'svelte';
 
 	interface Props {
 		id: string;
@@ -7,13 +8,18 @@
 			label: string;
 			iconClass?: string;
 			stage: number;
-			onDelete?: (id: string) => void;
-			onToggleOperator?: (id: string) => void;
-			logicOperator?: 'AND' | 'OR';
 		};
 	}
 
 	let { id, data }: Props = $props();
+
+	const editor = getContext<{
+		logicOps: Map<string, 'AND' | 'OR'>;
+		deleteNode: (id: string) => void;
+		toggleOperator: (id: string) => void;
+	}>('killChainEditor');
+
+	const logicOperator = $derived(editor?.logicOps.get(id));
 
 	const STAGE_BORDER: Record<number, string> = {
 		0: '#ec4899',
@@ -55,40 +61,32 @@
 	</div>
 
 	<!-- Logic operator badge (AND/OR) — shown when node has 2+ incoming edges -->
-	{#if data.logicOperator}
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<span
-			class="absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded text-[9px] font-bold border cursor-pointer select-none hover:brightness-90"
+	{#if logicOperator}
+		<button
+			class="nopan nodrag absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded text-[9px] font-bold border cursor-pointer select-none hover:brightness-90"
 			style="background: #ede9fe; border-color: #8b5cf6; color: #6d28d9; z-index: 10;"
-			role="button"
-			tabindex="-1"
-			onmousedown={(e) => {
-				e.stopPropagation();
-				data.onToggleOperator?.(id);
-			}}
+			onclick={() => editor?.toggleOperator(id)}
 		>
-			{data.logicOperator}
-		</span>
+			{logicOperator}
+		</button>
 	{/if}
 
 	<!-- Delete button on hover -->
-	{#if hovered && data.onDelete}
+	{#if hovered}
 		<button
-			class="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center hover:bg-red-600 cursor-pointer"
-			onmousedown={(e) => { e.stopPropagation(); data.onDelete?.(id); }}
+			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-red-500 text-white text-[8px] flex items-center justify-center hover:bg-red-600 cursor-pointer"
+			onclick={() => editor?.deleteNode(id)}
 		>
 			✕
 		</button>
 	{/if}
 
-	<!-- Input handle (left) — hidden for KNOW stage (0) -->
-	{#if data.stage > 0}
-		<Handle
-			type="target"
-			position={Position.Left}
-			class="!w-3 !h-3 !bg-white !border-2 !border-violet-800"
-		/>
-	{/if}
+	<!-- Input handle (left) -->
+	<Handle
+		type="target"
+		position={Position.Left}
+		class="!w-3 !h-3 !bg-white !border-2 !border-violet-800"
+	/>
 
 	<!-- Output handle (right) -->
 	<Handle
