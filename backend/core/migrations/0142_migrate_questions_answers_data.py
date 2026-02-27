@@ -41,7 +41,9 @@ def migrate_forward(apps, schema_editor):
     Framework.objects.all().update(status="published")
 
     # Get root folder for FK
-    root_folder = Folder.objects.filter(content_type="GLOBAL").first()
+    root_folder = Folder.objects.filter(content_type="GL").first()
+    if not root_folder:
+        raise Exception("Root folder with content_type='GL' not found")
 
     # 2. Migrate RequirementNode.questions → Question + QuestionChoice
     question_bulk = []
