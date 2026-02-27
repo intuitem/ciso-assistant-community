@@ -543,7 +543,10 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessments', urlModel: 'findings-assessments' },
 			{ field: 'evidences', urlModel: 'evidences' },
 			{ field: 'security_exceptions', urlModel: 'security-exceptions' },
-			{ field: 'policies', urlModel: 'policies' }
+			{ field: 'policies', urlModel: 'policies' },
+			{ field: 'processings', urlModel: 'processings' },
+			{ field: 'accreditations', urlModel: 'accreditations' },
+			{ field: 'contracts', urlModel: 'contracts' }
 		],
 		selectFields: [{ field: 'status' }],
 		filters: [

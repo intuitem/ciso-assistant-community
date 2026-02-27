@@ -1,4 +1,4 @@
-from django.db.utils import OperationalError, ProgrammingError
+from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -1837,7 +1837,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA criticality assessment choices")
     def dora_criticality_assessment(self, request):
-        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+        return Response(dict(dora.DORA_YES_NO_ASSESSMENT_CHOICES))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA discontinuing impact choices")
@@ -5774,6 +5774,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         evidence_model = related_model("evidences")
         security_exception_model = related_model("security_exceptions")
         policy_model = related_model("policies")
+        processing_model = related_model("processings")
+        accreditation_model = related_model("accreditations")
+        contract_model = related_model("contracts")
 
         queryset = queryset.select_related("requester", "approver").prefetch_related(
             Prefetch("events", queryset=events_qs),
@@ -5796,6 +5799,18 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "policies",
                 queryset=policy_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "processings",
+                queryset=processing_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "accreditations",
+                queryset=accreditation_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "contracts",
+                queryset=contract_model.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -5809,6 +5824,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_evidences": ValidationFlow.evidences.through,
             "has_security_exceptions": ValidationFlow.security_exceptions.through,
             "has_policies": ValidationFlow.policies.through,
+            "has_processings": ValidationFlow.processings.through,
+            "has_accreditations": ValidationFlow.accreditations.through,
+            "has_contracts": ValidationFlow.contracts.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -5837,6 +5855,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "evidences": "Evidences",
             "security_exceptions": "Security Exceptions",
             "policies": "Policies",
+            "processings": "Processings",
+            "accreditations": "Accreditations",
+            "contracts": "Contracts",
         }
         return Response(model_types)
 
@@ -10868,41 +10889,25 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     "color": "hsl(80deg, 80%, 60%)",
                 },
                 "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
+                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
-            grouped_status_counts = {}
+            status_values = []
 
             for status, count in metrics["status_distribution"].items():
                 mapping_info = status_mapping.get(
-                    status, {"localName": "other", "color": "#CCCCCC"}
+                    status, {"localName": status, "color": "#CCCCCC"}
                 )
-                local_name = mapping_info["localName"]
-                color = mapping_info["color"]
-
-                if local_name in grouped_status_counts:
-                    grouped_status_counts[local_name]["value"] += count
-                else:
-                    grouped_status_counts[local_name] = {
+                status_values.append(
+                    {
                         "value": count,
-                        "localName": local_name,
-                        "itemStyle": {"color": color},
+                        "localName": mapping_info["localName"],
+                        "itemStyle": {"color": mapping_info["color"]},
                     }
-
-            status_values = list(grouped_status_counts.values())
-
-            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
-            for status in expected_statuses:
-                if not any(item["localName"] == status for item in status_values):
-                    status_values.append(
-                        {
-                            "value": 0,
-                            "localName": status,
-                            "itemStyle": {"color": "#CCCCCC"},
-                        }
-                    )
+                )
 
             return {"values": status_values}
 
@@ -12258,6 +12263,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
+                if not template.task_date:
+                    continue
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
@@ -12279,53 +12286,110 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             tasks = _generate_occurrences(template, start_date, end_date)
             tasks_list.extend(tasks)
 
-        processed_tasks_identifiers = set()  # Track tasks we've already processed
+            # Preserve TaskNodes manually rescheduled by the user
+            # (due_date != scheduled_date)
+            # Unmodified nodes (due_date == scheduled_date)
+            # can be safely garbage-collected on schedule changes.
+            existing_nodes = TaskNode.objects.filter(
+                task_template=template,
+            ).filter(
+                Q(
+                    scheduled_date__gte=start_date,
+                    scheduled_date__lte=end_date,
+                )
+                | (
+                    Q(due_date__gte=start_date, due_date__lte=end_date)
+                    & ~Q(due_date=F("scheduled_date"))
+                )
+            )
+            generated_scheduled_dates = {t["due_date"] for t in tasks}
+            for node in existing_nodes:
+                if node.scheduled_date not in generated_scheduled_dates:
+                    if (
+                        node.due_date != node.scheduled_date
+                        or node.due_date < datetime.now().date()
+                    ):
+                        # Preserve nodes manually rescheduled or in the past
+                        node.to_delete = False
+                        node.save(update_fields=["to_delete"])
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
 
-        # Sort tasks by due date
+        def _parse_due_date(val):
+            """Normalize due_date to a date object"""
+            if isinstance(val, str):
+                return datetime.strptime(val, "%Y-%m-%d").date()
+            return val
+
+        # Sort tasks by due date, skip entries without a due_date
         sorted_tasks = sorted(
-            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+            [t for t in tasks_list if t.get("due_date")],
+            key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
 
-        # First separate past and future tasks
-        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
-        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+        # Separate past and future tasks, limit future to next 10
+        past_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) <= current_date
+        ]
+        next_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) > current_date
+        ]
 
-        # Combined list of tasks to process (past and next 10)
-        tasks_to_process = past_tasks + next_tasks
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
+        # Only virtual tasks (from _generate_occurrences) need to be materialized;
+        # existing TaskNodes from the DB are already persisted.
+        tasks_to_process_ids = set()
+        for task in past_tasks + next_tasks[:10]:
+            if not task.get("virtual"):
+                continue
+            template_id = task.get("task_template")
+            task_date = task.get("due_date")
+            if template_id and task_date:
+                tasks_to_process_ids.add((template_id, task_date))
 
-        # Directly modify tasks in the original tasks_list
+        processed_tasks_identifiers = set()
+
         for i in range(len(tasks_list)):
             task = tasks_list[i]
-            task_date = task["due_date"]
-            task_template_id = task["task_template"]
+            task_date = task.get("due_date")
+            if not task_date:
+                continue
 
-            # Create a unique identifier for this task to avoid duplication
+            # Already-serialized TaskNodes from the DB don't need processing
+            if not task.get("virtual"):
+                continue
+
+            task_template_id = task["task_template"]
             task_identifier = (task_template_id, task_date)
 
-            # Skip if we've already processed this task
             if task_identifier in processed_tasks_identifiers:
                 continue
 
-            # Check if this task should be processed (is in past or next 10)
-            if task in tasks_to_process:
+            if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                # Get or create the TaskNode
                 task_template = TaskTemplate.objects.get(id=task_template_id)
-                task_node, created = TaskNode.objects.get_or_create(
-                    task_template=task_template,
-                    due_date=task_date,
-                    defaults={
-                        "status": "pending",
-                        "folder": task_template.folder,
-                    },
-                )
+                try:
+                    task_node, created = TaskNode.objects.get_or_create(
+                        task_template=task_template,
+                        scheduled_date=task_date,
+                        defaults={
+                            "due_date": task_date,
+                            "status": "pending",
+                            "folder": task_template.folder,
+                        },
+                    )
+                except IntegrityError:
+                    # Another node for this template already has this due_date
+                    # (e.g. a rescheduled occurrence). Skip materialization.
+                    continue
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
-                # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
         return tasks_list
@@ -12333,9 +12397,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
-                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+                # Soft-delete future TaskNode instances for re-evaluation.
                 TaskNode.objects.filter(
-                    task_template=task_template, due_date__gt=date.today()
+                    task_template=task_template, scheduled_date__gte=date.today()
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
