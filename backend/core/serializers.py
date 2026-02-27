@@ -2640,8 +2640,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
 
             # Reject sending both value and selected_choices for choice questions
             if (
-                q_type
-                in (Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE)
+                q_type in (Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE)
                 and value is not None
                 and selected_choices_list is not None
             ):
@@ -2731,7 +2730,9 @@ class AnswerWriteSerializer(BaseModelSerializer):
                 if value is not None:
                     if not isinstance(value, str):
                         raise serializers.ValidationError(
-                            {"value": "Date answers must be a string in YYYY-MM-DD format."}
+                            {
+                                "value": "Date answers must be a string in YYYY-MM-DD format."
+                            }
                         )
                     try:
                         datetime.strptime(value, "%Y-%m-%d")
