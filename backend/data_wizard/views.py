@@ -1175,6 +1175,16 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     def _resolve_risk_matrix(
         self, record: dict
     ) -> tuple[Optional[RiskMatrix], Optional[Error]]:
+        # Form-selected matrix takes priority over whatever is in the file.
+        if self.matrix_id:
+            risk_matrix = RiskMatrix.objects.filter(id=self.matrix_id).first()
+            if risk_matrix is None:
+                return None, Error(
+                    record=record,
+                    error=f"Risk matrix with ID '{self.matrix_id}' does not exist",
+                )
+            return risk_matrix, None
+
         matrix_value = (
             record.get("risk_matrix")
             or record.get("risk_matrix_ref_id")
@@ -1203,15 +1213,6 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
                     error=f"Unknown risk matrix '{matrix_value}'",
                 )
 
-            return risk_matrix, None
-
-        if self.matrix_id:
-            risk_matrix = RiskMatrix.objects.filter(id=self.matrix_id).first()
-            if risk_matrix is None:
-                return None, Error(
-                    record=record,
-                    error=f"Risk matrix with ID '{self.matrix_id}' does not exist",
-                )
             return risk_matrix, None
 
         return None, Error(record=record, error="Risk matrix is mandatory")
@@ -1533,12 +1534,11 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
         if error:
             return None, error
 
-        assessment = AssetAssessment.objects.filter(bia=bia, asset=asset).first()
-        if assessment is None:
-            return None, Error(
-                record=record,
-                error=f"No asset assessment found for BIA '{bia.name}' and asset '{asset.name}'",
-            )
+        assessment, _ = AssetAssessment.objects.get_or_create(
+            bia=bia,
+            asset=asset,
+            defaults={"folder": bia.folder},
+        )
         return assessment, None
 
     def _resolve_qualifications(
@@ -1605,6 +1605,19 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
                 return {}, Error(
                     record=record,
                     error=f"Invalid quali_impact '{quali_impact}'",
+                )
+
+        if quali_impact_value != -1:
+            risk_matrix = asset_assessment.bia.risk_matrix
+            impacts = risk_matrix.impact if risk_matrix else []
+            n_impacts = len(impacts)
+            if n_impacts > 0 and not (0 <= quali_impact_value < n_impacts):
+                return {}, Error(
+                    record=record,
+                    error=(
+                        f"quali_impact {quali_impact_value} is out of range "
+                        f"[0, {n_impacts - 1}] for matrix '{risk_matrix.name}'"
+                    ),
                 )
 
         quanti_impact = record.get("quanti_impact")
