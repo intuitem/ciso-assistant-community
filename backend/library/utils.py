@@ -130,6 +130,7 @@ class RequirementNodeImporter:
                     c_urn = choice.get("urn", "")
                     c_parts = c_urn.split(":")
                     c_ref_id = c_parts[-1] if c_parts else c_urn
+                    c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
 
                     compute_result = choice.get("compute_result")
                     if compute_result is not None:
