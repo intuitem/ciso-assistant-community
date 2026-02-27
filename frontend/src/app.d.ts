@@ -13,6 +13,8 @@ declare global {
 			featureFlags: FeatureFlags;
 			globalSettings: GlobalSettings;
 			generalSettings: Record<string, any>;
+			settings: Record<string, any>;
+			featureflags: Record<string, any>;
 		}
 		interface PageData {
 			flash?: {
