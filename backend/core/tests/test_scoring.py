@@ -474,10 +474,7 @@ class TestScoring:
         ra.compute_score_and_result()
         ra.refresh_from_db()
 
-        # Both choices selected: add_score 5 + 3 = 8 total, weight 1+1=2
-        # But weight is per-question, not per-choice. Each choice adds
-        # score * weight, but total_weight only increments once per choice match.
-        # Actually looking at the code: each choice match adds score*weight and weight.
-        # So total_score = 5*1 + 3*1 = 8, total_weight = 1+1 = 2, mean = 4
+        # Both choices selected: each match adds score*weight and weight.
+        # total_score = 5*1 + 3*1 = 8, total_weight = 1+1 = 2, mean = 8/2 = 4
         assert ra.score == 4
         assert ra.result == "compliant"
