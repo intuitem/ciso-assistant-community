@@ -573,6 +573,7 @@
 	"passwordSuccessfullySetWelcome": "Vaše heslo bylo úspěšně nastaveno. Vítejte v CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Počkejte prosím {timing} sec před vyžádáním nového resetovacího odkazu",
 	"resetLinkSent": "Požadavek byl přijat, na následující adrese byste měli obdržet resetovací odkaz: {email}",
+	"invitationSent": "Pozvánka byla odeslána zástupci",
 	"riskAcceptanceStateDoesntAllowEdit": "Stav přijetí rizika neumožňuje jeho úpravu",
 	"associatedRequirements": "Přidružené požadavky",
 	"isPublished": "Je publikováno",

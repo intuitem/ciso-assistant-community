@@ -574,6 +574,7 @@
 	"passwordSuccessfullySetWelcome": "Ditt lösenord har ställts in framgångsrikt. Välkommen till CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Vänligen vänta {timing} sekunder innan du begär en ny återställningslänk",
 	"resetLinkSent": "Begäran har mottagits. Du bör få en återställningslänk på följande adress: {email}",
+	"invitationSent": "Inbjudan har skickats till representanten",
 	"riskAcceptanceStateDoesntAllowEdit": "Riskacceptansens tillstånd tillåter inte redigering",
 	"associatedRequirements": "Associerade krav",
 	"isPublished": "Är publicerad",

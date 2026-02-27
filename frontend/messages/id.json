@@ -575,6 +575,7 @@
 	"passwordSuccessfullySetWelcome": "Kata sandi Anda berhasil diatur. Selamat datang di CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Harap tunggu {timing} detik sebelum meminta tautan reset baru",
 	"resetLinkSent": "Permintaan telah diterima, Anda akan menerima tautan reset di alamat berikut: {email}",
+	"invitationSent": "Undangan telah dikirim ke perwakilan",
 	"riskAcceptanceStateDoesntAllowEdit": "Status penerimaan risiko tidak memungkinkan untuk diedit",
 	"associatedRequirements": "Persyaratan terkait",
 	"isPublished": "Telah diterbitkan",

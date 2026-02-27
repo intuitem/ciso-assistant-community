@@ -270,9 +270,28 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.confirmModalTitle(),
 			body: m.sureToSendQuestionnaire({ questionnaire: name })
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSendInvitation(id: string, email: string, action: string): void {
+		const modalComponent: ModalComponent = {
+			ref: ConfirmModal,
+			props: {
+				_form: { id: id, urlmodel: getModelInfo('representatives').urlModel, email: email },
+				id: id,
+				debug: false,
+				URLModel: getModelInfo('representatives').urlModel,
+				formAction: action
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.confirmModalTitle(),
+			body: `Do you want to send the invitation to ${email}?`
 		};
 		modalStore.trigger(modal);
 	}
@@ -728,6 +747,21 @@
 			{/if}
 
 			{#if displayEditButton()}
+				{#if data.urlModel === 'representatives' && data.data.user}
+					<button
+						class="btn preset-filled-ghost-500 mr-2"
+						onclick={() =>
+							modalSendInvitation(
+								data.data.id,
+								data.data.email,
+								`/representatives/${data.data.id}/send-invitation`
+							)}
+						data-testid="send-invitation-button"
+					>
+						<i class="fa-solid fa-envelope mr-2"></i>
+						Send invitation
+					</button>
+				{/if}
 				{#if data.data.state === 'Created'}
 					<Tooltip
 						open={openStateRA && !data.data.approver}

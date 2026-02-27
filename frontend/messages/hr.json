@@ -627,6 +627,7 @@
 	"passwordSuccessfullySetWelcome": "Vaša lozinka je uspješno postavljena. Dobrodošli u CISO Assistant!",
 	"waitBeforeRequestingResetLink": "Molimo pričekajte {timing}s prije zahtjevanja novog linka",
 	"resetLinkSent": "Zahtjev je zaprimljen. Trebali bi dobiti link za resetiranje na sljedeću adresu: {email}",
+	"invitationSent": "Pozivnica je poslana predstavniku",
 	"riskAcceptanceStateDoesntAllowEdit": "Stanje prihvaćanja rizika ne dopušta uređivanje istog.",
 	"associatedRequirements": "Povezani zahtjevi",
 	"isPublished": "Objavljeno",
