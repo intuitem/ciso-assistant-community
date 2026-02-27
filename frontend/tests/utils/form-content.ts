@@ -105,6 +105,8 @@ export class FormContent {
 								await responsePromise;
 							} else {
 								await field.locator.click();
+								// Type to trigger lazy autocomplete search if needed
+								await field.locator.getByRole('searchbox').fill(values[key]);
 								await expect(
 									field.locator.getByRole('option', { name: values[key] }).first()
 								).toBeVisible({ timeout: 10_000 });
@@ -116,7 +118,11 @@ export class FormContent {
 				case FormFieldType.SELECT_MULTIPLE_AUTOCOMPLETE:
 					await field.locator.click();
 					for (const val of values[key]) {
-						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible();
+						// Type to trigger lazy autocomplete search if needed
+						await field.locator.getByRole('searchbox').fill(val);
+						await expect(field.locator.getByRole('option', { name: val }).first()).toBeVisible({
+							timeout: 10_000
+						});
 						await field.locator.getByRole('option', { name: val }).first().click();
 					}
 					if (

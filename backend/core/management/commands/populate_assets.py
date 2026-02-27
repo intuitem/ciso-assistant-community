@@ -151,17 +151,25 @@ class Command(BaseCommand):
 
         def random_security_objectives():
             return {
-                obj: random.choices(
-                    security_objective_levels, weights=security_objective_weights
-                )[0]
-                for obj in Asset.DEFAULT_SECURITY_OBJECTIVES
+                "objectives": {
+                    obj: {
+                        "value": random.choices(
+                            security_objective_levels,
+                            weights=security_objective_weights,
+                        )[0],
+                        "is_enabled": True,
+                    }
+                    for obj in Asset.DEFAULT_SECURITY_OBJECTIVES
+                }
             }
 
         def random_disaster_recovery_objectives():
             return {
-                "rto": random.choice([0, 1, 2, 3, 4]),
-                "rpo": random.choice([0, 1, 2, 3, 4]),
-                "mtd": random.choice([0, 1, 2, 3, 4]),
+                "objectives": {
+                    "rto": {"value": random.choice([0, 1, 2, 3, 4])},
+                    "rpo": {"value": random.choice([0, 1, 2, 3, 4])},
+                    "mtd": {"value": random.choice([0, 1, 2, 3, 4])},
+                }
             }
 
         # --- distribute assets across depth levels -----------------------

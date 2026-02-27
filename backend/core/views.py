@@ -541,7 +541,10 @@ class ExportMixin:
 
 
 class GenericFilterSet(df.FilterSet):
-    id = df.BaseInFilter(field_name="id", lookup_expr="in")
+    class UUIDInFilter(df.BaseInFilter, df.UUIDFilter):
+        pass
+
+    id = UUIDInFilter(field_name="id", lookup_expr="in")
 
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
