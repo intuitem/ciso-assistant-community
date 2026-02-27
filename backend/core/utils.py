@@ -704,8 +704,17 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
     if not dep_ref:
         return True
 
+    # Check parent question visibility first (recursive chain)
+    if questions_by_ref:
+        parent_question = questions_by_ref.get(dep_ref)
+        if parent_question and not _is_question_visible(
+            parent_question, answers_by_ref, questions_by_ref
+        ):
+            return False
+
     target_answer = answers_by_ref.get(dep_ref)
-    if not target_answer:
+    # Use explicit None/empty-list check to avoid hiding on falsy values like 0 or False
+    if target_answer is None or (isinstance(target_answer, list) and not target_answer):
         return False
 
     condition = depends_on.get("condition", "any")
@@ -719,7 +728,8 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
     if condition == "all":
         if isinstance(target_answer, list):
             return all(a in target_answer for a in dep_answers)
-        return target_answer == dep_answers[0] if dep_answers else False
+        # Single-value answer can only satisfy "all" if there's exactly one expected answer
+        return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
     return True
 
