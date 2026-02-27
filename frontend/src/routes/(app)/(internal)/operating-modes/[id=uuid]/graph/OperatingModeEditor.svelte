@@ -55,10 +55,10 @@
 	const NODE_PADDING_Y = 60;
 
 	const STAGE_CONFIG = [
-		{ key: 'ebiosReconnaissance', icon: 'fa-magnifying-glass', bg: '#fdf2f8', border: '#ec4899' },
-		{ key: 'ebiosInitialAccess', icon: 'fa-right-to-bracket', bg: '#f5f3ff', border: '#8b5cf6' },
-		{ key: 'ebiosDiscovery', icon: 'fa-lightbulb', bg: '#fff7ed', border: '#f97316' },
-		{ key: 'ebiosExploitation', icon: 'fa-bolt', bg: '#fef2f2', border: '#ef4444' }
+		{ key: 'ebiosReconnaissance', icon: 'fa-magnifying-glass', twBg: 'bg-pink-50', twBorder: 'border-pink-400', twText: 'text-pink-500' },
+		{ key: 'ebiosInitialAccess', icon: 'fa-right-to-bracket', twBg: 'bg-violet-50', twBorder: 'border-violet-400', twText: 'text-violet-500' },
+		{ key: 'ebiosDiscovery', icon: 'fa-lightbulb', twBg: 'bg-orange-50', twBorder: 'border-orange-400', twText: 'text-orange-500' },
+		{ key: 'ebiosExploitation', icon: 'fa-bolt', twBg: 'bg-red-50', twBorder: 'border-red-400', twText: 'text-red-500' }
 	];
 
 	function stageColumnId(stage: number) {
@@ -165,8 +165,8 @@
 					id: `e-${antId}-${eaId}`,
 					source: antId,
 					target: eaId,
-					markerEnd: { type: MarkerType.ArrowClosed, color: '#4D179A' },
-					style: 'stroke: #8FA1B9; stroke-width: 1.5;'
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
+					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
 				});
 			}
 		}
@@ -228,8 +228,8 @@
 			id: `e-${connection.source}-${connection.target}`,
 			source: connection.source!,
 			target: connection.target!,
-			markerEnd: { type: MarkerType.ArrowClosed, color: '#4D179A' },
-			style: 'stroke: #8FA1B9; stroke-width: 1.5;'
+			markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
+			style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
 		};
 		edges = [...edges, newEdge];
 
@@ -377,21 +377,23 @@
 	}
 </script>
 
-<div class="flex h-[80vh] bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
+<div class="flex h-[80vh] bg-surface-50 rounded-base overflow-hidden border border-surface-200">
 	<!-- Sidebar -->
 	<EditorSidebar {elementaryActions} {placedNodeIds} />
 
 	<!-- Canvas area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
 		<!-- Toolbar -->
-		<div class="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
-			<div class="flex items-center gap-2 text-sm text-gray-500">
+		<div
+			class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200"
+		>
+			<div class="flex items-center gap-2 text-sm text-surface-500">
 				<i class="fa-solid fa-info-circle"></i>
 				<span>{m.graphEditorHelp()}</span>
 			</div>
 			<div class="flex items-center gap-2">
 				{#if dirty}
-					<span class="text-xs text-amber-600 flex items-center gap-1">
+					<span class="text-xs text-warning-500 flex items-center gap-1">
 						<i class="fa-solid fa-circle text-[6px]"></i>
 						{m.unsavedChanges()}
 					</span>
@@ -412,7 +414,7 @@
 					<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
 					<button
 						type="submit"
-						class="btn preset-filled-primary-500 text-sm px-4 py-1.5"
+						class="btn preset-filled-primary-500 text-sm"
 						disabled={saving || !dirty}
 					>
 						{#if saving}
@@ -427,7 +429,7 @@
 		</div>
 
 		<!-- Svelte Flow Canvas -->
-		<div style="flex: 1; min-height: 0;">
+		<div class="flex-1 min-h-0">
 			<SvelteFlow
 				bind:nodes
 				bind:edges
@@ -442,8 +444,8 @@
 				snapGrid={[10, 10]}
 				fitView
 				defaultEdgeOptions={{
-					markerEnd: { type: MarkerType.ArrowClosed, color: '#4D179A' },
-					style: 'stroke: #8FA1B9; stroke-width: 1.5;'
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
+					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
 				}}
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
@@ -456,14 +458,14 @@
 
 <style>
 	:global(.svelte-flow) {
-		--xy-node-border-radius: 6px;
-		--xy-edge-stroke: #8fa1b9;
+		--xy-node-border-radius: var(--radius-base);
+		--xy-edge-stroke: var(--color-surface-400);
 	}
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 1.5;
 	}
 	:global(.svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
-		stroke: #ef4444;
+		stroke: var(--color-error-500);
 		cursor: pointer;
 	}
 </style>

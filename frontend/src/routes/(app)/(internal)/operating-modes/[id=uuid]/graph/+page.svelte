@@ -37,10 +37,10 @@
 	<div class="flex items-center gap-3">
 		<!-- Edit/View toggle -->
 		<button
-			class="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-colors
+			class="flex items-center gap-1.5 px-3 py-1.5 rounded-base text-sm font-medium transition-colors
 				{editMode
 				? 'bg-violet-100 text-violet-700 border border-violet-300'
-				: 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'}"
+				: 'bg-surface-100 text-surface-600 border border-surface-200 hover:bg-surface-200'}"
 			onclick={() => (editMode = !editMode)}
 		>
 			{#if editMode}
@@ -83,7 +83,7 @@
 	/>
 {:else}
 	<div
-		class="rounded-xl w-full bg-linear-to-r from-slate-50 to-white shadow mb-4 p-2 text-xs text-slate-600 whitespace-pre-line mr-auto"
+		class="card rounded-xl w-full bg-linear-to-r from-surface-50 to-white shadow mb-4 p-2 text-xs text-surface-600 whitespace-pre-line mr-auto"
 	>
 		<i class="fa-solid fa-circle-info"></i>
 		{m.graphMoHelp()}

@@ -73,16 +73,16 @@
 	}
 </script>
 
-<div class="w-64 bg-white border-r border-gray-200 flex flex-col h-full overflow-hidden">
-	<div class="p-3 border-b border-gray-200">
-		<h3 class="text-sm font-semibold text-gray-700 mb-2">
+<div class="w-64 bg-white border-r border-surface-200 flex flex-col h-full overflow-hidden">
+	<div class="p-3 border-b border-surface-200">
+		<h3 class="text-sm font-semibold text-surface-700 mb-2">
 			{m.elementaryActions()}
 		</h3>
 		<input
 			type="text"
 			placeholder={m.searchPlaceholder()}
 			bind:value={searchQuery}
-			class="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:border-violet-500"
+			class="input w-full px-2 py-1 text-sm"
 		/>
 	</div>
 
@@ -91,7 +91,7 @@
 			{@const actions = groupedActions()[stageConfig.stage] ?? []}
 			<div>
 				<button
-					class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 rounded"
+					class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-surface-600 hover:bg-surface-100 rounded-base"
 					onclick={() => toggleStage(stageConfig.stage)}
 				>
 					<span class="flex items-center gap-1.5">
@@ -99,11 +99,11 @@
 						{safeTranslate(stageConfig.key)}
 					</span>
 					<span class="flex items-center gap-1">
-						<span class="text-gray-400">{actions.length}</span>
+						<span class="text-surface-400">{actions.length}</span>
 						<i
 							class="fa-solid fa-chevron-{collapsedStages.has(stageConfig.stage)
 								? 'right'
-								: 'down'} text-[10px] text-gray-400"
+								: 'down'} text-[10px] text-surface-400"
 						></i>
 					</span>
 				</button>
@@ -113,9 +113,9 @@
 						{#each actions as action}
 							{@const isPlaced = placedNodeIds.has(action.id)}
 							<div
-								class="flex items-center gap-2 px-2 py-1.5 rounded border text-xs
+								class="flex items-center gap-2 px-2 py-1.5 rounded-base border text-xs
 									{isPlaced
-									? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed opacity-50'
+									? 'border-surface-200 bg-surface-100 text-surface-400 cursor-not-allowed opacity-50'
 									: STAGE_COLORS[stageConfig.stage] + ' cursor-grab hover:shadow-sm'}"
 								draggable={!isPlaced}
 								ondragstart={(e) => {
@@ -128,12 +128,12 @@
 								{/if}
 								<span class="truncate flex-1">{action.name}</span>
 								{#if isPlaced}
-									<i class="fa-solid fa-check text-[10px] text-green-500"></i>
+									<i class="fa-solid fa-check text-[10px] text-success-500"></i>
 								{/if}
 							</div>
 						{/each}
 						{#if actions.length === 0}
-							<p class="text-xs text-gray-400 px-2 italic">{m.noResultFound()}</p>
+							<p class="text-xs text-surface-400 px-2 italic">{m.noResultFound()}</p>
 						{/if}
 					</div>
 				{/if}
