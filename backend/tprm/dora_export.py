@@ -489,12 +489,16 @@ def generate_b_02_02_ict_services(
                 )
 
                 # c0150: Location of data at rest
-                data_location_storage = "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                data_location_storage = (
+                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                )
                 if solution.data_location_storage:
                     data_location_storage = f"eba_GA:{solution.data_location_storage}"
 
                 # c0160: Location of data processing
-                data_location_processing = "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                data_location_processing = (
+                    "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
+                )
                 if solution.data_location_processing:
                     data_location_processing = (
                         f"eba_GA:{solution.data_location_processing}"
