@@ -8,6 +8,7 @@ Each function generates a specific report and writes it to a ZIP file.
 import csv
 import io
 import json
+from datetime import date
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
@@ -264,7 +265,8 @@ def generate_b_02_01_contracts(
     """
     Generate b_02.01.csv - Contractual arrangements – General Information.
 
-    Only includes contracts associated with solutions that are linked to business function assets.
+    Includes all contracts — RT.02.01 is the parent table referenced by RT.02.03,
+    RT.03.01–03.03, RT.04.01, RT.05.02, and RT.07.01 via foreign key.
 
     Columns:
     - b_02.01.0010: Contractual arrangement reference number
@@ -291,14 +293,8 @@ def generate_b_02_01_contracts(
         ]
     )
 
-    # Filter contracts: only those with solutions linked to business function assets
-    filtered_contracts = (
-        contracts.filter(
-            solutions__isnull=False, solutions__assets__is_business_function=True
-        )
-        .distinct()
-        .select_related("overarching_contract")
-    )
+    # RT.02.01 must include ALL contracts — other tabs reference it via FK (Rule 807)
+    filtered_contracts = contracts.select_related("overarching_contract")
 
     # Write contract data
     for contract in filtered_contracts:
@@ -483,7 +479,7 @@ def generate_b_02_02_ict_services(
                     governing_law_country = f"eba_GA:{contract.governing_law_country}"
 
                 # c0130: Country of provision of ICT services (provider country)
-                provider_country = ""
+                provider_country = "eba_GA:qx2007"  # "Not applicable" — key field, cannot be empty (Rule 805)
                 if contract.provider_entity and contract.provider_entity.country:
                     provider_country = f"eba_GA:{contract.provider_entity.country}"
 
@@ -493,12 +489,12 @@ def generate_b_02_02_ict_services(
                 )
 
                 # c0150: Location of data at rest
-                data_location_storage = ""
+                data_location_storage = "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
                 if solution.data_location_storage:
                     data_location_storage = f"eba_GA:{solution.data_location_storage}"
 
                 # c0160: Location of data processing
-                data_location_processing = ""
+                data_location_processing = "eba_GA:qx2007"  # Key field, cannot be empty (Rule 805)
                 if solution.data_location_processing:
                     data_location_processing = (
                         f"eba_GA:{solution.data_location_processing}"
@@ -1292,6 +1288,19 @@ def generate_filing_indicators(zip_file, folder_prefix: str = "") -> None:
     zip_file.writestr(path, csv_buffer.getvalue().encode("utf-8"))
 
 
+def _compute_ref_period() -> str:
+    """Compute the DORA RoI reference period based on the current year.
+
+    Per EBA Q&A 2025_7387:
+    - 2025 reporting: 2025-03-31
+    - 2026+ reporting: December 31 of the preceding year
+    """
+    current_year = date.today().year
+    if current_year <= 2025:
+        return "2025-03-31"
+    return f"{current_year - 1}-12-31"
+
+
 def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") -> None:
     """
     Generate parameters.csv - Report metadata and configuration parameters.
@@ -1311,7 +1320,13 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
 
     # Get LEI for entityID
     lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-    entity_id = f"rs:{lei}.CON" if lei else "rs:UNKNOWN.CON"
+    if not lei:
+        raise ValueError(
+            "Cannot generate DORA RoI export: main entity has no LEI. "
+            "The entityID parameter requires a valid LEI (EBA Filing Rules v5.5). "
+            "Please set a LEI in the main entity's legal identifiers before exporting."
+        )
+    entity_id = f"rs:{lei}.CON"
 
     # Get currency for baseCurrency
     base_currency = (
@@ -1321,7 +1336,7 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
     # Write parameters
     parameters = [
         ("entityID", entity_id),
-        ("refPeriod", "2025-03-31"),  # Placeholder - can be made dynamic later
+        ("refPeriod", _compute_ref_period()),
         ("baseCurrency", base_currency),
         ("decimalsInteger", "0"),
         ("decimalsMonetary", "-3"),

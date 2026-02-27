@@ -55,7 +55,8 @@ This document describes every column of every tab in the DORA Register of Inform
 - **RT.01.01**: Always exactly one row — the main (built-in) entity.
 - **RT.01.02**: All entities *except* branches. Branches are identified as child entities without `dora_provider_person_type` set.
 - **RT.01.03**: Only branch entities (child entities without `dora_provider_person_type`).
-- **RT.02.01 / RT.02.02**: Only contracts whose solutions are linked to at least one asset with `is_business_function=True` (or its children).
+- **RT.02.01**: All contracts. RT.02.01 is the parent table — every contract reference in RT.02.03 through RT.07.01 must exist here (EBA Rule 807).
+- **RT.02.02**: Only contracts whose solutions are linked to at least one asset with `is_business_function=True` (or its children).
 - **RT.02.03**: Only contracts where `is_intragroup=True` AND `overarching_contract` is set.
 - **RT.03.01**: All contracts (main entity is the signing entity for every contract).
 - **RT.03.02**: Non-intra-group contracts with a provider entity.
@@ -132,6 +133,38 @@ The EBA XLS Master Template uses specific type names that differ from the simpli
 | Country | Country (LISTCOUNTRY) | All country fields |
 | Currency | Currency (LISTCURRENCY) | All currency fields |
 | Date | Date | All date fields |
+
+### 3.7 Primary key fields and "Not applicable"
+
+RT.02.02 has a composite primary key that includes columns c0130 (country of provision), c0150 (data at rest location), and c0160 (data processing location). These key fields **cannot be left empty** — an empty primary key triggers EBA validation Rule 805, which causes submission rejection.
+
+When no value is available for these fields, the export uses `eba_GA:qx2007` ("Not applicable") as recommended by the EBA FAQ (March 2025): *"b_02.02.0130, b_02.02.0150 and b_02.02.0160 are key fields and thus cannot be left empty."*
+
+### 3.8 EBA validation rules
+
+The EBA DPM validation framework defines many rules, but only four cause **submission rejection** (all others produce non-blocking warnings):
+
+| Rule | Name | Description |
+|---|---|---|
+| 805 | Empty primary key | A primary key column contains an empty value. |
+| 806 | Duplicate primary key | Two rows in the same table share an identical composite primary key. |
+| 807 | Foreign key violation | A reference in one table points to a row that does not exist in the parent table. |
+| 808 | Filing indicator error | A filing indicator is set to `true` but the corresponding table is empty, or vice versa. |
+
+**Mandatory non-key fields** can be left blank — this produces a warning but does not cause rejection (per EBA FAQ, March 2025).
+
+**Foreign key relationships** between tables:
+
+| Child table | Parent table | FK column(s) |
+|---|---|---|
+| RT.02.02 | RT.02.01 | Contract reference (c0010) |
+| RT.02.03 | RT.02.01 | Contract reference (c0010) |
+| RT.03.01 | RT.02.01 | Contract reference (c0010) |
+| RT.03.02 | RT.02.01 | Contract reference (c0010) |
+| RT.03.03 | RT.02.01 | Contract reference (c0010) |
+| RT.04.01 | RT.02.01 | Contract reference (c0010) |
+| RT.05.02 | RT.02.01 | Contract reference (c0010) |
+| RT.07.01 | RT.02.01 | Contract reference (c0010) |
 
 ---
 
@@ -521,6 +554,7 @@ The EBA XLS Master Template uses specific type names that differ from the simpli
 - CSV header: `c0130`
 - CISO Assistant field: Contract > Provider Entity > Country
 - Export: prefixed with `eba_GA:`
+- Key field: part of RT.02.02 composite primary key. Uses `eba_GA:qx2007` ("Not applicable") when provider country is unknown.
 
 #### b_02.02.0140 — Storage of data
 
@@ -538,10 +572,11 @@ The EBA XLS Master Template uses specific type names that differ from the simpli
 #### b_02.02.0150 — Location of the data at rest (storage)
 
 - Type: Country (LISTCOUNTRY)
-- Required: Mandatory if ’Yes’ is reported in RT.02.02.0140
+- Required: Mandatory if ‘Yes’ is reported in RT.02.02.0140
 - CSV header: `c0150`
 - CISO Assistant field: Solution > Location of data at rest
 - Export: prefixed with `eba_GA:`
+- Key field: part of RT.02.02 composite primary key. Uses `eba_GA:qx2007` ("Not applicable") when data storage location is unknown.
 
 #### b_02.02.0160 — Location of management of the data (processing)
 
@@ -550,6 +585,7 @@ The EBA XLS Master Template uses specific type names that differ from the simpli
 - CSV header: `c0160`
 - CISO Assistant field: Solution > Location of data processing
 - Export: prefixed with `eba_GA:`
+- Key field: part of RT.02.02 composite primary key. Uses `eba_GA:qx2007` ("Not applicable") when data processing location is unknown.
 
 #### b_02.02.0170 — Sensitiveness of the data stored
 
@@ -1307,8 +1343,8 @@ Report metadata and configuration parameters.
 
 | Parameter | Value | Description |
 |---|---|---|
-| `entityID` | `rs:{LEI}.CON` | Main entity LEI wrapped in XBRL entity format (falls back to `rs:UNKNOWN.CON`) |
-| `refPeriod` | `2025-03-31` | Reference reporting period (currently a hardcoded placeholder) |
+| `entityID` | `rs:{LEI}.CON` | Main entity LEI wrapped in XBRL entity format. Export raises an error if the main entity has no LEI. |
+| `refPeriod` | `2025-03-31` or `{Y-1}-12-31` | `2025-03-31` for 2025 reporting; `{preceding year}-12-31` from 2026 onward (per EBA Q&A 2025_7387) |
 | `baseCurrency` | `iso4217:{currency}` | ISO 4217 currency code of the main entity (e.g. `iso4217:EUR`) |
 | `decimalsInteger` | `0` | Decimal precision for integer values |
 | `decimalsMonetary` | `-3` | Decimal precision for monetary values (thousands) |
