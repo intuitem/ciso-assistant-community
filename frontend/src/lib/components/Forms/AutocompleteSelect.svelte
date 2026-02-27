@@ -165,8 +165,10 @@
 
 	let isLoading = $state(false);
 	let lazySearchPending = $state(false);
+	let lazyHasSearched = $state(false);
 	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let lazyInputEl = $state<HTMLInputElement | null>(null);
+	const LAZY_HINT_VALUE = '__lazy_hint__';
 	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
@@ -259,10 +261,12 @@
 		if (!searchTerm || searchTerm.length < 2) {
 			// Keep only already-selected options visible
 			options = selected.length > 0 ? [...selected] : [];
+			lazyHasSearched = false;
 			return;
 		}
 
 		isLoading = true;
+		lazyHasSearched = true;
 		try {
 			const lazyBase = `${optionsEndpoint}/autocomplete`;
 			const endpoint = buildEndpoint(
@@ -552,7 +556,9 @@
 
 		<MultiSelect
 			bind:selected
-			{options}
+			options={lazy && selected.length > 0 && !lazyHasSearched
+				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
+				: options}
 			{...multiSelectOptions}
 			disabled={_disabled}
 			allowEmpty={true}
@@ -569,7 +575,9 @@
 			bind:input={lazyInputEl}
 		>
 			{#snippet option({ option })}
-				{#if optionSnippet}
+				{#if option.value === LAZY_HINT_VALUE}
+					<span class="text-sm italic text-surface-500">{option.label}</span>
+				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
 				{:else}
 					{#if option.infoString?.position === 'prefix'}

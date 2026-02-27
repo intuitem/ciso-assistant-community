@@ -27,6 +27,7 @@
 			fields: { field: string; translate?: boolean }[];
 			classes?: string;
 		};
+		lazy?: boolean;
 	}
 
 	let {
@@ -39,7 +40,8 @@
 		optionsInfoFields = {
 			fields: [],
 			classes: 'text-surface-500'
-		}
+		},
+		lazy = false
 	}: Props = $props();
 
 	const schema = modelSchema(urlModel);
@@ -116,6 +118,7 @@
 			<AutocompleteSelect
 				form={_form}
 				multiple
+				{lazy}
 				{optionsEndpoint}
 				optionsExtraFields={[['folder', 'str']]}
 				{optionsInfoFields}
