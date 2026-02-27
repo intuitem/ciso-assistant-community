@@ -129,6 +129,44 @@ class BaseModelSerializer(serializers.ModelSerializer):
             logger.error(e)
             raise serializers.ValidationError(e.args[0])
 
+    def _check_m2m_visibility(self, validated_data: dict) -> None:
+        """Verify that all M2M linked objects are visible to the requesting user."""
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return
+        user = request.user
+        root_folder = Folder.get_root_folder()
+        accessible_cache: dict = {}
+        for field_name, value in validated_data.items():
+            if not isinstance(value, list) or not value:
+                continue
+            if not all(isinstance(item, models.Model) for item in value):
+                continue
+            related_model = type(value[0])
+            if related_model not in accessible_cache:
+                try:
+                    ids = RoleAssignment.get_accessible_object_ids(
+                        root_folder, user, related_model
+                    )[0]
+                    accessible_cache[related_model] = {str(i) for i in ids}
+                except (NotImplementedError, Permission.DoesNotExist):
+                    accessible_cache[related_model] = None
+            accessible_ids = accessible_cache[related_model]
+            if accessible_ids is None:
+                continue
+            for item in value:
+                if str(item.id) not in accessible_ids:
+                    raise PermissionDenied(
+                        {
+                            field_name: f"You do not have permission to link to this {related_model._meta.model_name}"
+                        }
+                    )
+
+    def validate(self, data):
+        data = super().validate(data)
+        self._check_m2m_visibility(data)
+        return data
+
     def delete(self, instance: models.Model) -> None:
         """Enforce delete permission before removing *instance*."""
         self._check_object_perm(instance, "delete")
@@ -513,7 +551,7 @@ class AssetWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         "errorAssetGraphMustNotContainCycles"
                     )
-        return data
+        return super().validate(data)
 
     def create(self, validated_data):
         parent_assets = validated_data.pop("parent_assets", None)
@@ -2586,7 +2624,7 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                     }
                 )
 
-        return attrs
+        return super().validate(attrs)
 
     class Meta:
         model = RequirementAssignment
@@ -2660,6 +2698,16 @@ class SecurityExceptionReadSerializer(BaseModelSerializer):
     severity = serializers.CharField(source="get_severity_display")
     associated_objects_count = serializers.SerializerMethodField()
     assets = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_associated_objects_count(self, obj):
         """Prefer annotated or prefetched counts to avoid extra DB queries."""
@@ -3044,8 +3092,9 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     def create(self, validated_data):
         assigned_to_data = validated_data.get("assigned_to", [])
         tasknode_data = self._extract_tasknode_fields(validated_data)
-        instance = super().create(validated_data)
-        self._sync_task_node(instance, tasknode_data, False, False)
+        with transaction.atomic():
+            instance = super().create(validated_data)
+            self._sync_task_node(instance, tasknode_data, False, instance.is_recurrent)
 
         # Send notification to newly assigned users
         if assigned_to_data:
@@ -3134,6 +3183,7 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
             task_node = TaskNode.objects.create(
                 task_template=task_template,
                 due_date=task_template.task_date,
+                scheduled_date=task_template.task_date,
                 folder=task_template.folder,
             )
         else:
@@ -3145,11 +3195,13 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
                 task_node = TaskNode.objects.create(
                     task_template=task_template,
                     due_date=task_template.task_date,
+                    scheduled_date=task_template.task_date,
                     folder=task_template.folder,
                 )
 
         task_node.to_delete = False
         task_node.due_date = task_template.task_date
+        task_node.scheduled_date = task_template.task_date
         if tasknode_data.get("status") is not None:
             task_node.status = tasknode_data["status"]
         if tasknode_data.get("observation") is not None:
@@ -3207,7 +3259,21 @@ class TaskNodeReadSerializer(BaseModelSerializer):
 class TaskNodeWriteSerializer(BaseModelSerializer):
     class Meta:
         model = TaskNode
-        exclude = ["task_template", "evidences"]
+        exclude = ["task_template", "evidences", "scheduled_date"]
+
+    def validate_due_date(self, value):
+        if self.instance and value:
+            exists = (
+                TaskNode.objects.filter(
+                    task_template=self.instance.task_template,
+                    due_date=value,
+                )
+                .exclude(pk=self.instance.pk)
+                .exists()
+            )
+            if exists:
+                raise serializers.ValidationError("taskNodeDuplicateDueDate")
+        return value
 
 
 class TerminologyReadSerializer(BaseModelSerializer):
@@ -3516,6 +3582,9 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
     evidences = FieldsRelatedField(many=True)
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
+    processings = FieldsRelatedField(many=True)
+    accreditations = FieldsRelatedField(many=True)
+    contracts = FieldsRelatedField(many=True)
     filtering_labels = FieldsRelatedField(many=True)
     requester = FieldsRelatedField(["id", "email", "first_name", "last_name"])
     approver = FieldsRelatedField(["id", "email", "first_name", "last_name"])
@@ -3539,6 +3608,9 @@ class ValidationFlowReadSerializer(BaseModelSerializer):
             ("evidences", "has_evidences"),
             ("security_exceptions", "has_security_exceptions"),
             ("policies", "has_policies"),
+            ("processings", "has_processings"),
+            ("accreditations", "has_accreditations"),
+            ("contracts", "has_contracts"),
         ]
         prefetched = getattr(obj, "_prefetched_objects_cache", {})
         for field_name, flag_name in field_map:

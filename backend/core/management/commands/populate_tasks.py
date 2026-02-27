@@ -192,6 +192,7 @@ class Command(BaseCommand):
                 task_template=template,
                 folder=root_folder,
                 due_date=due_date,
+                scheduled_date=due_date,
                 status=status,
                 observation=observation,
             )
@@ -322,6 +323,7 @@ class Command(BaseCommand):
                     task_template=template,
                     folder=root_folder,
                     due_date=current_date,
+                    scheduled_date=current_date,
                     status=status,
                     observation=observation,
                 )

@@ -149,7 +149,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// Session is invalid
 		if (clonedResponse.status === 410) logoutUser(event);
 
-		if (clonedResponse.status === 401 && request.method !== 'DELETE') {
+		// Skip 401 interception for auth endpoints (/auth/login, /auth/2fa/authenticate, etc.)
+		// because 401 is an expected response during login/MFA flows (e.g. "MFA required").
+		// Only intercept 401 on account management endpoints (/account/...).
+		const isAuthEndpoint = request.url.includes('/_allauth/app/v1/auth/');
+
+		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
 			try {
 				const data = await clonedResponse.json();
 				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];

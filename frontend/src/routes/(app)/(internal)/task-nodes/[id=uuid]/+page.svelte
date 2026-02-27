@@ -95,7 +95,6 @@
 		});
 		if (!response.ok) {
 			console.error('Failed to update due date');
-			return;
 		}
 		invalidateAll();
 	}
