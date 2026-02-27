@@ -379,10 +379,7 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'applied_controls',
 				urlModel: 'assets',
 				disableDelete: true,
-				addExisting: {
-					parentField: 'assets',
-					lazy: true
-				}
+				disableCreate: true
 			}
 		],
 		selectFields: [

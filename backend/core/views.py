@@ -1820,22 +1820,17 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     @action(detail=False, name="Lightweight autocomplete search")
     def autocomplete(self, request):
         """Minimal endpoint for autocomplete selects — skips graph traversal."""
+        from core.serializers import AssetAutocompleteSerializer
+
         qs = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(qs)
         objects = page if page is not None else qs
-        data = [
-            {
-                "id": a.id,
-                "str": str(a),
-                "name": a.name,
-                "ref_id": a.ref_id,
-                "type": a.get_type_display(),
-                "folder": {"id": a.folder_id, "str": str(a.folder)}
-                if a.folder_id
-                else None,
-            }
-            for a in objects
-        ]
+        serializer = AssetAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
         if page is not None:
             return self.get_paginated_response(data)
         return Response(data)
