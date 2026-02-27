@@ -25,9 +25,12 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework?.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = compliance_assessment.framework?.id;
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
