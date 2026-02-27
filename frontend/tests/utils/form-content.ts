@@ -110,7 +110,7 @@ export class FormContent {
 									.first();
 								// If the option isn't immediately visible, type to trigger lazy search
 								if (!(await optionLocator.isVisible())) {
-									await field.locator.getByRole('searchbox').locator('input').fill(values[key]);
+									await field.locator.getByRole('textbox').fill(values[key]);
 								}
 								await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 								await optionLocator.click();
@@ -124,7 +124,7 @@ export class FormContent {
 						const optionLocator = field.locator.getByRole('option', { name: val }).first();
 						// If the option isn't immediately visible, type to trigger lazy search
 						if (!(await optionLocator.isVisible())) {
-							await field.locator.getByRole('searchbox').locator('input').fill(val);
+							await field.locator.getByRole('textbox').fill(val);
 						}
 						await expect(optionLocator).toBeVisible({ timeout: 10_000 });
 						await optionLocator.click();
