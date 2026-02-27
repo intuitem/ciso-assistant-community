@@ -7130,6 +7130,12 @@ class FolderViewSet(BaseModelViewSet):
                     id=link_dump_database_ids.get(_fields["requirement_assessment"])
                 )
                 question = Question.objects.get(urn=_fields.get("question"))
+                # Validate question belongs to the requirement
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
                 _fields["question"] = question
 
                 # Store M2M ref_ids for post-create
@@ -7417,6 +7423,15 @@ class FolderViewSet(BaseModelViewSet):
                     choices = QuestionChoice.objects.filter(
                         question=obj.question, ref_id__in=ref_ids
                     )
+                    found_refs = set(choices.values_list("ref_id", flat=True))
+                    missing = set(ref_ids) - found_refs
+                    if missing:
+                        logger.warning(
+                            "Answer import: could not resolve choice ref_ids %s "
+                            "for question %s",
+                            missing,
+                            obj.question.urn,
+                        )
                     obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):

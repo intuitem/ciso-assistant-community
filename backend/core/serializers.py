@@ -3,6 +3,8 @@ from typing import Any
 
 import structlog
 from django.db import models, transaction
+from datetime import datetime
+
 from django.db.models import F
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
@@ -2361,6 +2363,13 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
     answers = serializers.JSONField(required=False, write_only=True)
 
+    def validate_answers(self, value):
+        if value is not None and not isinstance(value, dict):
+            raise serializers.ValidationError(
+                "Answers must be a JSON object mapping question URNs to values."
+            )
+        return value
+
     def validate(self, attrs):
         compliance_assessment = self.get_compliance_assessment()
 
@@ -2555,7 +2564,10 @@ class QuestionChoiceWriteSerializer(BaseModelSerializer):
         try:
             return super(BaseModelSerializer, self).update(instance, validated_data)
         except Exception as e:
-            raise serializers.ValidationError(e.args[0])
+            logger.error("Failed to update QuestionChoice", exc_info=True)
+            raise serializers.ValidationError(
+                "Failed to update choice. Please check the input data."
+            )
 
     class Meta:
         model = QuestionChoice
@@ -2591,7 +2603,10 @@ class QuestionWriteSerializer(BaseModelSerializer):
         try:
             return super(BaseModelSerializer, self).update(instance, validated_data)
         except Exception as e:
-            raise serializers.ValidationError(e.args[0])
+            logger.error("Failed to update Question", exc_info=True)
+            raise serializers.ValidationError(
+                "Failed to update question. Please check the input data."
+            )
 
     class Meta:
         model = Question
@@ -2622,6 +2637,18 @@ class AnswerWriteSerializer(BaseModelSerializer):
 
         if question:
             q_type = question.type
+
+            # Reject sending both value and selected_choices for choice questions
+            if (
+                q_type
+                in (Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE)
+                and value is not None
+                and selected_choices_list is not None
+            ):
+                raise serializers.ValidationError(
+                    "Cannot send both 'value' and 'selected_choices' for choice questions. "
+                    "Use 'selected_choices' (PKs) or 'value' (ref_ids), not both."
+                )
 
             if q_type == Question.Type.SINGLE_CHOICE:
                 # Legacy: value is a ref_id string → resolve to M2M
@@ -2701,10 +2728,12 @@ class AnswerWriteSerializer(BaseModelSerializer):
                         {"value": "Boolean answers must be true or false."}
                     )
             elif q_type == Question.Type.DATE:
-                if value is not None and isinstance(value, str):
+                if value is not None:
+                    if not isinstance(value, str):
+                        raise serializers.ValidationError(
+                            {"value": "Date answers must be a string in YYYY-MM-DD format."}
+                        )
                     try:
-                        from datetime import datetime
-
                         datetime.strptime(value, "%Y-%m-%d")
                     except ValueError:
                         raise serializers.ValidationError(
@@ -2720,6 +2749,8 @@ class AnswerWriteSerializer(BaseModelSerializer):
         instance = super().create(validated_data)
         if m2m_choices is not None:
             instance.selected_choices.set(m2m_choices)
+            # Re-save to trigger IG update for dynamic frameworks
+            instance.save()
         return instance
 
     def update(self, instance, validated_data):
@@ -2728,6 +2759,8 @@ class AnswerWriteSerializer(BaseModelSerializer):
         instance = super().update(instance, validated_data)
         if m2m_choices is not None:
             instance.selected_choices.set(m2m_choices)
+            # Re-save to trigger IG update for dynamic frameworks
+            instance.save()
         return instance
 
     class Meta:
