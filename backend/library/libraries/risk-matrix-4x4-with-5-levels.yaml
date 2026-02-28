@@ -4,14 +4,17 @@ ref_id: risk-matrix-4x4-with-5-levels
 name: 4x4 risk matrix with 5 risk levels
 description: 4x4 risk matrix with 5 risk levels
 copyright: public domain
-version: 1
+version: 2
 publication_date: 2024-07-28
 provider: intuitem
 packager: intuitem
 translations:
   fr:
-    name: "Matrice 4x4 \xE0 5 niveaux de risque"
-    description: "Matrice 4x4 \xE0 5 niveaux de risque"
+    name: "Matrice 4x4 à 5 niveaux de risque"
+    description: "Matrice 4x4 à 5 niveaux de risque"
+  de:
+    name: 4x4-Risikomatrix mit 5 Risikostufen
+    description: 4x4-Risikomatrix mit 5 Risikostufen
 objects:
   risk_matrix:
   - urn: urn:intuitem:risk:matrix:4x4-with-5-levels
@@ -27,6 +30,9 @@ objects:
         fr:
           name: 1 - minime
           description: null
+        de:
+          name: 1 - minimal
+          description: null
     - id: 1
       abbreviation: '2'
       name: 2 - significant
@@ -34,6 +40,9 @@ objects:
       translations:
         fr:
           name: 2 - significative
+          description: null
+        de:
+          name: 2 - signifikant
           description: null
     - id: 2
       abbreviation: '3'
@@ -43,6 +52,9 @@ objects:
         fr:
           name: 3 - forte
           description: null
+        de:
+          name: 3 - hoch
+          description: null
     - id: 3
       abbreviation: '4'
       name: 4 - maximal
@@ -50,6 +62,9 @@ objects:
       translations:
         fr:
           name: 4 - maximale
+          description: null
+        de:
+          name: 4 - maximal
           description: null
     impact:
     - id: 0
@@ -60,13 +75,19 @@ objects:
         fr:
           name: 1 - faible
           description: null
+        de:
+          name: 1 - gering
+          description: null
     - id: 1
       abbreviation: '2'
       name: 2 - limited
       description: null
       translations:
         fr:
-          name: "2 - limit\xE9"
+          name: "2 - limité"
+          description: null
+        de:
+          name: 2 - begrenzt
           description: null
     - id: 2
       abbreviation: '3'
@@ -76,6 +97,9 @@ objects:
         fr:
           name: 3 - important
           description: null
+        de:
+          name: 3 - erheblich
+          description: null
     - id: 3
       abbreviation: '4'
       name: 4 - critical
@@ -84,6 +108,9 @@ objects:
         fr:
           name: 4 - critique
           description: null
+        de:
+          name: 4 - kritisch
+          description: null
     risk:
     - id: 0
       abbreviation: '1'
@@ -91,8 +118,11 @@ objects:
       description: 'The risk is acceptable as it stands '
       translations:
         fr:
-          name: "1 - tr\xE8s faible"
-          description: "Le risque est acceptable en l'\xE9tat"
+          name: "1 - très faible"
+          description: "Le risque est acceptable en l'état"
+        de:
+          name: 1 - sehr gering
+          description: Das Risiko ist in der bestehenden Form akzeptabel.
       hexcolor: '#92D050'
     - id: 1
       abbreviation: '2'
@@ -101,7 +131,10 @@ objects:
       translations:
         fr:
           name: 2 - faible
-          description: "Le risque est acceptable sous contr\xF4le"
+          description: "Le risque est acceptable sous contrôle"
+        de:
+          name: 2 - gering
+          description: Das Risiko ist unter Kontrolle akzeptabel.
       hexcolor: '#FFFF00'
     - id: 2
       abbreviation: '3'
@@ -110,19 +143,22 @@ objects:
       translations:
         fr:
           name: 3 - moyen
-          description: "Le risque est tol\xE9rable sous r\xE9serve d'un plan de r\xE9\
-            duction des risques suivi"
+          description: "Le risque est tolérable sous réserve d'un plan de réduction des risques suivi"
+        de:
+          name: 3 - mittel
+          description: Das Risiko ist tolerierbar, sofern ein nachverfolgter Risikoreduktionsplan besteht.
       hexcolor: '#FFA600'
     - id: 3
       abbreviation: '4'
       name: 4 - high
-      description: 'The risk is tolerable over a short period of time and accompanied
-        by effective reduction measures '
+      description: 'The risk is tolerable over a short period of time and accompanied by effective reduction measures '
       translations:
         fr:
-          name: "4 - \xE9lev\xE9"
-          description: "Le risque est tol\xE9rable sur une dur\xE9e courte et accompagn\xE9\
-            e de mesures de r\xE9duction effectives"
+          name: "4 - élevé"
+          description: "Le risque est tolérable sur une durée courte et accompagné de mesures de réduction effectives"
+        de:
+          name: 4 - hoch
+          description: Das Risiko ist kurzfristig tolerierbar und wird von wirksamen Risikoreduktionsmaßnahmen begleitet.
       hexcolor: '#FF1A00'
     - id: 4
       abbreviation: '5'
@@ -130,8 +166,11 @@ objects:
       description: The risk is unacceptable
       translations:
         fr:
-          name: "5 - intol\xE9rable"
+          name: "5 - intolérable"
           description: Le risque est inacceptable
+        de:
+          name: 5 - sehr hoch
+          description: Das Risiko ist inakzeptabel.
       hexcolor: '#000000'
     grid:
     - - 0
@@ -152,5 +191,8 @@ objects:
       - 4
     translations:
       fr:
-        name: "Matrice 4x4 \xE0 5 niveaux de risque"
-        description: "Matrice 4x4 \xE0 5 niveaux de risque"
+        name: "Matrice 4x4 à 5 niveaux de risque"
+        description: "Matrice 4x4 à 5 niveaux de risque"
+      de:
+        name: 4x4-Risikomatrix mit 5 Risikostufen
+        description: 4x4-Risikomatrix mit 5 Risikostufen
