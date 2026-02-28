@@ -806,6 +806,17 @@
 							{m.requestValidation()}
 						</button>
 					{/if}
+					{#if page.data?.featureflags?.advanced_analytics}
+						<Anchor
+							breadcrumbAction="push"
+							href={`${page.url.pathname}/advanced-analytics`}
+							class="btn text-gray-100 bg-linear-to-r from-sky-500 to-indigo-500 h-fit"
+							data-testid="advanced-analytics-button"
+						>
+							<i class="fa-solid fa-chart-line mr-2"></i>
+							{m.advancedAnalytics()}
+						</Anchor>
+					{/if}
 				{/if}
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
