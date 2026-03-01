@@ -682,62 +682,206 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def _is_question_visible(question, answers):
-    """Check if a question is visible based on depends_on logic."""
-    depends_on = question.get("depends_on")
+def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
+    """Check if a question is visible based on depends_on logic.
+
+    Works with Question model objects (new relational models).
+    - question: a Question model instance
+    - answers_by_ref: dict of {question.ref_id: answer_value}
+    - questions_by_ref: dict of {question.ref_id: Question} (optional, for lookups)
+    """
+    depends_on = (
+        question.depends_on
+        if hasattr(question, "depends_on")
+        else question.get("depends_on")
+        if isinstance(question, dict)
+        else None
+    )
     if not depends_on:
         return True
 
-    target_answer = answers.get(depends_on["question"])
-    if not target_answer:
+    dep_ref = depends_on.get("question") if isinstance(depends_on, dict) else None
+    if not dep_ref:
+        return True
+
+    # Check parent question visibility first (recursive chain)
+    if questions_by_ref:
+        parent_question = questions_by_ref.get(dep_ref)
+        if parent_question and not _is_question_visible(
+            parent_question, answers_by_ref, questions_by_ref
+        ):
+            return False
+
+    target_answer = answers_by_ref.get(dep_ref)
+    # Use explicit None/empty-list check to avoid hiding on falsy values like 0 or False
+    if target_answer is None or (isinstance(target_answer, list) and not target_answer):
         return False
 
-    if depends_on["condition"] == "any":
-        if isinstance(target_answer, list):
-            return any(a in depends_on["answers"] for a in target_answer)
-        return target_answer in depends_on["answers"]
+    condition = depends_on.get("condition", "any")
+    dep_answers = depends_on.get("answers", [])
 
-    if depends_on["condition"] == "all":
+    if condition == "any":
         if isinstance(target_answer, list):
-            return all(a in target_answer for a in depends_on["answers"])
-        return target_answer == depends_on["answers"][0]
+            return any(a in dep_answers for a in target_answer)
+        return target_answer in dep_answers
+
+    if condition == "all":
+        if isinstance(target_answer, list):
+            return all(a in target_answer for a in dep_answers)
+        # Single-value answer can only satisfy "all" if there's exactly one expected answer
+        return len(dep_answers) == 1 and target_answer == dep_answers[0]
 
     return True
 
 
+def build_answers_dict(answers_qs):
+    """Build {question.urn: answer_value} dict from Answer queryset for backward compat.
+
+    For choice-type questions, returns ref_id strings (single choice) or lists
+    of ref_id strings (multiple choice). For other types, returns the raw value.
+    """
+    from core.models import Question
+
+    result = {}
+    for a in answers_qs:
+        if a.question.type == Question.Type.SINGLE_CHOICE:
+            refs = [c.ref_id for c in a.selected_choices.all()]
+            result[a.question.urn] = refs[0] if refs else None
+        elif a.question.type == Question.Type.MULTIPLE_CHOICE:
+            result[a.question.urn] = [c.ref_id for c in a.selected_choices.all()]
+        else:
+            result[a.question.urn] = a.value
+    return result
+
+
 def update_selected_implementation_groups(compliance_assessment):
     """Recalculate selected IGs based on all visible answers in the assessment."""
+    from core.models import Answer, Question
+
     igs_to_select = set()
 
     requirement_assessments = (
         compliance_assessment.requirement_assessments.select_related(
             "requirement", "requirement__framework"
-        ).all()
+        )
+        .prefetch_related(
+            "answers",
+            "answers__question",
+            "answers__selected_choices",
+            "requirement__questions",
+            "requirement__questions__choices",
+        )
+        .all()
     )
+
     for ra in requirement_assessments:
-        answers = ra.answers or {}
-        if not ra.requirement.questions:
+        questions_qs = ra.requirement.questions.all()
+        if not questions_qs:
             continue
-        for question_urn, question in ra.requirement.questions.items():
-            if not _is_question_visible(question, answers):
+
+        answers_qs = ra.answers.all()
+        answers_by_ref = {}
+        selected_choice_pks_by_qid = {}
+        has_answer_by_qid = {}
+        questions_by_ref = {}
+        for q in questions_qs:
+            questions_by_ref[q.ref_id] = q
+        for a in answers_qs:
+            if a.question.type in (
+                Question.Type.SINGLE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ):
+                pks = {c.id for c in a.selected_choices.all()}
+                selected_choice_pks_by_qid[a.question_id] = pks
+                has_answer_by_qid[a.question_id] = len(pks) > 0
+            else:
+                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
+            # For depends_on resolution, pass ref_id strings
+            if a.question.ref_id:
+                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
+
+        for question in questions_qs:
+            if not _is_question_visible(question, answers_by_ref, questions_by_ref):
                 continue
 
-            question_answers = answers.get(question_urn)
-            if not question_answers:
+            if not has_answer_by_qid.get(question.id):
                 continue
-            if not isinstance(question_answers, list):
-                question_answers = [question_answers]
 
-            for choice in question["choices"]:
-                if choice["urn"] in question_answers:
-                    igs_to_select.update(choice.get("select_implementation_groups", []))
+            selected_pks = selected_choice_pks_by_qid.get(question.id, set())
+            for choice in question.choices.all():
+                if choice.id in selected_pks:
+                    igs_to_select.update(choice.select_implementation_groups or [])
 
-        for ig in ra.requirement.framework.implementation_groups_definition:
-            if ig.get("default_selected"):
-                igs_to_select.add(ig["ref_id"])
+        if ra.requirement.framework.implementation_groups_definition:
+            for ig in ra.requirement.framework.implementation_groups_definition:
+                if ig.get("default_selected"):
+                    igs_to_select.add(ig["ref_id"])
 
     compliance_assessment.selected_implementation_groups = list(igs_to_select)
     compliance_assessment.save(update_fields=["selected_implementation_groups"])
+
+
+def build_questions_dict(node):
+    """Reconstruct the JSON-format questions dict from relational Question/QuestionChoice models.
+
+    Returns a dict like {urn: {type, text, choices, ...}} or None for unsaved objects
+    or nodes with no questions.
+    """
+    if node.pk is None:
+        return None
+
+    from core.models import Question
+
+    questions_qs = node.questions.all()
+
+    if not questions_qs:
+        return None
+
+    result = {}
+    type_mapping = {
+        "single_choice": "unique_choice",
+        "multiple_choice": "multiple_choice",
+        "text": "text",
+        "number": "number",
+        "boolean": "boolean",
+        "date": "date",
+    }
+    for question in questions_qs:
+        choices = []
+        for choice in question.choices.all():
+            choice_data = {
+                "urn": choice.ref_id,
+                "value": choice.annotation or "",
+            }
+            if choice.add_score is not None:
+                choice_data["add_score"] = choice.add_score
+            if choice.compute_result is not None:
+                choice_data["compute_result"] = choice.compute_result not in (
+                    "false",
+                    "0",
+                    "",
+                )
+            if choice.description:
+                choice_data["description"] = choice.description
+            if choice.color:
+                choice_data["color"] = choice.color
+            if choice.select_implementation_groups:
+                choice_data["select_implementation_groups"] = (
+                    choice.select_implementation_groups
+                )
+            choices.append(choice_data)
+
+        q_data = {
+            "type": type_mapping.get(question.type, question.type),
+            "text": question.annotation or "",
+        }
+        if choices:
+            q_data["choices"] = choices
+        if question.depends_on:
+            q_data["depends_on"] = question.depends_on
+        result[question.urn] = q_data
+
+    return result if result else None
 
 
 def _resolve_auditee_role_ids():

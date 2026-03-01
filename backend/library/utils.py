@@ -6,6 +6,8 @@ from typing import List, Union
 # interesting thread: https://stackoverflow.com/questions/27743711/can-i-speedup-yaml
 from core.models import (
     Framework,
+    Question,
+    QuestionChoice,
     RequirementMapping,
     RequirementMappingSet,
     StoredLibrary,
@@ -50,7 +52,6 @@ def preview_library(framework: dict) -> dict[str, list]:
                     urn=requirement_node["urn"].lower(),
                     parent_urn=parent_urn,
                     order_id=index,
-                    questions=requirement_node.get("questions"),
                 )
             )
     preview["requirement_nodes"] = requirement_nodes_list
@@ -73,7 +74,6 @@ class RequirementNodeImporter:
         if parent_urn:
             parent_urn = parent_urn.lower()
         requirement_node = RequirementNode.objects.create(
-            # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
             framework=framework_object,
             urn=self.requirement_data["urn"].lower(),
@@ -92,15 +92,72 @@ class RequirementNodeImporter:
             default_locale=framework_object.default_locale,
             translations=self.requirement_data.get("translations", {}),
             is_published=True,
-            questions=self.requirement_data.get("questions"),
         )
+
+        # Create Question + QuestionChoice objects from questions data
+        questions_data = self.requirement_data.get("questions")
+        if questions_data and isinstance(questions_data, dict):
+            type_mapping = {
+                "unique_choice": "single_choice",
+                "single_choice": "single_choice",
+                "multiple_choice": "multiple_choice",
+                "text": "text",
+                "number": "number",
+                "boolean": "boolean",
+                "date": "date",
+            }
+            root_folder = Folder.get_root_folder()
+            for order, (q_urn, q_data) in enumerate(questions_data.items()):
+                q_type = type_mapping.get(q_data.get("type", "text"), "text")
+                parts = q_urn.split(":")
+                q_ref_id = parts[-1] if parts else q_urn
+
+                question = Question.objects.create(
+                    requirement_node=requirement_node,
+                    urn=q_urn,
+                    ref_id=q_ref_id,
+                    annotation=q_data.get("text", ""),
+                    type=q_type,
+                    depends_on=q_data.get("depends_on"),
+                    order=order,
+                    weight=q_data.get("weight", 1),
+                    folder=root_folder,
+                    is_published=True,
+                    translations=q_data.get("translations"),
+                )
+
+                for c_order, choice in enumerate(q_data.get("choices", [])):
+                    c_urn = choice.get("urn", "")
+                    c_parts = c_urn.split(":")
+                    c_ref_id = c_parts[-1] if c_parts else c_urn
+                    c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
+
+                    compute_result = choice.get("compute_result")
+                    if compute_result is not None:
+                        compute_result = str(compute_result).lower()
+
+                    QuestionChoice.objects.create(
+                        question=question,
+                        ref_id=c_ref_id,
+                        annotation=choice.get("value", ""),
+                        add_score=choice.get("add_score"),
+                        compute_result=compute_result,
+                        order=c_order,
+                        description=choice.get("description"),
+                        color=choice.get("color"),
+                        select_implementation_groups=choice.get(
+                            "select_implementation_groups"
+                        ),
+                        folder=root_folder,
+                        is_published=True,
+                        translations=choice.get("translations"),
+                    )
+
         for threat in self.requirement_data.get("threats", []):
             logger.info(
                 f"Parsing the threats for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.threats.add(
-                Threat.objects.get(urn=threat.lower())
-            )  # URN are not case insensitive in the whole codebase yet, we should fix that and make sure URNs are always transformed into lowercase before being used.
+            requirement_node.threats.add(Threat.objects.get(urn=threat.lower()))
 
         for reference_control in self.requirement_data.get("reference_controls", []):
             logger.info(
@@ -307,6 +364,11 @@ class FrameworkImporter:
                 "minimum score must be less than maximum score and equal or greater than 0."
             )
 
+        # Normalize scores_definition to object format
+        scores_definition = self.framework_data.get("scores_definition")
+        if isinstance(scores_definition, list):
+            scores_definition = {"scale": scores_definition}
+
         framework_object = Framework.objects.create(
             folder=Folder.get_root_folder(),
             library=library_object,
@@ -316,15 +378,16 @@ class FrameworkImporter:
             description=self.framework_data.get("description"),
             min_score=min_score,
             max_score=max_score,
-            scores_definition=self.framework_data.get("scores_definition"),
+            scores_definition=scores_definition,
             implementation_groups_definition=self.framework_data.get(
                 "implementation_groups_definition"
             ),
             provider=library_object.provider,
             locale=library_object.locale,
-            default_locale=library_object.default_locale,  # Change this in the future ?
+            default_locale=library_object.default_locale,
             translations=self.framework_data.get("translations", {}),
             is_published=True,
+            status=Framework.Status.PUBLISHED,
         )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)

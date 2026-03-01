@@ -124,14 +124,8 @@
 	}
 
 	// Function to update requirement assessments
-	async function update(
-		requirementAssessment: Record<string, any>,
-		field: string,
-		answers: {
-			urn: { value: string | string[] };
-		} | null = null
-	) {
-		const value = answers ? requirementAssessment.answers : requirementAssessment[field];
+	async function update(requirementAssessment: Record<string, any>, field: string) {
+		const value = requirementAssessment[field];
 		await updateBulk(requirementAssessment, {
 			[field]: value
 		});
@@ -638,7 +632,9 @@
 												{shallow}
 												onChange={(urn, newAnswer) => {
 													requirementAssessment.answers[urn] = newAnswer;
-													update(requirementAssessment, 'answers', requirementAssessment.answers);
+													updateBulk(requirementAssessment, {
+														answers: { [urn]: newAnswer }
+													});
 												}}
 											/>
 										</div>

@@ -125,6 +125,8 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    build_answers_dict,
+    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -7120,6 +7122,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["compliance_assessment"])
                 )
+                _fields.pop("answers", None)
                 many_to_many_map_ids.update(
                     {
                         "applied_controls": get_mapped_ids(
@@ -7130,6 +7133,24 @@ class FolderViewSet(BaseModelViewSet):
                         ),
                     }
                 )
+
+            case "answer":
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                question = Question.objects.get(urn=_fields.get("question"))
+                # Validate question belongs to the requirement
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
+                _fields["question"] = question
+
+                # Store M2M ref_ids for post-create
+                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
+                if choice_ref_ids:
+                    many_to_many_map_ids["selected_choices_ref_ids"] = choice_ref_ids
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -7406,6 +7427,21 @@ class FolderViewSet(BaseModelViewSet):
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
 
+            case "answer":
+                if ref_ids := many_to_many_map_ids.get("selected_choices_ref_ids"):
+                    choices = QuestionChoice.objects.filter(
+                        question=obj.question, ref_id__in=ref_ids
+                    )
+                    found_refs = set(choices.values_list("ref_id", flat=True))
+                    missing = set(ref_ids) - found_refs
+                    if missing:
+                        logger.warning(
+                            "Answer import: could not resolve choice ref_ids %s "
+                            "for question %s",
+                            missing,
+                            obj.question.urn,
+                        )
+                    obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
@@ -7664,13 +7700,13 @@ class FrameworkViewSet(BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related("requirement_nodes")
 
-        # Annotate if the framework is dynamic (any question uses implementation groups)
+        # Annotate if the framework is dynamic (any question choice uses implementation groups)
         qs = qs.annotate(
             is_dynamic=Exists(
-                RequirementNode.objects.filter(
-                    framework=OuterRef("pk"),
-                    questions__icontains="select_implementation_groups",
-                )
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=OuterRef("pk"),
+                    select_implementation_groups__isnull=False,
+                ).exclude(select_implementation_groups=[])
             )
         )
 
@@ -7695,7 +7731,9 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
+                RequirementNode.objects.filter(framework=_framework)
+                .prefetch_related("questions", "questions__choices")
+                .all(),
                 None,
                 _framework.max_score,
             )
@@ -7745,6 +7783,25 @@ class FrameworkViewSet(BaseModelViewSet):
             available_target_frameworks_objects, many=True
         ).data
         return Response({"results": available_target_frameworks})
+
+    @action(detail=True, methods=["post"], url_path="publish")
+    def publish(self, request, pk=None):
+        """Publish a draft framework after validation."""
+        framework = self.get_object()
+        try:
+            framework.publish()
+        except ValidationError as e:
+            logger.warning(
+                "Validation error while publishing framework",
+                framework_id=str(framework.id),
+                error=str(e),
+                exc_info=True,
+            )
+            return Response(
+                {"error": "Framework validation failed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response({"status": "published"}, status=status.HTTP_200_OK)
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):
@@ -9285,7 +9342,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -9337,7 +9396,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -9995,6 +10056,9 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
+                "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
+                "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -10554,6 +10618,15 @@ def generate_html(
 
             if assessment:
                 node_data["assessments"] = assessment
+                # Pre-compute dicts for template backward compat
+                node_data["answers_dict"] = build_answers_dict(
+                    assessment.answers.select_related("question")
+                    .prefetch_related("selected_choices")
+                    .all()
+                )
+                node_data["questions_dict"] = (
+                    build_questions_dict(requirement_node) or {}
+                )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)
@@ -12898,4 +12971,67 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             qs = qs.filter(
                 ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
             ).distinct()
+        return qs
+
+
+class QuestionViewSet(BaseModelViewSet):
+    """API endpoint for Question CRUD."""
+
+    model = Question
+    filterset_fields = [
+        "requirement_node",
+        "type",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("requirement_node", "requirement_node__framework", "folder")
+            .prefetch_related("choices")
+        )
+        # Allow filtering by framework
+        framework_id = self.request.query_params.get("framework")
+        if framework_id:
+            qs = qs.filter(requirement_node__framework_id=framework_id)
+        return qs
+
+
+class QuestionChoiceViewSet(BaseModelViewSet):
+    """API endpoint for QuestionChoice CRUD."""
+
+    model = QuestionChoice
+    filterset_fields = [
+        "question",
+    ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("question", "folder")
+
+
+class AnswerViewSet(BaseModelViewSet):
+    """API endpoint for Answer CRUD."""
+
+    model = Answer
+    filterset_fields = [
+        "requirement_assessment",
+        "question",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "requirement_assessment",
+                "requirement_assessment__compliance_assessment",
+                "question",
+                "folder",
+            )
+            .prefetch_related("selected_choices")
+        )
+        # Allow filtering by compliance assessment
+        ca_id = self.request.query_params.get("compliance_assessment")
+        if ca_id:
+            qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
         return qs

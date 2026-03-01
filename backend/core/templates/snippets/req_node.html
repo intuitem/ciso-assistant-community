@@ -35,10 +35,10 @@
           {{ node.assessments.requirement.get_description_translated }}
         </div>
       {% endif %}
-      {% if node.assessments.answers %}
+      {% if node.answers_dict %}
         <div class="text-left w-full">
-          {% for key, value in node.assessments.answers.items %}
-                {% with question=node.assessments.requirement.questions|get_item:key %}
+          {% for key, value in node.answers_dict.items %}
+                {% with question=node.questions_dict|get_item:key %}
                   <p class="font-semibold">{{ question.text }}</p>
                   {% with answer=question|get_answers:value %}
                     {% if answer|is_string %}

@@ -78,6 +78,7 @@ def match_urn(urn_string):
 def transform_questions_to_answers(questions):
     """
     Used during Requirement Assessment creation to prepare the answers from the questions
+    DEPRECATED: Kept for backward compatibility during migration. Use Answer model instead.
 
     Args:
         questions (json): the questions from the requirement
@@ -89,6 +90,72 @@ def transform_questions_to_answers(questions):
     for question_urn, question in questions.items():
         answers[question_urn] = [] if question["type"] == "multiple_choice" else None
     return answers
+
+
+def _create_questions_from_data(requirement_node, questions_data):
+    """Create Question and QuestionChoice objects from the old JSON questions format.
+
+    Args:
+        requirement_node: RequirementNode instance
+        questions_data: dict keyed by question URN with type, text, choices, etc.
+    """
+    from core.models import Question, QuestionChoice
+
+    type_mapping = {
+        "unique_choice": "single_choice",
+        "single_choice": "single_choice",
+        "multiple_choice": "multiple_choice",
+        "text": "text",
+        "number": "number",
+        "boolean": "boolean",
+        "date": "date",
+    }
+
+    for order, (q_urn, q_data) in enumerate(questions_data.items()):
+        q_type = type_mapping.get(q_data.get("type", "text"), "text")
+        # Extract ref_id: strip the framework-specific URN prefix
+        parts = q_urn.split(":")
+        q_ref_id = parts[-1] if parts else q_urn
+
+        question = Question.objects.create(
+            requirement_node=requirement_node,
+            urn=q_urn,
+            ref_id=q_ref_id,
+            annotation=q_data.get("text", ""),
+            type=q_type,
+            depends_on=q_data.get("depends_on"),
+            order=order,
+            weight=q_data.get("weight", 1),
+            folder=requirement_node.folder,
+            is_published=True,
+            translations=q_data.get("translations"),
+        )
+
+        for c_order, choice in enumerate(q_data.get("choices", [])):
+            c_urn = choice.get("urn", "")
+            c_parts = c_urn.split(":")
+            c_ref_id = c_parts[-1] if c_parts else c_urn
+            c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
+
+            # Convert compute_result bool to string
+            compute_result = choice.get("compute_result")
+            if compute_result is not None:
+                compute_result = str(compute_result).lower()
+
+            QuestionChoice.objects.create(
+                question=question,
+                ref_id=c_ref_id,
+                annotation=choice.get("value", ""),
+                add_score=choice.get("add_score"),
+                compute_result=compute_result,
+                order=c_order,
+                description=choice.get("description"),
+                color=choice.get("color"),
+                select_implementation_groups=choice.get("select_implementation_groups"),
+                folder=requirement_node.folder,
+                is_published=True,
+                translations=choice.get("translations"),
+            )
 
 
 ########################### Referential objects #########################
@@ -844,6 +911,11 @@ class LibraryUpdater:
                             **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
+                        # Create questions from the requirement_node data
+                        if questions:
+                            _create_questions_from_data(
+                                requirement_node_object, questions
+                            )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
                                 RequirementAssessment(
@@ -857,9 +929,6 @@ class LibraryUpdater:
                                             else Folder.get_root_folder()
                                         )
                                     ),
-                                    answers=transform_questions_to_answers(questions)
-                                    if questions
-                                    else {},
                                 )
                             )
 
@@ -947,83 +1016,60 @@ class LibraryUpdater:
                                 requirement_assessment_objects_to_update.append(ra)
                             continue
 
-                        answers = ra.answers or {}
-                        old_answers = ra.answers or {}
-                        answers = (
-                            dict(old_answers) if isinstance(old_answers, dict) else {}
-                        )
+                        # Sync Answer objects for existing requirement assessments
+                        # when the question set changes during a library update
+                        existing_answers = {
+                            a.question.urn: a
+                            for a in Answer.objects.filter(
+                                requirement_assessment=ra
+                            ).select_related("question")
+                        }
+                        new_questions = Question.objects.filter(
+                            requirement_node=requirement_node_object
+                        ).prefetch_related("choices")
 
-                        # Remove answers corresponding to questions that have been removed
-                        for urn in list(answers.keys()):
-                            if urn not in questions:
-                                del answers[urn]
-                        # Add answers corresponding to questions that have been updated/added
-                        for urn, question in questions.items():
-                            # If the question is not present in answers, initialize it
-                            if urn not in answers:
-                                answers[urn] = None
-                                continue
-
-                            answer_val = answers[urn]
-                            type = question.get("type")
-
-                            if type == "multiple_choice":
-                                # Keep only the choices that exist in the question
-                                if isinstance(answer_val, list):
-                                    valid_choices = {
-                                        choice["urn"]
-                                        for choice in question.get("choices", [])
-                                    }
-                                    answers[urn] = [
-                                        choice
-                                        for choice in answer_val
-                                        if choice in valid_choices
-                                    ]
-                                else:
-                                    answers[urn] = []
-
-                            elif type == "unique_choice":
-                                # If the answer does not match a valid choice, reset it to None
-                                valid_choices = {
-                                    choice["urn"]
-                                    for choice in question.get("choices", [])
-                                }
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if answer_val in valid_choices
-                                        else None
+                        for q in new_questions:
+                            if q.urn not in existing_answers:
+                                # New question: create empty answer
+                                Answer.objects.create(
+                                    requirement_assessment=ra,
+                                    question=q,
+                                    folder=ra.folder,
+                                )
+                                answers_changed_ca_ids.add(ra.compliance_assessment_id)
+                            else:
+                                # Existing question: validate answer against new choices
+                                answer = existing_answers[q.urn]
+                                valid_pks = set(q.choices.values_list("id", flat=True))
+                                changed = False
+                                if q.type in (
+                                    Question.Type.SINGLE_CHOICE,
+                                    Question.Type.MULTIPLE_CHOICE,
+                                ):
+                                    current_pks = set(
+                                        answer.selected_choices.values_list(
+                                            "id", flat=True
+                                        )
+                                    )
+                                    invalid_pks = current_pks - valid_pks
+                                    if invalid_pks:
+                                        answer.selected_choices.remove(
+                                            *QuestionChoice.objects.filter(
+                                                id__in=invalid_pks
+                                            )
+                                        )
+                                        changed = True
+                                if changed:
+                                    answers_changed_ca_ids.add(
+                                        ra.compliance_assessment_id
                                     )
 
-                            elif type == "text":
-                                # For a text question, simply check that it is a string
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    answers[urn] = (
-                                        answer_val
-                                        if isinstance(answer_val, str)
-                                        and answer_val.split(":")[0] != "urn"
-                                        else None
-                                    )
-
-                            elif type == "date":
-                                # For a date question, check the expected format (e.g., "YYYY-MM-DD")
-                                if isinstance(answer_val, list):
-                                    answers[urn] = None
-                                else:
-                                    try:
-                                        datetime.strptime(answer_val, "%Y-%m-%d")
-                                        answers[urn] = answer_val
-                                    except Exception:
-                                        answers[urn] = None
-
-                        if answers != old_answers:
-                            ra.answers = answers
-                            requirement_assessment_objects_to_update.append(ra)
-                            answers_changed_ca_ids.add(ra.compliance_assessment_id)
+                        # Remove answers for questions that no longer exist
+                        new_question_urns = {q.urn for q in new_questions}
+                        for urn, answer in existing_answers.items():
+                            if urn not in new_question_urns:
+                                answer.delete()
+                                answers_changed_ca_ids.add(ra.compliance_assessment_id)
 
                     # update threats linked to the requirement_node
                     for threat_urn in requirement_node.get("threats", []):
@@ -1073,12 +1119,15 @@ class LibraryUpdater:
                         ["answers", "score", "is_scored", "documentation_score"],
                         batch_size=100,
                     )
-                    # Keep selected_implementation_groups consistent for dynamic frameworks
-                    if new_framework.is_dynamic():
-                        for ca in ComplianceAssessment.objects.filter(
-                            id__in=answers_changed_ca_ids
-                        ):
-                            update_selected_implementation_groups(ca)
+
+                # Keep selected_implementation_groups consistent for dynamic frameworks
+                # This must run even if no RA scalar fields changed, because answer
+                # M2M changes (selected_choices) can affect implementation groups.
+                if answers_changed_ca_ids and new_framework.is_dynamic():
+                    for ca in ComplianceAssessment.objects.filter(
+                        id__in=answers_changed_ca_ids
+                    ):
+                        update_selected_implementation_groups(ca)
 
                 if requirement_assessment_objects_to_create:
                     RequirementAssessment.objects.bulk_create(
@@ -2021,6 +2070,10 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        PUBLISHED = "published", _("Published")
+
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -2035,6 +2088,12 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         null=True,
         blank=True,
         related_name="frameworks",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
     )
 
     class Meta:
@@ -2101,16 +2160,97 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         return node_dict
 
     def is_dynamic(self) -> bool:
-        return RequirementNode.objects.filter(
-            framework=self,
-            questions__icontains="select_implementation_groups",
-        ).exists()
+        return (
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=self,
+                select_implementation_groups__isnull=False,
+            )
+            .exclude(select_implementation_groups=[])
+            .exists()
+        )
+
+    def publish(self):
+        """Validate and publish a draft framework."""
+        if self.status == self.Status.PUBLISHED:
+            raise ValidationError("Framework is already published.")
+
+        errors = []
+
+        # Validate all choice/multiple_choice questions have >= 2 choices
+        questions_with_choices = Question.objects.filter(
+            requirement_node__framework=self,
+            type__in=[Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE],
+        ).prefetch_related("choices")
+        for q in questions_with_choices:
+            if q.choices.count() < 2:
+                errors.append(
+                    f"Question '{q.ref_id}' ({q.type}) must have at least 2 choices."
+                )
+
+        # Validate depends_on references point to valid question ref_ids within same requirement node
+        questions_with_depends = Question.objects.filter(
+            requirement_node__framework=self,
+            depends_on__isnull=False,
+        ).select_related("requirement_node")
+        for q in questions_with_depends:
+            dep = q.depends_on
+            if dep and dep.get("question"):
+                dep_ref = dep["question"]
+                if not Question.objects.filter(
+                    requirement_node=q.requirement_node,
+                    ref_id=dep_ref,
+                ).exists():
+                    errors.append(
+                        f"Question '{q.ref_id}' depends_on references unknown question '{dep_ref}'."
+                    )
+
+        # Validate scores_definition
+        if self.scores_definition:
+            sd = self.scores_definition
+            if isinstance(sd, dict):
+                scale = sd.get("scale", [])
+                if scale:
+                    scores_seen = set()
+                    for entry in scale:
+                        if "score" not in entry or "name" not in entry:
+                            errors.append(
+                                "scores_definition scale entries must have 'score' and 'name'."
+                            )
+                            break
+                        if entry["score"] in scores_seen:
+                            errors.append(
+                                f"Duplicate score value {entry['score']} in scores_definition."
+                            )
+                        scores_seen.add(entry["score"])
+                agg = sd.get("aggregation")
+                if agg and agg not in ("sum", "mean"):
+                    errors.append(
+                        f"Invalid aggregation method '{agg}'. Must be 'sum' or 'mean'."
+                    )
+
+        if errors:
+            raise ValidationError(errors)
+
+        self.status = self.Status.PUBLISHED
+        self.save(update_fields=["status", "updated_at"])
 
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
     def save(self, *args, **kwargs):
         from core.mappings.engine import engine
+
+        # Prevent un-publishing: if the framework was published, it stays published
+        if self.pk:
+            try:
+                old = Framework.objects.get(pk=self.pk)
+                if (
+                    old.status == self.Status.PUBLISHED
+                    and self.status == self.Status.DRAFT
+                ):
+                    raise ValidationError("Cannot un-publish a published framework.")
+            except Framework.DoesNotExist:
+                pass
 
         obj = super().save(*args, **kwargs)
 
@@ -2158,7 +2298,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     typical_evidence = models.TextField(
         null=True, blank=True, verbose_name=_("Typical evidence")
     )
-    questions = models.JSONField(blank=True, null=True, verbose_name=_("Questions"))
     weight = models.IntegerField(default=1, verbose_name=_("Weight"))
     importance = models.CharField(
         max_length=20,
@@ -2216,42 +2355,145 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
     @property
     def get_questions_translated(self) -> dict | None:
-        if not self.questions:
+        questions_qs = self.questions.prefetch_related("choices").all()
+        if not questions_qs:
             return None
 
         current_lang = get_language()
 
-        def _translate_choice(choice: dict) -> dict:
-            tr = choice.get("translations", {}).get(current_lang, {})
-            return {
-                **choice,
-                **({} if not tr.get("value") else {"value": tr["value"]}),
-                **(
-                    {}
-                    if not tr.get("description")
-                    else {"description": tr["description"]}
-                ),
-            }
-
-        def _translate_question(q_content: dict) -> dict:
-            tr = q_content.get("translations", {}).get(current_lang, {})
-            translated = {**q_content}
-            if tr.get("text"):
-                translated["text"] = tr["text"]
-            if "choices" in q_content:
-                translated["choices"] = [
-                    _translate_choice(c) for c in q_content["choices"]
-                ]
-            return translated
-
-        return {
-            q_urn: _translate_question(q_content)
-            for q_urn, q_content in self.questions.items()
+        type_mapping = {
+            "single_choice": "unique_choice",
+            "multiple_choice": "multiple_choice",
+            "text": "text",
+            "number": "number",
+            "boolean": "boolean",
+            "date": "date",
         }
+
+        def _translate_choice(choice):
+            tr = (choice.translations or {}).get(current_lang, {})
+            choice_data = {
+                "urn": choice.ref_id,
+                "value": tr.get("value", choice.annotation or ""),
+            }
+            description = tr.get("description", choice.description)
+            if description:
+                choice_data["description"] = description
+            if choice.add_score is not None:
+                choice_data["add_score"] = choice.add_score
+            if choice.compute_result is not None:
+                choice_data["compute_result"] = choice.compute_result not in (
+                    "false",
+                    "0",
+                    "",
+                )
+            if choice.color:
+                choice_data["color"] = choice.color
+            if choice.select_implementation_groups:
+                choice_data["select_implementation_groups"] = (
+                    choice.select_implementation_groups
+                )
+            return choice_data
+
+        result = {}
+        for question in questions_qs:
+            q_tr = (question.translations or {}).get(current_lang, {})
+            q_data = {
+                "type": type_mapping.get(question.type, question.type),
+                "text": q_tr.get("text", question.annotation or ""),
+            }
+            choices = [_translate_choice(c) for c in question.choices.all()]
+            if choices:
+                q_data["choices"] = choices
+            if question.depends_on:
+                q_data["depends_on"] = question.depends_on
+            result[question.urn] = q_data
+
+        return result if result else None
 
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
+
+
+class Question(AbstractBaseModel, FolderMixin):
+    class Type(models.TextChoices):
+        TEXT = "text", _("Text")
+        NUMBER = "number", _("Number")
+        BOOLEAN = "boolean", _("Boolean")
+        SINGLE_CHOICE = "single_choice", _("Single choice")
+        MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
+        DATE = "date", _("Date")
+
+    requirement_node = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        related_name="questions",
+        verbose_name=_("Requirement node"),
+    )
+    urn = models.CharField(max_length=255, unique=True, verbose_name=_("URN"))
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
+    )
+    annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
+    type = models.CharField(
+        max_length=20,
+        choices=Type.choices,
+        default=Type.TEXT,
+        verbose_name=_("Type"),
+    )
+    config = models.JSONField(blank=True, null=True, verbose_name=_("Config"))
+    depends_on = models.JSONField(blank=True, null=True, verbose_name=_("Depends on"))
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+    weight = models.IntegerField(default=1, verbose_name=_("Weight"))
+    translations = models.JSONField(
+        blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = _("Question")
+        verbose_name_plural = _("Questions")
+
+    def __str__(self) -> str:
+        return f"{self.ref_id or self.urn}: {self.annotation or ''}"
+
+
+class QuestionChoice(AbstractBaseModel, FolderMixin):
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="choices",
+        verbose_name=_("Question"),
+    )
+    ref_id = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
+    )
+    annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
+    add_score = models.IntegerField(blank=True, null=True, verbose_name=_("Add score"))
+    compute_result = models.CharField(
+        max_length=100, blank=True, null=True, verbose_name=_("Compute result")
+    )
+    order = models.IntegerField(default=0, verbose_name=_("Order"))
+    description = models.TextField(blank=True, null=True, verbose_name=_("Description"))
+    color = models.CharField(
+        max_length=50, blank=True, null=True, verbose_name=_("Color")
+    )
+    select_implementation_groups = models.JSONField(
+        blank=True, null=True, verbose_name=_("Select implementation groups")
+    )
+    translations = models.JSONField(
+        blank=True, null=True, verbose_name=_("Translations")
+    )
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = [("question", "ref_id")]
+        verbose_name = _("Question choice")
+        verbose_name_plural = _("Question choices")
+
+    def __str__(self) -> str:
+        return f"{self.ref_id or ''}: {self.annotation or ''}"
 
 
 class RequirementMappingSet(ReferentialObjectMixin):
@@ -6018,10 +6260,7 @@ class ComplianceAssessment(Assessment):
             RequirementAssessment(
                 compliance_assessment=self,
                 requirement=requirement,
-                folder_id=self.folder.id,  # Use foreign key directly
-                answers=transform_questions_to_answers(requirement.questions)
-                if requirement.questions
-                else {},
+                folder_id=self.folder.id,
             )
             for requirement in requirements
         ]
@@ -6030,6 +6269,27 @@ class ComplianceAssessment(Assessment):
         created_assessments = RequirementAssessment.objects.bulk_create(
             requirement_assessments
         )
+
+        # Bulk create empty Answer rows for each question
+        answers_to_create = []
+        # Build a mapping from requirement_id to created assessment
+        ra_by_req = {ra.requirement_id: ra for ra in created_assessments}
+        # Prefetch all questions for requirements in this framework
+        questions = Question.objects.filter(
+            requirement_node__framework=self.framework
+        ).select_related("requirement_node")
+        for question in questions:
+            ra = ra_by_req.get(question.requirement_node_id)
+            if ra:
+                answers_to_create.append(
+                    Answer(
+                        requirement_assessment=ra,
+                        question=question,
+                        folder_id=self.folder.id,
+                    )
+                )
+        if answers_to_create:
+            Answer.objects.bulk_create(answers_to_create, batch_size=1000)
 
         # If there's a baseline, update the created assessments with baseline data
         if baseline_assessments:
@@ -6283,6 +6543,11 @@ class ComplianceAssessment(Assessment):
                 Prefetch("evidences"),
                 Prefetch("requirement__reference_controls"),
                 Prefetch("requirement__threats"),
+                "requirement__questions",
+                "requirement__questions__choices",
+                "answers",
+                "answers__question",
+                "answers__selected_choices",
             )
         )
 
@@ -6870,16 +7135,22 @@ class ComplianceAssessment(Assessment):
         requirement_assessments = self.get_requirement_assessments(
             include_non_assessable=False
         )
-        total_questions_count = 0
-        answered_questions_count = 0
-        for ra in requirement_assessments:
-            # if it has question set it should count
-            if ra.requirement.questions:
-                total_questions_count += len(ra.requirement.questions)
-                answers = ra.answers
-                if answers:
-                    for answer in answers.values():
-                        answered_questions_count += 1 if answer else 0
+        ra_ids = [ra.id for ra in requirement_assessments]
+
+        total_questions_count = Answer.objects.filter(
+            requirement_assessment_id__in=ra_ids,
+        ).count()
+        answered_questions_count = (
+            Answer.objects.filter(
+                requirement_assessment_id__in=ra_ids,
+            )
+            .filter(
+                Q(value__isnull=False) & ~Q(value__in=[None, [], ""])
+                | Q(selected_choices__isnull=False)
+            )
+            .distinct()
+            .count()
+        )
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
@@ -6888,13 +7159,9 @@ class ComplianceAssessment(Assessment):
 
     @property
     def has_questions(self) -> bool:
-        requirement_assessments = self.get_requirement_assessments(
-            include_non_assessable=False
-        )
-        for ra in requirement_assessments:
-            if ra.requirement.questions:
-                return True
-        return False
+        return Question.objects.filter(
+            requirement_node__framework=self.framework
+        ).exists()
 
 
 class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
@@ -6981,11 +7248,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
     mapping_inference = models.JSONField(
         default=dict,
         verbose_name=_("Mapping inference"),
-    )
-    answers = models.JSONField(
-        blank=True,
-        null=True,
-        verbose_name=_("Answers"),
     )
     security_exceptions = models.ManyToManyField(
         SecurityException,
@@ -7131,27 +7393,57 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
 
-        self.compliance_assessment.upsert_daily_metrics()
+        # Defer metrics to on_commit, deduplicated per CA per transaction
+        ca = self.compliance_assessment
+        conn = transaction.get_connection()
+        pending = getattr(conn, "_pending_metrics_updates", None)
+        if pending is None:
+            pending = set()
+            conn._pending_metrics_updates = pending
+        if ca.pk not in pending:
+            pending.add(ca.pk)
 
-        # Recalculate selected IGs only when answers were updated
-        # Use transaction.on_commit to avoid nested save conflicts
-        update_fields = kwargs.get("update_fields")
-        answers_changed = (
-            update_fields is None  # full save
-            or "answers" in set(update_fields or [])
-        )
-        if answers_changed and self.compliance_assessment.framework.is_dynamic():
-            transaction.on_commit(
-                lambda: update_selected_implementation_groups(
-                    self.compliance_assessment
-                )
-            )
+            def _do_metrics_update(ca_ref=ca, pending_ref=pending):
+                pending_ref.discard(ca_ref.pk)
+                ca_ref.upsert_daily_metrics()
+
+            transaction.on_commit(_do_metrics_update)
 
     def compute_score_and_result(self):
-        questions = self.requirement.questions or {}
-        answers = self.answers or {}
+        questions_qs = self.requirement.questions.prefetch_related("choices").all()
+        answers_qs = (
+            self.answers.select_related("question")
+            .prefetch_related("selected_choices")
+            .all()
+        )
+
+        # Build lookup: question_id → set of selected choice PKs
+        selected_choice_pks_by_qid = {}
+        answers_by_ref = {}
+        questions_by_ref = {}
+        has_answer_by_qid = {}
+
+        for a in answers_qs:
+            q_type = a.question.type
+            if q_type in (
+                Question.Type.SINGLE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ):
+                pks = {c.id for c in a.selected_choices.all()}
+                selected_choice_pks_by_qid[a.question_id] = pks
+                has_answer_by_qid[a.question_id] = len(pks) > 0
+            else:
+                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
+
+            # For depends_on resolution, pass ref_id strings
+            if a.question.ref_id:
+                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
+
+        for q in questions_qs:
+            questions_by_ref[q.ref_id] = q
 
         total_score = 0
+        total_weight = 0
         min_score = self.compliance_assessment.min_score or 0
         max_score = self.compliance_assessment.max_score or 100
         results = []
@@ -7160,40 +7452,52 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         is_score_computed = False
         is_result_computed = False
 
-        for q_urn, question in questions.items():
-            if _is_question_visible(question, answers) is False:
+        # Determine aggregation method
+        scores_def = self.compliance_assessment.scores_definition
+        aggregation = None
+        if isinstance(scores_def, dict):
+            aggregation = scores_def.get("aggregation")
+        if not aggregation:
+            if (
+                self.compliance_assessment.score_calculation_method
+                == ComplianceAssessment.CalculationMethod.SUM
+            ):
+                aggregation = "sum"
+            else:
+                aggregation = "mean"
+
+        for question in questions_qs:
+            if not _is_question_visible(question, answers_by_ref, questions_by_ref):
                 continue
 
             visible_questions += 1
-            selected_choice_urn = answers.get(q_urn)
-
-            if not selected_choice_urn:
+            if not has_answer_by_qid.get(question.id):
                 continue
 
             answered_visible_questions += 1
 
-            # Handle both single and multiple choice questions
-            choice_urns = (
-                selected_choice_urn
-                if isinstance(selected_choice_urn, list)
-                else [selected_choice_urn]
-            )
-
-            for choice in question.get("choices", []):
-                if choice.get("urn") in choice_urns:
-                    add_score = choice.get("add_score")
-                    compute_result = choice.get("compute_result")
-
-                    if add_score is not None:
+            selected_pks = selected_choice_pks_by_qid.get(question.id, set())
+            for choice in question.choices.all():
+                if choice.id in selected_pks:
+                    if choice.add_score is not None:
                         is_score_computed = True
                         self.is_scored = True
-                        total_score += add_score
+                        total_score += choice.add_score * question.weight
+                        total_weight += question.weight
 
-                    if compute_result is not None:
+                    if choice.compute_result is not None:
                         is_result_computed = True
-                        results.append(bool(compute_result))
+                        # compute_result is truthy if not in falsy values
+                        results.append(
+                            choice.compute_result not in ("false", "0", "", None)
+                        )
 
-        self.score = max(min(total_score, max_score), min_score)
+        if aggregation == "mean" and total_weight > 0:
+            computed_score = total_score / total_weight
+        else:
+            computed_score = total_score
+
+        self.score = max(min(int(computed_score), max_score), min_score)
 
         # No visible questions → not applicable
         if visible_questions == 0:
@@ -7209,10 +7513,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         # Compute overall result
         if not results:
-            # All answered but no compliance checks defined
-            self.result = (
-                "not_assessed"  # or "compliant" depending on your business logic
-            )
+            self.result = "not_assessed"
         elif all(results):
             self.result = "compliant"
         elif any(results):
@@ -7260,6 +7561,71 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
+class Answer(AbstractBaseModel, FolderMixin):
+    requirement_assessment = models.ForeignKey(
+        RequirementAssessment,
+        on_delete=models.CASCADE,
+        related_name="answers",
+        verbose_name=_("Requirement assessment"),
+    )
+    question = models.ForeignKey(
+        Question,
+        on_delete=models.CASCADE,
+        related_name="given_answers",
+        verbose_name=_("Question"),
+    )
+    value = models.JSONField(blank=True, null=True, verbose_name=_("Value"))
+    selected_choices = models.ManyToManyField(
+        "QuestionChoice",
+        blank=True,
+        related_name="choice_answers",
+        verbose_name=_("Selected choices"),
+    )
+
+    class Meta:
+        unique_together = [("requirement_assessment", "question")]
+        verbose_name = _("Answer")
+        verbose_name_plural = _("Answers")
+
+    def __str__(self) -> str:
+        return f"Answer to {self.question} for {self.requirement_assessment}"
+
+    def get_choice_ref_ids(self):
+        """Return list of selected choice ref_ids for choice-type questions."""
+        if self.question.type in (
+            Question.Type.SINGLE_CHOICE,
+            Question.Type.MULTIPLE_CHOICE,
+        ):
+            return [c.ref_id for c in self.selected_choices.all()]
+        return []
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        # Update parent compliance assessment timestamp
+        self.requirement_assessment.compliance_assessment.updated_at = timezone.now()
+        self.requirement_assessment.compliance_assessment.save(
+            update_fields=["updated_at"]
+        )
+
+        # If framework is dynamic, trigger IG update (deduplicated per transaction)
+        if self.requirement_assessment.compliance_assessment.framework.is_dynamic():
+            ca = self.requirement_assessment.compliance_assessment
+            conn = transaction.get_connection()
+            pending = getattr(conn, "_pending_ig_updates", None)
+            if pending is None:
+                pending = set()
+                conn._pending_ig_updates = pending
+            if ca.pk not in pending:
+                pending.add(ca.pk)
+
+                def _do_ig_update(ca_ref=ca, pending_ref=pending):
+                    pending_ref.discard(ca_ref.pk)
+                    update_selected_implementation_groups(ca_ref)
+
+                transaction.on_commit(_do_ig_update)
 
 
 class FindingsAssessment(Assessment):
