@@ -32,8 +32,7 @@ from openpyxl import Workbook
 FRAMEWORK_HEADERS = [
     "assessable",
     "depth",
-    "ref_id",
-    "urn_id",
+    "node_id",
     "name",
     "description",
     "annotation",
@@ -42,6 +41,7 @@ FRAMEWORK_HEADERS = [
     "questions",
     "answer",
     "reference_controls",
+    "_dev_info",
 ]
 
 IMP_GRP_HEADERS = ["ref_id", "name", "description", "default_selected"]
@@ -49,9 +49,9 @@ ANSW_HEADERS = [
     "id",
     "question_type",
     "question_choices",
-    "color",
     "description",
     "select_implementation_groups",
+    "color",
 ]
 REF_CTRL_HEADERS = [
     "ref_id",
@@ -97,7 +97,16 @@ LIBRARY_META_ROWS: list[tuple[str, str]] = [
         "description",
         "MonAideCyber aide les entités publiques et privées sensibilisées à la sécurité informatique à passer à l’action. Le dispositif MonAideCyber est développé par l'Agence Nationale de la Sécurité des Systèmes d'Information, en lien avec BetaGouv et la Direction interministérielle du numérique.\n\n Sources :\n\t• https://github.com/betagouv/mon-aide-cyber \n\t• https://monaide.cyber.gouv.fr/diagnostic-libre-acces",
     ),
-    ("copyright", "ANSSI"),
+    (
+        "copyright",
+        "Copyright 2023 ANSSI - Agence nationale de la sécurité des systèmes d'information (https://www.cyber.gouv.fr)\n\n"
+        'Licensed under the Apache License, Version 2.0 (the "License");\n'
+        "you may not use this file except in compliance with the License.\n"
+        "You may obtain a copy of the License at\n\n"
+        "    http://www.apache.org/licenses/LICENSE-2.0\n\n"
+        'Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n'
+        "See the License for the specific language governing permissions and limitations under the License.",
+    ),
     ("provider", "ANSSI"),
     ("packager", "intuitem"),
 ]
@@ -243,17 +252,17 @@ def map_annotation_from_perimetre(perimetre: str | None) -> str:
     if not perimetre:
         return ""
     return (
-        "# **" + PERIMETRE_LABELS.get(perimetre, "") + "**"
+        "## **" + PERIMETRE_LABELS.get(perimetre, "") + "**"
         if PERIMETRE_LABELS.get(perimetre, "")
         else ""
     )
 
 
-def prepend_h1_markdown(text: str) -> str:
+def prepend_h2_markdown(text: str) -> str:
     stripped = text.lstrip()
-    if stripped.startswith("# "):
+    if stripped.startswith("## "):
         return text
-    return f"# {text}"
+    return f"## {text}"
 
 
 def insert_double_newline_before_title_word(text: str, limit_index: int) -> str:
@@ -278,13 +287,13 @@ def format_info_bulle_text(text: str) -> str:
         first_double_newline == -1 or first_newline_tab < first_double_newline
     ):
         value = insert_double_newline_before_title_word(value, first_newline_tab)
-        return prepend_h1_markdown(value)
+        return prepend_h2_markdown(value)
 
     # Generic case: if header-like part has at most 10 words, prefix with '# '
     header_part = value[:first_double_newline] if first_double_newline != -1 else value
     word_count = len(re.findall(r"\S+", header_part))
     if word_count <= 10:
-        return prepend_h1_markdown(value)
+        return prepend_h2_markdown(value)
 
     return value
 
@@ -370,11 +379,11 @@ def append_framework_row(ctx: Context, row: dict[str, str]) -> int:
     idx = len(ctx.framework_rows)
     ctx.framework_rows.append(row)
 
-    urn = row.get("urn_id", "")
+    urn = row.get("node_id", "")
     if urn:
         ctx.framework_index_by_urn[urn] = idx
 
-    name = row.get("name", "")
+    name = row.get("name", "") or row.get("_dev_info", "")
     if urn and name.startswith("Question "):
         ctx.question_name_suffix_by_urn[urn] = name.removeprefix("Question ").strip()
 
@@ -436,12 +445,13 @@ def process_question(
     if perimetre:
         ensure_imp_group(ctx, perimetre, PERIMETRE_LABELS.get(perimetre, ""))
 
+    depth = "2" if parent_question_id is None else "3"
+
     framework_row = {
         "assessable": "x",
-        "depth": "2",
-        "ref_id": ref_id,
-        "urn_id": qid.lower(),
-        "name": name,
+        "depth": depth,
+        "node_id": qid.lower(),
+        "name": "",
         "description": as_text(question.get("description")),
         "annotation": annotation,
         "typical_evidence": "",
@@ -451,6 +461,7 @@ def process_question(
         "reference_controls": measures_to_reference_controls(
             question.get("reponsesPossibles", []) or []
         ),
+        "_dev_info": name,
     }
     append_framework_row(ctx, framework_row)
 
@@ -495,8 +506,7 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
             {
                 "assessable": "",
                 "depth": "1",
-                "ref_id": as_text(theme_num),
-                "urn_id": theme_key.lower(),
+                "node_id": theme_key.lower(),
                 "name": as_text(theme_obj.get("libelle")),
                 "description": as_text(theme_obj.get("description")),
                 "annotation": "",
@@ -505,6 +515,7 @@ def process_referentiel(ctx: Context, referentiel: dict[str, Any]) -> None:
                 "questions": "",
                 "answer": "",
                 "reference_controls": "",
+                "_dev_info": "",
             },
         )
 
@@ -583,7 +594,7 @@ def build_ref_controls_rows(ctx: Context, mesures_json: dict[str, Any]) -> None:
             title = as_text(level_obj.get("titre"))
             pourquoi = as_text(level_obj.get("pourquoi"))
             comment = as_text(level_obj.get("comment"))
-            description = f"# Pourquoi ?\n{pourquoi}\n\n# Comment ?\n{comment}"
+            description = f"## Pourquoi ?\n{pourquoi}\n\n## Comment ?\n{comment}"
             ctx.ref_ctrl_rows.append(
                 {
                     "ref_id": f"{mesure_id}_{level_key}",
@@ -696,6 +707,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output", default="mon_aide_cyber.xlsx", help="Output XLSX file"
     )
+    parser.add_argument(
+        "--dev-info",
+        action="store_true",
+        help="Include the _dev_info column in fwk_content",
+    )
     return parser.parse_args()
 
 
@@ -703,6 +719,7 @@ def build_excel_from_json(
     questionnaire_path: Path,
     mesures_path: Path,
     output_path: Path,
+    include_dev_info: bool = False,
 ) -> dict[str, int]:
     """Point d'entrée unique: construit l'Excel à partir des 2 JSON."""
     questionnaire = load_json(questionnaire_path)
@@ -725,7 +742,12 @@ def build_excel_from_json(
     write_kv_sheet(wb, "library_meta", LIBRARY_META_ROWS)
 
     write_kv_sheet(wb, "fwk_meta", FWK_META_ROWS)
-    write_sheet(wb, "fwk_content", FRAMEWORK_HEADERS, ctx.framework_rows)
+    fwk_headers = (
+        FRAMEWORK_HEADERS
+        if include_dev_info
+        else [h for h in FRAMEWORK_HEADERS if h != "_dev_info"]
+    )
+    write_sheet(wb, "fwk_content", fwk_headers, ctx.framework_rows)
 
     write_kv_sheet(wb, "answ_meta", ANSW_META_ROWS)
     write_sheet(
@@ -763,6 +785,7 @@ def main() -> None:
         questionnaire_path=q_path,
         mesures_path=m_path,
         output_path=out_path,
+        include_dev_info=args.dev_info,
     )
 
     print(f"Excel generated: {out_path}")

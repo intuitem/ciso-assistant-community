@@ -229,6 +229,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
 90. Microsoft cloud security benchmark v1 - ☁️🌐
 91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
+92. ANSSI : Questionnaire MonAideCyber 🇫🇷
 
 ### Community contributions
 
