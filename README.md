@@ -400,10 +400,20 @@ export DB_PORT=5432  # optional, default value is 5432
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
+export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
+export AWS_S3_REGION_NAME=<aws-region>  # optional, e.g., us-east-1
+
+# S3 Authentication Option 1: Access Key (for standalone deployments or S3-compatible services)
 export AWS_ACCESS_KEY_ID=<XXX>
 export AWS_SECRET_ACCESS_KEY=<XXX>
-export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
-export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
+export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible services (e.g., MinIO)
+
+# S3 Authentication Option 2: IRSA (for Kubernetes/EKS deployments)
+# When running on EKS with IAM Roles for Service Accounts (IRSA) enabled,
+# these environment variables are automatically injected by the pod's service account.
+# No explicit configuration is needed - just ensure USE_S3=True and AWS_STORAGE_BUCKET_NAME are set.
+# export AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
+# export AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
 # Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
