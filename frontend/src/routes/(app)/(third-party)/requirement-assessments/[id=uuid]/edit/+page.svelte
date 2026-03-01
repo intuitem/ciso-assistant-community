@@ -143,9 +143,13 @@
 
 	let createAppliedControlsLoading = $state(false);
 
-	let applied_controls_options = $state([]);
+	let applied_controls_options = $state<any[]>([]);
+	let appliedControlsLoaded = $state(false);
+	let appliedControlsFetchInFlight = false;
 
 	async function fetchAppliedControlsOptions() {
+		if (appliedControlsFetchInFlight) return;
+		appliedControlsFetchInFlight = true;
 		try {
 			const url = `/applied-controls?scope_folder_id=${page.data.requirementAssessment.folder.id}&limit=0`;
 			const res = await fetch(url);
@@ -171,10 +175,13 @@
 					// Show suggested items first
 					if (a.suggested && !b.suggested) return -1;
 					if (!a.suggested && b.suggested) return 1;
-					return 0;
+					return a.label.localeCompare(b.label);
 				});
 		} catch (error) {
 			console.error('Unable to fetch applied controls', error);
+		} finally {
+			appliedControlsLoaded = true;
+			appliedControlsFetchInFlight = false;
 		}
 	}
 
@@ -295,7 +302,6 @@
 				{ taint: false }
 			);
 			form.newControls = undefined;
-			console.debug('formStore', $formStore);
 			fetchAppliedControlsOptions();
 		}
 	});
@@ -311,7 +317,6 @@
 				{ taint: false }
 			);
 			form.newEvidence = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -326,7 +331,6 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -591,13 +595,14 @@
 										><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 									>
 								</span>
-								{#if applied_controls_options.length}
+								{#if appliedControlsLoaded}
 									{#key applied_controls_options}
 										<AutocompleteSelect
 											multiple
 											{form}
 											options={applied_controls_options}
 											field="applied_controls"
+											placeholder={m.appliedControlsPlaceholder()}
 										/>
 									{/key}
 								{/if}
