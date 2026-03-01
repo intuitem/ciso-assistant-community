@@ -47,7 +47,7 @@ In this setup, it is necessary to launch the backend with an adjusted CISO_ASSIS
 ## Testing SSO
 
 1. Use `caddy run -c Caddyfile-sso`
-2. Launch `ORIGIN=https://localhost PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost/api node server` on frontend side
-3. Launch `CISO_ASSISTANT_URL=https://localhost  python manage.py runserver` on backend side
-4. Use `https://localhost` as the connection URL.
+2. Launch `ORIGIN=https://localhost:8443 PUBLIC_BACKEND_API_EXPOSED_URL=https://localhost/api pnpm run dev` on frontend side
+3. Launch `CISO_ASSISTANT_URL=https://localhost:8443  python manage.py runserver` on backend side
+4. Use `https://localhost:8443` as the connection URL.
 5. Configure your IdP accordingly.

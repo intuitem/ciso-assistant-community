@@ -374,12 +374,18 @@
 			>
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
-			<div class="p-4">
+			<div class="p-4 space-y-4">
 				<Checkbox
 					{form}
 					field="show_warning_external_links"
 					label={m.showWarningExternalLinks()}
 					helpText={m.showWarningExternalLinksHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="enforce_mfa"
+					label={m.enforceMfa()}
+					helpText={m.enforceMfaHelpText()}
 				/>
 			</div>
 		</Accordion.ItemContent>

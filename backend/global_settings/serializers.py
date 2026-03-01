@@ -20,6 +20,7 @@ GENERAL_SETTINGS_KEYS = [
     "show_warning_external_links",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
+    "enforce_mfa",
 ]
 
 
