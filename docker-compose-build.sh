@@ -2,14 +2,25 @@
 set -euo pipefail
 
 DOCKER_COMPOSE_FILE=docker-compose-build.yml
+EXPECTED_OWNER="1001:1001"
 
 prepare_meta_file() {
   VERSION=$(git describe --tags --always)
   BUILD=$(git rev-parse --short HEAD)
-  echo "CISO_ASSISTANT_VERSION=${VERSION}" >.meta
-  echo "CISO_ASSISTANT_BUILD=${BUILD}" >>.meta
+  echo "CISO_ASSISTANT_VERSION=${VERSION}" > .meta
+  echo "CISO_ASSISTANT_BUILD=${BUILD}" >> .meta
   cp .meta ./backend/ciso_assistant/.meta
   cp .meta ./backend/.meta
+}
+
+# On macOS, GNU stat (-c) is not available by default. We use this as a simple
+# Linux detector and skip chown on macOS (Docker Desktop emulates ownership).
+is_linux_gnu_stat() {
+  stat -c '%u:%g' . >/dev/null 2>&1
+}
+
+get_owner_linux() {
+  stat -c '%u:%g' "$1"
 }
 
 # Enable BuildKit for faster builds
@@ -23,14 +34,24 @@ if [ -f db/ciso-assistant.sqlite3 ]; then
 else
   prepare_meta_file
 
-  # Build and start the containers
   echo "Building containers..."
   docker compose -f "${DOCKER_COMPOSE_FILE}" build --pull
 
-  echo "Starting services..."
-  docker compose -f "${DOCKER_COMPOSE_FILE}" up -d
+  mkdir -p ./db
 
-  # Simple wait for database migrations
+  if is_linux_gnu_stat; then
+    DB_OWNER="$(get_owner_linux ./db)"
+    if [ "$DB_OWNER" != "$EXPECTED_OWNER" ]; then
+      echo "Fixing ownership of ./db (was $DB_OWNER, expected $EXPECTED_OWNER)"
+      sudo chown -R "$EXPECTED_OWNER" ./db
+    fi
+  else
+    echo "Non-Linux (no GNU stat detected): skipping ownership fix for ./db"
+  fi
+
+  echo "Starting services..."
+  docker compose -f "${DOCKER_COMPOSE_FILE}" up
+
   echo "Giving some time for the database to be ready, please wait ..."
   sleep 50
 

@@ -22,5 +22,7 @@ EXPOSE 3000
 ENV NODE_ENV=production
 ENV BODY_SIZE_LIMIT=25000000
 
+RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /usr/sbin/nologin app
+# USER app  # not activated by default to keep compatibility
 
 CMD [ "node", "server" ]
