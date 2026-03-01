@@ -373,6 +373,7 @@ export const UserEditSchema = z.object({
 	email: z.string().email(),
 	first_name: z.string().optional(),
 	last_name: z.string().optional(),
+	folder: z.string().optional(),
 	is_active: z.boolean().optional(),
 	keep_local_login: z.boolean().optional(),
 	user_groups: z.array(z.string().uuid().optional()).optional(),
@@ -396,6 +397,7 @@ export const UserEditSchema = z.object({
 
 export const UserCreateSchema = z.object({
 	email: z.string().email(),
+	folder: z.string().optional(),
 	observation: z.string().optional().nullable(),
 	expiry_date: z
 		.union([z.literal('').transform(() => null), z.string().date()])

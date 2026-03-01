@@ -141,6 +141,7 @@
 	"frameworks": "Référentiels",
 	"frameworksColon": "Référentiels :",
 	"domains": "Domaines",
+	"userFolderHelpText": "Domaine où l'utilisateur est visible aux autres avec accès à cette portée (n'affecte pas les permissions utilisateur)",
 	"perimeters": "Périmètres",
 	"users": "Utilisateurs",
 	"user": "Utilisateur",

@@ -119,6 +119,7 @@
 	"frameworks": "Cadre",
 	"frameworksColon": "Cadre:",
 	"domains": "Domenii",
+	"userFolderHelpText": "Domeniu unde utilizatorul este vizibil pentru alții cu acces la acel domeniu (nu afectează permisiunile utilizatorului)",
 	"perimeters": "Întinderi",
 	"users": "Utilizatori",
 	"user": "Utilizator",

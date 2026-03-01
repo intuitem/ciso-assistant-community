@@ -119,6 +119,7 @@
 	"frameworks": "Rámce",
 	"frameworksColon": "Rámce:",
 	"domains": "Domény",
+	"userFolderHelpText": "Doména, kde je uživatel viditelný pro ostatní s přístupem k této doméně (neovlivňuje oprávnění uživatele)",
 	"perimeters": "Obvody",
 	"users": "Uživatelé",
 	"user": "Uživatel",

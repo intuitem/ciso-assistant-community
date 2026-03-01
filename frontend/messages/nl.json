@@ -90,6 +90,7 @@
 	"frameworks": "Kaders",
 	"frameworksColon": "Kaders:",
 	"domains": "Domeinen",
+	"userFolderHelpText": "Domein waar de gebruiker zichtbaar is voor anderen met toegang tot dat bereik (beïnvloedt gebruikersrechten niet)",
 	"perimeters": "Perimeters",
 	"users": "Gebruikers",
 	"user": "Gebruiker",

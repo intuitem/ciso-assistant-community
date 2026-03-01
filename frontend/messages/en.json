@@ -148,6 +148,7 @@
 	"frameworks": "Frameworks",
 	"frameworksColon": "Frameworks:",
 	"domains": "Domains",
+	"userFolderHelpText": "Domain where the user is visible to others with access to that scope (does not affect user permissions)",
 	"perimeters": "Perimeters",
 	"users": "Users",
 	"user": "User",
