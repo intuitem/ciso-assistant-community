@@ -46,6 +46,93 @@
 		const names = sections.map((s: any) => (s.ref_id ? s.ref_id + ' ' : '') + s.name);
 		return { data: chartData, names };
 	}
+
+	function initTimelineChart(el: HTMLElement, timeline: any[]) {
+		let chart: any;
+		let resizeHandler: (() => void) | null = null;
+
+		import('echarts').then((echarts) => {
+			if (!el.isConnected) return;
+			chart = echarts.init(el, null, { renderer: 'svg' });
+			const dates = timeline.map((t: any) => t.date);
+			const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
+			const areaSeries = RESULT_KEYS.map((key) => ({
+				name: safeTranslate(key),
+				type: 'line',
+				stack: 'total',
+				smooth: true,
+				showSymbol: false,
+				areaStyle: { opacity: 0.5 },
+				lineStyle: { width: 1.5 },
+				emphasis: { focus: 'series' },
+				yAxisIndex: 0,
+				data: timeline.map((t: any) => t.per_result[key] || 0),
+				itemStyle: { color: complianceResultColorMap[key] }
+			}));
+			const series: any[] = [...areaSeries];
+			if (hasScores) {
+				series.push({
+					name: safeTranslate('score'),
+					type: 'line',
+					smooth: true,
+					showSymbol: true,
+					lineStyle: { width: 2.5 },
+					emphasis: { focus: 'series' },
+					yAxisIndex: 1,
+					data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
+					itemStyle: { color: '#6366f1' },
+					symbol: 'circle',
+					symbolSize: 5
+				});
+			}
+			chart.setOption({
+				tooltip: {
+					trigger: 'axis',
+					backgroundColor: '#1e293b',
+					borderColor: '#334155',
+					textStyle: { color: '#f1f5f9', fontSize: 12 }
+				},
+				legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+				grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
+				xAxis: {
+					type: 'category',
+					data: dates,
+					axisLine: { lineStyle: { color: '#e2e8f0' } },
+					axisLabel: { color: '#94a3b8', fontSize: 10 }
+				},
+				yAxis: [
+					{
+						type: 'value',
+						splitLine: { lineStyle: { color: '#f1f5f9' } },
+						axisLabel: { color: '#94a3b8', fontSize: 10 }
+					},
+					...(hasScores
+						? [
+								{
+									type: 'value',
+									position: 'right',
+									splitLine: { show: false },
+									axisLabel: { color: '#6366f1', fontSize: 10 },
+									axisLine: { show: true, lineStyle: { color: '#6366f1' } },
+									name: safeTranslate('score'),
+									nameTextStyle: { color: '#6366f1', fontSize: 10 }
+								}
+							]
+						: [])
+				],
+				series
+			});
+			resizeHandler = () => chart.resize();
+			window.addEventListener('resize', resizeHandler);
+		});
+
+		return {
+			destroy() {
+				if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+				if (chart) chart.dispose();
+			}
+		};
+	}
 </script>
 
 <div class="flex flex-col gap-5 pb-8">
@@ -101,87 +188,7 @@
 			{:then timelineData}
 				{@const timeline = timelineData.timeline}
 				{#if timeline && timeline.length > 0}
-					<div class="h-72" id="timeline_chart_container">
-						{#await import('echarts') then echarts}
-							{@const _init = (() => {
-								setTimeout(() => {
-									const el = document.getElementById('timeline_chart_container');
-									if (!el) return;
-									const chart = echarts.init(el, null, { renderer: 'svg' });
-									const dates = timeline.map((t: any) => t.date);
-									const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
-									const areaSeries = RESULT_KEYS.map((key) => ({
-										name: safeTranslate(key),
-										type: 'line',
-										stack: 'total',
-										smooth: true,
-										showSymbol: false,
-										areaStyle: { opacity: 0.5 },
-										lineStyle: { width: 1.5 },
-										emphasis: { focus: 'series' },
-										yAxisIndex: 0,
-										data: timeline.map((t: any) => t.per_result[key] || 0),
-										itemStyle: { color: complianceResultColorMap[key] }
-									}));
-									const series: any[] = [...areaSeries];
-									if (hasScores) {
-										series.push({
-											name: safeTranslate('score'),
-											type: 'line',
-											smooth: true,
-											showSymbol: true,
-											lineStyle: { width: 2.5 },
-											emphasis: { focus: 'series' },
-											yAxisIndex: 1,
-											data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
-											itemStyle: { color: '#6366f1' },
-											symbol: 'circle',
-											symbolSize: 5
-										});
-									}
-									chart.setOption({
-										tooltip: {
-											trigger: 'axis',
-											backgroundColor: '#1e293b',
-											borderColor: '#334155',
-											textStyle: { color: '#f1f5f9', fontSize: 12 }
-										},
-										legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
-										grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
-										xAxis: {
-											type: 'category',
-											data: dates,
-											axisLine: { lineStyle: { color: '#e2e8f0' } },
-											axisLabel: { color: '#94a3b8', fontSize: 10 }
-										},
-										yAxis: [
-											{
-												type: 'value',
-												splitLine: { lineStyle: { color: '#f1f5f9' } },
-												axisLabel: { color: '#94a3b8', fontSize: 10 }
-											},
-											...(hasScores
-												? [
-														{
-															type: 'value',
-															position: 'right',
-															splitLine: { show: false },
-															axisLabel: { color: '#6366f1', fontSize: 10 },
-															axisLine: { show: true, lineStyle: { color: '#6366f1' } },
-															name: safeTranslate('score'),
-															nameTextStyle: { color: '#6366f1', fontSize: 10 }
-														}
-													]
-												: [])
-										],
-										series
-									});
-									window.addEventListener('resize', () => chart.resize());
-								}, 0);
-								return '';
-							})()}
-						{/await}
-					</div>
+					<div class="h-72" use:initTimelineChart={timeline}></div>
 				{:else}
 					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
 						<i class="fa-solid fa-chart-area text-3xl mb-2 opacity-30"></i>

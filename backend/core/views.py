@@ -10139,6 +10139,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             requirements_by_control_count[bucket] += 1
 
         # Get all controls linked to filtered RAs
+        # Note: no IAM filtering here — coverage metrics must be comprehensive
+        # to avoid misleadingly low percentages. Only aggregates are exposed.
         ra_ids_list = [ra.id for ra in filtered_ras]
         control_ids = set(
             RequirementAssessment.applied_controls.through.objects.filter(
@@ -10203,6 +10205,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         ra_ids_list = [ra.id for ra in filtered_ras]
 
+        # Note: no IAM filtering on evidence/controls — coverage metrics must be
+        # comprehensive to avoid misleadingly low percentages. Only aggregates are exposed.
+
         # Direct evidence: RA.evidences M2M
         ra_with_direct = set(
             RequirementAssessment.evidences.through.objects.filter(
@@ -10211,7 +10216,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         )
 
         # Indirect evidence: RA → applied_controls → evidences
-        ra_control_pairs = (
+        ra_control_pairs = list(
             RequirementAssessment.applied_controls.through.objects.filter(
                 requirementassessment_id__in=ra_ids_list
             ).values_list("requirementassessment_id", "appliedcontrol_id")
@@ -10314,6 +10319,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 requirementassessment_id__in=ra_ids_list
             ).values_list("securityexception_id", flat=True)
         )
+        # IAM: intersect with user-visible exceptions
+        (viewable_exception_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+        exception_ids &= set(viewable_exception_ids)
 
         if not exception_ids:
             return Response(

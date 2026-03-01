@@ -1108,7 +1108,7 @@
 	"controlStatusDistribution": "Répartition par statut des mesures",
 	"complianceOverTime": "Évolution de la conformité",
 	"implementationGroupsBreakdown": "Répartition par groupe d'implémentation",
-	"mappingProjection": "Projection de correspondance",
+	"mappingProjection": "Projection vers d'autres référentiels",
 	"noImplementationGroups": "Ce référentiel ne définit pas de groupes d'implémentation",
 	"noMappingTargets": "Aucune cible de correspondance disponible pour ce référentiel",
 	"comparableAudits": "Audits comparables",
