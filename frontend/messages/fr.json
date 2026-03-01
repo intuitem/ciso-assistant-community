@@ -249,6 +249,8 @@
 	"contentType": "Type de contenu",
 	"objectType": "Type d'objet",
 	"type": "Type",
+	"typeToSearch": "Tapez pour rechercher...",
+	"searching": "Recherche en cours...",
 	"lcStatus": "Statut",
 	"internalReference": "Référence interne",
 	"isActive": "Actif",

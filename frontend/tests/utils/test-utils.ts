@@ -844,7 +844,7 @@ export class TestContent {
 				modelName: 'assetassessment',
 				build: {
 					str: vars.assetName,
-					asset: vars.folderName + '/' + vars.assetName,
+					asset: vars.assetName,
 					bia: vars.biaName
 				}
 			},
