@@ -146,7 +146,6 @@
 	let applied_controls_options = $state([]);
 
 	async function fetchAppliedControlsOptions() {
-		console.debug('fetch applied controls');
 		try {
 			const url = `/applied-controls?scope_folder_id=${page.data.requirementAssessment.folder.id}&limit=0`;
 			const res = await fetch(url);
@@ -174,7 +173,6 @@
 					if (!a.suggested && b.suggested) return 1;
 					return 0;
 				});
-			console.debug('updated applied_controls_options', $state.snapshot(applied_controls_options));
 		} catch (error) {
 			console.error('Unable to fetch applied controls', error);
 		}
