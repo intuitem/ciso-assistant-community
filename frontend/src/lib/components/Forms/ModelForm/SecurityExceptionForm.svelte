@@ -158,6 +158,7 @@
 />
 <AutocompleteSelect
 	multiple
+	lazy
 	{form}
 	optionsEndpoint="assets"
 	optionsLabelField="auto"

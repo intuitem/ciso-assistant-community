@@ -541,6 +541,11 @@ class ExportMixin:
 
 
 class GenericFilterSet(df.FilterSet):
+    class UUIDInFilter(df.BaseInFilter, df.UUIDFilter):
+        pass
+
+    id = UUIDInFilter(field_name="id", lookup_expr="in")
+
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
         DEFAULTS = dict(cls.FILTER_DEFAULTS)
@@ -1680,19 +1685,17 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .select_related("asset_class", "folder")
-            .prefetch_related(
-                "parent_assets",
-                "child_assets",
-                "owner",
-                "security_exceptions",
-                "filtering_labels",
-                "personal_data",
-                "overridden_children_capabilities",
-            )
+        qs = super().get_queryset().select_related("asset_class", "folder")
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "parent_assets",
+            "child_assets",
+            "owner",
+            "security_exceptions",
+            "filtering_labels",
+            "personal_data",
+            "overridden_children_capabilities",
         )
 
     def _get_optimized_object_data(self, queryset):
@@ -1813,6 +1816,24 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        """Minimal endpoint for autocomplete selects — skips graph traversal."""
+        from core.serializers import AssetAutocompleteSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = AssetAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")

@@ -122,6 +122,7 @@ export interface ReverseForeignKeyField extends ForeignKeyField {
 			fields: { field: string; translate?: boolean }[];
 			classes?: string;
 		};
+		lazy?: boolean; // Enable lazy loading for large option sets (e.g., assets)
 	};
 }
 
@@ -374,7 +375,12 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: true,
 				disableDelete: true
 			},
-			{ field: 'applied_controls', urlModel: 'assets', disableCreate: true, disableDelete: true }
+			{
+				field: 'applied_controls',
+				urlModel: 'assets',
+				disableDelete: true,
+				disableCreate: true
+			}
 		],
 		selectFields: [
 			{ field: 'status' },
@@ -1450,7 +1456,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'ebios_rm_studies',
 				urlModel: 'assets',
 				addExisting: {
-					parentField: 'assets'
+					parentField: 'assets',
+					lazy: true
 				}
 			}
 		],

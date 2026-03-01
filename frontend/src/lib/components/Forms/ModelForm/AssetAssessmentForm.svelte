@@ -34,6 +34,7 @@
 
 <AutocompleteSelect
 	{form}
+	lazy
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsLabelField="auto"
@@ -55,6 +56,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
+	lazy
 	optionsEndpoint="assets"
 	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}

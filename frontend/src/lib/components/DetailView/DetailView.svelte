@@ -198,7 +198,8 @@
 				field: addExisting.parentField,
 				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
 				label: addExisting.label,
-				optionsInfoFields: addExisting.optionsInfoFields
+				optionsInfoFields: addExisting.optionsInfoFields,
+				lazy: addExisting.lazy
 			}
 		};
 		const modal: ModalSettings = {
