@@ -10014,18 +10014,44 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 continue
 
             results = defaultdict(int)
-            score_sum = 0
-            doc_score_sum = 0
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
             scored_count = 0
-            doc_scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
             for ra in assessable_list:
                 results[ra.result] += 1
                 if ra.is_scored and ra.result != "not_applicable":
-                    score_sum += ra.score or 0
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
                     scored_count += 1
-                    if ra.documentation_score is not None:
-                        doc_score_sum += ra.documentation_score
-                        doc_scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            if is_sum:
+                section_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                section_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                section_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                section_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
 
             node_name = (
                 get_referential_translation(node, "name")
@@ -10039,19 +10065,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "name": node_name,
                     "total_assessable": len(assessable_list),
                     "results": dict(results),
-                    "avg_score": round(score_sum / scored_count, 1)
-                    if scored_count > 0
-                    else None,
-                    "avg_documentation_score": round(
-                        doc_score_sum / doc_scored_count, 1
-                    )
-                    if doc_scored_count > 0
-                    else None,
+                    "score": section_score,
+                    "documentation_score": section_doc_score,
                     "scored_count": scored_count,
                 }
             )
 
-        return Response({"sections": sections})
+        return Response(
+            {
+                "sections": sections,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
 
     @action(detail=True, methods=["get"], url_path="controls_coverage")
     def controls_coverage(self, request, pk):
@@ -10408,8 +10435,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "total_assessable": 0,
                         "results": {},
                         "progress_percent": 0,
-                        "avg_score": None,
-                        "avg_documentation_score": None,
+                        "score": None,
+                        "documentation_score": None,
                         "scored_count": 0,
                     }
                 )
@@ -10417,23 +10444,49 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             results = defaultdict(int)
             assessed = 0
-            score_sum = 0
-            doc_score_sum = 0
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
             scored_count = 0
-            doc_scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
 
             for ra in matching_ras:
                 results[ra.result] += 1
                 if ra.result != "not_assessed":
                     assessed += 1
                 if ra.is_scored and ra.result != "not_applicable":
-                    score_sum += ra.score or 0
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
                     scored_count += 1
-                    if ra.documentation_score is not None:
-                        doc_score_sum += ra.documentation_score
-                        doc_scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
 
             total = len(matching_ras)
+            if is_sum:
+                group_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                group_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                group_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                group_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
             groups.append(
                 {
                     "ref_id": group_ref_id,
@@ -10443,19 +10496,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "progress_percent": round(assessed / total * 100)
                     if total > 0
                     else 0,
-                    "avg_score": round(score_sum / scored_count, 1)
-                    if scored_count > 0
-                    else None,
-                    "avg_documentation_score": round(
-                        doc_score_sum / doc_scored_count, 1
-                    )
-                    if doc_scored_count > 0
-                    else None,
+                    "score": group_score,
+                    "documentation_score": group_doc_score,
                     "scored_count": scored_count,
                 }
             )
 
-        return Response({"groups": groups})
+        return Response(
+            {
+                "groups": groups,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
 
     @action(detail=False, methods=["get"], name="Get compliance analytics")
     def analytics(self, request):

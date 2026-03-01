@@ -32,6 +32,15 @@
 		deprecated: '#ef4444'
 	};
 
+	const evidenceStatusColors: Record<string, string> = {
+		'--': '#9ca3af',
+		draft: '#9ca3af',
+		missing: '#ef4444',
+		in_review: '#f59e0b',
+		approved: '#22c55e',
+		rejected: '#e11d48'
+	};
+
 	function buildSectionChartData(sections: any[]) {
 		const chartData = sections.map((s: any) => RESULT_KEYS.map((k) => s.results[k] || 0));
 		const names = sections.map((s: any) => (s.ref_id ? s.ref_id + ' ' : '') + s.name);
@@ -100,7 +109,8 @@
 									if (!el) return;
 									const chart = echarts.init(el, null, { renderer: 'svg' });
 									const dates = timeline.map((t: any) => t.date);
-									const series = RESULT_KEYS.map((key) => ({
+									const hasScores = timeline.some((t: any) => t.score != null && t.score >= 0);
+									const areaSeries = RESULT_KEYS.map((key) => ({
 										name: safeTranslate(key),
 										type: 'line',
 										stack: 'total',
@@ -109,15 +119,61 @@
 										areaStyle: { opacity: 0.5 },
 										lineStyle: { width: 1.5 },
 										emphasis: { focus: 'series' },
+										yAxisIndex: 0,
 										data: timeline.map((t: any) => t.per_result[key] || 0),
 										itemStyle: { color: complianceResultColorMap[key] }
 									}));
+									const series: any[] = [...areaSeries];
+									if (hasScores) {
+										series.push({
+											name: safeTranslate('score'),
+											type: 'line',
+											smooth: true,
+											showSymbol: true,
+											lineStyle: { width: 2.5 },
+											emphasis: { focus: 'series' },
+											yAxisIndex: 1,
+											data: timeline.map((t: any) => (t.score >= 0 ? t.score : null)),
+											itemStyle: { color: '#6366f1' },
+											symbol: 'circle',
+											symbolSize: 5
+										});
+									}
 									chart.setOption({
-										tooltip: { trigger: 'axis', backgroundColor: '#1e293b', borderColor: '#334155', textStyle: { color: '#f1f5f9', fontSize: 12 } },
+										tooltip: {
+											trigger: 'axis',
+											backgroundColor: '#1e293b',
+											borderColor: '#334155',
+											textStyle: { color: '#f1f5f9', fontSize: 12 }
+										},
 										legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
-										grid: { left: 45, right: 16, top: 36, bottom: 28 },
-										xAxis: { type: 'category', data: dates, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
-										yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
+										grid: { left: 45, right: hasScores ? 50 : 16, top: 36, bottom: 28 },
+										xAxis: {
+											type: 'category',
+											data: dates,
+											axisLine: { lineStyle: { color: '#e2e8f0' } },
+											axisLabel: { color: '#94a3b8', fontSize: 10 }
+										},
+										yAxis: [
+											{
+												type: 'value',
+												splitLine: { lineStyle: { color: '#f1f5f9' } },
+												axisLabel: { color: '#94a3b8', fontSize: 10 }
+											},
+											...(hasScores
+												? [
+														{
+															type: 'value',
+															position: 'right',
+															splitLine: { show: false },
+															axisLabel: { color: '#6366f1', fontSize: 10 },
+															axisLine: { show: true, lineStyle: { color: '#6366f1' } },
+															name: safeTranslate('score'),
+															nameTextStyle: { color: '#6366f1', fontSize: 10 }
+														}
+													]
+												: [])
+										],
 										series
 									});
 									window.addEventListener('resize', () => chart.resize());
@@ -141,9 +197,7 @@
 	<!-- Compliance by Section -->
 	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
 		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
-			<span
-				class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-500"
-			>
+			<span class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-500">
 				<i class="fa-solid fa-layer-group text-xs"></i>
 			</span>
 			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
@@ -174,21 +228,15 @@
 									<tr class="text-[11px] uppercase tracking-wider text-slate-400">
 										<th class="pb-2 pr-4 text-left font-medium">{m.section()}</th>
 										<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
-										<th class="pb-2 pr-4 text-right font-medium">{m.avgScore()}</th>
+										<th class="pb-2 pr-4 text-right font-medium">{m.score()}</th>
 										{#if data.compliance_assessment.show_documentation_score}
-											<th class="pb-2 pr-4 text-right font-medium"
-												>{m.avgDocumentationScore()}</th
-											>
+											<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
 										{/if}
 									</tr>
 								</thead>
 								<tbody>
 									{#each sections as section, i}
-										<tr
-											class="border-t border-slate-50 {i % 2 === 0
-												? 'bg-slate-50/50'
-												: ''}"
-										>
+										<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-slate-50/50' : ''}">
 											<td class="py-2.5 pr-4 text-slate-700"
 												>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
 											>
@@ -196,10 +244,10 @@
 												>{section.total_assessable}</td
 											>
 											<td class="py-2.5 pr-4 text-right">
-												{#if section.avg_score !== null}
+												{#if section.score !== null}
 													<span
 														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-														>{section.avg_score}</span
+														>{section.score}</span
 													>
 												{:else}
 													<span class="text-slate-300">&mdash;</span>
@@ -207,10 +255,10 @@
 											</td>
 											{#if data.compliance_assessment.show_documentation_score}
 												<td class="py-2.5 pr-4 text-right">
-													{#if section.avg_documentation_score !== null}
+													{#if section.documentation_score !== null}
 														<span
 															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-															>{section.avg_documentation_score}</span
+															>{section.documentation_score}</span
 														>
 													{:else}
 														<span class="text-slate-300">&mdash;</span>
@@ -258,9 +306,7 @@
 						<div
 							class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50"
 						>
-							<span class="text-2xl font-bold text-emerald-700"
-								>{coverage.coverage_percent}%</span
-							>
+							<span class="text-2xl font-bold text-emerald-700">{coverage.coverage_percent}%</span>
 						</div>
 						<div class="flex-1 space-y-2">
 							<div class="flex items-center justify-between text-sm">
@@ -280,7 +326,9 @@
 								<div class="flex h-2 rounded-full overflow-hidden bg-red-100">
 									<div
 										class="bg-emerald-400 rounded-full transition-all"
-										style="width: {(coverage.with_controls / (coverage.with_controls + coverage.without_controls)) * 100}%"
+										style="width: {(coverage.with_controls /
+											(coverage.with_controls + coverage.without_controls)) *
+											100}%"
 									></div>
 								</div>
 							{/if}
@@ -317,9 +365,7 @@
 		<!-- Evidence Coverage -->
 		<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
 			<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
-				<span
-					class="flex items-center justify-center w-7 h-7 rounded-md bg-sky-50 text-sky-500"
-				>
+				<span class="flex items-center justify-center w-7 h-7 rounded-md bg-sky-50 text-sky-500">
 					<i class="fa-solid fa-file-circle-check text-xs"></i>
 				</span>
 				<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
@@ -334,15 +380,12 @@
 						<div
 							class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50"
 						>
-							<span class="text-2xl font-bold text-sky-700"
-								>{coverage.coverage_percent}%</span
-							>
+							<span class="text-2xl font-bold text-sky-700">{coverage.coverage_percent}%</span>
 						</div>
 						<div class="flex-1 space-y-2">
 							<div class="flex items-center justify-between text-sm">
 								<span class="text-slate-500">{m.requirementsWithEvidence()}</span>
-								<span class="font-semibold text-sky-600 tabular-nums"
-									>{coverage.with_evidence}</span
+								<span class="font-semibold text-sky-600 tabular-nums">{coverage.with_evidence}</span
 								>
 							</div>
 							<div class="flex items-center justify-between text-sm">
@@ -355,7 +398,9 @@
 								<div class="flex h-2 rounded-full overflow-hidden bg-red-100">
 									<div
 										class="bg-sky-400 rounded-full transition-all"
-										style="width: {(coverage.with_evidence / (coverage.with_evidence + coverage.without_evidence)) * 100}%"
+										style="width: {(coverage.with_evidence /
+											(coverage.with_evidence + coverage.without_evidence)) *
+											100}%"
 									></div>
 								</div>
 							{/if}
@@ -370,22 +415,41 @@
 								>
 									<span class="w-2 h-2 rounded-full bg-blue-400"></span>
 									{m.directEvidence()}
-									<span class="font-semibold text-slate-800">{coverage.direct_only}</span>
+									<span class="font-semibold text-slate-800"
+										>{coverage.direct_only + coverage.both}</span
+									>
 								</span>
 								<span
 									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
 								>
 									<span class="w-2 h-2 rounded-full bg-amber-400"></span>
 									{m.indirectEvidence()}
-									<span class="font-semibold text-slate-800">{coverage.indirect_only}</span>
+									<span class="font-semibold text-slate-800"
+										>{coverage.indirect_only + coverage.both}</span
+									>
 								</span>
-								<span
-									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
-								>
-									<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-									{m.bothEvidenceTypes()}
-									<span class="font-semibold text-slate-800">{coverage.both}</span>
-								</span>
+							</div>
+						</div>
+					{/if}
+					<!-- Evidence status distribution -->
+					{#if Object.keys(coverage.evidence_status_distribution || {}).length > 0}
+						<div class="border-t border-slate-100 pt-4">
+							<p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium mb-3">
+								{safeTranslate('evidenceStatusDistribution')}
+							</p>
+							<div class="flex flex-wrap gap-2">
+								{#each Object.entries(coverage.evidence_status_distribution) as [status, count]}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+									>
+										<span
+											class="w-2 h-2 rounded-full"
+											style="background-color: {evidenceStatusColors[status] || '#9ca3af'}"
+										></span>
+										{safeTranslate(status)}
+										<span class="font-semibold text-slate-800">{count}</span>
+									</span>
+								{/each}
 							</div>
 						</div>
 					{/if}
@@ -460,9 +524,7 @@
 						<div class="grid grid-cols-2 gap-4">
 							<div class="h-48">
 								{#if Object.keys(exceptionsData.status_distribution).length > 0}
-									{@const statusEntries = Object.entries(
-										exceptionsData.status_distribution
-									)}
+									{@const statusEntries = Object.entries(exceptionsData.status_distribution)}
 									<DonutChart
 										name="exception_status"
 										values={statusEntries.map(([k, v]) => ({
@@ -471,18 +533,14 @@
 										}))}
 									/>
 								{:else}
-									<div
-										class="flex items-center justify-center h-full text-sm text-slate-400"
-									>
+									<div class="flex items-center justify-center h-full text-sm text-slate-400">
 										{m.nothingToShowYet()}
 									</div>
 								{/if}
 							</div>
 							<div class="h-48">
 								{#if Object.keys(exceptionsData.severity_distribution).length > 0}
-									{@const sevEntries = Object.entries(
-										exceptionsData.severity_distribution
-									)}
+									{@const sevEntries = Object.entries(exceptionsData.severity_distribution)}
 									<BarChart
 										name="exception_severity"
 										labels={sevEntries.map(([k]) => safeTranslate(k))}
@@ -490,9 +548,7 @@
 										title={safeTranslate('severity')}
 									/>
 								{:else}
-									<div
-										class="flex items-center justify-center h-full text-sm text-slate-400"
-									>
+									<div class="flex items-center justify-center h-full text-sm text-slate-400">
 										{m.nothingToShowYet()}
 									</div>
 								{/if}
@@ -523,9 +579,7 @@
 				{@const groups = igData.groups}
 				{#if groups && groups.length > 0}
 					{@const chartInfo = (() => {
-						const chartData = groups.map((g: any) =>
-							RESULT_KEYS.map((k) => g.results[k] || 0)
-						);
+						const chartData = groups.map((g: any) => RESULT_KEYS.map((k) => g.results[k] || 0));
 						const names = groups.map((g: any) => g.name || g.ref_id);
 						return { data: chartData, names };
 					})()}
@@ -546,31 +600,21 @@
 									<th class="pb-2 pr-4 text-left font-medium">{m.name()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
 									<th class="pb-2 pr-4 text-right font-medium">{m.progress()}</th>
-									<th class="pb-2 pr-4 text-right font-medium">{m.avgScore()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.score()}</th>
 									{#if data.compliance_assessment.show_documentation_score}
-										<th class="pb-2 pr-4 text-right font-medium"
-											>{m.avgDocumentationScore()}</th
-										>
+										<th class="pb-2 pr-4 text-right font-medium">{m.documentationScore()}</th>
 									{/if}
 								</tr>
 							</thead>
 							<tbody>
 								{#each groups as group, i}
-									<tr
-										class="border-t border-slate-50 {i % 2 === 0
-											? 'bg-slate-50/50'
-											: ''}"
-									>
-										<td class="py-2.5 pr-4 text-slate-700"
-											>{group.name || group.ref_id}</td
-										>
+									<tr class="border-t border-slate-50 {i % 2 === 0 ? 'bg-slate-50/50' : ''}">
+										<td class="py-2.5 pr-4 text-slate-700">{group.name || group.ref_id}</td>
 										<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
 											>{group.total_assessable}</td
 										>
 										<td class="py-2.5 pr-4 text-right">
-											<div
-												class="inline-flex items-center gap-1.5 text-xs text-slate-600"
-											>
+											<div class="inline-flex items-center gap-1.5 text-xs text-slate-600">
 												<div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden">
 													<div
 														class="h-full rounded-full bg-indigo-400"
@@ -581,10 +625,10 @@
 											</div>
 										</td>
 										<td class="py-2.5 pr-4 text-right">
-											{#if group.avg_score !== null}
+											{#if group.score !== null}
 												<span
 													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
-													>{group.avg_score}</span
+													>{group.score}</span
 												>
 											{:else}
 												<span class="text-slate-300">&mdash;</span>
@@ -592,10 +636,10 @@
 										</td>
 										{#if data.compliance_assessment.show_documentation_score}
 											<td class="py-2.5 pr-4 text-right">
-												{#if group.avg_documentation_score !== null}
+												{#if group.documentation_score !== null}
 													<span
 														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
-														>{group.avg_documentation_score}</span
+														>{group.documentation_score}</span
 													>
 												{:else}
 													<span class="text-slate-300">&mdash;</span>
@@ -622,9 +666,7 @@
 	<!-- Mapping Projection -->
 	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
 		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
-			<span
-				class="flex items-center justify-center w-7 h-7 rounded-md bg-rose-50 text-rose-500"
-			>
+			<span class="flex items-center justify-center w-7 h-7 rounded-md bg-rose-50 text-rose-500">
 				<i class="fa-solid fa-diagram-project text-xs"></i>
 			</span>
 			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
@@ -641,8 +683,7 @@
 							<div class="rounded-lg border border-slate-100 bg-slate-50/50 p-4">
 								<div class="flex items-center justify-between mb-2.5">
 									<span class="text-sm font-medium text-slate-700">{fw.str}</span>
-									<span
-										class="text-[11px] text-slate-400 tabular-nums font-medium"
+									<span class="text-[11px] text-slate-400 tabular-nums font-medium"
 										>{fw.assessable_requirements_count} {m.assessable()}</span
 									>
 								</div>
@@ -661,7 +702,9 @@
 													class="flex items-center justify-center text-[10px] font-medium transition-all first:rounded-l-md last:rounded-r-md"
 													style="width: {pct}%; background-color: {complianceResultColorMap[
 														key
-													]}; {key === 'not_applicable' ? 'color: white;' : 'color: rgba(0,0,0,0.5);'}"
+													]}; {key === 'not_applicable'
+														? 'color: white;'
+														: 'color: rgba(0,0,0,0.5);'}"
 													title="{safeTranslate(key)}: {count} ({pct.toFixed(1)}%)"
 												>
 													{#if pct > 8}{Math.round(pct)}%{/if}
