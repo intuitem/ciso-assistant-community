@@ -1,6 +1,7 @@
 export default {
 	assessmentName: 'Test assessment',
 	assetName: 'Test asset',
+	campaignName: 'Test campaign',
 	evidenceName: 'Test evidence',
 	folderName: 'Test domain',
 	perimeterName: 'Test perimeter',
@@ -592,6 +593,11 @@ export default {
 		name: 'NIST CSF v1.1',
 		ref: 'NIST-CSF-1.1',
 		urn: 'urn:intuitem:risk:library:nist-csf-1.1'
+	},
+	framework2: {
+		name: 'International standard ISO/IEC 27001:2022',
+		ref: 'ISO/IEC 27001:2022',
+		urn: 'urn:intuitem:risk:library:iso27001-2022'
 	},
 	questionnaire: {
 		name: 'CMMC version 2.0',

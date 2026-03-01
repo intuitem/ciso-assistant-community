@@ -38,6 +38,7 @@ type Fixtures = {
 	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	campaignsPage: PageContent;
 	entitiesPage: PageContent;
 	solutionsPage: PageContent;
 	representativesPage: PageContent;
@@ -86,6 +87,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			campaignsPage,
 			entitiesPage,
 			usersPage
 		},
@@ -111,6 +113,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			campaignsPage,
 			entitiesPage,
 			usersPage
 		});
@@ -376,6 +379,16 @@ export const test = base.extend<Fixtures>({
 		await use(ePage);
 	},
 
+	campaignsPage: async ({ page }, use) => {
+		const cPage = new PageContent(page, '/campaigns', 'Campaigns', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'frameworks', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'perimeters', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(cPage);
+	},
 	entitiesPage: async ({ page }, use) => {
 		const ePage = new PageContent(page, '/entities', /Entit(y|ies)/, [
 			{ name: 'name', type: type.TEXT },
@@ -848,6 +861,19 @@ export class TestContent {
 					bia: vars.biaName
 				}
 			},
+			campaignsPage: {
+				displayName: 'Campaigns',
+				modelName: 'campaign',
+				actions: ['view', 'add', 'change'],
+				dependency: vars.framework2,
+				build: {
+					str: `${vars.campaignName}`,
+					name: vars.campaignName,
+					description: vars.description,
+					perimeters: [vars.folderName + '/' + vars.perimeterName],
+					frameworks: [vars.framework.name]
+				}
+			},
 			entitiesPage: {
 				displayName: 'Entities',
 				modelName: 'entity',
@@ -907,10 +933,15 @@ export function replaceValues(obj: any, searchValue: string, replaceValue: strin
 export function userFromUserGroupHasPermission(
 	userGroup: string,
 	permission: string,
-	object: string
+	object: Record<string, any>
 ) {
-	const perm = `${permission}_${object.toLowerCase().replace(' ', '')}`;
-	return userGroup in testData.usergroups && testData.usergroups[userGroup].perms.includes(perm);
+	const _object = object.modelName ?? object.displayName;
+	const perm = `${permission}_${_object.toLowerCase().replace(' ', '')}`;
+	return (
+		userGroup in testData.usergroups &&
+		testData.usergroups[userGroup].perms.includes(perm) &&
+		(!object.actions || object.actions.includes(permission))
+	);
 }
 
 export function getObjectNameWithoutScope(name: string) {
