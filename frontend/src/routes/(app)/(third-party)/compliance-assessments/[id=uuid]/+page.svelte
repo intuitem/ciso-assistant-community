@@ -8,7 +8,7 @@
 
 	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
-	import { Switch, Progress, Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 
@@ -453,6 +453,7 @@
 	let compliance_assessment_donut_values = $derived(data.compliance_assessment_donut_values);
 
 	let exportPopupOpen = $state(false);
+	let powerUpsExpanded = $state(false);
 	let filterPopupOpen = $state(false);
 
 	run(() => {
@@ -758,144 +759,307 @@
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
 				{/if}
-				<span class="pt-4 text-sm">{m.powerUps()}</span>
-				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-violet-500 to-purple-500 h-fit"
-						data-testid="flash-mode-button"
-						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
-					>
-				{/if}
-				{#if !data.compliance_assessment.is_locked}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/table-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
-						data-testid="table-mode-button"
-						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-					>
-				{/if}
-				{#if !page.data.user.is_third_party}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
-						onclick={() => modalCreateForm()}
-						data-testid="apply-mapping-button"
-						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
-					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit"
-						onclick={() => modalCreateCloneForm()}
-						data-testid="clone-audit-button"
-						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
-					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-red-500 h-fit"
-						onclick={() => modalCompareAudit()}
-						data-testid="compare-audit-button"
-						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
-					</button>
-					{#if page.data?.featureflags?.validation_flows}
-						<button
-							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
-							onclick={() => modalRequestValidation()}
-							data-testid="request-validation-button"
+				<!-- Power-ups Toolbar -->
+				<div class="pt-3 border-t border-gray-200 mt-2">
+					<div class="flex flex-col gap-2">
+						<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none"
+							>{m.powerUps()}</span
 						>
-							<i class="fa-solid fa-check-circle mr-2"></i>
-							{m.requestValidation()}
-						</button>
-					{/if}
-					{#if page.data?.featureflags?.advanced_analytics}
-						<Anchor
-							breadcrumbAction="push"
-							href={`${page.url.pathname}/advanced-analytics`}
-							class="btn text-gray-100 bg-linear-to-r from-pink-500 to-orange-500 h-fit"
-							data-testid="advanced-analytics-button"
-						>
-							<i class="fa-solid fa-chart-line mr-2"></i>
-							{m.advancedAnalytics()}
-						</Anchor>
-					{/if}
-				{/if}
-
-				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
-						data-testid="sync-to-actions-button"
-						onclick={async () => {
-							await modalConfirmSyncToActions(
-								data.compliance_assessment.id,
-								data.compliance_assessment.name,
-								'?/syncToActions'
-							);
-						}}
-					>
-						<span class="mr-2">
-							{#if syncingToActionsIsLoading}
-								<Progress value={null}>
-									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-										<Progress.CircleTrack />
-										<Progress.CircleRange class="stroke-white" />
-									</Progress.Circle>
-								</Progress>
-							{:else}
-								<i class="fa-solid fa-arrows-rotate mr-2"></i>
+						<div class="flex items-center gap-1.5 flex-wrap">
+							<!-- Primary: Modes (always visible) -->
+							{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+								<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+									<Tooltip.Trigger>
+										<Anchor
+											breadcrumbAction="push"
+											href={`${page.url.pathname}/flash-mode`}
+											class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors cursor-pointer"
+											data-testid="flash-mode-button"
+										>
+											<i class="fa-solid fa-bolt text-base"></i>
+										</Anchor>
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content
+											class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+										>
+											{m.flashMode()}
+										</Tooltip.Content>
+									</Tooltip.Positioner>
+								</Tooltip>
 							{/if}
-						</span>
-						{m.syncToAppliedControls()}
-					</button>
-				{/if}
 
-				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-						onclick={() => {
-							modalConfirmCreateSuggestedControls(
-								data.compliance_assessment.id,
-								data.compliance_assessment.name,
-								'?/createSuggestedControls'
-							);
-						}}
-					>
-						<span class="mr-2">
-							{#if createAppliedControlsLoading}
-								<Progress value={null}>
-									<Progress.Circle class="[--size:--spacing(6)] -ml-2">
-										<Progress.CircleTrack />
-										<Progress.CircleRange class="stroke-white" />
-									</Progress.Circle>
-								</Progress>
-							{:else}
-								<i class="fa-solid fa-wand-magic-sparkles"></i>
+							{#if !data.compliance_assessment.is_locked}
+								<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+									<Tooltip.Trigger>
+										<Anchor
+											breadcrumbAction="push"
+											href={`${page.url.pathname}/table-mode`}
+											class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 transition-colors cursor-pointer"
+											data-testid="table-mode-button"
+										>
+											<i class="fa-solid fa-table-list text-base"></i>
+										</Anchor>
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content
+											class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+										>
+											{m.tableMode()}
+										</Tooltip.Content>
+									</Tooltip.Positioner>
+								</Tooltip>
 							{/if}
-						</span>
-						{m.suggestControls()}
-					</button>
-				{/if}
-				{#if has_threats && !page.data.user.is_third_party}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
-						onclick={openThreatsDialog}
-					>
-						<div class="flex items-center space-x-2">
-							<i class="fa-solid fa-triangle-exclamation text-white"></i>
-							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
-							<span>{m.potentialThreats()}</span>
+
+							<!-- Separator -->
+							{#if !page.data.user.is_third_party}
+								<span class="w-px h-7 bg-gray-300 mx-1"></span>
+
+								<!-- Actions (always visible) -->
+								<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+									<Tooltip.Trigger>
+										<button
+											class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 transition-colors cursor-pointer"
+											onclick={() => modalCreateForm()}
+											data-testid="apply-mapping-button"
+										>
+											<i class="fa-solid fa-diagram-project text-base"></i>
+										</button>
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content
+											class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+										>
+											{m.applyMapping()}
+										</Tooltip.Content>
+									</Tooltip.Positioner>
+								</Tooltip>
+
+								<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+									<Tooltip.Trigger>
+										<button
+											class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 transition-colors cursor-pointer"
+											onclick={() => modalCreateCloneForm()}
+											data-testid="clone-audit-button"
+										>
+											<i class="fa-solid fa-copy text-base"></i>
+										</button>
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content
+											class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+										>
+											{m.cloneAudit()}
+										</Tooltip.Content>
+									</Tooltip.Positioner>
+								</Tooltip>
+
+								<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+									<Tooltip.Trigger>
+										<button
+											class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-700 transition-colors cursor-pointer"
+											onclick={() => modalCompareAudit()}
+											data-testid="compare-audit-button"
+										>
+											<i class="fa-solid fa-code-compare text-base"></i>
+										</button>
+									</Tooltip.Trigger>
+									<Tooltip.Positioner>
+										<Tooltip.Content
+											class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+										>
+											{m.compareToAudit()}
+										</Tooltip.Content>
+									</Tooltip.Positioner>
+								</Tooltip>
+							{/if}
+
+							<!-- Expand/Collapse toggle -->
+							<button
+								class="inline-flex items-center justify-center w-11 h-11 rounded-lg transition-colors cursor-pointer {powerUpsExpanded
+									? 'bg-gray-200 text-gray-700'
+									: 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'}"
+								onclick={() => (powerUpsExpanded = !powerUpsExpanded)}
+								aria-label={powerUpsExpanded ? 'Collapse' : 'More actions'}
+							>
+								<i class="fa-solid {powerUpsExpanded ? 'fa-chevron-up' : 'fa-ellipsis'} text-base"
+								></i>
+							</button>
+
+							<!-- Expanded actions -->
+							{#if powerUpsExpanded}
+								<div class="flex items-center gap-1.5 flex-wrap basis-full pt-2">
+									{#if !page.data.user.is_third_party}
+										{#if page.data?.featureflags?.validation_flows}
+											<Tooltip
+												positioning={{ placement: 'bottom' }}
+												openDelay={300}
+												closeDelay={100}
+											>
+												<Tooltip.Trigger>
+													<button
+														class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 hover:text-amber-700 transition-colors cursor-pointer"
+														onclick={() => modalRequestValidation()}
+														data-testid="request-validation-button"
+													>
+														<i class="fa-solid fa-check-circle text-base"></i>
+													</button>
+												</Tooltip.Trigger>
+												<Tooltip.Positioner>
+													<Tooltip.Content
+														class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+													>
+														{m.requestValidation()}
+													</Tooltip.Content>
+												</Tooltip.Positioner>
+											</Tooltip>
+										{/if}
+
+										{#if page.data?.featureflags?.advanced_analytics}
+											<Tooltip
+												positioning={{ placement: 'bottom' }}
+												openDelay={300}
+												closeDelay={100}
+											>
+												<Tooltip.Trigger>
+													<Anchor
+														breadcrumbAction="push"
+														href={`${page.url.pathname}/advanced-analytics`}
+														class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 hover:text-orange-700 transition-colors cursor-pointer"
+														data-testid="advanced-analytics-button"
+													>
+														<i class="fa-solid fa-chart-line text-base"></i>
+													</Anchor>
+												</Tooltip.Trigger>
+												<Tooltip.Positioner>
+													<Tooltip.Content
+														class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+													>
+														{m.advancedAnalytics()}
+													</Tooltip.Content>
+												</Tooltip.Positioner>
+											</Tooltip>
+										{/if}
+									{/if}
+
+									{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
+										<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+											<Tooltip.Trigger>
+												<button
+													class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-100 hover:text-cyan-700 transition-colors cursor-pointer"
+													data-testid="sync-to-actions-button"
+													onclick={async () => {
+														await modalConfirmSyncToActions(
+															data.compliance_assessment.id,
+															data.compliance_assessment.name,
+															'?/syncToActions'
+														);
+													}}
+												>
+													{#if syncingToActionsIsLoading}
+														<Progress value={null}>
+															<Progress.Circle class="[--size:--spacing(4)]">
+																<Progress.CircleTrack />
+																<Progress.CircleRange class="stroke-cyan-600" />
+															</Progress.Circle>
+														</Progress>
+													{:else}
+														<i class="fa-solid fa-arrows-rotate text-base"></i>
+													{/if}
+												</button>
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content
+													class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+												>
+													{m.syncToAppliedControls()}
+												</Tooltip.Content>
+											</Tooltip.Positioner>
+										</Tooltip>
+									{/if}
+
+									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
+										<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+											<Tooltip.Trigger>
+												<button
+													class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-violet-50 text-violet-600 hover:bg-violet-100 hover:text-violet-700 transition-colors cursor-pointer"
+													onclick={() => {
+														modalConfirmCreateSuggestedControls(
+															data.compliance_assessment.id,
+															data.compliance_assessment.name,
+															'?/createSuggestedControls'
+														);
+													}}
+												>
+													{#if createAppliedControlsLoading}
+														<Progress value={null}>
+															<Progress.Circle class="[--size:--spacing(4)]">
+																<Progress.CircleTrack />
+																<Progress.CircleRange class="stroke-violet-600" />
+															</Progress.Circle>
+														</Progress>
+													{:else}
+														<i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+													{/if}
+												</button>
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content
+													class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+												>
+													{m.suggestControls()}
+												</Tooltip.Content>
+											</Tooltip.Positioner>
+										</Tooltip>
+									{/if}
+
+									{#if has_threats && !page.data.user.is_third_party}
+										<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+											<Tooltip.Trigger>
+												<button
+													class="inline-flex items-center gap-1.5 px-3 h-11 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors cursor-pointer"
+													onclick={openThreatsDialog}
+												>
+													<i class="fa-solid fa-triangle-exclamation text-base"></i>
+													<span class="text-sm font-bold">{data.threats.total_unique_threats}</span>
+												</button>
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content
+													class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+												>
+													{m.potentialThreats()}
+												</Tooltip.Content>
+											</Tooltip.Positioner>
+										</Tooltip>
+									{/if}
+
+									{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
+										<Tooltip positioning={{ placement: 'bottom' }} openDelay={300} closeDelay={100}>
+											<Tooltip.Trigger>
+												<Anchor
+													breadcrumbAction="push"
+													href={`${page.url.pathname}/assignments`}
+													class="inline-flex items-center justify-center w-11 h-11 rounded-lg bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 transition-colors cursor-pointer"
+													data-testid="assignments-button"
+												>
+													<i class="fa-solid fa-user-tag text-base"></i>
+												</Anchor>
+											</Tooltip.Trigger>
+											<Tooltip.Positioner>
+												<Tooltip.Content
+													class="bg-gray-800 text-white px-2.5 py-1 text-xs rounded-md shadow-lg"
+												>
+													{m.assignments?.() ?? 'Assignments'}
+												</Tooltip.Content>
+											</Tooltip.Positioner>
+										</Tooltip>
+									{/if}
+								</div>
+							{/if}
 						</div>
-					</button>
-				{/if}
-				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/assignments`}
-						class="btn text-gray-100 bg-linear-to-r from-lime-500 to-green-600 h-fit"
-						data-testid="assignments-button"
-					>
-						<i class="fa-solid fa-user-tag mr-2"></i>
-						{m.assignments?.() ?? 'Assignments'}
-					</Anchor>
-				{/if}
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
