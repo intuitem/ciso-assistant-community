@@ -560,6 +560,9 @@
 
 	let openState = $state(false);
 
+	// Search state lifted here so it survives BatchActionBar show/hide cycles
+	let searchValue = $state('');
+
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
@@ -673,7 +676,7 @@
 				</Popover>
 			{/if}
 			{#if search}
-				<Search {handler} />
+				<Search {handler} bind:value={searchValue} />
 			{/if}
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />

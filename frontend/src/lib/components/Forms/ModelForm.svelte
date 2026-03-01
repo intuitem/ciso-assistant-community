@@ -722,6 +722,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>

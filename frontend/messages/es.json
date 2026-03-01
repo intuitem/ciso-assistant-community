@@ -3146,5 +3146,7 @@
 	"processingTimeout": "Tiempo de procesamiento agotado",
 	"maliciousFileDetected": "Archivo malicioso detectado",
 	"serverConfigurationError": "Error de configuración del servidor",
-	"libraryLoadFailed": "Error al cargar la biblioteca"
+	"libraryLoadFailed": "Error al cargar la biblioteca",
+	"sortAscending": "Ordenar A → Z",
+	"sortDescending": "Ordenar Z → A"
 }
