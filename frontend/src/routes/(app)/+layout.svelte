@@ -27,6 +27,7 @@
 	} from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
+	import ChatWidget from '$lib/components/ChatWidget/ChatWidget.svelte';
 	import {
 		interceptExternalLinks,
 		setGlobalModalStore,
@@ -205,6 +206,9 @@
 	</AppBar>
 	<!-- Router Slot -->
 	<CommandPalette />
+	{#if $page.data.featureflags?.chat_mode}
+		<ChatWidget />
+	{/if}
 	<main
 		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen

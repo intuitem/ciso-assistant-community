@@ -1039,6 +1039,8 @@
 	"licenseExpiredMessage": "Your license has expired. Write operations are disabled. Please contact your administrator to renew it.",
 	"experimental": "Experimental",
 	"experimentalFeatures": "Experimental features",
+	"chatMode": "Chat mode",
+	"chatModeDescription": "Enable the chat assistant icon for AI-powered interactions",
 	"timeline": "Timeline",
 	"timelineEntries": "Timeline",
 	"graph": "Graph",
