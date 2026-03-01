@@ -149,6 +149,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "show_warning_external_links": True,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
+            "enforce_mfa": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
