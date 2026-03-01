@@ -1405,6 +1405,7 @@ def startup(sender: AppConfig, **kwargs):
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
         "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
