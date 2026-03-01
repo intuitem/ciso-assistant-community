@@ -235,6 +235,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=False
     )
+    advanced_analytics = serializers.BooleanField(
+        source="value.advanced_analytics", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings

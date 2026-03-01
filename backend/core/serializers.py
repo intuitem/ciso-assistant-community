@@ -2881,13 +2881,16 @@ class QuickStartSerializer(serializers.Serializer):
         return self.create(self.validated_data)
 
     def create(self, validated_data):
-        folder_data = {
-            "content_type": Folder.ContentType.DOMAIN,
-            "name": "Starter",
-            "create_iam_groups": True,
-        }
-        folder = Folder.objects.filter(**folder_data).first()
+        folder = Folder.objects.filter(
+            content_type=Folder.ContentType.DOMAIN,
+            name="Starter",
+        ).first()
         if not folder:
+            folder_data = {
+                "content_type": Folder.ContentType.DOMAIN,
+                "name": "Starter",
+                "create_iam_groups": True,
+            }
             folder_serializer = FolderWriteSerializer(
                 data=folder_data, context=self.context
             )
