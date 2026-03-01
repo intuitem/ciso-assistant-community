@@ -3005,5 +3005,7 @@
 	"processingTimeout": "Verarbeitungszeitüberschreitung",
 	"maliciousFileDetected": "Bösartige Datei erkannt",
 	"serverConfigurationError": "Serverkonfigurationsfehler",
-	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden"
+	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden",
+	"sortAscending": "Sortieren A → Z",
+	"sortDescending": "Sortieren Z → A"
 }
