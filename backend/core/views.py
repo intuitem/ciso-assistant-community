@@ -9961,6 +9961,587 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["get"], url_path="section_compliance")
+    def section_compliance(self, request, pk):
+        """Aggregates compliance results and scores per top-level requirement group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        requirement_nodes = list(
+            RequirementNode.objects.filter(framework=framework).all()
+        )
+        # Build children dict
+        children_dict = defaultdict(list)
+        for rn in requirement_nodes:
+            parent = rn.parent_urn or "root"
+            children_dict[parent].append(rn)
+
+        top_level_nodes = children_dict.get("root", [])
+        for node in top_level_nodes:
+            if node.order_id is None:
+                node.order_id = 0
+        top_level_nodes.sort(key=lambda x: x.order_id)
+
+        # Build RA map
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        ra_by_req_id = {}
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            ra_by_req_id[str(ra.requirement_id)] = ra
+
+        def collect_assessable_descendants(node_urn):
+            result = []
+            for child in children_dict.get(node_urn, []):
+                if child.assessable:
+                    ra = ra_by_req_id.get(str(child.id))
+                    if ra:
+                        if not ig or (ig & set(child.implementation_groups or [])):
+                            result.append(ra)
+                result.extend(collect_assessable_descendants(child.urn))
+            return result
+
+        sections = []
+        for node in top_level_nodes:
+            assessable_list = []
+            if node.assessable:
+                ra = ra_by_req_id.get(str(node.id))
+                if ra and (not ig or (ig & set(node.implementation_groups or []))):
+                    assessable_list.append(ra)
+            assessable_list.extend(collect_assessable_descendants(node.urn))
+
+            if not assessable_list:
+                continue
+
+            results = defaultdict(int)
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+            for ra in assessable_list:
+                results[ra.result] += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            if is_sum:
+                section_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                section_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                section_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                section_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            node_name = (
+                get_referential_translation(node, "name")
+                or node.name
+                or node.ref_id
+                or str(node.id)
+            )
+            sections.append(
+                {
+                    "ref_id": node.ref_id,
+                    "name": node_name,
+                    "total_assessable": len(assessable_list),
+                    "results": dict(results),
+                    "score": section_score,
+                    "documentation_score": section_doc_score,
+                    "scored_count": scored_count,
+                }
+            )
+
+        return Response(
+            {
+                "sections": sections,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="controls_coverage")
+    def controls_coverage(self, request, pk):
+        """Controls coverage analysis for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Filter by implementation groups and auditee
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        # Annotate with control counts
+        ra_control_counts = (
+            RequirementAssessment.objects.filter(id__in=[ra.id for ra in filtered_ras])
+            .annotate(control_count=Count("applied_controls"))
+            .values("id", "control_count")
+        )
+        count_map = {str(r["id"]): r["control_count"] for r in ra_control_counts}
+
+        with_controls = 0
+        without_controls = 0
+        requirements_by_control_count = defaultdict(int)
+        all_control_ids = set()
+
+        for ra in filtered_ras:
+            cc = count_map.get(str(ra.id), 0)
+            if cc > 0:
+                with_controls += 1
+            else:
+                without_controls += 1
+            bucket = str(cc) if cc <= 2 else "3+"
+            requirements_by_control_count[bucket] += 1
+
+        # Get all controls linked to filtered RAs
+        # Note: no IAM filtering here — coverage metrics must be comprehensive
+        # to avoid misleadingly low percentages. Only aggregates are exposed.
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        control_ids = set(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("appliedcontrol_id", flat=True)
+        )
+
+        control_status_distribution = defaultdict(int)
+        if control_ids:
+            controls = AppliedControl.objects.filter(id__in=control_ids)
+            for c in controls:
+                control_status_distribution[c.status] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_controls": with_controls,
+                "without_controls": without_controls,
+                "coverage_percent": round(with_controls / total * 100, 1)
+                if total > 0
+                else 0,
+                "control_status_distribution": dict(control_status_distribution),
+                "requirements_by_control_count": dict(requirements_by_control_count),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="evidence_coverage")
+    def evidence_coverage(self, request, pk):
+        """Evidence coverage analysis — direct (on RA) and indirect (via applied controls)."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+
+        # Note: no IAM filtering on evidence/controls — coverage metrics must be
+        # comprehensive to avoid misleadingly low percentages. Only aggregates are exposed.
+
+        # Direct evidence: RA.evidences M2M
+        ra_with_direct = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", flat=True)
+        )
+
+        # Indirect evidence: RA → applied_controls → evidences
+        ra_control_pairs = list(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", "appliedcontrol_id")
+        )
+        control_ids = set(pair[1] for pair in ra_control_pairs)
+        controls_with_evidence = (
+            set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("appliedcontrol_id", flat=True)
+            )
+            if control_ids
+            else set()
+        )
+        ra_with_indirect = set()
+        for ra_id, ctrl_id in ra_control_pairs:
+            if ctrl_id in controls_with_evidence:
+                ra_with_indirect.add(ra_id)
+
+        # Combine
+        ra_with_any_evidence = ra_with_direct | ra_with_indirect
+        with_evidence = len(ra_with_any_evidence)
+        without_evidence = len(filtered_ras) - with_evidence
+        direct_only = len(ra_with_direct - ra_with_indirect)
+        indirect_only = len(ra_with_indirect - ra_with_direct)
+        both = len(ra_with_direct & ra_with_indirect)
+
+        # Evidence status distribution
+        all_evidence_ids = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("evidence_id", flat=True)
+        )
+        if control_ids:
+            all_evidence_ids |= set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("evidence_id", flat=True)
+            )
+        evidence_status_distribution = defaultdict(int)
+        if all_evidence_ids:
+            for status_val in Evidence.objects.filter(
+                id__in=all_evidence_ids
+            ).values_list("status", flat=True):
+                evidence_status_distribution[status_val] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_evidence": with_evidence,
+                "without_evidence": without_evidence,
+                "coverage_percent": round(with_evidence / total * 100, 1)
+                if total > 0
+                else 0,
+                "direct_only": direct_only,
+                "indirect_only": indirect_only,
+                "both": both,
+                "evidence_status_distribution": dict(evidence_status_distribution),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="exceptions_summary")
+    def exceptions_summary(self, request, pk):
+        """Security exceptions summary for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        exception_ids = set(
+            RequirementAssessment.security_exceptions.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("securityexception_id", flat=True)
+        )
+        # IAM: intersect with user-visible exceptions
+        (viewable_exception_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+        exception_ids &= set(viewable_exception_ids)
+
+        if not exception_ids:
+            return Response(
+                {
+                    "total": 0,
+                    "status_distribution": {},
+                    "severity_distribution": {},
+                    "exceptions": [],
+                }
+            )
+
+        exceptions = SecurityException.objects.filter(id__in=exception_ids)
+        status_distribution = defaultdict(int)
+        severity_distribution = defaultdict(int)
+        exception_list = []
+        for exc in exceptions:
+            status_distribution[exc.status] += 1
+            severity_distribution[exc.get_severity_display()] += 1
+            exception_list.append(
+                {
+                    "id": str(exc.id),
+                    "name": exc.name,
+                    "status": exc.status,
+                    "severity": exc.get_severity_display(),
+                    "expiration_date": str(exc.expiration_date)
+                    if exc.expiration_date
+                    else None,
+                }
+            )
+
+        return Response(
+            {
+                "total": len(exception_ids),
+                "status_distribution": dict(status_distribution),
+                "severity_distribution": dict(severity_distribution),
+                "exceptions": exception_list,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="compliance_timeline")
+    def compliance_timeline(self, request, pk):
+        """Returns compliance metrics over time from HistoricalMetric snapshots."""
+        compliance_assessment = self.get_object()
+
+        # Get historical data for this assessment
+        metrics = HistoricalMetric.objects.filter(
+            model="ComplianceAssessment", object_id=pk
+        ).order_by("date")
+
+        timeline = []
+        for m in metrics:
+            data = m.data.get("reqs", {})
+            timeline.append(
+                {
+                    "date": m.date.isoformat(),
+                    "progress_perc": data.get("progress_perc", 0),
+                    "score": data.get("score", 0),
+                    "per_result": data.get("per_result", {}),
+                    "per_status": data.get("per_status", {}),
+                }
+            )
+
+        return Response({"timeline": timeline})
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="implementation_groups_breakdown",
+    )
+    def implementation_groups_breakdown(self, request, pk):
+        """Breakdown of compliance results by implementation group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+
+        ig_definition = framework.implementation_groups_definition
+        if not ig_definition:
+            return Response({"groups": []})
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Build filtered RA list
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            filtered_ras.append(ra)
+
+        groups = []
+        for group_def in ig_definition:
+            group_ref_id = group_def.get("ref_id")
+            group_name = group_def.get("name", group_ref_id)
+
+            matching_ras = [
+                ra
+                for ra in filtered_ras
+                if group_ref_id in (ra.requirement.implementation_groups or [])
+            ]
+
+            if not matching_ras:
+                groups.append(
+                    {
+                        "ref_id": group_ref_id,
+                        "name": group_name,
+                        "total_assessable": 0,
+                        "results": {},
+                        "progress_percent": 0,
+                        "score": None,
+                        "documentation_score": None,
+                        "scored_count": 0,
+                    }
+                )
+                continue
+
+            results = defaultdict(int)
+            assessed = 0
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+
+            for ra in matching_ras:
+                results[ra.result] += 1
+                if ra.result != "not_assessed":
+                    assessed += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            total = len(matching_ras)
+            if is_sum:
+                group_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                group_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                group_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                group_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            groups.append(
+                {
+                    "ref_id": group_ref_id,
+                    "name": group_name,
+                    "total_assessable": total,
+                    "results": dict(results),
+                    "progress_percent": round(assessed / total * 100)
+                    if total > 0
+                    else 0,
+                    "score": group_score,
+                    "documentation_score": group_doc_score,
+                    "scored_count": scored_count,
+                }
+            )
+
+        return Response(
+            {
+                "groups": groups,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
+
     @action(detail=False, methods=["get"], name="Get compliance analytics")
     def analytics(self, request):
         """
