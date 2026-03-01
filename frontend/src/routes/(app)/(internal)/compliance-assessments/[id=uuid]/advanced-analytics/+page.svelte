@@ -33,130 +33,572 @@
 	};
 
 	function buildSectionChartData(sections: any[]) {
-		// data: array of arrays (one per audit/bar), each inner array has counts per result category
 		const chartData = sections.map((s: any) => RESULT_KEYS.map((k) => s.results[k] || 0));
 		const names = sections.map((s: any) => (s.ref_id ? s.ref_id + ' ' : '') + s.name);
 		return { data: chartData, names };
 	}
 </script>
 
-<div class="flex flex-col space-y-6">
-	<div class="flex items-center space-x-3">
-		<a
-			href={`/compliance-assessments/${data.compliance_assessment.id}`}
-			class="text-sm text-indigo-600 hover:underline"
-		>
-			&larr; {data.compliance_assessment.name}
-		</a>
+<div class="flex flex-col gap-5 pb-8">
+	<!-- Header -->
+	<div
+		class="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 via-slate-900 to-indigo-950 px-8 py-6"
+	>
+		<div
+			class="absolute inset-0 opacity-[0.07]"
+			style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px); background-size: 32px 32px, 48px 48px;"
+		></div>
+		<div class="relative">
+			<a
+				href={`/compliance-assessments/${data.compliance_assessment.id}`}
+				class="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors mb-3"
+			>
+				<i class="fa-solid fa-arrow-left text-[10px]"></i>
+				{data.compliance_assessment.name}
+			</a>
+			<div class="flex items-center gap-3">
+				<div
+					class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 backdrop-blur-sm"
+				>
+					<i class="fa-solid fa-chart-line text-indigo-300 text-lg"></i>
+				</div>
+				<div>
+					<h1 class="text-xl font-semibold text-white tracking-tight">
+						{m.advancedAnalytics()}
+					</h1>
+					<p class="text-xs text-slate-400 mt-0.5">
+						{data.compliance_assessment.framework?.name ?? ''}
+					</p>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!-- Compliance Over Time -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.complianceOverTime()}</h2>
-		{#await data.stream.complianceTimeline}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then timelineData}
-			{@const timeline = timelineData.timeline}
-			{#if timeline && timeline.length > 0}
-				<div class="h-80" id="timeline_chart_container">
-					<!-- Inline ECharts for timeline -->
-					{#await import('echarts') then echarts}
-						{@const _init = (() => {
-							setTimeout(() => {
-								const el = document.getElementById('timeline_chart_container');
-								if (!el) return;
-								const chart = echarts.init(el, null, { renderer: 'svg' });
-								const dates = timeline.map((t: any) => t.date);
-								const series = RESULT_KEYS.map((key) => ({
-									name: safeTranslate(key),
-									type: 'line',
-									stack: 'total',
-									smooth: true,
-									showSymbol: false,
-									areaStyle: { opacity: 0.6 },
-									emphasis: { focus: 'series' },
-									data: timeline.map((t: any) => t.per_result[key] || 0),
-									itemStyle: { color: complianceResultColorMap[key] }
-								}));
-								chart.setOption({
-									tooltip: { trigger: 'axis' },
-									legend: { top: 0 },
-									grid: { left: 50, right: 20, top: 40, bottom: 30 },
-									xAxis: { type: 'category', data: dates },
-									yAxis: { type: 'value' },
-									series
-								});
-								window.addEventListener('resize', () => chart.resize());
-							}, 0);
-							return '';
-						})()}
-					{/await}
-				</div>
-			{:else}
-				<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
+	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+			<span
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-violet-50 text-violet-500"
+			>
+				<i class="fa-solid fa-timeline text-xs"></i>
+			</span>
+			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				{m.complianceOverTime()}
+			</h2>
+		</div>
+		<div class="p-6">
+			{#await data.stream.complianceTimeline}
+				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
+			{:then timelineData}
+				{@const timeline = timelineData.timeline}
+				{#if timeline && timeline.length > 0}
+					<div class="h-72" id="timeline_chart_container">
+						{#await import('echarts') then echarts}
+							{@const _init = (() => {
+								setTimeout(() => {
+									const el = document.getElementById('timeline_chart_container');
+									if (!el) return;
+									const chart = echarts.init(el, null, { renderer: 'svg' });
+									const dates = timeline.map((t: any) => t.date);
+									const series = RESULT_KEYS.map((key) => ({
+										name: safeTranslate(key),
+										type: 'line',
+										stack: 'total',
+										smooth: true,
+										showSymbol: false,
+										areaStyle: { opacity: 0.5 },
+										lineStyle: { width: 1.5 },
+										emphasis: { focus: 'series' },
+										data: timeline.map((t: any) => t.per_result[key] || 0),
+										itemStyle: { color: complianceResultColorMap[key] }
+									}));
+									chart.setOption({
+										tooltip: { trigger: 'axis', backgroundColor: '#1e293b', borderColor: '#334155', textStyle: { color: '#f1f5f9', fontSize: 12 } },
+										legend: { top: 0, textStyle: { fontSize: 11, color: '#64748b' } },
+										grid: { left: 45, right: 16, top: 36, bottom: 28 },
+										xAxis: { type: 'category', data: dates, axisLine: { lineStyle: { color: '#e2e8f0' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
+										yAxis: { type: 'value', splitLine: { lineStyle: { color: '#f1f5f9' } }, axisLabel: { color: '#94a3b8', fontSize: 10 } },
+										series
+									});
+									window.addEventListener('resize', () => chart.resize());
+								}, 0);
+								return '';
+							})()}
+						{/await}
+					</div>
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+						<i class="fa-solid fa-chart-area text-3xl mb-2 opacity-30"></i>
+						<p class="text-sm">{m.nothingToShowYet()}</p>
+					</div>
+				{/if}
+			{:catch}
+				<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+			{/await}
+		</div>
+	</section>
+
+	<!-- Compliance by Section -->
+	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+			<span
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-blue-50 text-blue-500"
+			>
+				<i class="fa-solid fa-layer-group text-xs"></i>
+			</span>
+			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				{m.complianceBySection()}
+			</h2>
+		</div>
+		<div class="p-6">
+			{#await data.stream.sectionCompliance}
+				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
+			{:then sectionData}
+				{@const sections = sectionData.sections}
+				{#if sections && sections.length > 0}
+					{@const chartInfo = buildSectionChartData(sections)}
+					<div class="h-[400px]">
+						<StackedBarsNormalized
+							name="section_compliance"
+							data={chartInfo.data}
+							names={chartInfo.names}
+							uuids={[]}
+							colors={RESULT_COLORS}
+							seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
+						/>
+					</div>
+					{#if sections.some((s: any) => s.scored_count > 0)}
+						<div class="mt-5 border-t border-slate-100 pt-5">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="text-[11px] uppercase tracking-wider text-slate-400">
+										<th class="pb-2 pr-4 text-left font-medium">{m.section()}</th>
+										<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
+										<th class="pb-2 pr-4 text-right font-medium">{m.avgScore()}</th>
+										{#if data.compliance_assessment.show_documentation_score}
+											<th class="pb-2 pr-4 text-right font-medium"
+												>{m.avgDocumentationScore()}</th
+											>
+										{/if}
+									</tr>
+								</thead>
+								<tbody>
+									{#each sections as section, i}
+										<tr
+											class="border-t border-slate-50 {i % 2 === 0
+												? 'bg-slate-50/50'
+												: ''}"
+										>
+											<td class="py-2.5 pr-4 text-slate-700"
+												>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
+											>
+											<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
+												>{section.total_assessable}</td
+											>
+											<td class="py-2.5 pr-4 text-right">
+												{#if section.avg_score !== null}
+													<span
+														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+														>{section.avg_score}</span
+													>
+												{:else}
+													<span class="text-slate-300">&mdash;</span>
+												{/if}
+											</td>
+											{#if data.compliance_assessment.show_documentation_score}
+												<td class="py-2.5 pr-4 text-right">
+													{#if section.avg_documentation_score !== null}
+														<span
+															class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+															>{section.avg_documentation_score}</span
+														>
+													{:else}
+														<span class="text-slate-300">&mdash;</span>
+													{/if}
+												</td>
+											{/if}
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					{/if}
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+						<i class="fa-solid fa-layer-group text-3xl mb-2 opacity-30"></i>
+						<p class="text-sm">{m.nothingToShowYet()}</p>
+					</div>
+				{/if}
+			{:catch}
+				<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+			{/await}
+		</div>
+	</section>
+
+	<!-- Coverage Row: Controls + Evidence side by side -->
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+		<!-- Controls Coverage -->
+		<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+			<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+				<span
+					class="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-50 text-emerald-500"
+				>
+					<i class="fa-solid fa-shield-halved text-xs"></i>
+				</span>
+				<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+					{m.controlsCoverage()}
+				</h2>
+			</div>
+			<div class="p-6">
+				{#await data.stream.controlsCoverage}
+					<div class="flex items-center justify-center h-48"><LoadingSpinner /></div>
+				{:then coverage}
+					<!-- Big coverage number -->
+					<div class="flex items-center gap-5 mb-5">
+						<div
+							class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50"
+						>
+							<span class="text-2xl font-bold text-emerald-700"
+								>{coverage.coverage_percent}%</span
+							>
+						</div>
+						<div class="flex-1 space-y-2">
+							<div class="flex items-center justify-between text-sm">
+								<span class="text-slate-500">{m.requirementsWithControls()}</span>
+								<span class="font-semibold text-emerald-600 tabular-nums"
+									>{coverage.with_controls}</span
+								>
+							</div>
+							<div class="flex items-center justify-between text-sm">
+								<span class="text-slate-500">{m.requirementsWithoutControls()}</span>
+								<span class="font-semibold text-red-400 tabular-nums"
+									>{coverage.without_controls}</span
+								>
+							</div>
+							<!-- Mini bar -->
+							{#if coverage.with_controls + coverage.without_controls > 0}
+								<div class="flex h-2 rounded-full overflow-hidden bg-red-100">
+									<div
+										class="bg-emerald-400 rounded-full transition-all"
+										style="width: {(coverage.with_controls / (coverage.with_controls + coverage.without_controls)) * 100}%"
+									></div>
+								</div>
+							{/if}
+						</div>
+					</div>
+					<!-- Status distribution inline -->
+					{#if Object.keys(coverage.control_status_distribution).length > 0}
+						<div class="border-t border-slate-100 pt-4">
+							<p class="text-[11px] uppercase tracking-wider text-slate-400 font-medium mb-3">
+								{safeTranslate('controlStatusDistribution')}
+							</p>
+							<div class="flex flex-wrap gap-2">
+								{#each Object.entries(coverage.control_status_distribution) as [status, count]}
+									<span
+										class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+									>
+										<span
+											class="w-2 h-2 rounded-full"
+											style="background-color: {controlStatusColors[status] || '#9ca3af'}"
+										></span>
+										{safeTranslate(status)}
+										<span class="font-semibold text-slate-800">{count}</span>
+									</span>
+								{/each}
+							</div>
+						</div>
+					{/if}
+				{:catch}
+					<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+				{/await}
+			</div>
+		</section>
+
+		<!-- Evidence Coverage -->
+		<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+			<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+				<span
+					class="flex items-center justify-center w-7 h-7 rounded-md bg-sky-50 text-sky-500"
+				>
+					<i class="fa-solid fa-file-circle-check text-xs"></i>
+				</span>
+				<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+					{m.evidenceCoverage()}
+				</h2>
+			</div>
+			<div class="p-6">
+				{#await data.stream.evidenceCoverage}
+					<div class="flex items-center justify-center h-48"><LoadingSpinner /></div>
+				{:then coverage}
+					<div class="flex items-center gap-5 mb-5">
+						<div
+							class="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-sky-50 to-blue-50"
+						>
+							<span class="text-2xl font-bold text-sky-700"
+								>{coverage.coverage_percent}%</span
+							>
+						</div>
+						<div class="flex-1 space-y-2">
+							<div class="flex items-center justify-between text-sm">
+								<span class="text-slate-500">{m.requirementsWithEvidence()}</span>
+								<span class="font-semibold text-sky-600 tabular-nums"
+									>{coverage.with_evidence}</span
+								>
+							</div>
+							<div class="flex items-center justify-between text-sm">
+								<span class="text-slate-500">{m.requirementsWithoutEvidence()}</span>
+								<span class="font-semibold text-red-400 tabular-nums"
+									>{coverage.without_evidence}</span
+								>
+							</div>
+							{#if coverage.with_evidence + coverage.without_evidence > 0}
+								<div class="flex h-2 rounded-full overflow-hidden bg-red-100">
+									<div
+										class="bg-sky-400 rounded-full transition-all"
+										style="width: {(coverage.with_evidence / (coverage.with_evidence + coverage.without_evidence)) * 100}%"
+									></div>
+								</div>
+							{/if}
+						</div>
+					</div>
+					<!-- Evidence type pills -->
+					{#if coverage.with_evidence > 0}
+						<div class="border-t border-slate-100 pt-4">
+							<div class="flex flex-wrap gap-2">
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+								>
+									<span class="w-2 h-2 rounded-full bg-blue-400"></span>
+									{m.directEvidence()}
+									<span class="font-semibold text-slate-800">{coverage.direct_only}</span>
+								</span>
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+								>
+									<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+									{m.indirectEvidence()}
+									<span class="font-semibold text-slate-800">{coverage.indirect_only}</span>
+								</span>
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs text-slate-600"
+								>
+									<span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+									{m.bothEvidenceTypes()}
+									<span class="font-semibold text-slate-800">{coverage.both}</span>
+								</span>
+							</div>
+						</div>
+					{/if}
+				{:catch}
+					<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+				{/await}
+			</div>
+		</section>
+	</div>
+
+	<!-- Threats & Exceptions Row -->
+	<div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+		<!-- Threats Overview -->
+		{#await data.stream.threats then threatsData}
+			{#if threatsData.total_unique_threats > 0}
+				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+						<span
+							class="flex items-center justify-center w-7 h-7 rounded-md bg-amber-50 text-amber-500"
+						>
+							<i class="fa-solid fa-triangle-exclamation text-xs"></i>
+						</span>
+						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+							{m.threatsOverview()}
+						</h2>
+						<span
+							class="ml-auto inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2.5 py-0.5 text-xs font-semibold text-amber-700"
+						>
+							{threatsData.total_unique_threats}
+						</span>
+					</div>
+					<div class="p-6">
+						{#if threatsData.graph?.nodes}
+							{@const sorted = [...threatsData.graph.nodes].sort(
+								(a: any, b: any) => b.value - a.value
+							)}
+							<div class="h-56">
+								<BarChart
+									name="threats_overview"
+									labels={sorted.map((t: any) => t.name)}
+									values={sorted.map((t: any) => t.value)}
+									horizontal={true}
+									title={safeTranslate('affectedRequirements')}
+								/>
+							</div>
+						{/if}
+					</div>
+				</section>
 			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
+		{/await}
+
+		<!-- Exceptions Overview -->
+		{#await data.stream.exceptions then exceptionsData}
+			{#if exceptionsData.total > 0}
+				<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+					<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+						<span
+							class="flex items-center justify-center w-7 h-7 rounded-md bg-purple-50 text-purple-500"
+						>
+							<i class="fa-solid fa-file-shield text-xs"></i>
+						</span>
+						<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+							{m.exceptionsOverview()}
+						</h2>
+						<span
+							class="ml-auto inline-flex items-center rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-semibold text-purple-700"
+						>
+							{exceptionsData.total}
+						</span>
+					</div>
+					<div class="p-6">
+						<div class="grid grid-cols-2 gap-4">
+							<div class="h-48">
+								{#if Object.keys(exceptionsData.status_distribution).length > 0}
+									{@const statusEntries = Object.entries(
+										exceptionsData.status_distribution
+									)}
+									<DonutChart
+										name="exception_status"
+										values={statusEntries.map(([k, v]) => ({
+											name: safeTranslate(k),
+											value: v
+										}))}
+									/>
+								{:else}
+									<div
+										class="flex items-center justify-center h-full text-sm text-slate-400"
+									>
+										{m.nothingToShowYet()}
+									</div>
+								{/if}
+							</div>
+							<div class="h-48">
+								{#if Object.keys(exceptionsData.severity_distribution).length > 0}
+									{@const sevEntries = Object.entries(
+										exceptionsData.severity_distribution
+									)}
+									<BarChart
+										name="exception_severity"
+										labels={sevEntries.map(([k]) => safeTranslate(k))}
+										values={sevEntries.map(([, v]) => v)}
+										title={safeTranslate('severity')}
+									/>
+								{:else}
+									<div
+										class="flex items-center justify-center h-full text-sm text-slate-400"
+									>
+										{m.nothingToShowYet()}
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+				</section>
+			{/if}
 		{/await}
 	</div>
 
-	<!-- Compliance by Section -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.complianceBySection()}</h2>
-		{#await data.stream.sectionCompliance}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then sectionData}
-			{@const sections = sectionData.sections}
-			{#if sections && sections.length > 0}
-				{@const chartInfo = buildSectionChartData(sections)}
-				<div class="h-[400px]">
-					<StackedBarsNormalized
-						name="section_compliance"
-						data={chartInfo.data}
-						names={chartInfo.names}
-						uuids={[]}
-						colors={RESULT_COLORS}
-						seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
-					/>
-				</div>
-				<!-- Score table -->
-				{#if sections.some((s: any) => s.scored_count > 0)}
-					<div class="mt-4 overflow-x-auto">
+	<!-- Implementation Groups Breakdown -->
+	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+			<span
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-orange-50 text-orange-500"
+			>
+				<i class="fa-solid fa-cubes text-xs"></i>
+			</span>
+			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				{m.implementationGroupsBreakdown()}
+			</h2>
+		</div>
+		<div class="p-6">
+			{#await data.stream.igBreakdown}
+				<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
+			{:then igData}
+				{@const groups = igData.groups}
+				{#if groups && groups.length > 0}
+					{@const chartInfo = (() => {
+						const chartData = groups.map((g: any) =>
+							RESULT_KEYS.map((k) => g.results[k] || 0)
+						);
+						const names = groups.map((g: any) => g.name || g.ref_id);
+						return { data: chartData, names };
+					})()}
+					<div class="h-[350px]">
+						<StackedBarsNormalized
+							name="ig_breakdown"
+							data={chartInfo.data}
+							names={chartInfo.names}
+							uuids={[]}
+							colors={RESULT_COLORS}
+							seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
+						/>
+					</div>
+					<div class="mt-5 border-t border-slate-100 pt-5">
 						<table class="w-full text-sm">
 							<thead>
-								<tr class="border-b text-left text-gray-500">
-									<th class="py-2 pr-4">{m.section()}</th>
-									<th class="py-2 pr-4 text-right">{m.assessable()}</th>
-									<th class="py-2 pr-4 text-right">{m.avgScore()}</th>
+								<tr class="text-[11px] uppercase tracking-wider text-slate-400">
+									<th class="pb-2 pr-4 text-left font-medium">{m.name()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.assessable()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.progress()}</th>
+									<th class="pb-2 pr-4 text-right font-medium">{m.avgScore()}</th>
 									{#if data.compliance_assessment.show_documentation_score}
-										<th class="py-2 pr-4 text-right">{m.avgDocumentationScore()}</th>
+										<th class="pb-2 pr-4 text-right font-medium"
+											>{m.avgDocumentationScore()}</th
+										>
 									{/if}
 								</tr>
 							</thead>
 							<tbody>
-								{#each sections as section}
-									<tr class="border-b border-gray-100">
-										<td class="py-2 pr-4 font-medium"
-											>{section.ref_id ? section.ref_id + ' ' : ''}{section.name}</td
+								{#each groups as group, i}
+									<tr
+										class="border-t border-slate-50 {i % 2 === 0
+											? 'bg-slate-50/50'
+											: ''}"
+									>
+										<td class="py-2.5 pr-4 text-slate-700"
+											>{group.name || group.ref_id}</td
 										>
-										<td class="py-2 pr-4 text-right">{section.total_assessable}</td>
-										<td class="py-2 pr-4 text-right">
-											{#if section.avg_score !== null}
-												<span class="badge preset-filled-primary-500 text-xs"
-													>{section.avg_score}</span
+										<td class="py-2.5 pr-4 text-right tabular-nums text-slate-500"
+											>{group.total_assessable}</td
+										>
+										<td class="py-2.5 pr-4 text-right">
+											<div
+												class="inline-flex items-center gap-1.5 text-xs text-slate-600"
+											>
+												<div class="w-12 h-1.5 rounded-full bg-slate-100 overflow-hidden">
+													<div
+														class="h-full rounded-full bg-indigo-400"
+														style="width: {group.progress_percent}%"
+													></div>
+												</div>
+												<span class="tabular-nums">{group.progress_percent}%</span>
+											</div>
+										</td>
+										<td class="py-2.5 pr-4 text-right">
+											{#if group.avg_score !== null}
+												<span
+													class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium px-2 py-0.5"
+													>{group.avg_score}</span
 												>
 											{:else}
-												<span class="text-gray-400">-</span>
+												<span class="text-slate-300">&mdash;</span>
 											{/if}
 										</td>
 										{#if data.compliance_assessment.show_documentation_score}
-											<td class="py-2 pr-4 text-right">
-												{#if section.avg_documentation_score !== null}
-													<span class="badge preset-filled-secondary-500 text-xs"
-														>{section.avg_documentation_score}</span
+											<td class="py-2.5 pr-4 text-right">
+												{#if group.avg_documentation_score !== null}
+													<span
+														class="inline-flex items-center justify-center min-w-[2.5rem] rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium px-2 py-0.5"
+														>{group.avg_documentation_score}</span
 													>
 												{:else}
-													<span class="text-gray-400">-</span>
+													<span class="text-slate-300">&mdash;</span>
 												{/if}
 											</td>
 										{/if}
@@ -165,365 +607,81 @@
 							</tbody>
 						</table>
 					</div>
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+						<i class="fa-solid fa-cubes text-3xl mb-2 opacity-30"></i>
+						<p class="text-sm">{m.noImplementationGroups()}</p>
+					</div>
 				{/if}
-			{:else}
-				<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
+			{:catch}
+				<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+			{/await}
+		</div>
+	</section>
 
-	<!-- Section 2: Controls Coverage -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.controlsCoverage()}</h2>
-		{#await data.stream.controlsCoverage}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then coverage}
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<!-- Summary cards -->
-				<div class="flex flex-col space-y-3">
-					<div class="rounded-lg border p-4 text-center">
-						<div class="text-3xl font-bold text-indigo-600">{coverage.coverage_percent}%</div>
-						<div class="text-sm text-gray-500 mt-1">{m.coveragePercent()}</div>
-					</div>
-					<div class="grid grid-cols-2 gap-3">
-						<div class="rounded-lg border p-3 text-center">
-							<div class="text-xl font-semibold text-green-600">{coverage.with_controls}</div>
-							<div class="text-xs text-gray-500">{m.requirementsWithControls()}</div>
-						</div>
-						<div class="rounded-lg border p-3 text-center">
-							<div class="text-xl font-semibold text-red-500">{coverage.without_controls}</div>
-							<div class="text-xs text-gray-500">{m.requirementsWithoutControls()}</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Donut: with/without controls -->
-				<div class="h-64">
-					<DonutChart
-						name="controls_coverage"
-						values={[
-							{
-								name: safeTranslate('requirementsWithControls'),
-								value: coverage.with_controls,
-								itemStyle: { color: '#86efac' }
-							},
-							{
-								name: safeTranslate('requirementsWithoutControls'),
-								value: coverage.without_controls,
-								itemStyle: { color: '#fca5a5' }
-							}
-						]}
-					/>
-				</div>
-
-				<!-- Control status distribution -->
-				<div class="h-64">
-					{#if Object.keys(coverage.control_status_distribution).length > 0}
-						{@const statusEntries = Object.entries(coverage.control_status_distribution)}
-						<BarChart
-							name="control_status"
-							labels={statusEntries.map(([k]) => safeTranslate(k))}
-							values={statusEntries.map(([, v]) => v)}
-							title={safeTranslate('controlStatusDistribution')}
-						/>
-					{:else}
-						<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-					{/if}
-				</div>
-			</div>
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
-
-	<!-- Section 3: Evidence Coverage -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.evidenceCoverage()}</h2>
-		{#await data.stream.evidenceCoverage}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then coverage}
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-				<!-- Summary cards -->
-				<div class="flex flex-col space-y-3">
-					<div class="rounded-lg border p-4 text-center">
-						<div class="text-3xl font-bold text-indigo-600">{coverage.coverage_percent}%</div>
-						<div class="text-sm text-gray-500 mt-1">{m.coveragePercent()}</div>
-					</div>
-					<div class="grid grid-cols-2 gap-3">
-						<div class="rounded-lg border p-3 text-center">
-							<div class="text-xl font-semibold text-green-600">{coverage.with_evidence}</div>
-							<div class="text-xs text-gray-500">{m.requirementsWithEvidence()}</div>
-						</div>
-						<div class="rounded-lg border p-3 text-center">
-							<div class="text-xl font-semibold text-red-500">{coverage.without_evidence}</div>
-							<div class="text-xs text-gray-500">{m.requirementsWithoutEvidence()}</div>
-						</div>
-					</div>
-				</div>
-
-				<!-- Donut: with/without evidence -->
-				<div class="h-64">
-					<DonutChart
-						name="evidence_coverage"
-						values={[
-							{
-								name: safeTranslate('requirementsWithEvidence'),
-								value: coverage.with_evidence,
-								itemStyle: { color: '#86efac' }
-							},
-							{
-								name: safeTranslate('requirementsWithoutEvidence'),
-								value: coverage.without_evidence,
-								itemStyle: { color: '#fca5a5' }
-							}
-						]}
-					/>
-				</div>
-
-				<!-- Evidence status distribution -->
-				<div class="h-64">
-					{#if Object.keys(coverage.evidence_status_distribution).length > 0}
-						{@const statusEntries = Object.entries(coverage.evidence_status_distribution)}
-						<BarChart
-							name="evidence_status"
-							labels={statusEntries.map(([k]) => safeTranslate(k))}
-							values={statusEntries.map(([, v]) => v)}
-							title={safeTranslate('evidenceStatusDistribution')}
-						/>
-					{:else}
-						<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-					{/if}
-				</div>
-			</div>
-
-			<!-- Evidence type breakdown -->
-			{#if coverage.with_evidence > 0}
-				<div class="mt-4 flex items-center justify-center gap-6 text-sm text-gray-600">
-					<span class="flex items-center gap-1">
-						<span class="inline-block w-3 h-3 rounded-full bg-blue-500"></span>
-						{m.directEvidence()}: {coverage.direct_only}
-					</span>
-					<span class="flex items-center gap-1">
-						<span class="inline-block w-3 h-3 rounded-full bg-amber-500"></span>
-						{m.indirectEvidence()}: {coverage.indirect_only}
-					</span>
-					<span class="flex items-center gap-1">
-						<span class="inline-block w-3 h-3 rounded-full bg-green-500"></span>
-						{m.bothEvidenceTypes()}: {coverage.both}
-					</span>
-				</div>
-			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
-
-	<!-- Section 4: Threats Overview -->
-	{#await data.stream.threats then threatsData}
-		{#if threatsData.total_unique_threats > 0}
-			<div class="card bg-white shadow-lg p-6">
-				<h2 class="text-lg font-semibold mb-4">{m.threatsOverview()}</h2>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div class="flex flex-col space-y-3">
-						<div class="rounded-lg border p-4 text-center">
-							<div class="text-3xl font-bold text-orange-600">
-								{threatsData.total_unique_threats}
-							</div>
-							<div class="text-sm text-gray-500 mt-1">{m.uniqueThreats()}</div>
-						</div>
-					</div>
-					<div class="md:col-span-2 h-64">
-						{#if threatsData.graph?.nodes}
-							{@const sorted = [...threatsData.graph.nodes].sort(
-								(a: any, b: any) => b.value - a.value
-							)}
-							<BarChart
-								name="threats_overview"
-								labels={sorted.map((t: any) => t.name)}
-								values={sorted.map((t: any) => t.value)}
-								horizontal={true}
-								title={safeTranslate('affectedRequirements')}
-							/>
-						{/if}
-					</div>
-				</div>
-			</div>
-		{/if}
-	{/await}
-
-	<!-- Section 5: Exceptions Overview -->
-	{#await data.stream.exceptions then exceptionsData}
-		{#if exceptionsData.total > 0}
-			<div class="card bg-white shadow-lg p-6">
-				<h2 class="text-lg font-semibold mb-4">{m.exceptionsOverview()}</h2>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-					<div class="flex flex-col space-y-3">
-						<div class="rounded-lg border p-4 text-center">
-							<div class="text-3xl font-bold text-purple-600">
-								{exceptionsData.total}
-							</div>
-							<div class="text-sm text-gray-500 mt-1">{m.totalExceptions()}</div>
-						</div>
-					</div>
-					<!-- Status distribution donut -->
-					<div class="h-64">
-						{#if Object.keys(exceptionsData.status_distribution).length > 0}
-							{@const statusEntries = Object.entries(exceptionsData.status_distribution)}
-							<DonutChart
-								name="exception_status"
-								values={statusEntries.map(([k, v]) => ({
-									name: safeTranslate(k),
-									value: v
-								}))}
-							/>
-						{:else}
-							<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-						{/if}
-					</div>
-					<!-- Severity distribution bar -->
-					<div class="h-64">
-						{#if Object.keys(exceptionsData.severity_distribution).length > 0}
-							{@const sevEntries = Object.entries(exceptionsData.severity_distribution)}
-							<BarChart
-								name="exception_severity"
-								labels={sevEntries.map(([k]) => safeTranslate(k))}
-								values={sevEntries.map(([, v]) => v)}
-								title={safeTranslate('severity')}
-							/>
-						{:else}
-							<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-						{/if}
-					</div>
-				</div>
-			</div>
-		{/if}
-	{/await}
-
-	<!-- Implementation Groups Breakdown -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.implementationGroupsBreakdown()}</h2>
-		{#await data.stream.igBreakdown}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then igData}
-			{@const groups = igData.groups}
-			{#if groups && groups.length > 0}
-				{@const chartInfo = (() => {
-					const chartData = groups.map((g: any) => RESULT_KEYS.map((k) => g.results[k] || 0));
-					const names = groups.map((g: any) => g.name || g.ref_id);
-					return { data: chartData, names };
-				})()}
-				<div class="h-[350px]">
-					<StackedBarsNormalized
-						name="ig_breakdown"
-						data={chartInfo.data}
-						names={chartInfo.names}
-						uuids={[]}
-						colors={RESULT_COLORS}
-						seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
-					/>
-				</div>
-				<!-- Score and progress table -->
-				<div class="mt-4 overflow-x-auto">
-					<table class="w-full text-sm">
-						<thead>
-							<tr class="border-b text-left text-gray-500">
-								<th class="py-2 pr-4">{m.name()}</th>
-								<th class="py-2 pr-4 text-right">{m.assessable()}</th>
-								<th class="py-2 pr-4 text-right">{m.progress()}</th>
-								<th class="py-2 pr-4 text-right">{m.avgScore()}</th>
-								{#if data.compliance_assessment.show_documentation_score}
-									<th class="py-2 pr-4 text-right">{m.avgDocumentationScore()}</th>
-								{/if}
-							</tr>
-						</thead>
-						<tbody>
-							{#each groups as group}
-								<tr class="border-b border-gray-100">
-									<td class="py-2 pr-4 font-medium">{group.name || group.ref_id}</td>
-									<td class="py-2 pr-4 text-right">{group.total_assessable}</td>
-									<td class="py-2 pr-4 text-right">{group.progress_percent}%</td>
-									<td class="py-2 pr-4 text-right">
-										{#if group.avg_score !== null}
-											<span class="badge preset-filled-primary-500 text-xs">{group.avg_score}</span>
-										{:else}
-											<span class="text-gray-400">-</span>
-										{/if}
-									</td>
-									{#if data.compliance_assessment.show_documentation_score}
-										<td class="py-2 pr-4 text-right">
-											{#if group.avg_documentation_score !== null}
-												<span class="badge preset-filled-secondary-500 text-xs"
-													>{group.avg_documentation_score}</span
-												>
-											{:else}
-												<span class="text-gray-400">-</span>
-											{/if}
-										</td>
-									{/if}
-								</tr>
-							{/each}
-						</tbody>
-					</table>
-				</div>
-			{:else}
-				<p class="text-gray-500 text-center py-8">{m.noImplementationGroups()}</p>
-			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
-
-	<!-- Section 5: Mapping Projection -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.mappingProjection()}</h2>
-		{#await data.stream.mappingProjection}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then frameworks}
-			{#if frameworks && frameworks.length > 0}
-				<div class="space-y-4">
-					{#each frameworks as fw}
-						<div class="border rounded-lg p-4">
-							<div class="flex items-center justify-between mb-2">
-								<span class="font-medium text-sm">{fw.str}</span>
-								<span class="text-xs text-gray-500"
-									>{fw.assessable_requirements_count} {m.assessable()}</span
-								>
-							</div>
-							<!-- Stacked progress bar -->
-							{#if Object.values(fw.results || {}).reduce((a, b) => a + (b as number), 0) > 0}
-								{@const results = fw.results || {}}
-								{@const total = Object.values(results).reduce(
-									(a: number, b: any) => a + (b as number),
-									0
-								)}
-								<div class="flex h-6 rounded-full overflow-hidden">
-									{#each RESULT_KEYS as key}
-										{@const count = results[key] || 0}
-										{@const pct = (count / total) * 100}
-										{#if pct > 0}
-											<div
-												class="flex items-center justify-center text-[10px] font-medium"
-												style="width: {pct}%; background-color: {complianceResultColorMap[
-													key
-												]}; {key === 'not_applicable' ? 'color: white;' : ''}"
-												title="{safeTranslate(key)}: {count} ({pct.toFixed(1)}%)"
-											>
-												{#if pct > 5}{Math.round(pct)}%{/if}
-											</div>
-										{/if}
-									{/each}
+	<!-- Mapping Projection -->
+	<section class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+		<div class="border-b border-slate-100 px-6 py-4 flex items-center gap-2.5">
+			<span
+				class="flex items-center justify-center w-7 h-7 rounded-md bg-rose-50 text-rose-500"
+			>
+				<i class="fa-solid fa-diagram-project text-xs"></i>
+			</span>
+			<h2 class="text-sm font-semibold text-slate-800 tracking-tight">
+				{m.mappingProjection()}
+			</h2>
+		</div>
+		<div class="p-6">
+			{#await data.stream.mappingProjection}
+				<div class="flex items-center justify-center h-48"><LoadingSpinner /></div>
+			{:then frameworks}
+				{#if frameworks && frameworks.length > 0}
+					<div class="space-y-3">
+						{#each frameworks as fw}
+							<div class="rounded-lg border border-slate-100 bg-slate-50/50 p-4">
+								<div class="flex items-center justify-between mb-2.5">
+									<span class="text-sm font-medium text-slate-700">{fw.str}</span>
+									<span
+										class="text-[11px] text-slate-400 tabular-nums font-medium"
+										>{fw.assessable_requirements_count} {m.assessable()}</span
+									>
 								</div>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			{:else}
-				<p class="text-gray-500 text-center py-8">{m.noMappingTargets()}</p>
-			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
+								{#if Object.values(fw.results || {}).reduce((a, b) => a + (b as number), 0) > 0}
+									{@const results = fw.results || {}}
+									{@const total = Object.values(results).reduce(
+										(a: number, b: any) => a + (b as number),
+										0
+									)}
+									<div class="flex h-5 rounded-md overflow-hidden gap-px">
+										{#each RESULT_KEYS as key}
+											{@const count = results[key] || 0}
+											{@const pct = (count / total) * 100}
+											{#if pct > 0}
+												<div
+													class="flex items-center justify-center text-[10px] font-medium transition-all first:rounded-l-md last:rounded-r-md"
+													style="width: {pct}%; background-color: {complianceResultColorMap[
+														key
+													]}; {key === 'not_applicable' ? 'color: white;' : 'color: rgba(0,0,0,0.5);'}"
+													title="{safeTranslate(key)}: {count} ({pct.toFixed(1)}%)"
+												>
+													{#if pct > 8}{Math.round(pct)}%{/if}
+												</div>
+											{/if}
+										{/each}
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<div class="flex flex-col items-center justify-center py-12 text-slate-400">
+						<i class="fa-solid fa-diagram-project text-3xl mb-2 opacity-30"></i>
+						<p class="text-sm">{m.noMappingTargets()}</p>
+					</div>
+				{/if}
+			{:catch}
+				<p class="text-red-500 text-center py-8 text-sm">{m.anErrorOccurred()}</p>
+			{/await}
+		</div>
+	</section>
 </div>
