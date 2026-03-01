@@ -29,6 +29,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
+| `BusinessImpactAnalysis` | Multi-sheet Excel (Summary, Assessments, Thresholds) | **Supported** |
 
 ---
 
@@ -558,6 +559,74 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
+### 20. BusinessImpactAnalysis (Multi-sheet Import)
+
+**Behavior:** Creates a `BusinessImpactAnalysis` object plus `AssetAssessment` and `EscalationThreshold` child objects from a three-sheet workbook produced by the BIA export.
+
+**Sheet layout:**
+
+| Sheet | Purpose |
+|-------|---------|
+| `Summary` | One row per BIA — creates/updates `BusinessImpactAnalysis` objects |
+| `<BIA name>` | One row per asset — creates/updates `AssetAssessment` objects |
+| `<BIA name> - thresholds` | One row per point-in-time — creates/updates `EscalationThreshold` objects |
+
+#### Summary Sheet Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `internal_id` | No | UUID of an existing BIA — used in UPDATE mode to locate the record by PK |
+| `name` | **Yes** | BIA name |
+| `description` | No | |
+| `perimeter` | No | Perimeter name lookup |
+| `perimeter_ref_id` | No | Alternative perimeter lookup by ref_id |
+| `risk_matrix` | No | Risk matrix name lookup (ignored when a matrix is selected on the import form) |
+| `risk_matrix_ref_id` | No | Alternative risk matrix lookup by ref_id (same precedence rule) |
+| `domain` | No | Folder/domain name lookup (falls back to form-selected folder) |
+| `version` | No | |
+| `status` | No | |
+| `eta` | No | Date (YYYY-MM-DD) |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `observation` | No | |
+
+> **Note:** `authors` and `reviewers` columns are present in the export for reference but are not processed during import.
+
+#### Asset Assessment Sheet Fields (`<BIA name>`)
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `bia_name` | **Yes** | Links row to the BIA created from Summary sheet |
+| `asset` | **Yes** | Asset name or ref_id lookup |
+| `asset_ref_id` | No | Alternative asset lookup by ref_id |
+| `recovery_documented` | No | Boolean |
+| `recovery_tested` | No | Boolean |
+| `recovery_targets_met` | No | Boolean |
+| `dependencies` | No | Comma-separated asset names |
+| `associated_controls` | No | Comma-separated control names |
+| `evidences` | No | Comma-separated evidence names |
+| `observation` | No | |
+
+#### Threshold Sheet Fields (`<BIA name> - thresholds`)
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `bia_name` | **Yes** | Links row to the BIA |
+| `asset` | **Yes** | Asset name or ref_id lookup |
+| `asset_ref_id` | No | Alternative asset lookup by ref_id |
+| `point_in_time` | **Yes** | Integer — time index for the threshold |
+| `quali_impact` | No | Integer index into BIA risk matrix impact levels; validated against matrix range |
+| `quanti_impact` | No | Decimal value |
+| `quanti_impact_unit` | No | Defaults to `"currency"` |
+| `qualifications` | No | Comma-separated Terminology names |
+| `justification` | No | |
+
+**Special considerations:**
+
+- **Get-or-create on AssetAssessment:** When importing a threshold sheet, if no `AssetAssessment` exists yet for the given BIA + asset pair, one is automatically created (with `folder` inherited from the BIA). This allows threshold-only imports without a prior assessment import pass.
+- **Matrix validation on `quali_impact`:** The value is validated against the impact count of the BIA's risk matrix. Values outside `[0, n_impacts - 1]` produce a clear row-level error rather than silently passing an invalid index to the database.
+
+---
+
 ## Models NOT Supported by Data Wizard
 
 ### Core App (`core/models.py`)
@@ -597,9 +666,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 | Model | Status | Priority to Add |
 |-------|--------|-----------------|
-| BusinessImpactAnalysis | **Not supported** | **High** |
-| AssetAssessment | **Not supported** | **High** |
-| EscalationThreshold | Not supported | Medium |
+| BusinessImpactAnalysis | **Supported** (multi-sheet) | Done |
+| AssetAssessment | **Supported** (via BIA import) | Done |
+| EscalationThreshold | **Supported** (via BIA import) | Done |
 
 ### EBIOS RM App (`ebios_rm/models.py`)
 
@@ -659,7 +728,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Category | Count |
 |----------|-------|
 | **Total Models Identified** | ~70 |
-| **Models with Direct Import Support** | 16 |
+| **Models with Direct Import Support** | 19 |
 | **Models with Indirect Import Support** | ~12 (via EBIOS/TPRM) |
 | **Models NOT Supported** | ~42 |
 
@@ -690,8 +759,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ### High Priority (Resilience)
 
-12. **BusinessImpactAnalysis** - BIA import
-13. **AssetAssessment** - Asset assessments for BIA
+12. ~~**BusinessImpactAnalysis**~~ - ✅ Now supported (multi-sheet)
+13. ~~**AssetAssessment**~~ - ✅ Now supported (via BIA import)
+14. ~~**EscalationThreshold**~~ - ✅ Now supported (via BIA import)
 
 ### Medium Priority
 
