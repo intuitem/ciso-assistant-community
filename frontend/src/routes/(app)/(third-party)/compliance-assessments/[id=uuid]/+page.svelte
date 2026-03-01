@@ -758,81 +758,85 @@
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
 				{/if}
-				<!-- Power-ups Segmented Pill Bar -->
+				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">
 					<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none">{m.powerUps()}</span>
 
-					<!-- Modes: joined toggle group -->
+					<!-- Modes -->
 					{#if !data.compliance_assessment.is_locked}
 						<div>
 							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Modes</span>
-							<div class="inline-flex rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+							<div class="grid grid-cols-2 gap-2">
 								{#if !page.data.user.is_third_party}
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/flash-mode`}
-										class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-white text-indigo-600 hover:bg-indigo-50 transition-colors border-r border-gray-200 cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 transition-colors cursor-pointer"
 										data-testid="flash-mode-button"
 									>
-										<i class="fa-solid fa-bolt"></i>
-										{m.flashMode()}
+										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 text-white shrink-0">
+											<i class="fa-solid fa-bolt text-sm"></i>
+										</div>
+										<span class="text-sm font-semibold">{m.flashMode()}</span>
 									</Anchor>
 								{/if}
 								<Anchor
 									breadcrumbAction="push"
 									href={`${page.url.pathname}/table-mode`}
-									class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-white text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
 									data-testid="table-mode-button"
 								>
-									<i class="fa-solid fa-table-list"></i>
-									{m.tableMode()}
+									<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0">
+										<i class="fa-solid fa-table-list text-sm"></i>
+									</div>
+									<span class="text-sm font-semibold">{m.tableMode()}</span>
 								</Anchor>
 							</div>
 						</div>
 					{/if}
 
-					<!-- Actions: rounded pill buttons -->
+					<!-- Actions -->
 					{#if !page.data.user.is_third_party}
 						<div>
 							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Actions</span>
-							<div class="grid grid-cols-3 gap-2">
+							<div class="grid grid-cols-2 gap-2">
 								<button
-									class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateForm()}
 									data-testid="apply-mapping-button"
 								>
-									<i class="fa-solid fa-diagram-project text-emerald-500"></i>
-									{m.applyMapping()}
+									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>
+									<span class="text-sm font-medium">{m.applyMapping()}</span>
 								</button>
 								<button
-									class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCreateCloneForm()}
 									data-testid="clone-audit-button"
 								>
-									<i class="fa-solid fa-copy text-fuchsia-500"></i>
-									{m.cloneAudit()}
+									<i class="fa-solid fa-copy text-fuchsia-500 text-base"></i>
+									<span class="text-sm font-medium">{m.cloneAudit()}</span>
 								</button>
 								<button
-									class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 									onclick={() => modalCompareAudit()}
 									data-testid="compare-audit-button"
 								>
-									<i class="fa-solid fa-code-compare text-rose-500"></i>
-									{m.compareToAudit()}
+									<i class="fa-solid fa-code-compare text-rose-500 text-base"></i>
+									<span class="text-sm font-medium">{m.compareToAudit()}</span>
 								</button>
 								{#if page.data?.featureflags?.validation_flows}
 									<button
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 										onclick={() => modalRequestValidation()}
 										data-testid="request-validation-button"
 									>
-										<i class="fa-solid fa-check-circle text-amber-500"></i>
-										{m.requestValidation()}
+										<i class="fa-solid fa-check-circle text-amber-500 text-base"></i>
+										<span class="text-sm font-medium">{m.requestValidation()}</span>
 									</button>
 								{/if}
 								{#if !data.compliance_assessment.is_locked}
 									<button
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="sync-to-actions-button"
 										onclick={async () => {
 											await modalConfirmSyncToActions(
@@ -850,74 +854,80 @@
 												</Progress.Circle>
 											</Progress>
 										{:else}
-											<i class="fa-solid fa-arrows-rotate text-cyan-500"></i>
+											<i class="fa-solid fa-arrows-rotate text-cyan-500 text-base"></i>
 										{/if}
-										{m.syncToAppliedControls()}
+										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
 									</button>
-								{/if}
-								{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
-									<button
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
-										onclick={() => {
-											modalConfirmCreateSuggestedControls(
-												data.compliance_assessment.id,
-												data.compliance_assessment.name,
-												'?/createSuggestedControls'
-											);
-										}}
-									>
-										{#if createAppliedControlsLoading}
-											<Progress value={null}>
-												<Progress.Circle class="[--size:--spacing(5)]">
-													<Progress.CircleTrack />
-													<Progress.CircleRange class="stroke-violet-500" />
-												</Progress.Circle>
-											</Progress>
-										{:else}
-											<i class="fa-solid fa-wand-magic-sparkles text-violet-500"></i>
-										{/if}
-										{m.suggestControls()}
-									</button>
+									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+										<button
+											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+											onclick={() => {
+												modalConfirmCreateSuggestedControls(
+													data.compliance_assessment.id,
+													data.compliance_assessment.name,
+													'?/createSuggestedControls'
+												);
+											}}
+										>
+											{#if createAppliedControlsLoading}
+												<Progress value={null}>
+													<Progress.Circle class="[--size:--spacing(5)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange class="stroke-violet-500" />
+													</Progress.Circle>
+												</Progress>
+											{:else}
+												<i class="fa-solid fa-wand-magic-sparkles text-violet-500 text-base"></i>
+											{/if}
+											<span class="text-sm font-medium">{m.suggestControls()}</span>
+										</button>
+									{/if}
 								{/if}
 								{#if canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/assignments`}
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
 										data-testid="assignments-button"
 									>
-										<i class="fa-solid fa-user-tag text-green-500"></i>
-										{m.assignments?.() ?? 'Assignments'}
+										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
+										<span class="text-sm font-medium">{m.assignments?.() ?? 'Assignments'}</span>
 									</Anchor>
 								{/if}
 							</div>
 						</div>
 					{/if}
 
-					<!-- Insights: badge-style -->
+					<!-- Insights -->
 					{#if has_threats || (page.data?.featureflags?.advanced_analytics && !page.data.user.is_third_party)}
 						<div>
 							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Insights</span>
-							<div class="grid grid-cols-3 gap-2">
+							<div class="grid grid-cols-2 gap-2">
 								{#if has_threats && !page.data.user.is_third_party}
 									<button
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
 										onclick={openThreatsDialog}
 									>
-										<i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-										<span class="font-bold">{data.threats.total_unique_threats}</span>
-										{m.potentialThreats()}
+										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-white shrink-0">
+											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
+										</div>
+										<div class="flex flex-col">
+											<span class="text-lg font-bold leading-tight">{data.threats.total_unique_threats}</span>
+											<span class="text-xs text-amber-600">{m.potentialThreats()}</span>
+										</div>
 									</button>
 								{/if}
 								{#if page.data?.featureflags?.advanced_analytics && !page.data.user.is_third_party}
 									<Anchor
 										breadcrumbAction="push"
 										href={`${page.url.pathname}/advanced-analytics`}
-										class="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-medium bg-slate-50 text-slate-700 border border-slate-200 hover:bg-slate-100 transition-colors cursor-pointer"
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
 										data-testid="advanced-analytics-button"
 									>
-										<i class="fa-solid fa-chart-line text-orange-500"></i>
-										{m.advancedAnalytics()}
+										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white shrink-0">
+											<i class="fa-solid fa-chart-line text-sm"></i>
+										</div>
+										<span class="text-sm font-semibold">{m.advancedAnalytics()}</span>
 									</Anchor>
 								{/if}
 							</div>
