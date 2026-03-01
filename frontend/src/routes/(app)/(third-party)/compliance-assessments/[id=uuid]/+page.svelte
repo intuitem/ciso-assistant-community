@@ -763,7 +763,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-violet-500 to-purple-500 h-fit"
 						data-testid="flash-mode-button"
 						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
 					>
@@ -772,7 +772,7 @@
 					<Anchor
 						breadcrumbAction="push"
 						href={`${page.url.pathname}/table-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
 						data-testid="table-mode-button"
 						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
 					>
@@ -785,13 +785,13 @@
 						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-fuchsia-500 to-pink-500 h-fit"
 						onclick={() => modalCreateCloneForm()}
 						data-testid="clone-audit-button"
 						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
 					</button>
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-red-500 h-fit"
 						onclick={() => modalCompareAudit()}
 						data-testid="compare-audit-button"
 						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
@@ -806,11 +806,22 @@
 							{m.requestValidation()}
 						</button>
 					{/if}
+					{#if page.data?.featureflags?.advanced_analytics}
+						<Anchor
+							breadcrumbAction="push"
+							href={`${page.url.pathname}/advanced-analytics`}
+							class="btn text-gray-100 bg-linear-to-r from-pink-500 to-orange-500 h-fit"
+							data-testid="advanced-analytics-button"
+						>
+							<i class="fa-solid fa-chart-line mr-2"></i>
+							{m.advancedAnalytics()}
+						</Anchor>
+					{/if}
 				{/if}
 
 				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-sky-500 to-cyan-500 h-fit"
 						data-testid="sync-to-actions-button"
 						onclick={async () => {
 							await modalConfirmSyncToActions(
@@ -838,7 +849,7 @@
 
 				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
 					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
+						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
 						onclick={() => {
 							modalConfirmCreateSuggestedControls(
 								data.compliance_assessment.id,
