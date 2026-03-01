@@ -2363,5 +2363,7 @@
 	"processingTimeout": "Timeout elaborazione",
 	"maliciousFileDetected": "File dannoso rilevato",
 	"serverConfigurationError": "Errore configurazione server",
-	"libraryLoadFailed": "Caricamento libreria fallito"
+	"libraryLoadFailed": "Caricamento libreria fallito",
+	"sortAscending": "Ordina A → Z",
+	"sortDescending": "Ordina Z → A"
 }

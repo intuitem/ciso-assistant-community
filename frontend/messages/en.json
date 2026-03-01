@@ -3486,5 +3486,7 @@
 	"changeTeam": "Change team",
 	"deleteTeam": "Delete team",
 	"appliedControlsPlaceholder": "Select applied controls...",
-	"jumpTo": "Jump to"
+	"jumpTo": "Jump to",
+	"sortAscending": "Sort A → Z",
+	"sortDescending": "Sort Z → A"
 }

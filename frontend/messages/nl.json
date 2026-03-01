@@ -3006,5 +3006,7 @@
 	"processingTimeout": "Verwerkingstime-out",
 	"maliciousFileDetected": "Schadelijk bestand gedetecteerd",
 	"serverConfigurationError": "Serverconfiguratiefout",
-	"libraryLoadFailed": "Bibliotheek laden mislukt"
+	"libraryLoadFailed": "Bibliotheek laden mislukt",
+	"sortAscending": "Sorteren A → Z",
+	"sortDescending": "Sorteren Z → A"
 }

@@ -1875,5 +1875,7 @@
 	"processingTimeout": "Limit czasu przetwarzania",
 	"maliciousFileDetected": "Wykryto złośliwy plik",
 	"serverConfigurationError": "Błąd konfiguracji serwera",
-	"libraryLoadFailed": "Błąd ładowania biblioteki"
+	"libraryLoadFailed": "Błąd ładowania biblioteki",
+	"sortAscending": "Sortuj A → Z",
+	"sortDescending": "Sortuj Z → A"
 }
