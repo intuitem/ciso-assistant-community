@@ -7,6 +7,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     OrganisationIssue,
+    RiskAssessment,
     TaskNode,
     TaskTemplate,
     ValidationFlow,
@@ -978,6 +979,68 @@ def lock_overdue_compliance_assessments():
         logger.info(f"Successfully locked {count} overdue compliance assessments")
     else:
         logger.debug("No overdue compliance assessments found to lock")
+
+
+# @db_periodic_task(crontab(minute="*/5"))  # for testing
+@db_periodic_task(crontab(hour="2", minute="45"))
+def auto_sync_assessments():
+    """Automatically sync to actions for assessments with auto_sync enabled, skipping locked ones"""
+    risk_assessments = RiskAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ra_count = 0
+    for assessment in risk_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(
+                reset_residual=False, dry_run=False
+            )
+            if changes:
+                ra_count += 1
+                logger.info(
+                    "Auto-synced risk assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync risk assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ca_count = 0
+    for assessment in compliance_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(dry_run=False)
+            if changes:
+                ca_count += 1
+                logger.info(
+                    "Auto-synced compliance assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync compliance assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    if ra_count > 0 or ca_count > 0:
+        logger.info(
+            f"Auto-sync completed: {ra_count} risk assessments, {ca_count} compliance assessments synced"
+        )
+    else:
+        logger.debug("Auto-sync completed: no assessments needed syncing")
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing

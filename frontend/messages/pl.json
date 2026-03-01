@@ -162,6 +162,8 @@
 	"focusModeTooltip": "Skup się na konkretnej domenie",
 	"objectNotReachableFromCurrentFocus": "Ten obiekt nie jest dostępny z obecnego skupienia. Przekierowywanie do widoku listy.",
 	"objectNotFound": "Nie znaleziono obiektu. Przekierowywanie do widoku listy.",
+	"autoSync": "Automatyczna codzienna synchronizacja z akcjami",
+	"autoSyncHelpText": "Po włączeniu zadanie będzie automatycznie synchronizować akcje codziennie. Zablokowane oceny są pomijane.",
 	"clearFocus": "Wyczyść fokus",
 	"noDomainsAvailable": "Brak dostępnych domen",
 	"urn": "URN",

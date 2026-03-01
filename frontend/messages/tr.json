@@ -163,6 +163,8 @@
 	"focusModeTooltip": "Belirli bir etki alanına odaklan",
 	"objectNotReachableFromCurrentFocus": "Bu nesneye mevcut odaktan erişilemiyor. Liste görünümüne yönlendiriliyor.",
 	"objectNotFound": "Nesne bulunamadı. Liste görünümüne yönlendiriliyor.",
+	"autoSync": "İşlemleri otomatik olarak günlük olarak senkronize et",
+	"autoSyncHelpText": "Etkinleştirildiğinde, bir görev İşlemleri otomatik olarak günlük olarak senkronize eder. Kilitli değerlendirmeler atlanır.",
 	"clearFocus": "Odağı temizle",
 	"noDomainsAvailable": "Mevcut etki alanı yok",
 	"urn": "URN",

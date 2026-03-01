@@ -157,6 +157,8 @@
 	"focusModeTooltip": "Fokus pada domain tertentu",
 	"objectNotReachableFromCurrentFocus": "Objek ini tidak dapat dijangkau dari fokus saat ini. Mengalihkan ke tampilan daftar.",
 	"objectNotFound": "Objek tidak ditemukan. Mengalihkan ke tampilan daftar.",
+	"autoSync": "Sinkronisasi otomatis harian ke tindakan",
+	"autoSyncHelpText": "Jika diaktifkan, tugas akan secara otomatis melakukan sinkronisasi ke tindakan setiap hari. Penilaian terkunci dilewati.",
 	"clearFocus": "Hapus fokus",
 	"noDomainsAvailable": "Tidak ada domain tersedia",
 	"urn": "URN",

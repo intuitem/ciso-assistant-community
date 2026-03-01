@@ -128,6 +128,8 @@
 	"focusModeTooltip": "Concentrati su un dominio specifico",
 	"objectNotReachableFromCurrentFocus": "Questo oggetto non è raggiungibile dal focus corrente. Reindirizzamento alla vista elenco.",
 	"objectNotFound": "Oggetto non trovato. Reindirizzamento alla vista elenco.",
+	"autoSync": "Sincronizzazione automatica giornaliera con azioni",
+	"autoSyncHelpText": "Se abilitato, un'attività sincronizza automaticamente le azioni su base giornaliera. Le valutazioni bloccate vengono saltate.",
 	"clearFocus": "Cancella focus",
 	"noDomainsAvailable": "Nessun dominio disponibile",
 	"urn": "URN",

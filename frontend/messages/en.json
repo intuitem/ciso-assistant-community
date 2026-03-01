@@ -2253,6 +2253,8 @@
 	"past": "Past",
 	"isLocked": "Locked",
 	"isLockedHelpText": "Lock this assessment to prevent changes on it or the associated items.",
+	"autoSync": "Automatic daily sync to actions",
+	"autoSyncHelpText": "When enabled, a task will automatically perform sync to actions on a daily basis. Locked assessments are skipped.",
 	"lockedAssessment": "Assessment Locked",
 	"lockedAssessmentMessage": "This assessment is locked.",
 	"lockedRiskScenarioMessage": "This risk scenario cannot be modified because its parent risk assessment is locked.",
