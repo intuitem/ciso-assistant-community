@@ -2974,6 +2974,8 @@
 	"height": "Height",
 	"showTarget": "Show target",
 	"showLegend": "Show title and legend",
+	"showInferences": "Show the inferences",
+	"hideInferences": "Hide the inferences",
 	"widgetConfig": "Widget configuration",
 	"target": "Target",
 	"actual": "Actual",
