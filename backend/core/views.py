@@ -10349,45 +10349,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 }
             )
 
-        # Get comparable audits (same framework, user can view)
-        (viewable_objects, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, ComplianceAssessment
-        )
-        comparable = (
-            ComplianceAssessment.objects.filter(
-                framework=compliance_assessment.framework,
-                id__in=viewable_objects,
-            )
-            .exclude(id=pk)
-            .order_by("-created_at")[:10]
-        )
-
-        comparable_audits = []
-        for ca in comparable:
-            latest = (
-                HistoricalMetric.objects.filter(
-                    model="ComplianceAssessment", object_id=ca.id
-                )
-                .order_by("-date")
-                .first()
-            )
-            final_data = latest.data.get("reqs", {}) if latest else {}
-            comparable_audits.append(
-                {
-                    "id": str(ca.id),
-                    "name": ca.name,
-                    "final_progress": final_data.get("progress_perc", 0),
-                    "final_score": final_data.get("score", 0),
-                    "final_per_result": final_data.get("per_result", {}),
-                }
-            )
-
-        return Response(
-            {
-                "timeline": timeline,
-                "comparable_audits": comparable_audits,
-            }
-        )
+        return Response({"timeline": timeline})
 
     @action(
         detail=True,

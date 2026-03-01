@@ -50,7 +50,57 @@
 		</a>
 	</div>
 
-	<!-- Section 1: Compliance by Section -->
+	<!-- Compliance Over Time -->
+	<div class="card bg-white shadow-lg p-6">
+		<h2 class="text-lg font-semibold mb-4">{m.complianceOverTime()}</h2>
+		{#await data.stream.complianceTimeline}
+			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
+		{:then timelineData}
+			{@const timeline = timelineData.timeline}
+			{#if timeline && timeline.length > 0}
+				<div class="h-80" id="timeline_chart_container">
+					<!-- Inline ECharts for timeline -->
+					{#await import('echarts') then echarts}
+						{@const _init = (() => {
+							setTimeout(() => {
+								const el = document.getElementById('timeline_chart_container');
+								if (!el) return;
+								const chart = echarts.init(el, null, { renderer: 'svg' });
+								const dates = timeline.map((t: any) => t.date);
+								const series = RESULT_KEYS.map((key) => ({
+									name: safeTranslate(key),
+									type: 'line',
+									stack: 'total',
+									smooth: true,
+									showSymbol: false,
+									areaStyle: { opacity: 0.6 },
+									emphasis: { focus: 'series' },
+									data: timeline.map((t: any) => t.per_result[key] || 0),
+									itemStyle: { color: complianceResultColorMap[key] }
+								}));
+								chart.setOption({
+									tooltip: { trigger: 'axis' },
+									legend: { top: 0 },
+									grid: { left: 50, right: 20, top: 40, bottom: 30 },
+									xAxis: { type: 'category', data: dates },
+									yAxis: { type: 'value' },
+									series
+								});
+								window.addEventListener('resize', () => chart.resize());
+							}, 0);
+							return '';
+						})()}
+					{/await}
+				</div>
+			{:else}
+				<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
+			{/if}
+		{:catch}
+			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
+		{/await}
+	</div>
+
+	<!-- Compliance by Section -->
 	<div class="card bg-white shadow-lg p-6">
 		<h2 class="text-lg font-semibold mb-4">{m.complianceBySection()}</h2>
 		{#await data.stream.sectionCompliance}
@@ -156,14 +206,15 @@
 						values={[
 							{
 								name: safeTranslate('requirementsWithControls'),
-								value: coverage.with_controls
+								value: coverage.with_controls,
+								itemStyle: { color: '#86efac' }
 							},
 							{
 								name: safeTranslate('requirementsWithoutControls'),
-								value: coverage.without_controls
+								value: coverage.without_controls,
+								itemStyle: { color: '#fca5a5' }
 							}
 						]}
-						colors={['#22c55e', '#ef4444']}
 					/>
 				</div>
 
@@ -219,14 +270,15 @@
 						values={[
 							{
 								name: safeTranslate('requirementsWithEvidence'),
-								value: coverage.with_evidence
+								value: coverage.with_evidence,
+								itemStyle: { color: '#86efac' }
 							},
 							{
 								name: safeTranslate('requirementsWithoutEvidence'),
-								value: coverage.without_evidence
+								value: coverage.without_evidence,
+								itemStyle: { color: '#fca5a5' }
 							}
 						]}
-						colors={['#22c55e', '#ef4444']}
 					/>
 				</div>
 
@@ -349,96 +401,7 @@
 		{/if}
 	{/await}
 
-	<!-- Compliance Over Time -->
-	<div class="card bg-white shadow-lg p-6">
-		<h2 class="text-lg font-semibold mb-4">{m.complianceOverTime()}</h2>
-		{#await data.stream.complianceTimeline}
-			<div class="flex items-center justify-center h-64"><LoadingSpinner /></div>
-		{:then timelineData}
-			{@const timeline = timelineData.timeline}
-			{#if timeline && timeline.length > 0}
-				<div class="h-80" id="timeline_chart_container">
-					<!-- Inline ECharts for timeline -->
-					{#await import('echarts') then echarts}
-						{@const _init = (() => {
-							setTimeout(() => {
-								const el = document.getElementById('timeline_chart_container');
-								if (!el) return;
-								const chart = echarts.init(el, null, { renderer: 'svg' });
-								const dates = timeline.map((t: any) => t.date);
-								const series = RESULT_KEYS.map((key) => ({
-									name: safeTranslate(key),
-									type: 'line',
-									stack: 'total',
-									smooth: true,
-									showSymbol: false,
-									areaStyle: { opacity: 0.6 },
-									emphasis: { focus: 'series' },
-									data: timeline.map((t: any) => t.per_result[key] || 0),
-									itemStyle: { color: complianceResultColorMap[key] }
-								}));
-								chart.setOption({
-									tooltip: { trigger: 'axis' },
-									legend: { top: 0 },
-									grid: { left: 50, right: 20, top: 40, bottom: 30 },
-									xAxis: { type: 'category', data: dates },
-									yAxis: { type: 'value' },
-									series
-								});
-								window.addEventListener('resize', () => chart.resize());
-							}, 0);
-							return '';
-						})()}
-					{/await}
-				</div>
-			{:else}
-				<p class="text-gray-500 text-center py-8">{m.nothingToShowYet()}</p>
-			{/if}
-
-			<!-- Comparable audits -->
-			{@const comparable = timelineData.comparable_audits}
-			{#if comparable && comparable.length > 0}
-				<div class="mt-6">
-					<h3 class="text-md font-semibold mb-3">{m.comparableAudits()}</h3>
-					<div class="overflow-x-auto">
-						<table class="w-full text-sm">
-							<thead>
-								<tr class="border-b text-left text-gray-500">
-									<th class="py-2 pr-4">{m.name()}</th>
-									<th class="py-2 pr-4 text-right">{m.progress()}</th>
-									<th class="py-2 pr-4 text-right">{m.score()}</th>
-									<th class="py-2 pr-4 text-right">{safeTranslate('compliant')}</th>
-									<th class="py-2 pr-4 text-right">{safeTranslate('nonCompliant')}</th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each comparable as audit}
-									<tr class="border-b border-gray-100">
-										<td class="py-2 pr-4">
-											<a
-												href={`/compliance-assessments/${audit.id}`}
-												class="text-indigo-600 hover:underline">{audit.name}</a
-											>
-										</td>
-										<td class="py-2 pr-4 text-right">{audit.final_progress}%</td>
-										<td class="py-2 pr-4 text-right">{audit.final_score ?? '-'}</td>
-										<td class="py-2 pr-4 text-right">{audit.final_per_result?.compliant ?? 0}</td>
-										<td class="py-2 pr-4 text-right"
-											>{audit.final_per_result?.non_compliant ?? 0}</td
-										>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			{/if}
-		{:catch}
-			<p class="text-red-500 text-center py-8">{m.anErrorOccurred()}</p>
-		{/await}
-	</div>
-
-	<!-- Section 4: Implementation Groups Breakdown -->
+	<!-- Implementation Groups Breakdown -->
 	<div class="card bg-white shadow-lg p-6">
 		<h2 class="text-lg font-semibold mb-4">{m.implementationGroupsBreakdown()}</h2>
 		{#await data.stream.igBreakdown}
