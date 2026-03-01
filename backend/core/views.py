@@ -14,7 +14,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Optional
 import time
 from django.db.models import (
     F,
@@ -608,31 +608,57 @@ class GenericFilterSet(df.FilterSet):
         }
 
 
-class FolderOrderingFilter(filters.OrderingFilter):
-    def get_ordering(self, request, queryset, view):
-        ordering = super().get_ordering(request, queryset, view)
-        if ordering:
-            return [
-                "folder__name"
-                if f == "folder"
-                else "-folder__name"
-                if f == "-folder"
-                else f
-                for f in ordering
-            ]
-        return ordering
+class CustomOrderingFilter(filters.OrderingFilter):
+    """A base class to map field ordering to specific field paths.
+
+    Example
+    -------
+    class SomeOrderingFilter(CustomOrderingFilter):
+        // The ordering of the "name" field will be based on the "owner__name" value instead.
+        ordering_mapping = { "name": "owner__name" }
+    """
+
+    ordering_mapping: dict[str, str]
+
+    def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
+        """Map ordering terms based on `ordering_mapping` when provided on the subclass."""
+        ordering_list = super().get_ordering(request, queryset, view)
+        if ordering_list is None:
+            return None
+
+        mapping = getattr(view, "ordering_mapping", None) or getattr(
+            self, "ordering_mapping", None
+        )
+
+        if mapping is None:
+            return ordering_list
+
+        new_ordering_list = []
+        for order in ordering_list:
+            field_name = order.lstrip("-")
+
+            if (new_field := mapping.get(field_name)) is None:
+                new_ordering_list.append(order)
+                continue
+
+            is_desc = order.startswith("-")
+            new_order = f"-{new_field}" if is_desc else new_field
+            new_ordering_list.append(new_order)
+
+        return new_ordering_list
 
 
 class BaseModelViewSet(viewsets.ModelViewSet):
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
-        FolderOrderingFilter,
+        CustomOrderingFilter,
     ]
     ordering = ["created_at"]
     ordering_fields = "__all__"
     search_fields = ["name", "description"]
     filterset_fields = []
+    ordering_mapping = {"folder": "folder__name"}
     model: type[models.Model] | None = None
 
     serializers_module = "core.serializers"
