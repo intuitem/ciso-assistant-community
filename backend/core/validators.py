@@ -60,9 +60,18 @@ def validate_file_name(value):
         "xml",
         "msg",
         "eml",
+        "zip",
+        "7z",
+        "tar",
+        "gz",
+        "log",
+        "svg",
+        "mp4",
+        "mov",
+        "gif",
     ]
     parts = value.name.split(".")
-    extension = parts[-1]
+    extension = parts[-1].lower()
 
     if extension in allowed_extensions:
         if len(value.name) > 256:
@@ -74,4 +83,6 @@ def validate_file_name(value):
         )
         return value
     else:
-        raise ValidationError("An error occured with file extension")
+        raise ValidationError(
+            f"Unsupported file extension '.{extension}'. Allowed extensions: {', '.join(allowed_extensions)}"
+        )
