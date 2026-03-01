@@ -14,7 +14,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
     F,
@@ -3502,64 +3502,78 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, RiskAssessment
         )
 
-        if UUID(pk) in object_ids_view:
-            risk_assessment = self.get_object()
-            data = request.data
-
-            duplicate_risk_assessment = RiskAssessment.objects.create(
-                name=data.get("name"),
-                description=data.get("description"),
-                perimeter=Perimeter.objects.get(id=data.get("perimeter")),
-                version=data.get("version"),
-                risk_matrix=risk_assessment.risk_matrix,
-                ref_id=data.get("ref_id"),
-                eta=risk_assessment.eta,
-                due_date=risk_assessment.due_date,
-                status=risk_assessment.status,
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"error": "Permission denied"}, status=status.HTTP_403_FORBIDDEN
             )
 
-            duplicate_risk_assessment.authors.set(risk_assessment.authors.all())
-            duplicate_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+        risk_assessment = self.get_object()
+        data = request.data.copy()
 
-            for scenario in risk_assessment.risk_scenarios.all():
-                duplicate_scenario = RiskScenario.objects.create(
-                    risk_assessment=duplicate_risk_assessment,
-                    name=scenario.name,
-                    description=scenario.description,
-                    treatment=scenario.treatment,
-                    current_proba=scenario.current_proba,
-                    current_impact=scenario.current_impact,
-                    residual_proba=scenario.residual_proba,
-                    residual_impact=scenario.residual_impact,
-                    strength_of_knowledge=scenario.strength_of_knowledge,
-                    justification=scenario.justification,
-                    ref_id=scenario.ref_id,
+        if not data.get("risk_matrix"):
+            data["risk_matrix"] = str(risk_assessment.risk_matrix.id)
+
+        duplicated_risk_assessment_serializer = RiskAssessmentWriteSerializer(
+            data=data, context={"request": request}
+        )
+        if not duplicated_risk_assessment_serializer.is_valid():
+            error = str(duplicated_risk_assessment_serializer.errors)
+            return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        duplicated_risk_assessment = duplicated_risk_assessment_serializer.save()
+
+        FIELDS_TO_COPY: Final[list[str]] = ["risk_matrix", "eta", "due_date", "status"]
+        for field_name in FIELDS_TO_COPY:
+            field_value = getattr(risk_assessment, field_name)
+            setattr(duplicated_risk_assessment, field_name, field_value)
+
+        duplicated_risk_assessment.save()
+
+        duplicated_risk_assessment.authors.set(risk_assessment.authors.all())
+        duplicated_risk_assessment.reviewers.set(risk_assessment.reviewers.all())
+
+        for scenario in risk_assessment.risk_scenarios.all():
+            duplicated_scenario = RiskScenario.objects.create(
+                risk_assessment=duplicated_risk_assessment,
+                name=scenario.name,
+                description=scenario.description,
+                treatment=scenario.treatment,
+                current_proba=scenario.current_proba,
+                current_impact=scenario.current_impact,
+                residual_proba=scenario.residual_proba,
+                residual_impact=scenario.residual_impact,
+                inherent_proba=scenario.inherent_proba,
+                inherent_impact=scenario.inherent_impact,
+                inherent_level=scenario.inherent_level,
+                strength_of_knowledge=scenario.strength_of_knowledge,
+                justification=scenario.justification,
+                ref_id=scenario.ref_id,
+            )
+
+            duplicated_scenario.qualifications.set(scenario.qualifications.all())
+
+            for field in [
+                "applied_controls",
+                "threats",
+                "assets",
+                "existing_applied_controls",
+            ]:
+                duplicate_related_objects(
+                    scenario,
+                    duplicated_scenario,
+                    duplicated_risk_assessment.folder,
+                    field,
                 )
 
-                duplicate_scenario.qualifications.set(scenario.qualifications.all())
+            if duplicated_risk_assessment.folder in [risk_assessment.folder] + [
+                folder for folder in risk_assessment.folder.get_sub_folders()
+            ]:
+                duplicated_scenario.owner.set(scenario.owner.all())
 
-                for field in [
-                    "applied_controls",
-                    "threats",
-                    "assets",
-                    "existing_applied_controls",
-                ]:
-                    duplicate_related_objects(
-                        scenario,
-                        duplicate_scenario,
-                        duplicate_risk_assessment.folder,
-                        field,
-                    )
+            duplicated_scenario.save()
 
-                if duplicate_risk_assessment.folder in [risk_assessment.folder] + [
-                    folder for folder in risk_assessment.folder.get_sub_folders()
-                ]:
-                    duplicate_scenario.owner.set(scenario.owner.all())
-
-                duplicate_scenario.save()
-
-            duplicate_risk_assessment.save()
-            return Response({"results": "risk assessment duplicated"})
+        duplicated_risk_assessment.save()
+        return Response({"results": "risk assessment duplicated"})
 
     @action(
         detail=True,
@@ -4634,36 +4648,50 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         applied_control = self.get_object()
         data = request.data
         new_folder = Folder.objects.get(id=data["folder"])
-        duplicate_applied_control = AppliedControl.objects.create(
-            reference_control=applied_control.reference_control,
-            name=data["name"],
-            description=data["description"],
-            folder=new_folder,
-            ref_id=applied_control.ref_id,
-            category=applied_control.category,
-            csf_function=applied_control.csf_function,
-            priority=applied_control.priority,
-            status=applied_control.status,
-            start_date=applied_control.start_date,
-            eta=applied_control.eta,
-            expiry_date=applied_control.expiry_date,
-            link=applied_control.link,
-            effort=applied_control.effort,
-            cost=applied_control.cost,
-            progress_field=applied_control.progress_field,
+
+        duplicated_applied_control_serializer = AppliedControlWriteSerializer(
+            data=data, context={"request": request}
         )
-        duplicate_applied_control.owner.set(applied_control.owner.all())
-        duplicate_applied_control.filtering_labels.set(
+        if not duplicated_applied_control_serializer.is_valid():
+            error = str(duplicated_applied_control_serializer.errors)
+            return Response({"results": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        duplicated_applied_control = duplicated_applied_control_serializer.save()
+
+        FIELDS_TO_COPY: Final[list[str]] = [
+            "reference_control",
+            "folder",
+            "ref_id",
+            "category",
+            "csf_function",
+            "priority",
+            "status",
+            "start_date",
+            "eta",
+            "expiry_date",
+            "link",
+            "effort",
+            "cost",
+            "progress_field",
+        ]
+        for field_name in FIELDS_TO_COPY:
+            field_value = getattr(applied_control, field_name)
+            setattr(duplicated_applied_control, field_name, field_value)
+
+        duplicated_applied_control.save()
+
+        duplicated_applied_control.owner.set(applied_control.owner.all())
+        duplicated_applied_control.filtering_labels.set(
             applied_control.filtering_labels.all()
         )
-        if data["duplicate_evidences"]:
+        if data.get("duplicate_evidences"):
             duplicate_related_objects(
-                applied_control, duplicate_applied_control, new_folder, "evidences"
+                applied_control, duplicated_applied_control, new_folder, "evidences"
             )
-            duplicate_applied_control.save()
+            duplicated_applied_control.save()
 
         return Response(
-            {"results": AppliedControlReadSerializer(duplicate_applied_control).data}
+            {"results": AppliedControlReadSerializer(duplicated_applied_control).data}
         )
 
     @action(detail=False, methods=["get"])
