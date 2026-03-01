@@ -8223,10 +8223,18 @@ class UploadAttachmentView(APIView):
                 revision.attachment = attachment
                 try:
                     revision.full_clean()
-                except ValidationError:
+                except ValidationError as e:
                     revision.attachment = old_attachment
+                    messages = []
+                    if hasattr(e, "message_dict"):
+                        for field_messages in e.message_dict.values():
+                            messages.extend(field_messages)
+                    elif hasattr(e, "messages"):
+                        messages = e.messages
+                    else:
+                        messages = [str(e.message)]
                     return Response(
-                        {"detail": "File too large or unsupported format."},
+                        {"detail": " ".join(messages)},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 if old_attachment:
