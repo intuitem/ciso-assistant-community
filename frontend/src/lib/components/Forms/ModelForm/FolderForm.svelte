@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import FileInput from '../FileInput.svelte';
@@ -28,6 +29,16 @@
 		object = {},
 		model
 	}: Props = $props();
+
+	onMount(() => {
+		const isEdit = Boolean(object?.id);
+		if (!isEdit && form.data?.create_iam_groups !== true) {
+			form.form.update((currentData) => ({
+				...currentData,
+				create_iam_groups: true
+			}));
+		}
+	});
 </script>
 
 {#if importFolder}
@@ -57,5 +68,11 @@
 		label={m.labels()}
 		translateOptions={false}
 		allowUserOptions="append"
+	/>
+	<Checkbox
+		{form}
+		field="create_iam_groups"
+		label={m.createIamGroups()}
+		helpText={m.whenEnabledIamGroupsAreCreatedAutomatically()}
 	/>
 {/if}

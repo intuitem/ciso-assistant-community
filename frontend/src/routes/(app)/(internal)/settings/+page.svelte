@@ -17,16 +17,15 @@
 	onValueChange={(e) => {
 		group = e.value;
 	}}
-	active="bg-primary-100 text-primary-800 border-b border-primary-800"
 >
-	{#snippet list()}
-		<Tabs.Control value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Control>
-		<Tabs.Control value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Control>
-		<Tabs.Control value="featureFlags"
-			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Control
+	<Tabs.List>
+		<Tabs.Trigger value="general"><i class="fa-solid fa-globe"></i> {m.general()}</Tabs.Trigger>
+		<Tabs.Trigger value="sso"><i class="fa-solid fa-key"></i> {m.sso()}</Tabs.Trigger>
+		<Tabs.Trigger value="featureFlags"
+			><i class="fa-solid fa-flag"></i> {m.featureFlags()}</Tabs.Trigger
 		>
 		{#if page.data?.featureflags?.outgoing_webhooks}
-			<Tabs.Control value="webhooks"
+			<Tabs.Trigger value="webhooks"
 				><span class="flex flex-row gap-2 items-center ml-0"
 					><svg width="20px" height="20px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 						<title>webhook</title>
@@ -36,22 +35,21 @@
 						/>
 					</svg>
 					{m.webhooks()}</span
-				></Tabs.Control
+				></Tabs.Trigger
 			>
 		{/if}
-	{/snippet}
-	{#snippet content()}
-		<Tabs.Panel value="general">
-			<GeneralSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="sso">
-			<SSOSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="featureFlags">
-			<FeatureFlagsSettings {data} />
-		</Tabs.Panel>
-		<Tabs.Panel value="webhooks">
-			<WebhooksSettings {data} />
-		</Tabs.Panel>
-	{/snippet}
+		<Tabs.Indicator />
+	</Tabs.List>
+	<Tabs.Content value="general">
+		<GeneralSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="sso">
+		<SSOSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="featureFlags">
+		<FeatureFlagsSettings {data} />
+	</Tabs.Content>
+	<Tabs.Content value="webhooks">
+		<WebhooksSettings {data} />
+	</Tabs.Content>
 </Tabs>

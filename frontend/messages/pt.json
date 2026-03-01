@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "Iniciar Auditoria",
 	"addEvidence": "Adicionar evidência",
 	"addDomain": "Adicionar domínio",
+	"createIamGroups": "Criar grupos IAM",
+	"iamGroups": "Grupos IAM",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "Os grupos IAM são usados para atribuir funções aos usuários",
+	"globalFolderMustKeepIamGroupsEnabled": "A pasta global deve manter os grupos IAM ativados.",
+	"cannotDisableIamGroupsAssignedUsers": "Não é possível desativar os grupos IAM enquanto estiverem atribuídos a usuários.",
 	"addPerimeter": "Adicionar âmbito",
 	"addUser": "Adicionar usuário",
 	"addPolicy": "Adicionar política",
@@ -173,6 +178,7 @@
 	"next": "Próximo",
 	"previous": "Anterior",
 	"show": "Mostrar",
+	"showStakeholdersName": "Mostrar o nome dos interessados",
 	"entries": "entradas",
 	"searchPlaceholder": "Pesquisar...",
 	"noEntriesFound": "Nenhuma entrada encontrada",
@@ -1125,5 +1131,7 @@
 	"processingTimeout": "Tempo limite de processamento",
 	"maliciousFileDetected": "Arquivo malicioso detectado",
 	"serverConfigurationError": "Erro de configuração do servidor",
-	"libraryLoadFailed": "Falha ao carregar biblioteca"
+	"libraryLoadFailed": "Falha ao carregar biblioteca",
+	"sortAscending": "Ordenar A → Z",
+	"sortDescending": "Ordenar Z → A"
 }

@@ -107,7 +107,7 @@ DORA_SENSITIVENESS_CHOICES = [
     ("eba_ZZ:x793", "High"),
 ]
 
-DORA_FUNCTION_CRITICALITY_CHOICES = [
+DORA_YES_NO_ASSESSMENT_CHOICES = [
     ("eba_BT:x28", "Yes"),
     ("eba_BT:x29", "No"),
     ("eba_BT:x21", "Assessment not performed"),

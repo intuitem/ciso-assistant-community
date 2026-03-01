@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "Audit hinzufügen",
 	"addEvidence": "Nachweis hinzufügen",
 	"addDomain": "Bereich hinzufügen",
+	"createIamGroups": "IAM-Gruppen erstellen",
+	"iamGroups": "IAM-Gruppen",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM-Gruppen werden verwendet, um Rollen Benutzern zuzuweisen",
+	"globalFolderMustKeepIamGroupsEnabled": "Der globale Ordner muss IAM-Gruppen aktiviert lassen.",
+	"cannotDisableIamGroupsAssignedUsers": "IAM-Gruppen können nicht deaktiviert werden, solange sie Benutzern zugewiesen sind.",
 	"addPerimeter": "Perimeter hinzufügen",
 	"addUser": "Benutzer hinzufügen",
 	"addPolicy": "Richtlinie hinzufügen",
@@ -144,6 +149,7 @@
 	"next": "Weiter",
 	"previous": "Zurück",
 	"show": "Anzeigen",
+	"showStakeholdersName": "Namen der Interessenträger anzeigen",
 	"entries": "Einträge",
 	"searchPlaceholder": "Suchen...",
 	"noEntriesFound": "Keine Einträge gefunden",
@@ -2999,5 +3005,7 @@
 	"processingTimeout": "Verarbeitungszeitüberschreitung",
 	"maliciousFileDetected": "Bösartige Datei erkannt",
 	"serverConfigurationError": "Serverkonfigurationsfehler",
-	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden"
+	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden",
+	"sortAscending": "Sortieren A → Z",
+	"sortDescending": "Sortieren Z → A"
 }

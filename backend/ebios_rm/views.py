@@ -8,6 +8,7 @@ from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
 from openpyxl.styles import Alignment
+
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -29,7 +30,6 @@ from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from django.shortcuts import get_object_or_404
 
 import structlog
 
@@ -124,7 +124,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
     def visual_analysis(self, request, pk):
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
         return Response(ebios_rm_visual_analysis(study))
 
     @action(detail=True, name="Get EBIOS RM study report data", url_path="report-data")
@@ -133,7 +133,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         Endpoint to prepare comprehensive report data for an EBIOS RM study.
         Returns all study attributes and associated objects in a structured format.
         """
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
 
         from .serializers import (
             EbiosRMStudyReadSerializer,
@@ -369,8 +369,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=True, name="Export EBIOS RM study as XLSX", url_path="export-xlsx")
     def export_xlsx(self, request, pk):
         """Export EBIOS RM study data to Excel with multiple sheets."""
-        study = get_object_or_404(EbiosRMStudy, id=pk)
 
+        study = self.get_object()
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study).with_pertinence()
@@ -1051,17 +1051,47 @@ class ElementaryActionFilter(GenericFilterSet):
         method="filter_operating_mode_available_actions",
         label="Operating mode available actions",
     )
+    operating_mode_available_antecedents = df.ModelChoiceFilter(
+        queryset=OperatingMode.objects.all(),
+        method="filter_operating_mode_available_antecedents",
+        label="Operating mode available antecedents",
+    )
 
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
-        used_elementary_actions = KillChain.objects.filter(
-            operating_mode=operating_mode
-        ).values_list("elementary_action", flat=True)
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        # When editing an existing kill chain step, exclude it from the "used"
+        # list so its elementary action remains available in the dropdown.
+        exclude_kill_chain = self.data.get("exclude_kill_chain")
+        if exclude_kill_chain:
+            kc_qs = kc_qs.exclude(id=exclude_kill_chain)
+        used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
         return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
+
+    def filter_operating_mode_available_antecedents(self, queryset, name, value):
+        operating_mode = value
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        action_id = self.data.get("actual_action")
+        action = ElementaryAction.objects.filter(id=action_id).first()
+        used_elementary_actions_ids = kc_qs.values_list("elementary_action", flat=True)
+        used_elementary_actions = ElementaryAction.objects.filter(
+            id__in=used_elementary_actions_ids
+        ).exclude(id=action_id if action else None)
+        if action:
+            precedent_actions = used_elementary_actions.filter(
+                attack_stage__lte=action.attack_stage
+            )
+        else:
+            precedent_actions = used_elementary_actions
+        return value.elementary_actions.filter(id__in=precedent_actions)
 
     class Meta:
         model = ElementaryAction
-        fields = ["operating_modes", "operating_mode_available_actions"]
+        fields = [
+            "operating_modes",
+            "operating_mode_available_actions",
+            "operating_mode_available_antecedents",
+        ]
 
 
 class ElementaryActionViewSet(BaseModelViewSet):
@@ -1131,7 +1161,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
-        mo = get_object_or_404(OperatingMode, id=pk)
+        mo = self.get_object()
         nodes = []
         links = []
         groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}

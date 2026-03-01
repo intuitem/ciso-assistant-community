@@ -1236,8 +1236,15 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		body: [
+			'name',
+			'description',
+			'content_type',
+			'parent_folder',
+			'create_iam_groups',
+			'filtering_labels'
+		],
 		filters: {
 			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1658,8 +1665,16 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels', 'appliedControls'],
+		body: [
+			'name',
+			'folder',
+			'owner',
+			'status',
+			'updated_at',
+			'filtering_labels',
+			'applied_controls'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,

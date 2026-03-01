@@ -148,6 +148,16 @@ class ProcessingReadSerializer(BaseModelSerializer):
     assigned_to = FieldsRelatedField(many=True)
     purposes = FieldsRelatedField(["name", "id", "legal_basis"], many=True)
     perimeters = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Processing
