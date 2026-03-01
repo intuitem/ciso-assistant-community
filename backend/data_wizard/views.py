@@ -2345,7 +2345,8 @@ class LoadFileView(APIView):
             excel_data = pd.ExcelFile(excel_file)
             sheet_names = excel_data.sheet_names
 
-            if "Summary" not in sheet_names or len(sheet_names) == 1:
+            if len(sheet_names) == 1:
+                # Single-sheet file: treat it as a Summary-only import.
                 df = normalize_datetime_columns(
                     pd.read_excel(excel_file, sheet_name=sheet_names[0])
                 ).fillna("")
@@ -2364,6 +2365,14 @@ class LoadFileView(APIView):
                     .process_records(records)
                     .to_dict()
                 )
+
+            if "Summary" not in sheet_names:
+                return {
+                    "error": (
+                        "Invalid BIA workbook: expected a 'Summary' sheet but only found: "
+                        + ", ".join(sheet_names)
+                    )
+                }
 
             overall_results = {
                 "bia": {"successful": 0, "failed": 0, "errors": []},

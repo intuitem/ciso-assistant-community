@@ -563,21 +563,21 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| `internal_id` | No | Ref ID (`ref_id`) |
+| `internal_id` | No | UUID of an existing BIA — used in UPDATE mode to locate the record by PK |
 | `name` | **Yes** | BIA name |
 | `description` | No | |
 | `perimeter` | No | Perimeter name lookup |
 | `perimeter_ref_id` | No | Alternative perimeter lookup by ref_id |
-| `risk_matrix` | No | Risk matrix name lookup |
-| `risk_matrix_ref_id` | No | Alternative risk matrix lookup by ref_id |
-| `folder` | No | Folder/domain name lookup |
+| `risk_matrix` | No | Risk matrix name lookup (ignored when a matrix is selected on the import form) |
+| `risk_matrix_ref_id` | No | Alternative risk matrix lookup by ref_id (same precedence rule) |
+| `domain` | No | Folder/domain name lookup (falls back to form-selected folder) |
 | `version` | No | |
 | `status` | No | |
 | `eta` | No | Date (YYYY-MM-DD) |
 | `due_date` | No | Date (YYYY-MM-DD) |
 | `observation` | No | |
-| `authors` | No | Comma-separated user emails |
-| `reviewers` | No | Comma-separated user emails |
+
+> **Note:** `authors` and `reviewers` columns are present in the export for reference but are not processed during import.
 
 #### Asset Assessment Sheet Fields (`<BIA name>`)
 
@@ -589,9 +589,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `recovery_documented` | No | Boolean |
 | `recovery_tested` | No | Boolean |
 | `recovery_targets_met` | No | Boolean |
-| `dependencies` | No | Pipe-separated asset names/ref_ids |
-| `associated_controls` | No | Pipe-separated control names/ref_ids |
-| `evidences` | No | Pipe-separated evidence names/ref_ids |
+| `dependencies` | No | Comma-separated asset names |
+| `associated_controls` | No | Comma-separated control names |
+| `evidences` | No | Comma-separated evidence names |
 | `observation` | No | |
 
 #### Threshold Sheet Fields (`<BIA name> - thresholds`)
@@ -605,7 +605,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `quali_impact` | No | Integer index into BIA risk matrix impact levels; validated against matrix range |
 | `quanti_impact` | No | Decimal value |
 | `quanti_impact_unit` | No | Defaults to `"currency"` |
-| `qualifications` | No | Pipe-separated Terminology names/ref_ids |
+| `qualifications` | No | Comma-separated Terminology names |
 | `justification` | No | |
 
 **Special considerations:**
@@ -749,6 +749,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 12. ~~**BusinessImpactAnalysis**~~ - ✅ Now supported (multi-sheet)
 13. ~~**AssetAssessment**~~ - ✅ Now supported (via BIA import)
+14. ~~**EscalationThreshold**~~ - ✅ Now supported (via BIA import)
 
 ### Medium Priority
 
