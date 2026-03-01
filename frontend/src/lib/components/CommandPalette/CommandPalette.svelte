@@ -3,6 +3,9 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { navigationLinks } from './paletteData';
 	import { goto } from '$lib/utils/breadcrumbs';
+	import { page } from '$app/state';
+	import { navData } from '../SideBar/navData';
+	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
 
 	let opened = $state(false);
 	let searchInput: HTMLElement | null = $state(null);
@@ -17,13 +20,28 @@
 		}
 	}));
 
+	const featureFlags = $derived(page.data?.featureflags ?? {});
+	const sideBarVisibleItems = $derived(getSidebarVisibleItems(featureFlags));
+
+	const visibilityKeyByHref = Object.fromEntries(
+		(navData.items ?? [])
+			.flatMap((section) => section.items ?? [])
+			.filter((item) => item?.href && item?.name)
+			.map((item) => [item.href, item.name])
+	);
+
 	let selected = $state(0);
 	let searchText = $state('');
 	let filteredNavigationCommands = $derived(
-		navigationCommands.filter(
-			(link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0
-		)
+		navigationCommands
+			.filter((link) => link.label.toLowerCase().indexOf(searchText.toLowerCase()) >= 0)
+			.filter((link) => {
+				const visibilityKey = visibilityKeyByHref[link.value];
+				if (!visibilityKey) return true;
+				return sideBarVisibleItems[visibilityKey] !== false;
+			})
 	);
+
 	$effect(() => {
 		if (selected >= filteredNavigationCommands.length) {
 			selected = 0;
