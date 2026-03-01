@@ -1868,5 +1868,7 @@
 	"processingTimeout": "İşlem zaman aşımı",
 	"maliciousFileDetected": "Kötü amaçlı dosya algılandı",
 	"serverConfigurationError": "Sunucu yapılandırma hatası",
-	"libraryLoadFailed": "Kütüphane yükleme hatası"
+	"libraryLoadFailed": "Kütüphane yükleme hatası",
+	"sortAscending": "Sırala A → Z",
+	"sortDescending": "Sırala Z → A"
 }

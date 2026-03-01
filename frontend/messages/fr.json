@@ -3452,5 +3452,7 @@
 	"processingTimeout": "Délai de traitement dépassé",
 	"maliciousFileDetected": "Fichier malveillant détecté",
 	"serverConfigurationError": "Erreur de configuration du serveur",
-	"libraryLoadFailed": "Échec du chargement de la bibliothèque"
+	"libraryLoadFailed": "Échec du chargement de la bibliothèque",
+	"sortAscending": "Trier A → Z",
+	"sortDescending": "Trier Z → A"
 }

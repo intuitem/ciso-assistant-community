@@ -3158,5 +3158,7 @@
 	"processingTimeout": "处理超时",
 	"maliciousFileDetected": "检测到恶意文件",
 	"serverConfigurationError": "服务器配置错误",
-	"libraryLoadFailed": "库加载失败"
+	"libraryLoadFailed": "库加载失败",
+	"sortAscending": "排序 A → Z",
+	"sortDescending": "排序 Z → A"
 }
