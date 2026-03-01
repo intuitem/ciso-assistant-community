@@ -53,6 +53,7 @@
 			label: m.elementaryActions(),
 			description: m.dataWizardElementaryActionDescription()
 		},
+		{ id: 'Vulnerability', label: m.vulnerabilities(), description: '' },
 		{ id: 'ReferenceControl', label: m.referenceControls(), description: '' },
 		{ id: 'Threat', label: m.threats(), description: '' },
 		{ id: 'Processing', label: m.processings(), description: '' },
@@ -129,7 +130,8 @@
 		'Incident',
 		'TPRM',
 		'EbiosRMStudyARM',
-		'EbiosRMStudyExcel'
+		'EbiosRMStudyExcel',
+		'Vulnerability'
 	];
 
 	// Determine if perimeter selection should be disabled
