@@ -49,6 +49,9 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
+CIS_LOCAL_LIBRARY_URN = "urn:local:risk:library:cis-controls-v8"
+
+
 class MultiStringFilter(df.CharFilter):
     def filter(self, qs, value):
         values = self.parent.data.getlist(self.field_name)
@@ -300,6 +303,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             )
 
         library = None
+        special_cis = False
 
         try:
             attachment = request.FILES["file"]
@@ -379,9 +383,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
                             time_limit_sec=30,
                         )
 
-                        result = handler.process_upload(attachment)
+                        upload_excel_result = handler.process_upload(attachment)
 
-                        if result["status"] != 200:
+                        if upload_excel_result["status"] != 200:
                             error_map = {
                                 400: "invalidExcelFile",
                                 413: "fileTooLarge",
@@ -389,29 +393,33 @@ class StoredLibraryViewSet(BaseModelViewSet):
                                 500: "processingError",
                             }
                             error_code = error_map.get(
-                                result["status"], "invalidExcelFile"
+                                upload_excel_result["status"], "invalidExcelFile"
                             )
 
                             # Log security violations specifically
-                            if result["status"] == 400:
+                            if upload_excel_result["status"] == 400:
                                 logger.warning(
                                     "Excel security violation detected",
                                     filename=attachment.name,
-                                    error=result.get("error"),
+                                    error=upload_excel_result.get("error"),
                                 )
 
                             error_payload = {"error": error_code}
-                            detail = result.get("detail") or result.get("error")
+                            detail = upload_excel_result.get(
+                                "detail"
+                            ) or upload_excel_result.get("error")
                             if detail:
                                 error_payload["detail"] = detail
 
                             return HttpResponse(
                                 json.dumps(error_payload),
-                                status=result["status"],
+                                status=upload_excel_result["status"],
                             )
 
                         # Convert YAML string to bytes for storage
-                        content = result["yaml"].encode("utf-8")
+                        content = upload_excel_result["yaml"].encode("utf-8")
+
+                        special_cis = upload_excel_result.get("special") == "CIS"
 
                     except SandboxViolationError as e:
                         logger.warning(
@@ -450,8 +458,9 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
                 # Store the library content (YAML bytes)
                 library, error = StoredLibrary.store_library_content(
-                    content, dry_run=dry_run
+                    content, dry_run=dry_run, force_update=special_cis
                 )
+
                 if error is not None:
                     return HttpResponse(
                         json.dumps({"error": error}),
@@ -470,6 +479,8 @@ class StoredLibraryViewSet(BaseModelViewSet):
                     already_loaded = LoadedLibrary.objects.filter(
                         urn=library.urn
                     ).exists()
+
+                    print("ALREADY LOADED = ", already_loaded, library.urn)
 
                     try:
                         load_error = library.load()
@@ -509,6 +520,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
                         )
 
+                    # print("LOAD_ERROR = ", load_error)
                     if load_error is not None:
                         if not already_loaded:
                             logger.error(

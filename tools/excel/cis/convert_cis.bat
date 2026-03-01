@@ -12,22 +12,17 @@ IF "%~2"=="" (
 
 REM Run the Python scripts
 echo ==^> [STEP 1] Extract Excel file data...
-call python prep_cis.py %1 %2
+call python ../../../backend/scripts/prep_cis_v2.py %1 -p %2
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 1 failed
     exit /b 1
 )
-echo ==^> [STEP 2] Convert extracted Excel file to v2...
-call python ..\..\convert_v1_to_v2.py cis-controls-v8.xlsx
+echo.
+echo ==^> [STEP 2] Convert Excel v2 file to YAML...
+call python ../../../backend/scripts/convert_library_v2.py cis-controls-v8-v2.xlsx
 if %errorlevel% neq 0 (
     echo ==^> [ERROR] Step 2 failed
     exit /b 1
 )
-echo ==^> [STEP 3] Convert Excel v2 file to YAML...
-call python ..\..\convert_library_v2.py cis-controls-v8_new.xlsx
-if %errorlevel% neq 0 (
-    echo ==^> [ERROR] Step 3 failed
-    exit /b 1
-)
-
-echo ==^> [OK] Resulting file is available at cis-controls-v8_new.yaml
+echo.
+echo ==^> [OK] Resulting file is available at cis-controls-v8-v2.yaml
