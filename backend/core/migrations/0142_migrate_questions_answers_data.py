@@ -16,8 +16,8 @@ from django.db.models import Count
 logger = logging.getLogger(__name__)
 
 TYPE_MAPPING = {
-    "unique_choice": "single_choice",
-    "single_choice": "single_choice",
+    "unique_choice": "unique_choice",
+    "single_choice": "unique_choice",
     "multiple_choice": "multiple_choice",
     "text": "text",
     "number": "number",
@@ -208,9 +208,9 @@ def migrate_forward(apps, schema_editor):
 
     # 5. Populate selected_choices M2M from value for choice-type answers
 
-    # SINGLE_CHOICE: resolve value string → M2M
+    # UNIQUE_CHOICE: resolve value string → M2M
     single_choice_qs = (
-        Answer.objects.filter(question__type="single_choice")
+        Answer.objects.filter(question__type="unique_choice")
         .exclude(value__isnull=True)
         .select_related("question")
     )

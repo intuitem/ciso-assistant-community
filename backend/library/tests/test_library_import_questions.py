@@ -81,8 +81,8 @@ class TestLibraryImportQuestions:
 
         q = rn.questions.first()
         assert q is not None
-        # unique_choice -> single_choice mapping
-        assert q.type == "single_choice"
+        # unique_choice is now stored as unique_choice directly
+        assert q.type == "unique_choice"
         assert q.annotation == "Pick one"
         assert q.choices.count() == 2
 

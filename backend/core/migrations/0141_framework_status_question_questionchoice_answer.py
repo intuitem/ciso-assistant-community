@@ -89,7 +89,7 @@ class Migration(migrations.Migration):
                             ("text", "Text"),
                             ("number", "Number"),
                             ("boolean", "Boolean"),
-                            ("single_choice", "Single choice"),
+                            ("unique_choice", "Unique choice"),
                             ("multiple_choice", "Multiple choice"),
                             ("date", "Date"),
                         ],

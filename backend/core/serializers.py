@@ -2484,7 +2484,7 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         defaults={"folder": instance.folder},
                     )
 
-                    if question.type == Question.Type.SINGLE_CHOICE:
+                    if question.type == Question.Type.UNIQUE_CHOICE:
                         if answer_value:
                             choice = question.choices.filter(
                                 ref_id=answer_value
@@ -2512,22 +2512,22 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         answer.value = answer_value
                         answer.save(update_fields=["value"])
 
-            # Check if any choice has scoring or result logic
-            from core.models import QuestionChoice
+                # Check if any choice has scoring or result logic
+                from core.models import QuestionChoice
 
-            has_score_or_result = (
-                QuestionChoice.objects.filter(
-                    question__requirement_node=instance.requirement,
+                has_score_or_result = (
+                    QuestionChoice.objects.filter(
+                        question__requirement_node=instance.requirement,
+                    )
+                    .filter(
+                        models.Q(add_score__isnull=False)
+                        | models.Q(compute_result__isnull=False)
+                    )
+                    .exists()
                 )
-                .filter(
-                    models.Q(add_score__isnull=False)
-                    | models.Q(compute_result__isnull=False)
-                )
-                .exists()
-            )
 
-            if has_score_or_result:
-                instance.compute_score_and_result()
+                if has_score_or_result:
+                    instance.compute_score_and_result()
 
             return instance
 
@@ -2640,7 +2640,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
 
             # Reject sending both value and selected_choices for choice questions
             if (
-                q_type in (Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE)
+                q_type in (Question.Type.UNIQUE_CHOICE, Question.Type.MULTIPLE_CHOICE)
                 and value is not None
                 and selected_choices_list is not None
             ):
@@ -2649,7 +2649,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     "Use 'selected_choices' (PKs) or 'value' (ref_ids), not both."
                 )
 
-            if q_type == Question.Type.SINGLE_CHOICE:
+            if q_type == Question.Type.UNIQUE_CHOICE:
                 # Legacy: value is a ref_id string → resolve to M2M
                 if value is not None:
                     if isinstance(value, list):

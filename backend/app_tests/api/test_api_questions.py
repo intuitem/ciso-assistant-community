@@ -183,7 +183,7 @@ class TestQuestionChoiceEndpoints:
             requirement_node=rn,
             urn="urn:test:choice:q1",
             ref_id="CQ1",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             folder=folder,
             is_published=True,
         )
@@ -209,7 +209,7 @@ class TestQuestionChoiceEndpoints:
             requirement_node=rn,
             urn="urn:test:pubchoice:q1",
             ref_id="PCQ1",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             folder=folder,
             is_published=True,
         )

@@ -18,6 +18,11 @@ from uuid import UUID
 logger = structlog.get_logger(__name__)
 
 
+def is_compute_result_truthy(compute_result: str | None) -> bool:
+    """Return True if a QuestionChoice.compute_result value is truthy."""
+    return compute_result is not None and compute_result not in ("false", "0", "")
+
+
 def sizeof_json(obj) -> int:
     """
     Returns the size of a JSON-encoded object in bytes.
@@ -682,13 +687,14 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
+def _is_question_visible(question, answers_by_ref, questions_by_ref=None, visited=None):
     """Check if a question is visible based on depends_on logic.
 
     Works with Question model objects (new relational models).
     - question: a Question model instance
     - answers_by_ref: dict of {question.ref_id: answer_value}
     - questions_by_ref: dict of {question.ref_id: Question} (optional, for lookups)
+    - visited: set of ref_ids already visited (cycle protection)
     """
     depends_on = (
         question.depends_on
@@ -704,11 +710,22 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None):
     if not dep_ref:
         return True
 
+    # Cycle protection
+    if visited is None:
+        visited = set()
+    q_ref = getattr(question, "ref_id", None) or (
+        question.get("ref_id") if isinstance(question, dict) else None
+    )
+    if q_ref:
+        if q_ref in visited:
+            return True
+        visited = visited | {q_ref}
+
     # Check parent question visibility first (recursive chain)
     if questions_by_ref:
         parent_question = questions_by_ref.get(dep_ref)
         if parent_question and not _is_question_visible(
-            parent_question, answers_by_ref, questions_by_ref
+            parent_question, answers_by_ref, questions_by_ref, visited
         ):
             return False
 
@@ -744,7 +761,7 @@ def build_answers_dict(answers_qs):
 
     result = {}
     for a in answers_qs:
-        if a.question.type == Question.Type.SINGLE_CHOICE:
+        if a.question.type == Question.Type.UNIQUE_CHOICE:
             refs = [c.ref_id for c in a.selected_choices.all()]
             result[a.question.urn] = refs[0] if refs else None
         elif a.question.type == Question.Type.MULTIPLE_CHOICE:
@@ -788,7 +805,7 @@ def update_selected_implementation_groups(compliance_assessment):
             questions_by_ref[q.ref_id] = q
         for a in answers_qs:
             if a.question.type in (
-                Question.Type.SINGLE_CHOICE,
+                Question.Type.UNIQUE_CHOICE,
                 Question.Type.MULTIPLE_CHOICE,
             ):
                 pks = {c.id for c in a.selected_choices.all()}
@@ -838,14 +855,6 @@ def build_questions_dict(node):
         return None
 
     result = {}
-    type_mapping = {
-        "single_choice": "unique_choice",
-        "multiple_choice": "multiple_choice",
-        "text": "text",
-        "number": "number",
-        "boolean": "boolean",
-        "date": "date",
-    }
     for question in questions_qs:
         choices = []
         for choice in question.choices.all():
@@ -856,10 +865,8 @@ def build_questions_dict(node):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = choice.compute_result not in (
-                    "false",
-                    "0",
-                    "",
+                choice_data["compute_result"] = is_compute_result_truthy(
+                    choice.compute_result
                 )
             if choice.description:
                 choice_data["description"] = choice.description
@@ -872,7 +879,7 @@ def build_questions_dict(node):
             choices.append(choice_data)
 
         q_data = {
-            "type": type_mapping.get(question.type, question.type),
+            "type": question.type,
             "text": question.annotation or "",
         }
         if choices:

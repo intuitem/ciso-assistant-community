@@ -97,18 +97,10 @@ class RequirementNodeImporter:
         # Create Question + QuestionChoice objects from questions data
         questions_data = self.requirement_data.get("questions")
         if questions_data and isinstance(questions_data, dict):
-            type_mapping = {
-                "unique_choice": "single_choice",
-                "single_choice": "single_choice",
-                "multiple_choice": "multiple_choice",
-                "text": "text",
-                "number": "number",
-                "boolean": "boolean",
-                "date": "date",
-            }
             root_folder = Folder.get_root_folder()
             for order, (q_urn, q_data) in enumerate(questions_data.items()):
-                q_type = type_mapping.get(q_data.get("type", "text"), "text")
+                raw_type = q_data.get("type", "text")
+                q_type = "unique_choice" if raw_type == "single_choice" else raw_type
                 parts = q_urn.split(":")
                 q_ref_id = parts[-1] if parts else q_urn
 

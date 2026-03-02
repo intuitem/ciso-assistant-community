@@ -62,7 +62,7 @@ def framework_with_questions(app_config):
         urn="urn:test:backup:q_sc",
         ref_id="BQSC",
         annotation="Pick one",
-        type=Question.Type.SINGLE_CHOICE,
+        type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
         is_published=True,

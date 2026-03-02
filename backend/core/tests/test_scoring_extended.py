@@ -40,7 +40,7 @@ def scoring_setup(db):
         urn="urn:test:extscore:q1",
         ref_id="EQ1",
         annotation="Question 1",
-        type=Question.Type.SINGLE_CHOICE,
+        type=Question.Type.UNIQUE_CHOICE,
         order=0,
         weight=1,
         folder=folder,
@@ -73,7 +73,7 @@ def scoring_setup(db):
         urn="urn:test:extscore:q2",
         ref_id="EQ2",
         annotation="Question 2",
-        type=Question.Type.SINGLE_CHOICE,
+        type=Question.Type.UNIQUE_CHOICE,
         order=1,
         weight=1,
         folder=folder,
@@ -220,7 +220,7 @@ class TestScoringExtended:
             requirement_node=rn,
             urn="urn:test:clamp:q1",
             ref_id="CLQ1",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             order=0,
             weight=1,
             folder=folder,
@@ -385,7 +385,7 @@ class TestVisibilityEdgeCases:
             requirement_node=rn,
             urn=f"urn:test:vis:{id(q2_depends_on)}:q2",
             ref_id="VQ2",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             depends_on=q2_depends_on,
             order=1,
             folder=folder,
@@ -560,7 +560,7 @@ class TestVisibilityEdgeCases:
         folder = Folder.get_root_folder()
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
-            Question.Type.SINGLE_CHOICE,
+            Question.Type.UNIQUE_CHOICE,
             {"question": "VQ1", "answers": ["VSA"], "condition": "all"},
         )
         c_a = QuestionChoice.objects.create(
@@ -662,7 +662,7 @@ class TestVisibilityEdgeCases:
             requirement_node=rn,
             urn="urn:test:chain:q1",
             ref_id="CHQ1",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             order=0,
             folder=folder,
             is_published=True,
@@ -692,7 +692,7 @@ class TestVisibilityEdgeCases:
             requirement_node=rn,
             urn="urn:test:chain:q2",
             ref_id="CHQ2",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             order=1,
             depends_on={"question": "CHQ1", "answers": ["CHC1A"], "condition": "any"},
             folder=folder,
@@ -723,7 +723,7 @@ class TestVisibilityEdgeCases:
             requirement_node=rn,
             urn="urn:test:chain:q3",
             ref_id="CHQ3",
-            type=Question.Type.SINGLE_CHOICE,
+            type=Question.Type.UNIQUE_CHOICE,
             order=2,
             depends_on={"question": "CHQ2", "answers": ["CHC2A"], "condition": "any"},
             folder=folder,
@@ -797,7 +797,7 @@ class TestVisibilityEdgeCases:
         folder = Folder.get_root_folder()
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
-            Question.Type.SINGLE_CHOICE,
+            Question.Type.UNIQUE_CHOICE,
             {"question": "VQ1", "answers": ["VUA"], "condition": "any"},
         )
         QuestionChoice.objects.create(
@@ -865,7 +865,7 @@ class TestVisibilityEdgeCases:
         folder = Folder.get_root_folder()
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
-            Question.Type.SINGLE_CHOICE,
+            Question.Type.UNIQUE_CHOICE,
             {"question": "VQ1", "answers": [], "condition": "any"},
         )
         c_a = QuestionChoice.objects.create(
@@ -940,7 +940,7 @@ class TestVisibilityEdgeCases:
         folder = Folder.get_root_folder()
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
-            Question.Type.SINGLE_CHOICE,
+            Question.Type.UNIQUE_CHOICE,
             {"question": "VQ1", "answers": ["VFA"], "condition": "foo"},
         )
         c_a = QuestionChoice.objects.create(

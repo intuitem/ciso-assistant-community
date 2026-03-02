@@ -150,7 +150,7 @@ class TestRequirementAssessmentAnswersPatchGet:
 
         # Verify question and choices exist
         q1 = Question.objects.get(urn="urn:test:answers:q1")
-        assert q1.type == "single_choice"
+        assert q1.type == "unique_choice"
         assert q1.choices.count() == 3
 
         # PATCH the RA with answers

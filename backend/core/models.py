@@ -49,6 +49,7 @@ from .base_models import (
 )
 from .utils import (
     camel_case,
+    is_compute_result_truthy,
     sha256,
     update_selected_implementation_groups,
     _is_question_visible,
@@ -101,18 +102,9 @@ def _create_questions_from_data(requirement_node, questions_data):
     """
     from core.models import Question, QuestionChoice
 
-    type_mapping = {
-        "unique_choice": "single_choice",
-        "single_choice": "single_choice",
-        "multiple_choice": "multiple_choice",
-        "text": "text",
-        "number": "number",
-        "boolean": "boolean",
-        "date": "date",
-    }
-
     for order, (q_urn, q_data) in enumerate(questions_data.items()):
-        q_type = type_mapping.get(q_data.get("type", "text"), "text")
+        raw_type = q_data.get("type", "text")
+        q_type = "unique_choice" if raw_type == "single_choice" else raw_type
         # Extract ref_id: strip the framework-specific URN prefix
         parts = q_urn.split(":")
         q_ref_id = parts[-1] if parts else q_urn
@@ -1043,7 +1035,7 @@ class LibraryUpdater:
                                 valid_pks = set(q.choices.values_list("id", flat=True))
                                 changed = False
                                 if q.type in (
-                                    Question.Type.SINGLE_CHOICE,
+                                    Question.Type.UNIQUE_CHOICE,
                                     Question.Type.MULTIPLE_CHOICE,
                                 ):
                                     current_pks = set(
@@ -2179,10 +2171,10 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         # Validate all choice/multiple_choice questions have >= 2 choices
         questions_with_choices = Question.objects.filter(
             requirement_node__framework=self,
-            type__in=[Question.Type.SINGLE_CHOICE, Question.Type.MULTIPLE_CHOICE],
+            type__in=[Question.Type.UNIQUE_CHOICE, Question.Type.MULTIPLE_CHOICE],
         ).prefetch_related("choices")
         for q in questions_with_choices:
-            if q.choices.count() < 2:
+            if len(q.choices.all()) < 2:
                 errors.append(
                     f"Question '{q.ref_id}' ({q.type}) must have at least 2 choices."
                 )
@@ -2361,15 +2353,6 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
 
         current_lang = get_language()
 
-        type_mapping = {
-            "single_choice": "unique_choice",
-            "multiple_choice": "multiple_choice",
-            "text": "text",
-            "number": "number",
-            "boolean": "boolean",
-            "date": "date",
-        }
-
         def _translate_choice(choice):
             tr = (choice.translations or {}).get(current_lang, {})
             choice_data = {
@@ -2382,10 +2365,8 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
             if choice.compute_result is not None:
-                choice_data["compute_result"] = choice.compute_result not in (
-                    "false",
-                    "0",
-                    "",
+                choice_data["compute_result"] = is_compute_result_truthy(
+                    choice.compute_result
                 )
             if choice.color:
                 choice_data["color"] = choice.color
@@ -2399,7 +2380,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         for question in questions_qs:
             q_tr = (question.translations or {}).get(current_lang, {})
             q_data = {
-                "type": type_mapping.get(question.type, question.type),
+                "type": question.type,
                 "text": q_tr.get("text", question.annotation or ""),
             }
             choices = [_translate_choice(c) for c in question.choices.all()]
@@ -2421,7 +2402,7 @@ class Question(AbstractBaseModel, FolderMixin):
         TEXT = "text", _("Text")
         NUMBER = "number", _("Number")
         BOOLEAN = "boolean", _("Boolean")
-        SINGLE_CHOICE = "single_choice", _("Single choice")
+        UNIQUE_CHOICE = "unique_choice", _("Unique choice")
         MULTIPLE_CHOICE = "multiple_choice", _("Multiple choice")
         DATE = "date", _("Date")
 
@@ -7426,7 +7407,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         for a in answers_qs:
             q_type = a.question.type
             if q_type in (
-                Question.Type.SINGLE_CHOICE,
+                Question.Type.UNIQUE_CHOICE,
                 Question.Type.MULTIPLE_CHOICE,
             ):
                 pks = {c.id for c in a.selected_choices.all()}
@@ -7487,10 +7468,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
                     if choice.compute_result is not None:
                         is_result_computed = True
-                        # compute_result is truthy if not in falsy values
-                        results.append(
-                            choice.compute_result not in ("false", "0", "", None)
-                        )
+                        results.append(is_compute_result_truthy(choice.compute_result))
 
         if aggregation == "mean" and total_weight > 0:
             computed_score = total_score / total_weight
@@ -7501,25 +7479,25 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         # No visible questions → not applicable
         if visible_questions == 0:
-            self.result = "not_applicable"
+            self.result = self.Result.NOT_APPLICABLE
             self.save(update_fields=["score", "result", "is_scored"])
             return
 
         # Not all visible questions are answered → not assessed
         if answered_visible_questions < visible_questions:
-            self.result = "not_assessed"
+            self.result = self.Result.NOT_ASSESSED
             self.save(update_fields=["score", "result", "is_scored"])
             return
 
         # Compute overall result
         if not results:
-            self.result = "not_assessed"
+            self.result = self.Result.NOT_ASSESSED
         elif all(results):
-            self.result = "compliant"
+            self.result = self.Result.COMPLIANT
         elif any(results):
-            self.result = "partially_compliant"
+            self.result = self.Result.PARTIALLY_COMPLIANT
         else:
-            self.result = "non_compliant"
+            self.result = self.Result.NON_COMPLIANT
 
         if is_score_computed and is_result_computed:
             self.save(update_fields=["score", "result", "is_scored"])
@@ -7595,7 +7573,7 @@ class Answer(AbstractBaseModel, FolderMixin):
     def get_choice_ref_ids(self):
         """Return list of selected choice ref_ids for choice-type questions."""
         if self.question.type in (
-            Question.Type.SINGLE_CHOICE,
+            Question.Type.UNIQUE_CHOICE,
             Question.Type.MULTIPLE_CHOICE,
         ):
             return [c.ref_id for c in self.selected_choices.all()]
