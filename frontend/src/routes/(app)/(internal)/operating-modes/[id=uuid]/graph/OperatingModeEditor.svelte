@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { enhance } from '$app/forms';
-	import { setContext } from 'svelte';
+	import { setContext, tick } from 'svelte';
 	import {
 		SvelteFlow,
 		Controls,
@@ -55,10 +55,34 @@
 	const NODE_PADDING_Y = 60;
 
 	const STAGE_CONFIG = [
-		{ key: 'ebiosReconnaissance', icon: 'fa-magnifying-glass', twBg: 'bg-pink-50', twBorder: 'border-pink-400', twText: 'text-pink-500' },
-		{ key: 'ebiosInitialAccess', icon: 'fa-right-to-bracket', twBg: 'bg-violet-50', twBorder: 'border-violet-400', twText: 'text-violet-500' },
-		{ key: 'ebiosDiscovery', icon: 'fa-lightbulb', twBg: 'bg-orange-50', twBorder: 'border-orange-400', twText: 'text-orange-500' },
-		{ key: 'ebiosExploitation', icon: 'fa-bolt', twBg: 'bg-red-50', twBorder: 'border-red-400', twText: 'text-red-500' }
+		{
+			key: 'ebiosReconnaissance',
+			icon: 'fa-magnifying-glass',
+			twBg: 'bg-pink-50',
+			twBorder: 'border-pink-400',
+			twText: 'text-pink-500'
+		},
+		{
+			key: 'ebiosInitialAccess',
+			icon: 'fa-right-to-bracket',
+			twBg: 'bg-violet-50',
+			twBorder: 'border-violet-400',
+			twText: 'text-violet-500'
+		},
+		{
+			key: 'ebiosDiscovery',
+			icon: 'fa-lightbulb',
+			twBg: 'bg-orange-50',
+			twBorder: 'border-orange-400',
+			twText: 'text-orange-500'
+		},
+		{
+			key: 'ebiosExploitation',
+			icon: 'fa-bolt',
+			twBg: 'bg-red-50',
+			twBorder: 'border-red-400',
+			twText: 'text-red-500'
+		}
 	];
 
 	function stageColumnId(stage: number) {
@@ -82,9 +106,6 @@
 	// ---- Context for child components (ActionNode, StageColumnNode) ----
 
 	setContext('killChainEditor', {
-		get logicOps() {
-			return logicOps;
-		},
 		get dragOverStage() {
 			return dragOverStage;
 		},
@@ -154,7 +175,8 @@
 				data: {
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
-					stage
+					stage,
+					logicOp: hasLogicOp ? (step.logic_operator as 'AND' | 'OR') : null
 				}
 			} as Node);
 			stageCount[stage] = count + 1;
@@ -182,7 +204,9 @@
 
 	// ---- Derived ----
 
-	const placedNodeIds = $derived(new Set(nodes.filter((n) => n.type === 'action').map((n) => n.id)));
+	const placedNodeIds = $derived(
+		new Set(nodes.filter((n) => n.type === 'action').map((n) => n.id))
+	);
 
 	// ---- Connection validation ----
 
@@ -217,27 +241,25 @@
 			newOps.delete(nodeId);
 		}
 		logicOps = newOps;
+
+		// Sync into node data so SvelteFlow re-renders the ActionNode
+		const op = newOps.get(nodeId) ?? null;
+		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: op } } : n));
 	}
 
 	// ---- Event handlers ----
 
-	function handleConnect(connection: Connection) {
-		if (!isValidConnection(connection)) return;
-
-		const newEdge: Edge = {
-			id: `e-${connection.source}-${connection.target}`,
-			source: connection.source!,
-			target: connection.target!,
-			markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
-			style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
-		};
-		edges = [...edges, newEdge];
-
-		updateNodeLogicData(connection.target!);
+	async function handleConnect(connection: Connection) {
+		// SvelteFlow v1.5 automatically creates the edge when onconnect fires
+		// (styled via defaultEdgeOptions), so we just mark dirty and update logic ops.
 		dirty = true;
+
+		// Wait for SvelteFlow to flush the new edge into bind:edges
+		await tick();
+		updateNodeLogicData(connection.target);
 	}
 
-	function handleDeleteNode(nodeId: string) {
+	async function handleDeleteNode(nodeId: string) {
 		const affectedTargets = edges.filter((e) => e.source === nodeId).map((e) => e.target);
 
 		nodes = nodes.filter((n) => n.id !== nodeId);
@@ -246,36 +268,41 @@
 		const newOps = new Map(logicOps);
 		newOps.delete(nodeId);
 		logicOps = newOps;
+		dirty = true;
 
+		await tick();
 		for (const targetId of affectedTargets) {
 			if (nodes.some((n) => n.id === targetId)) {
 				updateNodeLogicData(targetId);
 			}
 		}
-
-		dirty = true;
 	}
 
 	function handleToggleOperator(nodeId: string) {
 		const current = logicOps.get(nodeId) ?? 'AND';
 		const newOp = current === 'AND' ? 'OR' : 'AND';
 		logicOps = new Map(logicOps).set(nodeId, newOp);
+
+		// Sync into node data so SvelteFlow re-renders the ActionNode
+		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: newOp } } : n));
 		dirty = true;
 	}
 
-	function handleDeleteEdge(edgeId: string) {
+	async function handleDeleteEdge(edgeId: string) {
 		const edge = edges.find((e) => e.id === edgeId);
 		if (!edge) return;
 		edges = edges.filter((e) => e.id !== edgeId);
-		updateNodeLogicData(edge.target);
 		dirty = true;
+
+		await tick();
+		updateNodeLogicData(edge.target);
 	}
 
 	function handleEdgeClick(_event: MouseEvent, edge: Edge) {
 		handleDeleteEdge(edge.id);
 	}
 
-	function handleDelete({
+	async function handleDelete({
 		nodes: deletedNodes,
 		edges: deletedEdges
 	}: {
@@ -295,6 +322,7 @@
 
 		logicOps = newOps;
 
+		await tick();
 		for (const targetId of targetsToUpdate) {
 			if (nodes.some((n) => n.id === targetId)) {
 				updateNodeLogicData(targetId);
@@ -349,7 +377,8 @@
 			data: {
 				label: action.name,
 				iconClass: action.icon_fa_class ?? '',
-				stage
+				stage,
+				logicOp: null
 			}
 		} as Node;
 
@@ -368,7 +397,10 @@
 			return {
 				elementary_action: node.id,
 				antecedents: antecedentIds,
-				logic_operator: antecedentIds.length > 1 ? (logicOps.get(node.id) ?? 'AND') : null,
+				logic_operator:
+					antecedentIds.length > 1
+						? ((node.data as any).logicOp ?? logicOps.get(node.id) ?? 'AND')
+						: null,
 				is_highlighted: false
 			};
 		});
@@ -384,9 +416,7 @@
 	<!-- Canvas area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
 		<!-- Toolbar -->
-		<div
-			class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200"
-		>
+		<div class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200">
 			<div class="flex items-center gap-2 text-sm text-surface-500">
 				<i class="fa-solid fa-info-circle"></i>
 				<span>{m.graphEditorHelp()}</span>

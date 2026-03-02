@@ -8,18 +8,16 @@
 			label: string;
 			iconClass?: string;
 			stage: number;
+			logicOp?: 'AND' | 'OR' | null;
 		};
 	}
 
 	let { id, data }: Props = $props();
 
 	const editor = getContext<{
-		logicOps: Map<string, 'AND' | 'OR'>;
 		deleteNode: (id: string) => void;
 		toggleOperator: (id: string) => void;
 	}>('killChainEditor');
-
-	const logicOperator = $derived(editor?.logicOps.get(id));
 
 	const STAGE_CLASSES: Record<number, { bg: string; border: string; accent: string }> = {
 		0: { bg: 'bg-pink-100', border: 'border-pink-400', accent: 'bg-pink-400' },
@@ -40,9 +38,7 @@
 	onmouseleave={() => (hovered = false)}
 >
 	<!-- Stage accent bar -->
-	<div
-		class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {stageClass.accent}"
-	></div>
+	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {stageClass.accent}"></div>
 
 	<!-- Content -->
 	<div class="flex items-center gap-2">
@@ -53,12 +49,12 @@
 	</div>
 
 	<!-- Logic operator badge (AND/OR) — shown when node has 2+ incoming edges -->
-	{#if logicOperator}
+	{#if data.logicOp}
 		<button
 			class="nopan nodrag absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 bg-violet-100 border-violet-500 text-violet-700 z-10"
 			onclick={() => editor?.toggleOperator(id)}
 		>
-			{logicOperator}
+			{data.logicOp}
 		</button>
 	{/if}
 
