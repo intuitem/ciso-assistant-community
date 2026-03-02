@@ -578,7 +578,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 4.0 Elementary Actions sheet
             elementary_actions = ElementaryAction.objects.filter(
-                operating_modes__operational_scenario__ebios_rm_study=study
+                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study
             ).distinct()
             ea_data = []
             for ea in elementary_actions:
