@@ -894,6 +894,16 @@
 												{assignment.requirement_assessments.length}
 												{m.requirements()}
 											</button>
+											{#if assignment.status !== 'draft'}
+												<a
+													href="/auditee-assessments/{data.compliance_assessment.id}?assignment={assignment.id}"
+													class="badge bg-gray-100 text-gray-700 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+													title={m.reviewResponses()}
+												>
+													<i class="fa-solid fa-eye mr-1"></i>
+													{m.reviewResponses()}
+												</a>
+											{/if}
 										</div>
 
 										<!-- Reviewer observation display -->
