@@ -49,24 +49,6 @@
 		<span class="text-[11px] leading-tight text-surface-900 truncate">{data.label}</span>
 	</div>
 
-	<!-- Logic operator badge (AND/OR) — shown when node has 2+ incoming edges -->
-	{#if data.logicOp}
-		{#if editor?.readonly}
-			<span
-				class="absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border bg-violet-100 border-violet-500 text-violet-700 z-10"
-			>
-				{data.logicOp}
-			</span>
-		{:else}
-			<button
-				class="nopan nodrag absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 bg-violet-100 border-violet-500 text-violet-700 z-10"
-				onclick={() => editor?.toggleOperator(id)}
-			>
-				{data.logicOp}
-			</button>
-		{/if}
-	{/if}
-
 	<!-- Delete button on hover (edit mode only) -->
 	{#if hovered && !editor?.readonly}
 		<button

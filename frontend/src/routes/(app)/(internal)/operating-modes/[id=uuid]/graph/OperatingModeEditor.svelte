@@ -19,6 +19,7 @@
 
 	import ActionNodeComponent from './nodes/ActionNode.svelte';
 	import StageColumnNodeComponent from './nodes/StageColumnNode.svelte';
+	import LogicEdgeComponent from './edges/LogicEdge.svelte';
 	import EditorSidebar from './EditorSidebar.svelte';
 
 	// ---- Types ----
@@ -109,6 +110,10 @@
 	const nodeTypes = {
 		action: ActionNodeComponent,
 		stageColumn: StageColumnNodeComponent
+	};
+
+	const edgeTypes = {
+		logic: LogicEdgeComponent
 	};
 
 	// ---- State ----
@@ -239,15 +244,21 @@
 			} as Node);
 			stageCount[stage] = count + 1;
 
-			for (const ant of antecedents) {
+			for (let ai = 0; ai < antecedents.length; ai++) {
+				const ant = antecedents[ai];
 				const antId = typeof ant === 'object' ? ant.id : ant;
 				flowEdges.push({
 					id: `e-${antId}-${eaId}`,
 					source: antId,
 					target: eaId,
+					type: 'logic',
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
 					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;',
-					type: 'smoothstep'
+					data: {
+						logicOp: ai === 0 && hasLogicOp ? step.logic_operator : null,
+						targetStage: stage,
+						targetNodeId: eaId
+					}
 				});
 			}
 		}
@@ -288,7 +299,8 @@
 	// ---- Node logic operator helpers ----
 
 	function updateNodeLogicData(nodeId: string) {
-		const incomingCount = edges.filter((e) => e.target === nodeId).length;
+		const incomingEdges = edges.filter((e) => e.target === nodeId);
+		const incomingCount = incomingEdges.length;
 		const newOps = new Map(logicOps);
 
 		if (incomingCount >= 2 && !newOps.has(nodeId)) {
@@ -299,13 +311,44 @@
 		logicOps = newOps;
 
 		const op = newOps.get(nodeId) ?? null;
+		const targetNode = nodes.find((n) => n.id === nodeId);
+		const targetStage = (targetNode?.data as any)?.stage ?? 0;
+		const firstIncomingId = incomingEdges[0]?.id;
+
 		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: op } } : n));
+		edges = edges.map((e) =>
+			e.target === nodeId
+				? {
+						...e,
+						data: {
+							...e.data,
+							logicOp: e.id === firstIncomingId ? op : null,
+							targetStage,
+							targetNodeId: nodeId
+						}
+					}
+				: e
+		);
 	}
 
 	// ---- Event handlers ----
 
 	async function handleConnect(connection: Connection) {
 		dirty = true;
+
+		// Update the auto-created edge to use 'logic' type with proper data
+		const targetNode = nodes.find((n) => n.id === connection.target);
+		const targetStage = (targetNode?.data as any)?.stage ?? 0;
+		edges = edges.map((e) =>
+			e.source === connection.source && e.target === connection.target
+				? {
+						...e,
+						type: 'logic',
+						data: { logicOp: null, targetStage, targetNodeId: connection.target }
+					}
+				: e
+		);
+
 		await tick();
 		updateNodeLogicData(connection.target);
 	}
@@ -334,7 +377,15 @@
 		const newOp = current === 'AND' ? 'OR' : 'AND';
 		logicOps = new Map(logicOps).set(nodeId, newOp);
 
+		const incomingEdges = edges.filter((e) => e.target === nodeId);
+		const firstIncomingId = incomingEdges[0]?.id;
+
 		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: newOp } } : n));
+		edges = edges.map((e) =>
+			e.target === nodeId
+				? { ...e, data: { ...e.data, logicOp: e.id === firstIncomingId ? newOp : null } }
+				: e
+		);
 		dirty = true;
 	}
 
@@ -546,6 +597,7 @@
 				bind:nodes
 				bind:edges
 				{nodeTypes}
+				{edgeTypes}
 				isValidConnection={readonly ? () => false : isValidConnection}
 				onconnect={readonly ? undefined : handleConnect}
 				onnodedragstop={readonly ? undefined : () => (dirty = true)}
@@ -561,8 +613,9 @@
 				onmoveend={saveViewport}
 				snapGrid={[10, 10]}
 				fitView
+				proOptions={{ hideAttribution: true }}
 				defaultEdgeOptions={{
-					type: 'smoothstep',
+					type: 'logic',
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
 					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
 				}}
