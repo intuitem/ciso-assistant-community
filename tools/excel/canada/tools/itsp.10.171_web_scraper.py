@@ -87,6 +87,37 @@ def is_requirement_h4(tag: Tag) -> bool:
     )
 
 
+def normalize_inline_text(text: str) -> str:
+    text = text.replace("\xa0", " ")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def render_inline_markdown(node) -> str:
+    if isinstance(node, NavigableString):
+        return str(node)
+    if not isinstance(node, Tag):
+        return ""
+    if node.name == "br":
+        return "\n"
+
+    if node.name == "a":
+        href = (node.get("href") or "").strip()
+        label = normalize_inline_text("".join(render_inline_markdown(c) for c in node.contents))
+        if not label:
+            return ""
+        if href.startswith("#") or href.lower().startswith("file://"):
+            return f"**{label}**"
+        if href:
+            return f"[{label}]({href})"
+        return label
+
+    return "".join(render_inline_markdown(c) for c in node.contents)
+
+
+def render_tag_text(tag: Tag) -> str:
+    return normalize_inline_text(render_inline_markdown(tag))
+
+
 def li_direct_text(li: Tag) -> str:
     parts = []
     for child in li.contents:
@@ -97,7 +128,7 @@ def li_direct_text(li: Tag) -> str:
         elif isinstance(child, Tag):
             if child.name in ("ol", "ul"):
                 continue
-            t = clean_text(child.get_text(" ", strip=True))
+            t = render_tag_text(child)
             if t:
                 parts.append(t)
     return clean_text(" ".join(parts))
@@ -119,11 +150,11 @@ def render_list_tag(list_tag: Tag) -> str:
 
 def render_block_tag(tag: Tag) -> tuple[str, str]:
     if tag.name == "p":
-        return ("p", clean_text(tag.get_text(" ", strip=True)))
+        return ("p", render_tag_text(tag))
     if tag.name in ("ul", "ol"):
         return (tag.name, render_list_tag(tag))
     if tag.name == "table":
-        return ("table", clean_text(tag.get_text(" ", strip=True)))
+        return ("table", render_tag_text(tag))
     return ("", "")
 
 
@@ -183,11 +214,11 @@ def first_body_paragraph(details_tag: Tag):
         if isinstance(child, Tag) and child.name == "h5":
             break
         if isinstance(child, Tag) and child.name == "p":
-            return clean_text(child.get_text(" ", strip=True))
+            return render_tag_text(child)
         if isinstance(child, Tag):
             p = child.find("p")
             if p:
-                return clean_text(p.get_text(" ", strip=True))
+                return render_tag_text(p)
     return None
 
 
@@ -201,7 +232,7 @@ def parse_nested_list(
 ):
     li_tags = [c for c in nested_list.children if isinstance(c, Tag) and c.name == "li"]
     for idx, li in enumerate(li_tags, start=1):
-        text = clean_text(li.get_text(" ", strip=True))
+        text = li_direct_text(li) or clean_text(li.get_text(" ", strip=True))
         full_path = [alpha_label] + num_path + [idx]
         ref_id = base_req_id + "." + ".".join(str(p) for p in full_path)
         add_row(rows, "x", depth, ref_id, "", text)
