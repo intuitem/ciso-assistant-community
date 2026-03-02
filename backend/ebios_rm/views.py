@@ -136,15 +136,6 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         methods=["post"],
     )
     def duplicate(self, request, pk):
-        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
-            Folder.get_root_folder(), request.user, EbiosRMStudy
-        )
-        if UUID(pk) not in object_ids_view:
-            return Response(
-                {"results": "Ebios RM study not found."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
         ebios_rm_study = self.get_object()
         data = request.data
 

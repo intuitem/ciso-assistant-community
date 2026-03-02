@@ -1,4 +1,3 @@
-from os import name
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response

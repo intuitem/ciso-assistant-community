@@ -1,4 +1,3 @@
-from os import name
 from typing import Optional, Final
 
 from auditlog.registry import auditlog
@@ -1267,6 +1266,7 @@ class OperationalScenario(AbstractBaseModel, FolderMixin):
         duplicated_attack_path = AttackPath.objects.filter(
             ebios_rm_study=ebios_rm_study,
             name=self.attack_path.name,
+            ref_id=self.attack_path.ref_id,
         ).first()
         if duplicated_attack_path is None:
             return None, f"Duplicated attack path not found."

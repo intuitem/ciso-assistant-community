@@ -105,6 +105,8 @@ def duplicate_related_objects(
     - duplicate_object (object): The object where duplicated objects will be linked.
     - target_folder (Folder): The folder where duplicated objects will be stored.
     - field_name (str): The field name representing the related objects in the source
+
+    WARNING: Duplicating objects with a `unique=True` field will likely break (as field value deduplication was not implemented).
     """
 
     def process_related_object(
@@ -4510,7 +4512,7 @@ class AppliedControl(
         verbose_name = _("Applied control")
         verbose_name_plural = _("Applied controls")
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, skip_sync: bool = False, **kwargs):
         # Track what changed
         changed_fields = []
         old_instance = AppliedControl.objects.filter(pk=self.pk).first()
@@ -4526,7 +4528,6 @@ class AppliedControl(
 
         # Save first
         is_new = self.pk is None
-        skip_sync = kwargs.pop("skip_sync", False)
         super(AppliedControl, self).save(*args, **kwargs)
 
         # Then trigger sync (async, non-blocking)
