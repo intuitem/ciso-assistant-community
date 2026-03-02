@@ -73,7 +73,7 @@
 	}
 </script>
 
-<div class="w-64 bg-white border-r border-surface-200 flex flex-col h-full overflow-hidden">
+<div class="w-64 bg-surface-50 border-r border-surface-200 flex flex-col h-full overflow-hidden">
 	<div class="p-3 border-b border-surface-200">
 		<h3 class="text-sm font-semibold text-surface-700 mb-2">
 			{m.elementaryActions()}

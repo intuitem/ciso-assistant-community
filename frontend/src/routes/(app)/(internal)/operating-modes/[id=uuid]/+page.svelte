@@ -49,7 +49,6 @@
 	}
 
 	function handleSaved() {
-		editMode = false;
 		invalidateAll();
 	}
 
@@ -129,17 +128,14 @@
 	</div>
 {/if}
 
-<div class="card shadow-lg mt-8 bg-white w-full p-4">
+<div class="card shadow-lg mt-8 bg-surface-50 w-full p-4">
 	<div class="flex justify-between items-center mb-4">
 		<h3 class="text-lg font-semibold text-surface-800">
 			<i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}
 		</h3>
 		{#if canEditObject}
 			<button
-				class="flex items-center gap-1.5 px-3 py-1.5 rounded-base text-sm font-medium transition-colors
-					{editMode
-					? 'bg-violet-100 text-violet-700 border border-violet-300'
-					: 'bg-surface-100 text-surface-600 border border-surface-200 hover:bg-surface-200'}"
+				class="btn text-sm {editMode ? 'preset-tonal-primary' : 'preset-filled-primary-500'}"
 				onclick={() => (editMode = !editMode)}
 			>
 				{#if editMode}

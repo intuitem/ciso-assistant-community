@@ -20,11 +20,11 @@
 		readonly: boolean;
 	}>('killChainEditor');
 
-	const STAGE_CLASSES: Record<number, { bg: string; border: string; accent: string }> = {
-		0: { bg: 'bg-pink-100', border: 'border-pink-400', accent: 'bg-pink-400' },
-		1: { bg: 'bg-violet-100', border: 'border-violet-400', accent: 'bg-violet-400' },
-		2: { bg: 'bg-orange-100', border: 'border-orange-400', accent: 'bg-orange-400' },
-		3: { bg: 'bg-red-100', border: 'border-red-400', accent: 'bg-red-400' }
+	const STAGE_CLASSES: Record<number, { border: string; accent: string }> = {
+		0: { border: 'border-pink-300', accent: 'bg-pink-400' },
+		1: { border: 'border-violet-300', accent: 'bg-violet-400' },
+		2: { border: 'border-orange-300', accent: 'bg-orange-400' },
+		3: { border: 'border-red-300', accent: 'bg-red-400' }
 	};
 
 	const stageClass = $derived(STAGE_CLASSES[data.stage] ?? STAGE_CLASSES[1]);
@@ -34,7 +34,7 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="action-node relative rounded-base border-[1.5px] px-3 py-2 min-w-[140px] max-w-[180px] text-center select-none {stageClass.bg} {stageClass.border}"
+	class="action-node relative rounded-base border-[1.5px] px-3 py-2 min-w-[140px] max-w-[180px] text-center select-none bg-surface-50 {stageClass.border}"
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 >
@@ -65,13 +65,13 @@
 		position={Position.Left}
 		class={editor?.readonly
 			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
-			: '!w-3 !h-3 !bg-white !border-2 !border-primary-800'}
+			: '!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600'}
 	/>
 	<Handle
 		type="source"
 		position={Position.Right}
 		class={editor?.readonly
 			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
-			: '!w-3 !h-3 !bg-white !border-2 !border-primary-800'}
+			: '!w-3 !h-3 !bg-surface-50 !border-2 !border-surface-600'}
 	/>
 </div>

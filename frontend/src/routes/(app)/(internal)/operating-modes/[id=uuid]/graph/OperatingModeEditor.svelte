@@ -142,28 +142,22 @@
 	// ---- Viewport persistence (localStorage, personal) ----
 
 	const VIEWPORT_KEY = `mo-graph-viewport-${operatingModeId}`;
+	let flowInstance: ReturnType<typeof useSvelteFlow> | null = null;
 
-	function saveViewport() {
-		try {
-			const flow = useSvelteFlow();
-			const vp = flow.getViewport();
-			localStorage.setItem(VIEWPORT_KEY, JSON.stringify(vp));
-		} catch {
-			// useSvelteFlow may not be available yet
+	function handleFlowInit() {
+		flowInstance = useSvelteFlow();
+		const saved = localStorage.getItem(VIEWPORT_KEY);
+		if (saved) {
+			flowInstance.setViewport(JSON.parse(saved));
+		} else {
+			flowInstance.fitView();
 		}
 	}
 
-	function restoreViewport() {
-		try {
-			const saved = localStorage.getItem(VIEWPORT_KEY);
-			if (saved) {
-				const flow = useSvelteFlow();
-				const vp = JSON.parse(saved);
-				flow.setViewport(vp);
-			}
-		} catch {
-			// Ignore errors
-		}
+	function saveViewport() {
+		if (!flowInstance) return;
+		const vp = flowInstance.getViewport();
+		localStorage.setItem(VIEWPORT_KEY, JSON.stringify(vp));
 	}
 
 	// ---- Stage helpers ----
@@ -252,8 +246,8 @@
 					source: antId,
 					target: eaId,
 					type: 'logic',
-					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
-					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;',
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
+					style: 'stroke: var(--color-surface-500); stroke-width: 2;',
 					data: {
 						logicOp: ai === 0 && hasLogicOp ? step.logic_operator : null,
 						targetStage: stage,
@@ -270,6 +264,15 @@
 
 	$effect(() => {
 		initFromKillChain();
+	});
+
+	// Re-fit viewport after sidebar transition when toggling readonly
+	$effect(() => {
+		void readonly;
+		const timer = setTimeout(() => {
+			flowInstance?.fitView({ duration: 300 });
+		}, 350); // slightly after sidebar transition (300ms)
+		return () => clearTimeout(timer);
 	});
 
 	// ---- Derived ----
@@ -544,11 +547,12 @@
 		{#if !readonly}
 			<div transition:slide={{ duration: 200 }}>
 				<div
-					class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200"
+					class="flex items-center justify-between px-4 py-2 bg-surface-50 border-b border-surface-200"
 				>
-					<div class="flex items-center gap-2 text-sm text-surface-500">
-						<i class="fa-solid fa-info-circle"></i>
-						<span>{m.graphEditorHelp()}</span>
+					<div class="flex items-center gap-2">
+						<span class="badge preset-tonal text-xs"
+							><i class="fa-solid fa-info-circle mr-1"></i>{m.graphEditorHelp()}</span
+						>
 					</div>
 					<div class="flex items-center gap-2">
 						{#if dirty}
@@ -609,19 +613,18 @@
 				nodesDraggable={!readonly}
 				nodesConnectable={!readonly}
 				elementsSelectable={!readonly}
-				oninit={restoreViewport}
+				oninit={handleFlowInit}
 				onmoveend={saveViewport}
 				snapGrid={[10, 10]}
-				fitView
 				proOptions={{ hideAttribution: true }}
 				defaultEdgeOptions={{
 					type: 'logic',
-					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
-					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
+					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-surface-600)' },
+					style: 'stroke: var(--color-surface-500); stroke-width: 2;'
 				}}
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
-				<Controls />
+				<Controls showLock={false} />
 				<MiniMap />
 			</SvelteFlow>
 		</div>
@@ -631,10 +634,11 @@
 <style>
 	:global(.svelte-flow) {
 		--xy-node-border-radius: var(--radius-base);
-		--xy-edge-stroke: var(--color-surface-400);
+		--xy-edge-stroke: var(--color-surface-500);
+		background-color: var(--color-surface-50);
 	}
 	:global(.svelte-flow .svelte-flow__edge-path) {
-		stroke-width: 1.5;
+		stroke-width: 2;
 	}
 	:global(.svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
 		stroke: var(--color-error-500);
