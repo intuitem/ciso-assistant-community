@@ -148,12 +148,14 @@
 			</button>
 		{/if}
 	</div>
-	<OperatingModeEditor
-		elementaryActions={data.elementaryActions}
-		killChainSteps={data.killChainSteps}
-		operatingModeId={data.operatingModeId}
-		graphColumns={data.data.graph_columns ?? {}}
-		readonly={!editMode}
-		onSaved={handleSaved}
-	/>
+	<div class="h-[80vh]">
+		<OperatingModeEditor
+			elementaryActions={data.elementaryActions}
+			killChainSteps={data.killChainSteps}
+			operatingModeId={data.operatingModeId}
+			graphColumns={data.data.graph_columns ?? {}}
+			readonly={!editMode}
+			onSaved={handleSaved}
+		/>
+	</div>
 </div>

@@ -170,72 +170,37 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Build graph data for each operating mode
         def build_mode_graph(mo):
-            """Build graph data for a single operating mode"""
-            nodes = []
-            links = []
-            groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
-            panels = {
-                0: "reconnaissance",
-                1: "initialAccess",
-                2: "discovery",
-                3: "exploitation",
-            }
-            panel_nodes = {panel: [] for panel in panels.values()}
+            """Build kill chain steps and elementary actions"""
+            from .serializers import KillChainReadSerializer
 
-            # Collect all elementary actions that are part of kill chain steps
-            kill_chain_ea_ids = set()
-            for step in mo.kill_chain_steps.all():
-                kill_chain_ea_ids.add(step.elementary_action.id)
-                # Also add antecedents
+            steps = mo.kill_chain_steps.all()
+            if not steps.exists():
+                return None
+
+            kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+
+            # Collect all EAs referenced in kill chain steps
+            ea_ids = set()
+            for step in steps:
+                ea_ids.add(step.elementary_action_id)
                 for ant in step.antecedents.all():
-                    kill_chain_ea_ids.add(ant.id)
+                    ea_ids.add(ant.id)
 
-            # Create nodes only for elementary actions in the kill chain
-            kill_chain_eas = ElementaryAction.objects.filter(
-                id__in=kill_chain_ea_ids
-            ).order_by("attack_stage")
+            eas = ElementaryAction.objects.filter(id__in=ea_ids)
+            elementary_actions = [
+                {
+                    "id": str(ea.id),
+                    "name": ea.name,
+                    "attack_stage": ea.attack_stage,
+                    "icon_fa_class": ea.icon_fa_class,
+                }
+                for ea in eas
+            ]
 
-            for ea in kill_chain_eas:
-                stage = ea.attack_stage
-                entry = {"id": str(ea.id), "label": ea.name, "group": groups.get(stage)}
-                if ea.icon:
-                    entry["icon"] = ea.icon_fa_hex
-                nodes.append(entry)
-                panel_name = panels.get(stage)
-                if panel_name:
-                    panel_nodes[panel_name].append(str(ea.id))
-
-            # Build links based on kill chain steps
-            for step in mo.kill_chain_steps.all().order_by(
-                "elementary_action__attack_stage"
-            ):
-                ea = step.elementary_action
-                if step.antecedents.exists():
-                    target = str(ea.id)
-                    if step.logic_operator:
-                        # Get the stage from the first antecedent for panel placement
-                        antecedent_stage = step.antecedents.first().attack_stage
-                        nodes.append(
-                            {
-                                "id": str(step.id),
-                                "icon": step.logic_operator,
-                                "shape": "circle",
-                                "size": 45,
-                            }
-                        )
-                        # Add logic operator to the same panel as its antecedents
-                        panel_name = panels.get(antecedent_stage)
-                        if panel_name:
-                            panel_nodes[panel_name].append(str(step.id))
-                        target = str(step.id)
-                        links.append({"source": str(step.id), "target": str(ea.id)})
-                    for ant in step.antecedents.all().order_by("attack_stage"):
-                        links.append({"source": str(ant.id), "target": target})
-
-            # Only return graph data if there are nodes
-            if nodes:
-                return {"nodes": nodes, "links": links, "panelNodes": panel_nodes}
-            return None
+            return {
+                "kill_chain_steps": kill_chain_steps,
+                "elementary_actions": elementary_actions,
+            }
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []

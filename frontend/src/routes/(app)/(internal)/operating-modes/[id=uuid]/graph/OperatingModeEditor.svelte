@@ -146,12 +146,15 @@
 
 	function handleFlowInit() {
 		flowInstance = useSvelteFlow();
-		const saved = localStorage.getItem(VIEWPORT_KEY);
-		if (saved) {
-			flowInstance.setViewport(JSON.parse(saved));
-		} else {
-			flowInstance.fitView();
-		}
+		// Delay fitView to ensure nodes are rendered in the DOM
+		setTimeout(() => {
+			const saved = localStorage.getItem(VIEWPORT_KEY);
+			if (saved && !readonly) {
+				flowInstance?.setViewport(JSON.parse(saved));
+			} else {
+				flowInstance?.fitView({ duration: 200, padding: 0.15 });
+			}
+		}, 100);
 	}
 
 	function saveViewport() {
@@ -162,7 +165,8 @@
 
 	// ---- Stage helpers ----
 
-	function getStageNumber(attackStage: string): number {
+	function getStageNumber(attackStage: string | number): number {
+		if (typeof attackStage === 'number') return attackStage;
 		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
 		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
 		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
@@ -262,16 +266,16 @@
 		logicOps = ops;
 	}
 
-	$effect(() => {
-		initFromKillChain();
-	});
+	// Initialize nodes/edges immediately
+	initFromKillChain();
 
-	// Re-fit viewport after sidebar transition when toggling readonly
+	// Re-fit viewport after sidebar transition when toggling readonly,
+	// and also on initial mount to ensure nodes are visible
 	$effect(() => {
 		void readonly;
 		const timer = setTimeout(() => {
-			flowInstance?.fitView({ duration: 300 });
-		}, 350); // slightly after sidebar transition (300ms)
+			flowInstance?.fitView({ duration: 300, padding: 0.15 });
+		}, 350);
 		return () => clearTimeout(timer);
 	});
 
@@ -533,7 +537,7 @@
 	}
 </script>
 
-<div class="flex h-[80vh] bg-surface-50 rounded-base overflow-hidden border border-surface-200">
+<div class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200">
 	<!-- Sidebar: only in edit mode, with slide transition -->
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
@@ -616,6 +620,7 @@
 				oninit={handleFlowInit}
 				onmoveend={saveViewport}
 				snapGrid={[10, 10]}
+				minZoom={0.3}
 				proOptions={{ hideAttribution: true }}
 				defaultEdgeOptions={{
 					type: 'logic',
@@ -625,7 +630,9 @@
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
 				<Controls showLock={false} />
-				<MiniMap />
+				{#if !readonly}
+					<MiniMap />
+				{/if}
 			</SvelteFlow>
 		</div>
 	</div>

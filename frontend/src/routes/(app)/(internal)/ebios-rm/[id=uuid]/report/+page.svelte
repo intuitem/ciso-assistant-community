@@ -7,7 +7,7 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
-	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
+	import OperatingModeEditor from '../../../operating-modes/[id=uuid]/graph/OperatingModeEditor.svelte';
 	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
@@ -807,27 +807,30 @@
 														{safeTranslate(mode.likelihood.name)}
 													</span>
 												</div>
-												{#if mode.elementary_actions.length > 0}
+												{#if mode.graph?.elementary_actions?.length > 0}
 													<div class="text-xs">
-														<span class="font-semibold text-gray-700">{m.elementaryActions()}:</span
+														<span class="font-semibold text-surface-700"
+															>{m.elementaryActions()}:</span
 														>
-														<span class="ml-1 text-gray-600">{mode.elementary_actions.length}</span>
+														<span class="ml-1 text-surface-600"
+															>{mode.graph.elementary_actions.length}</span
+														>
 													</div>
 												{/if}
 											</div>
 											<!-- Operating Mode Graph -->
 											{#if mode.graph}
-												<div class="mt-4 pt-4 border-t border-gray-200">
-													<h5 class="text-xs font-semibold text-gray-700 mb-2">
+												<div class="mt-4 pt-4 border-t border-surface-200">
+													<h5 class="text-xs font-semibold text-surface-700 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="bg-gray-50 rounded p-2" data-chart="operating-mode-{mode.id}">
-														<GraphComponent
-															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
-															panelNodes={mode.graph.panelNodes}
-															linkFlow={false}
-															height="400px"
-															zoomLevel={0.6}
+													<div class="h-[400px]">
+														<OperatingModeEditor
+															elementaryActions={mode.graph.elementary_actions}
+															killChainSteps={mode.graph.kill_chain_steps}
+															operatingModeId={mode.id}
+															graphColumns={mode.graph_columns ?? {}}
+															readonly={true}
 														/>
 													</div>
 												</div>
