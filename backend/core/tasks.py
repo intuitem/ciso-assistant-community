@@ -1139,7 +1139,9 @@ def send_assignment_submitted_notification(assignment_id):
 
 
 @task()
-def send_assignment_reviewed_notification(assignment_id, decision):
+def send_assignment_reviewed_notification(
+    assignment_id, decision, reviewer_observation=""
+):
     """Send notification when a RequirementAssignment is reviewed (closed, reopened, or changes_requested)."""
     try:
         assignment = RequirementAssignment.objects.select_related(
@@ -1155,8 +1157,7 @@ def send_assignment_reviewed_notification(assignment_id, decision):
     context = {
         "assessment_name": ca.name,
         "decision": decision.replace("_", " ").title(),
-        "reviewer_observation": getattr(assignment.events.first(), "event_notes", "")
-        or "",
+        "reviewer_observation": reviewer_observation,
     }
 
     for actor in assignment.actor.all():

@@ -13632,7 +13632,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
         # Send notification
         try:
-            self._send_transition_notification(assignment, key)
+            self._send_transition_notification(assignment, key, observation or "")
         except Exception:
             logger.error(
                 "Failed to send assignment notification",
@@ -13644,7 +13644,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         return Response({"status": target})
 
     @staticmethod
-    def _send_transition_notification(assignment, transition_key):
+    def _send_transition_notification(assignment, transition_key, observation=""):
         from_status, to_status = transition_key
         if to_status == "in_progress":
             from core.tasks import send_assignment_activated_notification
@@ -13663,4 +13663,4 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             from core.tasks import send_assignment_reviewed_notification
 
             decision = "reopened" if from_status == "closed" else to_status
-            send_assignment_reviewed_notification(assignment.id, decision)
+            send_assignment_reviewed_notification(assignment.id, decision, observation)
