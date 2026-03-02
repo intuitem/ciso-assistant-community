@@ -1153,9 +1153,10 @@
 			onclick={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
+			aria-labelledby="request-changes-modal-title"
 		>
 			<div class="flex items-center justify-between p-4 border-b">
-				<h2 class="h4 font-semibold">
+				<h2 id="request-changes-modal-title" class="h4 font-semibold">
 					<i class="fa-solid fa-rotate-left text-red-500 mr-2"></i>
 					{m.requestChanges()}
 				</h2>
