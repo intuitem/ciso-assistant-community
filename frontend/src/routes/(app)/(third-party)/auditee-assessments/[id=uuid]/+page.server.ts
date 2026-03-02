@@ -120,11 +120,7 @@ export const load = (async ({ fetch, params, url }) => {
 	const assignmentsData = await assignmentsRes.json();
 	const assignments =
 		assignmentsData.results?.map(
-			(a: {
-				id: string;
-				status: string;
-				reviewer_observation: string | null;
-			}) => ({
+			(a: { id: string; status: string; reviewer_observation: string | null }) => ({
 				id: a.id,
 				status: a.status,
 				reviewer_observation: a.reviewer_observation

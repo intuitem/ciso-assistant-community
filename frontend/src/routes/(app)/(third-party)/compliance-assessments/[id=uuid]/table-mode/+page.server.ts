@@ -15,11 +15,9 @@ export const load = (async ({ fetch, params }) => {
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
 	const [compliance_assessment, tableMode, scores] = await Promise.all(
-		[
-			endpoint,
-			`${endpoint}requirements_list/`,
-			`${endpoint}global_score/`
-		].map((endpoint) => fetch(endpoint).then((res) => res.json()))
+		[endpoint, `${endpoint}requirements_list/`, `${endpoint}global_score/`].map((endpoint) =>
+			fetch(endpoint).then((res) => res.json())
+		)
 	);
 
 	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;

@@ -31,10 +31,11 @@ From the **Assignments** page of a compliance assessment:
 
 1. **Create assignments** — select requirements from the tree and assign them to one or more actors.
 2. **Start** — when ready, start individual assignments or use **Start All** to notify all respondents at once. An email is sent to each assigned actor.
-3. **Review submissions** — when a respondent submits, you can:
+3. **Review responses** — each non-draft assignment card has a **Review responses** link that opens the respondent's assessment view, scoped to only the requirements in that assignment. This lets you see exactly what the respondent sees.
+4. **Review submissions** — when a respondent submits, you can:
    - **Close** — mark the assignment as done. The respondent is notified.
    - **Request Changes** — send it back with an observation describing what needs to be fixed. The respondent is notified and can edit again.
-4. **Reopen** — a closed assignment can be reopened, returning it to submitted status for further review.
+5. **Reopen** — a closed assignment can be reopened, returning it to submitted status for further review.
 
 > Assignments can only be edited or deleted while in **Draft** or **In Progress** state.
 > Respondents must assess all assigned requirements before they can submit.
@@ -53,7 +54,8 @@ From the **Assessment** page:
 - The assessment is scoped to the requirements included in your assignment.
 - A status banner at the top shows your current state.
 - If changes were requested, the reviewer's observation is displayed so you know what to fix.
-- When you are done, click **Submit for Review**. This locks the assessment until the reviewer responds.
+- Use the **filter chips** above the table of contents to quickly filter requirements by compliance result (e.g. show only "Not assessed" items).
+- When you are done, click **Submit for Review**. All assigned requirements must be assessed before submission is allowed. This locks the assessment until the reviewer responds.
 
 ## Email Notifications
 
