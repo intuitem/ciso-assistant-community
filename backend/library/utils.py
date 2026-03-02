@@ -13,8 +13,10 @@ from core.models import (
     RequirementNode,
     RiskMatrix,
     ReferenceControl,
+    Terminology,
     Threat,
 )
+from metrology.models import MetricDefinition
 from django.db import transaction
 from iam.models import Folder
 
@@ -104,9 +106,20 @@ class RequirementNodeImporter:
             logger.info(
                 f"Parsing the reference controls for {self.requirement_data.get('ref_id')}"
             )
-            requirement_node.reference_controls.add(
-                ReferenceControl.objects.get(urn=reference_control.lower())
-            )
+            try:
+                ref = ReferenceControl.objects.get(urn=reference_control.lower())
+            except ReferenceControl.DoesNotExist as exc:
+                reference_control_name = reference_control or "unknown"
+                requirement_identifier = self.requirement_data.get(
+                    "ref_id", self.requirement_data.get("urn")
+                )
+                error_message = (
+                    f"Unknown reference control '{reference_control_name}' "
+                    f"referenced in requirement '{requirement_identifier}'."
+                )
+                logger.error(error_message)
+                raise ValueError(error_message) from exc
+            requirement_node.reference_controls.add(ref)
 
 
 class RequirementMappingImporter:
@@ -200,25 +213,7 @@ class RequirementMappingSetImporter:
         self,
         library_object: LoadedLibrary,
     ):
-        from core.mappings.engine import engine
-
-        _target_framework = Framework.objects.get(
-            urn=self.data["target_framework_urn"].lower(), default_locale=True
-        )
-        _source_framework = Framework.objects.get(
-            urn=self.data["source_framework_urn"].lower(), default_locale=True
-        )
-        mapping_set = RequirementMappingSet.objects.create(
-            name=self.data["name"],
-            urn=self.data["urn"].lower(),
-            target_framework=_target_framework,
-            source_framework=_source_framework,
-            library=library_object,
-        )
-        for mapping in self._requirement_mappings:
-            mapping.load(mapping_set)
-        transaction.on_commit(lambda: engine.load_rms_data())
-        return mapping_set
+        pass
 
     def init(self) -> Union[str, None]:
         if missing_fields := self.REQUIRED_FIELDS - set(self.data.keys()):
@@ -410,6 +405,58 @@ class ReferenceControlImporter:
         )
 
 
+class MetricDefinitionImporter:
+    REQUIRED_FIELDS = {"ref_id", "urn"}
+    CATEGORIES = set(_category[0] for _category in MetricDefinition.Category.choices)
+
+    def __init__(self, metric_definition_data: dict):
+        self.metric_definition_data = metric_definition_data
+
+    def is_valid(self) -> Union[str, None]:
+        if missing_fields := self.REQUIRED_FIELDS - set(
+            self.metric_definition_data.keys()
+        ):
+            return "Missing the following fields : {}".format(", ".join(missing_fields))
+
+        if (category := self.metric_definition_data.get("category")) is not None:
+            if category not in MetricDefinitionImporter.CATEGORIES:
+                return "Invalid category '{}', the category must be among the following list : {}".format(
+                    category, ", ".join(MetricDefinitionImporter.CATEGORIES)
+                )
+
+        # For qualitative metrics, choices_definition is required
+        if category == "qualitative":
+            if not self.metric_definition_data.get("choices_definition"):
+                return "Qualitative metrics require 'choices_definition' field"
+
+    def import_metric_definition(self, library_object: LoadedLibrary):
+        # Look up unit by name if provided
+        unit = None
+        if unit_name := self.metric_definition_data.get("unit"):
+            unit = Terminology.objects.filter(
+                name=unit_name,
+                field_path=Terminology.FieldPath.METRIC_UNIT,
+            ).first()
+
+        MetricDefinition.objects.create(
+            library=library_object,
+            urn=self.metric_definition_data["urn"].lower(),
+            ref_id=self.metric_definition_data["ref_id"],
+            name=self.metric_definition_data.get("name"),
+            description=self.metric_definition_data.get("description"),
+            provider=library_object.provider,
+            category=self.metric_definition_data.get("category", "quantitative"),
+            unit=unit,
+            choices_definition=self.metric_definition_data.get("choices_definition"),
+            higher_is_better=self.metric_definition_data.get("higher_is_better", True),
+            default_target=self.metric_definition_data.get("default_target"),
+            is_published=True,
+            locale=library_object.locale,
+            translations=self.metric_definition_data.get("translations", {}),
+            default_locale=library_object.default_locale,
+        )
+
+
 # The couple (URN, locale) is unique. ===> Check this in the future
 class RiskMatrixImporter:
     REQUIRED_FIELDS = {"ref_id", "urn", "json_definition"}
@@ -462,6 +509,7 @@ class LibraryImporter:
     OBJECT_FIELDS = [
         "threats",
         "reference_controls",
+        "metric_definitions",
         "risk_matrix",  # This field name is deprecated
         "risk_matrices",
         "framework",  # This field name is deprecated
@@ -480,6 +528,7 @@ class LibraryImporter:
         self._frameworks = []
         self._threats = []
         self._reference_controls = []
+        self._metric_definitions = []
         self._risk_matrices = []
         self._requirement_mapping_sets = []
 
@@ -535,6 +584,38 @@ class LibraryImporter:
                     invalid_reference_control_index + 1, "th"
                 ),
                 invalid_reference_control_error,
+            )
+
+    def init_metric_definitions(
+        self, metric_definitions: List[dict]
+    ) -> Union[str, None]:
+        metric_definition_importers = []
+        import_errors = []
+        for index, metric_definition_data in enumerate(metric_definitions):
+            metric_definition_importer = MetricDefinitionImporter(
+                metric_definition_data
+            )
+            metric_definition_importers.append(metric_definition_importer)
+            if (
+                metric_definition_error := metric_definition_importer.is_valid()
+            ) is not None:
+                import_errors.append((index, metric_definition_error))
+
+        self._metric_definitions = metric_definition_importers
+
+        if import_errors:
+            (
+                invalid_metric_definition_index,
+                invalid_metric_definition_error,
+            ) = import_errors[0]
+            return "[METRIC_DEFINITION_ERROR] {} invalid metric definition{} detected, the {}{} metric definition has the following error : {}".format(
+                len(import_errors),
+                "s" if len(import_errors) > 1 else "",
+                invalid_metric_definition_index + 1,
+                {1: "st", 2: "nd", 3: "rd"}.get(
+                    invalid_metric_definition_index + 1, "th"
+                ),
+                invalid_metric_definition_error,
             )
 
     def init_risk_matrices(self, risk_matrices: List[dict]) -> Union[str, None]:
@@ -699,9 +780,25 @@ class LibraryImporter:
             ) is not None:
                 return reference_control_import_error
 
+        if "metric_definitions" in library_objects:
+            metric_definition_data = library_objects["metric_definitions"]
+            if (
+                metric_definition_import_error := self.init_metric_definitions(
+                    metric_definition_data
+                )
+            ) is not None:
+                return metric_definition_import_error
+
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
-        if not self._library.dependencies:
+        if (
+            not self._library.dependencies
+            or self._library.content.get(
+                "requirement_mapping_set",
+                self._library.content.get("requirement_mapping_sets"),
+            )
+            is not None
+        ):
             return None
         for dependency_urn in self._library.dependencies:
             if not LoadedLibrary.objects.filter(urn=dependency_urn).exists():
@@ -765,6 +862,9 @@ class LibraryImporter:
 
         for reference_control in self._reference_controls:
             reference_control.import_reference_control(library_object)
+
+        for metric_definition in self._metric_definitions:
+            metric_definition.import_metric_definition(library_object)
 
         for risk_matrix in self._risk_matrices:
             risk_matrix.import_risk_matrix(library_object)

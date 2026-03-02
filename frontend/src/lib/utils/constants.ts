@@ -49,6 +49,15 @@ export const complianceStatusTailwindColorMap = {
 	done: 'bg-green-300'
 };
 
+export const extendedResultColorMap: { [key: string]: string } = {
+	not_set: '#d1d5db',
+	major_nonconformity: '#dc2626',
+	minor_nonconformity: '#f97316',
+	observation: '#eab308',
+	opportunity_for_improvement: '#3b82f6',
+	good_practice: '#22c55e'
+};
+
 export const MONTH_LIST = [
 	'January',
 	'February',
@@ -90,7 +99,9 @@ export const LOCALE_DISPLAY_MAP = {
 	uk: '🇺🇦 Українська',
 	el: '🇬🇷 Ελληνικά',
 	tr: '🇹🇷 Türkçe',
-	hr: '🇭🇷 Hrvatski'
+	hr: '🇭🇷 Hrvatski',
+	zh: '🇨🇳 简体中文',
+	lt: '🇱🇹 Lietuvių'
 };
 
 export const ISO_8601_REGEX =

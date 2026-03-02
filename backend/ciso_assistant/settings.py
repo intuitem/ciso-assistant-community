@@ -31,8 +31,10 @@ SCHEMA_VERSION = meta.SCHEMA_VERSION
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "WARNING")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
+DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
+FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
 
 
 def set_ciso_assistant_url(_, __, event_dict):
@@ -61,11 +63,6 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
-        "django.server": {
-            "handlers": [],
-            "level": "WARNING",
-            "propagate": False,
-        },
     },
 }
 
@@ -119,10 +116,20 @@ logger.info("SCHEMA_VERSION: %s", SCHEMA_VERSION)
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DJANGO_DEBUG", "False") == "True"
-MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False") == "True"
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() in ("true", "1", "yes")
+MAIL_DEBUG = os.environ.get("MAIL_DEBUG", "False").lower() in ("true", "1", "yes")
+
+# SECURITY WARNING: Sensitive operations, such as excel file processing, can run in a sandbox.
+# The sandbox is disabled by default; set ENABLE_SANDBOX=true to enable bubblewrap isolation.
+ENABLE_SANDBOX = os.environ.get(
+    "ENABLE_SANDBOX",
+    "False",
+).strip().lower() in ("true", "1", "yes")
+
+LIBRARY_COMPATIBILITY_MODES = [0, 1, 2, 3]
 
 logger.info("DEBUG mode: %s", DEBUG)
+logger.info("ENABLE_SANDBOX: %s", ENABLE_SANDBOX)
 logger.info("CISO_ASSISTANT_URL: %s", CISO_ASSISTANT_URL)
 # ALLOWED_HOSTS should contain the backend address
 ALLOWED_HOSTS = os.environ.get(
@@ -193,12 +200,14 @@ INSTALLED_APPS = [
     "privacy",
     "resilience",
     "crq",
+    "metrology",
     "core",
     "cal",
     "django_filters",
     "library",
     "serdes",
     "integrations",
+    "webhooks",
     "rest_framework",
     "knox",
     "drf_spectacular",
@@ -219,14 +228,14 @@ MIDDLEWARE = [
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django_structlog.middlewares.RequestMiddleware",
     "core.custom_middleware.AuditlogMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "core.focus_middleware.FocusModeMiddleware",
 ]
-# MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
 ROOT_URLCONF = "ciso_assistant.urls"
 # we leave these for the API UI tools - even if Django templates and Admin are not used anymore
 LOGIN_REDIRECT_URL = "/api"
@@ -235,28 +244,35 @@ LOGOUT_REDIRECT_URL = "/api"
 AUTH_TOKEN_TTL = int(
     os.environ.get("AUTH_TOKEN_TTL", default=60 * 60)
 )  # defaults to 60 minutes
-AUTH_TOKEN_AUTO_REFRESH = (
-    os.environ.get("AUTH_TOKEN_AUTO_REFRESH", default="True") == "True"
-)  # prevents token from expiring while user is active
+AUTH_TOKEN_AUTO_REFRESH = os.environ.get(
+    "AUTH_TOKEN_AUTO_REFRESH", default="True"
+).lower() in ("true", "1", "yes")  # prevents token from expiring while user is active
 AUTH_TOKEN_AUTO_REFRESH_MAX_TTL = (
     int(os.environ.get("AUTH_TOKEN_AUTO_REFRESH_MAX_TTL", default=60 * 60 * 10)) or None
 )  # absolute timeout for auto-refresh, defaults to 10 hours. token expires after this time even if the user is active
 
 
 CISO_ASSISTANT_SUPERUSER_EMAIL = os.environ.get("CISO_ASSISTANT_SUPERUSER_EMAIL")
+logger.info("CISO_ASSISTANT_SUPERUSER_EMAIL: %s", CISO_ASSISTANT_SUPERUSER_EMAIL)
+logger.info("FORCE_CREATE_ADMIN: %s", FORCE_CREATE_ADMIN)
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
+logger.info("DEFAULT_FROM_EMAIL: %s", DEFAULT_FROM_EMAIL)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False") == "True"
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "False").lower() in ("true", "1", "yes")
 # rescue mail
 EMAIL_HOST_RESCUE = os.environ.get("EMAIL_HOST_RESCUE")
 EMAIL_PORT_RESCUE = os.environ.get("EMAIL_PORT_RESCUE")
 EMAIL_HOST_USER_RESCUE = os.environ.get("EMAIL_HOST_USER_RESCUE")
 EMAIL_HOST_PASSWORD_RESCUE = os.environ.get("EMAIL_HOST_PASSWORD_RESCUE")
-EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False") == "True"
+EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
@@ -314,6 +330,15 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
+
+    if DB_LOG:
+        LOGGING["loggers"]["django.db.backends"] = {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        }
+        MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+
 
 TEMPLATES = [
     {
@@ -386,6 +411,8 @@ LANGUAGES = [
     ("el", "Greek"),
     ("tr", "Turkish"),
     ("hr", "Croatian"),
+    ("zh", "Chinese (Simplified)"),
+    ("lt", "Lithuanian"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -422,8 +449,19 @@ else:
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": SQLITE_FILE,
+            "TEST": {
+                "NAME": BASE_DIR / "db" / "test_ciso-assistant.sqlite3",
+            },
             "OPTIONS": {
                 "timeout": 120,
+                "transaction_mode": "IMMEDIATE",
+                "init_command": """
+                PRAGMA journal_mode=WAL;
+                PRAGMA synchronous=NORMAL;
+                PRAGMA mmap_size=134217728;
+                PRAGMA journal_size_limit=27103364;
+                PRAGMA cache_size=2000;
+            """,
             },
         }
     }
@@ -450,9 +488,8 @@ SPECTACULAR_SETTINGS = {
 # SSO with allauth
 
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # NOTE: The reauthentication flow has not been implemented in the frontend yet, hence the long timeout.
 # It is used to reauthenticate the user when they are performing sensitive operations. E.g. enabling/disabling MFA.
@@ -500,3 +537,7 @@ HUEY = {
 
 AUDITLOG_RETENTION_DAYS = int(os.environ.get("AUDITLOG_RETENTION_DAYS", 90))
 AUDITLOG_MAX_RECORDS = int(os.environ.get("AUDITLOG_MAX_RECORDS", 50000))
+
+WEBHOOK_ALLOW_PRIVATE_IPS = os.environ.get(
+    "WEBHOOK_ALLOW_PRIVATE_IPS", "False"
+).lower() in ("true", "1", "yes")

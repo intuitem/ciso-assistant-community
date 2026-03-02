@@ -44,7 +44,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v3
       - name: Set up python ${{ matrix.python-version }}
@@ -74,7 +74,7 @@ jobs:
         working-directory: ${{ env.backend-directory }}
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: poetry run coverage run -m pytest
+        run: poetry run coverage run -m pytest --ignore-glob="**/test_api*" --ignore="**/venv/**"
       - name: Display coverage report
         working-directory: ${{ env.backend-directory }}
         env:

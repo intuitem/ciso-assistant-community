@@ -1,9 +1,22 @@
 import type { PageLoad } from './$types';
 
 export const load: PageLoad = async ({ fetch, params, url }) => {
-	const endpoint = `/stored-libraries/${params.id}`;
+	let endpoint = `/stored-libraries/${params.id}`;
 	const queryParams = url.searchParams.toString();
-	const library = await fetch(`${endpoint}?${queryParams}`).then((res) => res.json());
+	let library = await fetch(`${endpoint}?${queryParams}`).then((res) => res.json());
+
+	const isExclusivelyLoaded = !library.builtin && Object.keys(library.objects).length === 0;
+
+	if (isExclusivelyLoaded) {
+		const loadedLibraryId = library.loaded_library;
+
+		if (loadedLibraryId !== null) {
+			endpoint = `/loaded-libraries/${loadedLibraryId}`;
+			library = await fetch(`${endpoint}?${queryParams}`).then((res) => res.json());
+		} else {
+			console.error('Loaded library id not found.');
+		}
+	}
 
 	return {
 		tree: fetch(`${endpoint}/tree?${queryParams}`)

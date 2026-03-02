@@ -15,6 +15,8 @@
 
 	const modalStore: ModalStore = getModalStore();
 
+	let exportMenuOpen = $state(false);
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
@@ -143,6 +145,44 @@
 		]
 	};
 
+	function handleActivityOneClick(): void {
+		// Check if a risk assessment already exists
+		if (data.data.last_risk_assessment) {
+			const riskAssessment = data.data.last_risk_assessment;
+			const riskAssessmentName =
+				riskAssessment.str || riskAssessment.name || 'Existing Risk Assessment';
+
+			// Show choice modal - using i18n strings
+			const choiceModal: ModalSettings = {
+				type: 'confirm',
+				title: m.ebiosRmSyncModalTitle(),
+				body: `${m.ebiosRmSyncModalBody({ name: riskAssessmentName })}
+
+  • ${m.ebiosRmSyncExisting()}
+    ${m.ebiosRmSyncExistingDescription()}
+
+  • ${m.ebiosRmCreateNew()}
+    ${m.ebiosRmCreateNewDescription()}`,
+				buttonTextConfirm: m.ebiosRmSyncExisting(),
+				buttonTextCancel: m.ebiosRmCreateNew(),
+				response: (confirmed: boolean | undefined) => {
+					if (confirmed === true) {
+						// Sync existing - navigate to sync
+						window.location.href = `${page.url.pathname}/workshop-5/risk-analyses?sync=${riskAssessment.id}`;
+					} else if (confirmed === false) {
+						// Create new
+						modalCreateForm();
+					}
+					// If confirmed is undefined (close button/escape), do nothing
+				}
+			};
+			modalStore.trigger(choiceModal);
+		} else {
+			// No existing assessment, just create
+			modalCreateForm();
+		}
+	}
+
 	function modalCreateForm(): void {
 		let modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -204,7 +244,10 @@
 		>
 			{#snippet addRiskAnalysis()}
 				<div>
-					<button class="flex flex-col text-left hover:text-purple-800" onclick={modalCreateForm}>
+					<button
+						class="flex flex-col text-left hover:text-purple-800"
+						onclick={handleActivityOneClick}
+					>
 						{#if data.data.meta.workshops[4].steps[0].status == 'done'}
 							<span
 								class="absolute flex items-center justify-center w-8 h-8 bg-success-200 rounded-full -start-4 ring-4 ring-white"
@@ -241,6 +284,31 @@
 						<i class="fa-solid fa-file-lines"></i>
 						<span>{m.report()}</span>
 					</a>
+					<!-- Export dropdown -->
+					<div class="relative">
+						<button
+							class="bg-surface-600 hover:bg-purple-600 text-white font-semibold text-sm py-3 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 w-full"
+							onclick={() => (exportMenuOpen = !exportMenuOpen)}
+							onblur={() => setTimeout(() => (exportMenuOpen = false), 150)}
+						>
+							<i class="fa-solid fa-download"></i>
+							<span>{m.exportButton()}</span>
+							<i class="fa-solid fa-chevron-down text-xs"></i>
+						</button>
+						{#if exportMenuOpen}
+							<div
+								class="absolute top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10"
+							>
+								<a
+									href={`${page.url.pathname}/export/xlsx`}
+									class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+								>
+									<i class="fa-solid fa-file-excel mr-2"></i>
+									{m.exportExcel()}
+								</a>
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/snippet}
 			{#snippet content()}

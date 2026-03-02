@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	interface Props {
 		width?: string;
@@ -23,9 +24,9 @@
 		name = 'lognormal-distribution',
 		lowerBound = 1000,
 		upperBound = 10000,
-		title = 'Impact Distribution (90% CI)',
-		xAxisLabel = 'Loss Amount ($)',
-		yAxisLabel = 'Probability Density',
+		title = m.distributionImpactCI(),
+		xAxisLabel = m.lossAmountDollar(),
+		yAxisLabel = m.probabilityDensity(),
 		enableTooltip = true,
 		xAxisScale = 'linear',
 		onParametersCalculated = undefined

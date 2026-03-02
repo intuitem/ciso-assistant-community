@@ -20,4 +20,5 @@
 	model={data.model}
 	{customNameDescription}
 	context="edit"
+	supportedModels={data.supportedModels}
 />

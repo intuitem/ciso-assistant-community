@@ -11,7 +11,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import type { ActionResult } from '@sveltejs/kit';
 	import TreeViewItemContent from '../../frameworks/[id=uuid]/TreeViewItemContent.svelte';
 
@@ -27,6 +27,7 @@
 	const riskMatrices = libraryObjects['risk_matrix'] ?? [];
 	const referenceControls = libraryObjects['reference_controls'] ?? [];
 	const threats = libraryObjects['threats'] ?? [];
+	const metricDefinitions = libraryObjects['metric_definitions'] ?? [];
 	const framework = libraryObjects['framework'];
 
 	function transformToTreeView(nodes) {
@@ -70,6 +71,24 @@
 		meta: { count: threats.length }
 	};
 
+	const metricDefinitionsTable: TableSource = {
+		head: {
+			ref_id: 'ref',
+			name: 'name',
+			description: 'description',
+			category: 'category',
+			unit: 'unit'
+		},
+		body: tableSourceMapper(metricDefinitions, [
+			'ref_id',
+			'name',
+			'description',
+			'category',
+			'unit'
+		]),
+		meta: { count: metricDefinitions.length }
+	};
+
 	function riskMatricesPreview(riskMatrices: []) {
 		let riskMatricesDumps = [];
 		for (const riskMatrix of riskMatrices) {
@@ -97,7 +116,13 @@
 		applyAction(result);
 	}
 
-	let displayImportButton = $derived(!(data.library.is_loaded ?? true));
+	let displayImportButton = $derived(
+		!(
+			data.library?.is_loaded ||
+			data.library?.objects?.requirement_mapping_set ||
+			data.library?.objects?.requirement_mapping_sets
+		)
+	);
 </script>
 
 <div class="card bg-white p-4 shadow-sm space-y-4">
@@ -107,7 +132,12 @@
 			<div>
 				{#if displayImportButton}
 					{#if loading.form}
-						<ProgressRing size="size-6" meterStroke="stroke-primary-500" />
+						<Progress value={null}>
+							<Progress.Circle class="[--size:--spacing(6)]">
+								<Progress.CircleTrack />
+								<Progress.CircleRange class="stroke-primary-500" />
+							</Progress.Circle>
+						</Progress>
 					{:else}
 						<form
 							method="post"
@@ -124,7 +154,11 @@
 							onsubmit={handleSubmit}
 						>
 							{#if page.data.user.is_admin}
-								<button type="submit" class="p-1 btn text-xl hover:text-primary-500">
+								<button
+									type="submit"
+									class="p-1 btn text-xl hover:text-primary-500"
+									aria-label="load library"
+								>
 									<i class="fa-solid fa-file-import"></i>
 								</button>
 							{/if}
@@ -168,6 +202,16 @@
 				<p class="text-md leading-5 text-gray-700">
 					<strong>{m.copyright()}</strong>: {data.library.copyright}
 				</p>
+			{/if}
+			{#if data.library.filtering_labels && data.library.filtering_labels.length > 0}
+				<p class="text-md leading-5 text-gray-700">
+					<strong>{m.labels()}</strong>:
+				</p>
+				<ul class="list-disc list-inside">
+					{#each data.library.filtering_labels as label}
+						<li>{label.label}</li>
+					{/each}
+				</ul>
 			{/if}
 		</div>
 	</div>
@@ -220,6 +264,24 @@
 		>
 			<ModelTable
 				source={threatsTable}
+				displayActions={false}
+				pagination={false}
+				rowCount={false}
+				rowsPerPage={false}
+				search={false}
+				interactive={false}
+			/>
+		</Dropdown>
+	{/if}
+
+	{#if metricDefinitions.length > 0}
+		<Dropdown
+			style="hover:text-indigo-700"
+			icon="fa-solid fa-chart-line"
+			header="{metricDefinitions.length} {m.metricDefinitions()}"
+		>
+			<ModelTable
+				source={metricDefinitionsTable}
 				displayActions={false}
 				pagination={false}
 				rowCount={false}

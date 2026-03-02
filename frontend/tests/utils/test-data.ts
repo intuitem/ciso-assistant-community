@@ -27,6 +27,12 @@ export default {
 		firstName: 'Test',
 		lastName: 'User'
 	},
+	thirdPartyUser: {
+		email: 'third-party@tests.com',
+		password: 'pass123wordTest',
+		firstName: 'Third',
+		lastName: 'Party'
+	},
 	usergroups: {
 		// this lists needs to be updated when updating permissions in apps.py in order to avoid test failures
 		analyst: {
@@ -587,6 +593,11 @@ export default {
 		ref: 'NIST-CSF-1.1',
 		urn: 'urn:intuitem:risk:library:nist-csf-1.1'
 	},
+	questionnaire: {
+		name: 'CMMC version 2.0',
+		ref: 'CMMC-2.0',
+		urn: 'urn:intuitem:risk:framework:cmmc-2.0'
+	},
 	matrix: {
 		name: 'Critical risk matrix 5x5',
 		displayName: 'critical 5x5',
@@ -617,7 +628,7 @@ export default {
 	threat: {
 		name: 'T1011 - Exfiltration Over Other Network Medium',
 		library: {
-			name: 'Mitre ATT&CK v16 - Threats and mitigations',
+			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
 			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack'
 		},
@@ -626,7 +637,7 @@ export default {
 	threat2: {
 		name: 'T1052 - Exfiltration Over Physical Medium',
 		library: {
-			name: 'Mitre ATT&CK v16 - Threats and mitigations',
+			name: 'Mitre ATT&CK v18.1 - Threats and mitigations',
 			ref: 'mitre-attack',
 			urn: 'urn:intuitem:risk:library:mitre-attack'
 		},

@@ -1,0 +1,2182 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-iso42001-2023-and-scf-2025.2.2
+locale: en
+ref_id: mapping-iso42001-2023-and-scf-2025.2.2
+name: iso42001-2023 <-> scf-2025.2.2
+description: "Mapping between ISO 42001-2023 \u2014 Artificial intelligence  \u2014\
+  \ Requirements and Controls outline and SCF: Secure Controls Framework (2025.2.2)"
+copyright: SCF - CC BY-ND 4.0
+version: 1
+publication_date: 2025-12-15
+provider: SCF
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:iso42001-2023
+- urn:intuitem:risk:library:scf-2025.2.2
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-iso42001-2023-and-scf-2025.2.2
+    ref_id: mapping-iso42001-2023-and-scf-2025.2.2
+    name: iso42001-2023 <-> scf-2025.2.2
+    description: "Mapping between ISO 42001-2023 \u2014 Artificial intelligence  \u2014\
+      \ Requirements and Controls outline and SCF: Secure Controls Framework (2025.2.2)"
+    source_framework_urn: urn:intuitem:risk:framework:iso42001-2023
+    target_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-18.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:3.0
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-16.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-16.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-06.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-02.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-16
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-03.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.5
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.13
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-iso42001-2023-and-scf-2025.2.2-revert
+    ref_id: mapping-iso42001-2023-and-scf-2025.2.2-revert
+    name: iso42001-2023 <-> scf-2025.2.2
+    description: "Mapping between ISO 42001-2023 \u2014 Artificial intelligence  \u2014\
+      \ Requirements and Controls outline and SCF: Secure Controls Framework (2025.2.2)"
+    target_framework_urn: urn:intuitem:risk:framework:iso42001-2023
+    source_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-18.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:sea-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:3.0
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:vpm-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:4.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-15.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-16.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-17.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-16.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.1.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:6.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-05.7
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:7.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-15.5
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-06.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:9.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-09
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.10.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.2.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.3.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-13.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.4.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:chg-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-08
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.5.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.1.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-02.3
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.9
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-01
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-02
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-06
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iao-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-16
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-05
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:prm-07
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tda-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.6.2.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-03.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-22
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.7.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11.4
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-11
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ast-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.8.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-04
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:aat-10.13
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:ops-03
+      target_requirement_urn: urn:intuitem:risk:req_node:iso42001-2023:a.9.4
+      relationship: intersect

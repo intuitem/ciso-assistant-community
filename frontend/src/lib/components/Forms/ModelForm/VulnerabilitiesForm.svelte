@@ -31,7 +31,6 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />
 
 <Select
@@ -53,8 +52,10 @@
 />
 <AutocompleteSelect
 	multiple
+	lazy
 	{form}
 	optionsEndpoint="assets"
+	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{
 		fields: [

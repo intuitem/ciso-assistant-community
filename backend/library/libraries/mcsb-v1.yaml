@@ -1,0 +1,2861 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mcsb-v1
+locale: en
+ref_id: mcsb-v1
+name: Microsoft cloud security benchmark
+description: 'The Microsoft cloud security benchmark provides prescriptive best practices
+  and recommendations to help improve the security of workloads, data, and services
+  on Azure and your multicloud environment. This benchmark focuses on cloud-centric
+  security areas with input from a set of holistic Microsoft and industry security
+  guidance.
+
+  https://learn.microsoft.com/en-us/security/benchmark/azure/'
+copyright: Microsoft
+version: 1
+publication_date: 2023-04-03
+provider: Microsoft
+packager: intuitem
+objects:
+  framework:
+    urn: urn:intuitem:risk:framework:mcsb-v1
+    ref_id: mcsb-v1
+    name: Microsoft cloud security benchmark
+    description: The Microsoft cloud security benchmark provides prescriptive best
+      practices and recommendations to help improve the security of workloads, data,
+      and services on Azure and your multicloud environment. This benchmark focuses
+      on cloud-centric security areas with input from a set of holistic Microsoft
+      and industry security guidance
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      assessable: false
+      depth: 1
+      ref_id: NS
+      name: Network Security
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-1
+      name: Establish network segmentation boundaries
+      description: "Ensure that your virtual network deployment aligns to your enterprise\
+        \ segmentation strategy defined in the GS-2 security control. Any workload\
+        \ that could incur higher risk for the organization should be in isolated\
+        \ virtual networks. \nExamples of high-risk workload include:\n- An application\
+        \ storing or processing highly sensitive data.\n- An external network-facing\
+        \ application accessible by the public or users outside of your organization.\n\
+        - An application using insecure architecture or containing vulnerabilities\
+        \ that cannot be easily remediated.\n\nTo enhance your enterprise segmentation\
+        \ strategy, restrict or monitor traffic between internal resources using network\
+        \ controls. For specific, well-defined applications (such as a 3-tier app),\
+        \ this can be a highly secure \"deny by default, permit by exception\" approach\
+        \ by restricting the ports, protocols, source, and destination IPs of the\
+        \ network traffic. If you have many applications and endpoints interacting\
+        \ with each other, blocking traffic may not scale well, and you may only be\
+        \ able to monitor traffic."
+      annotation: "### Azure Guidance\n\nCreate a virtual network (VNet) as a fundamental\
+        \ segmentation approach in your Azure network, so resources such as VMs can\
+        \ be deployed into the VNet within a network boundary. To further segment\
+        \ the network, you can create subnets inside VNet for smaller sub-networks.\n\
+        \nUse network security groups (NSG) as a network layer control to restrict\
+        \ or monitor traffic by port, protocol, source IP address, or destination\
+        \ IP address. Refer to NS-7 Simplify network security configuration to use\
+        \ Adaptive Network Hardening to recommend NSG hardening rules based on threat\
+        \ intelligence and traffic analysis result. \n\nYou can also use application\
+        \ security groups (ASGs) to simplify complex configuration. Instead of defining\
+        \ policy based on explicit IP addresses in network security groups, ASGs enable\
+        \ you to configure network security as a natural extension of an application's\
+        \ structure, allowing you to group virtual machines and define network security\
+        \ policies based on those groups.\n\n### AWS Guidance\n\nCreate a Virtual\
+        \ Private Cloud (VPC) as a fundamental segmentation approach in your AWS network,\
+        \ so resources such as EC2 instances can be deployed into the VPC within a\
+        \ network boundary. To further segment the network, you can create subnets\
+        \ inside VPC for smaller sub-networks. \n\nFor EC2 instances, use Security\
+        \ Groups, as a stateful firewall to restrict traffic by port, protocol, source\
+        \ IP address, or destination IP address. At the VPC subnet level, use Network\
+        \ Access Control List (NACL) as a stateless firewall to have explicit rules\
+        \ for ingress and egress traffic to the subnet. \n\nNote: To control VPC traffic,\
+        \ Internet and NAT Gateway should be configured to ensure the traffic from/to\
+        \ the internet are restricted."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-2
+      name: Secure cloud native services with network controls
+      description: Secure cloud services by establishing a private access point for
+        the resources. You should also disable or restrict access from public network
+        when possible.
+      annotation: "### Azure Guidance\n\nDeploy private endpoints for all Azure resources\
+        \ that support the Private Link feature, to establish a private access point\
+        \ for the resources. Using Private Link will keep the private connection from\
+        \ routing through the public network. \n\nNote: Certain Azure services may\
+        \ also allow private communication through the service endpoint feature, though\
+        \ it is recommended to use Azure Private Link for secure and private access\
+        \ to services hosted on Azure platform.\n\nFor certain services, you can choose\
+        \ to deploy VNet integration for the service where you can restrict/isolate\
+        \ the VNET to establish a private access point for the service. \n\nYou also\
+        \ have the option to configure the service native network ACL rules or simply\
+        \ disable public network access to block access from the public network. \n\
+        \nFor Azure VMs, unless there is a strong use case, you should avoid assigning\
+        \ public IPs/subnet directly to the VM interface and instead use gateway or\
+        \ load balancer services as the front-end for access by the public network.\n\
+        \n### AWS Guidance\n\nDeploy VPC PrivateLink for all AWS resources that support\
+        \ the PrivateLink feature, to allow private connection to the supported AWS\
+        \ services or services hosted by other AWS accounts (VPC endpoint services).\
+        \ Using PrivateLink will keep the private connection from routing through\
+        \ the public network.\n\nFor certain services, you can choose to deploy the\
+        \ service instance into your own VPC to isolate the traffic. \n\nYou also\
+        \ have the option to configure the service native ACL rules to block access\
+        \ from the public network. For example, Amazon S3 allows you to block public\
+        \ access at the bucket or account level. \n\nWhen assigning IPs to your service\
+        \ resources in your VPC, unless there is a strong use case, you should avoid\
+        \ assigning public IPs/subnet directly to your resources and instead use private\
+        \ IPs/subnet."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-3
+      name: Deploy firewall at the edge of enterprise network
+      description: 'Deploy a firewall to perform advanced filtering on network traffic
+        to and from external networks. You can also use firewalls between internal
+        segments to support a segmentation strategy. If required, use custom routes
+        for your subnet to override the system route when you need to force the network
+        traffic to go through a network appliance for security control purpose.
+
+
+        At a minimum, block known bad IP addresses and high-risk protocols, such as
+        remote management (for example, RDP and SSH) and intranet protocols (for example,
+        SMB and Kerberos).'
+      annotation: "### Azure Guidance\n\nUse Azure Firewall to provide fully stateful\
+        \ application layer traffic restriction (such as URL filtering) and/or central\
+        \ management over a large number of enterprise segments or spokes (in a hub/spoke\
+        \ topology).  \n\nIf you have a complex network topology, such as a hub/spoke\
+        \ setup, you may need to create user-defined routes (UDR) to ensure the traffic\
+        \ goes through the desired route. For example, you have the option to use\
+        \ an UDR to redirect egress internet traffic through a specific Azure Firewall\
+        \ or a network virtual appliance.\n\n### AWS Guidance\n\nUse AWS Network Firewall\
+        \ to provide fully stateful application layer traffic restriction (such as\
+        \ URL filtering) and/or central management over a large number of enterprise\
+        \ segments or spokes (in a hub/spoke topology).  \n\nIf you have a complex\
+        \ network topology, such as a hub/spoke setup, you may need to create custom\
+        \ VPC route tables to ensure the traffic goes through the desired route. \
+        \ For example, you have the option to use a custom route to redirect egress\
+        \ internet traffic through a specific AWS Firewall or a network virtual appliance."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-4
+      name: Deploy intrusion detection/intrusion prevention systems (IDS/IPS)
+      description: 'Use network intrusion detection and intrusion prevention systems
+        (IDS/IPS) to inspect the network and payload traffic to or from your workload.
+        Ensure that IDS/IPS is always tuned to provide high-quality alerts to your
+        SIEM solution.
+
+
+        For more in-depth host level detection and prevention capability, use host-based
+        IDS/IPS or a host-based endpoint detection and response (EDR) solution in
+        conjunction with the network IDS/IPS.'
+      annotation: "### Azure Guidance\n\nUse Azure Firewall\u2019s IDPS capability\
+        \ to protect your virtual network to alert on and/or block traffic to and\
+        \ from known malicious IP addresses and domains. \n\nFor more in-depth host-level\
+        \ detection and prevention capabilities, deploy host-based IDS/IPS or a host-based\
+        \ endpoint detection and response (EDR) solution, such as Microsoft Defender\
+        \ for Endpoint, at the VM level in conjunction with the network IDS/IPS.\n\
+        \n### AWS Guidance\n\nUse AWS Network Firewall\u2019s IPS capability to protect\
+        \ your VPC to alert on and/or block traffic to and from known malicious IP\
+        \ addresses and domains. \n\nFor more in-depth host-level detection and prevention\
+        \ capabilities, deploy host-based IDS/IPS or a host-based endpoint detection\
+        \ and response (EDR) solution, such as third-party solution for host-based\
+        \ IDS/IPS, at the VM level in conjunction with the network IDS/IPS. \n\nNote:\
+        \ If using a third-party IDS/IPS from marketplace, use Transit Gateway and\
+        \ Gateway Balancer to direct the traffic for in-line inspection."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-5
+      name: Deploy DDOS protection
+      description: Deploy distributed denial of service (DDoS) protection to protect
+        your network and applications from attacks.
+      annotation: "### Azure Guidance\n\nDDoS Protection Basic is automatically enabled\
+        \ to protect the Azure underlying platform infrastructure (e.g., Azure DNS)\
+        \ and requires no configuration from the users. \n\nFor higher levels of protection\
+        \ of your application layer (Layer 7) attacks such as HTTP floods and DNS\
+        \ floods, enable the DDoS standard protection plan on your VNet to protect\
+        \ resources that are exposed to the public networks.\n\n### AWS Guidance\n\
+        \nAWS Shield Standard is automatically enabled with standard mitigations,\
+        \ to protect your workload from common network and transport layer (Layer\
+        \ 3 and 4) DDoS attacks \n\nFor higher levels of protection of your applications\
+        \ against application layer (Layer 7) attack such as HTTPS floods, and DNS\
+        \ floods, enable AWS Shield Advanced protection on Amazon EC2, Elastic Load\
+        \ Balancing (ELB), Amazon CloudFront, AWS Global Accelerator, and Amazon Route\
+        \ 53."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-6
+      name: Deploy web application firewall
+      description: Deploy a web application firewall (WAF) and configure the appropriate
+        rules to protect your web applications and APIs from application-specific
+        attacks.
+      annotation: "### Azure Guidance\n\nUse web application firewall (WAF) capabilities\
+        \ in Azure Application Gateway, Azure Front Door, and Azure Content Delivery\
+        \ Network (CDN) to protect your applications, services and APIs against application\
+        \ layer attacks at the edge of your network. \n\nSet your WAF in \"detection\"\
+        \ or \"prevention mode,\" depending on your needs and threat landscape. \n\
+        \nChoose a built-in ruleset, such as OWASP Top 10 vulnerabilities, and tune\
+        \ it to your application needs.\n\n### AWS Guidance\n\nUse AWS Web Application\
+        \ Firewall (WAF) in Amazon CloudFront distribution, Amazon API Gateway, Application\
+        \ Load Balancer, or AWS AppSync to protect your applications, services, and\
+        \ APIs against application layer attacks at the edge of your network. \n\n\
+        Use AWS Managed Rules for WAF to deploy built-in baseline groups, and customize\
+        \ it to your application needs for the user-case rule groups.  \n\nTo simplify\
+        \ the WAF rules deployment, you can also use the AWS WAF Security Automations\
+        \ solution to automatically deploy pre-defined AWS WAF rules that filters\
+        \ web-based attacks on your web ACL."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-7
+      name: Simplify network security configuration
+      description: When managing a complex network environment, use tools to simplify,
+        centralize and enhance the network security management.
+      annotation: "### Azure Guidance\n\nUse the following features to simplify the\
+        \ implementation and management of the virtual network, NSG rules, and Azure\
+        \ Firewall rules: \n- Use Azure Virtual Network Manager to group, configure,\
+        \ deploy, and manage virtual networks and NSG rules across regions and subscriptions.\
+        \ \n- Use Microsoft Defender for Cloud Adaptive Network Hardening to recommend\
+        \ NSG hardening rules that further limit ports, protocols and source IPs based\
+        \ on threat intelligence and traffic analysis result. \n- Use Azure Firewall\
+        \ Manager to centralize the firewall policy and route management of the virtual\
+        \ network. To simplify the firewall rules and network security groups implementation,\
+        \ you can also use the Azure Firewall Manager Azure Resource Manager (ARM)\
+        \ template.\n\n### AWS Guidance\n\nUse AWS Firewall Manager to centralize\
+        \ the network protection policy management across the following services.\
+        \ \n- AWS WAF policies\n- AWS Shield Advanced policies\n- VPC security group\
+        \ policies\n- Network Firewall policies\nAWS Firewall Manager can automatically\
+        \ analyze your firewall-related policies and create findings for non-compliant\
+        \ resources and for detected attacks and sends them to AWS Security Hub for\
+        \ investigation."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-8
+      name: Detect and disable insecure services and  protocols
+      description: Detect and disable insecure services and protocols at the OS, application,
+        or software package layer. Deploy compensating controls if disabling insecure
+        services and protocols are not possible.
+      annotation: "### Azure Guidance\n\nUse Microsoft Sentinel\u2019s built-in Insecure\
+        \ Protocol Workbook to discover the use of insecure services and protocols\
+        \ such as SSL/TLSv1, SSHv1, SMBv1, LM/NTLMv1, wDigest, weak ciphers in Kerberos,\
+        \ and Unsigned LDAP Binds. Disable insecure services and protocols that do\
+        \ not meet the appropriate security standard. \n\nNote: If disabling insecure\
+        \ services or protocols is not possible, use compensating controls such as\
+        \ blocking access to the resources through network security groups, Azure\
+        \ Firewall, or Azure Web Application Firewall to reduce the attack surface.\n\
+        \n### AWS Guidance\n\nEnable VPC Flow Logs and use GuardDuty to analyze the\
+        \ VPC Flow Logs to identify the possible insecure services and protocols that\
+        \ do not meet the appropriate security standard. \n\nIf the logs in the AWS\
+        \ environment can be forwarded to Microsoft Sentinel, you can also use Microsoft\
+        \ Sentinel\u2019s built-in Insecure Protocol Workbook to discover the use\
+        \ of insecure services and protocols \n\nNote: If disabling insecure services\
+        \ or protocols is not possible, use compensating controls such as blocking\
+        \ access to the resources through security groups, AWS Network Firewall, or\
+        \ AWS Web Application Firewall to reduce the attack surface."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-9
+      name: Connect on-premises or cloud network privately
+      description: Use private connections for secure communication between different
+        networks, such as cloud service provider datacenters and on-premises infrastructure
+        in a colocation environment.
+      annotation: "### Azure Guidance\n\nFor lightweight site-to-site or point-to-site\
+        \ connectivity, use Azure virtual private network (VPN) to create a secure\
+        \ connection between your on-premises site or end-user device and the Azure\
+        \ virtual network. \n\nFor enterprise-level high performance connections,\
+        \ use Azure ExpressRoute (or Virtual WAN) to connect Azure datacenters and\
+        \ on-premises infrastructure in a co-location environment.\n\nWhen connecting\
+        \ two or more Azure virtual networks together, use virtual network peering.\
+        \ Network traffic between peered virtual networks is private and is kept on\
+        \ the Azure backbone network.\n\n### AWS Guidance\n\nFor lightweight site-to-site\
+        \ or point-to-site connectivity, use AWS VPN to create a secure connection\
+        \ (when IPsec overhead is not a concern) between your on-premises site or\
+        \ end-user device to the AWS network.\n\nFor enterprise-level high performance\
+        \ connections, use AWS Direct Connect to connect AWS VPCs and resources with\
+        \ your on-premises infrastructure in a co-location environment. \n\nYou have\
+        \ the option to use VPC Peering or Transit Gateway to establish connectivity\
+        \ between two or more VPCs within or across regions.  Network traffic between\
+        \ peered VPC is private and is kept on the AWS backbone network.  When you\
+        \ need to join multiple VPCs to create a large flat subnet, you also have\
+        \ the option to use VPC Sharing."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ns-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ns
+      ref_id: NS-10
+      name: Ensure Domain Name System (DNS) security
+      description: "Ensure that Domain Name System (DNS) security configuration protects\
+        \ against known risks:\n- Use trusted authoritative and recursive DNS services\
+        \ across your cloud environment to ensure the client (such as operating systems\
+        \ and applications) receive the correct resolution result. \n- Separate the\
+        \ public and private DNS resolution so the DNS resolution process for the\
+        \ private network can be isolated from the public network.\n- Ensure your\
+        \ DNS security strategy also includes mitigations against common attacks,\
+        \ such as dangling DNS, DNS amplifications attacks, DNS poisoning and spoofing,\
+        \ and so on."
+      annotation: "### Azure Guidance\n\nUse Azure recursive DNS  (usually assigned\
+        \ to your VM through DHCP or preconfigured in the service) or a trusted external\
+        \ DNS server in your workload recursive DNS setup, such as in the VM's operating\
+        \ system or in the application. \n\nUse Azure Private DNS for a private DNS\
+        \ zone setup where the DNS resolution process does not leave the designated\
+        \ virtual network. Use a custom DNS to restrict the DNS resolution to only\
+        \ allow trusted resolution to your client.\n\nUse Microsoft Defender for DNS\
+        \ for the advanced protection against the following security threats to your\
+        \ workload or your DNS service:\n- Data exfiltration from your Azure resources\
+        \ using DNS tunneling\n- Malware communicating with a command-and-control\
+        \ server\n- Communication with malicious domains such as as phishing and crypto\
+        \ mining\n- DNS attacks in communication with malicious DNS resolvers\n\n\
+        You can also use Microsoft Defender for App Service to detect dangling DNS\
+        \ records if you decommission an App Service website without removing its\
+        \ custom domain from your DNS registrar.\n\n### AWS Guidance\n\nUse the Amazon\
+        \ DNS Server (i.e. Amazon Route 53 Resolver server which is usually assigned\
+        \ to you through DHCP or preconfigured in the service) or a centralized trusted\
+        \ DNS resolver server in your workload recursive DNS setup, such as in the\
+        \ VM's operating system or in the application. \n\nUse Amazon Route 53 to\
+        \ create a private hosted zone setup where the DNS resolution process does\
+        \ not leave the designated VPCs. Use Amazon Route 53 firewall to regulate\
+        \ and filter the outbound DNS/UDP traffic in your VPC for the following use\
+        \ cases:\n- Prevent attacks such as DNS exfiltration in your VPC\n- Set up\
+        \ allow or deny lists for the domains that your applications can query \n\n\
+        Configure Domain Name System Security Extensions (DNSSEC) feature in Amazon\
+        \ Route 53 to secure DNS traffic to protect your domain from DNS spoofing\
+        \ or a man-in-the-middle attack.\n\nAmazon Route 53 also provides a DNS registration\
+        \ service where Route 53 can be used as the authoritative name servers for\
+        \ your domains. The following best practices should be followed to ensure\
+        \ the security of your domain names:\n- Domain names should be automatically\
+        \ renewed by the Amazon Route 53 service.\n- Domain names should have the\
+        \ Transfer Lock feature enabled in order to keep them secure.\n- he Sender\
+        \ Policy Framework (SPF) is should be used to stop spammers from spoofing\
+        \ your domain."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      assessable: false
+      depth: 1
+      ref_id: IM
+      name: Identity Management
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-1
+      name: Use centralized identity and authentication system
+      description: Use a centralized identity and authentication system to govern
+        your organization's identities and authentications for cloud and non-cloud
+        resources.
+      annotation: "### Azure Guidance\n\nAzure Active Directory (Azure AD) is Azure's\
+        \ identity and authentication management service. You should standardize on\
+        \ Azure AD to govern your organization's identity and authentication in:\n\
+        - Microsoft cloud resources, such as Azure Storage, Azure Virtual Machines\
+        \ (Linux and Windows), Azure Key Vault, PaaS, and SaaS applications.\n- Your\
+        \ organization's resources, such as applications on Azure, third-party applications\
+        \ running on your corporate network resources, and third-party SaaS applications.\
+        \ \n- Your enterprise identities in Active Directory by synchronization to\
+        \ Azure AD to ensure a consistent and centrally managed identity strategy.\n\
+        \nFor the Azure services that apply, avoid use of local authentication methods\
+        \ and instead use Azure Active Directory to centralize your service authentications.\n\
+        \nNote: As soon as it is technically feasible, you should migrate on-premises\
+        \ Active Directory-based applications to Azure AD. This could be an Azure\
+        \ AD Enterprise Directory, Business to Business configuration, or Business\
+        \ to consumer configuration.\n\n### AWS Guidance\n\nAWS IAM (Identity and\
+        \ Access Management) is AWS' default identity and authentication management\
+        \ service. Use AWS IAM to govern your AWS identity and access management.\
+        \  Alternatively, through AWS and Azure Sigle Sign-On (SSO), you can also\
+        \ use Azure AD to manage the identity and access control of AWS to avoid managing\
+        \ duplicate accounts separately in two cloud platforms.\n\nAWS supports Single\
+        \ Sign-On which allows you to bridge your corporate's third party identities\
+        \ (such as Windows Active Directory,  or other identity stores) with the AWS\
+        \ identities to avoid creating duplicate accounts to access AWS resources."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-2
+      name: Protect identity and authentication systems
+      description: "Secure your identity and authentication system as a high priority\
+        \ in your organization's cloud security practice. Common security controls\
+        \ include: \n- Restrict privileged roles and accounts\n- Require strong authentication\
+        \ for all privileged access\n- Monitor and audit high risk activities"
+      annotation: "### Azure Guidance\n\nUse the Azure AD security baseline and the\
+        \ Azure AD Identity Secure Score to evaluate your Azure AD identity security\
+        \ posture, and remediate security and configuration gaps.\nThe Azure AD Identity\
+        \ Secure Score evaluates Azure AD for the following configurations:\n- Use\
+        \ limited administrative roles\n- Turn on user risk policy\n- Designate more\
+        \ than one global admin\n- Enable policy to block legacy authentication\n\
+        - Ensure all users can complete multi-factor authentication for secure access\n\
+        - Require MFA for administrative roles\n- Enable self-service password reset\n\
+        - Do not expire passwords\n- Turn on sign-in risk policy\n- Do not allow users\
+        \ to grant consent to unmanaged applications\n\nUse Azure AD Identity Protection\
+        \ to detect, investigate, and remediate identity-based risks. To similarly\
+        \ protect your on-premises Active Directory domain, use Defender for Identity.\
+        \ \n\nNote: Follow published best practices for all other identity components,\
+        \ including your on-premises Active Directory and any third party capabilities,\
+        \ and the infrastructure (such as operating systems, networks, databases)\
+        \ that host them.\n\n### AWS Guidance\n\nUse the following security best practices\
+        \ to secure your AWS IAM:\n- Set up AWS account root user access keys for\
+        \ emergency access as described in PA-5 (Set up emergency access)\n- Follow\
+        \ least privilege principles for access assignments\n- Leverage IAM groups\
+        \ to apply policies instead of individual user(s).\n- Follow strong authentication\
+        \ guidance in IM-6 (Use strong authentication controls) for all users\n- Use\
+        \ AWS Organizations SCP (Service Control Policy) and permission boundaries\n\
+        - Use IAM Access Advisor to audit service access\n- Use IAM credential report\
+        \ to track user accounts and credential status\n\nNote: Follow published best\
+        \ practices if you have other identity and authentication systems, e.g., follow\
+        \ the Azure AD security baseline if you use Azure AD to manage AWS identity\
+        \ and access."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-3
+      name: Manage application identities securely and automatically
+      description: Use managed application identities instead of creating human accounts
+        for applications to access resources and execute code. Managed application
+        identities provide benefits such as reducing the exposure of credentials.
+        Automate the rotation of credentials to ensure the security of the identities.
+      annotation: "### Azure Guidance\n\nUse Azure managed identities, which can authenticate\
+        \ to Azure services and resources that support Azure AD authentication. Managed\
+        \ identity credentials are fully managed, rotated, and protected by the platform,\
+        \ avoiding hard-coded credentials in source code or configuration files. \n\
+        \nFor services that don't support managed identities, use Azure AD to create\
+        \ a service principal with restricted permissions at the resource level. It\
+        \ is recommended to configure service principals with certificate credentials\
+        \ and fall back to client secrets for authentication.\n\n### AWS Guidance\n\
+        \nUse AWS IAM roles instead of creating user accounts for resources that support\
+        \ this feature. IAM roles are managed by the platform at the backend and the\
+        \ credentials are temporary and rotated automatically. This avoids creating\
+        \ long-term access keys or a username/password for applications and hard-coded\
+        \ credentials in source code or configuration files. \n\nYou may use service-linked\
+        \ roles which are attached with pre-defined permission policies for access\
+        \ between  AWS services instead of customizing your own role permissions for\
+        \ the IAM roles. \n\nNote: For services that don't support IAM roles, use\
+        \ access keys but follow the security best practice such as IM-8: Restrict\
+        \ the exposure of credential and secrets to secure your keys."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-4
+      name: Authenticate server and services
+      description: "Authenticate remote servers and services from your client side\
+        \ to ensure you are connecting to trusted server and services. The most common\
+        \ server authentication protocol is Transport Layer Security (TLS), where\
+        \ the client-side (often a browser or client device) verifies the server by\
+        \ verifying the server\u2019s certificate was issued by a trusted certificate\
+        \ authority.\n\nNote: Mutual authentication can be used when both the server\
+        \ and the client authenticate one-another."
+      annotation: "### Azure Guidance\n\nMany Azure services support TLS authentication\
+        \ by default. For services that don't support this by default or support TLS\
+        \ disabling, ensure it is always enabled to support the server/service authentication.\
+        \ Your client application should also be designed to verify server/service\
+        \ identity (by verifying the server\u2019s certificate issued by a trusted\
+        \ certificate authority) in the handshake stage.\n\nNote: Services such as\
+        \ API Management and API Gateway support TLS mutual authentication.\n\n###\
+        \ AWS Guidance\n\nMany AWS services support TLS authentication by default.\
+        \ For services that don't support this by default or support  TLS disabling,\
+        \ ensure it is always enabled to support the server/service authentication.\
+        \ Your client application should also be designed to verify server/service\
+        \ identity (by verifying the server\u2019s certificate issued by a trusted\
+        \ certificate authority) in the handshake stage.\n\nNote: Services such as\
+        \ API Gateway support TLS mutual authentication."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-5
+      name: Use single sign-on (SSO) for application access
+      description: Use single sign-on (SSO) to simplify the user experience for authenticating
+        to resources including applications and data across cloud services and on-premises
+        environments.
+      annotation: "### Azure Guidance\n\nUse Azure AD for workload application workload\
+        \ access (customer facing)  through Azure AD single sign-on (SSO), reducing\
+        \ the need for duplicate accounts. Azure AD provides identity and access management\
+        \ to Azure resources (in the management plane including CLI, PowerShell, portal),\
+        \ cloud applications, and on-premises applications. \n\nAzure AD also supports\
+        \ SSO for enterprise identities such as corporate user identities, as well\
+        \ as external user identities from trusted third-party and public users.\n\
+        \n### AWS Guidance\n\nUse AWS Cognito to manage access to  your customer facing\
+        \ workload application through single sign-on (SSO) to allow customers to\
+        \ bridge their third-party identities from different identity providers.\n\
+        \nFor SSO access to the AWS native resources (including AWS console access\
+        \ or service management and data plane level access), use AWS Sigle Sign-On\
+        \ to reduce the need for duplicate accounts.\n\nAWS SSO also allows you to\
+        \ bridge corporate identities (such as identities from Azure Active Directory)\
+        \ with  AWS identities, as well as external user identities from trusted third-party\
+        \ and public users."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-6
+      name: Use strong authentication controls
+      description: "Enforce strong authentication controls (strong passwordless authentication\
+        \ or multi-factor authentication) with your centralized identity and authentication\
+        \ management system for all access to resources. Authentication based on password\
+        \ credentials alone is considered legacy, as it is insecure and does not stand\
+        \ up to popular attack methods. \n\nWhen deploying strong authentication,\
+        \ configure administrators and privileged users first, to ensure the highest\
+        \ level of the strong authentication method, quickly followed by rolling out\
+        \ the appropriate strong authentication policy to all users.\n\nNote: If legacy\
+        \ password-based authentication is required for legacy applications and scenarios,\
+        \ ensure password security best practices such as complexity requirements,\
+        \ are followed."
+      annotation: "### Azure Guidance\n\nAzure AD supports strong authentication controls\
+        \ through passwordless methods and multi-factor authentication (MFA).\n- Passwordless\
+        \ authentication: Use passwordless authentication as your default authentication\
+        \ method. There are three options available in passwordless authentication:\
+        \ Windows Hello for Business, Microsoft Authenticator app phone sign-in, and\
+        \ FIDO2 security keys. In addition, customers can use on-premises authentication\
+        \ methods such as smart cards.\n- Multi-factor authentication: Azure MFA can\
+        \ be enforced on all users, select users, or at the per-user level based on\
+        \ sign-in conditions and risk factors. Enable Azure MFA and follow Microsoft\
+        \ Defender for Cloud identity and access management recommendations for your\
+        \ MFA setup. \n\nIf legacy password-based authentication is still used for\
+        \ Azure AD authentication, be aware that cloud-only accounts (user accounts\
+        \ created directly in Azure) have a default baseline password policy. And\
+        \ hybrid accounts (user accounts that come from on-premises Active Directory)\
+        \ follow the on-premises password policies. \n\nFor third-party applications\
+        \ and services that may have default IDs and passwords, you should disable\
+        \ or change them during initial service setup.\n\n### AWS Guidance\n\nAWS\
+        \ IAM supports strong authentication controls through multi-factor authentication\
+        \ (MFA). MFA can be enforced on all users, select users, or at the per-user\
+        \ level based on defined conditions.\n\nIf you use corporate accounts from\
+        \ a third-party directory (such as Windows Active Directory) with AWS identities,\
+        \ follow the respective security guidance to enforce strong authentication.\
+        \  Refer to the Azure Guidance for this control if you use Azure AD to manage\
+        \ AWS access.\n\nNote: For third-party applications and AWS services that\
+        \ may have default IDs and passwords, you should disable or change them during\
+        \ initial service setup."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-7
+      name: Restrict resource access based on  conditions
+      description: Explicitly validate trusted signals to allow or deny user access
+        to resources, as part of a zero-trust access model. Signals to validate should
+        include strong authentication of user account, behavioral analytics of user
+        account, device trustworthiness, user or group membership, locations and so
+        on.
+      annotation: "### Azure Guidance\n\nUse Azure AD conditional access for more\
+        \ granular access controls based on user-defined conditions, such as requiring\
+        \ user logins from certain IP ranges (or devices) to use MFA. Azure AD Conditional\
+        \ Access allows you to enforce access controls on your organization\u2019\
+        s apps based on certain conditions. \n\nDefine the applicable conditions and\
+        \ criteria for Azure AD conditional access in the workload. Consider the following\
+        \ common use cases: \n- Requiring multi-factor authentication for users with\
+        \ administrative roles\n- Requiring multi-factor authentication for Azure\
+        \ management tasks\n- Blocking sign-ins for users attempting to use legacy\
+        \ authentication protocols\n- Requiring trusted locations for Azure AD Multi-Factor\
+        \ Authentication registration\n- Blocking or granting access from specific\
+        \ locations\n- Blocking risky sign-in behaviors\n- Requiring organization-managed\
+        \ devices for specific applications\n\nNote: Granular authentication session\
+        \ management controls can also be implemented through Azure AD conditional\
+        \ access policies such as sign-in frequency and persistent browser session.\n\
+        \n### AWS Guidance\n\nCreate IAM policy and define conditions for more granular\
+        \ access controls based on user-defined conditions, such as requiring user\
+        \ logins from certain IP ranges (or devices) to use multi-factor authentication.\
+        \ Condition settings may include single or multiple conditions as well as\
+        \ logic. \n\nPolicies can be defined from six different dimensions: identity-based\
+        \ policies, resource-based policies, permissions boundaries, AWS Organizations\
+        \ service control policy (SCP) , Access Control Lists(ACL), and session policies."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-8
+      name: Restrict the exposure of credential and secrets
+      description: "Ensure that application developers securely handle credentials\
+        \ and secrets:\n- Avoid embedding the credentials and secrets into the code\
+        \ and configuration files\n- Use key vault or a secure key store service to\
+        \ store the credentials and secrets\n- Scan for credentials in source code.\
+        \  \n\nNote: This is often governed and enforced through a secure software\
+        \ development lifecycle (SDLC) and DevOps security process"
+      annotation: "### Azure Guidance\n\nWhen using a managed identity is not an option,\
+        \ ensure that secrets and credentials are stored in secure locations such\
+        \ as Azure Key Vault, instead of embedding them into the code and configuration\
+        \ files. \n\nIf you use Azure DevOps and GitHub for your code management platform:\n\
+        - Implement Azure DevOps Credential Scanner to identify credentials within\
+        \ the code. \n- For GitHub, use the native secret scanning feature to identify\
+        \ credentials or other forms of secrets within the code.\n\nClients such as\
+        \ Azure Functions, Azure Apps services, and VMs can use managed identities\
+        \ to access Azure Key Vault securely. See Data Protection controls related\
+        \ to the use of Azure Key Vault for secrets management.\n\nNote: Azure Key\
+        \ Vault provides automatic rotation for supported services. For secrets which\
+        \ cannot be automatically rotated, ensure they are manually rotated periodically\
+        \ and purged when no longer in use.\n\n### AWS Guidance\n\nWhen using an IAM\
+        \ role for application access is not an option, ensure that secrets and credentials\
+        \ are stored in secure locations such as AWS Secret Manager or Systems Manager\
+        \ Parameter Store, instead of embedding them into the code and configuration\
+        \ files. \n\nUse CodeGuru Reviewer for static code analysis which can detect\
+        \ the secrets hard-coded in your source code. \n\nIf you use the Azure DevOps\
+        \ and GitHub for your code management platform:\n- Implement Azure DevOps\
+        \ Credential Scanner to identify credentials within the code. \n- For GitHub,\
+        \ use the native secret scanning feature to identify credentials or other\
+        \ forms of secrets within the code.\n\nNote: Secrets Manager provides automatic\
+        \ secrets rotation for supported services. For secrets which cannot be automatically\
+        \ rotated, ensure they are manually rotated periodically and purged when no\
+        \ longer in use."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:im-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:im
+      ref_id: IM-9
+      name: Secure user access to  existing applications
+      description: "In a hybrid environment, where you have on-premises applications\
+        \ or non-native cloud applications using legacy authentication, consider solutions\
+        \ such as cloud access security broker (CASB), application proxy, single sign-on\
+        \ (SSO)  to govern the access to these applications for the following benefits:\n\
+        - Enforce a centralized strong authentication\n- Monitor and control risky\
+        \ end-user activities \n- Monitor and remediate risky legacy applications\
+        \ activities\n- Detect and prevent sensitive data transmission"
+      annotation: "### Azure Guidance\n\nProtect your on-premises and non-native cloud\
+        \ applications using legacy authentication by connecting them to:\n- Azure\
+        \ AD Application Proxy and configure header-based authentication to allow\
+        \ single sign-on (SSO) access to the applications for remote users  while\
+        \ explicitly validating the trustworthiness of both remote users and devices\
+        \ with Azure AD Conditional Access. If required, use a third-party Software-Defined\
+        \ Perimeter (SDP) solution which can offer similar functionality. \n- Microsoft\
+        \ Defender for Cloud Apps which serves as a cloud access security broker (CASB)\
+        \ service to monitor and block user access to unapproved third-party SaaS\
+        \ applications. \n- Your existing third-party application delivery controllers\
+        \ and networks.\n\nNote: VPNs are commonly used to access legacy applications\
+        \ and often only have basic access control and limited session monitoring.\n\
+        \n### AWS Guidance\n\nFollow Azure's guidance to protect your on-premises\
+        \ and non-native cloud applications using legacy authentication by connecting\
+        \ them to:\n- Azure AD Application Proxy and configure header-based authentication\
+        \ to allow single sign-on (SSO) access to the applications for remote users\
+        \ while explicitly validating the trustworthiness of both remote users and\
+        \ devices with Azure AD Conditional Access. If required, use a third-party\
+        \ Software-Defined Perimeter (SDP) solution which can offer similar functionality.\
+        \ \n- Microsoft Defender for Cloud Apps which serves as a cloud access security\
+        \ broker (CASB) service to monitor and block user access to unapproved third-party\
+        \ SaaS applications. \n- Your existing third-party application delivery controllers\
+        \ and networks.\n\nNote: VPNs are commonly used to access legacy applications\
+        \ and often only have basic access control and limited session monitoring."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      assessable: false
+      depth: 1
+      ref_id: PA
+      name: Privileged Access
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-1
+      name: Separate and limit highly privileged/administrative users
+      description: Ensure you identify all high business impact accounts. Limit the
+        number of privileged/administrative accounts in your cloud's control plane,
+        management plane and data/workload plane.
+      annotation: "### Azure Guidance\n\nYou must secure all roles with direct or\
+        \ indirect administrative access to Azure hosted resources.\n\nAzure Active\
+        \ Directory (Azure AD) is Azure's default identity and access management service.\
+        \ The most critical built-in roles in Azure AD are Global Administrator and\
+        \ Privileged Role Administrator, because users assigned to these two roles\
+        \ can delegate administrator roles. With these privileges, users can directly\
+        \ or indirectly read and modify every resource in your Azure environment:\n\
+        - Global Administrator / Company Administrator: Users with this role have\
+        \ access to all administrative features in Azure AD as well as services that\
+        \ use Azure AD identities.\n- Privileged Role Administrator: Users with this\
+        \ role can manage role assignments in Azure AD, as well as within Azure AD\
+        \ Privileged Identity Management (PIM). In addition, this role allows management\
+        \ of all aspects of PIM and administrative units.\n\nOutside of Azure AD,\
+        \ Azure has built-in roles that can be critical for privileged access at the\
+        \ resource level.\n- Owner: Grants full access to manage all resources, including\
+        \ the ability to assign roles in Azure RBAC.\n- Contributor: Grants full access\
+        \ to manage all resources, but does not allow you to assign roles in Azure\
+        \ RBAC, manage assignments in Azure Blueprints, or share image galleries.\n\
+        - User Access Administrator: Lets you manage user access to Azure resources.\n\
+        Note: You may have other critical roles that need to be governed if you use\
+        \ custom roles in the Azure AD level or resource level with certain privileged\
+        \ permissions assigned. \n\nIn addition, users with the following three roles\
+        \ in Azure Enterprise Agreement (EA) portal should also be restricted as they\
+        \ can be used to directly or indirectly manage Azure subscriptions.\n- Account\
+        \ Owner: Users with this role can manage subscriptions, including the creation\
+        \ and deletion of subscriptions. \n- Enterprise Administrator: Users assigned\
+        \ with this role can manage (EA) portal users. \n- Department Administrator:\
+        \ Users assigned with this role can change account owners within the department.\
+        \ \n\nLastly, ensure that you also restrict privileged accounts in other management,\
+        \ identity, and security systems that have administrative access to your business-critical\
+        \ assets, such as Active Directory Domain Controllers (DCs), security tools,\
+        \ and system management tools with agents installed on business-critical systems.\
+        \ Attackers who compromise these management and security systems can immediately\
+        \ weaponize them to compromise business critical assets.\n\n### AWS Guidance\n\
+        \nYou must secure all roles with direct or indirect administrative access\
+        \ to AWS hosted resources.\n\nThe privileged/administrative users need to\
+        \ be secured include:\n - Root user: Root user is the highest-level privileged\
+        \ accounts in your AWS account. Root accounts should be highly restricted\
+        \ and only used in emergency situation. Refer to emergency access controls\
+        \ in PA-5 (Setup emergency access).\n - IAM identities (users, groups, roles)\
+        \ with the privileged permission policy: IAM identities assigned with a permission\
+        \ policy such as AdministratorAccess can have full access to AWS services\
+        \ and resources. \n\nIf you are using Azure Active Directory (Azure AD) as\
+        \ the identity provider for AWS, refer to the Azure guidance for managing\
+        \ the privileged roles in Azure AD. \n\nEnsure that you also restrict privileged\
+        \ accounts in other management, identity, and security systems that have administrative\
+        \ access to your business-critical assets, such as AWS Cognito, security tools,\
+        \ and system management tools with agents installed on business critical systems.\
+        \ Attackers who compromise these management and security systems can immediately\
+        \ weaponize them to compromise business critical assets."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-2
+      name: Avoid standing access for user accounts and permissions
+      description: Instead of creating standing privileges, use just-in-time (JIT)
+        mechanism to assign privileged access to the different resource tiers.
+      annotation: "### Azure Guidance\n\nEnable just-in-time (JIT) privileged access\
+        \ to Azure resources and Azure AD using Azure AD Privileged Identity Management\
+        \ (PIM). JIT is a model in which users receive temporary permissions to perform\
+        \ privileged tasks, which prevents malicious or unauthorized users from gaining\
+        \ access after the permissions have expired. Access is granted only when users\
+        \ need it. PIM can also generate security alerts when there is suspicious\
+        \ or unsafe activity in your Azure AD organization.\n\nRestrict inbound traffic\
+        \ to your sensitive virtual machines (VM) management ports with Microsoft\
+        \ Defender for Cloud's just-in-time (JIT) for VM access feature. This ensures\
+        \ privileged access to the VM is granted only when users need it.\n\n### AWS\
+        \ Guidance\n\nUse AWS Security Token Service (AWS STS) to create temporary\
+        \ security credentials to access the resources through the AWS API. Temporary\
+        \ security credentials work almost identically to the long-term access key\
+        \ credentials that your IAM users can use, with the following differences:\n\
+        - Temporary security credentials have a short-term life, from minutes to hours.\
+        \ \n- Temporary security credentials are not stored with the user but are\
+        \ generated dynamically and provided to the user when requested."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-3
+      name: Manage lifecycle of identities and entitlements
+      description: Use an automated process or technical control to manage the identity
+        and access lifecycle including the request, review, approval, provision, and
+        deprovision.
+      annotation: "### Azure Guidance\n\nUse Azure AD entitlement management features\
+        \ to automate access request workflows (for Azure resource groups). This enables\
+        \ workflows for Azure resource groups to manage access assignments, reviews,\
+        \ expiration, and dual or multi-stage approval.\n\nUse Permissions Management\
+        \ to detect, automatically right-size, and continuously monitor unused and\
+        \ excessive permissions assigned to user and workload identities across multi-cloud\
+        \ infrastructures.\n\n### AWS Guidance\n\nUse AWS Access Advisor to pull the\
+        \ access logs for the user accounts and entitlements for resources.  Build\
+        \ a manual or automated workflow to integrate with AWS IAM to manage access\
+        \ assignments, reviews, and deletions. \n\nNote: There are third-party solutions\
+        \ available on AWS Marketplace for managing the lifecycle of identities and\
+        \ entitlements."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-4
+      name: Review and reconcile user access regularly
+      description: Conduct regular review of privileged account entitlements. Ensure
+        the access granted to the accounts are valid for administration of control
+        plane, management plane, and workloads.
+      annotation: "### Azure Guidance\n\nReview all privileged accounts and the access\
+        \ entitlements in Azure including Azure tenants, Azure services, VM/IaaS,\
+        \ CI/CD processes, and enterprise management and security tools. \n\nUse Azure\
+        \ AD access reviews to review Azure AD roles, Azure resource access roles,\
+        \ group memberships, and access to enterprise applications. Azure AD reporting\
+        \ can also provide logs to help discover stale accounts, or accounts which\
+        \ have not been used for certain amount of time.\n\nIn addition, Azure AD\
+        \ Privileged Identity Management can be configured to alert when an excessive\
+        \ number of administrator accounts are created for a specific role, and to\
+        \ identify administrator accounts that are stale or improperly configured.\n\
+        \n### AWS Guidance\n\nReview all privileged accounts and the access entitlements\
+        \ in AWS including AWS accounts, services, VM/IaaS, CI/CD processes, and enterprise\
+        \ management and security tools. \n\nUse IAM Access Advisor, Access Analyzer\
+        \ and Credential Reports to review resource access roles, group memberships,\
+        \ and access to enterprise applications. IAM Access Analyzer and Credential\
+        \ Reports reporting can also provide logs to help discover stale accounts,\
+        \ or accounts which have not been used for certain amount of time.\n\nIf you\
+        \ are using Azure Active Directory (Azure AD) as the identity provider for\
+        \ AWS, use Azure AD access review to review the privileged accounts and access\
+        \ entitlements periodically."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-5
+      name: Set up emergency access
+      description: "Set up emergency access to ensure that you are not accidentally\
+        \ locked out of your critical cloud infrastructure (such as your identity\
+        \ and access management system) in an emergency. \n\nEmergency access accounts\
+        \ should be rarely used and can be highly damaging to the organization if\
+        \ compromised, but their availability to the organization is also critically\
+        \ important for the few scenarios when they are required."
+      annotation: "### Azure Guidance\n\nTo prevent being accidentally locked out\
+        \ of your Azure AD organization, set up an emergency access account (e.g.,\
+        \ an account with Global Administrator role) for access when normal administrative\
+        \ accounts cannot be used. Emergency access accounts are usually highly privileged,\
+        \ and they should not be assigned to specific individuals. Emergency access\
+        \ accounts are limited to emergency or \"break glass\"' scenarios where normal\
+        \ administrative accounts can't be used.\n\nYou should ensure that the credentials\
+        \ (such as password, certificate, or smart card) for emergency access accounts\
+        \ are kept secure and known only to individuals who are authorized to use\
+        \ them only in an emergency. You may also use additional controls, such dual\
+        \ controls (e.g., splitting the credential into two pieces and giving it to\
+        \ separate persons) to enhance the security of this process. You should also\
+        \ monitor the sign-in and audit logs to ensure that emergency access accounts\
+        \ are only used when authorized.\n\n### AWS Guidance\n\nAWS \"root\" accounts\
+        \ should not be used for regular administrative tasks. As the \"root\" account\
+        \ is highly privileged, it should not be assigned to specific individuals.\
+        \ It's use should be limited to only emergency or \"break glass\u201D scenarios\
+        \ when normal administrative accounts can't be used. For daily administrative\
+        \ tasks, separate privileged user accounts should be used and assigned the\
+        \ appropriate permissions via IAM roles.\n\nYou should also ensure that the\
+        \ credentials (such as password, MFA tokens and access keys) for root accounts\
+        \ are kept secure and known only to individuals who are authorized to use\
+        \ them only in an emergency. MFA should be enabled for the root account, and\
+        \ you may also use additional controls, such as dual controls (e.g., splitting\
+        \ the credential into two pieces and giving it to separate persons) to enhance\
+        \ the security of this process. \n\nYou should also monitor the sign-in and\
+        \ audit logs in CloudTrail or EventBridge to ensure that root access accounts\
+        \ are only used when authorized."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-6
+      name: Use privileged access workstations / channel for administrative tasks
+      description: Secured, isolated workstations are critically important for the
+        security of sensitive roles like administrator, developer, and critical service
+        operator.
+      annotation: "### Azure Guidance\n\nUse Azure Active Directory, Microsoft Defender,\
+        \ and/or Microsoft Intune to deploy privileged access workstations (PAW) on-premises\
+        \ or in Azure for privileged tasks. The PAW should be centrally managed to\
+        \ enforce secured configuration, including strong authentication, software\
+        \ and hardware baselines, and restricted logical and network access.\n\nYou\
+        \ may also use Azure Bastion which is a fully platform-managed PaaS service\
+        \ that can be provisioned inside your virtual network. Azure Bastion allows\
+        \ RDP/SSH connectivity to your virtual machines directly from the Azure portal\
+        \ using a web browser.\n\n### AWS Guidance\n\nUse Session Manager in AWS Systems\
+        \ Manager to create an access path (a connection session) to the EC2 instance\
+        \ or a browser session to the AWS resources for privileged tasks. Session\
+        \ Manager allows RDP, SSH, and HTTPS connectivity to your destination hosts\
+        \ through port forwarding. \n\nYou may also choose to deploy a privileged\
+        \ access workstations (PAW) centrally managed through Azure Active Directory,\
+        \ Microsoft Defender, and/or Microsoft Intune. The central management should\
+        \ enforce secured configuration, including strong authentication, software\
+        \ and hardware baselines, and restricted logical and network access."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-7
+      name: Follow just enough administration (least privilege) principle
+      description: Follow the just enough administration (least privilege) principle
+        to manage permissions at fine-grained level. Use features such as role-based
+        access control (RBAC) to manage resource access through role assignments.
+      annotation: "### Azure Guidance\n\nUse Azure role-based access control (Azure\
+        \ RBAC) to manage Azure resource access through role assignments. Through\
+        \ RBAC, you can assign roles to users, groups, service principals, and managed\
+        \ identities. There are pre-defined built-in roles for certain resources,\
+        \ and these roles can be inventoried or queried through tools such as Azure\
+        \ CLI, Azure PowerShell, and the Azure portal. \n\nThe privileges you assign\
+        \ to resources through Azure RBAC should always be limited to what's required\
+        \ by the roles. Limited privileges will complement the just-in-time (JIT)\
+        \ approach of Azure AD Privileged Identity Management (PIM), and those privileges\
+        \ should be reviewed periodically. If required, you can also use PIM to define\
+        \ a time-bound assignment, which is a condition in a role assignment where\
+        \ a user can only activate the role within the specified start and end dates.\
+        \ \n\nNote: Use Azure built-in roles to allocate permissions and only create\
+        \ custom roles when required.\n\n### AWS Guidance\n\nUse AWS policy to manage\
+        \ AWS resource access. There are six types of policies: identity-based policies,\
+        \ resource-based policies, permissions boundaries, AWS Organizations service\
+        \ control policy (SCP), Access Control List, and session policies. You may\
+        \ use AWS managed policies for common permission use cases. However, you should\
+        \ be mindful that managed policies may carry excessive permissions that should\
+        \ not be assigned to the users.\n\nYou may also use AWS ABAC (attribute-based\
+        \ access control) to assign permissions based on attributes (tags) attached\
+        \ to IAM resources, including IAM entities (users or roles) and AWS resources."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pa-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pa
+      ref_id: PA-8
+      name: Determine access process for cloud provider support
+      description: Establish an approval process and access path for requesting and
+        approving vendor support request and temporary access to your data through
+        a secure channel.
+      annotation: '### Azure Guidance
+
+
+        In support scenarios where Microsoft needs to access your data, use Customer
+        Lockbox to review and either approve or reject each data access request made
+        by Microsoft.
+
+
+        ### AWS Guidance
+
+
+        In support scenarios where AWS support teams need to access your data, create
+        an account in the AWS Support portal to request support. Review the available
+        options such as providing read-only data access, or the screen sharing option
+        for AWS support to access to your data.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      assessable: false
+      depth: 1
+      ref_id: DP
+      name: Data Protection
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-1
+      name: Discover, classify, and label sensitive data
+      description: Establish and maintain an inventory of the sensitive data, based
+        on the defined sensitive data scope. Use tools to discover, classify and label
+        the in- scope sensitive data.
+      annotation: "### Azure Guidance\n\nUse tools such as Microsoft Purview, which\
+        \ combines the former Azure Purview and Microsoft 365 compliance solutions,\
+        \ and Azure SQL Data Discovery and Classification to centrally scan, classify,\
+        \ and label the sensitive data that reside in the Azure, on-premises, Microsoft\
+        \ 365, and other locations.\n\n### AWS Guidance\n\nReplicate your data from\
+        \ various sources to a S3 storage bucket and use AWS Macie to scan, classify\
+        \ and label the sensitive data stored in the bucket. AWS Macie can detect\
+        \ sensitive data such as security credentials, financial information, PHI\
+        \ and PII data, or other data pattern based on the custom data identifier\
+        \ rules.\n\nYou may also use the Azure Purview multi-cloud scanning connector\
+        \ to scan, classify and label the sensitive data residing in a S3 storage\
+        \ bucket. \n\nNote: You can also use third-party enterprise solutions from\
+        \ AWS marketplace for the purpose of data discovery classification and labeling"
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-2
+      name: Monitor anomalies and threats targeting sensitive data
+      description: Monitor for anomalies around sensitive data, such as unauthorized
+        transfer of data to locations outside of enterprise visibility and control.
+        This typically involves monitoring for anomalous activities (large or unusual
+        transfers) that could indicate unauthorized data exfiltration.
+      annotation: "### Azure Guidance\n\nUse Azure Information protection (AIP) to\
+        \ monitor the data that has been classified and labeled.\n\nUse Microsoft\
+        \ Defender for Storage, Microsoft Defender for SQL, Microsoft Defender for\
+        \ open-source relational databases, and Microsoft Defender for Cosmos DB to\
+        \ alert on anomalous transfer of information that might indicate unauthorized\
+        \ transfers of sensitive data information.  \n\nNote: If required for compliance\
+        \ of data loss prevention (DLP), you can use a host-based DLP solution from\
+        \ Azure Marketplace or a Microsoft 365 DLP solution to enforce detective and/or\
+        \ preventative controls to prevent data exfiltration.\n\n### AWS Guidance\n\
+        \nUse AWS Macie to monitor the data that has been classified and labeled,\
+        \ and use GuardDuty to detect anomalous activities on some resources (S3,\
+        \ EC2 or Kubernetes or IAM resources). Findings and alerts can be triaged,\
+        \ analyzed, and tracked using EventBridge and forwarded to Microsoft Sentinel\
+        \ or Security Hub for incident aggregation and tracking. \n\nYou may also\
+        \ connect your AWS accounts to Microsoft Defender for Cloud for compliance\
+        \ checks, container security, and endpoint security capabilities.\n\nNote:\
+        \ If required for compliance of data loss prevention (DLP), you can use a\
+        \ host-based DLP solution from AWS Marketplace."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-3
+      name: Encrypt sensitive data in transit
+      description: "Protect the data in transit against 'out of band' attacks (such\
+        \ as traffic capture) using encryption to ensure that attackers cannot easily\
+        \ read or modify the data. \n\nSet the network boundary and service scope\
+        \ where data in transit encryption is mandatory inside and outside of the\
+        \ network. While this is optional for traffic on private networks, this is\
+        \ critical for traffic on external and public networks."
+      annotation: "### Azure Guidance\n\nEnforce secure transfer in services such\
+        \ as Azure Storage, where a native data in transit encryption feature is built\
+        \ in. \n\nEnforce HTTPS for web application workloads and services by ensuring\
+        \ that any clients connecting to your Azure resources use transport layer\
+        \ security (TLS) v1.2 or later. For remote management of VMs, use SSH (for\
+        \ Linux) or RDP/TLS (for Windows) instead of an unencrypted protocol. \n\n\
+        For remote management of Azure virtual machines, use SSH (for Linux) or RDP/TLS\
+        \ (for Windows) instead of an unencrypted protocol. For secure file transfer,\
+        \ use the SFTP/FTPS service in Azure Storage Blob, App Service apps, and Function\
+        \ apps, instead of using the regular FTP service. \n\nNote: Data in transit\
+        \ encryption is enabled for all Azure traffic traveling between Azure datacenters.\
+        \ TLS v1.2 or later is enabled on most Azure services by default. And some\
+        \ services such as Azure Storage and Application Gateway can enforce TLS v1.2\
+        \ or later on the server side.\n\n### AWS Guidance\n\nEnforce secure transfer\
+        \ in services such as Amazon S3, RDS and CloudFront, where a native data in\
+        \ transit encryption feature is built in. \n\nEnforce HTTPS (such as in AWS\
+        \ Elastic Load Balancer) for workload web application and services (either\
+        \ on the server side or client side, or on both) by ensuring that any clients\
+        \ connecting to your AWS resources use TLS v1.2 or later. \n\nFor remote management\
+        \ of EC2 instances, use SSH (for Linux) or RDP/TLS (for Windows) instead of\
+        \ an unencrypted protocol. For secure file transfer, use AWS Transfer SFTP\
+        \ or FTPS service instead of a regular FTP service. \n\nNote: All network\
+        \ traffic between AWS data centers is transparently encrypted at the physical\
+        \ layer. All traffic within a VPC and between peered VPCs across regions is\
+        \ transparently encrypted at the network layer when using supported Amazon\
+        \ EC2 instance types. TLS v1.2 or later is enabled on most AWS services by\
+        \ default. And some services such as AWS Load Balancer can enforce TLS v1.2\
+        \ or later on the server side."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-4
+      name: Enable data at rest encryption by default
+      description: To complement access controls, data at rest should be protected
+        against 'out of band' attacks (such as accessing underlying storage) using
+        encryption. This helps ensure that attackers cannot easily read or modify
+        the data.
+      annotation: "### Azure Guidance\n\nMany Azure services have data at rest encryption\
+        \ enabled by default at the infrastructure layer using a service-managed key.\
+        \ These service-managed keys are generated on the customer\u2019s behalf and\
+        \ automatically rotated every two years. \n\nWhere technically feasible and\
+        \ not enabled by default, you can enable data at rest encryption in the Azure\
+        \ services, or in your VMs at the storage level, file level, or database level.\n\
+        \n### AWS Guidance\n\nMany AWS services have data at rest encryption enabled\
+        \ by default at the infrastructure/platform layer using an AWS-managed customer\
+        \ master key. These AWS-managed customer master keys are generated on the\
+        \ customer's behalf and rotated automatically every three years.\n\nWhere\
+        \ technically feasible and not enabled by default, you can enable data at\
+        \ rest encryption in the AWS services, or in your VMs at the storage level,\
+        \ file level, or database level"
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-5
+      name: Use customer-managed key option in data at rest encryption when required
+      description: If required for regulatory compliance, define the use case and
+        service scope where customer-managed key option is needed. Enable and implement
+        data at rest encryption using customer-managed key in services.
+      annotation: "### Azure Guidance\n\nAzure also provides an encryption option\
+        \ using keys managed by yourself (customer-managed keys) for most services.\
+        \ \n\nAzure Key Vault Standard, Premium, and Managed HSM are natively integrated\
+        \ with many Azure Services for customer-managed key use cases. You may use\
+        \ Azure Key Vault to generate your key or bring your own keys.\n\nHowever,\
+        \ using the customer-managed key option requires additional operational effort\
+        \ to manage the key lifecycle. This may include encryption key generation,\
+        \ rotation, revoke, and access control, etc.\n\n### AWS Guidance\n\nAWS also\
+        \ provides an encryption option using keys managed by yourself (customer-managed\
+        \ customer master key stored in AWS Key Management Service) for certain services.\
+        \ \n\nAWS Key Management Service (KMS) is natively integrated with many AWS\
+        \ services for customer-managed customer master key use cases. You may either\
+        \ use AWS Key Management Service (KMS) to generate your master keys or bring\
+        \ your own keys. \n\nHowever, using the customer-managed key option requires\
+        \ additional operational efforts to manage the key lifecycle. This may include\
+        \ encryption key generation, rotation, revoke, and access control, etc."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-6
+      name: Use a secure key management process
+      description: Document and implement an enterprise cryptographic key management
+        standard, processes, and procedures to control your key lifecycle. When there
+        is a need to use customer-managed key in the services, use a secured key vault
+        service for key generation, distribution, and storage. Rotate and revoke your
+        keys based on the defined schedule and when there is a key retirement or compromise.
+      annotation: "### Azure Guidance\n\nUse Azure Key Vault to create and control\
+        \ your encryption keys life cycle, including key generation, distribution,\
+        \ and storage. Rotate and revoke your keys in Azure Key Vault and your service\
+        \ based on the defined schedule and when there is a key retirement or compromise.\
+        \ Require a certain cryptographic type and minimum key size when generating\
+        \ keys.\n\nWhen there is a need to use customer-managed key (CMK) in the workload\
+        \ services or applications, ensure you follow the best practices:\n- Use a\
+        \ key hierarchy to generate a separate data encryption key (DEK) with your\
+        \ key encryption key (KEK) in your key vault. \n- Ensure keys are registered\
+        \ with Azure Key Vault and implemented via key IDs in each service or application.\n\
+        \nTo maximize the key material lifetime and portability, bring your own key\
+        \ (BYOK) to the services (i.e., importing HSM-protected keys from your on-premises\
+        \ HSMs into Azure Key Vault). Follow the recommended guideline to perform\
+        \ the key generation and key transfer.\n\nNote: Refer to the below for the\
+        \ FIPS 140-2 level for Azure Key Vault types and FIPS compliance/validation\
+        \ level.\n- Software-protected keys in vaults (Premium & Standard SKUs): \
+        \ FIPS 140-2 Level 1\n- HSM-protected keys in vaults (Premium SKU): FIPS 140-2\
+        \ Level 2\n- HSM-protected keys in Managed HSM: FIPS 140-2 Level 3\nAzure\
+        \ Key Vault Premium uses a shared HSM infrastructure in the backend. Azure\
+        \ Key Vault Managed HSM uses dedicated, confidential service endpoints with\
+        \ a dedicated HSM for when you need a higher level of key security.\n\n###\
+        \ AWS Guidance\n\nUse AWS Key Management Service (KMS) to create and control\
+        \ your encryption keys life cycle, including key generation, distribution,\
+        \ and storage. Rotate and revoke your keys in KMS and your service based on\
+        \ the defined schedule and when there is a key retirement or compromise.\n\
+        \nWhen there is a need to use customer-managed customer master key in the\
+        \ workload services or applications, ensure you follow the best practices:\n\
+        - Use a key hierarchy to generate a separate data encryption key (DEK) with\
+        \ your key encryption key (KEK) in your KMS. \n- Ensure keys are registered\
+        \ with KMS and implement via IAM policies in each service or application.\n\
+        \nTo maximize the key material lifetime and portability, bring your own key\
+        \ (BYOK) to the services (i.e., importing HSM-protected keys from your on-premises\
+        \ HSMs into KMS or Cloud HSM). Follow the recommended guideline to perform\
+        \ the key generation and key transfer. \n\nNote: AWS KMS uses shared HSM infrastructure\
+        \ in the backend. Use AWS KMS Custom Key Store backed by AWS CloudHSM when\
+        \ you need to manage your own key store and dedicated HSMs (e.g. regulatory\
+        \ compliance requirement for higher level of key security) to generate and\
+        \ store your encryption keys.\n\nNote: Refer to the below for the FIPS 140-2\
+        \ level for FIPS compliance level in AWS KMS and CloudHSM\n- AWS KMS default:\
+        \ FIPS 140-2 Level 2 validated\n- AWS KMS using CloudHSM: FIPS 140-2 Level\
+        \ 3 (for certain services)  validated\n- AWS CloudHSM: FIPS 140-2 Level 3\
+        \  validated\n\nNote: For secrets management(credentials, password, API keys\
+        \ etc.), use AWS Secrets Manager."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-7
+      name: Use a secure certificate management process
+      description: 'Document and implement an enterprise certificate management standard,
+        processes and procedures which includes the certificate lifecycle control,
+        and certificate policies (if a public key infrastructure is needed).
+
+
+        Ensure certificates used by the critical services in your organization are
+        inventoried, tracked, monitored, and renewed timely using automated mechanism
+        to avoid service disruption.'
+      annotation: "### Azure Guidance\n\nUse Azure Key Vault to create and control\
+        \ the certificate lifecycle, including the creation/import, rotation, revocation,\
+        \ storage, and purge of the certificate. Ensure the certificate generation\
+        \ follows the defined standard without using any insecure properties, such\
+        \ as insufficient key size, overly long validity period, insecure cryptography\
+        \ and so on. Setup automatic rotation of the certificate in Azure Key Vault\
+        \ and supported Azure services based on the defined schedule and when a certificate\
+        \ expires. If automatic rotation is not supported in the frontend application,\
+        \ use a manual rotation in Azure Key Vault.\n\nAvoid using a self-signed certificate\
+        \ and wildcard certificate in your critical services due to the limited security\
+        \ assurance. Instead, you can create public signed certificates in Azure Key\
+        \ Vault. The following Certificate Authorities (CAs) are the partnered providers\
+        \ that are currently integrated with Azure Key Vault. \n- DigiCert: Azure\
+        \ Key Vault offers OV TLS/SSL certificates with DigiCert.\n- GlobalSign: Azure\
+        \ Key Vault offers OV TLS/SSL certificates with GlobalSign.\n\nNote: Use only\
+        \ approved CA and ensure that known bad root/intermediate certificates issued\
+        \ by these CAs are disabled.\n\n### AWS Guidance\n\nUse AWS Certificate Manager\
+        \ (ACM) to create and control the certificate lifecycle, including creation/import,\
+        \ rotation, revocation, storage, and purge of the certificate. Ensure the\
+        \ certificate generation follows the defined standard without using any insecure\
+        \ properties, such as insufficient key size, overly long validity period,\
+        \ insecure cryptography and so on. Setup automatic rotation of the certificate\
+        \ in ACM and supported AWS services based on the defined schedule and when\
+        \ a certificate expires. If automatic rotation is not supported in the frontend\
+        \ application, use manual rotation in ACM. In the meantime, you should always\
+        \ track your certificate renewal status to ensure the certificate validity.\
+        \ \n\nAvoid using a self-signed certificate and wildcard certificate in your\
+        \ critical services due to the limited security assurance. Instead, create\
+        \ public-signed certificates (signed by the Amazon Certificate Authority)\
+        \ in ACM and deploy it programmatically in services such as CloudFront, Load\
+        \ Balancers, API Gateway etc. You also can use ACM to establish your private\
+        \ certificate authority (CA) to sign the private certificates. \n\nNote: Use\
+        \ only an approved CA and ensure that known bad CA root/intermediate certificates\
+        \ issued by these CAs are disabled."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:dp-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:dp
+      ref_id: DP-8
+      name: Ensure security of key and certificate repository
+      description: Ensure the security of the key vault service used for the cryptographic
+        key and certificate lifecycle management. Harden your key vault service through
+        access control, network security, logging and monitoring and backup to ensure
+        keys and certificates are always protected using the maximum security.
+      annotation: "### Azure Guidance\n\nSecure your cryptographic keys and certificates\
+        \ by hardening your Azure Key Vault service through the following controls:\n\
+        - Implement access control using RBAC policies in Azure Key Vault Managed\
+        \ HSM at the key level to ensure the least privilege and separation of duties\
+        \ principles are followed. For example, ensure separation of duties are in\
+        \ place for users who manage encryption keys so they do not have the ability\
+        \ to access encrypted data, and vice versa. For Azure Key Vault Standard and\
+        \ Premium, create unique vaults for different applications to ensure the least\
+        \ privilege and separation of duties principles are followed.\n- Turn on Azure\
+        \ Key Vault logging to ensure critical management plane and data plane activities\
+        \ are logged.\n - Secure the Azure Key Vault using Private Link and Azure\
+        \ Firewall to ensure minimal exposure of the service \n- Use managed identity\
+        \ to access keys stored in Azure Key Vault in your workload applications.\n\
+        - When purging data, ensure your keys are not deleted before the actual data,\
+        \ backups and archives are purged.\n- Backup your keys and certificates using\
+        \ Azure Key Vault. Enable soft delete and purge protection to avoid accidental\
+        \ deletion of keys.When keys need to be deleted, consider disabling keys instead\
+        \ of deleting them to avoid accidental deletion of keys and cryptographic\
+        \ erasure of  data. \n- For bring your own key (BYOK) use cases, generate\
+        \ keys in an on-premises HSM and import them to maximize the lifetime and\
+        \ portability of the keys.\n- Never store keys in plaintext format outside\
+        \ of the Azure Key Vault. Keys in all key vault services are not exportable\
+        \ by default. \n- Use HSM-backed key types (RSA-HSM) in Azure Key Vault Premium\
+        \ and Azure Managed HSM for the hardware protection and the strongest FIPS\
+        \ levels.\n\nEnable Microsoft Defender for Key Vault for Azure-native, advanced\
+        \ threat protection for Azure Key Vault, providing an additional layer of\
+        \ security intelligence.\n\n### AWS Guidance\n\nFor cryptographic keys security,\
+        \ secure your keys by hardening your AWS Key Management Service (KMS) service\
+        \ through the following controls:\n- Implement access control using key policies\
+        \ (key-level access control) in conjunction with IAM policies (identity-based\
+        \ access control) to ensure the least privilege and separation of duties principles\
+        \ are followed. For example, ensure separation of duties are in place for\
+        \ users who manage encryption keys so they do not have the ability to access\
+        \ encrypted data, and vice versa. \n- Use detective controls such as CloudTrails\
+        \ to log and track the usage of keys in KMS and alert you on critical actions.\
+        \ \n- Never store keys in plaintext format outside of KMS. \n- When keys need\
+        \ to be deleted, consider disabling keys in KMS instead of deleting them to\
+        \ avoid accidental deletion of keys and cryptographic erasure of data. \n\
+        - When purging data, ensure your keys are not deleted before the actual data,\
+        \ backups and archives are purged.\n- For bring your own key (BYOK) uses cases,\
+        \ generate keys in an on-premise HSM and import them to maximize the lifetime\
+        \ and portability of  the keys.\n\nFor certificates security, secure your\
+        \ certificates by hardening your AWS Certificate Manager (ACM) service through\
+        \ the following controls:\n- Implement access control using resource-level\
+        \ policies in conjunction with IAM policies (identity-based access control)\
+        \ to ensure the least privilege and separation of duties principles are followed.\
+        \ For example, ensure separation of duties is in place for user accounts:\
+        \ user accounts who generate certificates are separate from the user accounts\
+        \ who only require read-only access to certificates.\n- Use detective controls\
+        \ such as CloudTrails to log and track the usage of the certificates in ACM,\
+        \ and alert you on critical actions. \n- Follow the KMS security guidance\
+        \ to secure your private key (generated for certificate request) used for\
+        \ service certificate integration."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      assessable: false
+      depth: 1
+      ref_id: AM
+      name: Asset Management
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      ref_id: AM-1
+      name: Track asset inventory and their risks
+      description: 'Track your asset inventory by query and discover all your cloud
+        resources. Logically organize your assets by tagging and grouping your assets
+        based on their service nature, location, or other characteristics. Ensure
+        your security organization has access to a continuously updated inventory
+        of assets.
+
+
+        Ensure your security organization can monitor the risks of the cloud assets
+        by always having security insights and risks aggregated centrally'
+      annotation: "### Azure Guidance\n\nThe Microsoft Defender for Cloud inventory\
+        \ feature and Azure Resource Graph can query for and discover all resources\
+        \ in your subscriptions, including Azure services, applications, and network\
+        \ resources. Logically organize assets according to your organization's taxonomy\
+        \ using tags as well as other metadata in Azure (Name, Description, and Category).\n\
+        \nEnsure that security organizations have access to a continuously updated\
+        \ inventory of assets on Azure. Security teams often need this inventory to\
+        \ evaluate their organization's potential exposure to emerging risks, and\
+        \ as an input for continuous security improvements.\n\nEnsure security organizations\
+        \ are granted Security Reader permissions in your Azure tenant and subscriptions\
+        \ so they can monitor for security risks using Microsoft Defender for Cloud.\
+        \ Security Reader permissions can be applied broadly to an entire tenant (Root\
+        \ Management Group) or scoped to management groups or specific subscriptions.\n\
+        \nNote: Additional permissions might be required to get visibility into workloads\
+        \ and services.\n\n### AWS Guidance\n\nUse the AWS Systems Manager Inventory\
+        \ feature to query for and discover all resources in your EC2 instances, including\
+        \ application level and operating system level details. In addition, use AWS\
+        \ Resource Groups - Tag Editor to browse AWS resource inventories. \n\nLogically\
+        \ organize assets according to your organization's taxonomy using tags as\
+        \ well as other metadata in AWS (Name, Description, and Category).\n\nEnsure\
+        \ that security organizations have access to a continuously updated inventory\
+        \ of assets on AWS. Security teams often need this inventory to evaluate their\
+        \ organization's potential exposure to emerging risks, and as an input for\
+        \ continuous security improvements.\n\nNote: Additional permissions might\
+        \ be required to get visibility into workloads and services."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      ref_id: AM-2
+      name: Use only approved services
+      description: Ensure that only approved cloud services can be used, by auditing
+        and restricting which services users can provision in the environment.
+      annotation: '### Azure Guidance
+
+
+        Use Azure Policy to audit and restrict which services users can provision
+        in your environment. Use Azure Resource Graph to query for and discover resources
+        within their subscriptions. You can also use Azure Monitor to create rules
+        to trigger alerts when a non-approved service is detected.
+
+
+        ### AWS Guidance
+
+
+        Use AWS Config to audit and restrict which services users can provision in
+        your environment. Use AWS Resource Groups to query for and discover resources
+        within their accounts. You can also use CloudWatch and/or AWS Config to create
+        rules to trigger alerts when a non-approved service is detected.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      ref_id: AM-3
+      name: Ensure security of asset lifecycle management
+      description: Ensure security attributes or configurations of the assets are
+        always updated during the asset lifecycle.
+      annotation: '### Azure Guidance
+
+
+        Establish or update security policies/process that address asset lifecycle
+        management processes for potentially high impact modifications. These modifications
+        include changes to identity providers and access, data sensitivity level,
+        network configuration, and administrative privilege assignment.
+
+
+        Identify and remove Azure resources when they are no longer needed.
+
+
+        ### AWS Guidance
+
+
+        Establish or update security policies/process that address asset lifecycle
+        management processes for potentially high impact modifications. These modifications
+        include changes to identity providers and access, data sensitivity level,
+        network configuration, and administrative privilege assignment.
+
+
+        Identify and remove AWS resources when they are no longer needed.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      ref_id: AM-4
+      name: Limit access to asset management
+      description: Limit users' access to asset management features, to avoid accidental
+        or malicious modification of the assets in your cloud.
+      annotation: '### Azure Guidance
+
+
+        Azure Resource Manager is the deployment and management service for Azure.
+        It provides a management layer that enables you to create, update, and delete
+        resources (assets) in Azure. Use Azure AD Conditional Access to limit users''
+        ability to interact with Azure Resource Manager by configuring "Block access"
+        for the "Microsoft Azure Management" App.
+
+
+        Use Azure Role-based Access Control (Azure RBAC) to assign roles to identities
+        to control their permissions and access to Azure resources. For example, a
+        user with only the ''Reader'' Azure RBAC role can view all resources, but
+        is not allowed to make any changes.
+
+
+        Use Resource Locks to prevent either deletions or modifications to resources.
+        Resource Locks may also be administered through Azure Blueprints.
+
+
+        ### AWS Guidance
+
+
+        Use AWS IAM to restrict access to a specific resource. You can specify allowed
+        or deny actions as well as the conditions under which actions are triggered.
+        You may specify one condition or combine methods of resource-level permissions,
+        resource-based policies, tag-based authorization, temporary credentials, or
+        service-linked roles to have a fine-grain control access control for your
+        resources.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:am-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:am
+      ref_id: AM-5
+      name: Use only approved applications in virtual machine
+      description: Ensure that only authorized software executes by creating an allow
+        list and block the unauthorized software from executing in your environment.
+      annotation: "### Azure Guidance\n\nUse Microsoft Defender for Cloud adaptive\
+        \ application controls to discover and generate an application allow list.\
+        \ You can also use ASC adaptive application controls to ensure that only authorized\
+        \ software can executes, and all unauthorized software is blocked from executing\
+        \ on Azure Virtual Machines.\n\nUse Azure Automation Change Tracking and Inventory\
+        \ to automate the collection of inventory information from your Windows and\
+        \ Linux VMs. Software name, version, publisher, and refresh time information\
+        \ are available from the Azure portal. To get the software installation date\
+        \ and other information, enable guest-level diagnostics and direct the Windows\
+        \ Event Logs to a Log Analytics workspace.\n\nDepending on the type of scripts,\
+        \ you can use operating system-specific configurations or third-party resources\
+        \ to limit users' ability to execute scripts in Azure compute resources.\n\
+        \nYou can also use a third-party solution to discover and identify unapproved\
+        \ software.\n\n### AWS Guidance\n\nUse the AWS Systems Manager Inventory feature\
+        \ to discover the applications installed in your EC2 instances. Use AWS Config\
+        \ rules to ensure that non-authorized software is blocked from executing on\
+        \ EC2 instances. \n\nYou can also use a third-party solution to discover and\
+        \ identify unapproved software."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      assessable: false
+      depth: 1
+      ref_id: LT
+      name: Logging and threat detection
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-1
+      name: Enable threat detection capabilities
+      description: To support threat detection scenarios, monitor all known resource
+        types for known and expected threats and anomalies. Configure your alert filtering
+        and analytics rules to extract high-quality alerts from log data, agents,
+        or other data sources to reduce false positives.
+      annotation: "### Azure Guidance\n\nUse the threat detection capability of Microsoft\
+        \ Defender for Cloud for the respective Azure services. \n\nFor threat detection\
+        \ not included in Microsoft Defender services, refer to Microsoft Cloud Security\
+        \ Benchmark service baselines for the respective services to enable the threat\
+        \ detection or security alert capabilities within the service. Ingest alerts\
+        \ and log data from Microsoft Defender for Cloud, Microsoft 365 Defender,\
+        \ and log data from other resources into your Azure Monitor or Microsoft Sentinel\
+        \ instances to build analytics rules, which hunt detect threats and create\
+        \ alerts that match specific criteria across your environment. \n\nFor Operational\
+        \ Technology (OT) environments that include computers that control or monitor\
+        \ Industrial Control System (ICS) or Supervisory Control and Data Acquisition\
+        \ (SCADA) resources, use Microsoft Defender for IoT to inventory assets and\
+        \ detect threats and vulnerabilities. \n\nFor services that do not have a\
+        \ native threat detection capability, consider collecting the data plane logs\
+        \ and analyze the threats through Microsoft Sentinel.\n\n### AWS Guidance\n\
+        \nUse Amazon GuardDuty for threat detection which analyzes and processes the\
+        \ following data sources: VPC Flow Logs, AWS CloudTrail management event logs,\
+        \ CloudTrail S3 data event logs, EKS audit logs, and DNS logs. GuardDuty is\
+        \ capable of reporting on security issues such as privilege escalation, exposed\
+        \ credential usage , or communication with malicious IP addresses, or domains.\n\
+        \nConfigure AWS Config to check rules in SecurityHub for compliance monitoring\
+        \ such as configuration drift, and create findings when needed. \n\nFor threat\
+        \ detection not included in GuardDuty and SecurityHub, enable threat detection\
+        \ or security alert capabilities within the supported AWS services. Extract\
+        \ the alerts to your CloudTrail, CloudWatch, or Microsoft Sentinel to build\
+        \ analytics rules, which hunt threats that match specific criteria across\
+        \ your environment.\n\nYou can also use Microsoft Defender for Cloud to monitor\
+        \ certain services in AWS such as EC2 instances.\n\nFor Operational Technology\
+        \ (OT) environments that include computers that control or monitor Industrial\
+        \ Control System (ICS) or Supervisory Control and Data Acquisition (SCADA)\
+        \ resources, use Microsoft Defender for IoT to inventory assets and detect\
+        \ threats and vulnerabilities."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-2
+      name: Enable threat detection for  identity and access management
+      description: Detect threats for identities and access management by monitoring
+        the user and application sign-in and access anomalies. Behavioral patterns
+        such as excessive number of failed login attempts, and deprecated accounts
+        in the subscription, should be alerted.
+      annotation: "### Azure Guidance\n\nAzure AD provides the following logs that\
+        \ can be viewed in Azure AD reporting or integrated with Azure Monitor, Microsoft\
+        \ Sentinel or other SIEM/monitoring tools for more sophisticated monitoring\
+        \ and analytics use cases:\n- Sign-ins: The sign-ins report provides information\
+        \ about the usage of managed applications and user sign-in activities.\n-\
+        \ Audit logs: Provides traceability through logs for all changes done by various\
+        \ features within Azure AD. Examples of audit logs include changes made to\
+        \ any resources within Azure AD like adding or removing users, apps, groups,\
+        \ roles and policies.\n- Risky sign-ins: A risky sign-in is an indicator for\
+        \ a sign-in attempt that might have been performed by someone who is not the\
+        \ legitimate owner of a user account.\n- Users flagged for risk: A risky user\
+        \ is an indicator for a user account that might have been compromised.\n\n\
+        Azure AD also provides an Identity Protection module to detect and remediate\
+        \ risks related to user accounts and sign-in behaviors. Examples of risks\
+        \ include leaked credentials, sign-in from anonymous or malware linked IP\
+        \ addresses, password spray. The policies in Azure AD Identity Protection\
+        \ allow you to enforce risk-based MFA authentication in conjunction with Azure\
+        \ Conditional Access on user accounts.\n\nIn addition, Microsoft Defender\
+        \ for Cloud can be configured to alert on deprecated accounts in the subscription\
+        \ and suspicious activities such as an excessive number of failed authentication\
+        \ attempts. In addition to the basic security hygiene monitoring, Microsoft\
+        \ Defender for Cloud's Threat Protection module can also collect more in-depth\
+        \ security alerts from individual Azure compute resources (such as virtual\
+        \ machines, containers, app service), data resources (such as SQL DB and storage),\
+        \ and Azure service layers. This capability allows you to see account anomalies\
+        \ inside the individual resources.\n\nNote: If you are connecting your on-premises\
+        \ Active Directory for synchronization, use the Microsoft Defender for Identity\
+        \ solution to consume your on-premises Active Directory signals to identify,\
+        \ detect, and investigate advanced threats, compromised identities, and malicious\
+        \ insider actions directed at your organization.\n\n### AWS Guidance\n\nAWS\
+        \ IAM provides the following reporting the logs and reports for console user\
+        \ activities through IAM Access Advisor and IAM credential report: \n- Every\
+        \ successful sign-in and unsuccessful login attempts. \n- Multi-factor authentication\
+        \ (MFA) status for each user. \n- Dormant IAM user \n\nFor API level access\
+        \ monitoring and threat detection, use Amazon GuadDuty to identify the findings\
+        \ related to the IAM. Examples of these findings include:\n- An API used to\
+        \ gain access to an AWS environment and was invoked in an anomalous way, or\
+        \ was used to evade defensive measures \n- An API used to:\na) discover resources\
+        \ was invoked in an anomalous way\nb) collect data from an AWS environment\
+        \ was invoked in an anomalous way.\nb) tamper with data or processes in an\
+        \ AWS environment was invoked in an anomalous way.\nc) gain unauthorized access\
+        \ to an AWS environment was invoked in an anomalous way.\nd) maintain unauthorized\
+        \ access to an AWS environment was invoked in an anomalous way.\ne) obtain\
+        \ high-level permissions to an AWS environment was invoked in an anomalous\
+        \ way.\nf) be invoked from a known malicious IP address.\ng) be invoked using\
+        \ root credentials.\n- AWS CloudTrail logging was disabled.\n- Account password\
+        \ policy was weakened.\n- Multiple worldwide successful console logins were\
+        \ observed.\n- Credentials that were created exclusively for an EC2 instance\
+        \ through an Instance launch role are being used from another account within\
+        \ AWS.\n- Credentials that were created exclusively for an EC2 instance through\
+        \ an Instance launch role are being used from an external IP address.\n- An\
+        \ API was invoked from a known malicious IP address.\n- An API was invoked\
+        \ from an IP address on a custom threat list.\n- An API was invoked from a\
+        \ Tor exit node IP address."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-3
+      name: Enable logging for security investigation
+      description: Enable logging for your cloud resources to meet the requirements
+        for security incident investigations and security response and compliance
+        purposes.
+      annotation: "### Azure Guidance\n\nEnable logging capability for resources at\
+        \ the different tiers, such as logs for Azure resources, operating systems\
+        \ and applications inside in your VMs and other log types.\n\nBe mindful about\
+        \ different types of logs for security, audit, and other operational logs\
+        \ at the management/control plane and data plane tiers. There are three types\
+        \ of the logs available at the Azure platform:\n- Azure resource log: Logging\
+        \ of operations that are performed within an Azure resource (the data plane).\
+        \ For example, getting a secret from a key vault or making a request to a\
+        \ database. The content of resource logs varies by the Azure service and resource\
+        \ type.\n- Azure activity log: Logging of operations on each Azure resource\
+        \ at the subscription layer, from the outside (the management plane). You\
+        \ can use the Activity Log to determine what, who, and when for any write\
+        \ operations (PUT, POST, DELETE) taken on the resources in your subscription.\
+        \ There is a single Activity log for each Azure subscription.\n- Azure Active\
+        \ Directory logs: Logs of the history of sign-in activity and audit trail\
+        \ of changes made in the Azure Active Directory for a particular tenant.\n\
+        \nYou can also use Microsoft Defender for Cloud and Azure Policy to enable\
+        \ resource logs and log data collecting on Azure resources.\n\n### AWS Guidance\n\
+        \nUse AWS CloudTrail logging for management events (control plane operations)\
+        \ and data events (data plane operations) and monitor these trails with CloudWatch\
+        \ for automated actions.\n\nThe Amazon CloudWatch Logs service allows you\
+        \ to collect and store logs from your resources, applications, and services\
+        \ in near real time. There are three main categories of logs:\n- Vended logs:\
+        \ Logs natively published by AWS services on your behalf. Currently, Amazon\
+        \ VPC Flow Logs and Amazon Route 53 logs are the two supported types. These\
+        \ two logs are enabled by default.\n- Logs published by AWS services: Logs\
+        \ from more than 30 AWS services publish to CloudWatch. They include Amazon\
+        \ API Gateway, AWS Lambda, AWS CloudTrail, and many others. These logs can\
+        \ be enabled directly in the services and CloudWatch.\n- Custom logs: Logs\
+        \ from your own application and on-premises resources. You may need to collect\
+        \ these logs by installing CloudWatch Agent in your operating systems and\
+        \ forward them to CloudWatch. \n\nWhile many services publish logs only to\
+        \ CloudWatch Logs, some AWS services can publish logs directly to AmazonS3\
+        \ or Amazon Kinesis Data Firehose where you can use different logging storage\
+        \ and retention policies."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-4
+      name: Enable network logging for security investigation
+      description: Enable logging for your network services to support network-related
+        incident investigations, threat hunting, and security alert generation. The
+        network logs may include logs from network services such as IP filtering,
+        network and application firewall, DNS, flow monitoring and so on.
+      annotation: '### Azure Guidance
+
+
+        Enable and collect network security group (NSG) resource logs, NSG flow logs,
+        Azure Firewall logs, and Web Application Firewall (WAF) logs, and logs from
+        virtual machines via the network traffic data collection agent for security
+        analysis to support incident investigations, and security alert generation.
+        You can send the flow logs to an Azure Monitor Log Analytics workspace and
+        then use Traffic Analytics to provide insights.
+
+
+        Collect DNS query logs to assist in correlating other network data.
+
+
+        ### AWS Guidance
+
+
+        Enable and collect network logs such as VPC Flow Logs, WAF Logs, and Route53
+        Resolver query logs for security analysis to support incident investigations,
+        and security alert generation. The logs can be exported to CloudWatch for
+        monitoring or an S3 storage bucket for ingesting into the Microsoft Sentinel
+        solution for centralized analytics.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-5
+      name: Centralize security log management and analysis
+      description: 'Centralize logging storage and analysis to enable correlation
+        across log data. For each log source, ensure that you have assigned a data
+        owner, access guidance, storage location, what tools are used to process and
+        access the data, and data retention requirements.
+
+
+        Use Cloud native SIEM if you don''t have an existing SIEM solution for CSPs.
+        or aggregate logs/alerts into your existing SIEM.'
+      annotation: '### Azure Guidance
+
+
+        Ensure that you are integrating Azure activity logs into a centralized Log
+        Analytics workspace. Use Azure Monitor to query and perform analytics and
+        create alert rules using the logs aggregated from Azure services, endpoint
+        devices, network resources, and other security systems.
+
+
+        In addition, enable and onboard data to Microsoft Sentinel which provides
+        security information event management (SIEM) and security orchestration automated
+        response (SOAR) capabilities.
+
+
+        ### AWS Guidance
+
+
+        Ensure that you are integrating your AWS logs  into a centralized resource
+        for storage and analysis. Use CloudWatch to query and perform analytics, and
+        to create alert rules using the logs aggregated from AWS services, services,
+        endpoint devices, network resources, and other security systems.
+
+
+        In addition, you can aggregate the logs in a S3 storage bucket and onboard
+        the log data to Microsoft Sentinel which provides security information event
+        management (SIEM) and security orchestration automated response (SOAR) capabilities.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-6
+      name: Configure log storage retention
+      description: Plan your log retention strategy according to your compliance,
+        regulation, and business requirements. Configure the log retention policy
+        at the individual logging services to ensure the logs are archived appropriately.
+      annotation: "### Azure Guidance\n\nLogs such as Azure Activity Logs are retained\
+        \ for 90 days and then deleted. You should create a diagnostic setting and\
+        \ route the logs to another location (such as Azure Monitor Log Analytics\
+        \ workspace, Event Hubs or Azure Storage) based on your needs. This strategy\
+        \ also applies to other resource logs and resources managed by yourself such\
+        \ as logs in the operating systems and applications inside VMs. \n\nYou have\
+        \ the log retention option as below:\n- Use Azure Monitor Log Analytics workspace\
+        \ for a log retention period of up to 1 year or per your response team requirements.\
+        \ \n- Use Azure Storage, Data Explorer or Data Lake for long-term and archival\
+        \ storage for greater than 1 year and to meet your security compliance requirements.\
+        \ \n- Use Azure Event Hubs to forward logs to an external resource outside\
+        \ of Azure. \n\nNote: Microsoft Sentinel uses Log Analytics workspace as its\
+        \ backend for log storage. You should consider a long-term storage strategy\
+        \ if you plan to retain SIEM logs for longer time.\n\n### AWS Guidance\n\n\
+        By default, logs are kept indefinitely and never expire in CloudWatch. You\
+        \ can adjust the retention policy for each log group, keeping the indefinite\
+        \ retention, or choosing a retention period between 10 years and one day.\n\
+        \nUse Amazon S3 for log archival from CloudWatch and apply object lifecycle\
+        \ management and archival policy to the bucket. You can use Azure Storage\
+        \ for central log archival by transferring the files from Amazon S3 to Azure\
+        \ Storage."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:lt-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:lt
+      ref_id: LT-7
+      name: Use approved time synchronization sources
+      description: Use approved time synchronization sources for your logging time
+        stamp which include date, time and time zone information.
+      annotation: '### Azure Guidance
+
+
+        Microsoft maintains time sources for most Azure PaaS and SaaS services. For
+        your compute resources operating systems, use a Microsoft default NTP server
+        for time synchronization unless you have a specific requirement. If you need
+        to stand up your own network time protocol (NTP) server, ensure you secure
+        the UDP service port 123.
+
+
+        All logs generated by resources within Azure provide time stamps with the
+        time zone specified by default.
+
+
+        ### AWS Guidance
+
+
+        AWS maintains time sources for most AWS services. For resources or services
+        where the operating system time setting is configured, use AWS default Amazon
+        Time Sync Service for time synchronization unless you have a specific requirement.
+        If you need to stand up your own network time protocol (NTP) server, ensure
+        you secure the UDP service port 123.
+
+
+        All logs generated by resources within AWS provide time stamps with the time
+        zone specified by default.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      assessable: false
+      depth: 1
+      ref_id: IR
+      name: Incident Response
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-1
+      name: Preparation - update incident response plan and handling process
+      description: 'Ensure your organization follows industry best practice to develop
+        processes and plans to respond to security incidents on the cloud platforms.
+        Be mindful about the shared responsibility model and the variances across
+        IaaS, PaaS, and SaaS services. This will have a direct impact to how you collaborate
+        with your cloud provider in incident response and handling activities, such
+        as incident notification and triage, evidence collection, investigation, eradication,
+        and recovery.
+
+
+
+        Regularly test the incident response plan and handling process to ensure they''re
+        up to date.'
+      annotation: '### Azure Guidance
+
+
+        Update your organization''s incident response process to include the handling
+        of incidents in the Azure platform. Based on the Azure services used and your
+        application nature, customize the incident response plan and playbook to ensure
+        they can be used to respond to the incident in the cloud environment.
+
+
+        ### AWS Guidance
+
+
+        Update your organization''s incident response process to include the handling
+        of incidents. Ensure a unified multi-cloud incident response plan is in place
+        by updating your organization''s incident response process to include the
+        handling of incidents in the AWS platform. Based on the AWS services used
+        and your application nature, follow the AWS Security Incident Response Guide
+        to customize the incident response plan and playbook to ensure they can be
+        used to respond to the incident in the cloud environment.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-2
+      name: Preparation - setup incident contact information
+      description: Ensure the security alerts and incident notification from the cloud
+        service provider's platform and your environments can be received by correct
+        contact in your incident response organization.
+      annotation: '### Azure Guidance
+
+
+        Set up security incident contact information in Microsoft Defender for Cloud.
+        This contact information is used by Microsoft to contact you if the Microsoft
+        Security Response Center (MSRC) discovers that your data has been accessed
+        by an unlawful or unauthorized party. You also have options to customize incident
+        alerts and notification in different Azure services based on your incident
+        response needs.
+
+
+        ### AWS Guidance
+
+
+        Set up security incident contact information in AWS Systems Manager Incident
+        Manager (the incident management center for AWS). This contact information
+        is used for incident management communication between you and AWS through
+        the different channels (i.e., Email, SMS, or Voice). You can define a contact''s
+        engagement plan and escalation plan to describe how and when the  Incident
+        Manager engages the contact and to escalate if the contact(s) does not response
+        to an incident.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-3
+      name: Detection and analysis - create incidents based on high-quality alerts
+      description: 'Ensure you have a process to create high-quality alerts and measure
+        the quality of alerts. This allows you to learn lessons from past incidents
+        and prioritize alerts for analysts, so they don''t waste time on false positives.
+
+
+        High-quality alerts can be built based on experience from past incidents,
+        validated community sources, and tools designed to generate and clean up alerts
+        by fusing and correlating diverse signal sources.'
+      annotation: '### Azure Guidance
+
+
+        Microsoft Defender for Cloud provides high-quality alerts across many Azure
+        assets. You can use the Microsoft Defender for Cloud data connector to stream
+        the alerts to Microsoft Sentinel. Microsoft Sentinel lets you create advanced
+        alert rules to generate incidents automatically for an investigation.
+
+
+        Export your Microsoft Defender for Cloud alerts and recommendations using
+        the export feature to help identify risks to Azure resources. Export alerts
+        and recommendations either manually or in an ongoing, continuous fashion.
+
+
+        ### AWS Guidance
+
+
+        Use security tools like SecurityHub or GuardDuty and other third-party tools
+        to send alerts to Amazon CloudWatch or Amazon EventBridge so incidents can
+        be automatically created in Incident Manager based on the defined criteria
+        and rule sets.  You can also manually create incidents in the Incident Manager
+        for further incident handling and tracking.
+
+
+        If you use Microsoft Defender for Cloud to monitor your AWS accounts, you
+        can also use Microsoft Sentinel to monitor and alert the incidents identified
+        by Microsoft Defender for Cloud on AWS resources.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-4
+      name: Detection and analysis - investigate an incident
+      description: 'Ensure the security operation team can query and use diverse data
+        sources as they investigate potential incidents, to build a full view of what
+        happened. Diverse logs should be collected to track the activities of a potential
+        attacker across the kill chain to avoid blind spots. You should also ensure
+        insights and learnings are captured for other analysts and for future historical
+        reference.
+
+
+        Use the cloud native SIEM and incident management solution if your organization
+        does not have an existing solution to aggregate security logs and alerts information.
+        Correlate incident data based on the data sourced from different sources to
+        facility the incident investigations.'
+      annotation: '### Azure Guidance
+
+
+        Ensure your security operations team can query and use diverse data sources
+        that are collected from the in-scope services and systems. In addition, it
+        sources can also include:
+
+        - Identity and access log data: Use Azure AD logs and workload (such as operating
+        systems or application level) access logs for correlating identity and access
+        events.
+
+        - Network data: Use network security groups'' flow logs, Azure Network Watcher,
+        and Azure Monitor to capture network flow logs and other analytics information.
+
+        - Incident related activity data of from snapshots of the impacted systems,
+        which can be obtained through:
+
+        a) The azure virtual machine''s snapshots capability, to create a snapshot
+        of the running system''s disk.
+
+        b) The operating system''s native memory dump capability, to create a snapshot
+        of the running system''s memory.
+
+        c) The snapshot feature of the other supported Azure services or your software''s
+        own capability, to create snapshots of the running systems.
+
+
+        Microsoft Sentinel provides extensive data analytics across virtually any
+        log source and a case management portal to manage the full lifecycle of incidents.
+        Intelligence information during an investigation can be associated with an
+        incident for tracking and reporting purposes.
+
+
+        Note: When incident related data is captured for investigation, ensure there
+        is adequate security in place to protect the data from unauthorized alteration,
+        such as disabling logging or removing logs, which can be performed by the
+        attackers during an in-flight data breach activity.
+
+
+        ### AWS Guidance
+
+
+        The data sources for investigation are the centralized logging sources that
+        collect from the in-scope services and running systems, but can also include:
+
+        - Identity and access log data: Use IAM logs and workload (such as operating
+        systems or application level) access logs for correlating identity and access
+        events.
+
+        - Network data: Use VPC Flow Logs, VPC Traffic Mirrors, and Azure CloudTrail
+        and CloudWatch to capture network flow logs and other analytics information.
+
+        - Snapshots of running systems, which can be obtained through:
+
+        a) Snapshot capability in Amazon EC2(EBS) to create a snapshot of the running
+        system''s disk.
+
+        b) The operating system''s native memory dump capability, to create a snapshot
+        of the running system''s memory.
+
+        c) The snapshot feature of the AWS services or your software''s own capability,
+        to create snapshots of the running systems.
+
+
+        If you aggregate your SIEM related data into Microsoft Sentinel, it provides
+        extensive data analytics across virtually any log source and a case management
+        portal to manage the full lifecycle of incidents. Intelligence information
+        during an investigation can be associated with an incident for tracking and
+        reporting purposes.
+
+
+        Note: When incident related data is captured for investigation, ensure there
+        is adequate security in place to protect the data from unauthorized alteration,
+        such as disabling logging or removing logs, which can be performed by the
+        attackers during an in-flight data breach activity.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-5
+      name: Detection and analysis - prioritize incidents
+      description: "Provide context to security operations teams to help them determine\
+        \ which incidents ought to first be focused on, based on alert severity and\
+        \ asset sensitivity defined in your organization\u2019s incident response\
+        \ plan.\n\nAdditionally, mark resources using tags and create a naming system\
+        \ to identify and categorize your cloud resources, especially those processing\
+        \ sensitive data. It is your responsibility to prioritize the remediation\
+        \ of alerts based on the criticality of the resources and environment where\
+        \ the incident occurred."
+      annotation: '### Azure Guidance
+
+
+        Microsoft Defender for Cloud assigns a severity to each alert to help you
+        prioritize which alerts should be investigated first. The severity is based
+        on how confident Microsoft Defender for Cloud is in the finding or the analytics
+        used to issue the alert, as well as the confidence level that there was malicious
+        intent behind the activity that led to the alert.
+
+
+        Similarly, Microsoft Sentinel creates alerts and incidents with an assigned
+        severity and other details based on analytics rules. Use analytic rule templates
+        and customize the rules according to your organization''s needs to support
+        incident prioritization. Use automation rules in Microsoft Sentinel to manage
+        and orchestrate threat response in order to maximize your security operation''s
+        team efficiency and effectiveness, including tagging incidents to classify
+        them.
+
+
+        ### AWS Guidance
+
+
+        For each incident created in the Incident Manager, assign an impact level
+        based on your organization''s defined criteria, such as a measure of the severity
+        of the incident and criticality level of the assets impacted.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-6
+      name: Containment, eradication and recovery - automate the incident handling
+      description: Automate the manual, repetitive tasks to speed up response time
+        and reduce the burden on analysts. Manual tasks take longer to execute, slowing
+        each incident and reducing how many incidents an analyst can handle. Manual
+        tasks also increase analyst fatigue, which increases the risk of human error
+        that causes delays and degrades the ability of analysts to focus effectively
+        on complex tasks.
+      annotation: '### Azure Guidance
+
+
+        Use workflow automation features in Microsoft Defender for Cloud and Microsoft
+        Sentinel to automatically trigger actions or run a playbooks to respond to
+        incoming security alerts. Playbooks take actions, such as sending notifications,
+        disabling accounts, and isolating problematic networks.
+
+
+        ### AWS Guidance
+
+
+        If you use Microsoft Sentinel to centrally manage your incident, you can also
+        create  automated actions or run a playbooks to respond to incoming security
+        alerts.
+
+
+        Alternatively, use automation features in AWS System Manager to automatically
+        trigger actions defined in the incident response plan, including notifying
+        the contacts and/or running a runbook to respond to alerts, such as disabling
+        accounts, and isolating problematic networks.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ir-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ir
+      ref_id: IR-7
+      name: Post-incident activity - conduct lesson learned and retain evidence
+      description: "Conduct lessons learned in your organization periodically and/or\
+        \ after major incidents, to improve your future capability in incident response\
+        \ and handling. \n\nBased on the nature of the incident, retain the evidence\
+        \ related to the incident for the period defined in the incident handling\
+        \ standard for further analysis or legal actions."
+      annotation: '### Azure Guidance
+
+
+        Use the outcome from the lessons learned activity to update your incident
+        response plan, playbook (such as a Microsoft Sentinel playbook) and reincorporate
+        findings into your environments (such as logging and threat detection to address
+        any gaps in logging) to improve your future capability in detecting, responding,
+        and handling of incidents in Azure.
+
+
+        Keep the evidence collected during the "Detection and analysis - investigate
+        an incident step" such as system logs, network traffic dumps and running system
+        snapshots in storage such as an Azure Storage account for immutable retention.
+
+
+        ### AWS Guidance
+
+
+        Create incident analysis for a closed incident in Incident Manager using the
+        standard incident analysis template or your own custom template. Use the outcome
+        from the lessons learned activity to update your incident response plan, playbook
+        (such as the AWS Systems Manager runbook and Microsoft Sentinel playbook)
+        and reincorporate findings into your environments (such as logging and threat
+        detection to address any gaps in logging) to improve your future capability
+        in detecting, responding, and handling of the incidents in AWS.
+
+
+        Keep the evidence collected during the "Detection and analysis - investigate
+        an incident step" such as system logs, network traffic dumps and running system
+        snapshot in storage such as an Amazon S3 bucket or Azure Storage account for
+        immutable retention.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      assessable: false
+      depth: 1
+      ref_id: PV
+      name: Posture and Vulnerability Management
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-1
+      name: Define and establish secure configurations
+      description: Define the security configuration baselines for different resource
+        types in the cloud. Alternatively, use configuration management tools to establish
+        the configuration baseline automatically before or during resource deployment
+        so the environment can be compliant by default after the deployment.
+      annotation: "### Azure Guidance\n\nUse the Microsoft Cloud Security Benchmark\
+        \ and service baseline to define your configuration baseline for each respective\
+        \ Azure offering or service. Refer to the Azure reference architecture and\
+        \ Cloud Adoption Framework landing zone architecture to understand the critical\
+        \ security controls and configurations that may be needed across Azure resources.\
+        \ \n\nUse Azure landing zone (and Blueprints) to accelerate the workload deployment\
+        \ by setting up configuration of services and application environments, including\
+        \ Azure Resource Manager templates, Azure RBAC controls, and Azure Policy.\n\
+        \n### AWS Guidance\n\nUse the Microsoft Cloud Security Benchmark - multi-cloud\
+        \ guidance for AWS and other input to define your configuration baseline for\
+        \ each respective AWS offering or service. Refer to the security pillar and\
+        \ other pillars in the AWS Well-Architectured Framework to understand the\
+        \ critical security controls and configurations that may be needed across\
+        \ AWS resources.\n\nUse AWS CloudFormation templates and AWS Config rules\
+        \ in the AWS landing zone definition to automate deployment and configuration\
+        \ of services and application environments."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-2
+      name: Audit and enforce secure configurations
+      description: Continuously monitor and alert when there is a deviation from the
+        defined configuration baseline. Enforce the desired configuration according
+        to the baseline configuration by denying the non-compliant configuration or
+        deploying a configuration.
+      annotation: "### Azure Guidance\n\nUse Microsoft Defender for Cloud to configure\
+        \ Azure Policy to audit and enforce configurations of your Azure resources.\
+        \ Use Azure Monitor to create alerts when there is a configuration deviation\
+        \ detected on the resources. \n\nUse Azure Policy [deny] and [deploy if not\
+        \ exist] rules to enforce secure configuration across Azure resources. \n\n\
+        For resource configuration audit and enforcement not supported by Azure Policy,\
+        \ you may need to write custom  scripts or use third-party tooling to implement\
+        \ the configuration audit and enforcement.\n\n### AWS Guidance\n\nUse AWS\
+        \ Config rules to audit configurations of your AWS resources. And you can\
+        \ choose to resolve the configuration drift using AWS Systems Manager Automation\
+        \ associated with the AWS Config rule. Use Amazon CloudWatch to create alerts\
+        \ when there is a configuration deviation detected on the resources. \n\n\
+        For resource configuration audit and enforcement not supported by AWS Config,\
+        \ you may need to write custom scripts or use third-party tooling to implement\
+        \ the configuration audit and enforcement. \n\nYou can also centrally monitor\
+        \ your configuration drifting by onboarding your AWS account to Microsoft\
+        \ Defender for Cloud."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-3
+      name: Define and establish secure configurations for compute resources
+      description: Define the secure configuration baselines for your compute resources,
+        such as VMs and containers. Use configuration management tools to establish
+        the configuration baseline automatically before or during the compute resource
+        deployment so the environment can be compliant by default after the deployment.
+        Alternatively, use a pre-configured image to build the desired configuration
+        baseline into the compute resource image template.
+      annotation: "### Azure Guidance\n\nUse Azure recommended operating system security\
+        \ baselines (for both Windows and Linux) as a benchmark to define your compute\
+        \ resource configuration baseline.  \n\nAdditionally, you can use a custom\
+        \ VM image (using Azure Image Builder) or container image with Azure Automanage\
+        \ Machine Configuration (formerly called Azure Policy Guest Configuration)\
+        \ and Azure Automation State Configuration to establish the desired security\
+        \ configuration.\n\n### AWS Guidance\n\nUse EC2 AWS Machine Images (AMI) from\
+        \ trusted sources on marketplace as a benchmark to define your EC2 configuration\
+        \ baseline. \n\nAdditionally, you can use EC2 Image Builder to build custom\
+        \ AMI template with a Systems Manager agent to establish the desired security\
+        \ configuration. \nNote: The AWS Systems Manager Agent is preinstalled on\
+        \ some Amazon Machine Images (AMIs) provided by AWS.\n\nFor workload applications\
+        \ running within your EC2 instances, AWS Lambda or containers environment,\
+        \ you may use AWS System Manager AppConfig to establish the desired configuration\
+        \ baseline."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-4
+      name: Audit and enforce secure configurations for compute resources
+      description: Continuously monitor and alert when there is a deviation from the
+        defined configuration baseline in your compute resources. Enforce the desired
+        configuration according to the baseline configuration by denying the non-compliant
+        configuration or deploying a configuration in compute resources.
+      annotation: "### Azure Guidance\n\nUse Microsoft Defender for Cloud and Azure\
+        \ Automanage Machine Configuration (formerly called Azure Policy Guest Configuration)\
+        \ to regularly assess and remediate configuration deviations on your Azure\
+        \ compute resources, including VMs, containers, and others. In addition, you\
+        \ can use Azure Resource Manager templates, custom operating system images,\
+        \ or Azure Automation State Configuration to maintain the security configuration\
+        \ of the operating system.  Microsoft VM templates in conjunction with Azure\
+        \ Automation State Configuration can assist in meeting and maintaining security\
+        \ requirements. Use Change Tracking and Inventory in Azure Automation to track\
+        \ changes in virtual machines hosted in Azure, on-premises, and other cloud\
+        \ environments to help you pinpoint operational and environmental issues with\
+        \ software managed by the Distribution Package Manager. Install the Guest\
+        \ Attestation agent on virtual machines to monitor for boot integrity on confidential\
+        \ virtual machines.\n\nNote: Azure Marketplace VM images published by Microsoft\
+        \ are managed and maintained by Microsoft.\n\n### AWS Guidance\n\nUse AWS\
+        \ System Manager's State Manager feature to regularly assess and remediate\
+        \ configuration deviations on your EC2 instances. In addition, you can use\
+        \ CloudFormation templates, custom operating system images to maintain the\
+        \ security configuration of the operating system. AMI templates in conjunction\
+        \ with Systems Manager can assist in meeting and maintaining security requirements.\n\
+        \nYou can also centrally monitor and manage the operating system configuration\
+        \ drift through Azure Automation State Configuration and onboard the applicable\
+        \ resources to Azure security governance using the following methods :\n-\
+        \ Onboard your AWS account into Microsoft Defender for Cloud \n- Use Azure\
+        \ Arc for servers to connect your EC2 instances to Microsoft Defender for\
+        \ Cloud\n\nFor workload applications running within your EC2 instances, AWS\
+        \ Lambda or containers environment, you may use AWS System Manager AppConfig\
+        \ to audit and enforce the desired configuration baseline.\n\nNote: AMIs published\
+        \ by Amazon Web Services in AWS Marketplace are managed and maintained by\
+        \ Amazon Web Services."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-5
+      name: Perform vulnerability assessments
+      description: 'Perform vulnerabilities assessment for your cloud resources at
+        all tiers in a fixed schedule or on-demand. Track and compare the scan results
+        to verify the vulnerabilities are remediated. The assessment should include
+        all type of vulnerabilities, such as vulnerabilities in Azure services, network,
+        web, operating systems, misconfigurations, and so on.
+
+
+        Be aware of the potential risks associated with the privileged access used
+        by the vulnerability scanners. Follow the privileged access security best
+        practice to secure any administrative accounts used for the scanning.'
+      annotation: "### Azure Guidance\n\nFollow recommendations from Microsoft Defender\
+        \ for Cloud for performing vulnerability assessments on your Azure virtual\
+        \ machines, container images, and SQL servers. Microsoft Defender for Cloud\
+        \ has a built-in vulnerability scanner for virtual machines. Use a third-party\
+        \ solution for performing vulnerability assessments on network devices and\
+        \ applications (e.g., web applications)\n\nExport scan results at consistent\
+        \ intervals and compare the results with previous scans to verify that vulnerabilities\
+        \ have been remediated. When using vulnerability management recommendations\
+        \ suggested by Microsoft Defender for Cloud, you can pivot into the selected\
+        \ scan solution's portal to view historical scan data.\n\nWhen conducting\
+        \ remote scans, do not use a single, perpetual, administrative account. Consider\
+        \ implementing JIT (Just In Time) provisioning methodology for the scan account.\
+        \ Credentials for the scan account should be protected, monitored, and used\
+        \ only for vulnerability scanning.\n\nNote: Microsoft Defender services (including\
+        \ Defender for servers, containers, App Service, Database, and DNS) embed\
+        \ certain vulnerability assessment capabilities. The alerts generated from\
+        \ Azure Defender services should be monitored and reviewed together with the\
+        \ result from Microsoft Defender for Cloud vulnerability scanning tool.\n\n\
+        Note: Ensure you setup email notifications in Microsoft Defender for Cloud.\n\
+        \n### AWS Guidance\n\nUse Amazon Inspector to scan your Amazon EC2 instances\
+        \ and container images residing in Amazon Elastic Container Registry (Amazon\
+        \ ECR) for software vulnerabilities and unintended network exposure. Use a\
+        \ third-party solution for performing vulnerability assessments on network\
+        \ devices and applications (e.g., web applications)\n\nRefer to control ES-1,\
+        \ \"Use Endpoint Detection and Response (EDR)\", to onboard your AWS account\
+        \ into Microsoft Defender for Cloud and deploy Microsoft Defender for servers\
+        \ (with Microsoft Defender for Endpoint integrated) in your EC2 instances.\
+        \ Microsoft Defender for servers provides a native threat and vulnerability\
+        \ management capability for your VMs. The vulnerability scanning result will\
+        \ be consolidated in the Microsoft Defender for Cloud dashboard. \n\nTrack\
+        \ the status of vulnerability findings to ensure they are properly remediated\
+        \ or suppressed if they're considered false positive.\n\nWhen conducting remote\
+        \ scans, do not use a single, perpetual, administrative account. Consider\
+        \ implementing a temporary provisioning methodology for the scan account.\
+        \ Credentials for the scan account should be protected, monitored, and used\
+        \ only for vulnerability scanning."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-6
+      name: Rapidly and automatically remediate vulnerabilities
+      description: "Rapidly and automatically deploy patches and updates to remediate\
+        \ vulnerabilities in your cloud resources. Use the appropriate risk-based\
+        \ approach to prioritize the remediation of vulnerabilities. For example,\
+        \ more severe vulnerabilities in a higher value asset should be addressed\
+        \ as a higher priority. \n\nPrioritize which updates to deploy first using\
+        \ a common risk scoring program (such as Common Vulnerability Scoring System)\
+        \ or the default risk ratings provided by your third-party scanning tool and\
+        \ tailor to your environment. You should also consider which applications\
+        \ present a high security risk and which ones require high uptime."
+      annotation: "### Azure Guidance\n\nUse Azure Automation Update Management or\
+        \ a third-party solution to ensure that the most recent security updates are\
+        \ installed on your Windows and Linux VMs. For Windows VMs, ensure Windows\
+        \ Update has been enabled and set to update automatically.\n\nFor third-party\
+        \ software, use a third-party patch management solution or Microsoft System\
+        \ Center Updates Publisher for Configuration Manager.\n\n### AWS Guidance\n\
+        \nUse AWS Systems Manager - Patch Manager to ensure that the most recent security\
+        \ updates are installed on your operating systems and applications. Patch\
+        \ Manager supports patch baselines to allow you to define a list of approved\
+        \ and rejected patches for your systems.\n\nYou can also use Azure Automation\
+        \ Update Management to centrally manage the patches and updates of your AWS\
+        \ EC2 Windows and Linux instances. \n\nFor third-party software, use a third-party\
+        \ patch management solution or Microsoft System Center Updates Publisher for\
+        \ Configuration Manager."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:pv-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:pv
+      ref_id: PV-7
+      name: Conduct regular red team operations
+      description: "Simulate real-world attacks to provide a more complete view of\
+        \ your organization's vulnerability. Red team operations and penetration testing\
+        \ complement the traditional vulnerability scanning approach to discover risks.\
+        \ \n\nFollow industry best practices to design, prepare and conduct this kind\
+        \ of testing to ensure it will not cause damage or disruption to your environment.\
+        \ This should always include discussing testing scope and constraints with\
+        \ relevant stakeholders and resource owners."
+      annotation: '### Azure Guidance
+
+
+        As required, conduct penetration testing or red team activities on your Azure
+        resources and ensure remediation of all critical security findings.
+
+
+        Follow the Microsoft Cloud Penetration Testing Rules of Engagement to ensure
+        your penetration tests are not in violation of Microsoft policies. Use Microsoft''s
+        strategy and execution of Red Teaming and live site penetration testing against
+        Microsoft-managed cloud infrastructure, services, and applications.
+
+
+        ### AWS Guidance
+
+
+        As required, conduct penetration testing or red team activities on your AWS
+        resources and ensure remediation of all critical security findings.
+
+
+        Follow the AWS Customer Support Policy for Penetration Testing to ensure your
+        penetration tests are not in violation of AWS policies.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:es
+      assessable: false
+      depth: 1
+      ref_id: ES
+      name: Endpoint security
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:es-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:es
+      ref_id: ES-1
+      name: Use Endpoint Detection and Response (EDR)
+      description: Enable Endpoint Detection and Response (EDR) capabilities for VMs
+        and integrate with SIEM and security operations processes.
+      annotation: "### Azure Guidance\n\nMicrosoft Defender for servers (with Microsoft\
+        \ Defender for Endpoint integrated) provides EDR capability to prevent, detect,\
+        \ investigate, and respond to advanced threats. \n\nUse Microsoft Defender\
+        \ for Cloud to deploy Microsoft Defender for servers on your endpoints and\
+        \ integrate the alerts to your SIEM solution such as Microsoft Sentinel.\n\
+        \n### AWS Guidance\n\nOnboard your AWS account into Microsoft Defender for\
+        \ Cloud and deploy Microsoft Defender for servers (with Microsoft Defender\
+        \ for Endpoint integrated) on your EC2 instances to provide EDR capabilities\
+        \ to prevent, detect, investigate, and respond to advanced threats. \n\nAlternatively,\
+        \ use Amazon GuardDuty integrated threat intelligence capability to monitor\
+        \ and protect your EC2 instances. Amazon GuardDuty can detect anomalous activities\
+        \ such as activity indicating an instance compromise, such as cryptocurrency\
+        \ mining, malware using domain generation algorithms (DGAs), outbound denial\
+        \ of service activity, unusually high volume of network traffic, unusual network\
+        \ protocols, outbound instance communication with a known malicious IP, temporary\
+        \ Amazon EC2 credentials use by an external IP address, and data exfiltration\
+        \ using DNS."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:es-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:es
+      ref_id: ES-2
+      name: Use modern anti-malware software
+      description: Use anti-malware solutions (also known as endpoint protection)
+        capable of real-time protection and periodic scanning.
+      annotation: "### Azure Guidance\n\nMicrosoft Defender for Cloud can automatically\
+        \ identify the use of a number of popular anti-malware solutions for your\
+        \ virtual machines and on-premises machines with Azure Arc configured and\
+        \ report the endpoint protection running status and make recommendations.\n\
+        \nMicrosoft Defender Antivirus is the default anti-malware solution for Windows\
+        \ server 2016 and above. For Windows server 2012 R2, use Microsoft Antimalware\
+        \ extension to enable SCEP (System Center Endpoint Protection).   For Linux\
+        \ VMs, use Microsoft Defender for Endpoint on Linux for the endpoint protection\
+        \ feature.\n\nFor both Windows and Linux, you can use Microsoft Defender for\
+        \ Cloud to discover and assess the health status of the anti-malware solution.\
+        \ \n\nNote: You can also use Microsoft Defender for Cloud's Defender for Storage\
+        \ to detect malware uploaded to Azure Storage accounts.\n\n### AWS Guidance\n\
+        \nOnboard your AWS account into Microsoft Defender for Cloud to allow Microsoft\
+        \ Defender for Cloud to automatically identify the use some popular anti-malware\
+        \ solutions for EC2 instances with Azure Arc configured and report the endpoint\
+        \ protection running status and make recommendations. \n\nDeploy Microsoft\
+        \ Defender Antivirus which is the default anti-malware solution for Windows\
+        \ server 2016 and above. For EC2 instances running Windows server 2012 R2,\
+        \ use Microsoft Antimalware extension to enable SCEP (System Center Endpoint\
+        \ Protection). For EC2 instances running Linux, use Microsoft Defender for\
+        \ Endpoint on Linux for the endpoint protection feature. \n\nFor both Windows\
+        \ and Linux, you can use Microsoft Defender for Cloud to discover and assess\
+        \ the health status of the anti-malware solution. \n\nNote: Microsoft Defender\
+        \ Cloud also supports certain third-party endpoint protection products for\
+        \ the discovery and health status assessment."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:es-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:es
+      ref_id: ES-3
+      name: Ensure anti-malware software and signatures are updated
+      description: Ensure anti-malware signatures are updated rapidly and consistently
+        for the anti-malware solution.
+      annotation: "### Azure Guidance\n\nFollow recommendations in Microsoft Defender\
+        \ for Cloud to keep all endpoints up to date with the latest signatures. Microsoft\
+        \ Antimalware (for Windows) and Microsoft Defender for Endpoint (for Linux)\
+        \ will automatically install the latest signatures and engine updates by default.\
+        \ \n\nFor third-party solutions, ensure the signatures are updated in the\
+        \ third-party anti-malware solution.\n\n### AWS Guidance\n\nWith your AWS\
+        \ account onboarded into Microsoft Defender for Cloud, follow recommendations\
+        \ in Microsoft Defender for Cloud to keep all endpoints up to date with the\
+        \ latest signatures. Microsoft Antimalware (for Windows) and Microsoft Defender\
+        \ for Endpoint (for Linux) will automatically install the latest signatures\
+        \ and engine updates by default. \n\nFor third-party solutions, ensure the\
+        \ signatures are updated in the third-party anti-malware solution."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:br
+      assessable: false
+      depth: 1
+      ref_id: BR
+      name: Backup and recovery
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:br-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:br
+      ref_id: BR-1
+      name: Ensure regular automated backups
+      description: Ensure backup of business-critical resources, either during resource
+        creation or enforced through policy for existing resources.
+      annotation: "### Azure Guidance\n\nFor Azure Backup supported resources (such\
+        \ as Azure VMs, SQL Server, HANA databases, Azure PostgreSQL Database, File\
+        \ Shares, Blobs or Disks), enable Azure Backup and configure the desired frequency\
+        \ and retention period. For Azure VM, you can use Azure Policy to have backup\
+        \ automatically enabled using Azure Policy. \n\nFor resources or services\
+        \ not supported by Azure Backup, use the native backup capability provided\
+        \ by the resource or service. For example, Azure Key Vault provides a native\
+        \ backup capability. \n\nFor resources/services that are neither supported\
+        \ by Azure Backup nor have a native backup capability, evaluate your backup\
+        \ and disaster needs, and create your own mechanism as per your business requirements.\
+        \ For example: \n- If you use Azure Storage for data storage, enable blob\
+        \ versioning for your storage blobs which will allow you to preserve, retrieve,\
+        \ and restore every version of every object stored in your Azure Storage.\
+        \ \n- Service configuration settings can usually be exported to Azure Resource\
+        \ Manager templates.\n\n### AWS Guidance\n\nFor AWS Backup supported resources\
+        \ (such as EC2, S3, EBS or RDS), enable AWS Backup and configure the desired\
+        \ frequency and retention period. \n\nFor resources/services not supported\
+        \ by AWS Backup, such as AWS KMS, enable the native backup feature as part\
+        \ of its resource creation. \n\nFor resources/services that are neither supported\
+        \ by AWS Backup nor have a native backup capability, evaluate your backup\
+        \ and disaster needs, and create your own mechanism as per your business requirements.\
+        \ For example:\n- If Amazon S3 is used for data storage, enable S3 versioning\
+        \ for your storage backet which will allow you to preserve, retrieve, and\
+        \ restore every version of every object stored in your S3 bucket. \n- Service\
+        \ configuration settings can usually be exported to CloudFormation templates."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:br-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:br
+      ref_id: BR-2
+      name: Protect backup and recovery data
+      description: Ensure backup data and operations are protected from data exfiltration,
+        data compromise, ransomware/malware and malicious insiders. The security controls
+        that should be applied include user and network access control, data encryption
+        at-rest and in-transit.
+      annotation: "### Azure Guidance\n\nUse multi-factor-authentication and Azure\
+        \ RBAC to secure the critical Azure Backup operations (such as delete, change\
+        \ retention, updates to backup config). For Azure Backup supported resources,\
+        \ use Azure RBAC to segregate duties and enable fine grained access, and create\
+        \ private endpoints within your Azure Virtual Network to securely backup and\
+        \ restore data from your Recovery Services vaults.\n\nFor Azure Backup supported\
+        \ resources, backup data is automatically encrypted using Azure platform-managed\
+        \ keys with 256-bit AES encryption. You can also choose to encrypt the backups\
+        \ using a customer managed key. In this case, ensure the customer-managed\
+        \ key in the Azure Key Vault is also in the backup scope. If you use a customer-managed\
+        \ key, use soft delete and purge protection in Azure Key Vault to protect\
+        \ keys from accidental or malicious deletion. For on-premises backups using\
+        \ Azure Backup, encryption-at-rest is provided using the passphrase you provide.\
+        \ \n\nSafeguard backup data from accidental or malicious deletion, such as\
+        \ ransomware attacks/attempts to encrypt or tamper backup data. For Azure\
+        \ Backup supported resources, enable soft delete to ensure recovery of items\
+        \ with no data loss for up to 14 days after an unauthorized deletion, and\
+        \ enable multifactor authentication using a PIN generated in the Azure portal.\
+        \ Also enable geo-redundant storage or cross-region restoration to ensure\
+        \ backup data is restorable when there is a disaster in primary region. You\
+        \ can also enable Zone-redundant Storage (ZRS) to ensure backups are restorable\
+        \ during zonal failures.\n\nNote: If you use a resource's native backup feature\
+        \ or backup services other than Azure Backup, refer to the Microsoft Cloud\
+        \ Security Benchmark (and service baselines) to implement the above controls.\n\
+        \n### AWS Guidance\n\nUse AWS IAM access control to secure AWS Backup. This\
+        \ includes securing the AWS Backup service access and backup and restore points.\
+        \ Example controls include:\n- Use multi-factor authentication (MFA) for critical\
+        \ operations such as deletion of a backup/restore point.\n- Use Secure Sockets\
+        \ Layer (SSL)/Transport Layer Security (TLS) to communicate with AWS resources.\n\
+        - Use AWS KMS in conjunction with AWS Backup to encrypt the backup data either\
+        \ using customer-managed CMK or an AWS-managed CMK associated with the AWS\
+        \ Backup service.\n- Use AWS Backup Vault Lock for immutable storage of critical\
+        \ data. \n- Secure S3 buckets through access policy, disabling public access,\
+        \ enforcing data at-rest encryption, and versioning control."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:br-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:br
+      ref_id: BR-3
+      name: Monitor backups
+      description: Ensure all business-critical protectable resources are compliant
+        with the defined backup policy and standard.
+      annotation: "### Azure Guidance\n\nMonitor your Azure environment to ensure\
+        \ that all your critical resources are compliant from a backup perspective.\
+        \ Use Azure Policy for backup to audit and enforce such controls.  For Azure\
+        \ Backup supported resources, Backup Center helps you centrally govern your\
+        \ backup estate.\n\nEnsure critical backup operations (delete, change retention,\
+        \ updates to backup config) are monitored, audited, and have alerts in place.\
+        \ For Azure Backup supported resources, monitor overall backup health, get\
+        \ alerted to critical backup incidents, and audit triggered user actions on\
+        \ vaults. \n\nNote: Where applicable, also use built-in policies (Azure Policy)\
+        \ to ensure that your Azure resources are configured for backup.\n\n### AWS\
+        \ Guidance\n\nAWS Backup works with other AWS tools to empower you to monitor\
+        \ its workloads. These tools include the following:\n- Use AWS Backup Audit\
+        \ Manager to monitor the backup operations to ensure the compliance.\n- Use\
+        \ CloudWatch and Amazon EventBridge to monitor AWS Backup processes.\n- Use\
+        \ CloudWatch to track metrics, create alarms, and view dashboards.\n- Use\
+        \ EventBridge to view and monitor AWS Backup events.\n- Use Amazon Simple\
+        \ Notification Service (Amazon SNS) to subscribe to AWS Backup-related topics\
+        \ such as backup, restore, and copy events."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:br-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:br
+      ref_id: BR-4
+      name: Regularly test backup
+      description: Periodically perform data recovery tests of your backup to verify
+        that the backup configurations and availability of the backup data meets the
+        recovery needs as per defined in the RTO (Recovery Time Objective) and RPO
+        (Recovery Point Objective).
+      annotation: '### Azure Guidance
+
+
+        Periodically perform data recovery tests of your backup to verify that the
+        backup configurations and availability of the backup data meets the recovery
+        needs as defined in the RTO and RPO.
+
+
+        You may need to define your backup recovery test strategy, including the test
+        scope, frequency and method as performing the full recovery test each time
+        can be difficult.
+
+
+        ### AWS Guidance
+
+
+        Periodically perform data recovery tests of your backup to verify that the
+        backup configurations and availability of the backup data meets the recovery
+        needs as defined in the RTO and RPO.
+
+
+        You may need to define your backup recovery test strategy, including the test
+        scope, frequency and method as performing the full recovery test each time
+        can be difficult.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      assessable: false
+      depth: 1
+      ref_id: DS
+      name: DevOps Security
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-1
+      name: Conduct threat modeling
+      description: 'Perform threat modeling to identify the potential threats and
+        enumerate the mitigating controls. Ensure your threat modeling serves the
+        following purposes:
+
+
+        Secure your applications and services in the production run-time stage.
+
+        Secure the artifacts, underlying CI/CD pipeline and other tooling environment
+        used for build, test, and deployment. The threat modeling at least should
+        include the following aspects:
+
+        Define the security requirements of the application. Ensure these requirements
+        are adequately addressed in the threat modeling.
+
+        Analyze application components, data connections and their relationship. Ensure
+        this analysis also includes the upstream and downstream connections outside
+        of your application scope.
+
+        List the potential threats and attack vectors that your application components,
+        data connections and upstream and downstream services may be exposed to.
+
+        Identify the applicable security controls that can be used to mitigate the
+        threats enumerated and identify any controls gaps (e.g., security vulnerabilities)
+        that may require additional treatment plans.
+
+        Enumerate and design the controls that can mitigate the vulnerabilities identified.'
+      annotation: '### Azure Guidance
+
+
+        Use threat modeling tools such as the Microsoft threat modeling tool with
+        the Azure threat model template embedded to drive your threat modeling process.
+        Use the STRIDE model to enumerate the  threats from both internal and external
+        and identify the controls applicable. Ensure the threat modeling process includes
+        the threat scenarios in the DevOps process, such as malicious code injection
+        through an insecure artifacts repository with misconfigured access control
+        policy.
+
+
+        If using a threat modeling tool is not applicable, you should, at minimum,
+        use a questionnaire-based threat modeling process to identify the threats.
+
+
+        Ensure the threat modeling or analysis results are recorded and updated when
+        there is a major security-impact change in your application or in the threat
+        landscape.
+
+
+        ### AWS Guidance
+
+
+        Use threat modeling tools such as the Microsoft threat modeling tool with
+        the Azure threat model template embedded to drive your threat modeling process.
+        Use the STRIDE model to enumerate the threats from both internal and external
+        and identify the controls applicable. Ensure the threat modeling process includes
+        the threat scenarios in the DevOps process, such as malicious code injection
+        through an insecure artifacts repository with misconfigured access control
+        policy.
+
+
+        If using a threat modeling tool is not applicable, you should, at minimum,
+        use a questionnaire-based threat modeling process to identify the threats.
+
+
+        Ensure the threat modeling or analysis results are recorded and updated when
+        there is a major security-impact change in your application or in the threat
+        landscape.'
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-2
+      name: Ensure software supply chain security
+      description: "Ensure your enterprise\u2019s SDLC (Software Development Lifecycle)\
+        \ or process include a set of security controls to govern the in-house and\
+        \ third-party software components (including both proprietary and open-source\
+        \ software) where your applications have dependencies. Define gating criteria\
+        \ to prevent vulnerable or malicious components being integrated and deployed\
+        \ into the environment.\n\nThe software supply chain security controls should\
+        \ at least include the following aspects:\n\nProperly manage a Software Bill\
+        \ of Materials (SBOM) by identifying the upstream dependencies required for\
+        \ the service/resource development, build, integration and deployment phase.\n\
+        Inventory and track the in-house and third-party software components for known\
+        \ vulnerability when there is a fix available in the upstream.\nAssess the\
+        \ vulnerabilities and malware in the software components using static and\
+        \ dynamic application testing for unknown vulnerabilities.\nEnsure the vulnerabilities\
+        \ and malware are mitigated using the appropriate approach. This may include\
+        \ source code local or upstream fix, feature exclusion and/or applying compensating\
+        \ controls if the direct mitigation is not available.\nIf closed source third-party\
+        \ components are used in your production environment, you may have limited\
+        \ visibility to its security posture. You should consider additional controls\
+        \ such as access control, network isolation and endpoint security to minimize\
+        \ the impact if there is a malicious activity or vulnerability associated\
+        \ with the component."
+      annotation: "### Azure Guidance\n\nFor the GitHub platform, ensure the software\
+        \ supply chain security through the following capability or tools from GitHub\
+        \ Advanced Security or GitHub\u2019s native feature:- Use Dependency Graph\
+        \ to scan, inventory and identify all your project\u2019s dependencies and\
+        \ related vulnerabilities through Advisory Database.\n\n- Use Dependabot to\
+        \ ensure that the vulnerable dependency is tracked and remediated, and ensure\
+        \ your repository automatically keeps up with the latest releases of the packages\
+        \ and applications it depends on.\n- Use GitHub's native code scanning capability\
+        \ to scan the source code when sourcing the code externally.\n- Use Microsoft\
+        \ Defender for Cloud to integrate vulnerability assessment for your container\
+        \ image in the CI/CD workflow.\nFor Azure DevOps, you can use third-party\
+        \ extensions to implement similar controls to inventory, analyze and remediate\
+        \ the third-party software components and their vulnerabilities\n\n### AWS\
+        \ Guidance\n\nIf you use AWS CI/CD platforms such as CodeCommit or CodePipeline,\
+        \ ensure the software supply chain security using CodeGuru Reviewer to scan\
+        \ the source code (for Java and Python) through the CI/CD workflows. Platforms\
+        \ such as CodeCommit and CodePipeline also supports third-party extensions\
+        \ to implement similar controls to inventory, analyze and remediate the third-party\
+        \ software components and their vulnerabilities.\n\nIf you manage your source\
+        \ code through the GitHub platform, ensure the software supply chain security\
+        \ through the following capability or tools from GitHub Advanced Security\
+        \ or GitHub\u2019s native feature:\n- Use Dependency Graph to scan, inventory\
+        \ and identify all your project\u2019s dependencies and related vulnerabilities\
+        \ through Advisory Database.\n- Use Dependabot to ensure that the vulnerable\
+        \ dependency is tracked and remediated, and ensure your repository automatically\
+        \ keeps up with the latest releases of the packages and applications it depends\
+        \ on.\n- Use GitHub's native code scanning capability to scan the source code\
+        \ when sourcing the code externally.\n- If applicable, use Microsoft Defender\
+        \ for Cloud to integrate vulnerability assessment for your container image\
+        \ in the CI/CD workflow."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-3
+      name: Secure DevOps infrastructure
+      description: 'Ensure the DevOps infrastructure and pipeline follow security
+        best practices across environments including your build, test, and production
+        stages. This typically includes the security controls for following scope:
+
+
+        - Artifact repositories that store source code, built packages and images,
+        project artifacts and business data.
+
+        - Servers, services, and tooling that host CI/CD pipelines.
+
+        - CI/CD pipeline configuration.'
+      annotation: "### Azure Guidance\n\nAs part of applying the Microsoft Cloud Security\
+        \ Benchmark to your DevOps infrastructure security controls, prioritize the\
+        \ following controls:\n- Protect artifacts and the underlying environment\
+        \ to ensure the CI/CD pipelines don\u2019t become avenues to insert malicious\
+        \ code. For example, review your CI/CD pipeline to identify any misconfiguration\
+        \ in core areas of Azure DevOps such as Organization, Projects, Users, Pipelines\
+        \ (Build & Release), Connections, and Build Agent to identify any misconfigurations\
+        \ such as open access, weak authentication, insecure connection setup and\
+        \ so on. For GitHub, use similar controls to secure the Organization permission\
+        \ levels. \n- Ensure your DevOps infrastructure is deployed consistently across\
+        \ development projects. Track compliance of your DevOps infrastructure at\
+        \ scale by using Microsoft Defender for Cloud (such as Compliance Dashboard,\
+        \ Azure Policy, Cloud Posture Management) or your own compliance monitoring\
+        \ tools. \n- Configure identity/role permissions and entitlement policies\
+        \ in Azure AD, native services, and CI/CD tools in your pipeline to ensure\
+        \ changes to the pipelines are authorized.\n- Avoid providing permanent \u201C\
+        standing\u201D privileged access to the human accounts such as developers\
+        \ or testers by using features such as Azure managed identifies and just-in-time\
+        \ access.\n- Remove keys, credentials, and secrets from code and scripts used\
+        \ in CI/CD workflow jobs and keep them in a key store or Azure Key Vault.\
+        \ \n- If you run self-hosted build/deployment agents, follow Microsoft Cloud\
+        \ Security Benchmark controls including network security, posture and vulnerability\
+        \ management, and endpoint security to secure your environment.\n\nNote: Refer\
+        \ to the Logging and Threat Detection, DS-7, and the Posture and Vulnerability\
+        \ Management sections to use services such as Azure Monitor and Microsoft\
+        \ Sentinel to enable governance, compliance, operational auditing, and risk\
+        \ auditing for your DevOps infrastructure.\n\n### AWS Guidance\n\nAs part\
+        \ of applying the Microsoft Cloud Security Benchmark to the security controls\
+        \ of your DevOps infrastructure, such as GitHub, CodeCommit, CodeArtifact,\
+        \ CodePipeline, CodeBuild and CodeDeploy, prioritize the following controls:\
+        \ \n- Refer to this guidance and the AWS Well-architected Framework security\
+        \ pillar to secure your DevOps environments in AWS.\n- Protect artifacts and\
+        \ the underlying supporting infrastructure to ensure the CI/CD pipelines don\u2019\
+        t become avenues to insert malicious code. \n- Ensure your DevOps infrastructure\
+        \ is deployed and sustained consistently across development projects. Track\
+        \ compliance of your DevOps infrastructure at scale by using AWS Config or\
+        \ your own compliance check solution. \n- Use CodeArtifact to securely store\
+        \ and share software packages used for application development. You can use\
+        \ CodeArtifact with popular build tools and package managers such as Maven,\
+        \ Gradle, npm, yarn, pip, and twine.\n- Configure identity/role permissions\
+        \ and permission policies in AWS IAM, native services, and CI/CD tools in\
+        \ your pipeline to ensure changes to the pipelines are authorized. \n- Remove\
+        \ keys, credentials, and secrets from code and scripts used in CI/CD workflow\
+        \ jobs and keep them in key store or AWS KMS\n- If you run self-hosted build/deployment\
+        \ agents, follow Microsoft Cloud Security Benchmark controls including network\
+        \ security, posture and vulnerability management, and endpoint security to\
+        \ secure your environment. Use AWS Inspector for vulnerability scanning for\
+        \ vulnerabilities in EC2 or containerized environment as the build environment.\
+        \ \n\nNote: Refer to the Logging and Threat Detection, DS-7, and the and Posture\
+        \ and Vulnerability Management sections to use services such as AWS CloudTrail,\
+        \ CloudWatch and Microsoft Sentinel to enable governance, compliance, operational\
+        \ auditing, and risk auditing for your DevOps infrastructure."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-4
+      name: Integrate static application security testing into DevOps pipeline
+      description: Ensure static application security testing (SAST) fuzzy testing,
+        interactive testing, mobile application testing, are part of the gating controls
+        in the CI/CD workflow. The gating can be set based on the testing results
+        to prevent vulnerable packages from committing into the repository, building
+        into the packages, or deploying into the production.
+      annotation: "### Azure Guidance\n\nIntegrate SAST into your pipeline (e.g.,\
+        \ in your infrastructure as code template) so the source code can be scanned\
+        \ automatically in your CI/CD workflow. Azure DevOps Pipeline or GitHub can\
+        \ integrate the  below tools and third-party SAST tools into the workflow.\
+        \ \n- GitHub CodeQL for source code analysis.\n- Microsoft BinSkim Binary\
+        \ Analyzer for Windows and *nix binary analysis.\n- Azure DevOps Credential\
+        \ Scanner (Microsoft Security DevOps extension) and GitHub native secret scanning\
+        \ for credential scan in the source code.\n\n### AWS Guidance\n\nIntegrate\
+        \ SAST into your pipeline so the source code can be scanned automatically\
+        \ in your CI/CD workflow.\n\nIf using AWS CodeCommit, use AWS CodeGuru Reviewer\
+        \ for Python and Java source code analysis. AWS Codepipeline can also support\
+        \ integration of third-part SAST tools into the code deployment pipeline.\
+        \ \n\nIf using GitHub, the below tools and third-party SAST tools can be integrated\
+        \ into the workflow. \n- GitHub CodeQL for source code analysis.\n- Microsoft\
+        \ BinSkim Binary Analyzer for Windows and *nix binary analysis.\n- GitHub\
+        \ native secret scanning for credential scan in the source code. \n- AWS CodeGuru\
+        \ Reviewer for Python and Java source code analysis."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-5
+      name: Integrate dynamic application security testing into DevOps pipeline
+      description: Ensure dynamic application security testing (DAST) are part of
+        the gating controls in the CI/CD workflow. The gating can be set based on
+        the testing results to prevent vulnerability from building into the packages
+        or deploying into the production.
+      annotation: "### Azure Guidance\n\nIntegrate DAST into your pipeline so the\
+        \ runtime application can be tested automatically in your CI/CD workflow set\
+        \ in Azure DevOps or GitHub. The automated penetration testing (with manual\
+        \ assisted validation) should also be part of the DAST. \n\nAzure DevOps Pipeline\
+        \ or GitHub supports the integration of third-party DAST tools into the CI/CD\
+        \ workflow.\n\n### AWS Guidance\n\nIntegrate DAST into your pipeline so the\
+        \ runtime application can be tested automatically in your CI/CD workflow set\
+        \ in AWS CodePipeline or GitHub. The automated penetration testing (with manual\
+        \ assisted validation) should also be part of the DAST. \n\nAWS CodePipeline\
+        \ or GitHub supports integration of third-party DAST tools into the CI/CD\
+        \ workflow."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-6
+      name: Enforce security of workload throughout DevOps lifecycle
+      description: "Ensure the workload is secured throughout the entire lifecycle\
+        \ in development, testing, and deployment stage. Use Microsoft Cloud Security\
+        \ Benchmark to evaluate the controls (such as network security, identity management,\
+        \ privileged access and so on) that can be set as guardrails by default or\
+        \ shift left prior to the deployment stage. In particular, ensure the following\
+        \ controls are in place in your DevOps process: \n- Automate the deployment\
+        \ by using Azure or third-party tooling in the CI/CD workflow, infrastructure\
+        \ management (infrastructure as code), and testing to reduce human error and\
+        \ attack surface. \n- Ensure VMs, container images and other artifacts are\
+        \ secure from malicious manipulation. \n- Scan the workload artifacts (in\
+        \ other words, container images, dependencies, SAST and DAST scans) prior\
+        \ to the deployment in the CI/CD workflow\n- Deploy vulnerability assessment\
+        \ and threat detection capability into the production environment and continuously\
+        \ use these capabilities in the run-time."
+      annotation: "### Azure Guidance\n\nGuidance for Azure VMs:\n- Use Azure Shared\
+        \ Image Gallery to share and control access to your images by different users,\
+        \ service principals, or AD groups within your organization. Use Azure role-based\
+        \ access control (Azure RBAC) to ensure that only authorized users can access\
+        \ your custom images. \n- Define the secure configuration baselines for the\
+        \ VMs to eliminate unnecessary credentials, permissions, and packages. Deploy\
+        \ and enforce configuration baselines through custom images, Azure Resource\
+        \ Manager templates, and/or Azure Policy guest configuration.\n\nGuidance\
+        \ for Azure container services: \n- Use Azure Container Registry (ACR) to\
+        \ create your private container registry where granular access can be restricted\
+        \ through Azure RBAC, so only authorized services and accounts can access\
+        \ the containers in the private registry. \n- Use Defender for Containers\
+        \ for vulnerability assessment of the images in your private Azure Container\
+        \ Registry. In addition, you can use Microsoft Defender for Cloud to integrate\
+        \ the container image scans as part of your CI/CD workflows. \n\nFor Azure\
+        \ serverless services, adopt similar controls to ensure security controls\
+        \ \"shift-left\" to the stage prior to deployment.\n\n### AWS Guidance\n\n\
+        Use Amazon Elastic Container Registry to share and control access to your\
+        \ images by different users and roles within your organization. And Use AWS\
+        \ IAM to ensure that only authorized users can access your custom images.\
+        \ \n\nDefine the secure configuration baselines for the EC2 AMI images to\
+        \ eliminate unnecessary credentials, permissions, and packages. Deploy and\
+        \ enforce configurations baselines through custom AMI images, CloudFormation\
+        \ templates, and/or AWS Config Rules.\n\nUse AWS Inspector for vulnerability\
+        \ scanning of VM's and Containerized environments, securing them from malicious\
+        \ manipulation. \n\nFor AWS serverless services, use AWS CodePipeline in conjunction\
+        \ with AWS AppConfig to adopt similar controls to ensure security controls\
+        \ \"shift left\" to the stage prior to deployment."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:ds-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:ds
+      ref_id: DS-7
+      name: Enable logging and monitoring in DevOps
+      description: "Ensure your logging and monitoring scope includes non-production\
+        \ environments and CI/CD workflow elements used in DevOps (and any other development\
+        \ processes). The vulnerabilities and threats targeting these environments\
+        \ can introduce significant risks to your production environment if they are\
+        \ not monitored properly. The events from the CI/CD build, test and deployment\
+        \ workflow should also be monitored to identify any deviations in the CI/CD\
+        \ workflow jobs. \n\nFollow Microsoft Cloud Security Benchmark \u2013 Logging\
+        \ and Threat Detection as the guideline to implement your logging and monitoring\
+        \ controls for workload."
+      annotation: "### Azure Guidance\n\nEnable and configure the audit logging capabilities\
+        \ in non-production and CI/CD tooling environments (such as Azure DevOps and\
+        \ GitHub) used throughout the DevOps process. \n\nThe events generated from\
+        \ Azure DevOps and the GitHub CI/CD workflow, including the build, test and\
+        \ deployment jobs, should also be monitored to identify any anomalous results.\n\
+        \nIngest the above logs and events into Microsoft Sentinel or other SIEM tools\
+        \ through a logging stream or API to ensure the security incidents are properly\
+        \ monitored and triaged for handling.\n\n### AWS Guidance\n\nEnable and configure\
+        \ AWS CloudTrail for audit logging capabilities in non-production and CI/CD\
+        \ tooling environments (such as AWS CodePipeline, AWS CodeBuild, AWS CodeDeploy,\
+        \ AWS CodeStar) used throughout the DevOps process. \n\nThe events generated\
+        \ from the AWS CI/CD environments (such as AWS CodePipeline, AWS CodeBuild,\
+        \ AWS CodeDeploy, AWS CodeStar) and the GitHub CI/CD workflow, including the\
+        \ build, test and deployment jobs, should also be monitored to identify any\
+        \ anomalous results.\n\nIngest the above logs and events into AWS CloudWatch,\
+        \ Microsoft Sentinel or other SIEM tools through a logging stream or API to\
+        \ ensure the security incidents are properly monitored and triaged for handling."
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      assessable: false
+      depth: 1
+      ref_id: GS
+      name: Governance and Strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-1
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-1
+      name: Align organization roles, responsibilities and accountabilities
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-2
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-2
+      name: Define and implement enterprise segmentation/separation of duties strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-3
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-3
+      name: Define and implement data protection strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-4
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-4
+      name: Define and implement network security strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-5
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-5
+      name: Define and implement security posture management strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-6
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-6
+      name: Define and implement identity and privileged access strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-7
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-7
+      name: Define and implement logging, threat detection and incident response strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-8
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-8
+      name: Define and implement backup and recovery strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-9
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-9
+      name: Define and implement endpoint security strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-10
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-10
+      name: Define and implement DevOps security strategy
+    - urn: urn:intuitem:risk:req_node:mcsb-v1:gs-11
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:mcsb-v1:gs
+      ref_id: GS-11
+      name: Define and implement multi-cloud security strategy

@@ -24,6 +24,25 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		}
 	}
 
+	// Fetch accessible folder tree for Focus Mode selector
+	let orgTree: {
+		name: string;
+		uuid: string | null;
+		viewable?: boolean;
+		children?: unknown[];
+	} | null = null;
+	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
+	if (locals.user && focusModeEnabled) {
+		try {
+			const treeRes = await fetch(`${BASE_API_URL}/folders/org_tree/?include_perimeters=false`);
+			if (treeRes.ok) {
+				orgTree = await treeRes.json();
+			}
+		} catch (e) {
+			console.error('Failed to fetch folder tree for focus mode:', e);
+		}
+	}
+
 	const licenseStatus = await fetch(`${BASE_API_URL}/license-status/`).then((res) => res.json());
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
@@ -34,6 +53,7 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		settings: locals.settings,
 		featureflags: locals.featureflags,
 		licenseStatus,
-		LICENSE_EXPIRATION_NOTIFY_DAYS
+		LICENSE_EXPIRATION_NOTIFY_DAYS,
+		orgTree
 	};
 }) satisfies LayoutServerLoad;

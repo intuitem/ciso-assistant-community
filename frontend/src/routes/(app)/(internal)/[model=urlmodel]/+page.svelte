@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { handlers } from 'svelte/legacy';
+	import { page } from '$app/state';
 
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
@@ -8,7 +9,6 @@
 	import { m } from '$paraglide/messages';
 	import type { ActionData, PageData } from './$types';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-
 	import { onMount } from 'svelte';
 	import {
 		getModalStore,
@@ -24,6 +24,7 @@
 
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
+	let exportPopupOpen = $state(false);
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -116,40 +117,55 @@
 				source={data.table}
 				deleteForm={data.deleteForm}
 				{URLModel}
-				disableEdit={['user-groups'].includes(URLModel)}
+				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
 			>
 				{#snippet addButton()}
-					<div>
-						<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+					<div class="relative">
+						<div class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
 							{#if !['risk-matrices', 'frameworks', 'requirement-mapping-sets', 'user-groups', 'role-assignments', 'qualifications'].includes(URLModel)}
 								<button
 									class="inline-block p-3 btn-mini-primary w-12 focus:relative"
 									data-testid="add-button"
 									id="add-button"
 									title={safeTranslate('add-' + data.model.localName)}
+									aria-label={safeTranslate('add-' + data.model.localName)}
 									onclick={handlers(modalCreateForm, handleClickForGT)}
 									><i class="fa-solid fa-file-circle-plus"></i>
 								</button>
-								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios'].includes(URLModel)}
-									<a
-										href="{URLModel}/export/"
+								{#if ['applied-controls', 'assets', 'incidents', 'security-exceptions', 'risk-scenarios', 'processings', 'task-templates'].includes(URLModel)}
+									<button
 										class="inline-block p-3 btn-mini-tertiary w-12 focus:relative"
 										title={m.exportButton()}
-										data-testid="export-button"><i class="fa-solid fa-download mr-2"></i></a
+										data-testid="export-button"
+										onclick={() => (exportPopupOpen = !exportPopupOpen)}
 									>
+										<i class="fa-solid fa-download"></i>
+									</button>
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/"
+										href="{URLModel}/flash-mode/{page.url.search}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
+										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
+									<a
+										href="{URLModel}/kanban-mode/{page.url.search}"
+										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
+										title={m.kanbanMode()}
+										aria-label={m.kanbanMode()}
+										data-testid="kanban-mode-button"><i class="fa-solid fa-table-columns"></i></a
+									>
 								{/if}
-								{#if ['threats', 'reference-controls'].includes(URLModel)}
+								{#if ['threats', 'reference-controls', 'metric-definitions'].includes(URLModel)}
 									{@const title =
-										URLModel === 'threats' ? m.importThreats() : m.importReferenceControls()}
+										URLModel === 'threats'
+											? m.importThreats()
+											: URLModel === 'reference-controls'
+												? m.importReferenceControls()
+												: m.importMetricDefinitions()}
 									<Anchor
 										href={`/libraries?object_type=${URLModel.replace(/-/g, '_')}`}
 										label={m.libraries()}
@@ -168,11 +184,21 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'entities'}
+									<Anchor
+										href="entities/graph/"
+										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+										title={m.exploreButton()}
+										label={m.inspect()}
+										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
+									>
+								{/if}
 								{#if URLModel === 'folders'}
 									<button
 										class="text-gray-50 inline-block border-e p-3 bg-sky-400 hover:bg-sky-300 w-12 focus:relative"
 										data-testid="import-button"
 										title={safeTranslate('importFolder')}
+										aria-label={safeTranslate('importFolder')}
 										onclick={modalFolderImportForm}
 										><i class="fa-solid fa-file-import"></i>
 									</button>
@@ -220,7 +246,31 @@
 									>
 								{/if}
 							{/if}
-						</span>
+						</div>
+						{#if exportPopupOpen}
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="fixed inset-0 z-40"
+								onclick={() => (exportPopupOpen = false)}
+								onkeydown={() => {}}
+							></div>
+							<div
+								class="absolute right-0 z-50 mt-1 card whitespace-nowrap bg-white py-2 w-fit shadow-lg"
+							>
+								<div class="flex flex-col">
+									<a
+										href="{URLModel}/export/"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										onclick={() => (exportPopupOpen = false)}>... {m.asCSV()}</a
+									>
+									<a
+										href="{URLModel}/export/xlsx/"
+										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+										onclick={() => (exportPopupOpen = false)}>... {m.asXLSX()}</a
+									>
+								</div>
+							</div>
+						{/if}
 					</div>
 				{/snippet}
 				{#snippet badge(key, row)}

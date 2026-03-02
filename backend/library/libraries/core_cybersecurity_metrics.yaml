@@ -1,0 +1,294 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:core-cybersecurity-metrics
+locale: en
+ref_id: CORE-CYBER-METRICS
+name: Core Cybersecurity Metrics
+description: A curated set of 25 essential cybersecurity metrics for organizations
+  of all sizes and industries. Covers governance, vulnerabilities, incidents, access,
+  awareness, third-party risk, assets, and resilience.
+copyright: intuitem
+version: 1
+publication_date: 2025-12-13
+provider: intuitem
+packager: intuitem
+objects:
+  metric_definitions:
+  - urn: urn:intuitem:risk:metric:core:gov-01
+    ref_id: GOV-01
+    name: Compliance Score
+    description: Overall compliance percentage across applicable security frameworks
+      and regulatory requirements
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 85.0
+  - urn: urn:intuitem:risk:metric:core:gov-02
+    ref_id: GOV-02
+    name: Security Program Maturity
+    description: Overall maturity of the organization's cybersecurity program based
+      on people, process, and technology capabilities
+    category: qualitative
+    higher_is_better: true
+    choices_definition:
+    - name: Initial
+      description: Ad-hoc security practices, reactive approach, no formal program
+    - name: Developing
+      description: Basic policies exist, some processes documented, limited resources
+    - name: Defined
+      description: Formal security program, documented processes, dedicated team
+    - name: Managed
+      description: Metrics-driven, regular assessments, integrated with business
+    - name: Optimized
+      description: Continuous improvement, proactive threat management, security culture
+        embedded
+  - urn: urn:intuitem:risk:metric:core:gov-03
+    ref_id: GOV-03
+    name: Risk Management Maturity
+    description: Maturity of risk identification, assessment, treatment, and monitoring
+      processes
+    category: qualitative
+    higher_is_better: true
+    choices_definition:
+    - name: Initial
+      description: No formal risk process, risks addressed reactively
+    - name: Developing
+      description: Basic risk register, informal assessments
+    - name: Defined
+      description: Formal risk framework, regular assessments, documented treatment
+        plans
+    - name: Managed
+      description: Quantitative risk analysis, KRIs tracked, risk-informed decisions
+    - name: Optimized
+      description: Real-time risk monitoring, predictive analytics, full business
+        integration
+  - urn: urn:intuitem:risk:metric:core:vuln-01
+    ref_id: VULN-01
+    name: Open Critical/High Vulnerabilities
+    description: Total count of unresolved critical and high severity vulnerabilities
+      across all systems
+    category: quantitative
+    unit: count
+    higher_is_better: false
+    default_target: 0.0
+  - urn: urn:intuitem:risk:metric:core:vuln-02
+    ref_id: VULN-02
+    name: Vulnerability Remediation Time
+    description: Average number of days to remediate identified vulnerabilities from
+      discovery to resolution
+    category: quantitative
+    unit: days
+    higher_is_better: false
+    default_target: 30.0
+  - urn: urn:intuitem:risk:metric:core:vuln-03
+    ref_id: VULN-03
+    name: Patch Coverage
+    description: Percentage of systems with security patches applied within defined
+      SLA timeframes
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 95.0
+  - urn: urn:intuitem:risk:metric:core:inc-01
+    ref_id: INC-01
+    name: Security Incidents Count
+    description: Total number of confirmed security incidents during the measurement
+      period
+    category: quantitative
+    unit: count
+    higher_is_better: false
+    default_target: 0.0
+  - urn: urn:intuitem:risk:metric:core:inc-02
+    ref_id: INC-02
+    name: Mean Time to Detect
+    description: Average time in hours from when a security incident occurs to when
+      it is detected
+    category: quantitative
+    unit: hours
+    higher_is_better: false
+    default_target: 24.0
+  - urn: urn:intuitem:risk:metric:core:inc-03
+    ref_id: INC-03
+    name: Mean Time to Respond
+    description: Average time in hours from incident detection to initial containment
+      response
+    category: quantitative
+    unit: hours
+    higher_is_better: false
+    default_target: 4.0
+  - urn: urn:intuitem:risk:metric:core:inc-04
+    ref_id: INC-04
+    name: Incident Response Readiness
+    description: Assessment of the organization's preparedness to detect, respond
+      to, and recover from security incidents
+    category: qualitative
+    higher_is_better: true
+    choices_definition:
+    - name: Unprepared
+      description: No incident response plan, no defined roles or procedures
+    - name: Basic
+      description: Documented IR plan exists but rarely tested, limited team training
+    - name: Capable
+      description: IR plan tested annually, trained response team, basic playbooks
+    - name: Advanced
+      description: Regular tabletop and live exercises, automated detection, established
+        partnerships
+    - name: Elite
+      description: 24/7 response capability, threat hunting, continuous improvement
+        from lessons learned
+  - urn: urn:intuitem:risk:metric:core:iam-01
+    ref_id: IAM-01
+    name: MFA Adoption Rate
+    description: Percentage of user accounts and critical systems protected by multi-factor
+      authentication
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:iam-02
+    ref_id: IAM-02
+    name: Privileged Access Coverage
+    description: Percentage of privileged accounts managed through privileged access
+      management (PAM) controls
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:iam-03
+    ref_id: IAM-03
+    name: Dormant Account Rate
+    description: Percentage of user accounts that have been inactive beyond the defined
+      threshold and not yet disabled
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 0.0
+  - urn: urn:intuitem:risk:metric:core:awr-01
+    ref_id: AWR-01
+    name: Security Training Completion
+    description: Percentage of employees who have completed mandatory security awareness
+      training within the required timeframe
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 95.0
+  - urn: urn:intuitem:risk:metric:core:awr-02
+    ref_id: AWR-02
+    name: Phishing Click Rate
+    description: Percentage of employees who clicked on simulated phishing emails
+      during awareness testing campaigns
+    category: quantitative
+    unit: percentage
+    higher_is_better: false
+    default_target: 5.0
+  - urn: urn:intuitem:risk:metric:core:tpr-01
+    ref_id: TPR-01
+    name: Vendor Assessment Coverage
+    description: Percentage of critical and high-risk vendors that have completed
+      security assessments within the required period
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:ast-01
+    ref_id: AST-01
+    name: Asset Inventory Coverage
+    description: Percentage of IT assets (hardware, software, cloud resources) documented
+      in the asset inventory
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 95.0
+  - urn: urn:intuitem:risk:metric:core:dat-01
+    ref_id: DAT-01
+    name: Data Protection Maturity
+    description: Maturity of data classification, encryption, data loss prevention,
+      and privacy controls
+    category: qualitative
+    higher_is_better: true
+    choices_definition:
+    - name: Initial
+      description: No data classification, encryption used inconsistently, no DLP
+    - name: Developing
+      description: Basic classification scheme, encryption for some data at rest
+    - name: Defined
+      description: Formal classification policy, encryption standards, basic DLP rules
+    - name: Managed
+      description: Automated classification, comprehensive encryption, DLP with monitoring
+    - name: Optimized
+      description: Data-centric security, advanced DLP with ML, privacy by design
+        embedded
+  - urn: urn:intuitem:risk:metric:core:mon-01
+    ref_id: MON-01
+    name: Security Monitoring Maturity
+    description: Maturity of security monitoring, logging, SIEM capabilities, and
+      threat detection
+    category: qualitative
+    higher_is_better: true
+    choices_definition:
+    - name: Initial
+      description: Minimal logging, no centralized monitoring, reactive only
+    - name: Developing
+      description: Basic log collection, some alerting, limited coverage
+    - name: Defined
+      description: Centralized SIEM, correlation rules, defined use cases, 8x5 monitoring
+    - name: Managed
+      description: Comprehensive visibility, tuned detection, threat intelligence
+        integrated, 24x7 monitoring
+    - name: Optimized
+      description: Advanced analytics, proactive threat hunting, automated response,
+        continuous optimization
+  - urn: urn:intuitem:risk:metric:core:res-01
+    ref_id: RES-01
+    name: Backup Coverage
+    description: Percentage of critical systems and data with regular automated backups
+      configured
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:res-02
+    ref_id: RES-02
+    name: Immutable Backup Coverage
+    description: Percentage of critical systems with air-gapped or immutable backups
+      protected against ransomware
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:res-03
+    ref_id: RES-03
+    name: Backup Test Success Rate
+    description: Percentage of backup restoration tests completed successfully within
+      defined RTO
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:res-04
+    ref_id: RES-04
+    name: Recovery Objectives Compliance
+    description: Percentage of critical systems meeting their defined Recovery Time
+      Objective (RTO) and Recovery Point Objective (RPO)
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:res-05
+    ref_id: RES-05
+    name: BCP/DRP Coverage
+    description: Percentage of critical business processes with documented and tested
+      business continuity and disaster recovery plans
+    category: quantitative
+    unit: percentage
+    higher_is_better: true
+    default_target: 100.0
+  - urn: urn:intuitem:risk:metric:core:res-06
+    ref_id: RES-06
+    name: Mean Time to Recovery
+    description: Average time in hours to fully restore critical business operations
+      after a major incident or disaster
+    category: quantitative
+    unit: hours
+    higher_is_better: false
+    default_target: 24.0

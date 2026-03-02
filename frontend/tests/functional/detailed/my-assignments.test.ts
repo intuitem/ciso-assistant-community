@@ -40,17 +40,14 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
 
-		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined, 'any');
-
-		// Optional: Confirm import
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.importLibrary('4x4 risk matrix from EBIOS-RM', undefined);
 	});
 
 	await test.step('Create risk assessment', async () => {
 		await riskAssessmentsPage.goto();
 		await riskAssessmentsPage.createItem({
 			name: vars.riskAssessmentName,
+			folder: vars.folderName,
 			perimeter: `${vars.folderName}/${vars.perimeterName}`,
 			description: vars.description,
 			authors: ['admin@tests.com']
@@ -96,17 +93,14 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 		await librariesPage.goto();
 		await librariesPage.hasUrl();
 
-		await librariesPage.importLibrary('NIST CSF v2.0', undefined, 'any');
-
-		// Optional: Confirm import
-		await librariesPage.tab('Libraries store').click();
-		await expect(librariesPage.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
+		await librariesPage.importLibrary('NIST-CSF-2.0', undefined);
 	});
 
 	await test.step('Create audit', async () => {
 		await complianceAssessmentsPage.goto();
 		await complianceAssessmentsPage.createItem({
 			name: vars.assessmentName,
+			folder: vars.folderName,
 			framework: 'NIST CSF',
 			perimeter: `${vars.folderName}/${vars.perimeterName}`,
 			authors: ['admin@tests.com']
@@ -116,8 +110,8 @@ test('My assignments full flow - creation, validation, negative case and cleanup
 	await test.step('Verify my assignments contains created entities', async () => {
 		await page.getByTestId('accordion-item-overview').click();
 		await page.getByTestId('accordion-item-my-assignments').click();
-		await expect(page.locator('#page-title')).toHaveText('My assignments');
-		const assignmentsPage = new PageContent(page, '/my-assignments', 'My assignments');
+		await expect(page.locator('#page-title')).toHaveText('Assignments');
+		const assignmentsPage = new PageContent(page, '/my-assignments', 'Assignments');
 		await assignmentsPage.goto();
 
 		await expect(page).toHaveURL('/my-assignments');

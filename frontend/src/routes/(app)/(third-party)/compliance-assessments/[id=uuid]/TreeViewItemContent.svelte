@@ -3,7 +3,7 @@
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { darkenColor } from '$lib/utils/helpers';
 	import type { ReferenceControlSchema, ThreatSchema } from '$lib/utils/schemas';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import type { z } from 'zod';
@@ -24,6 +24,7 @@
 		canEditRequirementAssessment: boolean;
 		hasParentNode: boolean;
 		showDocumentationScore: boolean;
+		scoreCalculationMethod: string;
 		selectedStatus: string[];
 		resultCounts: Record<string, number> | undefined;
 		assessable: boolean;
@@ -42,6 +43,7 @@
 		canEditRequirementAssessment,
 		hasParentNode,
 		showDocumentationScore,
+		scoreCalculationMethod,
 		selectedStatus,
 		resultCounts,
 		assessable,
@@ -128,11 +130,15 @@
 		if (
 			!resultCounts ||
 			!resultCounts.hasOwnProperty('total_score') ||
-			!resultCounts.hasOwnProperty('scored')
+			!resultCounts.hasOwnProperty('total_weight')
 		) {
 			return null;
 		}
-		let mean = resultCounts['total_score'] / resultCounts['scored'];
+		if (scoreCalculationMethod === 'sum') {
+			return Math.floor(resultCounts['total_score'] * 10) / 10;
+		}
+		// Default to weighted average
+		let mean = resultCounts['total_score'] / resultCounts['total_weight'];
 		return Math.floor(mean * 10) / 10;
 	}
 
@@ -140,12 +146,25 @@
 		if (
 			!resultCounts ||
 			!resultCounts.hasOwnProperty('total_documentation_score') ||
-			!resultCounts.hasOwnProperty('scored')
+			!resultCounts.hasOwnProperty('total_weight')
 		) {
 			return null;
 		}
-		let mean = resultCounts['total_documentation_score'] / resultCounts['scored'];
+		if (scoreCalculationMethod === 'sum') {
+			return Math.floor(resultCounts['total_documentation_score'] * 10) / 10;
+		}
+		// Default to weighted average
+		let mean = resultCounts['total_documentation_score'] / resultCounts['total_weight'];
 		return Math.floor(mean * 10) / 10;
+	}
+
+	function nodeTotalMaxScore(): number {
+		// For SUM, the total max is max_score * total_weight
+		// For AVG, the total max is just max_score
+		if (scoreCalculationMethod === 'sum' && resultCounts?.total_weight) {
+			return node.max_score * resultCounts['total_weight'];
+		}
+		return node.max_score;
 	}
 
 	let classesShowInfo = $derived((show: boolean) => (!show ? 'hidden' : ''));
@@ -182,7 +201,7 @@
 {#if !displayOnlyAssessableNodes || assessable || hasAssessableChildren}
 	<div class="flex flex-row justify-between space-x-8">
 		<div class="flex flex-1 justify-center max-w-[80ch] flex-col">
-			<div class="flex flex-row space-x-2" style="font-weight: 300;">
+			<div class="flex flex-row space-x-2 items-center" style="font-weight: 300;">
 				<div>
 					{#if assessable}
 						<span class="w-full h-full flex rounded-base hover:text-primary-500">
@@ -228,6 +247,36 @@
 						</p>
 					{/if}
 				</div>
+				{#if !assessable}
+					<div class="flex flex-row items-end items-middle text-xs mr-2" style="width:6rem">
+						{#each orderedResultPercentages as rp}
+							{#if resultCounts && resultCounts[rp.result] !== undefined}
+								<div
+									class="rounded-md px-1 mx-1 leading-4"
+									style="background-color: {complianceResultColorMap[
+										rp.result
+									]}; color: {complianceResultColorMap[rp.result] === '#000000'
+										? '#ffffff'
+										: '#111827'}"
+								>
+									{resultCounts[rp.result]}
+								</div>
+							{/if}
+						{/each}
+						{#if resultCounts && resultCounts['not_assessed'] !== undefined}
+							<div
+								class="rounded-md px-1 mx-1 leading-4"
+								style="background-color: {complianceResultColorMap[
+									'not_assessed'
+								]}; color: {complianceResultColorMap['not_assessed'] === '#000000'
+									? '#ffffff'
+									: '#111827'}"
+							>
+								{resultCounts['not_assessed']}
+							</div>
+						{/if}
+					</div>
+				{/if}
 				<div>
 					{#if hasAssessableChildren}
 						{#each Object.entries(complianceStatusColorMap) as [status, color]}
@@ -347,35 +396,81 @@
 				<div class="flex flex-row space-x-2 items-center">
 					{#if hasParentNode}
 						{#if nodeScore() !== null}
-							<ProgressRing
-								strokeWidth="20px"
-								value={formatScoreValue(nodeScore(), node.max_score)}
-								meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-								size="size-12">{nodeScore()}</ProgressRing
-							>
-							{#if showDocumentationScore}
-								<ProgressRing
-									strokeWidth="20px"
-									value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
-									meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
-									size="size-12">{nodeDocumentationScore()}</ProgressRing
+							<div class="relative">
+								<Progress
+									value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
+									data-testid="progress-ring-svg"
 								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeScore()}</span>
+									</div>
+								</Progress>
+							</div>
+							{#if showDocumentationScore}
+								<div class="relative">
+									<Progress
+										value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+										min={0}
+										max={100}
+									>
+										<Progress.Circle class="[--size:--spacing(12)]">
+											<Progress.CircleTrack />
+											<Progress.CircleRange
+												class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+											/>
+										</Progress.Circle>
+										<div class="absolute inset-0 flex items-center justify-center">
+											<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+										</div>
+									</Progress>
+								</div>
 							{/if}
 						{/if}
 					{:else if nodeScore() !== null}
-						<ProgressRing
-							strokeWidth="20px"
-							value={formatScoreValue(nodeScore(), node.max_score)}
-							meterStroke={displayScoreColor(nodeScore(), node.max_score)}
-							size="size-12">{nodeScore()}</ProgressRing
-						>
-						{#if showDocumentationScore}
-							<ProgressRing
-								strokeWidth="20px"
-								value={formatScoreValue(nodeDocumentationScore(), node.max_score)}
-								meterStroke={displayScoreColor(nodeDocumentationScore(), node.max_score)}
-								size="size-12">{nodeDocumentationScore()}</ProgressRing
+						<div class="relative">
+							<Progress
+								value={formatScoreValue(nodeScore(), nodeTotalMaxScore())}
+								min={0}
+								max={100}
+								data-testid="progress-ring-svg"
 							>
+								<Progress.Circle class="[--size:--spacing(12)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange
+										class={displayScoreColor(nodeScore(), nodeTotalMaxScore())}
+									/>
+								</Progress.Circle>
+								<div class="absolute inset-0 flex items-center justify-center">
+									<span class="text-xs font-bold">{nodeScore()}</span>
+								</div>
+							</Progress>
+						</div>
+						{#if showDocumentationScore}
+							<div class="relative">
+								<Progress
+									value={formatScoreValue(nodeDocumentationScore(), nodeTotalMaxScore())}
+									min={0}
+									max={100}
+								>
+									<Progress.Circle class="[--size:--spacing(12)]">
+										<Progress.CircleTrack />
+										<Progress.CircleRange
+											class={displayScoreColor(nodeDocumentationScore(), nodeTotalMaxScore())}
+										/>
+									</Progress.Circle>
+									<div class="absolute inset-0 flex items-center justify-center">
+										<span class="text-xs font-bold">{nodeDocumentationScore()}</span>
+									</div>
+								</Progress>
+							</div>
 						{/if}
 					{/if}
 				</div>

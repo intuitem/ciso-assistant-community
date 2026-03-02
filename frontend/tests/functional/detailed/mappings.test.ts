@@ -79,6 +79,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 	const applyMappingForm = new FormContent(page, 'Create audit from baseline', [
 		{ name: 'name', type: FormFieldType.TEXT },
 		{ name: 'description', type: FormFieldType.TEXT },
+		{ name: 'folder', type: FormFieldType.SELECT_AUTOCOMPLETE },
 		{ name: 'perimeter', type: FormFieldType.SELECT_AUTOCOMPLETE },
 		{ name: 'framework', type: FormFieldType.SELECT_AUTOCOMPLETE }
 	]);
@@ -99,11 +100,11 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await IDAM1TreeViewItem.content.click();
 
 		await page.waitForURL('/requirement-assessments/**');
-		await page.getByTestId('switch').click({ force: true });
+		await page.getByTestId('form-input-is-scored').click();
 		if (!(await page.getByTestId('progress-ring-svg').isVisible())) {
-			await page.getByTestId('switch').click({ force: true });
+			await page.getByTestId('form-input-is-scored').click();
 		}
-		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('aria-valuenow', '1');
+		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute('data-value', '1');
 
 		const slider = page.getByTestId('range-slider-input');
 		await expect(slider).toBeVisible();
@@ -112,14 +113,16 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 			await slider.press('ArrowRight');
 		}
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
-			'aria-valuenow',
+			'data-value',
 			IDAM1Score.value.toString()
 		);
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
 		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
-			'aria-valuenow',
+			'data-value',
 			IDAM1Score.progress
 		);
 	});
@@ -135,6 +138,7 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await applyMappingForm.fill({
 			name: 'Mapped-' + vars.assessmentName,
 			description: vars.description,
+			folder: vars.folderName,
 			perimeter: vars.folderName + '/' + vars.perimeterName,
 			framework: vars.framework.name
 		});
@@ -155,14 +159,16 @@ test('user can map csf-1.1 audit to a new iso27001-2022 audit', async ({
 		await page.waitForURL('/requirement-assessments/**');
 
 		await expect(page.getByTestId('progress-ring-svg')).toHaveAttribute(
-			'aria-valuenow',
+			'data-value',
 			IDAM1Score.value.toString()
 		);
 
-		await complianceAssessmentsPage.form.saveButton.click();
+		await page.getByTestId('save-no-continue-button').click();
+		await complianceAssessmentsPage.isToastVisible('successfully saved', 'i');
+		await page.goBack();
 		await page.waitForURL(complianceAssessmentsPage.url + '/**');
 		await expect(IDAM1TreeViewItem.progressRadial).toHaveAttribute(
-			'aria-valuenow',
+			'data-value',
 			IDAM1Score.progress
 		);
 	});

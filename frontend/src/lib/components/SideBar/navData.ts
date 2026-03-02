@@ -27,6 +27,17 @@ export const navData = {
 					]
 				},
 				{
+					name: 'reports',
+					fa_icon: 'fas fa-file-invoice',
+					href: '/reports',
+					permissions: [
+						'view_perimeter',
+						'view_riskscenario',
+						'view_referencecontrol',
+						'view_riskassessment'
+					]
+				},
+				{
 					name: 'myAssignments',
 					fa_icon: 'fa-solid fa-list-check',
 					href: '/my-assignments',
@@ -35,8 +46,15 @@ export const navData = {
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
-						'view_riskassessment'
+						'view_riskassessment',
+						'view_requirementassignment'
 					]
+				},
+				{
+					name: 'auditDashboard',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/auditee-dashboard',
+					permissions: ['view_requirementassignment']
 				}
 			]
 		},
@@ -47,7 +65,7 @@ export const navData = {
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders',
-					exclude: ['BI-RL-TPR']
+					exclude: ['BI-RL-TPR', 'BI-RL-ADE']
 				},
 				{
 					name: 'perimeters',
@@ -58,6 +76,11 @@ export const navData = {
 					name: 'users',
 					fa_icon: 'fa-solid fa-user',
 					href: '/users'
+				},
+				{
+					name: 'teams',
+					fa_icon: 'fa-solid fa-people-group',
+					href: '/teams'
 				},
 				{
 					name: 'userGroups',
@@ -186,6 +209,12 @@ export const navData = {
 					href: '/risk-acceptances'
 				},
 				{
+					name: 'validationFlows',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/validation-flows',
+					permissions: ['view_validationflow']
+				},
+				{
 					name: 'securityExceptions',
 					fa_icon: 'fa-solid fa-circle-exclamation',
 					href: '/security-exceptions'
@@ -242,7 +271,8 @@ export const navData = {
 				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
-					href: '/compliance-assessments'
+					href: '/compliance-assessments',
+					exclude: ['BI-RL-ADE']
 				},
 				{
 					name: 'evidences',
@@ -258,13 +288,36 @@ export const navData = {
 			]
 		},
 		{
+			name: 'metrology',
+			items: [
+				{
+					name: 'metricDefinitions',
+					fa_icon: 'fa-solid fa-ruler',
+					href: '/metric-definitions',
+					permissions: ['view_metricdefinition']
+				},
+				{
+					name: 'metricInstances',
+					fa_icon: 'fa-solid fa-chart-line',
+					href: '/metric-instances',
+					permissions: ['view_metricinstance']
+				},
+				{
+					name: 'dashboards',
+					fa_icon: 'fa-solid fa-chart-bar',
+					href: '/dashboards',
+					permissions: ['view_dashboard']
+				}
+			]
+		},
+		{
 			name: 'thirdPartyCategory',
 			items: [
 				{
 					name: 'tprmOverview',
 					fa_icon: 'fa-solid fa-gauge',
 					href: '/analytics/tprm',
-					permissions: ['view_entity', 'view_solution', 'view_entityassessment']
+					permissions: ['view_entity', 'view_solution', 'view_contract', 'view_entityassessment']
 				},
 				{
 					name: 'entities',
@@ -280,6 +333,11 @@ export const navData = {
 					name: 'solutions',
 					fa_icon: 'fa-solid fa-box',
 					href: '/solutions'
+				},
+				{
+					name: 'contracts',
+					fa_icon: 'fa-solid fa-file-contract',
+					href: '/contracts'
 				},
 				{
 					name: 'entityAssessments',

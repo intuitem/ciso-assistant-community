@@ -7,6 +7,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { canPerformAction } from '$lib/utils/access-control';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
+	import { countMasked } from '$lib/utils/related-visibility';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import {
 		getModalStore,
@@ -135,13 +136,45 @@
 				<p class="text-gray-600">{m.noDescription()}</p>
 			{/if}
 			<div class="flex flex-col space-y-2 items-center">
-				<div class="flex flex-col items-center space-x-2">
-					<span class="font-semibold text-lg text-gray-700"
-						><i class="fa-solid fa-shuffle"></i> {m.attackPath()}</span
-					>
-					<p class="text-gray-600">{operationalScenario.attack_path.name}</p>
-					{#if operationalScenario.attack_path.description}
-						<p class="text-gray-600">{operationalScenario.attack_path.description}</p>
+				<div class="flex items-center gap-4">
+					{#if operationalScenario.strategic_scenario}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-amber-100 border-amber-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.strategicScenario()}</h4>
+							<i class="fa-solid fa-chess text-3xl text-amber-600"></i>
+							<a
+								href="/strategic-scenarios/{operationalScenario.strategic_scenario.id}"
+								class="badge text-white bg-amber-500 hover:bg-amber-600"
+								>{operationalScenario.strategic_scenario.name}</a
+							>
+							{#if operationalScenario.strategic_scenario.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.strategic_scenario.description}
+								</p>
+							{/if}
+						</div>
+					{/if}
+					{#if operationalScenario.strategic_scenario && operationalScenario.attack_path}
+						<i class="fa-solid fa-arrow-right text-2xl text-gray-400"></i>
+					{/if}
+					{#if operationalScenario.attack_path}
+						<div
+							class="flex flex-col space-y-2 p-4 bg-teal-100 border-teal-400 border rounded-md shadow-xs text-center min-w-48"
+						>
+							<h4 class="font-semibold text-gray-600">{m.attackPath()}</h4>
+							<i class="fa-solid fa-route text-3xl text-teal-600"></i>
+							<a
+								href="/attack-paths/{operationalScenario.attack_path.id}"
+								class="badge text-white bg-teal-500 hover:bg-teal-600"
+								>{operationalScenario.attack_path.name}</a
+							>
+							{#if operationalScenario.attack_path.description}
+								<p class="text-sm text-gray-600 italic">
+									{operationalScenario.attack_path.description}
+								</p>
+							{/if}
+						</div>
 					{/if}
 				</div>
 				<div class="grid grid-cols-3 gap-12 items-center">
@@ -150,7 +183,7 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
@@ -160,7 +193,7 @@
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
@@ -174,7 +207,9 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+							{operationalScenario.ro_to.target_objective}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -183,10 +218,18 @@
 					<i class="fa-solid fa-biohazard text-red-500"></i>
 					<span>{m.threats()}</span>
 				</h3>
+				{#if operationalScenario.threats && countMasked(operationalScenario.threats) > 0}
+					<div class="alert variant-soft-warning mb-2">
+						<i class="fa-solid fa-triangle-exclamation"></i>
+						<span>{m.objectsNotVisible({ count: countMasked(operationalScenario.threats) })}</span>
+					</div>
+				{/if}
 				<ul class="list-disc list-inside text-gray-600">
 					{#if operationalScenario.threats?.length}
 						{#each operationalScenario.threats as threat}
-							<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{#if threat.id && threat.str}
+								<li><a class="anchor" href="/threats/{threat.id}">{threat.str}</a></li>
+							{/if}
 						{/each}
 					{:else}
 						<li>{m.noThreat()}</li>
@@ -200,53 +243,47 @@
 						onValueChange={(e) => {
 							group = e.value;
 						}}
-						listJustify="justify-center"
 					>
-						{#snippet list()}
+						<Tabs.List>
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Control value={urlmodel}>
+								<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 									{safeTranslate(model.info.localNamePlural)}
 									{#if model.table.body.length > 0}
 										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 									{/if}
-								</Tabs.Control>
+								</Tabs.Trigger>
 							{/each}
-						{/snippet}
-						{#snippet content()}
-							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
-									{#if model.table}
-										<ModelTable
-											source={model.table}
-											deleteForm={model.deleteForm}
-											URLModel={urlmodel}
-											baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
-										>
-											{#snippet addButton()}
-												<div>
-													<span
-														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-													>
-														<button
-															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-															data-testid="add-button"
-															title={safeTranslate('add-' + model.info.localName)}
-															onclick={(_) => modalCreateForm(model)}
-															><i class="fa-solid fa-file-circle-plus"></i>
-														</button>
-													</span>
-												</div>
-											{/snippet}
-										</ModelTable>
-									{/if}
-								</Tabs.Panel>
-							{/each}
-						{/snippet}
+							<Tabs.Indicator />
+						</Tabs.List>
+						{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+							<Tabs.Content value={urlmodel}>
+								<div class="py-2"></div>
+								{#if model.table}
+									<ModelTable
+										source={model.table}
+										deleteForm={model.deleteForm}
+										URLModel={urlmodel}
+										baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
+									>
+										{#snippet addButton()}
+											<div>
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												>
+													<button
+														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+														data-testid="add-button"
+														title={safeTranslate('add-' + model.info.localName)}
+														onclick={(_) => modalCreateForm(model)}
+														><i class="fa-solid fa-file-circle-plus"></i>
+													</button>
+												</span>
+											</div>
+										{/snippet}
+									</ModelTable>
+								{/if}
+							</Tabs.Content>
+						{/each}
 					</Tabs>
 				</div>
 			{/if}
@@ -280,10 +317,8 @@
 						onOpenChange={(e) =>
 							(likelihoodPopupOpen = operationalScenario.likelihood.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
 									<i class="fa-solid fa-dice text-black opacity-75"></i>
@@ -292,18 +327,19 @@
 							</h3>
 							<span>{operationalScenario.likelihood.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.likelihood.hexcolor}"
-							>
-								<p data-testid="likelihood-description" class="font-semibold">
-									{operationalScenario.likelihood.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.likelihood.hexcolor}"
+								>
+									<p data-testid="likelihood-description" class="font-semibold">
+										{operationalScenario.likelihood.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-xmark"></i>
@@ -316,10 +352,8 @@
 						onOpenChange={(e) =>
 							(gravityPopupOpen = operationalScenario.gravity.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
 									<i class="fa-solid fa-bomb text-black opacity-75"></i>
@@ -328,18 +362,19 @@
 							</h3>
 							<span>{operationalScenario.gravity.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.gravity.hexcolor}"
-							>
-								<p data-testid="gravity-description" class="font-semibold">
-									{operationalScenario.gravity.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.gravity.hexcolor}"
+								>
+									<p data-testid="gravity-description" class="font-semibold">
+										{operationalScenario.gravity.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-equals"></i>
@@ -352,10 +387,8 @@
 						onOpenChange={(e) =>
 							(riskLevelPopupOpen = operationalScenario.risk_level.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
 									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
@@ -364,18 +397,19 @@
 							</h3>
 							<span>{operationalScenario.risk_level.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.risk_level.hexcolor}"
-							>
-								<p data-testid="riskLevel-description" class="font-semibold">
-									{operationalScenario.risk_level.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.risk_level.hexcolor}"
+								>
+									<p data-testid="riskLevel-description" class="font-semibold">
+										{operationalScenario.risk_level.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 			</div>

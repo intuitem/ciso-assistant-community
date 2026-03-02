@@ -16,6 +16,7 @@ import argparse
 import yaml
 import os
 import sys
+from typing import Dict, List
 
 
 
@@ -45,6 +46,44 @@ def load_and_validate_yaml(path, label):
         raise KeyError(f'{label} file is missing the "locale" field.')
 
     return data
+
+
+
+def compute_base_urn(req_nodes: List[Dict], *, name: str) -> str:
+    
+    # Ensure the requirement nodes list exists and is not empty
+    if not req_nodes:
+        raise ValueError(f'{name}: Missing or empty "requirement_nodes"')
+
+    urns = []
+    for i, node in enumerate(req_nodes):
+        # Validate that each node contains a valid URN string
+        urn = node.get("urn")
+        if not isinstance(urn, str) or not urn:
+            raise ValueError(f'{name}: requirement_nodes[{i}] missing/invalid "urn"')
+        urns.append(urn)
+
+    # Split each URN into its ":"-separated parts
+    split_urns = [u.split(":") for u in urns]
+
+    # Compute the longest common prefix (part by part) across all URNs
+    prefix = []
+    for parts_tuple in zip(*split_urns):
+        # If all URNs have the same value at this position, it belongs to the common prefix
+        if len(set(parts_tuple)) == 1:
+            prefix.append(parts_tuple[0])
+        else:
+            # Stop at the first mismatch
+            break
+
+    # If there is no common prefix at all, something is inconsistent
+    if not prefix:
+        print(f"⚠️  {name}: No common URN prefix found across requirement nodes")
+
+    # Rebuild the base URN using ":" as separator
+    return ":".join(prefix)
+
+
 
 
 def generate_mapping_excel(source_yaml, target_yaml):
@@ -81,10 +120,19 @@ def generate_mapping_excel(source_yaml, target_yaml):
 
     library_urn = f"urn:{packager.lower()}:risk:library:{ref_id}"
     mapping_urn = f"urn:{packager.lower()}:risk:req_mapping_set:{ref_id}"
-    source_node_base_urn = f"urn:{packager.lower()}:risk:req_node:{source_ref_id}"
-    target_node_base_urn = f"urn:{packager.lower()}:risk:req_node:{target_ref_id}"
+    
+    # --- Get Correct Source & Target Requirement Node Base URN ---
+    
+    # Retrieve requirement nodes from both frameworks
+    source_req_nodes = source_framework.get("requirement_nodes")
+    target_req_nodes = target_framework.get("requirement_nodes")
 
-    # Create a new workbook and remove default sheet
+    # Compute the base URN (common prefix) for each framework
+    source_node_base_urn = compute_base_urn(source_req_nodes, name="Source framework")
+    target_node_base_urn = compute_base_urn(target_req_nodes, name="Target framework")
+    
+
+    # --- Create a new workbook and remove default sheet ---
     wb_output = openpyxl.Workbook()
     default_sheet = wb_output.active
     wb_output.remove(default_sheet)

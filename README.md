@@ -24,13 +24,13 @@ Star the project 🌟 to get releases notification and help growing the communit
 
 ![](gh_banner.png)
 
-[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
-[![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
-[![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
-![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
-<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D"></a>
-<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20"></a>
+![GitHub Release](https://img.shields.io/github/v/release/intuitem/ciso-assistant-community?style=for-the-badge)
+![GitHub contributors](https://img.shields.io/github/contributors-anon/intuitem/ciso-assistant-community?style=for-the-badge&color=%235D4596)
+![GitHub Repo stars](https://img.shields.io/github/stars/intuitem/ciso-assistant-community?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/intuitem/ciso-assistant-community?style=for-the-badge&color=%235D4596)
+![Discord](https://img.shields.io/discord/1155083727932764190?style=for-the-badge&label=Discord)
+<a href="https://intuitem.gitbook.io/ciso-assistant"><img src="https://img.shields.io/static/v1?message=Documentation&logo=gitbook&logoColor=ffffff&label=%20&labelColor=5c5c5c&color=F4E28D&style=for-the-badge"></a>
+<a href="https://ca-api-doc.pages.dev/"><img src="https://img.shields.io/static/v1?message=API&logo=swagger&label=%20&style=for-the-badge"></a>
 
 CISO Assistant offers a fresh perspective on Cybersecurity Management and **GRC** (Governance, Risk, and Compliance) practices:
 
@@ -52,6 +52,46 @@ Our vision is to create a **one-stop-shop** for cybersecurity management—moder
 As practitioners working with cybersecurity and IT professionals, we've faced the same issues: tool fragmentation, data duplication, and a lack of intuitive, integrated solutions. CISO Assistant was born from those lessons, and we're building a community around **pragmatic**, **common-sense** principles.
 
 We’re constantly evolving with input from users and customers. Like an octopus 🐙, CISO Assistant keeps growing extra arms—bringing clarity, automation, and productivity to cybersecurity teams while reducing the effort of data input and output.
+
+[![CodeFactor](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community/badge)](https://www.codefactor.io/repository/github/intuitem/ciso-assistant-community)
+[![API Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml/badge.svg)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/backend-api-tests.yml)
+[![Functional Tests](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml/badge.svg?branch=main)](https://github.com/intuitem/ciso-assistant-community/actions/workflows/functional-tests.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community.svg?type=small)](https://app.fossa.com/projects/git%2Bgithub.com%2Fab-smith%2Fciso-assistant-community?ref=badge_small)
+
+---
+
+## Quick Start 🚀
+
+> [!TIP]
+> The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
+
+Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server:
+
+clone the repo:
+
+```
+git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
+```
+
+and run the starter script
+
+```sh
+./docker-compose.sh
+```
+
+If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
+
+> [!NOTE]
+> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
+> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
+
+The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
+
+> [!WARNING]
+> If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
+
+> [!CAUTION]
+> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ---
 
@@ -91,39 +131,6 @@ Here is an illustration of the **decoupling** principle and its advantages:
 ## System architecture
 
 ![](./documentation/system-architecture.png)
-
-## Quick Start 🚀
-
-> [!TIP]
-> The easiest way to get started is through the [free trial of cloud instance available here](https://intuitem.com/trial).
-
-Alternatively, once you have _Docker_ and _Docker-compose_ installed, on your workstation or server:
-
-clone the repo:
-
-```
-git clone --single-branch -b main https://github.com/intuitem/ciso-assistant-community.git
-```
-
-and run the starter script
-
-```sh
-./docker-compose.sh
-```
-
-If you are looking for other installation options for self-hosting, check the [config builder](./config/) and the [docs](https://intuitem.gitbook.io/ciso-assistant).
-
-> [!NOTE]
-> The docker-compose script uses prebuilt Docker images supporting most of the standard hardware architecture.
-> If you're using **Windows**, Make sure to have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) installed and trigger the script within a WSL command line. It will feed Docker Desktop on your behalf.
-
-The docker compose file can be adjusted to pass extra parameters to suit your setup (e.g. Mailer settings).
-
-> [!WARNING]
-> If you're getting warnings or errors about image's platform not matching host platform, raise an issue with the details and we'll add it shortly after. You can also use `docker-compose-build.sh` instead (see below) to build for your specific architecture.
-
-> [!CAUTION]
-> Don't use the `main` branch code directly for production as it's the merge upstream and can have breaking changes during our development. Either use the `tags` for stable versions or prebuilt images.
 
 ## End-user Documentation
 
@@ -213,7 +220,15 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 80. Post-Quantum Cryptography (PQC) Migration Roadmap (May 2025) 🔐
 81. Cloud Sovereignty Framework - 1.2.1 - Oct 2025 🇪🇺
 82. ISO 22301:2019 outline - Business continuity management systems 🌐
-83. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+83. CCB CyberFundamentals Framework 2025 🇧🇪
+84. Prestataires de détection des incidents de sécurité (PDIS) - Référentiel d’exigences 🇫🇷
+85. Vendor Due Diligence - simple baseline - intuitem 🌐
+86. Points de contrôle Active Directory (AD) - ANSSI 🇫🇷
+87. ISO 42001:2023 outline - Artificial Intelligence Management System, including Annex A 🤖🌐
+88. India's Digital Personal Data Protection Act (DPDPA) - 2023 🇮🇳
+89. E-ITS (Estonia's national cyber security standard) - 2024 🇪🇪
+90. Microsoft cloud security benchmark v1 - ☁️🌐
+91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
 
 ### Community contributions
 
@@ -240,11 +255,12 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 21. Swift Customer Security Controls Framework (CSCF) v2025 🏦🌐
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
+24. RBI Master Direction 2023 - india 🏦🇮🇳
 
 <br/>
 
 > [!NOTE]
-> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage.
+> Frameworks with `*` require an extra manual step of getting the latest Excel sheet through their website as their license prevent direct usage. You can load the Excel sheet directly as a library.
 
 <br/>
 
@@ -257,19 +273,32 @@ Checkout the [library](/backend/library/libraries/) and [tools](/tools/) for the
 - COBAC R-2024/01
 - ICO Data protection self-assessment 🇬🇧
 - ASD ISM 🇦🇺
-- Baseline informatiebeveiliging Overheid (BIO) 🇳🇱
 
 - and much more: just ask on [Discord](https://discord.gg/qvkaMdQ8da). If it's an open standard, we'll do it for you, _free of charge_ 😉
 
-## Add your own library
+## Add your own custom library
 
-A library can be a framework, a catalog of threats or reference controls, and even a custom risk matrix.
+A library can represent a framework, a threat catalog, a set of reference controls, or even a custom risk matrix.
 
-Take a look at the `tools` directory and its [dedicated README](tools/README.md). The `convert_library_v2.py` script will help you create your library from a simple Excel file. Once you have structured your items in that format, just run the script and use the resulting YAML file.
+Libraries can now be loaded **directly from Excel files**. There is no need to manually convert them to YAML beforehand—the conversion is handled internally when an Excel file is uploaded.
 
-You can also find some specific converters in the tools directory (e.g. for CIS or CCM Controls).
+Take a look at the `tools` directory and its [dedicated README](tools/README.md), which describes the expected format of library source files in Excel. The `excel` subdirectory contains example XLSX files used as sources for the existing libraries and can be used as templates for creating your own.
 
-There is also a tool to facilitate the creation of mappings, called `prepare_mapping_v2.py` that will create an Excel file based on two framework libraries in YAML. Once properly filled, this Excel file can be processed by the `convert_library_v2.py` tool to get the resulting mapping library.
+To load a library from an Excel file, go to the **Governance → Library** page, click **Load**, and select your Excel source file. Any validation or parsing errors will be reported during the import process.
+
+### Optional: converting libraries to YAML
+
+While Excel files can be loaded directly, it is still possible to convert library source files to YAML using external Python scripts:
+
+- `convert_library_v2.py` helps you generate a library from a simple Excel file. Once your items are structured in the expected format, run the script to produce the corresponding YAML file.
+- The `tools` directory also contains specialized converters for specific frameworks (for example, CIS or CCM Controls).
+
+### Creating mapping libraries
+
+To facilitate the creation of mappings between frameworks, you can use the `prepare_mapping_v2.py` tool. It generates an Excel file based on two existing framework libraries in YAML format. After filling in the mappings, the resulting Excel file can be:
+
+- loaded directly into the application, or
+- converted to YAML using `convert_library_v2.py`.
 
 ## Community
 
@@ -316,12 +345,12 @@ For the following executions, use "docker compose up" directly.
 
 ### Requirements
 
-- Python 3.12+
+- Python 3.14+
 - pip 20.3+
 - poetry 2.0+
-- node 22+
+- node 24+
 - npm 10.2+
-- pnpm 9.0+
+- pnpm 10.18+
 - yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
 
 ### Running the backend
@@ -391,6 +420,10 @@ export CISO_SUPERUSER_EMAIL=<XXX>
 # this [topic](https://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key) for more information).
 # To set a fixed secret key, use the environment variable DJANGO_SECRET_KEY.
 export DJANGO_SECRET_KEY=...
+
+# Sandbox mode for running untrusted code (e.g. library excel files)
+# WARNING: Sandboxing must be enabled in production environments.
+export ENABLE_SANDBOX=True  # optional, default value is True in production enfironments (DJANGO_DEBUG=False) and False in development environments (DJANGO_DEBUG=True).
 
 # Logging configuration
 export LOG_LEVEL=INFO # optional, default value is INFO. Available options: DEBUG, INFO, WARNING, ERROR, CRITICAL
@@ -588,6 +621,7 @@ Set DJANGO_DEBUG=False for security reason.
 19. EL: Greek
 20. TR: Turkish
 21. HR: Croatian
+22. ZH: Chinese (Simplified)
 
 ## Contributors 🤝
 
@@ -628,4 +662,4 @@ Unless otherwise noted, all files are © intuitem.
 
 ## Activity
 
-![Alt](https://repobeats.axiom.co/api/embed/83162c6044da29efd7efa28f746b6bee5a3c6a8a.svg "Repobeats analytics image")
+![Alt](https://repobeats.axiom.co/api/embed/02f80d1b099ffd1ae66d9cfdc3a0e13234606f35.svg "Repobeats analytics image")

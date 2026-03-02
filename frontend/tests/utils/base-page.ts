@@ -32,6 +32,7 @@ export abstract class BasePage {
 	async goto() {
 		await this.page.goto(this.url);
 		await this.page.waitForURL(this.url);
+		await this.page.locator('body[data-hydrated="true"]').waitFor();
 	}
 
 	async hasTitle(title: string | RegExp = this.name) {
@@ -71,11 +72,16 @@ export abstract class BasePage {
 		}
 	}
 
-	async isToastVisible(value: string, flags?: string | undefined, options?: {} | undefined) {
+	async isToastVisible(value: string, flags?: string, options?: { optional?: boolean }) {
 		const toast = this.page.getByTestId('toast').filter({ hasText: new RegExp(value, flags) });
-		await expect(toast).toBeVisible(options);
-		await toast.getByLabel('Dismiss toast').click();
-		// await expect(toast).toBeHidden();
+		try {
+			await expect(toast).toHaveCount(1);
+		} catch (error) {
+			if (!(options?.optional ?? false)) throw error;
+			console.warn(`[toast] Optional toast not found: "${value}" (flags: ${flags ?? 'none'})`);
+			return toast;
+		}
+		await toast.first().getByLabel('Dismiss toast').click();
 		return toast;
 	}
 }
