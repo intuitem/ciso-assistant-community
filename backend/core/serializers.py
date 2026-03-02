@@ -1749,7 +1749,15 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
 
 
 class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
-    pass
+    def validate(self, attrs):
+        framework = attrs.get("framework") or (
+            self.instance.framework if self.instance else None
+        )
+        if framework and framework.status == Framework.Status.PUBLISHED:
+            raise serializers.ValidationError(
+                "Cannot modify requirement nodes on a published framework."
+            )
+        return super().validate(attrs)
 
 
 class EvidenceReadSerializer(BaseModelSerializer):
