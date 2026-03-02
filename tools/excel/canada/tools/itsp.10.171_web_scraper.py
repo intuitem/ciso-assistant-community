@@ -103,6 +103,52 @@ def li_direct_text(li: Tag) -> str:
     return clean_text(" ".join(parts))
 
 
+def render_list_tag(list_tag: Tag) -> str:
+    lines = []
+    li_tags = list_tag.find_all("li", recursive=False)
+    for idx, li in enumerate(li_tags, start=1):
+        item_text = li_direct_text(li) or clean_text(li.get_text(" ", strip=True))
+        if not item_text:
+            continue
+        if list_tag.name == "ol":
+            lines.append(f"{idx}. {item_text}")
+        else:
+            lines.append(f"• {item_text}")
+    return "\n".join(lines)
+
+
+def render_block_tag(tag: Tag) -> tuple[str, str]:
+    if tag.name == "p":
+        return ("p", clean_text(tag.get_text(" ", strip=True)))
+    if tag.name in ("ul", "ol"):
+        return (tag.name, render_list_tag(tag))
+    if tag.name == "table":
+        return ("table", clean_text(tag.get_text(" ", strip=True)))
+    return ("", "")
+
+
+def join_rendered_blocks(blocks: list[tuple[str, str]]) -> str:
+    out = []
+    prev_type = ""
+    for block_type, text in blocks:
+        if not text:
+            continue
+        if not out:
+            out.append(text)
+            prev_type = block_type
+            continue
+
+        # Before a list, insert a single newline. Otherwise keep a blank line.
+        if block_type in ("ul", "ol"):
+            out.append("\n" + text)
+        elif prev_type in ("ul", "ol"):
+            out.append("\n\n" + text)
+        else:
+            out.append("\n\n" + text)
+        prev_type = block_type
+    return "".join(out)
+
+
 def add_row(rows, assessable, depth, ref_id, name, description):
     rows.append(
         {
@@ -122,9 +168,11 @@ def extract_disc_text(details_tag: Tag) -> str:
             sib = h5.find_next_sibling()
             while sib is not None and not (isinstance(sib, Tag) and sib.name == "h5"):
                 if isinstance(sib, Tag):
-                    disc_parts.append(sib.get_text(" ", strip=True))
+                    block_type, text = render_block_tag(sib)
+                    if text:
+                        disc_parts.append((block_type, text))
                 sib = sib.find_next_sibling()
-            return clean_text(" ".join(disc_parts))
+            return join_rendered_blocks(disc_parts)
     return ""
 
 
@@ -206,11 +254,11 @@ def iter_elements_until(start_tag: Tag, stop_predicate):
 def collect_text(elements) -> str:
     parts = []
     for el in elements:
-        if isinstance(el, Tag) and el.name in ("p", "ul", "ol", "table"):
-            text = clean_text(el.get_text(" ", strip=True))
+        if isinstance(el, Tag):
+            block_type, text = render_block_tag(el)
             if text:
-                parts.append(text)
-    return clean_text(" ".join(parts))
+                parts.append((block_type, text))
+    return join_rendered_blocks(parts)
 
 
 def parse_requirement_detail(details_tag: Tag, rows):
