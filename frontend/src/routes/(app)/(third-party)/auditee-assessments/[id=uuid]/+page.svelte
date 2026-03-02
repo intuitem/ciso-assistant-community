@@ -59,10 +59,13 @@
 		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
 	);
 
-	// Get latest observation from events
+	// Get latest observation from the most recent changes_requested event
 	let reviewerObservation = $derived.by(() => {
 		if (assignmentStatus !== 'changes_requested' || !assignment?.events?.length) return null;
-		const event = assignment.events.find((e: { event_notes: string | null }) => e.event_notes);
+		const event = assignment.events.find(
+			(e: { event_type: string; event_notes: string | null }) =>
+				e.event_type === 'changes_requested' && e.event_notes
+		);
 		return event?.event_notes ?? null;
 	});
 

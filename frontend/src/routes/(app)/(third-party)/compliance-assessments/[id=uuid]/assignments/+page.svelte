@@ -572,11 +572,11 @@
 		historyModalAssignment = null;
 	}
 
-	// Get latest observation from events (most recent event with event_notes)
+	// Get latest observation from the most recent changes_requested event
 	function getLatestObservation(
 		events: Array<{ event_notes: string | null; event_type: string }>
 	): string | null {
-		const event = events.find((e) => e.event_notes);
+		const event = events.find((e) => e.event_type === 'changes_requested' && e.event_notes);
 		return event?.event_notes ?? null;
 	}
 
