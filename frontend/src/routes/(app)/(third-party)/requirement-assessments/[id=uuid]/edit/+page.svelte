@@ -39,6 +39,8 @@
 		displayScoreColor
 	} from '$lib/utils/helpers';
 
+	import { onMount } from 'svelte';
+
 	interface Props {
 		data: PageData;
 		form: ActionData;
@@ -140,6 +142,48 @@
 	}
 
 	let createAppliedControlsLoading = $state(false);
+
+	let applied_controls_options = $state<any[]>([]);
+	let appliedControlsLoaded = $state(false);
+	let appliedControlsFetchInFlight = false;
+
+	async function fetchAppliedControlsOptions() {
+		if (appliedControlsFetchInFlight) return;
+		appliedControlsFetchInFlight = true;
+		try {
+			const url = `/applied-controls?scope_folder_id=${page.data.requirementAssessment.folder.id}&limit=0`;
+			const res = await fetch(url);
+			if (!res.ok) {
+				console.error('failed to fetch the applied controls list');
+				return;
+			}
+
+			const applied_controls = await res.json();
+			const reference_controls_list = reference_controls.map((rc) => rc.id);
+			applied_controls_options = applied_controls.results
+				.map((t: any) => {
+					const label = `${t.folder.str}/${t.name}`;
+					return {
+						value: t.id,
+						label,
+						translatedLabel: label,
+						suggested: reference_controls_list.includes(t.reference_control?.id),
+						ref: t.reference_control?.id
+					};
+				})
+				.sort((a, b) => {
+					// Show suggested items first
+					if (a.suggested && !b.suggested) return -1;
+					if (!a.suggested && b.suggested) return 1;
+					return a.label.localeCompare(b.label);
+				});
+		} catch (error) {
+			console.error('Unable to fetch applied controls', error);
+		} finally {
+			appliedControlsLoaded = true;
+			appliedControlsFetchInFlight = false;
+		}
+	}
 
 	async function modalConfirmCreateSuggestedControls(id: string, name: string, action: string) {
 		let previewItems: string[] = [];
@@ -244,14 +288,12 @@
 
 	let group = $state(page.data.user.is_third_party ? 'evidences' : 'applied_controls');
 
-	// Refresh AutompleteSelect to assign created applied control/evidence
 	let refreshKey = $state(false);
 
 	let formStore = $derived(requirementAssessmentForm.form);
 
 	$effect(() => {
 		if (form?.newControls) {
-			refreshKey = !refreshKey;
 			requirementAssessmentForm.form.update(
 				(current: Record<string, any>) => ({
 					...current,
@@ -260,7 +302,7 @@
 				{ taint: false }
 			);
 			form.newControls = undefined;
-			console.debug('formStore', $formStore);
+			fetchAppliedControlsOptions();
 		}
 	});
 
@@ -275,7 +317,6 @@
 				{ taint: false }
 			);
 			form.newEvidence = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -290,7 +331,6 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -304,6 +344,10 @@
 
 	let computedResult = $derived(computedScoreAndResult.result);
 	let computedScore = $derived(computedScoreAndResult.score);
+
+	onMount(async () => {
+		await fetchAppliedControlsOptions();
+	});
 </script>
 
 {#if data.requirementAssessment.compliance_assessment.is_locked}
@@ -551,19 +595,17 @@
 										><i class="fa-solid fa-plus mr-2"></i>{m.addAppliedControl()}</button
 									>
 								</span>
-								{#key refreshKey}
-									<AutocompleteSelect
-										multiple
-										{form}
-										optionsEndpoint="applied-controls"
-										optionsDetailedUrlParameters={[
-											['scope_folder_id', page.data.requirementAssessment.folder.id]
-										]}
-										optionsExtraFields={[['folder', 'str']]}
-										field="applied_controls"
-										placeholder={m.appliedControlsPlaceholder()}
-									/>
-								{/key}
+								{#if appliedControlsLoaded}
+									{#key applied_controls_options}
+										<AutocompleteSelect
+											multiple
+											{form}
+											options={applied_controls_options}
+											field="applied_controls"
+											placeholder={m.appliedControlsPlaceholder()}
+										/>
+									{/key}
+								{/if}
 								<ModelTable
 									baseEndpoint="/applied-controls?requirement_assessments={page.data
 										.requirementAssessment.id}"
