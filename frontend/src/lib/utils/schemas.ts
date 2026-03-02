@@ -524,7 +524,8 @@ export const GeneralSettingsSchema = z.object({
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
-	allow_assignments_to_entities: z.boolean().default(false).optional()
+	allow_assignments_to_entities: z.boolean().default(false).optional(),
+	enforce_mfa: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -559,7 +560,8 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
-	auditee_mode: z.boolean().optional()
+	auditee_mode: z.boolean().optional(),
+	advanced_analytics: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

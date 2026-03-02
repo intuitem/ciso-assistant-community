@@ -62,6 +62,7 @@
 <AutocompleteSelect
 	{form}
 	multiple
+	lazy
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{

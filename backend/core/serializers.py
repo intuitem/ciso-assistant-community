@@ -692,6 +692,20 @@ class AssetReadSerializer(AssetWriteSerializer):
         return obj.get_recovery_objectives_comparison()
 
 
+class AssetAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    type = serializers.CharField(source="get_type_display")
+
+    class Meta:
+        model = Asset
+        fields = ["id", "name", "ref_id", "type", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
@@ -2867,13 +2881,16 @@ class QuickStartSerializer(serializers.Serializer):
         return self.create(self.validated_data)
 
     def create(self, validated_data):
-        folder_data = {
-            "content_type": Folder.ContentType.DOMAIN,
-            "name": "Starter",
-            "create_iam_groups": True,
-        }
-        folder = Folder.objects.filter(**folder_data).first()
+        folder = Folder.objects.filter(
+            content_type=Folder.ContentType.DOMAIN,
+            name="Starter",
+        ).first()
         if not folder:
+            folder_data = {
+                "content_type": Folder.ContentType.DOMAIN,
+                "name": "Starter",
+                "create_iam_groups": True,
+            }
             folder_serializer = FolderWriteSerializer(
                 data=folder_data, context=self.context
             )

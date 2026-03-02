@@ -1122,5 +1122,7 @@
 	"processingTimeout": "Bearbetningstidsgräns",
 	"maliciousFileDetected": "Skadlig fil upptäckt",
 	"serverConfigurationError": "Serverkonfigurationsfel",
-	"libraryLoadFailed": "Biblioteket kunde inte laddas"
+	"libraryLoadFailed": "Biblioteket kunde inte laddas",
+	"sortAscending": "Sortera A → Z",
+	"sortDescending": "Sortera Z → A"
 }

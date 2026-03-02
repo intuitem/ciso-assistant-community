@@ -1650,5 +1650,7 @@
 	"processingTimeout": "Processing timeout",
 	"maliciousFileDetected": "Malicious file detected",
 	"serverConfigurationError": "Server configuration error",
-	"libraryLoadFailed": "Library load failed"
+	"libraryLoadFailed": "Library load failed",
+	"sortAscending": "Сортувати А → Я",
+	"sortDescending": "Сортувати Я → А"
 }
