@@ -19,6 +19,21 @@ export const load = (async ({ fetch, params }) => {
 
 	const tree = await fetch(`${endpoint}tree/`).then((res) => res.json());
 
+	// Fetch framework to get implementation groups definition
+	const frameworkId = compliance_assessment.framework?.id;
+	let implementationGroupsDefinition: Array<{
+		ref_id: string;
+		name: string;
+		description?: string;
+	}> = [];
+	if (frameworkId) {
+		const fwRes = await fetch(`${BASE_API_URL}/frameworks/${frameworkId}/`);
+		if (fwRes.ok) {
+			const framework = await fwRes.json();
+			implementationGroupsDefinition = framework.implementation_groups_definition || [];
+		}
+	}
+
 	// Create form for assignment
 	const assignmentForm = await superValidate(zod(assignmentSchema));
 
@@ -55,6 +70,7 @@ export const load = (async ({ fetch, params }) => {
 		tree,
 		assignmentForm,
 		assignments,
+		implementationGroupsDefinition,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;

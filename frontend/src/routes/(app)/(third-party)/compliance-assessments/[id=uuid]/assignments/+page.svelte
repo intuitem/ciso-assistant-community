@@ -112,6 +112,61 @@
 		status?: string;
 		result?: string;
 		ra_id?: string;
+		implementation_groups?: string[];
+	}
+
+	// Implementation groups
+	let implementationGroupsDefinition = $derived(data.implementationGroupsDefinition ?? []);
+	let hasImplementationGroups = $derived(implementationGroupsDefinition.length > 0);
+
+	// Get all assessable node IDs that belong to a specific implementation group
+	function getAssessableIdsByIG(nodes: Record<string, Node>, igRefId: string): string[] {
+		const ids: string[] = [];
+		for (const node of Object.values(nodes)) {
+			if (node.assessable && node.ra_id && node.implementation_groups?.includes(igRefId)) {
+				ids.push(node.ra_id);
+			}
+			if (node.children) {
+				ids.push(...getAssessableIdsByIG(node.children, igRefId));
+			}
+		}
+		return ids;
+	}
+
+	// Count available (unassigned) requirements per IG
+	function countAvailableByIG(igRefId: string): number {
+		return getAssessableIdsByIG(data.tree, igRefId).filter((id) => !assignedRequirementIds.has(id))
+			.length;
+	}
+
+	// Select all available requirements for a given implementation group
+	function selectByImplementationGroup(igRefId: string) {
+		const ids = getAssessableIdsByIG(data.tree, igRefId).filter(
+			(id) => !assignedRequirementIds.has(id)
+		);
+		$checkedNodesStore = new Set(ids);
+	}
+
+	// Get IG ref_ids covered by a set of requirement assessment IDs
+	function getIGsForRequirements(requirementIds: string[]): string[] {
+		const igs = new Set<string>();
+		function traverse(nodes: Record<string, Node>) {
+			for (const node of Object.values(nodes)) {
+				if (node.ra_id && requirementIds.includes(node.ra_id) && node.implementation_groups) {
+					for (const ig of node.implementation_groups) {
+						igs.add(ig);
+					}
+				}
+				if (node.children) traverse(node.children);
+			}
+		}
+		traverse(data.tree);
+		return [...igs];
+	}
+
+	// Map IG ref_id to display name
+	function igName(refId: string): string {
+		return implementationGroupsDefinition.find((ig) => ig.ref_id === refId)?.name ?? refId;
 	}
 
 	// Build a lookup map from requirement assessment ID to node details
@@ -668,6 +723,34 @@
 				</button>
 			</div>
 
+			<!-- Implementation Groups quick-select -->
+			{#if hasImplementationGroups && !isReadOnly}
+				<div class="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b">
+					<span class="text-xs font-medium text-gray-500 mr-1">
+						<i class="fa-solid fa-layer-group mr-1"></i>
+						{m.implementationGroups()}:
+					</span>
+					{#each implementationGroupsDefinition as ig}
+						{@const availableCount = countAvailableByIG(ig.ref_id)}
+						<button
+							class="btn btn-sm preset-outlined-secondary-500 text-xs"
+							onclick={() => selectByImplementationGroup(ig.ref_id)}
+							title={ig.description || ig.name}
+							disabled={availableCount === 0}
+						>
+							{ig.name}
+							<span
+								class="badge text-[10px] ml-1 {availableCount > 0
+									? 'bg-secondary-100 text-secondary-700'
+									: 'bg-gray-100 text-gray-400'}"
+							>
+								{availableCount}
+							</span>
+						</button>
+					{/each}
+				</div>
+			{/if}
+
 			<!-- Legend -->
 			<div class="flex flex-wrap items-center gap-4 mb-4 text-xs">
 				<div class="flex items-center gap-2">
@@ -856,6 +939,17 @@
 													<i class="fa-solid fa-eye mr-1"></i>
 													{m.reviewResponses()}
 												</a>
+											{/if}
+											{#if hasImplementationGroups}
+												{#each getIGsForRequirements(assignment.requirement_assessments) as igRef}
+													<span
+														class="badge bg-purple-50 text-purple-600 text-[10px] border border-purple-200"
+														title={m.implementationGroups()}
+													>
+														<i class="fa-solid fa-layer-group mr-0.5"></i>
+														{igName(igRef)}
+													</span>
+												{/each}
 											{/if}
 										</div>
 
