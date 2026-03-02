@@ -487,6 +487,14 @@
 		changes_requested: 'bg-red-100 text-red-700'
 	};
 
+	const statusAccentLeft: Record<string, string> = {
+		draft: 'border-l-gray-300',
+		in_progress: 'border-l-amber-400',
+		submitted: 'border-l-blue-400',
+		closed: 'border-l-emerald-500',
+		changes_requested: 'border-l-red-400'
+	};
+
 	const assignmentStatusLabel: Record<string, () => string> = {
 		draft: () => m.assignmentStatusDraft(),
 		in_progress: () => m.assignmentStatusInProgress(),
@@ -585,12 +593,18 @@
 	</div>
 
 	<!-- Info banner -->
-	<div class="alert bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg">
-		<div class="flex items-start">
-			<i class="fa-solid fa-info-circle text-blue-600 mr-3 mt-0.5"></i>
+	<div
+		class="bg-white border border-blue-200 border-l-[3px] border-l-blue-400 rounded-lg px-4 py-3 shadow-sm"
+	>
+		<div class="flex items-start gap-3">
+			<div
+				class="w-7 h-7 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5"
+			>
+				<i class="fa-solid fa-info text-blue-500 text-xs"></i>
+			</div>
 			<div class="text-sm">
-				<p class="font-medium">{m.aboutAssignments()}</p>
-				<p class="mt-1">
+				<p class="font-medium text-blue-900">{m.aboutAssignments()}</p>
+				<p class="mt-1 text-blue-700/80">
 					{m.assignmentsDescription()}
 				</p>
 			</div>
@@ -599,9 +613,15 @@
 
 	<!-- Read-only banner -->
 	{#if isReadOnly}
-		<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
-			<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-			<p class="text-yellow-800 font-medium">
+		<div
+			class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+		>
+			<div
+				class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
+			>
+				<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
+			</div>
+			<p class="text-sm text-yellow-800 font-medium">
 				{data.compliance_assessment.is_locked
 					? m.lockedAssessmentMessage()
 					: m.assessmentInReviewMessage()}
@@ -791,18 +811,20 @@
 				</div>
 
 				{#if assignments.length === 0}
-					<div class="text-center py-8 text-gray-500">
-						<i class="fa-solid fa-folder-open text-4xl mb-2 opacity-30"></i>
+					<div class="flex flex-col items-center justify-center py-10 text-gray-400">
+						<div class="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-3">
+							<i class="fa-solid fa-folder-open text-lg text-gray-300"></i>
+						</div>
 						<p class="text-sm">{m.noAssignmentsYet()}</p>
 					</div>
 				{:else}
 					<div class="space-y-3 max-h-[400px] overflow-y-auto">
 						{#each assignments as assignment}
 							<div
-								class="border rounded-lg p-3 transition-colors {editingAssignmentId ===
+								class="border border-l-[3px] rounded-lg p-3.5 transition-all duration-200 {editingAssignmentId ===
 								assignment.id
-									? 'bg-violet-50 border-violet-300 ring-2 ring-violet-200'
-									: 'bg-gray-50 hover:bg-gray-100'}"
+									? 'bg-violet-50 border-violet-300 border-l-violet-500 ring-2 ring-violet-200'
+									: `bg-white hover:bg-gray-50 hover:shadow-sm ${statusAccentLeft[assignment.status] ?? 'border-l-gray-300'}`}"
 							>
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
@@ -842,9 +864,9 @@
 										<!-- Reviewer observation display -->
 										{#if assignment.status === 'changes_requested' && assignment.reviewer_observation}
 											<div
-												class="mt-2 bg-red-50 border border-red-200 rounded-md p-2 text-xs text-red-700 whitespace-pre-line"
+												class="mt-2 bg-red-50/50 border-l-2 border-l-red-300 rounded-r-md pl-3 pr-2 py-2 text-xs text-red-700 whitespace-pre-line"
 											>
-												<i class="fa-solid fa-comment-dots mr-1"></i>
+												<i class="fa-solid fa-comment-dots mr-1 text-red-400"></i>
 												{assignment.reviewer_observation}
 											</div>
 										{/if}

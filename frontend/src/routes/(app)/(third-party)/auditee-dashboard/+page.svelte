@@ -9,20 +9,20 @@
 
 	let { data }: Props = $props();
 
-	const statusBadgeStyle: Record<string, string> = {
-		planned: 'bg-yellow-100 text-yellow-800',
-		in_progress: 'bg-orange-200 text-orange-800',
-		in_review: 'bg-blue-500 text-white',
-		done: 'bg-cyan-600 text-white',
-		deprecated: 'bg-red-400 text-white'
+	const assignmentStatusBadgeStyle: Record<string, string> = {
+		draft: 'bg-gray-100 text-gray-600',
+		in_progress: 'bg-amber-50 text-amber-700',
+		submitted: 'bg-blue-50 text-blue-700',
+		closed: 'bg-emerald-50 text-emerald-700',
+		changes_requested: 'bg-red-50 text-red-700'
 	};
 
-	const assignmentStatusBadgeStyle: Record<string, string> = {
-		draft: 'bg-gray-100 text-gray-700',
-		in_progress: 'bg-orange-100 text-orange-700',
-		submitted: 'bg-blue-100 text-blue-700',
-		closed: 'bg-green-100 text-green-700',
-		changes_requested: 'bg-red-100 text-red-700'
+	const statusAccentColor: Record<string, string> = {
+		draft: 'border-l-gray-300',
+		in_progress: 'border-l-amber-400',
+		submitted: 'border-l-blue-400',
+		closed: 'border-l-emerald-500',
+		changes_requested: 'border-l-red-400'
 	};
 
 	const assignmentStatusLabel: Record<string, () => string> = {
@@ -68,42 +68,54 @@
 	});
 </script>
 
-<div class="flex flex-col space-y-4 p-2">
+<div class="flex flex-col space-y-6 p-3">
 	{#if data.dashboard.length === 0}
-		<div class="card bg-white shadow-lg p-8 text-center">
-			<i class="fa-solid fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
-			<p class="text-gray-500 text-lg">{m.noAuditAssignments()}</p>
+		<div class="flex flex-col items-center justify-center py-20">
+			<div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
+				<i class="fa-solid fa-clipboard-check text-2xl text-gray-300"></i>
+			</div>
+			<p class="text-gray-400">{m.noAuditAssignments()}</p>
 		</div>
 	{:else}
-		{#each auditsByFolder as [folderName, audits]}
-			<div class="space-y-3">
-				<h3 class="text-base font-semibold text-gray-700 flex items-center gap-2">
-					<i class="fa-solid fa-sitemap text-gray-400"></i>
+		{#each auditsByFolder as [folderName, audits], fi}
+			<section class="space-y-3">
+				<h3
+					class="text-xs font-semibold text-gray-400 uppercase tracking-widest flex items-center gap-2 {fi >
+					0
+						? 'pt-5 border-t border-gray-200'
+						: ''}"
+				>
+					<i class="fa-solid fa-folder-open"></i>
 					{folderName}
 				</h3>
 				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-					{#each audits as audit}
-						<div class="card bg-white shadow-lg p-5 flex flex-col space-y-3">
-							<div class="flex items-start justify-between">
-								<div class="flex-1">
-									<h3 class="font-semibold text-base">{audit.name}</h3>
+					{#each audits as audit, ai}
+						<div
+							class="audit-card card bg-white shadow-sm border-l-[3px] {statusAccentColor[
+								audit.assignment_status
+							] ?? 'border-l-gray-300'} p-5 flex flex-col space-y-4 hover:shadow-md hover:-translate-y-px transition-all duration-200"
+							style="animation-delay: {ai * 50}ms"
+						>
+							<div class="flex items-start justify-between gap-3">
+								<div class="flex-1 min-w-0">
+									<h4 class="font-semibold text-[15px] text-gray-900 leading-snug">
+										{audit.name}
+									</h4>
 									{#if audit.framework}
-										<p class="text-sm text-gray-500 mt-0.5">
-											<i class="fa-solid fa-book mr-1"></i>
-											{audit.framework}
+										<p class="text-xs text-gray-500 mt-1 truncate">
+											<i class="fa-solid fa-book mr-1 text-gray-400"></i>{audit.framework}
 										</p>
 									{/if}
 									{#if audit.actor}
-										<p class="text-sm text-gray-500 mt-0.5">
-											<i class="fa-solid fa-user mr-1"></i>
-											{audit.actor}
+										<p class="text-xs text-gray-500 mt-0.5 truncate">
+											<i class="fa-solid fa-user mr-1 text-gray-400"></i>{audit.actor}
 										</p>
 									{/if}
 								</div>
 								<span
-									class="text-xs font-medium px-2 py-1 rounded-md {assignmentStatusBadgeStyle[
+									class="flex-shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-full {assignmentStatusBadgeStyle[
 										audit.assignment_status
-									] ?? 'bg-gray-200 text-gray-700'}"
+									] ?? 'bg-gray-100 text-gray-600'}"
 								>
 									{assignmentStatusLabel[audit.assignment_status]?.() ??
 										safeTranslate(audit.status)}
@@ -111,24 +123,29 @@
 							</div>
 
 							<div class="flex-1">
-								<div class="flex justify-between text-sm text-gray-600 mb-1">
+								<div class="flex justify-between items-baseline text-xs text-gray-500 mb-1.5">
 									<span>{m.progress()}</span>
-									<span class="font-medium"
+									<span class="font-semibold text-gray-700 tabular-nums"
 										>{audit.assessed_requirements}/{audit.total_requirements}</span
 									>
 								</div>
-								<div class="w-full bg-gray-200 rounded-full h-2.5">
+								<div class="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
 									<div
-										class="bg-indigo-500 h-2.5 rounded-full transition-all duration-300"
-										style="width: {audit.progress_percent}%"
+										class="h-2 rounded-full transition-all duration-500 ease-out"
+										style="width: {audit.progress_percent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 									></div>
 								</div>
-								<p class="text-xs text-gray-400 mt-1">{audit.progress_percent}%</p>
+								<p class="text-[11px] text-gray-400 mt-1 tabular-nums">
+									{audit.progress_percent}%
+								</p>
 							</div>
 
 							{#if isCtaDisabled(audit)}
-								<button class="btn preset-outlined-surface-500 w-full text-center" disabled>
-									<i class="fa-solid fa-hourglass mr-2"></i>
+								<button
+									class="btn preset-outlined-surface-500 w-full text-center opacity-50"
+									disabled
+								>
+									<i class="fa-solid fa-hourglass-half mr-2 text-xs"></i>
 									{getCtaLabel(audit)}
 								</button>
 							{:else if isCtaReadOnly(audit)}
@@ -136,7 +153,7 @@
 									href="/auditee-assessments/{audit.assignment_id}"
 									class="btn preset-outlined-primary-500 w-full text-center"
 								>
-									<i class="fa-solid fa-eye mr-2"></i>
+									<i class="fa-solid fa-eye mr-2 text-xs"></i>
 									{getCtaLabel(audit)}
 								</a>
 							{:else}
@@ -144,14 +161,30 @@
 									href="/auditee-assessments/{audit.assignment_id}"
 									class="btn preset-filled-primary-500 w-full text-center"
 								>
-									<i class="fa-solid fa-arrow-right mr-2"></i>
+									<i class="fa-solid fa-arrow-right mr-2 text-xs"></i>
 									{getCtaLabel(audit)}
 								</a>
 							{/if}
 						</div>
 					{/each}
 				</div>
-			</div>
+			</section>
 		{/each}
 	{/if}
 </div>
+
+<style>
+	.audit-card {
+		animation: card-enter 0.35s ease-out both;
+	}
+	@keyframes card-enter {
+		from {
+			opacity: 0;
+			transform: translateY(6px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+</style>

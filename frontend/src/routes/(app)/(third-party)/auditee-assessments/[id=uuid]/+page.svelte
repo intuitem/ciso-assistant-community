@@ -440,7 +440,7 @@
 	<!-- Main content -->
 	<div class="flex-1 flex flex-col space-y-4 p-4 min-w-0">
 		<!-- Header: audit name + progress -->
-		<div class="card bg-white shadow-sm px-5 py-3">
+		<div class="card bg-white shadow-sm px-5 py-4 border-t-[3px] border-t-primary-500">
 			<div class="flex items-center justify-between mb-2">
 				<div class="flex items-center space-x-3">
 					<a
@@ -482,8 +482,8 @@
 			<div class="flex items-center space-x-3">
 				<div class="flex-1 bg-gray-200 rounded-full h-2">
 					<div
-						class="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-						style="width: {progressPercent}%"
+						class="h-2 rounded-full transition-all duration-500 ease-out"
+						style="width: {progressPercent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 					></div>
 				</div>
 				<span class="text-sm font-medium text-gray-600 whitespace-nowrap"
@@ -494,32 +494,58 @@
 
 		<!-- Assignment status banners -->
 		{#if assignmentStatus === 'submitted'}
-			<div class="card bg-blue-50 border border-blue-300 px-5 py-3 flex items-center space-x-3">
-				<i class="fa-solid fa-clock text-blue-600 text-lg"></i>
-				<p class="text-blue-800 font-medium">{m.assignmentSubmittedBanner()}</p>
+			<div
+				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-clock text-blue-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-blue-800 font-medium">{m.assignmentSubmittedBanner()}</p>
 			</div>
 		{:else if assignmentStatus === 'closed'}
-			<div class="card bg-green-50 border border-green-300 px-5 py-3 flex items-center space-x-3">
-				<i class="fa-solid fa-check-circle text-green-600 text-lg"></i>
-				<p class="text-green-800 font-medium">{m.assignmentClosedBanner()}</p>
+			<div
+				class="bg-white border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-check-circle text-emerald-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-green-800 font-medium">{m.assignmentClosedBanner()}</p>
 			</div>
 		{:else if assignmentStatus === 'changes_requested'}
-			<div class="card bg-red-50 border border-red-300 px-5 py-3 flex flex-col space-y-2">
-				<div class="flex items-center space-x-3">
-					<i class="fa-solid fa-rotate-left text-red-600 text-lg"></i>
-					<p class="text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
+			<div
+				class="bg-white border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
+			>
+				<div class="flex items-center gap-3">
+					<div
+						class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0"
+					>
+						<i class="fa-solid fa-rotate-left text-red-500 text-sm"></i>
+					</div>
+					<p class="text-sm text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
 				</div>
 				{#if reviewerObservation}
-					<div class="bg-red-100 rounded-md p-3 text-sm text-red-700 whitespace-pre-line">
+					<div
+						class="bg-red-50 rounded-md p-3 ml-11 text-sm text-red-700 whitespace-pre-line"
+					>
 						<i class="fa-solid fa-comment-dots mr-1"></i>
 						{reviewerObservation}
 					</div>
 				{/if}
 			</div>
 		{:else if assignmentStatus === 'draft'}
-			<div class="card bg-gray-50 border border-gray-300 px-5 py-3 flex items-center space-x-3">
-				<i class="fa-solid fa-hourglass text-gray-500 text-lg"></i>
-				<p class="text-gray-700 font-medium">{m.assignmentAwaitingStart()}</p>
+			<div
+				class="bg-white border border-gray-200 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-hourglass text-gray-400 text-sm"></i>
+				</div>
+				<p class="text-sm text-gray-600 font-medium">{m.assignmentAwaitingStart()}</p>
 			</div>
 		{/if}
 
@@ -543,9 +569,15 @@
 
 		<!-- Read-only banner (only for CA-level locks, not assignment-level) -->
 		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
-			<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
-				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-				<p class="text-yellow-800 font-medium">
+			<div
+				class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-yellow-800 font-medium">
 					{complianceAssessment.is_locked
 						? m.lockedAssessmentMessage()
 						: m.assessmentInReviewMessage()}
@@ -562,7 +594,7 @@
 				] ?? requirementAssessment}
 			<div
 				id="current-requirement"
-				class="card bg-white shadow-lg px-6 py-4 flex flex-col space-y-4"
+				class="card bg-white shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
 				<div class="flex items-start justify-between">
@@ -940,9 +972,11 @@
 				</button>
 			</div>
 		{:else}
-			<div class="card bg-white shadow-lg p-8 text-center">
-				<i class="fa-solid fa-clipboard-check text-4xl text-gray-300 mb-4"></i>
-				<p class="text-gray-500 text-lg">{m.noAuditAssignments()}</p>
+			<div class="flex flex-col items-center justify-center py-20">
+				<div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-5">
+					<i class="fa-solid fa-clipboard-check text-2xl text-gray-300"></i>
+				</div>
+				<p class="text-gray-400">{m.noAuditAssignments()}</p>
 			</div>
 		{/if}
 	</div>
