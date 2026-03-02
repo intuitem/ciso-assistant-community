@@ -169,11 +169,11 @@ export const actions: Actions = {
 		const formData = await event.request.formData();
 		const id = formData.get('id') as string;
 
-		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/submit/`;
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/set_status/`;
 		const res = await event.fetch(endpoint, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({})
+			body: JSON.stringify({ status: 'submitted' })
 		});
 		const body = await res.json();
 		return { submitStatus: res.status, submitBody: body };

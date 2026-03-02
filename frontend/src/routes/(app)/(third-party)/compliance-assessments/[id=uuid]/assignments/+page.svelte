@@ -512,119 +512,52 @@
 		reviewerObservationText = '';
 	}
 
-	// Action handlers for workflow transitions
-	async function handleActivate(assignmentId: string) {
+	// Unified status transition handler
+	async function handleSetStatus(
+		assignmentId: string,
+		targetStatus: string,
+		reviewerObservation?: string
+	) {
 		try {
 			const formData = new FormData();
 			formData.append('id', assignmentId);
-			const response = await fetch(`?/activate`, { method: 'POST', body: formData });
+			formData.append('status', targetStatus);
+			if (reviewerObservation) {
+				formData.append('reviewer_observation', reviewerObservation);
+			}
+			const response = await fetch(`?/setStatus`, { method: 'POST', body: formData });
 			const result = deserialize(await response.text());
 			if (result.type === 'success' && result.data?.status === 200) {
 				await applyAction(result);
 				await invalidateAll();
 				toastStore.trigger({
-					message: m.activateAssignment() + ' ✓',
+					message: m.statusUpdatedSuccessfully(),
 					background: 'variant-filled-success',
 					timeout: 3000
 				});
 			} else {
 				toastStore.trigger({
-					message: result.data?.body?.error || 'Failed to activate',
+					message: result.data?.body?.error || 'Action failed',
 					background: 'variant-filled-error',
 					timeout: 3000
 				});
 			}
 		} catch (error) {
-			console.error('Error activating assignment:', error);
+			console.error('Error transitioning assignment:', error);
 		}
 	}
 
 	async function handleActivateAll() {
 		const draftAssignments = assignments.filter((a) => a.status === 'draft');
 		for (const assignment of draftAssignments) {
-			await handleActivate(assignment.id);
-		}
-	}
-
-	async function handleClose(assignmentId: string) {
-		try {
-			const formData = new FormData();
-			formData.append('id', assignmentId);
-			const response = await fetch(`?/close`, { method: 'POST', body: formData });
-			const result = deserialize(await response.text());
-			if (result.type === 'success' && result.data?.status === 200) {
-				await applyAction(result);
-				await invalidateAll();
-				toastStore.trigger({
-					message: m.closeAssignment() + ' ✓',
-					background: 'variant-filled-success',
-					timeout: 3000
-				});
-			} else {
-				toastStore.trigger({
-					message: result.data?.body?.error || 'Failed to close',
-					background: 'variant-filled-error',
-					timeout: 3000
-				});
-			}
-		} catch (error) {
-			console.error('Error closing assignment:', error);
-		}
-	}
-
-	async function handleReopen(assignmentId: string) {
-		try {
-			const formData = new FormData();
-			formData.append('id', assignmentId);
-			const response = await fetch(`?/reopen`, { method: 'POST', body: formData });
-			const result = deserialize(await response.text());
-			if (result.type === 'success' && result.data?.status === 200) {
-				await applyAction(result);
-				await invalidateAll();
-				toastStore.trigger({
-					message: m.reopenAssignment() + ' ✓',
-					background: 'variant-filled-success',
-					timeout: 3000
-				});
-			} else {
-				toastStore.trigger({
-					message: result.data?.body?.error || 'Failed to reopen',
-					background: 'variant-filled-error',
-					timeout: 3000
-				});
-			}
-		} catch (error) {
-			console.error('Error reopening assignment:', error);
+			await handleSetStatus(assignment.id, 'in_progress');
 		}
 	}
 
 	async function handleRequestChanges() {
 		if (!requestChangesAssignmentId || !reviewerObservationText.trim()) return;
-		try {
-			const formData = new FormData();
-			formData.append('id', requestChangesAssignmentId);
-			formData.append('reviewer_observation', reviewerObservationText);
-			const response = await fetch(`?/requestChanges`, { method: 'POST', body: formData });
-			const result = deserialize(await response.text());
-			if (result.type === 'success' && result.data?.status === 200) {
-				closeRequestChangesModal();
-				await applyAction(result);
-				await invalidateAll();
-				toastStore.trigger({
-					message: m.requestChanges() + ' ✓',
-					background: 'variant-filled-success',
-					timeout: 3000
-				});
-			} else {
-				toastStore.trigger({
-					message: result.data?.body?.error || 'Failed to request changes',
-					background: 'variant-filled-error',
-					timeout: 3000
-				});
-			}
-		} catch (error) {
-			console.error('Error requesting changes:', error);
-		}
+		await handleSetStatus(requestChangesAssignmentId, 'changes_requested', reviewerObservationText);
+		closeRequestChangesModal();
 	}
 
 	// Check if there are any draft assignments (for "Activate All" button)
@@ -922,7 +855,7 @@
 										{#if assignment.status === 'draft' && !isReadOnly}
 											<button
 												class="btn btn-sm preset-filled-warning-500"
-												onclick={() => handleActivate(assignment.id)}
+												onclick={() => handleSetStatus(assignment.id, 'in_progress')}
 												title={m.activateAssignment()}
 											>
 												<i class="fa-solid fa-play mr-1"></i>
@@ -934,7 +867,7 @@
 										{#if assignment.status === 'submitted' && !isReadOnly}
 											<button
 												class="btn btn-sm preset-filled-success-500"
-												onclick={() => handleClose(assignment.id)}
+												onclick={() => handleSetStatus(assignment.id, 'closed')}
 												title={m.closeAssignment()}
 											>
 												<i class="fa-solid fa-check mr-1"></i>
@@ -954,7 +887,7 @@
 										{#if assignment.status === 'closed' && !isReadOnly}
 											<button
 												class="btn btn-sm preset-filled-warning-500"
-												onclick={() => handleReopen(assignment.id)}
+												onclick={() => handleSetStatus(assignment.id, 'submitted')}
 												title={m.reopenAssignment()}
 											>
 												<i class="fa-solid fa-lock-open mr-1"></i>

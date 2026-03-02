@@ -13470,6 +13470,10 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     Requirement assignments delegate groups of requirement assessments to specific actors.
     """
 
+    permission_overrides = {
+        "set_status": "change_requirementassignment",
+    }
+
     model = RequirementAssignment
     filterset_fields = [
         "folder",
@@ -13499,163 +13503,140 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
-    @action(detail=True, methods=["post"])
-    def activate(self, request, pk=None):
-        """Transition assignment from draft to in_progress."""
+    # Valid transitions: (from_status, to_status) → config
+    # reviewer_only: auditee-only users are forbidden
+    # actor_only: only assigned actors can perform this transition
+    # check_completion: all assessable requirements must be assessed
+    # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
+    TRANSITIONS = {
+        ("draft", "in_progress"): {},
+        ("in_progress", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("submitted", "closed"): {
+            "reviewer_only": True,
+            "observation": "optional",
+        },
+        ("submitted", "changes_requested"): {
+            "reviewer_only": True,
+            "observation": "required",
+        },
+        ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+    }
+
+    @action(detail=True, methods=["post"], url_path="set_status")
+    def set_status(self, request, pk=None):
+        """Transition assignment to a new status.
+
+        Accepts {"status": "<target_status>", "reviewer_observation": "..."}.
+        Valid transitions and their constraints are defined in TRANSITIONS.
+        """
         assignment = self.get_object()
-        if assignment.status != RequirementAssignment.Status.DRAFT:
+        target = request.data.get("status")
+        if not target:
             return Response(
-                {"error": "Assignment must be in draft status to activate."},
+                {"error": "Missing 'status' field."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        assignment.status = RequirementAssignment.Status.IN_PROGRESS
-        assignment.save(update_fields=["status"])
+
+        key = (assignment.status, target)
+        config = self.TRANSITIONS.get(key)
+        if config is None:
+            return Response(
+                {
+                    "error": f"Invalid transition from '{assignment.status}' to '{target}'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Reviewer-only check: auditee-only users are forbidden
+        if config.get("reviewer_only"):
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if (
+                auditee_folders
+                and assignment.compliance_assessment.folder_id in auditee_folders
+            ):
+                return Response(
+                    {"error": "Auditee users cannot perform this action."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Actor-only check: user must be an assigned actor
+        if config.get("actor_only"):
+            user_actors = Actor.get_all_for_user(request.user)
+            if not assignment.actor.filter(id__in=[a.id for a in user_actors]).exists():
+                return Response(
+                    {"error": "You are not assigned to this assignment."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Completion check: all assessable requirements must be assessed
+        if config.get("check_completion"):
+            unassessed_count = assignment.requirement_assessments.filter(
+                requirement__assessable=True, result="not_assessed"
+            ).count()
+            if unassessed_count > 0:
+                return Response(
+                    {
+                        "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
+                        "unassessed_count": unassessed_count,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Handle reviewer_observation
+        obs_rule = config.get("observation")
+        observation = request.data.get("reviewer_observation")
+        if obs_rule == "required" and not observation:
+            return Response(
+                {"error": "Reviewer observation is required for this transition."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        if obs_rule == "clear":
+            assignment.reviewer_observation = None
+        elif obs_rule in ("required", "optional") and observation:
+            assignment.reviewer_observation = observation
+
+        # Apply transition
+        assignment.status = target
+        assignment.save(update_fields=["status", "reviewer_observation"])
+
+        # Send notification
         try:
+            self._send_transition_notification(assignment, key)
+        except Exception:
+            pass
+
+        return Response({"status": target})
+
+    @staticmethod
+    def _send_transition_notification(assignment, transition_key):
+        from_status, to_status = transition_key
+        if to_status == "in_progress":
             from core.tasks import send_assignment_activated_notification
 
             send_assignment_activated_notification(assignment.id)
-        except Exception:
-            pass
-        return Response({"status": "in_progress"})
-
-    @action(detail=True, methods=["post"])
-    def submit(self, request, pk=None):
-        """Respondent submits assignment for review."""
-        assignment = self.get_object()
-        if assignment.status not in (
-            RequirementAssignment.Status.IN_PROGRESS,
-            RequirementAssignment.Status.CHANGES_REQUESTED,
+        elif to_status == "submitted" and from_status in (
+            "in_progress",
+            "changes_requested",
         ):
-            return Response(
-                {
-                    "error": "Assignment must be in progress or changes requested to submit."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Verify the requesting user is an actor on this assignment
-        user_actors = Actor.get_all_for_user(request.user)
-        if not assignment.actor.filter(id__in=[a.id for a in user_actors]).exists():
-            return Response(
-                {"error": "You are not assigned to this assignment."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        # Require all assessable requirements to be assessed before submission
-        unassessed_count = assignment.requirement_assessments.filter(
-            requirement__assessable=True, result="not_assessed"
-        ).count()
-        if unassessed_count > 0:
-            return Response(
-                {
-                    "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
-                    "unassessed_count": unassessed_count,
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        assignment.status = RequirementAssignment.Status.SUBMITTED
-        assignment.reviewer_observation = None
-        assignment.save(update_fields=["status", "reviewer_observation"])
-        try:
             from core.tasks import send_assignment_submitted_notification
 
             send_assignment_submitted_notification(assignment.id)
-        except Exception:
-            pass
-        return Response({"status": "submitted"})
-
-    @action(detail=True, methods=["post"])
-    def close(self, request, pk=None):
-        """Reviewer closes a submitted assignment."""
-        assignment = self.get_object()
-        if assignment.status != RequirementAssignment.Status.SUBMITTED:
-            return Response(
-                {"error": "Assignment must be in submitted status to close."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Verify user is not auditee-only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if (
-            auditee_folders
-            and assignment.compliance_assessment.folder_id in auditee_folders
+        elif to_status in ("closed", "changes_requested") or (
+            to_status == "submitted" and from_status == "closed"
         ):
-            return Response(
-                {"error": "Auditee users cannot close assignments."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        assignment.status = RequirementAssignment.Status.CLOSED
-        observation = request.data.get("reviewer_observation")
-        if observation:
-            assignment.reviewer_observation = observation
-        assignment.save(update_fields=["status", "reviewer_observation"])
-        try:
             from core.tasks import send_assignment_reviewed_notification
 
-            send_assignment_reviewed_notification(assignment.id, "closed")
-        except Exception:
-            pass
-        return Response({"status": "closed"})
-
-    @action(detail=True, methods=["post"])
-    def reopen(self, request, pk=None):
-        """Reviewer reopens a closed assignment back to submitted."""
-        assignment = self.get_object()
-        if assignment.status != RequirementAssignment.Status.CLOSED:
-            return Response(
-                {"error": "Assignment must be in closed status to reopen."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Verify user is not auditee-only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if (
-            auditee_folders
-            and assignment.compliance_assessment.folder_id in auditee_folders
-        ):
-            return Response(
-                {"error": "Auditee users cannot reopen assignments."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        assignment.status = RequirementAssignment.Status.SUBMITTED
-        assignment.reviewer_observation = None
-        assignment.save(update_fields=["status", "reviewer_observation"])
-        try:
-            from core.tasks import send_assignment_reviewed_notification
-
-            send_assignment_reviewed_notification(assignment.id, "reopened")
-        except Exception:
-            pass
-        return Response({"status": "submitted"})
-
-    @action(detail=True, methods=["post"], url_path="request_changes")
-    def request_changes(self, request, pk=None):
-        """Reviewer requests changes on a submitted assignment."""
-        assignment = self.get_object()
-        if assignment.status != RequirementAssignment.Status.SUBMITTED:
-            return Response(
-                {"error": "Assignment must be in submitted status to request changes."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Verify user is not auditee-only
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if (
-            auditee_folders
-            and assignment.compliance_assessment.folder_id in auditee_folders
-        ):
-            return Response(
-                {"error": "Auditee users cannot request changes."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-        observation = request.data.get("reviewer_observation")
-        if not observation:
-            return Response(
-                {"error": "Reviewer observation is required when requesting changes."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        assignment.status = RequirementAssignment.Status.CHANGES_REQUESTED
-        assignment.reviewer_observation = observation
-        assignment.save(update_fields=["status", "reviewer_observation"])
-        try:
-            from core.tasks import send_assignment_reviewed_notification
-
-            send_assignment_reviewed_notification(assignment.id, "changes_requested")
-        except Exception:
-            pass
-        return Response({"status": "changes_requested"})
+            decision = "reopened" if from_status == "closed" else to_status
+            send_assignment_reviewed_notification(assignment.id, decision)
