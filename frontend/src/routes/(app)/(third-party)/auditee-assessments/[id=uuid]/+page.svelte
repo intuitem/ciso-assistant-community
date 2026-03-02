@@ -59,8 +59,6 @@
 		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
 	);
 
-	let submitBlocked = $derived(assessedCount < totalAssessable);
-
 	// Get latest observation from events
 	let reviewerObservation = $derived.by(() => {
 		if (assignmentStatus !== 'changes_requested' || !assignment?.events?.length) return null;
@@ -166,6 +164,7 @@
 	const progressPercent = $derived(
 		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
 	);
+	let submitBlocked = $derived(assessedCount < totalAssessable);
 
 	// --- Update logic (same as table-mode) ---
 	async function updateBulk(
