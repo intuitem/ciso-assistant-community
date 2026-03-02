@@ -146,6 +146,27 @@ class TestQuestionEndpoints:
         q.refresh_from_db()
         assert q.annotation == "Updated?"
 
+    def test_update_question_on_published_framework_rejected(
+        self, authenticated_client, published_framework
+    ):
+        fw, rn = published_framework
+        folder = Folder.get_root_folder()
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:pubupd:q1",
+            ref_id="PUQ1",
+            annotation="Original?",
+            type=Question.Type.TEXT,
+            folder=folder,
+            is_published=True,
+        )
+        response = authenticated_client.patch(
+            reverse("questions-detail", args=[q.id]),
+            {"annotation": "Should fail?"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_delete_question_on_draft_framework(
         self, authenticated_client, draft_framework
     ):
@@ -163,6 +184,77 @@ class TestQuestionEndpoints:
         response = authenticated_client.delete(reverse("questions-detail", args=[q.id]))
         assert response.status_code == status.HTTP_204_NO_CONTENT
         assert not Question.objects.filter(id=q.id).exists()
+
+
+@pytest.mark.django_db
+class TestRequirementNodeEndpoints:
+    """Test RequirementNode API endpoints for published-framework guards."""
+
+    def test_create_requirement_node_on_draft_framework(
+        self, authenticated_client, draft_framework
+    ):
+        fw, rn = draft_framework
+        folder = Folder.get_root_folder()
+        data = {
+            "framework": str(fw.id),
+            "ref_id": "REQ-NEW",
+            "assessable": True,
+            "folder": str(folder.id),
+        }
+        response = authenticated_client.post(
+            reverse("requirement-nodes-list"), data, format="json"
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+    def test_create_requirement_node_on_published_framework_rejected(
+        self, authenticated_client, published_framework
+    ):
+        fw, rn = published_framework
+        folder = Folder.get_root_folder()
+        data = {
+            "framework": str(fw.id),
+            "ref_id": "REQ-PNEW",
+            "assessable": True,
+            "folder": str(folder.id),
+        }
+        response = authenticated_client.post(
+            reverse("requirement-nodes-list"), data, format="json"
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_update_requirement_node_on_draft_framework(
+        self, authenticated_client, draft_framework
+    ):
+        fw, rn = draft_framework
+        response = authenticated_client.patch(
+            reverse("requirement-nodes-detail", args=[rn.id]),
+            {"ref_id": "REQ-UPDATED"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        rn.refresh_from_db()
+        assert rn.ref_id == "REQ-UPDATED"
+
+    def test_update_requirement_node_on_published_framework_rejected(
+        self, authenticated_client, published_framework
+    ):
+        fw, rn = published_framework
+        response = authenticated_client.patch(
+            reverse("requirement-nodes-detail", args=[rn.id]),
+            {"ref_id": "REQ-SHOULDFAIL"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_delete_requirement_node_on_draft_framework(
+        self, authenticated_client, draft_framework
+    ):
+        fw, rn = draft_framework
+        response = authenticated_client.delete(
+            reverse("requirement-nodes-detail", args=[rn.id])
+        )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not RequirementNode.objects.filter(id=rn.id).exists()
 
 
 @pytest.mark.django_db
@@ -200,6 +292,64 @@ class TestQuestionChoiceEndpoints:
         )
         assert response.status_code == status.HTTP_201_CREATED
 
+    def test_update_choice_on_draft_framework(
+        self, authenticated_client, draft_framework
+    ):
+        fw, rn = draft_framework
+        folder = Folder.get_root_folder()
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:updchoice:q1",
+            ref_id="UCQ1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c = QuestionChoice.objects.create(
+            question=q,
+            ref_id="UC1",
+            annotation="Original",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        response = authenticated_client.patch(
+            reverse("question-choices-detail", args=[c.id]),
+            {"annotation": "Updated"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_200_OK
+        c.refresh_from_db()
+        assert c.annotation == "Updated"
+
+    def test_update_choice_on_published_framework_rejected(
+        self, authenticated_client, published_framework
+    ):
+        fw, rn = published_framework
+        folder = Folder.get_root_folder()
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:pubupdchoice:q1",
+            ref_id="PUCQ1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c = QuestionChoice.objects.create(
+            question=q,
+            ref_id="PUC1",
+            annotation="Should not change",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        response = authenticated_client.patch(
+            reverse("question-choices-detail", args=[c.id]),
+            {"annotation": "Should fail"},
+            format="json",
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     def test_create_choice_on_published_framework_rejected(
         self, authenticated_client, published_framework
     ):
@@ -224,3 +374,30 @@ class TestQuestionChoiceEndpoints:
             reverse("question-choices-list"), data, format="json"
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_delete_choice_on_draft_framework(
+        self, authenticated_client, draft_framework
+    ):
+        fw, rn = draft_framework
+        folder = Folder.get_root_folder()
+        q = Question.objects.create(
+            requirement_node=rn,
+            urn="urn:test:delchoice:q1",
+            ref_id="DCQ1",
+            type=Question.Type.UNIQUE_CHOICE,
+            folder=folder,
+            is_published=True,
+        )
+        c = QuestionChoice.objects.create(
+            question=q,
+            ref_id="DC1",
+            annotation="Delete me",
+            order=0,
+            folder=folder,
+            is_published=True,
+        )
+        response = authenticated_client.delete(
+            reverse("question-choices-detail", args=[c.id])
+        )
+        assert response.status_code == status.HTTP_204_NO_CONTENT
+        assert not QuestionChoice.objects.filter(id=c.id).exists()

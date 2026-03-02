@@ -1748,7 +1748,7 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
         exclude = ["translations"]
 
 
-class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
+class RequirementNodeWriteSerializer(BaseModelSerializer):
     def validate(self, attrs):
         framework = attrs.get("framework") or (
             self.instance.framework if self.instance else None
@@ -1758,6 +1758,24 @@ class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
                 "Cannot modify requirement nodes on a published framework."
             )
         return super().validate(attrs)
+
+    def update(self, instance, validated_data):
+        # Skip the URN-based "imported objects" guard from BaseModelSerializer
+        # because requirement nodes on draft frameworks should be editable.
+        self._check_object_perm(instance, "change")
+        try:
+            return super(BaseModelSerializer, self).update(instance, validated_data)
+        except Exception as e:
+            logger.error(
+                "Failed to update RequirementNode", error=str(e), exc_info=True
+            )
+            raise serializers.ValidationError(
+                "Failed to update requirement node. Please check the input data."
+            )
+
+    class Meta:
+        model = RequirementNode
+        exclude = ["created_at", "updated_at"]
 
 
 class EvidenceReadSerializer(BaseModelSerializer):
