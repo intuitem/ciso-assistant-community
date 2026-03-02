@@ -20,6 +20,7 @@ from core.models import (
     Policy,
     SecurityException,
     Incident,
+    Vulnerability,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -1104,7 +1105,7 @@ class LoadFileView(APIView):
     VULNERABILITY_SEVERITY_MAP = {
         None: -1,
         "undefined": -1,
-        "information": 0,
+        "info": 0,
         "low": 1,
         "medium": 2,
         "high": 3,
@@ -1259,6 +1260,10 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.VULNERABILITY:
+                            res = self._process_vulnerability_record(
+                                records, folder_id, request, on_conflict
+                            )
                         case _:
                             res = self.process_data(
                                 request,
@@ -1313,8 +1318,6 @@ class LoadFileView(APIView):
                 )
             case ModelType.FOLDER:
                 return self._process_folders(request, records)
-            case ModelType.VULNERABILITY:
-                return self._process_vulnerability_record(records, folder_id, request)
             case _:
                 return {
                     "successful": 0,
@@ -2698,7 +2701,9 @@ class LoadFileView(APIView):
             }
         )
 
-    def _process_vulnerability_record(self, records, folder_id, request):
+    def _process_vulnerability_record(
+        self, records, folder_id, request, on_conflict=ConflictMode.STOP
+    ):
         def safe_lowercase(s):
             if s is None or type(s) is not str:
                 return s
@@ -2765,6 +2770,9 @@ class LoadFileView(APIView):
                             )
                             break
 
+                if failed_record_reference:
+                    continue
+
                 filtering_labels = []
                 if record.get("filtering_labels"):
                     for filter_name in record.get("filtering_labels", "").split("\n"):
@@ -2772,7 +2780,7 @@ class LoadFileView(APIView):
                         if not filter_name:
                             continue
                         filtering_label, _ = FilteringLabel.objects.get_or_create(
-                            label=filter_name, folder=folder_id
+                            label=filter_name, folder_id=folder_id
                         )
                         filtering_labels.append(filtering_label.id)
 
@@ -2813,9 +2821,38 @@ class LoadFileView(APIView):
                 if failed_record_reference:
                     continue
 
-                vuln_serializer = VulnerabilityWriteSerializer(
-                    data=vuln_data, context={"request": request}
-                )
+                existing = None
+                if ref_id:
+                    existing = Vulnerability.objects.filter(
+                        ref_id=ref_id, folder_id=folder_id
+                    ).first()
+                if existing is None:
+                    existing = Vulnerability.objects.filter(
+                        name=name, folder_id=folder_id
+                    ).first()
+
+                if existing is not None:
+                    match on_conflict:
+                        case ConflictMode.STOP:
+                            results["failed"] += 1
+                            results["errors"].append(
+                                {
+                                    "record": record,
+                                    "error": f"Vulnerability '{name}' already exists",
+                                }
+                            )
+                            return results
+                        case ConflictMode.SKIP:
+                            continue
+                        case ConflictMode.UPDATE:
+                            vuln_serializer = VulnerabilityWriteSerializer(
+                                existing, data=vuln_data, context={"request": request}
+                            )
+                else:
+                    vuln_serializer = VulnerabilityWriteSerializer(
+                        data=vuln_data, context={"request": request}
+                    )
+
                 if vuln_serializer.is_valid():
                     try:
                         vuln_serializer.save()
@@ -2828,7 +2865,6 @@ class LoadFileView(APIView):
                                 "error": f"Failed to save vulnerability record {str(e)}",
                             }
                         )
-
                 else:
                     logger.warning(
                         f"Vulnerability validation failed: {vuln_serializer.errors}"
@@ -2837,8 +2873,7 @@ class LoadFileView(APIView):
                     results["errors"].append(
                         {
                             "record": record,
-                            "error": "Failed to save vulnerability record: "
-                            + str(vuln_serializer.errors),
+                            "error": f"Failed to save vulnerability record: {vuln_serializer.errors}",
                         }
                     )
 

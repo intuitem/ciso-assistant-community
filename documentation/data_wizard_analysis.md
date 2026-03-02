@@ -547,34 +547,36 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ---
 
 
-## 20. Vulnerability
+### 20. Vulnerability
 
 | Field | Type | Required | Note |
 |-------|------|---------|-------|
 | `ref_id`      | string | No  ||
-| `name`        | string | yes ||
+| `name`        | string | **Yes** ||
 | `description` | string | No  ||
-|`status`       | string | No  | The list of the possible statuses below |
+| `status`      | string | No  | The list of the possible statuses below |
 | `severity`    | string | No  | The list of the possible severities below |
-| `filtering_label` | list | No | List of labels, newline-separated |
-| `assets`      | list   | No | List of the named of the related assets, newline-separated |
-| `applied_controls` | list | No | List of the name of the related applied controls, newline-separated |
-| `security_exceptions`| list | No | List of the name of the related security exceptions, newline-separated |
+| `filtering_labels` | list | No | List of labels, newline-separated |
+| `assets`      | list   | No | List of the names of the related assets, newline-separated |
+| `applied_controls` | list | No | List of the names of the related applied controls, newline-separated |
+| `security_exceptions`| list | No | List of the names of the related security exceptions, newline-separated |
 
 **Vulnerability's status**
-* Potential
-* Exploitable
-* Mitigated
-* Fixed
-* Not exploitable
-* Unaffected
+* undefined
+* potential
+* exploitable
+* mitigated
+* fixed
+* not exploitable
+* unaffected
 
 **Vulnerability's severity**
-* Information
-* Low
-* Medium
-* High
-* Critical
+* undefined
+* info
+* low
+* medium
+* high
+* critical
 
 
 ## Models NOT Supported by Data Wizard
@@ -688,7 +690,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 ### High Priority (Core GRC Functionality)
 
 1. **RiskAcceptance** - Risk management workflow completion
-2. **Vulnerability** - Vulnerability tracking
+2. ~~**Vulnerability**~~ - ✅ Now supported
 3. ~~**Incident**~~ - ✅ Now supported
 4. ~~**SecurityException**~~ - ✅ Now supported
 5. ~~**Policy**~~ - ✅ Now supported
