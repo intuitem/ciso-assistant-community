@@ -14,6 +14,7 @@ OUTPUT_XLSX = "itsp.10.171_requirements.xlsx"
 TOP_H2_RE = re.compile(r"^\s*(\d+)\s+(.*)$")
 SECTION_H3_RE = re.compile(r"^\s*\d+\.\d+\s+")
 REQ_H4_TEXT_RE = re.compile(r"^\s*(\d{2}\.\d{2}\.\d{2})\s+(.*)$")
+FOOTNOTE_HREF_RE = re.compile(r"^#fn(\d+)$", re.IGNORECASE)
 
 FR_NAME = "[ITSP.10.171] Protection de l’information désignée dans les organisations et les systèmes ne relevant pas du gouvernement du Canada"
 EN_NAME = "[ITSP.10.171] Protecting specified information in non-Government of Canada systems and organizations"
@@ -92,7 +93,7 @@ def normalize_inline_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def render_inline_markdown(node) -> str:
+def render_inline_markdown(node, note_refs: set[str]) -> str:
     if isinstance(node, NavigableString):
         return str(node)
     if not isinstance(node, Tag):
@@ -102,24 +103,33 @@ def render_inline_markdown(node) -> str:
 
     if node.name == "a":
         href = (node.get("href") or "").strip()
-        label = normalize_inline_text("".join(render_inline_markdown(c) for c in node.contents))
+        label = normalize_inline_text(
+            "".join(render_inline_markdown(c, note_refs) for c in node.contents)
+        )
         if not label:
             return ""
+        footnote_match = FOOTNOTE_HREF_RE.match(href)
+        if footnote_match:
+            footnote_num = footnote_match.group(1)
+            note_refs.add(footnote_num)
+            return f"({footnote_num})"
         if href.startswith("#") or href.lower().startswith("file://"):
             return f"**{label}**"
         if href:
             return f"[{label}]({href})"
         return label
 
-    return "".join(render_inline_markdown(c) for c in node.contents)
+    return "".join(render_inline_markdown(c, note_refs) for c in node.contents)
 
 
-def render_tag_text(tag: Tag) -> str:
-    return normalize_inline_text(render_inline_markdown(tag))
+def render_tag_text(tag: Tag, note_refs: set[str] | None = None) -> str:
+    active_note_refs = note_refs if note_refs is not None else set()
+    return normalize_inline_text(render_inline_markdown(tag, active_note_refs))
 
 
-def li_direct_text(li: Tag) -> str:
+def li_direct_text(li: Tag, note_refs: set[str] | None = None) -> str:
     parts = []
+    active_note_refs = note_refs if note_refs is not None else set()
     for child in li.contents:
         if isinstance(child, NavigableString):
             t = clean_text(str(child))
@@ -128,17 +138,20 @@ def li_direct_text(li: Tag) -> str:
         elif isinstance(child, Tag):
             if child.name in ("ol", "ul"):
                 continue
-            t = render_tag_text(child)
+            t = render_tag_text(child, active_note_refs)
             if t:
                 parts.append(t)
     return clean_text(" ".join(parts))
 
 
-def render_list_tag(list_tag: Tag) -> str:
+def render_list_tag(list_tag: Tag, note_refs: set[str] | None = None) -> str:
     lines = []
+    active_note_refs = note_refs if note_refs is not None else set()
     li_tags = list_tag.find_all("li", recursive=False)
     for idx, li in enumerate(li_tags, start=1):
-        item_text = li_direct_text(li) or clean_text(li.get_text(" ", strip=True))
+        item_text = li_direct_text(li, active_note_refs) or clean_text(
+            li.get_text(" ", strip=True)
+        )
         if not item_text:
             continue
         if list_tag.name == "ol":
@@ -148,13 +161,14 @@ def render_list_tag(list_tag: Tag) -> str:
     return "\n".join(lines)
 
 
-def render_block_tag(tag: Tag) -> tuple[str, str]:
+def render_block_tag(tag: Tag, note_refs: set[str] | None = None) -> tuple[str, str]:
+    active_note_refs = note_refs if note_refs is not None else set()
     if tag.name == "p":
-        return ("p", render_tag_text(tag))
+        return ("p", render_tag_text(tag, active_note_refs))
     if tag.name in ("ul", "ol"):
-        return (tag.name, render_list_tag(tag))
+        return (tag.name, render_list_tag(tag, active_note_refs))
     if tag.name == "table":
-        return ("table", render_tag_text(tag))
+        return ("table", render_tag_text(tag, active_note_refs))
     return ("", "")
 
 
@@ -188,18 +202,19 @@ def add_row(rows, assessable, depth, ref_id, name, description):
             "ref_id": ref_id,
             "name": name,
             "description": description,
+            "annotation": "",
         }
     )
 
 
-def extract_disc_text(details_tag: Tag) -> str:
+def extract_disc_text(details_tag: Tag, note_refs: set[str]) -> str:
     for h5 in details_tag.find_all("h5"):
         if clean_text(h5.get_text(" ", strip=True)).lower() == "discussion":
             disc_parts = []
             sib = h5.find_next_sibling()
             while sib is not None and not (isinstance(sib, Tag) and sib.name == "h5"):
                 if isinstance(sib, Tag):
-                    block_type, text = render_block_tag(sib)
+                    block_type, text = render_block_tag(sib, note_refs)
                     if text:
                         disc_parts.append((block_type, text))
                 sib = sib.find_next_sibling()
@@ -207,19 +222,50 @@ def extract_disc_text(details_tag: Tag) -> str:
     return ""
 
 
-def first_body_paragraph(details_tag: Tag):
+def first_body_paragraph(details_tag: Tag, note_refs: set[str]):
     for child in details_tag.children:
         if isinstance(child, Tag) and child.name == "summary":
             continue
         if isinstance(child, Tag) and child.name == "h5":
             break
         if isinstance(child, Tag) and child.name == "p":
-            return render_tag_text(child)
+            return render_tag_text(child, note_refs)
         if isinstance(child, Tag):
             p = child.find("p")
             if p:
-                return render_tag_text(p)
+                return render_tag_text(p, note_refs)
     return None
+
+
+def extract_footnotes_map(soup: BeautifulSoup) -> dict[str, str]:
+    footnotes: dict[str, str] = {}
+    for dd in soup.find_all("dd", id=True):
+        match = re.match(r"^fn(\d+)$", dd.get("id", ""))
+        if not match:
+            continue
+        footnote_num = match.group(1)
+        blocks = []
+        for child in dd.children:
+            if not isinstance(child, Tag):
+                continue
+            if child.name == "p" and "fn-rtn" in child.get("class", []):
+                continue
+            block_type, text = render_block_tag(child, set())
+            if text:
+                blocks.append((block_type, text))
+        footnotes[footnote_num] = join_rendered_blocks(blocks)
+    return footnotes
+
+
+def build_annotation(note_refs: set[str], footnotes_map: dict[str, str]) -> str:
+    if not note_refs:
+        return ""
+    parts = []
+    for num in sorted(note_refs, key=lambda x: int(x)):
+        text = footnotes_map.get(num, "")
+        if text:
+            parts.append(f"({num}) {text}")
+    return "\n\n".join(parts)
 
 
 def parse_nested_list(
@@ -229,17 +275,26 @@ def parse_nested_list(
     alpha_label: str,
     num_path: list[int],
     depth: int,
+    footnotes_map: dict[str, str],
 ):
     li_tags = [c for c in nested_list.children if isinstance(c, Tag) and c.name == "li"]
     for idx, li in enumerate(li_tags, start=1):
-        text = li_direct_text(li) or clean_text(li.get_text(" ", strip=True))
+        note_refs = set()
+        text = li_direct_text(li, note_refs) or clean_text(li.get_text(" ", strip=True))
         full_path = [alpha_label] + num_path + [idx]
         ref_id = base_req_id + "." + ".".join(str(p) for p in full_path)
         add_row(rows, "x", depth, ref_id, "", text)
+        rows[-1]["annotation"] = build_annotation(note_refs, footnotes_map)
 
         for sub in li.find_all(["ol", "ul"], recursive=False):
             parse_nested_list(
-                sub, rows, base_req_id, alpha_label, num_path + [idx], depth + 1
+                sub,
+                rows,
+                base_req_id,
+                alpha_label,
+                num_path + [idx],
+                depth + 1,
+                footnotes_map,
             )
 
 
@@ -282,17 +337,17 @@ def iter_elements_until(start_tag: Tag, stop_predicate):
         yield el
 
 
-def collect_text(elements) -> str:
+def collect_text(elements, note_refs: set[str]) -> str:
     parts = []
     for el in elements:
         if isinstance(el, Tag):
-            block_type, text = render_block_tag(el)
+            block_type, text = render_block_tag(el, note_refs)
             if text:
                 parts.append((block_type, text))
     return join_rendered_blocks(parts)
 
 
-def parse_requirement_detail(details_tag: Tag, rows):
+def parse_requirement_detail(details_tag: Tag, rows, footnotes_map: dict[str, str]):
     h4 = details_tag.find("h4", id=True)
     if not h4:
         return
@@ -318,25 +373,32 @@ def parse_requirement_detail(details_tag: Tag, rows):
         for idx, li in enumerate(alpha_list.find_all("li", recursive=False)):
             alpha = string.ascii_uppercase[idx]
             ref_a = f"{req_id}.{alpha}"
-            text = li_direct_text(li) or clean_text(li.get_text(" ", strip=True))
+            note_refs = set()
+            text = li_direct_text(li, note_refs) or clean_text(li.get_text(" ", strip=True))
             add_row(rows, "x", 4, ref_a, "", text)
+            rows[-1]["annotation"] = build_annotation(note_refs, footnotes_map)
             used_alpha = True
 
             for sub in li.find_all(["ol", "ul"], recursive=False):
-                parse_nested_list(sub, rows, req_id, alpha, [], 5)
+                parse_nested_list(sub, rows, req_id, alpha, [], 5, footnotes_map)
 
     if not used_alpha:
-        para = first_body_paragraph(details_tag)
+        note_refs = set()
+        para = first_body_paragraph(details_tag, note_refs)
         if para:
             add_row(rows, "x", 4, f"{req_id}.A", "", para)
+            rows[-1]["annotation"] = build_annotation(note_refs, footnotes_map)
 
-    disc = extract_disc_text(details_tag)
+    note_refs = set()
+    disc = extract_disc_text(details_tag, note_refs)
     if disc:
         add_row(rows, "", 4, f"{req_id}.disc", "Discussion", disc)
+        rows[-1]["annotation"] = build_annotation(note_refs, footnotes_map)
 
 
 def parse_requirements_from_html(html: str) -> pd.DataFrame:
     soup = BeautifulSoup(html, "lxml")
+    footnotes_map = extract_footnotes_map(soup)
     rows = []
 
     for h2 in soup.find_all("h2", id=True):
@@ -348,10 +410,13 @@ def parse_requirements_from_html(html: str) -> pd.DataFrame:
         top_id = h2_match.group(1)
         top_name = clean_text(h2_match.group(2))
 
+        top_note_refs = set()
         top_desc = collect_text(
-            iter_elements_until(h2, lambda t: is_top_h2(t) or is_section_h3(t))
+            iter_elements_until(h2, lambda t: is_top_h2(t) or is_section_h3(t)),
+            top_note_refs,
         )
         add_row(rows, "", 1, top_id, top_name, top_desc)
+        rows[-1]["annotation"] = build_annotation(top_note_refs, footnotes_map)
 
         seen_h3 = set()
         for el in iter_elements_until(h2, lambda t: is_top_h2(t)):
@@ -369,6 +434,7 @@ def parse_requirements_from_html(html: str) -> pd.DataFrame:
                 continue
 
             sec_id, sec_name = m.group(1), clean_text(m.group(2))
+            sec_note_refs = set()
             sec_desc = collect_text(
                 iter_elements_until(
                     h3,
@@ -379,17 +445,20 @@ def parse_requirements_from_html(html: str) -> pd.DataFrame:
                         or is_requirement_h4(t)
                     ),
                 )
+                ,
+                sec_note_refs,
             )
             add_row(rows, "", 2, sec_id, sec_name, sec_desc)
+            rows[-1]["annotation"] = build_annotation(sec_note_refs, footnotes_map)
 
             for req_el in iter_elements_until(
                 h3, lambda t: is_top_h2(t) or is_section_h3(t)
             ):
                 if isinstance(req_el, Tag) and req_el.name == "details":
-                    parse_requirement_detail(req_el, rows)
+                    parse_requirement_detail(req_el, rows, footnotes_map)
 
     return pd.DataFrame(
-        rows, columns=["assessable", "depth", "ref_id", "name", "description"]
+        rows, columns=["assessable", "depth", "ref_id", "name", "description", "annotation"]
     )
 
 
@@ -417,8 +486,14 @@ def build_excel_from_urls(
 
     df_fr = parse_requirements_from_html(html_fr)
     df_en = parse_requirements_from_html(html_en)[
-        ["ref_id", "name", "description"]
-    ].rename(columns={"name": "name[en]", "description": "description[en]"})
+        ["ref_id", "name", "description", "annotation"]
+    ].rename(
+        columns={
+            "name": "name[en]",
+            "description": "description[en]",
+            "annotation": "annotation[en]",
+        }
+    )
 
     df = df_fr.merge(df_en, on="ref_id", how="left")
     df = df[
@@ -428,8 +503,10 @@ def build_excel_from_urls(
             "ref_id",
             "name",
             "description",
+            "annotation",
             "name[en]",
             "description[en]",
+            "annotation[en]",
         ]
     ]
     df = add_review_flag(df)
