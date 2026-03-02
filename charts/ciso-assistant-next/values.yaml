@@ -50,6 +50,20 @@ global:
   # -- Default tolerations for all components
   tolerations: []
 
+## Service Account
+serviceAccount:
+  # -- Create a service account for CISO Assistant
+  create: false
+  # -- Service account name
+  # @default -- `""` (defaults to fullname)
+  name: ""
+  # -- Annotations applied to created service account
+  annotations: {} # @schema additionalProperties: true
+  # -- Labels applied to created service account
+  labels: {} # @schema additionalProperties: true
+  # -- Automount API credentials for the Service Account
+  automountServiceAccountToken: true
+
 ## CISO Assistant backend
 backend:
   # -- Backend container name

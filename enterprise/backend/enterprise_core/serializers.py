@@ -3,10 +3,16 @@ from global_settings.models import GlobalSettings
 from rest_framework import serializers
 from core.serializers import (
     BaseModelSerializer,
+    FolderWriteSerializer as CommunityFolderWriteSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User, Role
+
+from global_settings.models import GlobalSettings
+from global_settings.serializers import (
+    FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
+)
 
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
@@ -18,18 +24,12 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class FolderWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Folder
-        exclude = [
-            "builtin",
-            "content_type",
-        ]
-
+class FolderWriteSerializer(CommunityFolderWriteSerializer):
     def validate_parent_folder(self, parent_folder):
         """
         Check that the folders graph will not contain cycles
         """
+        parent_folder = super().validate_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -69,7 +69,7 @@ class EditorPermissionMixin:
         editors = User.get_editors()
         seats = settings.LICENSE_SEATS
 
-        perms = group.permissions
+        perms = [p for p in group.permissions if p not in User.NON_SEAT_PERMISSIONS]
         if any(perm.startswith(prefix) for prefix in editor_prefixes for perm in perms):
             logger.info("Adding editor permissions to user", user=instance, group=group)
             if instance not in editors and len(editors) >= seats:
@@ -93,6 +93,10 @@ class UserWriteSerializer(CommunityUserWriteSerializer, EditorPermissionMixin):
             )
             for group in validated_data["user_groups"]:
                 self.check_editor_permissions(instance, group)
+
+    def create(self, validated_data):
+        self._update_user_groups(None, validated_data)
+        return super().create(validated_data)
 
     def update(self, instance: User, validated_data):
         self._update_user_groups(instance, validated_data)
@@ -180,11 +184,10 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     BooleanField, mapping directly to keys within the 'value' dictionary.
     """
 
+    campaigns = serializers.BooleanField(
+        source="value.campaigns", required=False, default=True
+    )
+
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False
     )
-
-    class Meta:
-        model = GlobalSettings
-        fields = "__all__"
-        read_only_fields = ["name"]

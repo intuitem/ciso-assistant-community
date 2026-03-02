@@ -10,6 +10,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import {
+	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
 	handleErrorResponse
@@ -57,6 +58,13 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	update: async (event) => {
+		return defaultWriteFormAction({
+			event,
+			urlModel: event.params.model,
+			action: 'edit'
+		});
 	},
 	duplicate: async (event) => {
 		const formData = await event.request.formData();

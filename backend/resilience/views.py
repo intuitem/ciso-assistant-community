@@ -202,16 +202,15 @@ class EscalationThresholdViewSet(BaseModelViewSet):
     def quant_unit(self, request):
         return Response(dict(EscalationThreshold.QUANT_IMPACT_UNIT))
 
-    @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=True, name="Get impact choices")
     def quali_impact(self, request, pk):
         escalation_threshold = self.get_object()
-        undefined = dict([(-1, "--")])
-        _choices = dict(
-            zip(
-                list(range(0, 64)),
-                [x["name"] for x in escalation_threshold.parsed_matrix["impact"]],
+        undefined_choice = {-1: "--"}
+        impact_choices = dict(
+            enumerate(
+                impact["name"]
+                for impact in escalation_threshold.parsed_matrix["impact"]
             )
         )
-        choices = undefined | _choices
+        choices = undefined_choice | impact_choices
         return Response(choices)

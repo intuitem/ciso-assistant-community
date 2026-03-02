@@ -149,25 +149,36 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// Session is invalid
 		if (clonedResponse.status === 410) logoutUser(event);
 
-		if (clonedResponse.status === 401) {
-			const data = await clonedResponse.json();
-			const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
-			console.log(data);
+		// Skip 401 interception for auth endpoints (/auth/login, /auth/2fa/authenticate, etc.)
+		// because 401 is an expected response during login/MFA flows (e.g. "MFA required").
+		// Only intercept 401 on account management endpoints (/account/...).
+		const isAuthEndpoint = request.url.includes('/_allauth/app/v1/auth/');
 
-			if (
-				// User is authenticated, but needs to reauthenticate to perform a sensitive action
-				data.meta.is_authenticated &&
-				data.data.flows.filter((flow: Record<string, any>) =>
-					reauthenticationFlows.includes(flow.id)
-				)
-			) {
-				setFlash(
-					{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
-					event
-				);
-				// NOTE: This is a temporary solution to force the user to reauthenticate
-				// We have to properly implement allauth's reauthentication flow
-				// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
+		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
+			try {
+				const data = await clonedResponse.json();
+				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];
+
+				if (!data.meta?.is_authenticated) {
+					// Allauth session has fully expired — force logout
+					logoutUser(event);
+				} else if (
+					// User is authenticated, but needs to reauthenticate to perform a sensitive action
+					data.data?.flows?.some((flow: Record<string, any>) =>
+						reauthenticationFlows.includes(flow.id)
+					)
+				) {
+					setFlash(
+						{ type: 'warning', message: safeTranslate('reauthenticateForSensitiveAction') },
+						event
+					);
+					// NOTE: This is a temporary solution to force the user to reauthenticate
+					// We have to properly implement allauth's reauthentication flow
+					// https://docs.allauth.org/en/latest/headless/openapi-specification/#tag/Authentication:-Account/paths/~1_allauth~1%7Bclient%7D~1v1~1auth~1reauthenticate/post
+					logoutUser(event);
+				}
+			} catch {
+				// Malformed response — force logout to be safe
 				logoutUser(event);
 			}
 		}

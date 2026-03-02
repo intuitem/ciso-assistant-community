@@ -62,6 +62,7 @@ from .tools.update_tools import (
     update_risk_scenario,
     update_applied_control,
     update_requirement_assessment,
+    update_requirement_assessments,
     update_quantitative_risk_study,
     update_quantitative_risk_scenario,
     update_quantitative_risk_hypothesis,
@@ -173,6 +174,7 @@ mcp.tool()(update_asset)
 mcp.tool()(update_risk_scenario)
 mcp.tool()(update_applied_control)
 mcp.tool()(update_requirement_assessment)
+mcp.tool()(update_requirement_assessments)
 mcp.tool()(update_quantitative_risk_study)
 mcp.tool()(update_quantitative_risk_scenario)
 mcp.tool()(update_quantitative_risk_hypothesis)

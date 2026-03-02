@@ -1748,9 +1748,13 @@ msgstr "Analyste"
 msgid "Reader"
 msgstr "Lecteur"
 
+#: core/utils.py
+msgid "Auditee"
+msgstr "Répondant"
+
 #: core/utils.py:76 core/utils.py:87
 msgid "Third-party respondent"
-msgstr ""
+msgstr "Tier"
 
 #: core/utils.py:100
 msgid "French"

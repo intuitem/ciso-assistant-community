@@ -1,3 +1,4 @@
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
@@ -28,12 +29,14 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
 
 import csv
 import io
+import uuid
 import zipfile
 from datetime import datetime
 
@@ -593,13 +596,13 @@ class EntityViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify folder exists and user has access
-            if not RoleAssignment.is_object_readable(request.user, Folder, folder_id):
+            try:
+                folder = Folder.objects.get(id=uuid.UUID(str(folder_id)))
+            except (ValueError, AttributeError, Folder.DoesNotExist):
                 return Response(
                     {"error": "Folder not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
-            folder = Folder.objects.get(id=folder_id)
 
             # Parse the entities text
             lines = [line.strip() for line in entities_text.split("\n") if line.strip()]
@@ -624,7 +627,7 @@ class EntityViewSet(BaseModelViewSet):
 
                 # Check if entity already exists in the folder
                 existing_entity = Entity.objects.filter(
-                    name=entity_name, folder=folder_id
+                    name=entity_name, folder=folder
                 ).first()
 
                 if existing_entity:
@@ -641,7 +644,7 @@ class EntityViewSet(BaseModelViewSet):
                 # Create new entity using the serializer to respect IAM
                 entity_data = {
                     "name": entity_name,
-                    "folder": folder_id,
+                    "folder": str(folder.id),
                 }
 
                 if ref_id:
@@ -652,7 +655,13 @@ class EntityViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    entity = serializer.save()
+                    try:
+                        entity = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_entities.append(
                         {
@@ -768,7 +777,7 @@ class EntityAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment_id": ea.compliance_assessment.id
                 if ea.compliance_assessment
                 else "#",
-                "reviewers": ",".join([re.email for re in ea.reviewers.all()])
+                "reviewers": ",".join([str(re.specific) for re in ea.reviewers.all()])
                 if len(ea.reviewers.all())
                 else "-",
                 "observation": ea.observation if ea.observation else "-",
@@ -871,7 +880,7 @@ class SolutionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get alternative providers identified choices")
     def dora_alternative_providers_identified(self, request):
-        return Response(dict(DORA_BINARY_CHOICES))
+        return Response(dict(DORA_YES_NO_ASSESSMENT_CHOICES))
 
     def perform_create(self, serializer):
         serializer.save()

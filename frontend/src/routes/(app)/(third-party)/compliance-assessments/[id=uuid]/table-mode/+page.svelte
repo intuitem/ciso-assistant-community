@@ -24,7 +24,7 @@
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { Accordion, ProgressRing, Switch } from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Progress, Switch } from '@skeletonlabs/skeleton-svelte';
 	import { superForm, type SuperForm } from 'sveltekit-superforms';
 	import type { Actions, PageData } from './$types';
 	import TableOfContents from '$lib/components/TableOfContents/TableOfContents.svelte';
@@ -75,6 +75,10 @@
 	let hideSuggestionHashmap: Record<string, boolean> = $state({});
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
+
+	let isReadOnly = $derived(
+		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+	);
 
 	const hasQuestions = $derived(
 		requirementAssessments.some(
@@ -198,19 +202,17 @@
 	);
 
 	async function updateScore(requirementAssessment: Record<string, any>) {
-		const isScored = requirementAssessment.is_scored;
 		const score = requirementAssessment.score;
 		const documentationScore = requirementAssessment.documentation_score;
-		requirementAssessmentScores[requirementAssessment.id] = [isScored, score, documentationScore];
+		requirementAssessmentScores[requirementAssessment.id] = [
+			requirementAssessment.is_scored,
+			score,
+			documentationScore
+		];
 		setTimeout(async () => {
 			const currentScoreValue = requirementAssessmentScores[requirementAssessment.id];
-			if (
-				isScored === currentScoreValue[0] &&
-				score === currentScoreValue[1] &&
-				documentationScore === currentScoreValue[2]
-			) {
+			if (score === currentScoreValue[1] && documentationScore === currentScoreValue[2]) {
 				await updateBulk(requirementAssessment, {
-					is_scored: isScored,
 					score: score,
 					documentation_score: documentationScore
 				});
@@ -376,13 +378,15 @@
 						{/if}
 						<Switch
 							name="questionnaireToggle"
-							classes="flex flex-row items-center justify-center"
-							controlActive="bg-primary-500"
-							controlInactive="bg-green-500"
+							class="flex flex-row items-center justify-center"
 							onCheckedChange={(e) => {
 								questionnaireMode = e.checked;
 							}}
 						>
+							<Switch.Control>
+								<Switch.Thumb />
+							</Switch.Control>
+							<Switch.HiddenInput />
 							{#if questionnaireMode}
 								<p class="font-bold text-sm text-primary-500">{m.questionnaireMode()}</p>
 							{:else}
@@ -391,6 +395,19 @@
 						</Switch>
 					</div>
 				{/if}
+			</div>
+		{/if}
+		<!-- Read-only banner -->
+		{#if isReadOnly}
+			<div
+				class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3 my-2"
+			>
+				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
+				<p class="text-yellow-800 font-medium">
+					{complianceAssessment.is_locked
+						? m.lockedAssessmentMessage()
+						: m.assessmentInReviewMessage()}
+				</p>
 			</div>
 		{/if}
 		<ul data-testid="requirement-assessments">
@@ -550,26 +567,33 @@
 								>
 									{#if !questionnaireMode}
 										<div class="flex flex-row w-full space-x-2 my-4">
-											<div class="flex flex-col items-center w-1/2">
-												<p class="flex items-center font-semibold text-blue-600 italic">
-													{m.status()}
-												</p>
-												<RadioGroup
-													possibleOptions={status_options}
-													key="id"
-													labelKey="label"
-													field="status"
-													colorMap={complianceStatusTailwindColorMap}
-													initialValue={requirementAssessment.status}
-													onChange={(newValue) => {
-														const newStatus =
-															requirementAssessment.status === newValue ? 'to_do' : newValue;
-														requirementAssessment.status = newStatus;
-														update(requirementAssessment, 'status');
-													}}
-												/>
-											</div>
-											<div class="flex flex-col items-center w-1/2">
+											{#if complianceAssessment.progress_status_enabled}
+												<div class="flex flex-col items-center w-1/2">
+													<p class="flex items-center font-semibold text-blue-600 italic">
+														{m.status()}
+													</p>
+													<RadioGroup
+														possibleOptions={status_options}
+														key="id"
+														labelKey="label"
+														field="status"
+														colorMap={complianceStatusTailwindColorMap}
+														disabled={isReadOnly}
+														initialValue={requirementAssessment.status}
+														onChange={(newValue) => {
+															const newStatus =
+																requirementAssessment.status === newValue ? 'to_do' : newValue;
+															requirementAssessment.status = newStatus;
+															update(requirementAssessment, 'status');
+														}}
+													/>
+												</div>
+											{/if}
+											<div
+												class="flex flex-col items-center {complianceAssessment.progress_status_enabled
+													? 'w-1/2'
+													: 'w-full'}"
+											>
 												<p class="flex items-center font-semibold text-purple-600 italic">
 													{m.result()}
 												</p>
@@ -589,6 +613,7 @@
 														labelKey="label"
 														field="result"
 														colorMap={complianceResultTailwindColorMap}
+														disabled={isReadOnly}
 														initialValue={requirementAssessment.result}
 														onChange={(newValue) => {
 															const newResult =
@@ -609,6 +634,7 @@
 												questions={requirementAssessment.requirement.questions}
 												initialValue={requirementAssessment.answers}
 												field="answers"
+												disabled={isReadOnly}
 												{shallow}
 												onChange={(urn, newAnswer) => {
 													requirementAssessment.answers[urn] = newAnswer;
@@ -617,26 +643,40 @@
 											/>
 										</div>
 									{/if}
-									<div class="flex flex-col w-full place-items-center">
+									<div
+										class="flex flex-col w-full place-items-center {isReadOnly
+											? 'pointer-events-none opacity-60'
+											: ''}"
+									>
 										{#if !shallow}
 											{#if Object.values(requirementAssessment.requirement.questions || {}).some((question) => Array.isArray(question.choices) && question.choices.some((choice) => choice.add_score !== undefined))}
 												<div class="flex flex-row items-center space-x-4">
 													<span class="font-medium">{m.score()}</span>
-													<ProgressRing
-														strokeWidth="20px"
-														meterStroke={displayScoreColor(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-														value={formatScoreValue(
-															requirementAssessment.score,
-															complianceAssessment.max_score
-														)}
-														classes="shrink-0"
-														size="size-10">{requirementAssessment.score}</ProgressRing
-													>
+													<div class="shrink-0 relative">
+														<Progress
+															value={formatScoreValue(
+																requirementAssessment.score,
+																complianceAssessment.max_score
+															)}
+															min={0}
+															max={100}
+														>
+															<Progress.Circle class="[--size:--spacing(10)]">
+																<Progress.CircleTrack />
+																<Progress.CircleRange
+																	class={displayScoreColor(
+																		requirementAssessment.score,
+																		complianceAssessment.max_score
+																	)}
+																/>
+															</Progress.Circle>
+															<div class="absolute inset-0 flex items-center justify-center">
+																<span class="text-xs font-bold">{requirementAssessment.score}</span>
+															</div>
+														</Progress>
+													</div>
 												</div>
-											{:else}
+											{:else if requirementAssessment.result !== 'not_applicable'}
 												<Score
 													form={scoreForms[requirementAssessment.id]}
 													min_score={complianceAssessment.min_score}
@@ -651,22 +691,21 @@
 														requirementAssessment.score = newScore;
 														updateScore(requirementAssessment);
 													}}
-													disabled={!requirementAssessment.is_scored ||
-														requirementAssessment.result === 'not_applicable'}
+													disabled={!requirementAssessment.is_scored}
 												>
 													{#snippet left()}
 														<div>
 															<Checkbox
 																form={isScoredForms[requirementAssessment.id]}
 																field="is_scored"
+																disabled={isReadOnly}
 																label={''}
 																helpText={m.scoringHelpText()}
 																checkboxComponent="switch"
 																classes="h-full flex flex-row items-center justify-center my-1"
 																classesContainer="h-full flex flex-row items-center space-x-4"
-																onChange={async () => {
-																	requirementAssessment.is_scored =
-																		!requirementAssessment.is_scored;
+																onChange={async (newValue) => {
+																	requirementAssessment.is_scored = newValue;
 																	await update(requirementAssessment, 'is_scored');
 																}}
 															/>
@@ -687,55 +726,87 @@
 															requirementAssessment.documentation_score = newScore;
 															updateScore(requirementAssessment);
 														}}
-														disabled={!requirementAssessment.is_scored ||
-															requirementAssessment.result === 'not_applicable'}
+														disabled={!requirementAssessment.is_scored}
 													/>
 												{/if}
 											{/if}
 										{:else if complianceAssessment.show_documentation_score && requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.implementationScoreResult()}</span>
-												<ProgressRing
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.score ?? '--'}
-												</ProgressRing>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 												<span>{m.documentationScoreResult()}</span>
-												<ProgressRing
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.documentation_score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.documentation_score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.documentation_score ?? '--'}
-												</ProgressRing>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.documentation_score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.documentation_score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.documentation_score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 											</div>
 										{:else if requirementAssessment.is_scored}
 											<div class="flex flex-row items-center space-x-2 w-full">
 												<span>{m.scoreResult()}</span>
-												<ProgressRing
-													strokeWidth="20px"
-													meterStroke={displayScoreColor(
-														requirementAssessment.score,
-														complianceAssessment.max_score
-													)}
-													value={(requirementAssessment.score * 100) /
-														complianceAssessment.max_score}
-													size="size-10"
-												>
-													{requirementAssessment.score ?? '--'}
-												</ProgressRing>
+												<div class="relative">
+													<Progress
+														value={(requirementAssessment.score * 100) /
+															complianceAssessment.max_score}
+														min={0}
+														max={100}
+													>
+														<Progress.Circle class="[--size:--spacing(10)]">
+															<Progress.CircleTrack />
+															<Progress.CircleRange
+																class={displayScoreColor(
+																	requirementAssessment.score,
+																	complianceAssessment.max_score
+																)}
+															/>
+														</Progress.Circle>
+														<div class="absolute inset-0 flex items-center justify-center">
+															<span class="text-xs font-bold"
+																>{requirementAssessment.score ?? '--'}</span
+															>
+														</div>
+													</Progress>
+												</div>
 											</div>
 										{/if}
 										<Accordion
@@ -753,18 +824,32 @@
 												{/if}
 											{:else}
 												<Accordion.Item value="observation">
-													{#snippet control()}
-														<p class="flex">{m.observation()}</p>
-													{/snippet}
-													{#snippet panel()}
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 text-left">{m.observation()}</p>
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<TableMarkdownField
 															bind:value={requirementAssessment.observation}
+															disabled={isReadOnly}
 															onSave={async (newValue) => {
 																await update(requirementAssessment, 'observation');
 																requirementAssessment.observationBuffer = newValue;
 															}}
 														/>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 
@@ -772,8 +857,8 @@
 												<p class="text-gray-400 italic">{m.noAppliedControlYet()}</p>
 											{:else}
 												<Accordion.Item value="appliedControl">
-													{#snippet control()}
-														<p class="flex items-center space-x-2">
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 items-center space-x-2 text-left">
 															<span>{m.appliedControl()}</span>
 															{#key addedMeasure}
 																{#if requirementAssessment.applied_controls != null}
@@ -783,10 +868,23 @@
 																{/if}
 															{/key}
 														</p>
-													{/snippet}
-													{#snippet panel()}
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<div class="flex flex-row space-x-2 items-center">
-															{#if !shallow}
+															{#if !shallow && !isReadOnly}
 																<button
 																	class="btn preset-filled-primary-500 self-start"
 																	onclick={() =>
@@ -820,7 +918,7 @@
 																{/each}
 															{/key}
 														</div>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 
@@ -830,8 +928,8 @@
 												</p>
 											{:else}
 												<Accordion.Item value="evidence">
-													{#snippet control()}
-														<p class="flex items-center space-x-2">
+													<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+														<p class="flex flex-1 items-center space-x-2 text-left">
 															<span>{m.evidence()}</span>
 															{#key addedEvidence}
 																{#if requirementAssessment.evidences != null}
@@ -843,10 +941,23 @@
 																{/if}
 															{/key}
 														</p>
-													{/snippet}
-													{#snippet panel()}
+
+														<Accordion.ItemIndicator
+															class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+															><svg
+																xmlns="http://www.w3.org/2000/svg"
+																width="14px"
+																height="14px"
+																viewBox="0 0 448 512"
+																><path
+																	d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+																/></svg
+															></Accordion.ItemIndicator
+														>
+													</Accordion.ItemTrigger>
+													<Accordion.ItemContent>
 														<div class="flex flex-row space-x-2 items-center">
-															{#if !shallow}
+															{#if !shallow && !isReadOnly}
 																<button
 																	class="btn preset-filled-primary-500 self-start"
 																	onclick={() =>
@@ -883,7 +994,7 @@
 																{/each}
 															{/key}
 														</div>
-													{/snippet}
+													</Accordion.ItemContent>
 												</Accordion.Item>
 											{/if}
 										</Accordion>

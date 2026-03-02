@@ -92,15 +92,20 @@
 				{/if}
 
 				{#if fearedEventsWithAssets && fearedEventsWithAssets.length > 0}
-					<div class="flex flex-wrap items-center gap-2">
-						{#each fearedEventsWithAssets as fe}
-							{#each fe.assets as asset}
+					{@const uniqueAssets = [
+						...new Map(
+							fearedEventsWithAssets.flatMap((fe) => fe.assets).map((a) => [a.id, a])
+						).values()
+					]}
+					{#if uniqueAssets.length > 0}
+						<div class="flex flex-wrap items-center gap-2">
+							{#each uniqueAssets as asset}
 								<span class="px-2 py-1 bg-cyan-100 text-cyan-800 rounded text-xs">
 									{asset.str}
 								</span>
 							{/each}
-						{/each}
-					</div>
+						</div>
+					{/if}
 				{/if}
 			</div>
 		</div>
