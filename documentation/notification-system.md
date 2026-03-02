@@ -175,6 +175,7 @@ These are triggered from serializer `create()` / `update()` methods when users a
 | AppliedControl owner assigned | `AppliedControlWriteSerializer.create/update` | `send_applied_control_assignment_notification` | `applied_control_assignment` |
 | ComplianceAssessment author assigned | `ComplianceAssessmentWriteSerializer.create/update` | `send_compliance_assessment_assignment_notification` | `compliance_assessment_assignment` |
 | TaskTemplate assigned_to set | `TaskTemplateWriteSerializer.create/update` | `send_task_template_assignment_notification` | `task_template_assignment` |
+| RiskScenario owner assigned | `RiskScenarioWriteSerializer.create/update` | `send_risk_scenario_assignment_notification` | `risk_scenario_assignment` |
 | ValidationFlow created | `ValidationFlowWriteSerializer.create` | `send_validation_flow_created_notification` | `validation_flow_created` |
 | ValidationFlow status changed | `ValidationFlowWriteSerializer.update` | `send_validation_flow_updated_notification` | `validation_flow_updated` |
 
@@ -256,6 +257,7 @@ This means assigning a Team as owner of a control can notify multiple people in 
 | `applied_control_expiring_soon.yaml` | `send_applied_control_expiring_soon_notification` |
 | `compliance_assessment_assignment.yaml` | `send_compliance_assessment_assignment_notification` |
 | `compliance_assessment_due_soon.yaml` | `send_compliance_assessment_due_soon_notification` |
+| `risk_scenario_assignment.yaml` | `send_risk_scenario_assignment_notification` |
 | `evidence_expiring_soon.yaml` | `send_evidence_expiring_soon_notification` |
 | `expired_evidences.yaml` | `send_notification_email_expired_evidence` |
 | `task_template_assignment.yaml` | `send_task_template_assignment_notification` |
@@ -267,7 +269,7 @@ This means assigning a Team as owner of a control can notify multiple people in 
 
 ### French (`fr/`)
 
-All English templates have a matching French translation. Both directories contain 13 templates.
+All English templates have a matching French translation. Both directories contain 14 templates.
 
 ---
 
@@ -369,24 +371,22 @@ All English templates have a matching French translation. Both directories conta
 
 ### High Value
 
-1. **Risk scenario notifications**: Notify risk owners when risk scenarios change status or when risk levels exceed thresholds. Add to `RiskScenarioWriteSerializer`.
+1. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
 
-2. **Requirement assessment status change**: Notify assigned actors when a requirement assessment result changes (e.g., from `non_compliant` to `partially_compliant`). Useful for audit workflows.
+2. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
 
-3. **Incident notifications**: When a new incident is created or its severity changes, notify relevant stakeholders. The `Incident` model has owners who should be alerted.
-
-4. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
+3. **Compliance assessment status transitions**: Notify authors when an assessment moves to `in_review` or `done` status, especially when auto-locked by `lock_overdue_compliance_assessments`.
 
 ### Medium Value
 
-5. **In-app notification center**: Add a `Notification` model to store notifications in the database, with a frontend notification bell/inbox. This would complement emails and work when email is not configured.
+4. **In-app notification center**: Add a `Notification` model to store notifications in the database, with a frontend notification bell/inbox. This would complement emails and work when email is not configured.
 
-6. **Digest emails**: Instead of individual emails per event, offer a daily/weekly digest option that aggregates all pending notifications into a single email per user.
+5. **Digest emails**: Instead of individual emails per event, offer a daily/weekly digest option that aggregates all pending notifications into a single email per user.
 
-7. **Notification preferences per user**: Allow users to opt in/out of specific notification categories (assignments, deadlines, status changes) via their profile settings.
+6. **Notification preferences per user**: Allow users to opt in/out of specific notification categories (assignments, deadlines, status changes) via their profile settings.
 
-8. **Entity/TPRM notifications**: Notify entity contacts when an entity assessment is created or its compliance assessment is due. Relevant for third-party risk management workflows.
+7. **Entity/TPRM notifications**: Notify entity contacts when an entity assessment is created or its compliance assessment is due. Relevant for third-party risk management workflows.
 
 ### Low Effort / Quick Wins
 
-9. **Additional locales**: The template system supports any locale. Add templates for other supported languages (e.g., `de/`, `es/`, `pt/`, `ar/`) as the user base grows.
+8. **Additional locales**: The template system supports any locale. Add templates for other supported languages (e.g., `de/`, `es/`, `pt/`, `ar/`) as the user base grows.
