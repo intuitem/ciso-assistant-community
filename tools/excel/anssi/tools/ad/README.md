@@ -9,3 +9,10 @@ pip install -r requirements.txt
 ```shell
 playwright install firefox
 ```
+
+## Step 3
+```shell
+python anssi_ad_framework_builder.py
+```
+
+*Note: Use `python3` instead if `python` doesn't work.*
