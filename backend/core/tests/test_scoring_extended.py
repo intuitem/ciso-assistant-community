@@ -297,10 +297,15 @@ class TestScoringExtended:
         )
         a2.selected_choices.set([d["q2_good"]])
 
+        # Set a non-default result to prove compute_score_and_result persists
+        d["ra"].result = "compliant"
+        d["ra"].is_scored = True
+        d["ra"].save(update_fields=["result", "is_scored"])
+
         d["ra"].compute_score_and_result()
         d["ra"].refresh_from_db()
 
-        # No crash; results list empty -> not_assessed
+        # No crash; results list empty -> not_assessed is persisted
         assert d["ra"].result == "not_assessed"
         assert d["ra"].is_scored is False
 

@@ -7436,6 +7436,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         answered_visible_questions = 0
         is_score_computed = False
         is_result_computed = False
+        self.is_scored = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
@@ -7509,6 +7510,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["score", "is_scored"])
         elif is_result_computed:
             self.save(update_fields=["result"])
+        else:
+            self.save(update_fields=["result", "is_scored"])
 
 
 class RequirementAssignment(AbstractBaseModel, FolderMixin):
