@@ -950,6 +950,11 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         related_name="operating_modes",
     )
     likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
+    graph_columns = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="Stage column positions and sizes in the graph editor",
+    )
 
     fields_to_check = ["name", "operational_scenario", "ref_id"]
 

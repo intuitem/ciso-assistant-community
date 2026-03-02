@@ -17,12 +17,16 @@
 
 	let { id, data }: Props = $props();
 
-	const editor = getContext<{ dragOverStage: number | null; readonly: boolean }>('killChainEditor');
+	const editor = getContext<{
+		dragOverStage: number | null;
+		readonly: boolean;
+		markDirty: () => void;
+	}>('killChainEditor');
 	const isHighlighted = $derived(editor?.dragOverStage === data.stage);
 </script>
 
 {#if !editor?.readonly}
-	<NodeResizer minWidth={220} minHeight={300} />
+	<NodeResizer minWidth={220} minHeight={300} onResizeEnd={() => editor?.markDirty()} />
 {/if}
 
 <div

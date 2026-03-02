@@ -40,10 +40,15 @@
 
 	// ---- Props ----
 
+	interface GraphColumns {
+		[stageId: string]: { x: number; y: number; width: number; height: number };
+	}
+
 	interface Props {
 		elementaryActions: ElementaryActionItem[];
 		killChainSteps: KillChainStep[];
 		operatingModeId: string;
+		graphColumns?: GraphColumns;
 		onSaved?: () => void;
 		readonly?: boolean;
 	}
@@ -52,6 +57,7 @@
 		elementaryActions,
 		killChainSteps,
 		operatingModeId,
+		graphColumns = {},
 		onSaved,
 		readonly = false
 	}: Props = $props();
@@ -124,7 +130,8 @@
 			return readonly;
 		},
 		deleteNode: (id: string) => handleDeleteNode(id),
-		toggleOperator: (id: string) => handleToggleOperator(id)
+		toggleOperator: (id: string) => handleToggleOperator(id),
+		markDirty: () => (dirty = true)
 	});
 
 	// ---- Viewport persistence (localStorage, personal) ----
@@ -167,17 +174,21 @@
 	// ---- Build stage column parent nodes ----
 
 	function buildStageColumnNodes(): Node[] {
-		return STAGE_CONFIG.map((config, stage) => ({
-			id: stageColumnId(stage),
-			type: 'stageColumn',
-			position: { x: stage * COLUMN_GAP, y: 0 },
-			style: `width: ${COLUMN_WIDTH}px; height: ${COLUMN_HEIGHT}px;`,
-			data: { ...config, stage },
-			selectable: true,
-			draggable: false,
-			deletable: false,
-			connectable: false
-		}));
+		return STAGE_CONFIG.map((config, stage) => {
+			const colId = stageColumnId(stage);
+			const saved = graphColumns[colId];
+			return {
+				id: colId,
+				type: 'stageColumn',
+				position: saved ? { x: saved.x, y: saved.y } : { x: stage * COLUMN_GAP, y: 0 },
+				style: `width: ${saved?.width ?? COLUMN_WIDTH}px; height: ${saved?.height ?? COLUMN_HEIGHT}px;`,
+				data: { ...config, stage },
+				selectable: true,
+				draggable: false,
+				deletable: false,
+				connectable: false
+			};
+		});
 	}
 
 	// ---- Initialize from existing kill chain ----
@@ -449,6 +460,23 @@
 
 		return JSON.stringify(steps);
 	}
+
+	function buildGraphColumnsJson(): string {
+		const columns: GraphColumns = {};
+		for (const node of nodes) {
+			if (node.type === 'stageColumn') {
+				const w = node.measured?.width ?? node.width ?? COLUMN_WIDTH;
+				const h = node.measured?.height ?? node.height ?? COLUMN_HEIGHT;
+				columns[node.id] = {
+					x: node.position.x,
+					y: node.position.y,
+					width: w,
+					height: h
+				};
+			}
+		}
+		return JSON.stringify(columns);
+	}
 </script>
 
 <div class="flex h-[80vh] bg-surface-50 rounded-base overflow-hidden border border-surface-200">
@@ -493,6 +521,7 @@
 							}}
 						>
 							<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
+							<input type="hidden" name="graph_columns" value={buildGraphColumnsJson()} />
 							<button
 								type="submit"
 								class="btn preset-filled-primary-500 text-sm"
@@ -519,6 +548,7 @@
 				{nodeTypes}
 				isValidConnection={readonly ? () => false : isValidConnection}
 				onconnect={readonly ? undefined : handleConnect}
+				onnodedragstop={readonly ? undefined : () => (dirty = true)}
 				ondelete={readonly ? undefined : handleDelete}
 				onedgeclick={readonly ? undefined : handleEdgeClick}
 				ondragover={readonly ? undefined : handleDragOver}
@@ -532,6 +562,7 @@
 				snapGrid={[10, 10]}
 				fitView
 				defaultEdgeOptions={{
+					type: 'smoothstep',
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
 					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
 				}}

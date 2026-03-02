@@ -156,6 +156,7 @@
 		elementaryActions={data.elementaryActions}
 		killChainSteps={data.killChainSteps}
 		operatingModeId={data.operatingModeId}
+		graphColumns={data.data.graph_columns ?? {}}
 		readonly={!editMode}
 		onSaved={handleSaved}
 	/>

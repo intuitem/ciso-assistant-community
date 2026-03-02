@@ -77,17 +77,19 @@
 		</button>
 	{/if}
 
-	<!-- Handles (edit mode only) -->
-	{#if !editor?.readonly}
-		<Handle
-			type="target"
-			position={Position.Left}
-			class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
-		/>
-		<Handle
-			type="source"
-			position={Position.Right}
-			class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
-		/>
-	{/if}
+	<!-- Handles -->
+	<Handle
+		type="target"
+		position={Position.Left}
+		class={editor?.readonly
+			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
+			: '!w-3 !h-3 !bg-white !border-2 !border-primary-800'}
+	/>
+	<Handle
+		type="source"
+		position={Position.Right}
+		class={editor?.readonly
+			? '!w-0 !h-0 !border-0 !bg-transparent !pointer-events-none'
+			: '!w-3 !h-3 !bg-white !border-2 !border-primary-800'}
+	/>
 </div>

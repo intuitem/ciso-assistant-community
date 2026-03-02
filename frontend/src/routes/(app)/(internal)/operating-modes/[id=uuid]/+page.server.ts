@@ -55,26 +55,34 @@ export const actions: Actions = {
 	saveGraph: async (event) => {
 		const formData = await event.request.formData();
 		const killChainStepsJson = formData.get('kill_chain_steps');
+		const graphColumnsJson = formData.get('graph_columns');
 
 		if (!killChainStepsJson || typeof killChainStepsJson !== 'string') {
 			return fail(400, { error: 'Missing kill_chain_steps data' });
 		}
 
 		let killChainSteps;
+		let graphColumns;
 		try {
 			killChainSteps = JSON.parse(killChainStepsJson);
+			graphColumns = graphColumnsJson ? JSON.parse(graphColumnsJson as string) : undefined;
 		} catch {
-			return fail(400, { error: 'Invalid JSON in kill_chain_steps' });
+			return fail(400, { error: 'Invalid JSON in form data' });
 		}
 
 		const endpoint = `${BASE_API_URL}/ebios-rm/operating-modes/${event.params.id}/save_graph/`;
+
+		const body: Record<string, unknown> = { kill_chain_steps: killChainSteps };
+		if (graphColumns) {
+			body.graph_columns = graphColumns;
+		}
 
 		const response = await event.fetch(endpoint, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ kill_chain_steps: killChainSteps })
+			body: JSON.stringify(body)
 		});
 
 		if (response.ok) {

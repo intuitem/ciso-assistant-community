@@ -1165,6 +1165,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
         mo = self.get_object()
         kill_chain_steps = request.data.get("kill_chain_steps", [])
+        graph_columns = request.data.get("graph_columns", None)
 
         # Validate all steps — use RBAC to determine accessible EAs
         from iam.models import RoleAssignment, Folder
@@ -1249,6 +1250,9 @@ class OperatingModeViewSet(BaseModelViewSet):
         # Atomically replace all kill chain steps
         with transaction.atomic():
             mo.kill_chain_steps.all().delete()
+            if graph_columns is not None:
+                mo.graph_columns = graph_columns
+                mo.save(update_fields=["graph_columns"])
 
             for step in kill_chain_steps:
                 ea_id = uuid.UUID(str(step["elementary_action"]))

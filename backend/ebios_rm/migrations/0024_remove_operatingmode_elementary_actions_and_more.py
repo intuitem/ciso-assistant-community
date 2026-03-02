@@ -27,4 +27,13 @@ class Migration(migrations.Migration):
                 default=0, help_text="Y position of the node in the graph editor"
             ),
         ),
+        migrations.AddField(
+            model_name="operatingmode",
+            name="graph_columns",
+            field=models.JSONField(
+                blank=True,
+                default=dict,
+                help_text="Stage column positions and sizes in the graph editor",
+            ),
+        ),
     ]
