@@ -616,9 +616,7 @@
 		<div
 			class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 		>
-			<div
-				class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
-			>
+			<div class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0">
 				<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
 			</div>
 			<p class="text-sm text-yellow-800 font-medium">

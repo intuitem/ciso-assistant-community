@@ -93,7 +93,8 @@
 						<div
 							class="audit-card card bg-white shadow-sm border-l-[3px] {statusAccentColor[
 								audit.assignment_status
-							] ?? 'border-l-gray-300'} p-5 flex flex-col space-y-4 hover:shadow-md hover:-translate-y-px transition-all duration-200"
+							] ??
+								'border-l-gray-300'} p-5 flex flex-col space-y-4 hover:shadow-md hover:-translate-y-px transition-all duration-200"
 							style="animation-delay: {ai * 50}ms"
 						>
 							<div class="flex items-start justify-between gap-3">

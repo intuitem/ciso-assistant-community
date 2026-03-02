@@ -497,9 +497,7 @@
 			<div
 				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
 			>
-				<div
-					class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0"
-				>
+				<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
 					<i class="fa-solid fa-clock text-blue-500 text-sm"></i>
 				</div>
 				<p class="text-sm text-blue-800 font-medium">{m.assignmentSubmittedBanner()}</p>
@@ -528,9 +526,7 @@
 					<p class="text-sm text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
 				</div>
 				{#if reviewerObservation}
-					<div
-						class="bg-red-50 rounded-md p-3 ml-11 text-sm text-red-700 whitespace-pre-line"
-					>
+					<div class="bg-red-50 rounded-md p-3 ml-11 text-sm text-red-700 whitespace-pre-line">
 						<i class="fa-solid fa-comment-dots mr-1"></i>
 						{reviewerObservation}
 					</div>
