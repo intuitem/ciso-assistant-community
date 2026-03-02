@@ -949,13 +949,6 @@ class OperatingMode(NameDescriptionMixin, FolderMixin):
         on_delete=models.CASCADE,
         related_name="operating_modes",
     )
-    elementary_actions = models.ManyToManyField(
-        ElementaryAction,
-        verbose_name=_("Elementary actions"),
-        related_name="operating_modes",
-        help_text=_("Elementary actions that are part of the operating mode"),
-        blank=True,
-    )
     likelihood = models.SmallIntegerField(default=-1, verbose_name="Likelihood")
 
     fields_to_check = ["name", "operational_scenario", "ref_id"]
@@ -1192,6 +1185,14 @@ class KillChain(AbstractBaseModel, FolderMixin):
         related_name="kill_chain_antecedents",
         blank=True,
         help_text="Elementary actions that are antecedents to this action in the kill chain",
+    )
+    position_x = models.FloatField(
+        default=0,
+        help_text="X position of the node in the graph editor",
+    )
+    position_y = models.FloatField(
+        default=0,
+        help_text="Y position of the node in the graph editor",
     )
 
     @property

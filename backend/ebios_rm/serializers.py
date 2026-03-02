@@ -510,14 +510,6 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class ElementaryActionWriteSerializer(BaseModelSerializer):
-    operating_modes = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=OperatingMode.objects.all(),
-        required=False,
-        allow_null=True,
-        write_only=True,
-    )
-
     class Meta:
         model = ElementaryAction
         exclude = ["created_at", "updated_at"]
@@ -548,7 +540,6 @@ class OperatingModeWriteSerializer(BaseModelSerializer):
 class OperatingModeReadSerializer(BaseModelSerializer):
     operational_scenario = FieldsRelatedField()
     folder = FieldsRelatedField()
-    elementary_actions = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
     ebios_rm_study = FieldsRelatedField()
 

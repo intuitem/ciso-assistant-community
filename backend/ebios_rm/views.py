@@ -191,7 +191,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                     kill_chain_ea_ids.add(ant.id)
 
             # Create nodes only for elementary actions in the kill chain
-            kill_chain_eas = mo.elementary_actions.filter(
+            kill_chain_eas = ElementaryAction.objects.filter(
                 id__in=kill_chain_ea_ids
             ).order_by("attack_stage")
 
@@ -671,7 +671,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         else "",
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
-                            [ea.name for ea in om.elementary_actions.all()]
+                            [
+                                step.elementary_action.name
+                                for step in om.kill_chain_steps.all()
+                            ]
                         ),
                     }
                 )
@@ -1060,13 +1063,11 @@ class ElementaryActionFilter(GenericFilterSet):
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
         kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
-        # When editing an existing kill chain step, exclude it from the "used"
-        # list so its elementary action remains available in the dropdown.
         exclude_kill_chain = self.data.get("exclude_kill_chain")
         if exclude_kill_chain:
             kc_qs = kc_qs.exclude(id=exclude_kill_chain)
         used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
-        return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
+        return queryset.exclude(id__in=used_elementary_actions)
 
     def filter_operating_mode_available_antecedents(self, queryset, name, value):
         operating_mode = value
@@ -1083,12 +1084,11 @@ class ElementaryActionFilter(GenericFilterSet):
             )
         else:
             precedent_actions = used_elementary_actions
-        return value.elementary_actions.filter(id__in=precedent_actions)
+        return queryset.filter(id__in=precedent_actions)
 
     class Meta:
         model = ElementaryAction
         fields = [
-            "operating_modes",
             "operating_mode_available_actions",
             "operating_mode_available_antecedents",
         ]
@@ -1166,9 +1166,13 @@ class OperatingModeViewSet(BaseModelViewSet):
         mo = self.get_object()
         kill_chain_steps = request.data.get("kill_chain_steps", [])
 
-        # Validate all steps
-        ea_ids_in_mode = set(
-            mo.elementary_actions.values_list("id", flat=True)
+        # Validate all steps — use RBAC to determine accessible EAs
+        from iam.models import RoleAssignment, Folder
+
+        accessible_ea_ids = set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, ElementaryAction
+            )[0]
         )
         seen_ea_ids = set()
         errors = []
@@ -1188,16 +1192,12 @@ class OperatingModeViewSet(BaseModelViewSet):
                 errors.append(f"Step {i}: invalid elementary_action UUID.")
                 continue
 
-            if ea_id not in ea_ids_in_mode:
-                errors.append(
-                    f"Step {i}: elementary action is not part of this operating mode."
-                )
+            if ea_id not in accessible_ea_ids:
+                errors.append(f"Step {i}: elementary action is not accessible.")
                 continue
 
             if ea_id in seen_ea_ids:
-                errors.append(
-                    f"Step {i}: duplicate elementary action in kill chain."
-                )
+                errors.append(f"Step {i}: duplicate elementary action in kill chain.")
                 continue
             seen_ea_ids.add(ea_id)
 
@@ -1222,10 +1222,8 @@ class OperatingModeViewSet(BaseModelViewSet):
                     )
                     continue
 
-                if ant_uuid not in ea_ids_in_mode:
-                    errors.append(
-                        f"Step {i}: antecedent is not part of this operating mode."
-                    )
+                if ant_uuid not in accessible_ea_ids:
+                    errors.append(f"Step {i}: antecedent is not accessible.")
                     continue
 
                 try:
@@ -1243,9 +1241,7 @@ class OperatingModeViewSet(BaseModelViewSet):
                 parsed_antecedents.append(ant_uuid)
 
             if logic_operator and logic_operator not in ("AND", "OR"):
-                errors.append(
-                    f"Step {i}: logic_operator must be 'AND', 'OR', or null."
-                )
+                errors.append(f"Step {i}: logic_operator must be 'AND', 'OR', or null.")
 
         if errors:
             return Response({"errors": errors}, status=400)
@@ -1261,12 +1257,16 @@ class OperatingModeViewSet(BaseModelViewSet):
                 ]
                 logic_operator = step.get("logic_operator")
                 is_highlighted = step.get("is_highlighted", False)
+                position_x = step.get("position_x", 0)
+                position_y = step.get("position_y", 0)
 
                 kc = KillChain.objects.create(
                     operating_mode=mo,
                     elementary_action_id=ea_id,
                     logic_operator=logic_operator if len(antecedent_ids) > 1 else None,
                     is_highlighted=is_highlighted,
+                    position_x=position_x,
+                    position_y=position_y,
                     folder=mo.folder,
                 )
                 if antecedent_ids:
@@ -1298,7 +1298,7 @@ class OperatingModeViewSet(BaseModelViewSet):
                 kill_chain_ea_ids.add(ant.id)
 
         # Create nodes only for elementary actions in the kill chain
-        kill_chain_eas = mo.elementary_actions.filter(
+        kill_chain_eas = ElementaryAction.objects.filter(
             id__in=kill_chain_ea_ids
         ).order_by("attack_stage")
 
