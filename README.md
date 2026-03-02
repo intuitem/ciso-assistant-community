@@ -346,7 +346,7 @@ For the following executions, use "docker compose up" directly.
 ### Requirements
 
 - Python 3.14+
-- pip 20.3+
+- pip 25.3+
 - poetry 2.0+
 - node 24+
 - npm 10.2+
