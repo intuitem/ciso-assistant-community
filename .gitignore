@@ -22,3 +22,4 @@ charts/ciso-assistant-next/custom.yaml
 .history/
 __pycache__
 cli/db_backup
+/.claude

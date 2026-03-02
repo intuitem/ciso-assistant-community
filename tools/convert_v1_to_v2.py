@@ -5,9 +5,61 @@ import argparse
 from pathlib import Path
 from openpyxl import load_workbook, Workbook
 import re
+import sys
+from copy import copy
+from openpyxl.cell.cell import Cell
 
 
-def convert_v1_to_v2(input_path: str, output_path: str):
+def row_has_content(row) -> bool:
+    for cell in row:
+        value = cell.value if isinstance(cell, Cell) else cell
+        if value is None:
+            continue
+        if isinstance(value, str) and value.strip() == "":
+            continue
+        return True
+    return False
+
+
+def cell_has_content(cell) -> bool:
+    value = cell.value if isinstance(cell, Cell) else cell
+    if value is None:
+        return False
+    if isinstance(value, str) and value.strip() == "":
+        return False
+    return True
+
+
+def copy_sheet_dimensions(src_ws, dst_ws):
+    # Preserve visual layout (column widths / row heights) without copying
+    # workbook-bound dimension objects that may corrupt the output file.
+    for col_key, col_dim in src_ws.column_dimensions.items():
+        dst_col = dst_ws.column_dimensions[col_key]
+        if col_dim.width is not None:
+            dst_col.width = col_dim.width
+        dst_col.hidden = col_dim.hidden
+        dst_col.outlineLevel = col_dim.outlineLevel
+        dst_col.collapsed = col_dim.collapsed
+        dst_col.bestFit = col_dim.bestFit
+
+    for row_key in range(1, src_ws.max_row + 1):
+        has_content = row_has_content(src_ws[row_key])
+
+        # Stop copying row heights at the first empty row.
+        if not has_content:
+            break
+
+        src_row_dim = src_ws.row_dimensions.get(row_key)
+        if src_row_dim is not None:
+            dst_row = dst_ws.row_dimensions[row_key]
+            if src_row_dim.height is not None:
+                dst_row.height = src_row_dim.height
+            dst_row.hidden = src_row_dim.hidden
+            dst_row.outlineLevel = src_row_dim.outlineLevel
+            dst_row.collapsed = src_row_dim.collapsed
+
+
+def build_converted_workbook(input_path: str) -> Workbook:
     wb = load_workbook(input_path, data_only=False)
 
     if "library_content" not in wb.sheetnames:
@@ -87,6 +139,7 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 object_metadata.setdefault(normalized_type, {})[field] = val1
 
     sheets_out = {"library_meta": library_meta}
+    sheet_dimensions = {}
 
     used_tabs = set()
 
@@ -120,7 +173,10 @@ def convert_v1_to_v2(input_path: str, output_path: str):
         if tab_name in wb.sheetnames:
             ws = wb[tab_name]
             for row in ws.iter_rows():
+                if not row_has_content(row):
+                    break
                 content_rows.append(list(row))
+            sheet_dimensions[f"{tab_name}_content"] = ws
 
         sheets_out[f"{tab_name}_meta"] = meta_rows
         sheets_out[f"{tab_name}_content"] = content_rows
@@ -141,21 +197,22 @@ def convert_v1_to_v2(input_path: str, output_path: str):
             raw = [[cell.value for cell in row] for row in ws.iter_rows()]
             if raw:
                 sheets_out[sheet_name] = raw
-
-    # --- Write output workbook ---
-    from copy import copy
-    from openpyxl.cell.cell import Cell
+                sheet_dimensions[sheet_name] = ws
 
     wb_out = Workbook()
     del wb_out["Sheet"]
 
     for sheet_name, rows in sheets_out.items():
         ws_out = wb_out.create_sheet(title=sheet_name[:31])
+        src_ws = sheet_dimensions.get(sheet_name)
+        if src_ws is not None:
+            copy_sheet_dimensions(src_ws, ws_out)
         for r_idx, row in enumerate(rows, 1):
+            # print(f"coucou {r_idx}")
             for c_idx, cell in enumerate(row, 1):
                 if isinstance(cell, Cell):
                     new_cell = ws_out.cell(row=r_idx, column=c_idx, value=cell.value)
-                    if cell.has_style:
+                    if cell.has_style and cell_has_content(cell):
                         new_cell.font = copy(cell.font)
                         new_cell.fill = copy(cell.fill)
                         new_cell.border = copy(cell.border)
@@ -165,24 +222,156 @@ def convert_v1_to_v2(input_path: str, output_path: str):
                 else:
                     ws_out.cell(row=r_idx, column=c_idx, value=cell)
 
-    wb_out.save(output_path)
-    print(f"✅ Conversion complete: {output_path}")
+    return wb_out
+
+
+def convert_v1_to_v2(
+    input_path: Path, output_path: Path, old_output_dir: Path | None = None
+):
+    backup_dir = old_output_dir if old_output_dir else input_path.parent
+    backup_path = backup_dir / f"{input_path.stem}_v1{input_path.suffix}.old"
+
+    if backup_path.exists():
+        raise FileExistsError(
+            f"Backup file already exists, refusing to overwrite: {backup_path}"
+        )
+
+    wb_out = build_converted_workbook(str(input_path))
+    output_existed_before = output_path.exists()
+
+    try:
+        input_path.rename(backup_path)
+        wb_out.save(output_path)
+        print(f"✅ Conversion complete: {output_path}")
+    except Exception:
+        if output_path.exists() and not output_existed_before:
+            output_path.unlink()
+        if backup_path.exists() and not input_path.exists():
+            backup_path.rename(input_path)
+        raise
+
+
+def with_output_suffix(path: Path, output_suffix: str) -> Path:
+    normalized = path if path.suffix.lower() == ".xlsx" else path.with_suffix(".xlsx")
+    if not output_suffix:
+        return normalized
+    return normalized.with_name(
+        f"{normalized.stem}{output_suffix}{normalized.suffix}"
+    )
 
 
 def main():
     parser = argparse.ArgumentParser(
         description="Convert Excel library v1 to v2 format."
     )
-    parser.add_argument("input_file", type=str, help="Path to the v1 Excel file")
+    parser.add_argument(
+        "input_file", type=str, help="Path to a v1 Excel file (or directory in bulk mode)"
+    )
+    parser.add_argument(
+        "--bulk",
+        action="store_true",
+        help="Enable bulk mode to process all .xlsx files in a directory.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        help="Custom output file name (only used in non-bulk mode).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        help="Output directory for .xlsx files (only used with --bulk mode).",
+    )
+    parser.add_argument(
+        "--old-output-dir",
+        type=str,
+        help="Output directory for renamed .old files (only used with --bulk mode).",
+    )
+    parser.add_argument(
+        "--output-suffix",
+        type=str,
+        default="",
+        help='Suffix added just before ".xlsx" for converted files (example: "_v2").',
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input_file)
     if not input_path.exists():
         raise FileNotFoundError(f"File not found: {input_path}")
 
-    output_path = input_path.with_name(f"{input_path.stem}_new.xlsx")
-    convert_v1_to_v2(str(input_path), str(output_path))
+
+    # --- BULK MODE ------------------------------------------------------------
+    if args.bulk:
+        if args.output:
+            raise ValueError('The option "--output" cannot be used with "--bulk" mode.')
+
+        if not input_path.is_dir():
+            raise NotADirectoryError("Bulk mode requires a directory as input")
+
+        if args.output_dir:
+            output_dir = Path(args.output_dir)
+            output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            output_dir = input_path
+
+        if args.old_output_dir:
+            old_output_dir = Path(args.old_output_dir)
+            old_output_dir.mkdir(parents=True, exist_ok=True)
+        else:
+            old_output_dir = None
+
+        xlsx_files = [
+            f for f in input_path.glob("*.xlsx") if not f.name.startswith("~$")
+        ]
+        if not xlsx_files:
+            raise FileNotFoundError(f"No .xlsx files found in directory: {input_path}")
+
+        errors = []
+        for i, file in enumerate(xlsx_files, 1):
+            print(f'▶️  Processing file [{i}/{len(xlsx_files)}]: "{file}"')
+            try:
+                output_path = with_output_suffix(output_dir / file.name, args.output_suffix)
+                convert_v1_to_v2(file, output_path, old_output_dir=old_output_dir)
+            except Exception as e:
+                print(f'❌ Failed to process "{file}": {e}', file=sys.stderr)
+                errors.append(file.name)
+
+        print("\n📋 Bulk mode completed!")
+        
+        if errors:
+            print(f"❌ The following file{'s' if len(errors) > 1 else ''} [{len(errors)}/{len(xlsx_files)}] failed to process:", file=sys.stderr)
+            for f in errors:
+                print(f"- {f}", file=sys.stderr)
+            sys.exit(1)
+        else:
+            print("✅ All files processed successfully!")
+            sys.exit(0)
+
+    # --- SINGLE FILE MODE -----------------------------------------------------
+    else:
+        if args.output_dir:
+            raise ValueError(
+                'The option "--output-dir" can only be used with "--bulk" mode.'
+            )
+        if args.old_output_dir:
+            raise ValueError(
+                'The option "--old-output-dir" can only be used with "--bulk" mode.'
+            )
+
+        if not input_path.is_file():
+            raise FileNotFoundError(f"Input must be a file in non-bulk mode: {input_path}")
+
+        if args.output:
+            output_path = with_output_suffix(Path(args.output), args.output_suffix)
+        else:
+            output_path = with_output_suffix(input_path, args.output_suffix)
+
+        convert_v1_to_v2(input_path, output_path)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as err:
+        print(f"❌ [ERROR] {err}")
+        sys.exit(1)

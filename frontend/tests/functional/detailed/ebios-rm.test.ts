@@ -319,8 +319,8 @@ test('ebios rm study', async ({
 			await page.getByText('1', { exact: true }).nth(3).click();
 			await page.getByTestId('save-button').click();
 			await expect(page.getByTestId('modal-title')).not.toBeVisible();
-			await page.getByRole('button', { name: ' Ecosystem radar +' }).click();
-			await page.getByRole('button', { name: ' Ecosystem radar −' }).click();
+			await page.getByRole('button', { name: 'Ecosystem radar' }).click();
+			await page.getByRole('button', { name: 'Ecosystem radar' }).click();
 			await page.getByRole('link', { name: ' Go back to Ebios RM study' }).click();
 			await page
 				.getByRole('listitem')
@@ -604,6 +604,6 @@ test('ebios rm study', async ({
 			.getByRole('gridcell', { name: 'test strategic scenario 1 - test attack path 1' })
 			.click();
 		await expect(page).not.toHaveURL(/.*workshop-5.*/);
-		await expect(page.getByText('High').nth(2)).toBeVisible();
+		await expect(page.locator('span:text("High")').first()).toBeVisible();
 	});
 });

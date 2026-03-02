@@ -3,8 +3,6 @@
 	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { m } from '$paraglide/messages';
 	import { getLocale, locales, setLocale } from '$paraglide/runtime';
-	import { Popover } from '@skeletonlabs/skeleton-svelte';
-
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { createEventDispatcher, onMount } from 'svelte';
 	const dispatch = createEventDispatcher();
@@ -41,6 +39,13 @@
 	});
 
 	let openState = $state(false);
+	let triggerEl: HTMLButtonElement | undefined = $state();
+	let menuStyle = $derived.by(() => {
+		if (!openState || !triggerEl) return '';
+		const rect = triggerEl.getBoundingClientRect();
+		const centerX = rect.left + rect.width / 2;
+		return `position: fixed; bottom: ${window.innerHeight - rect.top + 8}px; left: ${centerX}px; transform: translateX(-50%);`;
+	});
 </script>
 
 <div class="border-t pt-2.5">
@@ -63,30 +68,33 @@
 			{/if}
 		</div>
 		{#if enableMoreBtn}
-			<Popover
-				open={openState}
-				onOpenChange={(e) => (openState = e.open)}
-				positioning={{ placement: 'top' }}
-				triggerBase="btn "
-				contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-				zIndex="1000"
-			>
-				{#snippet trigger()}
-					<button
-						class="btn bg-initial"
-						data-testid="sidebar-more-btn"
-						aria-label="More options"
-						id="sidebar-more-btn"
+			<div class="relative">
+				<button
+					bind:this={triggerEl}
+					class="btn bg-initial"
+					data-testid="sidebar-more-btn"
+					aria-label="More options"
+					id="sidebar-more-btn"
+					onclick={() => (openState = !openState)}
+				>
+					<i class="fa-solid fa-ellipsis-vertical"></i>
+				</button>
+				{#if openState}
+					<!-- svelte-ignore a11y_no_static_element_interactions -->
+					<div
+						class="fixed inset-0 z-[999]"
+						onclick={() => (openState = false)}
+						onkeydown={(e) => e.key === 'Escape' && (openState = false)}
+					></div>
+					<div
+						style={menuStyle}
+						class="z-[1000] card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1 rounded-lg"
+						data-testid="sidebar-more-panel"
 					>
-						<i class="fa-solid fa-ellipsis-vertical"></i>
-					</button>
-				{/snippet}
-				{#snippet content()}
-					<div data-testid="sidebar-more-panel">
 						<a
 							href="/my-profile"
-							onclick={(e) => {
-								window.location.href = e.target.href;
+							onclick={() => {
+								openState = false;
 							}}
 							class="unstyled cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="profile-button"
@@ -105,19 +113,28 @@
 							{/each}
 						</select>
 						<button
-							onclick={() => dispatch('triggerGT')}
+							onclick={() => {
+								openState = false;
+								dispatch('triggerGT');
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="gt-button"
 							><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
 						>
 						<button
-							onclick={() => dispatch('loadDemoDomain')}
+							onclick={() => {
+								openState = false;
+								dispatch('loadDemoDomain');
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="load-demo-data-button"
 							><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
 						>
 						<button
-							onclick={modalBuildInfo}
+							onclick={() => {
+								openState = false;
+								modalBuildInfo();
+							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100 disabled:text-gray-500 text-gray-800"
 							data-testid="about-button"
 							><i class="fa-solid fa-circle-info mr-2"></i>{m.aboutCiso()}</button
@@ -137,8 +154,8 @@
 							</button>
 						</form>
 					</div>
-				{/snippet}
-			</Popover>
+				{/if}
+			</div>
 		{:else}
 			<button
 				class="btn bg-initial"

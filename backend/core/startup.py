@@ -26,6 +26,7 @@ READER_PERMISSIONS_LIST = [
     "view_referencecontrol",
     "view_representative",
     "view_requirementassessment",
+    "view_requirementassignment",
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
@@ -96,6 +97,7 @@ READER_PERMISSIONS_LIST = [
     "view_dashboardwidget",
     # integrations
     "view_syncmapping",
+    "view_filteringlabel",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -205,6 +207,10 @@ ANALYST_PERMISSIONS_LIST = [
     "change_vulnerability",
     "change_representative",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -471,6 +477,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_referencecontrol",
     "change_representative",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -815,6 +825,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -1093,6 +1107,27 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_folder",
 ]
 
+AUDITEE_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
+    "view_evidencerevision",
+    "add_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
+    "view_folder",
+    "view_requirementassignment",
+    "view_appliedcontrol",
+    "add_appliedcontrol",
+    "change_appliedcontrol",
+    "delete_appliedcontrol",
+    "view_framework",
+]
+
 
 def startup(sender: AppConfig, **kwargs):
     """
@@ -1228,6 +1263,32 @@ def startup(sender: AppConfig, **kwargs):
     )
     third_party_respondent.permissions.set(third_party_respondent_permissions)
 
+    auditee_permissions = Permission.objects.filter(
+        codename__in=AUDITEE_PERMISSIONS_LIST
+    )
+    auditee, created = Role.objects.get_or_create(
+        name=RoleCodename.AUDITEE.value, builtin=True
+    )
+    auditee.permissions.set(auditee_permissions)
+
+    # if global auditees user group does not exist, then create it
+    if not UserGroup.objects.filter(
+        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
+    ).exists():
+        global_auditees = UserGroup.objects.create(
+            name=UserGroupCodename.GLOBAL_AUDITEE.value,
+            folder=Folder.get_root_folder(),
+            builtin=True,
+        )
+        ra = RoleAssignment.objects.create(
+            user_group=global_auditees,
+            role=auditee,
+            is_recursive=True,
+            builtin=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra.perimeter_folders.add(global_auditees.folder)
+
     # Create default Qualifications
     try:
         Terminology.create_default_qualifications()
@@ -1344,6 +1405,7 @@ def startup(sender: AppConfig, **kwargs):
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
         "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
@@ -1358,7 +1420,10 @@ def startup(sender: AppConfig, **kwargs):
             logger.warning(
                 "ebios radar settings are invalid (None or 0). Reverting to default settings."
             )
-            updated_value = {**current_value, **default_settings}
+            # Merge defaults first, then apply current values to preserve user settings
+            # Finally force-reset the invalid ebios_radar_max to default
+            updated_value = {**default_settings, **current_value}
+            updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
             settings.value = updated_value
             settings.save()
             logger.info(

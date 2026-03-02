@@ -8,7 +8,7 @@
 </script>
 
 <span
-	class="whitespace-nowrap text-primary-800 font-semibold uppercase tracking-tighter text-xs"
+	class="flex-1 text-left whitespace-nowrap text-primary-800 font-semibold uppercase tracking-tighter text-xs"
 	data-testid={'accordion-item-' + item.name.toLowerCase().replace(' ', '-')}
 >
 	{safeTranslate(item.name)}
