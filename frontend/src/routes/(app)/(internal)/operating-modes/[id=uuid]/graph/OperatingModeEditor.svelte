@@ -2,8 +2,10 @@
 	import { m } from '$paraglide/messages';
 	import { enhance } from '$app/forms';
 	import { setContext, tick } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import {
 		SvelteFlow,
+		useSvelteFlow,
 		Controls,
 		Background,
 		BackgroundVariant,
@@ -32,6 +34,8 @@
 		elementary_action: any;
 		antecedents: any[];
 		logic_operator?: string | null;
+		position_x?: number;
+		position_y?: number;
 	}
 
 	// ---- Props ----
@@ -41,9 +45,16 @@
 		killChainSteps: KillChainStep[];
 		operatingModeId: string;
 		onSaved?: () => void;
+		readonly?: boolean;
 	}
 
-	let { elementaryActions, killChainSteps, operatingModeId, onSaved }: Props = $props();
+	let {
+		elementaryActions,
+		killChainSteps,
+		operatingModeId,
+		onSaved,
+		readonly = false
+	}: Props = $props();
 
 	// ---- Constants ----
 
@@ -109,9 +120,39 @@
 		get dragOverStage() {
 			return dragOverStage;
 		},
+		get readonly() {
+			return readonly;
+		},
 		deleteNode: (id: string) => handleDeleteNode(id),
 		toggleOperator: (id: string) => handleToggleOperator(id)
 	});
+
+	// ---- Viewport persistence (localStorage, personal) ----
+
+	const VIEWPORT_KEY = `mo-graph-viewport-${operatingModeId}`;
+
+	function saveViewport() {
+		try {
+			const flow = useSvelteFlow();
+			const vp = flow.getViewport();
+			localStorage.setItem(VIEWPORT_KEY, JSON.stringify(vp));
+		} catch {
+			// useSvelteFlow may not be available yet
+		}
+	}
+
+	function restoreViewport() {
+		try {
+			const saved = localStorage.getItem(VIEWPORT_KEY);
+			if (saved) {
+				const flow = useSvelteFlow();
+				const vp = JSON.parse(saved);
+				flow.setViewport(vp);
+			}
+		} catch {
+			// Ignore errors
+		}
+	}
 
 	// ---- Stage helpers ----
 
@@ -142,7 +183,6 @@
 	// ---- Initialize from existing kill chain ----
 
 	function initFromKillChain() {
-		// Parent column nodes must come first in the array
 		const flowNodes: Node[] = buildStageColumnNodes();
 		const flowEdges: Edge[] = [];
 		const ops = new Map<string, 'AND' | 'OR'>();
@@ -165,13 +205,20 @@
 				ops.set(eaId, step.logic_operator as 'AND' | 'OR');
 			}
 
-			// Position is relative to the parent column node
+			// Use saved position if available, otherwise auto-layout
+			const hasSavedPosition = (step.position_x ?? 0) !== 0 || (step.position_y ?? 0) !== 0;
+			const posX = hasSavedPosition ? step.position_x! : NODE_PADDING_X;
+			const posY = hasSavedPosition ? step.position_y! : NODE_PADDING_Y + count * NODE_GAP_Y;
+
 			flowNodes.push({
 				id: eaId,
 				type: 'action',
-				position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + count * NODE_GAP_Y },
+				position: { x: posX, y: posY },
 				parentId: stageColumnId(stage),
 				extent: 'parent',
+				draggable: !readonly,
+				deletable: !readonly,
+				connectable: !readonly,
 				data: {
 					label: ea.name,
 					iconClass: ea.icon_fa_class ?? '',
@@ -188,7 +235,8 @@
 					source: antId,
 					target: eaId,
 					markerEnd: { type: MarkerType.ArrowClosed, color: 'var(--color-primary-800)' },
-					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;'
+					style: 'stroke: var(--color-surface-400); stroke-width: 1.5;',
+					type: 'smoothstep'
 				});
 			}
 		}
@@ -218,11 +266,8 @@
 		const sourceStage = sourceNode.data.stage as number;
 		const targetStage = targetNode.data.stage as number;
 
-		// Source stage must be <= target stage (same stage allowed)
 		if (sourceStage > targetStage) return false;
-		// No self-connections
 		if (connection.source === connection.target) return false;
-		// No duplicates
 		if (edges.some((e) => e.source === connection.source && e.target === connection.target))
 			return false;
 
@@ -242,7 +287,6 @@
 		}
 		logicOps = newOps;
 
-		// Sync into node data so SvelteFlow re-renders the ActionNode
 		const op = newOps.get(nodeId) ?? null;
 		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: op } } : n));
 	}
@@ -250,11 +294,7 @@
 	// ---- Event handlers ----
 
 	async function handleConnect(connection: Connection) {
-		// SvelteFlow v1.5 automatically creates the edge when onconnect fires
-		// (styled via defaultEdgeOptions), so we just mark dirty and update logic ops.
 		dirty = true;
-
-		// Wait for SvelteFlow to flush the new edge into bind:edges
 		await tick();
 		updateNodeLogicData(connection.target);
 	}
@@ -283,7 +323,6 @@
 		const newOp = current === 'AND' ? 'OR' : 'AND';
 		logicOps = new Map(logicOps).set(nodeId, newOp);
 
-		// Sync into node data so SvelteFlow re-renders the ActionNode
 		nodes = nodes.map((n) => (n.id === nodeId ? { ...n, data: { ...n.data, logicOp: newOp } } : n));
 		dirty = true;
 	}
@@ -362,18 +401,19 @@
 
 		const stage = getStageNumber(action.attack_stage);
 
-		// Count existing nodes in this stage column
 		const nodesInStage = nodes.filter(
 			(n) => n.type === 'action' && (n.data as any).stage === stage
 		);
 
-		// Position relative to the parent column node
 		const newNode: Node = {
 			id: action.id,
 			type: 'action',
 			position: { x: NODE_PADDING_X, y: NODE_PADDING_Y + nodesInStage.length * NODE_GAP_Y },
 			parentId: stageColumnId(stage),
 			extent: 'parent',
+			draggable: true,
+			deletable: true,
+			connectable: true,
 			data: {
 				label: action.name,
 				iconClass: action.icon_fa_class ?? '',
@@ -401,7 +441,9 @@
 					antecedentIds.length > 1
 						? ((node.data as any).logicOp ?? logicOps.get(node.id) ?? 'AND')
 						: null,
-				is_highlighted: false
+				is_highlighted: false,
+				position_x: node.position.x,
+				position_y: node.position.y
 			};
 		});
 
@@ -410,53 +452,64 @@
 </script>
 
 <div class="flex h-[80vh] bg-surface-50 rounded-base overflow-hidden border border-surface-200">
-	<!-- Sidebar -->
-	<EditorSidebar {elementaryActions} {placedNodeIds} />
+	<!-- Sidebar: only in edit mode, with slide transition -->
+	{#if !readonly}
+		<div transition:slide={{ axis: 'x', duration: 300 }}>
+			<EditorSidebar {elementaryActions} {placedNodeIds} />
+		</div>
+	{/if}
 
 	<!-- Canvas area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
-		<!-- Toolbar -->
-		<div class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200">
-			<div class="flex items-center gap-2 text-sm text-surface-500">
-				<i class="fa-solid fa-info-circle"></i>
-				<span>{m.graphEditorHelp()}</span>
-			</div>
-			<div class="flex items-center gap-2">
-				{#if dirty}
-					<span class="text-xs text-warning-500 flex items-center gap-1">
-						<i class="fa-solid fa-circle text-[6px]"></i>
-						{m.unsavedChanges()}
-					</span>
-				{/if}
-				<form
-					method="POST"
-					action="?/saveGraph"
-					use:enhance={() => {
-						saving = true;
-						return async ({ update }) => {
-							saving = false;
-							dirty = false;
-							onSaved?.();
-							await update();
-						};
-					}}
+		<!-- Toolbar: only in edit mode, with slide transition -->
+		{#if !readonly}
+			<div transition:slide={{ duration: 200 }}>
+				<div
+					class="flex items-center justify-between px-4 py-2 bg-white border-b border-surface-200"
 				>
-					<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
-					<button
-						type="submit"
-						class="btn preset-filled-primary-500 text-sm"
-						disabled={saving || !dirty}
-					>
-						{#if saving}
-							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-						{:else}
-							<i class="fa-solid fa-save mr-1"></i>
+					<div class="flex items-center gap-2 text-sm text-surface-500">
+						<i class="fa-solid fa-info-circle"></i>
+						<span>{m.graphEditorHelp()}</span>
+					</div>
+					<div class="flex items-center gap-2">
+						{#if dirty}
+							<span class="text-xs text-warning-500 flex items-center gap-1">
+								<i class="fa-solid fa-circle text-[6px]"></i>
+								{m.unsavedChanges()}
+							</span>
 						{/if}
-						{m.save()}
-					</button>
-				</form>
+						<form
+							method="POST"
+							action="?/saveGraph"
+							use:enhance={() => {
+								saving = true;
+								return async ({ update }) => {
+									saving = false;
+									dirty = false;
+									saveViewport();
+									onSaved?.();
+									await update();
+								};
+							}}
+						>
+							<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
+							<button
+								type="submit"
+								class="btn preset-filled-primary-500 text-sm"
+								disabled={saving || !dirty}
+							>
+								{#if saving}
+									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+								{:else}
+									<i class="fa-solid fa-save mr-1"></i>
+								{/if}
+								{m.save()}
+							</button>
+						</form>
+					</div>
+				</div>
 			</div>
-		</div>
+		{/if}
 
 		<!-- Svelte Flow Canvas -->
 		<div class="flex-1 min-h-0">
@@ -464,13 +517,18 @@
 				bind:nodes
 				bind:edges
 				{nodeTypes}
-				{isValidConnection}
-				onconnect={handleConnect}
-				ondelete={handleDelete}
-				onedgeclick={handleEdgeClick}
-				ondragover={handleDragOver}
-				ondragleave={handleDragLeave}
-				ondrop={handleDrop}
+				isValidConnection={readonly ? () => false : isValidConnection}
+				onconnect={readonly ? undefined : handleConnect}
+				ondelete={readonly ? undefined : handleDelete}
+				onedgeclick={readonly ? undefined : handleEdgeClick}
+				ondragover={readonly ? undefined : handleDragOver}
+				ondragleave={readonly ? undefined : handleDragLeave}
+				ondrop={readonly ? undefined : handleDrop}
+				nodesDraggable={!readonly}
+				nodesConnectable={!readonly}
+				elementsSelectable={!readonly}
+				oninit={restoreViewport}
+				onmoveend={saveViewport}
 				snapGrid={[10, 10]}
 				fitView
 				defaultEdgeOptions={{

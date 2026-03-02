@@ -17,6 +17,7 @@
 	const editor = getContext<{
 		deleteNode: (id: string) => void;
 		toggleOperator: (id: string) => void;
+		readonly: boolean;
 	}>('killChainEditor');
 
 	const STAGE_CLASSES: Record<number, { bg: string; border: string; accent: string }> = {
@@ -50,16 +51,24 @@
 
 	<!-- Logic operator badge (AND/OR) — shown when node has 2+ incoming edges -->
 	{#if data.logicOp}
-		<button
-			class="nopan nodrag absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 bg-violet-100 border-violet-500 text-violet-700 z-10"
-			onclick={() => editor?.toggleOperator(id)}
-		>
-			{data.logicOp}
-		</button>
+		{#if editor?.readonly}
+			<span
+				class="absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border bg-violet-100 border-violet-500 text-violet-700 z-10"
+			>
+				{data.logicOp}
+			</span>
+		{:else}
+			<button
+				class="nopan nodrag absolute -left-8 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-base text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 bg-violet-100 border-violet-500 text-violet-700 z-10"
+				onclick={() => editor?.toggleOperator(id)}
+			>
+				{data.logicOp}
+			</button>
+		{/if}
 	{/if}
 
-	<!-- Delete button on hover -->
-	{#if hovered}
+	<!-- Delete button on hover (edit mode only) -->
+	{#if hovered && !editor?.readonly}
 		<button
 			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
 			onclick={() => editor?.deleteNode(id)}
@@ -68,17 +77,17 @@
 		</button>
 	{/if}
 
-	<!-- Input handle (left) -->
-	<Handle
-		type="target"
-		position={Position.Left}
-		class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
-	/>
-
-	<!-- Output handle (right) -->
-	<Handle
-		type="source"
-		position={Position.Right}
-		class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
-	/>
+	<!-- Handles (edit mode only) -->
+	{#if !editor?.readonly}
+		<Handle
+			type="target"
+			position={Position.Left}
+			class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
+		/>
+		<Handle
+			type="source"
+			position={Position.Right}
+			class="!w-3 !h-3 !bg-white !border-2 !border-primary-800"
+		/>
+	{/if}
 </div>

@@ -3,11 +3,12 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
-	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import OperatingModeEditor from './graph/OperatingModeEditor.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -28,6 +29,7 @@
 	let { data }: Props = $props();
 
 	let group = $state(Object.keys(data.relatedModels)[0]);
+	let editMode = $state(false);
 
 	function modalCreateForm(model: Record<string, any>): void {
 		let modalComponent: ModalComponent = {
@@ -41,29 +43,14 @@
 		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
 	}
 
-	function modalUpdateForm(): void {
-		let modalComponent: ModalComponent = {
-			ref: UpdateModal,
-			props: {
-				form: data.updateForm,
-				model: data.model,
-				object: data.object,
-				context: 'selectElementaryActions'
-			}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.selectElementaryActions()
-		};
-		modalStore.trigger(modal);
+	function handleSaved() {
+		editMode = false;
+		invalidateAll();
 	}
 
 	const user = page.data.user;
@@ -86,18 +73,7 @@
 	<i class="fa-solid fa-arrow-left"></i>
 	<p>{m.goBackToEbiosRmStudy()}</p>
 </Anchor>
-<DetailView {data} displayModelTable={false}>
-	{#snippet actions()}
-		<div class="flex flex-col space-y-2">
-			<Anchor
-				href={`${page.url.pathname}/graph`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"
-				><i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}</Anchor
-			>
-		</div>
-	{/snippet}
-</DetailView>
+<DetailView {data} displayModelTable={false} />
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white w-full">
 		<Tabs
@@ -132,21 +108,6 @@
 							baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
 							disableDelete={field?.disableDelete ?? false}
 						>
-							{#snippet selectButton()}
-								{#if urlmodel === 'elementary-actions'}
-									<div>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-button"
-												title={m.selectElementaryActions()}
-												onclick={(_) => modalUpdateForm()}
-												><i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
-									</div>
-								{/if}
-							{/snippet}
 							{#snippet addButton()}
 								<div>
 									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
@@ -167,3 +128,35 @@
 		</Tabs>
 	</div>
 {/if}
+
+<div class="card shadow-lg mt-8 bg-white w-full p-4">
+	<div class="flex justify-between items-center mb-4">
+		<h3 class="text-lg font-semibold text-surface-800">
+			<i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}
+		</h3>
+		{#if canEditObject}
+			<button
+				class="flex items-center gap-1.5 px-3 py-1.5 rounded-base text-sm font-medium transition-colors
+					{editMode
+					? 'bg-violet-100 text-violet-700 border border-violet-300'
+					: 'bg-surface-100 text-surface-600 border border-surface-200 hover:bg-surface-200'}"
+				onclick={() => (editMode = !editMode)}
+			>
+				{#if editMode}
+					<i class="fa-solid fa-eye"></i>
+					{m.viewMode()}
+				{:else}
+					<i class="fa-solid fa-pen"></i>
+					{m.editMode()}
+				{/if}
+			</button>
+		{/if}
+	</div>
+	<OperatingModeEditor
+		elementaryActions={data.elementaryActions}
+		killChainSteps={data.killChainSteps}
+		operatingModeId={data.operatingModeId}
+		readonly={!editMode}
+		onSaved={handleSaved}
+	/>
+</div>

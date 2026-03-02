@@ -17,11 +17,13 @@
 
 	let { id, data }: Props = $props();
 
-	const editor = getContext<{ dragOverStage: number | null }>('killChainEditor');
+	const editor = getContext<{ dragOverStage: number | null; readonly: boolean }>('killChainEditor');
 	const isHighlighted = $derived(editor?.dragOverStage === data.stage);
 </script>
 
-<NodeResizer minWidth={220} minHeight={300} />
+{#if !editor?.readonly}
+	<NodeResizer minWidth={220} minHeight={300} />
+{/if}
 
 <div
 	class="w-full h-full rounded-xl transition-all duration-200 overflow-hidden border-2 border-dashed {data.twBorder} {data.twBg}"
