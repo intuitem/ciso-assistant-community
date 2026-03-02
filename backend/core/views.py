@@ -13615,7 +13615,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         try:
             self._send_transition_notification(assignment, key)
         except Exception:
-            pass
+            logger.error(
+                "Failed to send assignment notification",
+                assignment_id=str(assignment.id),
+                transition=f"{key[0]} -> {key[1]}",
+                exc_info=True,
+            )
 
         return Response({"status": target})
 

@@ -3535,7 +3535,6 @@
 	"submitForReviewConfirm": "Are you sure you want to submit your responses for review? You will not be able to edit them until the reviewer sends them back.",
 	"closeAssignment": "Close",
 	"reopenAssignment": "Reopen",
-	"requestChanges": "Request Changes",
 	"reviewerObservation": "Reviewer observation",
 	"reviewerObservationPlaceholder": "Describe what changes are needed...",
 	"assignmentSubmittedBanner": "Your responses have been submitted and are under review.",
