@@ -258,6 +258,13 @@ def map_annotation_from_perimetre(perimetre: str | None) -> str:
     )
 
 
+def humanize_question_id_for_group_name(question_id: str) -> str:
+    words = as_text(question_id).replace("-", " ").split()
+    if len(words) <= 1:
+        return " ".join(words)
+    return " ".join(words[1:])
+
+
 def prepend_h2_markdown(text: str) -> str:
     stripped = text.lstrip()
     if stripped.startswith("## "):
@@ -427,14 +434,17 @@ def process_question(
         ref_id = f"{base_ref}.{index_in_parent}"
         name = f"Question {question_label}"
 
-        depends_group = f"_Q{question_label}_DEPENDS_ON_{parent_question_id}"
+        depends_group = f"_Q_{qid}_DEPENDS_ON_{parent_question_id}"
         implementation_groups = implementation_groups_for_question(
             perimetre, depends_group
         )
+
+        position_indicator = "ère" if index_in_parent == 1 else "ème"
+
         ensure_imp_group(
             ctx,
             depends_group,
-            f"Question {question_label} dépendante de la Question {parent_question_label or ''}".strip(),
+            f"{index_in_parent}{position_indicator} Sous-question dépendante à {humanize_question_id_for_group_name(parent_question_id or '')}".strip(),
         )
         if parent_response is not None:
             parent_answ = ctx.answer_rows.get(parent_question_id)
@@ -558,12 +568,13 @@ def apply_conditions_perimetre_second_pass(
             dep_group = f"_DEPENDS_ON_{context_question_id}"
             groups_to_add.append(dep_group)
 
-            urn_c = as_text(context_question_id).lower()
-            q_label = ctx.question_name_suffix_by_urn.get(urn_c, "")
+            # urn_c = as_text(context_question_id).lower()
+            # q_label = ctx.question_name_suffix_by_urn.get(urn_c, "")
+
             ensure_imp_group(
                 ctx,
                 dep_group,
-                f"Questions dépendantes de la Question {q_label}".strip(),
+                f"Questions dépendantes à {humanize_question_id_for_group_name(context_question_id)}".strip(),
             )
 
             answ_row = ctx.answer_rows.get(as_text(context_question_id))
