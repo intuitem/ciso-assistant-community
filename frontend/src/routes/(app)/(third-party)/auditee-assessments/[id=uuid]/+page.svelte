@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/state';
 	import { applyAction, deserialize } from '$app/forms';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
@@ -45,7 +44,7 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
-	// Single assignment scoped via ?assignment= query param
+	// Single assignment — the URL param (params.id) IS the assignment ID
 	let assignment = $derived(data.assignment);
 	let assignmentStatus = $derived(assignment?.status ?? null);
 

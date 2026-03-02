@@ -14,9 +14,7 @@ export const load = (async ({ fetch, params }) => {
 	const assignmentId = params.id;
 
 	// Fetch the assignment
-	const assignmentRes = await fetch(
-		`${BASE_API_URL}/requirement-assignments/?id=${assignmentId}`
-	);
+	const assignmentRes = await fetch(`${BASE_API_URL}/requirement-assignments/?id=${assignmentId}`);
 	if (!assignmentRes.ok) {
 		throw error(assignmentRes.status, 'Failed to load assignment');
 	}
@@ -43,10 +41,9 @@ export const load = (async ({ fetch, params }) => {
 	const compliance_assessment = await res.json();
 
 	const [tableMode, scores] = await Promise.all(
-		[
-			`${endpoint}requirements_list/?assignment=${assignmentId}`,
-			`${endpoint}global_score/`
-		].map((endpoint) => fetch(endpoint).then((res) => res.json()))
+		[`${endpoint}requirements_list/?assignment=${assignmentId}`, `${endpoint}global_score/`].map(
+			(endpoint) => fetch(endpoint).then((res) => res.json())
+		)
 	);
 
 	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
