@@ -1,4 +1,4 @@
-from django.db.utils import OperationalError, ProgrammingError
+from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -541,6 +541,11 @@ class ExportMixin:
 
 
 class GenericFilterSet(df.FilterSet):
+    class UUIDInFilter(df.BaseInFilter, df.UUIDFilter):
+        pass
+
+    id = UUIDInFilter(field_name="id", lookup_expr="in")
+
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
         DEFAULTS = dict(cls.FILTER_DEFAULTS)
@@ -1680,19 +1685,17 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .select_related("asset_class", "folder")
-            .prefetch_related(
-                "parent_assets",
-                "child_assets",
-                "owner",
-                "security_exceptions",
-                "filtering_labels",
-                "personal_data",
-                "overridden_children_capabilities",
-            )
+        qs = super().get_queryset().select_related("asset_class", "folder")
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "parent_assets",
+            "child_assets",
+            "owner",
+            "security_exceptions",
+            "filtering_labels",
+            "personal_data",
+            "overridden_children_capabilities",
         )
 
     def _get_optimized_object_data(self, queryset):
@@ -1813,6 +1816,24 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             )
             if content.get("value") is not None and content.get("value") > 0
         ]
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        """Minimal endpoint for autocomplete selects — skips graph traversal."""
+        from core.serializers import AssetAutocompleteSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = AssetAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
@@ -5774,6 +5795,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         evidence_model = related_model("evidences")
         security_exception_model = related_model("security_exceptions")
         policy_model = related_model("policies")
+        processing_model = related_model("processings")
+        accreditation_model = related_model("accreditations")
+        contract_model = related_model("contracts")
 
         queryset = queryset.select_related("requester", "approver").prefetch_related(
             Prefetch("events", queryset=events_qs),
@@ -5796,6 +5820,18 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "policies",
                 queryset=policy_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "processings",
+                queryset=processing_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "accreditations",
+                queryset=accreditation_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "contracts",
+                queryset=contract_model.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -5809,6 +5845,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_evidences": ValidationFlow.evidences.through,
             "has_security_exceptions": ValidationFlow.security_exceptions.through,
             "has_policies": ValidationFlow.policies.through,
+            "has_processings": ValidationFlow.processings.through,
+            "has_accreditations": ValidationFlow.accreditations.through,
+            "has_contracts": ValidationFlow.contracts.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -5837,6 +5876,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "evidences": "Evidences",
             "security_exceptions": "Security Exceptions",
             "policies": "Policies",
+            "processings": "Processings",
+            "accreditations": "Accreditations",
+            "contracts": "Contracts",
         }
         return Response(model_types)
 
@@ -6046,6 +6088,15 @@ class UserGroupViewSet(BaseModelViewSet):
         UserGroupOrderingFilter,
         filters.SearchFilter,
     ]
+
+    def destroy(self, request, *args, **kwargs):
+        user_group = self.get_object()
+        if user_group.builtin:
+            return Response(
+                {"error": "attemptToDeleteBuiltinUserGroup"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
 
 
 class RoleAssignmentViewSet(BaseModelViewSet):
@@ -8172,10 +8223,18 @@ class UploadAttachmentView(APIView):
                 revision.attachment = attachment
                 try:
                     revision.full_clean()
-                except ValidationError:
+                except ValidationError as e:
                     revision.attachment = old_attachment
+                    messages = []
+                    if hasattr(e, "message_dict"):
+                        for field_messages in e.message_dict.values():
+                            messages.extend(field_messages)
+                    elif hasattr(e, "messages"):
+                        messages = e.messages
+                    else:
+                        messages = [str(e.message)]
                     return Response(
-                        {"detail": "File too large or unsupported format."},
+                        {"detail": " ".join(messages)},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 if old_attachment:
@@ -9910,6 +9969,587 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=["get"], url_path="section_compliance")
+    def section_compliance(self, request, pk):
+        """Aggregates compliance results and scores per top-level requirement group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        requirement_nodes = list(
+            RequirementNode.objects.filter(framework=framework).all()
+        )
+        # Build children dict
+        children_dict = defaultdict(list)
+        for rn in requirement_nodes:
+            parent = rn.parent_urn or "root"
+            children_dict[parent].append(rn)
+
+        top_level_nodes = children_dict.get("root", [])
+        for node in top_level_nodes:
+            if node.order_id is None:
+                node.order_id = 0
+        top_level_nodes.sort(key=lambda x: x.order_id)
+
+        # Build RA map
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        ra_by_req_id = {}
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            ra_by_req_id[str(ra.requirement_id)] = ra
+
+        def collect_assessable_descendants(node_urn):
+            result = []
+            for child in children_dict.get(node_urn, []):
+                if child.assessable:
+                    ra = ra_by_req_id.get(str(child.id))
+                    if ra:
+                        if not ig or (ig & set(child.implementation_groups or [])):
+                            result.append(ra)
+                result.extend(collect_assessable_descendants(child.urn))
+            return result
+
+        sections = []
+        for node in top_level_nodes:
+            assessable_list = []
+            if node.assessable:
+                ra = ra_by_req_id.get(str(node.id))
+                if ra and (not ig or (ig & set(node.implementation_groups or []))):
+                    assessable_list.append(ra)
+            assessable_list.extend(collect_assessable_descendants(node.urn))
+
+            if not assessable_list:
+                continue
+
+            results = defaultdict(int)
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+            for ra in assessable_list:
+                results[ra.result] += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            if is_sum:
+                section_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                section_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                section_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                section_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            node_name = (
+                get_referential_translation(node, "name")
+                or node.name
+                or node.ref_id
+                or str(node.id)
+            )
+            sections.append(
+                {
+                    "ref_id": node.ref_id,
+                    "name": node_name,
+                    "total_assessable": len(assessable_list),
+                    "results": dict(results),
+                    "score": section_score,
+                    "documentation_score": section_doc_score,
+                    "scored_count": scored_count,
+                }
+            )
+
+        return Response(
+            {
+                "sections": sections,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="controls_coverage")
+    def controls_coverage(self, request, pk):
+        """Controls coverage analysis for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Filter by implementation groups and auditee
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        # Annotate with control counts
+        ra_control_counts = (
+            RequirementAssessment.objects.filter(id__in=[ra.id for ra in filtered_ras])
+            .annotate(control_count=Count("applied_controls"))
+            .values("id", "control_count")
+        )
+        count_map = {str(r["id"]): r["control_count"] for r in ra_control_counts}
+
+        with_controls = 0
+        without_controls = 0
+        requirements_by_control_count = defaultdict(int)
+        all_control_ids = set()
+
+        for ra in filtered_ras:
+            cc = count_map.get(str(ra.id), 0)
+            if cc > 0:
+                with_controls += 1
+            else:
+                without_controls += 1
+            bucket = str(cc) if cc <= 2 else "3+"
+            requirements_by_control_count[bucket] += 1
+
+        # Get all controls linked to filtered RAs
+        # Note: no IAM filtering here — coverage metrics must be comprehensive
+        # to avoid misleadingly low percentages. Only aggregates are exposed.
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        control_ids = set(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("appliedcontrol_id", flat=True)
+        )
+
+        control_status_distribution = defaultdict(int)
+        if control_ids:
+            controls = AppliedControl.objects.filter(id__in=control_ids)
+            for c in controls:
+                control_status_distribution[c.status] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_controls": with_controls,
+                "without_controls": without_controls,
+                "coverage_percent": round(with_controls / total * 100, 1)
+                if total > 0
+                else 0,
+                "control_status_distribution": dict(control_status_distribution),
+                "requirements_by_control_count": dict(requirements_by_control_count),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="evidence_coverage")
+    def evidence_coverage(self, request, pk):
+        """Evidence coverage analysis — direct (on RA) and indirect (via applied controls)."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+
+        # Note: no IAM filtering on evidence/controls — coverage metrics must be
+        # comprehensive to avoid misleadingly low percentages. Only aggregates are exposed.
+
+        # Direct evidence: RA.evidences M2M
+        ra_with_direct = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", flat=True)
+        )
+
+        # Indirect evidence: RA → applied_controls → evidences
+        ra_control_pairs = list(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", "appliedcontrol_id")
+        )
+        control_ids = set(pair[1] for pair in ra_control_pairs)
+        controls_with_evidence = (
+            set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("appliedcontrol_id", flat=True)
+            )
+            if control_ids
+            else set()
+        )
+        ra_with_indirect = set()
+        for ra_id, ctrl_id in ra_control_pairs:
+            if ctrl_id in controls_with_evidence:
+                ra_with_indirect.add(ra_id)
+
+        # Combine
+        ra_with_any_evidence = ra_with_direct | ra_with_indirect
+        with_evidence = len(ra_with_any_evidence)
+        without_evidence = len(filtered_ras) - with_evidence
+        direct_only = len(ra_with_direct - ra_with_indirect)
+        indirect_only = len(ra_with_indirect - ra_with_direct)
+        both = len(ra_with_direct & ra_with_indirect)
+
+        # Evidence status distribution
+        all_evidence_ids = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("evidence_id", flat=True)
+        )
+        if control_ids:
+            all_evidence_ids |= set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("evidence_id", flat=True)
+            )
+        evidence_status_distribution = defaultdict(int)
+        if all_evidence_ids:
+            for status_val in Evidence.objects.filter(
+                id__in=all_evidence_ids
+            ).values_list("status", flat=True):
+                evidence_status_distribution[status_val] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_evidence": with_evidence,
+                "without_evidence": without_evidence,
+                "coverage_percent": round(with_evidence / total * 100, 1)
+                if total > 0
+                else 0,
+                "direct_only": direct_only,
+                "indirect_only": indirect_only,
+                "both": both,
+                "evidence_status_distribution": dict(evidence_status_distribution),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="exceptions_summary")
+    def exceptions_summary(self, request, pk):
+        """Security exceptions summary for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        exception_ids = set(
+            RequirementAssessment.security_exceptions.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("securityexception_id", flat=True)
+        )
+        # IAM: intersect with user-visible exceptions
+        (viewable_exception_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+        exception_ids &= set(viewable_exception_ids)
+
+        if not exception_ids:
+            return Response(
+                {
+                    "total": 0,
+                    "status_distribution": {},
+                    "severity_distribution": {},
+                    "exceptions": [],
+                }
+            )
+
+        exceptions = SecurityException.objects.filter(id__in=exception_ids)
+        status_distribution = defaultdict(int)
+        severity_distribution = defaultdict(int)
+        exception_list = []
+        for exc in exceptions:
+            status_distribution[exc.status] += 1
+            severity_distribution[exc.get_severity_display()] += 1
+            exception_list.append(
+                {
+                    "id": str(exc.id),
+                    "name": exc.name,
+                    "status": exc.status,
+                    "severity": exc.get_severity_display(),
+                    "expiration_date": str(exc.expiration_date)
+                    if exc.expiration_date
+                    else None,
+                }
+            )
+
+        return Response(
+            {
+                "total": len(exception_ids),
+                "status_distribution": dict(status_distribution),
+                "severity_distribution": dict(severity_distribution),
+                "exceptions": exception_list,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="compliance_timeline")
+    def compliance_timeline(self, request, pk):
+        """Returns compliance metrics over time from HistoricalMetric snapshots."""
+        compliance_assessment = self.get_object()
+
+        # Get historical data for this assessment
+        metrics = HistoricalMetric.objects.filter(
+            model="ComplianceAssessment", object_id=pk
+        ).order_by("date")
+
+        timeline = []
+        for m in metrics:
+            data = m.data.get("reqs", {})
+            timeline.append(
+                {
+                    "date": m.date.isoformat(),
+                    "progress_perc": data.get("progress_perc", 0),
+                    "score": data.get("score", 0),
+                    "per_result": data.get("per_result", {}),
+                    "per_status": data.get("per_status", {}),
+                }
+            )
+
+        return Response({"timeline": timeline})
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="implementation_groups_breakdown",
+    )
+    def implementation_groups_breakdown(self, request, pk):
+        """Breakdown of compliance results by implementation group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+
+        ig_definition = framework.implementation_groups_definition
+        if not ig_definition:
+            return Response({"groups": []})
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Build filtered RA list
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            filtered_ras.append(ra)
+
+        groups = []
+        for group_def in ig_definition:
+            group_ref_id = group_def.get("ref_id")
+            group_name = group_def.get("name", group_ref_id)
+
+            matching_ras = [
+                ra
+                for ra in filtered_ras
+                if group_ref_id in (ra.requirement.implementation_groups or [])
+            ]
+
+            if not matching_ras:
+                groups.append(
+                    {
+                        "ref_id": group_ref_id,
+                        "name": group_name,
+                        "total_assessable": 0,
+                        "results": {},
+                        "progress_percent": 0,
+                        "score": None,
+                        "documentation_score": None,
+                        "scored_count": 0,
+                    }
+                )
+                continue
+
+            results = defaultdict(int)
+            assessed = 0
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+
+            for ra in matching_ras:
+                results[ra.result] += 1
+                if ra.result != "not_assessed":
+                    assessed += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            total = len(matching_ras)
+            if is_sum:
+                group_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                group_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                group_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                group_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            groups.append(
+                {
+                    "ref_id": group_ref_id,
+                    "name": group_name,
+                    "total_assessable": total,
+                    "results": dict(results),
+                    "progress_percent": round(assessed / total * 100)
+                    if total > 0
+                    else 0,
+                    "score": group_score,
+                    "documentation_score": group_doc_score,
+                    "scored_count": scored_count,
+                }
+            )
+
+        return Response(
+            {
+                "groups": groups,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
+
     @action(detail=False, methods=["get"], name="Get compliance analytics")
     def analytics(self, request):
         """
@@ -10868,41 +11508,25 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     "color": "hsl(80deg, 80%, 60%)",
                 },
                 "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
+                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
-            grouped_status_counts = {}
+            status_values = []
 
             for status, count in metrics["status_distribution"].items():
                 mapping_info = status_mapping.get(
-                    status, {"localName": "other", "color": "#CCCCCC"}
+                    status, {"localName": status, "color": "#CCCCCC"}
                 )
-                local_name = mapping_info["localName"]
-                color = mapping_info["color"]
-
-                if local_name in grouped_status_counts:
-                    grouped_status_counts[local_name]["value"] += count
-                else:
-                    grouped_status_counts[local_name] = {
+                status_values.append(
+                    {
                         "value": count,
-                        "localName": local_name,
-                        "itemStyle": {"color": color},
+                        "localName": mapping_info["localName"],
+                        "itemStyle": {"color": mapping_info["color"]},
                     }
-
-            status_values = list(grouped_status_counts.values())
-
-            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
-            for status in expected_statuses:
-                if not any(item["localName"] == status for item in status_values):
-                    status_values.append(
-                        {
-                            "value": 0,
-                            "localName": status,
-                            "itemStyle": {"color": "#CCCCCC"},
-                        }
-                    )
+                )
 
             return {"values": status_values}
 
@@ -12258,6 +12882,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
+                if not template.task_date:
+                    continue
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
@@ -12279,53 +12905,110 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             tasks = _generate_occurrences(template, start_date, end_date)
             tasks_list.extend(tasks)
 
-        processed_tasks_identifiers = set()  # Track tasks we've already processed
+            # Preserve TaskNodes manually rescheduled by the user
+            # (due_date != scheduled_date)
+            # Unmodified nodes (due_date == scheduled_date)
+            # can be safely garbage-collected on schedule changes.
+            existing_nodes = TaskNode.objects.filter(
+                task_template=template,
+            ).filter(
+                Q(
+                    scheduled_date__gte=start_date,
+                    scheduled_date__lte=end_date,
+                )
+                | (
+                    Q(due_date__gte=start_date, due_date__lte=end_date)
+                    & ~Q(due_date=F("scheduled_date"))
+                )
+            )
+            generated_scheduled_dates = {t["due_date"] for t in tasks}
+            for node in existing_nodes:
+                if node.scheduled_date not in generated_scheduled_dates:
+                    if (
+                        node.due_date != node.scheduled_date
+                        or node.due_date < datetime.now().date()
+                    ):
+                        # Preserve nodes manually rescheduled or in the past
+                        node.to_delete = False
+                        node.save(update_fields=["to_delete"])
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
 
-        # Sort tasks by due date
+        def _parse_due_date(val):
+            """Normalize due_date to a date object"""
+            if isinstance(val, str):
+                return datetime.strptime(val, "%Y-%m-%d").date()
+            return val
+
+        # Sort tasks by due date, skip entries without a due_date
         sorted_tasks = sorted(
-            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+            [t for t in tasks_list if t.get("due_date")],
+            key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        # Process all past tasks and next 10 upcoming tasks
         current_date = datetime.now().date()
 
-        # First separate past and future tasks
-        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
-        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+        # Separate past and future tasks, limit future to next 10
+        past_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) <= current_date
+        ]
+        next_tasks = [
+            task
+            for task in sorted_tasks
+            if _parse_due_date(task["due_date"]) > current_date
+        ]
 
-        # Combined list of tasks to process (past and next 10)
-        tasks_to_process = past_tasks + next_tasks
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
+        # Only virtual tasks (from _generate_occurrences) need to be materialized;
+        # existing TaskNodes from the DB are already persisted.
+        tasks_to_process_ids = set()
+        for task in past_tasks + next_tasks[:10]:
+            if not task.get("virtual"):
+                continue
+            template_id = task.get("task_template")
+            task_date = task.get("due_date")
+            if template_id and task_date:
+                tasks_to_process_ids.add((template_id, task_date))
 
-        # Directly modify tasks in the original tasks_list
+        processed_tasks_identifiers = set()
+
         for i in range(len(tasks_list)):
             task = tasks_list[i]
-            task_date = task["due_date"]
-            task_template_id = task["task_template"]
+            task_date = task.get("due_date")
+            if not task_date:
+                continue
 
-            # Create a unique identifier for this task to avoid duplication
+            # Already-serialized TaskNodes from the DB don't need processing
+            if not task.get("virtual"):
+                continue
+
+            task_template_id = task["task_template"]
             task_identifier = (task_template_id, task_date)
 
-            # Skip if we've already processed this task
             if task_identifier in processed_tasks_identifiers:
                 continue
 
-            # Check if this task should be processed (is in past or next 10)
-            if task in tasks_to_process:
+            if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                # Get or create the TaskNode
                 task_template = TaskTemplate.objects.get(id=task_template_id)
-                task_node, created = TaskNode.objects.get_or_create(
-                    task_template=task_template,
-                    due_date=task_date,
-                    defaults={
-                        "status": "pending",
-                        "folder": task_template.folder,
-                    },
-                )
+                try:
+                    task_node, created = TaskNode.objects.get_or_create(
+                        task_template=task_template,
+                        scheduled_date=task_date,
+                        defaults={
+                            "due_date": task_date,
+                            "status": "pending",
+                            "folder": task_template.folder,
+                        },
+                    )
+                except IntegrityError:
+                    # Another node for this template already has this due_date
+                    # (e.g. a rescheduled occurrence). Skip materialization.
+                    continue
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
-                # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
         return tasks_list
@@ -12333,9 +13016,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
-                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
+                # Soft-delete future TaskNode instances for re-evaluation.
                 TaskNode.objects.filter(
-                    task_template=task_template, due_date__gt=date.today()
+                    task_template=task_template, scheduled_date__gte=date.today()
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date

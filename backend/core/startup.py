@@ -1405,6 +1405,7 @@ def startup(sender: AppConfig, **kwargs):
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
         "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
@@ -1419,7 +1420,10 @@ def startup(sender: AppConfig, **kwargs):
             logger.warning(
                 "ebios radar settings are invalid (None or 0). Reverting to default settings."
             )
-            updated_value = {**current_value, **default_settings}
+            # Merge defaults first, then apply current values to preserve user settings
+            # Finally force-reset the invalid ebios_radar_max to default
+            updated_value = {**default_settings, **current_value}
+            updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
             settings.value = updated_value
             settings.save()
             logger.info(
