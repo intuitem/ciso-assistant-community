@@ -7687,6 +7687,9 @@ class FrameworkViewSet(BaseModelViewSet):
     model = Framework
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
+    permission_overrides = {
+        "publish": "change_framework",
+    }
 
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related("requirement_nodes")
