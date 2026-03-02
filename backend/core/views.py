@@ -4681,7 +4681,6 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         FIELDS_TO_COPY: Final[list[str]] = [
             "reference_control",
-            "folder",
             "ref_id",
             "category",
             "csf_function",
