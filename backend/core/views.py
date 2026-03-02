@@ -13069,7 +13069,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(enabled=True),
+                task_templates=self.get_queryset().filter(enabled=True),
                 start=start,
                 end=end,
             )
