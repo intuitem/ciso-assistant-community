@@ -67,7 +67,7 @@
 
 	const COLUMN_GAP = 350;
 	const COLUMN_WIDTH = 280;
-	const COLUMN_HEIGHT = 800;
+	const COLUMN_HEIGHT = 400;
 	const NODE_GAP_Y = 90;
 	const NODE_PADDING_X = 50;
 	const NODE_PADDING_Y = 60;
