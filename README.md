@@ -351,7 +351,7 @@ For the following executions, use "docker compose up" directly.
 - node 24+
 - npm 10.2+
 - pnpm 10.18+
-- yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
+- yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
 
 ### Running the backend
 
