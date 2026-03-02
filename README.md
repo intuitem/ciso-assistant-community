@@ -350,7 +350,7 @@ For the following executions, use "docker compose up" directly.
 - poetry 2.0+
 - node 24+
 - npm 10.2+
-- pnpm 10.18+
+- pnpm 10.30+
 - yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
 
 ### Running the backend
