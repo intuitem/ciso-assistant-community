@@ -15,6 +15,55 @@ TOP_H2_RE = re.compile(r"^\s*(\d+)\s+(.*)$")
 SECTION_H3_RE = re.compile(r"^\s*\d+\.\d+\s+")
 REQ_H4_TEXT_RE = re.compile(r"^\s*(\d{2}\.\d{2}\.\d{2})\s+(.*)$")
 
+FR_NAME = "[ITSP.10.171] Protection de l’information désignée dans les organisations et les systèmes ne relevant pas du gouvernement du Canada"
+EN_NAME = "[ITSP.10.171] Protecting specified information in non-Government of Canada systems and organizations"
+
+FR_DESCRIPTION = """La protection de l’information désignée revêt une importance capitale pour les ministères et organismes du gouvernement du Canada (GC) et peut avoir une incidence directe sur la capacité du GC de réaliser ses missions et ses fonctions essentielles avec succès. Cette publication offre aux ministères et aux organismes du GC des exigences de sécurité recommandées afin de protéger la confidentialité de l’information désignée se trouvant dans des organisations et des systèmes ne relevant pas du GC. Ces exigences s’appliquent aux composants des systèmes ne relevant pas du GC qui gèrent, traitent, stockent ou transmettent de l’information désignée ou qui protègent de tels composants. Les exigences de sécurité sont destinées à l’usage des ministères et organismes du GC dans des contrats ou d’autres ententes établis avec des organisations ne relevant pas du GC.
+
+Le présent document est une version canadienne de la publication du National Institute of Standards and Technology intitulée [NIST SP 800-171 Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations (en anglais seulement)](https://csrc.nist.gov/pubs/sp/800/171/r3/final). Le Centre pour la cybersécurité produira une publication complémentaire à utiliser conjointement avec le document intitulé [NIST SP 800-171A Assessing Security Requirements for Controlled Unclassified Information (en anglais seulement)](https://csrc.nist.gov/pubs/sp/800/171/a/r3/final). Ce document fournira un ensemble complet de procédures pour évaluer les exigences de sécurité. Dans l’intervalle, le document NIST SP 800-171A (en anglais seulement) pourra servir de référence."""
+
+EN_DESCRIPTION = """Protecting Specified Information is of paramount importance to Government of Canada (GC) departments and agencies and can directly impact the GC’s ability to successfully conduct its essential missions and functions. This publication provides GC departments and agencies with recommended security requirements for protecting the confidentiality of specified information when it resides in non-GC systems and organizations. These requirements apply to the components of non-GC systems that handle, process, store or transmit CI, or that provide protection for such components. The security requirements are intended for use by GC departments and agencies in contractual vehicles or other agreements established between those departments and agencies and non-GC organizations.
+
+This publication is a Canadian version of the National Institute of Standards and Technology [NIST SP 800-171 Protecting Controlled Unclassified Information in Nonfederal Systems and Organizations](https://csrc.nist.gov/pubs/sp/800/171/r3/final). The Cyber Centre will produce a companion publication to use in conjunction with this publication, based on [NIST SP 800-171A Assessing Security Requirements for Controlled Unclassified Information](https://csrc.nist.gov/pubs/sp/800/171/a/r3/final). That publication will provide a comprehensive set of procedures to assess the security requirements. In the interim, NIST SP 800-171A can be used as a reference."""
+
+LIBRARY_META_ROWS = [
+    ("type", "library"),
+    ("urn", "urn:intuitem:risk:library:itsp.10.171"),
+    ("version", "1"),
+    ("locale", "fr"),
+    ("ref_id", "ITSP.10.171"),
+    ("name", FR_NAME),
+    ("description", FR_DESCRIPTION),
+    (
+        "copyright",
+        "Centre de la sécurité des télécommunications Canada. "
+        "[Open Government Licence - Canada]"
+        "(https://open.canada.ca/fr/licence-du-gouvernement-ouvert-canada)",
+    ),
+    ("provider", "Centre de la sécurité des télécommunications Canada"),
+    ("packager", "intuitem"),
+    ("name[en]", EN_NAME),
+    ("description[en]", EN_DESCRIPTION),
+    (
+        "copyright[en]",
+        "Communications Security Establishment Canada. "
+        "[Open Government Licence - Canada]"
+        "(https://open.canada.ca/en/open-government-licence-canada)",
+    ),
+    ("provider[en]", "Communications Security Establishment Canada"),
+]
+
+FWK_META_ROWS = [
+    ("type", "framework"),
+    ("base_urn", "urn:intuitem:risk:req_node:itsp.10.171"),
+    ("urn", "urn:intuitem:risk:framework:itsp.10.171"),
+    ("ref_id", "ITSP.10.171"),
+    ("name", FR_NAME),
+    ("description", FR_DESCRIPTION),
+    ("name[en]", EN_NAME),
+    ("description[en]", EN_DESCRIPTION),
+]
+
 
 def clean_text(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
@@ -275,6 +324,10 @@ def add_review_flag(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def build_meta_df(rows: list[tuple[str, str]]) -> pd.DataFrame:
+    return pd.DataFrame(rows)
+
+
 def build_excel_from_urls(
     source_url_fr: str = SOURCE_URL_FR,
     source_url_en: str = SOURCE_URL_EN,
@@ -302,8 +355,15 @@ def build_excel_from_urls(
     ]
     df = add_review_flag(df)
 
+    library_meta_df = build_meta_df(LIBRARY_META_ROWS)
+    fwk_meta_df = build_meta_df(FWK_META_ROWS)
+
     with pd.ExcelWriter(output_xlsx, engine="openpyxl") as writer:
-        df.to_excel(writer, index=False, sheet_name="requirements")
+        library_meta_df.to_excel(
+            writer, index=False, header=False, sheet_name="library_meta"
+        )
+        fwk_meta_df.to_excel(writer, index=False, header=False, sheet_name="fwk_meta")
+        df.to_excel(writer, index=False, sheet_name="fwk_content")
 
     return output_xlsx
 
