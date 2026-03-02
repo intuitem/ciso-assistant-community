@@ -2,6 +2,8 @@
 	import { run } from 'svelte/legacy';
 
 	import { page } from '$app/state';
+	import { applyAction, deserialize } from '$app/forms';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
@@ -42,10 +44,100 @@
 	];
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
+	let assignments = $derived(data.assignments ?? []);
+
+	// Aggregate assignment status (priority: changes_requested > in_progress > draft > submitted > closed)
+	let assignmentStatus = $derived.by(() => {
+		if (assignments.length === 0) return null;
+		const statuses = assignments.map((a: { status: string }) => a.status);
+		if (statuses.includes('changes_requested')) return 'changes_requested';
+		if (statuses.includes('in_progress')) return 'in_progress';
+		if (statuses.includes('draft')) return 'draft';
+		if (statuses.includes('submitted')) return 'submitted';
+		if (statuses.includes('closed')) return 'closed';
+		return statuses[0];
+	});
 
 	let isReadOnly = $derived(
-		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+		complianceAssessment.is_locked ||
+			complianceAssessment.status === 'in_review' ||
+			assignments.some((a: { status: string }) => a.status === 'submitted' || a.status === 'closed')
 	);
+
+	// Can submit: at least one assignment is in_progress or changes_requested
+	let canSubmit = $derived(
+		assignments.some(
+			(a: { status: string }) => a.status === 'in_progress' || a.status === 'changes_requested'
+		)
+	);
+
+	// Reviewer observation from changes_requested assignments
+	let reviewerObservation = $derived.by(() => {
+		const changesRequested = assignments.find(
+			(a: { status: string }) => a.status === 'changes_requested'
+		);
+		return changesRequested?.reviewer_observation ?? null;
+	});
+
+	const toastStore = getToastStore();
+
+	let isSubmitting = $state(false);
+
+	async function handleSubmitForReview() {
+		const submittableAssignments = assignments.filter(
+			(a: { status: string }) => a.status === 'in_progress' || a.status === 'changes_requested'
+		);
+		if (submittableAssignments.length === 0) return;
+
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.submitForReview(),
+			body: m.submitForReviewConfirm(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				isSubmitting = true;
+				try {
+					for (const assignment of submittableAssignments) {
+						const formData = new FormData();
+						formData.append('id', assignment.id);
+						const response = await fetch(`?/submitAssignment`, {
+							method: 'POST',
+							body: formData
+						});
+						const result = deserialize(await response.text());
+						if (result.type === 'success' && result.data?.submitStatus === 200) {
+							await applyAction(result);
+						} else {
+							const errorMsg = result.data?.submitBody?.error || 'Failed to submit';
+							toastStore.trigger({
+								message: errorMsg,
+								background: 'variant-filled-error',
+								timeout: 5000
+							});
+							isSubmitting = false;
+							return;
+						}
+					}
+					await invalidateAll();
+					toastStore.trigger({
+						message: m.submitForReview() + ' ✓',
+						background: 'variant-filled-success',
+						timeout: 3000
+					});
+				} catch (error) {
+					console.error('Error submitting assignment:', error);
+					toastStore.trigger({
+						message: 'An error occurred',
+						background: 'variant-filled-error',
+						timeout: 3000
+					});
+				} finally {
+					isSubmitting = false;
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
 
 	const requirementHashmap = $derived(
 		Object.fromEntries(
@@ -396,8 +488,57 @@
 			</div>
 		</div>
 
-		<!-- Read-only banner -->
-		{#if isReadOnly}
+		<!-- Assignment status banners -->
+		{#if assignmentStatus === 'submitted'}
+			<div class="card bg-blue-50 border border-blue-300 px-5 py-3 flex items-center space-x-3">
+				<i class="fa-solid fa-clock text-blue-600 text-lg"></i>
+				<p class="text-blue-800 font-medium">{m.assignmentSubmittedBanner()}</p>
+			</div>
+		{:else if assignmentStatus === 'closed'}
+			<div class="card bg-green-50 border border-green-300 px-5 py-3 flex items-center space-x-3">
+				<i class="fa-solid fa-check-circle text-green-600 text-lg"></i>
+				<p class="text-green-800 font-medium">{m.assignmentClosedBanner()}</p>
+			</div>
+		{:else if assignmentStatus === 'changes_requested'}
+			<div class="card bg-red-50 border border-red-300 px-5 py-3 flex flex-col space-y-2">
+				<div class="flex items-center space-x-3">
+					<i class="fa-solid fa-rotate-left text-red-600 text-lg"></i>
+					<p class="text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
+				</div>
+				{#if reviewerObservation}
+					<div class="bg-red-100 rounded-md p-3 text-sm text-red-700">
+						<i class="fa-solid fa-comment-dots mr-1"></i>
+						{reviewerObservation}
+					</div>
+				{/if}
+			</div>
+		{:else if assignmentStatus === 'draft'}
+			<div class="card bg-gray-50 border border-gray-300 px-5 py-3 flex items-center space-x-3">
+				<i class="fa-solid fa-hourglass text-gray-500 text-lg"></i>
+				<p class="text-gray-700 font-medium">{m.assignmentAwaitingStart()}</p>
+			</div>
+		{/if}
+
+		<!-- Submit for Review button -->
+		{#if canSubmit}
+			<div class="flex justify-end">
+				<button
+					class="btn preset-filled-primary-500"
+					onclick={handleSubmitForReview}
+					disabled={isSubmitting}
+				>
+					{#if isSubmitting}
+						<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+					{:else}
+						<i class="fa-solid fa-paper-plane mr-2"></i>
+					{/if}
+					{m.submitForReview()}
+				</button>
+			</div>
+		{/if}
+
+		<!-- Read-only banner (only for CA-level locks, not assignment-level) -->
+		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
 			<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
 				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
 				<p class="text-yellow-800 font-medium">

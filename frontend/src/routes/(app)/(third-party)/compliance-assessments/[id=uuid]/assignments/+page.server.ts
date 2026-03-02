@@ -34,6 +34,8 @@ export const load = (async ({ fetch, params }) => {
 			id: string;
 			actor: Array<{ id: string; str: string; type?: string }>;
 			requirement_assessments: { id: string }[];
+			status: string;
+			reviewer_observation: string | null;
 		}) => ({
 			id: assignment.id,
 			actor: assignment.actor.map((a) => ({
@@ -41,7 +43,9 @@ export const load = (async ({ fetch, params }) => {
 				str: a.str,
 				type: a.type || 'user'
 			})),
-			requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id)
+			requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
+			status: assignment.status,
+			reviewer_observation: assignment.reviewer_observation
 		})
 	);
 
@@ -117,5 +121,59 @@ export const actions: Actions = {
 
 		const res = await event.fetch(endpoint, requestInitOptions);
 		return { status: res.status };
+	},
+	activate: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/activate/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
+		});
+		const body = await res.json();
+		return { status: res.status, body };
+	},
+	close: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+		const reviewer_observation = formData.get('reviewer_observation') as string | null;
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/close/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ reviewer_observation: reviewer_observation || undefined })
+		});
+		const body = await res.json();
+		return { status: res.status, body };
+	},
+	reopen: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/reopen/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
+		});
+		const body = await res.json();
+		return { status: res.status, body };
+	},
+	requestChanges: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+		const reviewer_observation = formData.get('reviewer_observation') as string;
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/request_changes/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ reviewer_observation })
+		});
+		const body = await res.json();
+		return { status: res.status, body };
 	}
 };

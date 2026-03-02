@@ -9290,14 +9290,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
-            user_actors = Actor.get_all_for_user(request.user)
+        # Scope to a specific assignment if requested
+        assignment_id = request.query_params.get("assignment")
+        if assignment_id:
             assigned_ra_ids = set(
                 RequirementAssignment.objects.filter(
+                    id=assignment_id,
                     compliance_assessment=compliance_assessment,
-                    actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments = [
@@ -9342,14 +9341,13 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
-        auditee_folders = get_auditee_filtered_folder_ids(request.user)
-        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
-            user_actors = Actor.get_all_for_user(request.user)
+        # Scope to a specific assignment if requested
+        assignment_id = request.query_params.get("assignment")
+        if assignment_id:
             assigned_ra_ids = set(
                 RequirementAssignment.objects.filter(
+                    id=assignment_id,
                     compliance_assessment=compliance_assessment,
-                    actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments_objects = [
@@ -9457,7 +9455,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="auditee-dashboard")
     def auditee_dashboard(self, request):
-        """Returns aggregated progress data for the auditee's assigned audits."""
+        """Returns per-assignment progress data for the auditee's dashboard."""
         user_actors = Actor.get_all_for_user(request.user)
         assignments = (
             RequirementAssignment.objects.filter(actor__in=user_actors)
@@ -9466,7 +9464,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment__framework",
                 "compliance_assessment__folder",
             )
-            .prefetch_related("requirement_assessments")
+            .prefetch_related("requirement_assessments", "actor")
+            .distinct()
         )
 
         # Only include compliance assessments the user can view
@@ -9474,34 +9473,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
 
-        # Group by compliance assessment
-        ca_map = defaultdict(list)
-        for assignment in assignments:
-            if assignment.compliance_assessment_id in viewable_ca_ids:
-                ca_map[assignment.compliance_assessment_id].append(assignment)
-
         dashboard_data = []
-        for ca_id, group in ca_map.items():
-            ca = group[0].compliance_assessment
-            ra_ids = set()
-            for assignment in group:
-                ra_ids.update(
-                    assignment.requirement_assessments.values_list("id", flat=True)
-                )
+        for assignment in assignments:
+            if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
 
+            ca = assignment.compliance_assessment
+            ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
             ras = RequirementAssessment.objects.filter(
                 id__in=ra_ids, requirement__assessable=True
             )
             total = ras.count()
             done = ras.exclude(result="not_assessed").count()
 
+            actor_names = ", ".join(str(a) for a in assignment.actor.all())
+
             dashboard_data.append(
                 {
                     "id": str(ca.id),
+                    "assignment_id": str(assignment.id),
                     "name": ca.name,
                     "folder": ca.folder.name if ca.folder else None,
                     "framework": ca.framework.name if ca.framework else None,
                     "status": ca.status,
+                    "assignment_status": assignment.status,
+                    "actor": actor_names,
                     "total_requirements": total,
                     "assessed_requirements": done,
                     "progress_percent": round(done / total * 100) if total > 0 else 0,
@@ -13479,6 +13475,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
         "folder",
         "compliance_assessment",
         "actor",
+        "status",
     ]
 
     def get_queryset(self):
@@ -13501,3 +13498,164 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
+
+    @action(detail=True, methods=["post"])
+    def activate(self, request, pk=None):
+        """Transition assignment from draft to in_progress."""
+        assignment = self.get_object()
+        if assignment.status != RequirementAssignment.Status.DRAFT:
+            return Response(
+                {"error": "Assignment must be in draft status to activate."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assignment.status = RequirementAssignment.Status.IN_PROGRESS
+        assignment.save(update_fields=["status"])
+        try:
+            from core.tasks import send_assignment_activated_notification
+
+            send_assignment_activated_notification(assignment.id)
+        except Exception:
+            pass
+        return Response({"status": "in_progress"})
+
+    @action(detail=True, methods=["post"])
+    def submit(self, request, pk=None):
+        """Respondent submits assignment for review."""
+        assignment = self.get_object()
+        if assignment.status not in (
+            RequirementAssignment.Status.IN_PROGRESS,
+            RequirementAssignment.Status.CHANGES_REQUESTED,
+        ):
+            return Response(
+                {
+                    "error": "Assignment must be in progress or changes requested to submit."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Verify the requesting user is an actor on this assignment
+        user_actors = Actor.get_all_for_user(request.user)
+        if not assignment.actor.filter(id__in=[a.id for a in user_actors]).exists():
+            return Response(
+                {"error": "You are not assigned to this assignment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        # Require all assessable requirements to be assessed before submission
+        unassessed_count = assignment.requirement_assessments.filter(
+            requirement__assessable=True, result="not_assessed"
+        ).count()
+        if unassessed_count > 0:
+            return Response(
+                {
+                    "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
+                    "unassessed_count": unassessed_count,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assignment.status = RequirementAssignment.Status.SUBMITTED
+        assignment.reviewer_observation = None
+        assignment.save(update_fields=["status", "reviewer_observation"])
+        try:
+            from core.tasks import send_assignment_submitted_notification
+
+            send_assignment_submitted_notification(assignment.id)
+        except Exception:
+            pass
+        return Response({"status": "submitted"})
+
+    @action(detail=True, methods=["post"])
+    def close(self, request, pk=None):
+        """Reviewer closes a submitted assignment."""
+        assignment = self.get_object()
+        if assignment.status != RequirementAssignment.Status.SUBMITTED:
+            return Response(
+                {"error": "Assignment must be in submitted status to close."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Verify user is not auditee-only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if (
+            auditee_folders
+            and assignment.compliance_assessment.folder_id in auditee_folders
+        ):
+            return Response(
+                {"error": "Auditee users cannot close assignments."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        assignment.status = RequirementAssignment.Status.CLOSED
+        observation = request.data.get("reviewer_observation")
+        if observation:
+            assignment.reviewer_observation = observation
+        assignment.save(update_fields=["status", "reviewer_observation"])
+        try:
+            from core.tasks import send_assignment_reviewed_notification
+
+            send_assignment_reviewed_notification(assignment.id, "closed")
+        except Exception:
+            pass
+        return Response({"status": "closed"})
+
+    @action(detail=True, methods=["post"])
+    def reopen(self, request, pk=None):
+        """Reviewer reopens a closed assignment back to submitted."""
+        assignment = self.get_object()
+        if assignment.status != RequirementAssignment.Status.CLOSED:
+            return Response(
+                {"error": "Assignment must be in closed status to reopen."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Verify user is not auditee-only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if (
+            auditee_folders
+            and assignment.compliance_assessment.folder_id in auditee_folders
+        ):
+            return Response(
+                {"error": "Auditee users cannot reopen assignments."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        assignment.status = RequirementAssignment.Status.SUBMITTED
+        assignment.reviewer_observation = None
+        assignment.save(update_fields=["status", "reviewer_observation"])
+        try:
+            from core.tasks import send_assignment_reviewed_notification
+
+            send_assignment_reviewed_notification(assignment.id, "reopened")
+        except Exception:
+            pass
+        return Response({"status": "submitted"})
+
+    @action(detail=True, methods=["post"], url_path="request_changes")
+    def request_changes(self, request, pk=None):
+        """Reviewer requests changes on a submitted assignment."""
+        assignment = self.get_object()
+        if assignment.status != RequirementAssignment.Status.SUBMITTED:
+            return Response(
+                {"error": "Assignment must be in submitted status to request changes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Verify user is not auditee-only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if (
+            auditee_folders
+            and assignment.compliance_assessment.folder_id in auditee_folders
+        ):
+            return Response(
+                {"error": "Auditee users cannot request changes."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        observation = request.data.get("reviewer_observation")
+        if not observation:
+            return Response(
+                {"error": "Reviewer observation is required when requesting changes."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        assignment.status = RequirementAssignment.Status.CHANGES_REQUESTED
+        assignment.reviewer_observation = observation
+        assignment.save(update_fields=["status", "reviewer_observation"])
+        try:
+            from core.tasks import send_assignment_reviewed_notification
+
+            send_assignment_reviewed_notification(assignment.id, "changes_requested")
+        except Exception:
+            pass
+        return Response({"status": "changes_requested"})

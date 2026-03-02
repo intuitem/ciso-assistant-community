@@ -17,6 +17,45 @@
 		deprecated: 'bg-red-400 text-white'
 	};
 
+	const assignmentStatusBadgeStyle: Record<string, string> = {
+		draft: 'bg-gray-100 text-gray-700',
+		in_progress: 'bg-orange-100 text-orange-700',
+		submitted: 'bg-blue-100 text-blue-700',
+		closed: 'bg-green-100 text-green-700',
+		changes_requested: 'bg-red-100 text-red-700'
+	};
+
+	const assignmentStatusLabel: Record<string, () => string> = {
+		draft: () => m.assignmentStatusDraft(),
+		in_progress: () => m.assignmentStatusInProgress(),
+		submitted: () => m.assignmentStatusSubmitted(),
+		closed: () => m.assignmentStatusClosed(),
+		changes_requested: () => m.assignmentStatusChangesRequested()
+	};
+
+	function getCtaLabel(audit: { assignment_status?: string; progress_percent: number }): string {
+		switch (audit.assignment_status) {
+			case 'draft':
+				return m.assignmentAwaitingStart();
+			case 'submitted':
+			case 'closed':
+				return m.reviewResponses();
+			case 'in_progress':
+			case 'changes_requested':
+				return audit.progress_percent === 0 ? m.startAssessment() : m.continueAssessment();
+			default:
+				return audit.progress_percent === 0 ? m.startAssessment() : m.continueAssessment();
+		}
+	}
+
+	function isCtaDisabled(audit: { assignment_status?: string }): boolean {
+		return audit.assignment_status === 'draft';
+	}
+
+	function isCtaReadOnly(audit: { assignment_status?: string }): boolean {
+		return audit.assignment_status === 'submitted' || audit.assignment_status === 'closed';
+	}
+
 	// Group audits by folder (domain)
 	const auditsByFolder = $derived.by(() => {
 		const groups: Record<string, typeof data.dashboard> = {};
@@ -54,12 +93,20 @@
 											{audit.framework}
 										</p>
 									{/if}
+									{#if audit.actor}
+										<p class="text-sm text-gray-500 mt-0.5">
+											<i class="fa-solid fa-user mr-1"></i>
+											{audit.actor}
+										</p>
+									{/if}
 								</div>
 								<span
-									class="text-xs font-medium px-2 py-1 rounded-md {statusBadgeStyle[audit.status] ??
-										'bg-gray-200 text-gray-700'}"
+									class="text-xs font-medium px-2 py-1 rounded-md {assignmentStatusBadgeStyle[
+										audit.assignment_status
+									] ?? 'bg-gray-200 text-gray-700'}"
 								>
-									{safeTranslate(audit.status)}
+									{assignmentStatusLabel[audit.assignment_status]?.() ??
+										safeTranslate(audit.status)}
 								</span>
 							</div>
 
@@ -79,13 +126,28 @@
 								<p class="text-xs text-gray-400 mt-1">{audit.progress_percent}%</p>
 							</div>
 
-							<a
-								href="/auditee-assessments/{audit.id}"
-								class="btn preset-filled-primary-500 w-full text-center"
-							>
-								<i class="fa-solid fa-arrow-right mr-2"></i>
-								{audit.progress_percent === 0 ? m.startAssessment() : m.continueAssessment()}
-							</a>
+							{#if isCtaDisabled(audit)}
+								<button class="btn preset-outlined-surface-500 w-full text-center" disabled>
+									<i class="fa-solid fa-hourglass mr-2"></i>
+									{getCtaLabel(audit)}
+								</button>
+							{:else if isCtaReadOnly(audit)}
+								<a
+									href="/auditee-assessments/{audit.id}?assignment={audit.assignment_id}"
+									class="btn preset-outlined-primary-500 w-full text-center"
+								>
+									<i class="fa-solid fa-eye mr-2"></i>
+									{getCtaLabel(audit)}
+								</a>
+							{:else}
+								<a
+									href="/auditee-assessments/{audit.id}?assignment={audit.assignment_id}"
+									class="btn preset-filled-primary-500 w-full text-center"
+								>
+									<i class="fa-solid fa-arrow-right mr-2"></i>
+									{getCtaLabel(audit)}
+								</a>
+							{/if}
 						</div>
 					{/each}
 				</div>

@@ -9,9 +9,10 @@ import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch, params }) => {
+export const load = (async ({ fetch, params, url }) => {
 	const URLModel = 'compliance-assessments';
 	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
+	const assignmentId = url.searchParams.get('assignment');
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
@@ -19,9 +20,10 @@ export const load = (async ({ fetch, params }) => {
 	}
 	const compliance_assessment = await res.json();
 
+	const assignmentParam = assignmentId ? `?assignment=${assignmentId}` : '';
 	const [tableMode, scores] = await Promise.all(
-		[`${endpoint}requirements_list/`, `${endpoint}global_score/`].map((endpoint) =>
-			fetch(endpoint).then((res) => res.json())
+		[`${endpoint}requirements_list/${assignmentParam}`, `${endpoint}global_score/`].map(
+			(endpoint) => fetch(endpoint).then((res) => res.json())
 		)
 	);
 
@@ -108,6 +110,27 @@ export const load = (async ({ fetch, params }) => {
 		return requirement;
 	});
 
+	// Fetch the user's assignment(s) for this compliance assessment
+	const assignmentFilter = assignmentId
+		? `id=${assignmentId}`
+		: `compliance_assessment=${params.id}`;
+	const assignmentsRes = await fetch(
+		`${BASE_API_URL}/requirement-assignments/?${assignmentFilter}`
+	);
+	const assignmentsData = await assignmentsRes.json();
+	const assignments =
+		assignmentsData.results?.map(
+			(a: {
+				id: string;
+				status: string;
+				reviewer_observation: string | null;
+			}) => ({
+				id: a.id,
+				status: a.status,
+				reviewer_observation: a.reviewer_observation
+			})
+		) ?? [];
+
 	return {
 		URLModel,
 		compliance_assessment,
@@ -116,6 +139,7 @@ export const load = (async ({ fetch, params }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
+		assignments,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;
@@ -144,5 +168,18 @@ export const actions: Actions = {
 	},
 	update: async (event) => {
 		return nestedWriteFormAction({ event, action: 'edit' });
+	},
+	submitAssignment: async (event) => {
+		const formData = await event.request.formData();
+		const id = formData.get('id') as string;
+
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/submit/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({})
+		});
+		const body = await res.json();
+		return { submitStatus: res.status, submitBody: body };
 	}
 };

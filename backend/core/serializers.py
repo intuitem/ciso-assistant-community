@@ -2376,6 +2376,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
+        # Assignment-level locking for auditee users
+        request = self.context.get("request")
+        if request and self.instance and compliance_assessment:
+            from core.utils import get_auditee_filtered_folder_ids
+
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+                locked_assignment = self.instance.assignments.filter(
+                    status__in=["submitted", "closed"]
+                ).first()
+                if locked_assignment:
+                    raise serializers.ValidationError(
+                        "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
+
         # Validate extended_result against result
         extended_result = attrs.get("extended_result")
         if extended_result is None and self.instance:
@@ -2599,6 +2614,11 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssignmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+        read_only_fields = ["status", "reviewer_observation"]
+
     def validate(self, attrs):
         """
         Validate that requirement assessments belong to the specified compliance assessment
@@ -2639,10 +2659,6 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                 )
 
         return super().validate(attrs)
-
-    class Meta:
-        model = RequirementAssignment
-        fields = "__all__"
 
 
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):

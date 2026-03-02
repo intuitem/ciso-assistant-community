@@ -7234,6 +7234,13 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     Used to delegate audit work within a compliance assessment to specific users or teams.
     """
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        SUBMITTED = "submitted", _("Submitted")
+        CLOSED = "closed", _("Closed")
+        CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,
@@ -7250,6 +7257,17 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         related_name="assignments",
         verbose_name=_("Requirement Assessments"),
         blank=True,
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+    reviewer_observation = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Reviewer Observation"),
     )
 
     class Meta:

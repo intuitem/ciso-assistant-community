@@ -477,6 +477,163 @@
 		if (actors.length > 1) return 'users';
 		return actors[0]?.type === 'user' ? 'user' : 'users';
 	}
+
+	// Assignment status badge styles
+	const assignmentStatusStyle: Record<string, string> = {
+		draft: 'bg-gray-100 text-gray-700',
+		in_progress: 'bg-orange-100 text-orange-700',
+		submitted: 'bg-blue-100 text-blue-700',
+		closed: 'bg-green-100 text-green-700',
+		changes_requested: 'bg-red-100 text-red-700'
+	};
+
+	const assignmentStatusLabel: Record<string, () => string> = {
+		draft: () => m.assignmentStatusDraft(),
+		in_progress: () => m.assignmentStatusInProgress(),
+		submitted: () => m.assignmentStatusSubmitted(),
+		closed: () => m.assignmentStatusClosed(),
+		changes_requested: () => m.assignmentStatusChangesRequested()
+	};
+
+	// State for reviewer observation modal
+	let showRequestChangesModal = $state(false);
+	let requestChangesAssignmentId = $state<string | null>(null);
+	let reviewerObservationText = $state('');
+
+	function openRequestChangesModal(assignmentId: string) {
+		requestChangesAssignmentId = assignmentId;
+		reviewerObservationText = '';
+		showRequestChangesModal = true;
+	}
+
+	function closeRequestChangesModal() {
+		showRequestChangesModal = false;
+		requestChangesAssignmentId = null;
+		reviewerObservationText = '';
+	}
+
+	// Action handlers for workflow transitions
+	async function handleActivate(assignmentId: string) {
+		try {
+			const formData = new FormData();
+			formData.append('id', assignmentId);
+			const response = await fetch(`?/activate`, { method: 'POST', body: formData });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.status === 200) {
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.activateAssignment() + ' ✓',
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.body?.error || 'Failed to activate',
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
+			}
+		} catch (error) {
+			console.error('Error activating assignment:', error);
+		}
+	}
+
+	async function handleActivateAll() {
+		const draftAssignments = assignments.filter((a) => a.status === 'draft');
+		for (const assignment of draftAssignments) {
+			await handleActivate(assignment.id);
+		}
+	}
+
+	async function handleClose(assignmentId: string) {
+		try {
+			const formData = new FormData();
+			formData.append('id', assignmentId);
+			const response = await fetch(`?/close`, { method: 'POST', body: formData });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.status === 200) {
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.closeAssignment() + ' ✓',
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.body?.error || 'Failed to close',
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
+			}
+		} catch (error) {
+			console.error('Error closing assignment:', error);
+		}
+	}
+
+	async function handleReopen(assignmentId: string) {
+		try {
+			const formData = new FormData();
+			formData.append('id', assignmentId);
+			const response = await fetch(`?/reopen`, { method: 'POST', body: formData });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.status === 200) {
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.reopenAssignment() + ' ✓',
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.body?.error || 'Failed to reopen',
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
+			}
+		} catch (error) {
+			console.error('Error reopening assignment:', error);
+		}
+	}
+
+	async function handleRequestChanges() {
+		if (!requestChangesAssignmentId || !reviewerObservationText.trim()) return;
+		try {
+			const formData = new FormData();
+			formData.append('id', requestChangesAssignmentId);
+			formData.append('reviewer_observation', reviewerObservationText);
+			const response = await fetch(`?/requestChanges`, { method: 'POST', body: formData });
+			const result = deserialize(await response.text());
+			if (result.type === 'success' && result.data?.status === 200) {
+				closeRequestChangesModal();
+				await applyAction(result);
+				await invalidateAll();
+				toastStore.trigger({
+					message: m.requestChanges() + ' ✓',
+					background: 'variant-filled-success',
+					timeout: 3000
+				});
+			} else {
+				toastStore.trigger({
+					message: result.data?.body?.error || 'Failed to request changes',
+					background: 'variant-filled-error',
+					timeout: 3000
+				});
+			}
+		} catch (error) {
+			console.error('Error requesting changes:', error);
+		}
+	}
+
+	// Check if there are any draft assignments (for "Activate All" button)
+	let hasDraftAssignments = $derived(assignments.some((a) => a.status === 'draft'));
+
+	// Helper: can edit/delete this assignment?
+	function canModifyAssignment(assignmentStatus: string): boolean {
+		return assignmentStatus === 'draft' || assignmentStatus === 'in_progress';
+	}
 </script>
 
 <div class="flex flex-col space-y-4">
@@ -686,11 +843,19 @@
 
 			<!-- Existing Assignments Card -->
 			<div class="card bg-white shadow-lg p-4">
-				<h2 class="h4 font-semibold mb-4">
-					<i class="fa-solid fa-list text-primary-500 mr-2"></i>
-					{m.existingAssignments()}
-					<span class="badge bg-gray-200 text-gray-700 ml-2">{assignments.length}</span>
-				</h2>
+				<div class="flex items-center justify-between mb-4">
+					<h2 class="h4 font-semibold">
+						<i class="fa-solid fa-list text-primary-500 mr-2"></i>
+						{m.existingAssignments()}
+						<span class="badge bg-gray-200 text-gray-700 ml-2">{assignments.length}</span>
+					</h2>
+					{#if !isReadOnly && hasDraftAssignments}
+						<button class="btn btn-sm preset-filled-warning-500" onclick={handleActivateAll}>
+							<i class="fa-solid fa-play mr-1"></i>
+							{m.activateAll()}
+						</button>
+					{/if}
+				</div>
 
 				{#if assignments.length === 0}
 					<div class="text-center py-8 text-gray-500">
@@ -708,11 +873,18 @@
 							>
 								<div class="flex items-start justify-between">
 									<div class="flex-1">
-										<div class="flex items-center text-sm text-gray-900 font-medium">
-											<i class="fa-solid fa-{actorIcon(assignment.actor)} mr-1"></i>
+										<div class="flex items-center gap-2 text-sm text-gray-900 font-medium">
+											<i class="fa-solid fa-{actorIcon(assignment.actor)}"></i>
 											<span>{formatActors(assignment.actor)}</span>
+											<span
+												class="text-xs font-medium px-2 py-0.5 rounded-md {assignmentStatusStyle[
+													assignment.status
+												] ?? 'bg-gray-100 text-gray-700'}"
+											>
+												{assignmentStatusLabel[assignment.status]?.() ?? assignment.status}
+											</span>
 										</div>
-										<div class="mt-2">
+										<div class="mt-2 flex flex-wrap items-center gap-2">
 											<button
 												class="badge bg-blue-100 text-blue-700 text-xs hover:bg-blue-200 cursor-pointer transition-colors"
 												onclick={() => openRequirementsModal(assignment)}
@@ -723,31 +895,88 @@
 												{m.requirements()}
 											</button>
 										</div>
+
+										<!-- Reviewer observation display -->
+										{#if assignment.status === 'changes_requested' && assignment.reviewer_observation}
+											<div
+												class="mt-2 bg-red-50 border border-red-200 rounded-md p-2 text-xs text-red-700"
+											>
+												<i class="fa-solid fa-comment-dots mr-1"></i>
+												{assignment.reviewer_observation}
+											</div>
+										{/if}
 									</div>
-									{#if !isReadOnly}
-										<div class="flex items-center gap-1">
+									<div class="flex flex-col items-end gap-1">
+										<!-- Activate button (draft) -->
+										{#if assignment.status === 'draft' && !isReadOnly}
 											<button
-												class="btn btn-sm preset-ghost-surface"
-												onclick={() => startEdit(assignment)}
-												title={m.edit()}
-												disabled={editingAssignmentId !== null}
+												class="btn btn-sm preset-filled-warning-500"
+												onclick={() => handleActivate(assignment.id)}
+												title={m.activateAssignment()}
 											>
-												<i class="fa-solid fa-pen"></i>
+												<i class="fa-solid fa-play mr-1"></i>
+												{m.activateAssignment()}
+											</button>
+										{/if}
+
+										<!-- Reviewer actions (submitted) -->
+										{#if assignment.status === 'submitted' && !isReadOnly}
+											<button
+												class="btn btn-sm preset-filled-success-500"
+												onclick={() => handleClose(assignment.id)}
+												title={m.closeAssignment()}
+											>
+												<i class="fa-solid fa-check mr-1"></i>
+												{m.closeAssignment()}
 											</button>
 											<button
-												class="btn btn-sm preset-ghost-error-500"
-												onclick={() => handleDeleteAssignment(assignment.id)}
-												title={m.delete()}
-												disabled={isDeleting === assignment.id || editingAssignmentId !== null}
+												class="btn btn-sm preset-filled-error-500"
+												onclick={() => openRequestChangesModal(assignment.id)}
+												title={m.requestChanges()}
 											>
-												{#if isDeleting === assignment.id}
-													<i class="fa-solid fa-spinner fa-spin"></i>
-												{:else}
-													<i class="fa-solid fa-trash"></i>
-												{/if}
+												<i class="fa-solid fa-rotate-left mr-1"></i>
+												{m.requestChanges()}
 											</button>
-										</div>
-									{/if}
+										{/if}
+
+										<!-- Reopen (closed) -->
+										{#if assignment.status === 'closed' && !isReadOnly}
+											<button
+												class="btn btn-sm preset-filled-warning-500"
+												onclick={() => handleReopen(assignment.id)}
+												title={m.reopenAssignment()}
+											>
+												<i class="fa-solid fa-lock-open mr-1"></i>
+												{m.reopenAssignment()}
+											</button>
+										{/if}
+
+										<!-- Edit/Delete (draft or in_progress only) -->
+										{#if !isReadOnly && canModifyAssignment(assignment.status)}
+											<div class="flex items-center gap-1">
+												<button
+													class="btn btn-sm preset-ghost-surface"
+													onclick={() => startEdit(assignment)}
+													title={m.edit()}
+													disabled={editingAssignmentId !== null}
+												>
+													<i class="fa-solid fa-pen"></i>
+												</button>
+												<button
+													class="btn btn-sm preset-ghost-error-500"
+													onclick={() => handleDeleteAssignment(assignment.id)}
+													title={m.delete()}
+													disabled={isDeleting === assignment.id || editingAssignmentId !== null}
+												>
+													{#if isDeleting === assignment.id}
+														<i class="fa-solid fa-spinner fa-spin"></i>
+													{:else}
+														<i class="fa-solid fa-trash"></i>
+													{/if}
+												</button>
+											</div>
+										{/if}
+									</div>
 								</div>
 							</div>
 						{/each}
@@ -759,7 +988,12 @@
 </div>
 
 <svelte:window
-	onkeydown={(e) => showRequirementsModal && e.key === 'Escape' && closeRequirementsModal()}
+	onkeydown={(e) => {
+		if (e.key === 'Escape') {
+			if (showRequestChangesModal) closeRequestChangesModal();
+			else if (showRequirementsModal) closeRequirementsModal();
+		}
+	}}
 />
 
 <!-- Requirements Detail Modal -->
@@ -843,6 +1077,61 @@
 			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
 				<button class="btn preset-filled-surface-500 w-full" onclick={closeRequirementsModal}>
 					{m.close()}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Request Changes Modal -->
+{#if showRequestChangesModal && requestChangesAssignmentId}
+	<div
+		class="fixed inset-0 bg-black/50 z-40"
+		onclick={closeRequestChangesModal}
+		role="presentation"
+	></div>
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div
+			class="bg-white rounded-lg shadow-xl max-w-lg w-full flex flex-col"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+		>
+			<div class="flex items-center justify-between p-4 border-b">
+				<h2 class="h4 font-semibold">
+					<i class="fa-solid fa-rotate-left text-red-500 mr-2"></i>
+					{m.requestChanges()}
+				</h2>
+				<button
+					class="btn btn-sm preset-ghost-surface"
+					onclick={closeRequestChangesModal}
+					aria-label={m.close()}
+				>
+					<i class="fa-solid fa-times"></i>
+				</button>
+			</div>
+			<div class="p-4">
+				<label class="label mb-2">
+					<span class="text-sm font-medium">{m.reviewerObservation()}</span>
+				</label>
+				<textarea
+					class="textarea w-full"
+					rows="4"
+					placeholder={m.reviewerObservationPlaceholder()}
+					bind:value={reviewerObservationText}
+				></textarea>
+			</div>
+			<div class="p-4 border-t bg-gray-50 rounded-b-lg flex gap-2">
+				<button
+					class="btn preset-filled-error-500 flex-1"
+					onclick={handleRequestChanges}
+					disabled={!reviewerObservationText.trim()}
+				>
+					<i class="fa-solid fa-rotate-left mr-2"></i>
+					{m.requestChanges()}
+				</button>
+				<button class="btn preset-outlined-surface-500 flex-1" onclick={closeRequestChangesModal}>
+					{m.cancel()}
 				</button>
 			</div>
 		</div>
