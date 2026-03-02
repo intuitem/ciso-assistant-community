@@ -369,8 +369,18 @@
 		})
 	);
 
-	// ToC visibility
+	// ToC visibility and filtering
 	let tocCollapsed = $state(false);
+	let tocFilterResult = $state<string | null>(null);
+	const resultCounts = $derived(
+		result_options.map((opt) => ({
+			...opt,
+			count: tocSections.filter((s) => s.result === opt.id).length
+		}))
+	);
+	const filteredTocSections = $derived(
+		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+	);
 
 	// Keyboard navigation
 	function handleKeydown(event: KeyboardEvent) {
@@ -412,8 +422,28 @@
 			</button>
 		</div>
 		{#if !tocCollapsed}
+			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-gray-200">
+				{#each resultCounts as opt}
+					{#if opt.count > 0}
+						<button
+							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
+								{tocFilterResult === opt.id
+								? 'bg-gray-700 text-white font-semibold'
+								: 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}"
+							onclick={() => (tocFilterResult = tocFilterResult === opt.id ? null : opt.id)}
+							title={opt.label}
+						>
+							<span
+								class="inline-block w-1.5 h-1.5 rounded-full"
+								style="background-color: {complianceResultColorMap[opt.id] ?? '#d1d5db'};"
+							></span>
+							{opt.count}
+						</button>
+					{/if}
+				{/each}
+			</div>
 			<nav class="p-2 space-y-0.5">
-				{#each tocSections as section}
+				{#each filteredTocSections as section}
 					<button
 						class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 							{section.index === currentIndex
