@@ -269,6 +269,19 @@
 	// Initialize nodes/edges immediately
 	initFromKillChain();
 
+	// Update node interactivity when readonly changes
+	let prevReadonly = readonly;
+	$effect(() => {
+		if (readonly !== prevReadonly) {
+			prevReadonly = readonly;
+			nodes = nodes.map((n) =>
+				n.type === 'action'
+					? { ...n, draggable: !readonly, deletable: !readonly, connectable: !readonly }
+					: n
+			);
+		}
+	});
+
 	// Re-fit viewport after sidebar transition when toggling readonly,
 	// and also on initial mount to ensure nodes are visible
 	$effect(() => {
