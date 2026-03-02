@@ -1094,7 +1094,6 @@ class LibraryUpdater:
                                 "name",
                                 "description",
                                 "order_id",
-                                "questions",
                                 "implementation_groups",
                             }
                         )
@@ -2184,14 +2183,19 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             requirement_node__framework=self,
             depends_on__isnull=False,
         ).select_related("requirement_node")
+
+        # Build set of (requirement_node_id, ref_id) for all questions in this framework
+        valid_question_refs = set(
+            Question.objects.filter(
+                requirement_node__framework=self,
+            ).values_list("requirement_node_id", "ref_id")
+        )
+
         for q in questions_with_depends:
             dep = q.depends_on
             if dep and dep.get("question"):
                 dep_ref = dep["question"]
-                if not Question.objects.filter(
-                    requirement_node=q.requirement_node,
-                    ref_id=dep_ref,
-                ).exists():
+                if (q.requirement_node_id, dep_ref) not in valid_question_refs:
                     errors.append(
                         f"Question '{q.ref_id}' depends_on references unknown question '{dep_ref}'."
                     )

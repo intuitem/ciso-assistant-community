@@ -2564,7 +2564,7 @@ class QuestionChoiceWriteSerializer(BaseModelSerializer):
         try:
             return super(BaseModelSerializer, self).update(instance, validated_data)
         except Exception as e:
-            logger.error("Failed to update QuestionChoice", exc_info=True)
+            logger.error("Failed to update QuestionChoice", error=str(e), exc_info=True)
             raise serializers.ValidationError(
                 "Failed to update choice. Please check the input data."
             )
@@ -2603,7 +2603,7 @@ class QuestionWriteSerializer(BaseModelSerializer):
         try:
             return super(BaseModelSerializer, self).update(instance, validated_data)
         except Exception as e:
-            logger.error("Failed to update Question", exc_info=True)
+            logger.error("Failed to update Question", error=str(e), exc_info=True)
             raise serializers.ValidationError(
                 "Failed to update question. Please check the input data."
             )

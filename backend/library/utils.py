@@ -17,6 +17,7 @@ from core.models import (
     ReferenceControl,
     Terminology,
     Threat,
+    _create_questions_from_data,
 )
 from metrology.models import MetricDefinition
 from django.db import transaction
@@ -97,53 +98,7 @@ class RequirementNodeImporter:
         # Create Question + QuestionChoice objects from questions data
         questions_data = self.requirement_data.get("questions")
         if questions_data and isinstance(questions_data, dict):
-            root_folder = Folder.get_root_folder()
-            for order, (q_urn, q_data) in enumerate(questions_data.items()):
-                raw_type = q_data.get("type", "text")
-                q_type = "unique_choice" if raw_type == "single_choice" else raw_type
-                parts = q_urn.split(":")
-                q_ref_id = parts[-1] if parts else q_urn
-
-                question = Question.objects.create(
-                    requirement_node=requirement_node,
-                    urn=q_urn,
-                    ref_id=q_ref_id,
-                    annotation=q_data.get("text", ""),
-                    type=q_type,
-                    depends_on=q_data.get("depends_on"),
-                    order=order,
-                    weight=q_data.get("weight", 1),
-                    folder=root_folder,
-                    is_published=True,
-                    translations=q_data.get("translations"),
-                )
-
-                for c_order, choice in enumerate(q_data.get("choices", [])):
-                    c_urn = choice.get("urn", "")
-                    c_parts = c_urn.split(":")
-                    c_ref_id = c_parts[-1] if c_parts else c_urn
-                    c_ref_id = c_ref_id or None  # Allow multiple NULL ref_ids
-
-                    compute_result = choice.get("compute_result")
-                    if compute_result is not None:
-                        compute_result = str(compute_result).lower()
-
-                    QuestionChoice.objects.create(
-                        question=question,
-                        ref_id=c_ref_id,
-                        annotation=choice.get("value", ""),
-                        add_score=choice.get("add_score"),
-                        compute_result=compute_result,
-                        order=c_order,
-                        description=choice.get("description"),
-                        color=choice.get("color"),
-                        select_implementation_groups=choice.get(
-                            "select_implementation_groups"
-                        ),
-                        folder=root_folder,
-                        is_published=True,
-                        translations=choice.get("translations"),
-                    )
+            _create_questions_from_data(requirement_node, questions_data)
 
         for threat in self.requirement_data.get("threats", []):
             logger.info(

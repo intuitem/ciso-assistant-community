@@ -7788,8 +7788,9 @@ class FrameworkViewSet(BaseModelViewSet):
                 error=str(e),
                 exc_info=True,
             )
+            errors = e.messages if hasattr(e, "messages") else [str(e)]
             return Response(
-                {"error": "Framework validation failed."},
+                {"errors": errors},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         return Response({"status": "published"}, status=status.HTTP_200_OK)
