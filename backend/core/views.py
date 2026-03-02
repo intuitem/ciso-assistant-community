@@ -10582,6 +10582,30 @@ def generate_html(
             p = req.parent_urn
             req = None if not (p) else node_per_urn[p]
 
+    # Pre-fetch all assessments, answers, and questions to avoid N+1 queries
+    # in the recursive traversal.
+    assessments_prefetched = (
+        assessments.select_related("requirement")
+        .prefetch_related(
+            "answers__question",
+            "answers__selected_choices",
+            "evidences",
+            "applied_controls__evidences",
+        )
+    )
+    assessment_by_urn = {a.requirement.urn: a for a in assessments_prefetched}
+
+    # Pre-build answers and questions dicts keyed by requirement URN
+    answers_dict_by_urn = {}
+    for a in assessments_prefetched:
+        answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
+
+    questions_dict_by_urn = {}
+    for node in requirement_nodes.prefetch_related("questions__choices"):
+        qd = build_questions_dict(node)
+        if qd:
+            questions_dict_by_urn[node.urn] = qd
+
     def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
         children_nodes = [
@@ -10603,21 +10627,15 @@ def generate_html(
         node_data["bar_graph"] = True if children_nodes else False
 
         if requirement_node.assessable:
-            assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn,
-                compliance_assessment=compliance_assessment,
-            ).first()
+            assessment = assessment_by_urn.get(requirement_node.urn)
 
             if assessment:
                 node_data["assessments"] = assessment
-                # Pre-compute dicts for template backward compat
-                node_data["answers_dict"] = build_answers_dict(
-                    assessment.answers.select_related("question")
-                    .prefetch_related("selected_choices")
-                    .all()
+                node_data["answers_dict"] = answers_dict_by_urn.get(
+                    requirement_node.urn, {}
                 )
-                node_data["questions_dict"] = (
-                    build_questions_dict(requirement_node) or {}
+                node_data["questions_dict"] = questions_dict_by_urn.get(
+                    requirement_node.urn, {}
                 )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
