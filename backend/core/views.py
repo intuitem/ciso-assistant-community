@@ -10587,14 +10587,11 @@ def generate_html(
 
     # Pre-fetch all assessments, answers, and questions to avoid N+1 queries
     # in the recursive traversal.
-    assessments_prefetched = (
-        assessments.select_related("requirement")
-        .prefetch_related(
-            "answers__question",
-            "answers__selected_choices",
-            "evidences",
-            "applied_controls__evidences",
-        )
+    assessments_prefetched = assessments.select_related("requirement").prefetch_related(
+        "answers__question",
+        "answers__selected_choices",
+        "evidences",
+        "applied_controls__evidences",
     )
     assessment_by_urn = {a.requirement.urn: a for a in assessments_prefetched}
 
