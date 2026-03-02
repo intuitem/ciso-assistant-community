@@ -19,7 +19,7 @@ copyright: "Copyright 2023 ANSSI - Agence nationale de la s\xE9curit\xE9 des sys
   \ CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific\
   \ language governing permissions and limitations under the License."
 version: 1
-publication_date: 2026-02-26
+publication_date: 2026-03-02
 provider: ANSSI
 packager: intuitem
 objects:
@@ -2005,11 +2005,8 @@ objects:
       name: "\xC9l\xE9ments principaux"
       description: null
       default_selected: true
-    - ref_id: _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
-      name: "Question 8.1 d\xE9pendante de la Question 8"
-      description: null
-    - ref_id: _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
-      name: "Question 8.2 d\xE9pendante de la Question 8"
+    - ref_id: _DEPENDS_ON_contexte-cyber-attaque-subie
+      name: "D\xE9pendance \xE0 attaque subie"
       description: null
     - ref_id: SYSTEME-INDUSTRIEL
       name: "SYST\xC8ME INDUSTRIEL"
@@ -2017,35 +2014,26 @@ objects:
     - ref_id: ATTAQUE-CIBLEE
       name: "ATTAQUE CIBL\xC9E"
       description: null
-    - ref_id: _Q33.1_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
-      name: "Question 33.1 d\xE9pendante de la Question 33"
+    - ref_id: _DEPENDS_ON_securite-infrastructure-pare-feu-deploye
+      name: "D\xE9pendance \xE0 pare-feu d\xE9ploy\xE9"
       description: null
-    - ref_id: _Q33.2_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
-      name: "Question 33.2 d\xE9pendante de la Question 33"
+    - ref_id: _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-ponctuellement
+      name: "D\xE9pendance \xE0 sauvegardes ponctuelles"
       description: null
-    - ref_id: _Q44.1_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-      name: "Question 44.1 d\xE9pendante de la Question 44"
-      description: null
-    - ref_id: _Q44.2_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-      name: "Question 44.2 d\xE9pendante de la Question 44"
-      description: null
-    - ref_id: _Q44.3_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-      name: "Question 44.3 d\xE9pendante de la Question 44"
-      description: null
-    - ref_id: _Q44.4_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-      name: "Question 44.4 d\xE9pendante de la Question 44"
+    - ref_id: _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-regulierement
+      name: "D\xE9pendance \xE0 sauvegardes r\xE9guli\xE8res"
       description: null
     - ref_id: _DEPENDS_ON_contexte-opere-systemes-information-industriels
-      name: "Questions d\xE9pendantes de la Question 7"
+      name: "D\xE9pendance \xE0 SI industriel"
       description: null
     - ref_id: _DEPENDS_ON_contexte-activites-recherche-et-developpement
-      name: "Questions d\xE9pendantes de la Question 6"
+      name: "D\xE9pendance \xE0 activit\xE9s R&D"
       description: null
     - ref_id: _DEPENDS_ON_contexte-nombre-postes-travail-dans-entite
-      name: "Questions d\xE9pendantes de la Question 5"
+      name: "D\xE9pendance \xE0 postes de travail dans entit\xE9"
       description: null
     - ref_id: _DEPENDS_ON_contexte-nombre-postes-travail-dans-organisation
-      name: "Questions d\xE9pendantes de la Question"
+      name: "D\xE9pendance \xE0 postes de travail dans organisation"
       description: null
     requirement_nodes:
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte
@@ -2503,15 +2491,14 @@ objects:
           - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie:question:1:choice:3
             value: Oui
             select_implementation_groups:
-            - _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
-            - _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
+            - _DEPENDS_ON_contexte-cyber-attaque-subie
             color: '#209226'
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie
       implementation_groups:
-      - _Q8.1_DEPENDS_ON_contexte-cyber-attaque-subie
+      - _DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
         urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-oui-tiroir-type:question:1:
           type: multiple_choice
@@ -2540,7 +2527,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie
       implementation_groups:
-      - _Q8.2_DEPENDS_ON_contexte-cyber-attaque-subie
+      - _DEPENDS_ON_contexte-cyber-attaque-subie
       questions:
         urn:intuitem:risk:req_node:anssi-monaidecyber:contexte-cyber-attaque-subie-tiroir-plainte:question:1:
           type: unique_choice
@@ -3491,15 +3478,14 @@ objects:
           - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye:question:1:choice:3
             value: Oui
             select_implementation_groups:
-            - _Q33.1_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
-            - _Q33.2_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
+            - _DEPENDS_ON_securite-infrastructure-pare-feu-deploye
             color: '#209226'
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-oui-tiroir-interconnexions-protegees
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye
       implementation_groups:
-      - _Q33.1_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
+      - _DEPENDS_ON_securite-infrastructure-pare-feu-deploye
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-interconnexions-protegees_niveau1
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-interconnexions-protegees_niveau2
@@ -3527,7 +3513,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye
       implementation_groups:
-      - _Q33.2_DEPENDS_ON_securite-infrastructure-pare-feu-deploye
+      - _DEPENDS_ON_securite-infrastructure-pare-feu-deploye
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:securite-infrastructure-pare-feu-deploye-logs-stockes_niveau1
       questions:
@@ -3985,20 +3971,18 @@ objects:
           - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:3
             value: "Des sauvegardes des donn\xE9es sont r\xE9alis\xE9es ponctuellement"
             select_implementation_groups:
-            - _Q44.1_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-            - _Q44.2_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+            - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-ponctuellement
           - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees:question:1:choice:4
             value: "Des sauvegardes des donn\xE9es sont r\xE9alis\xE9es de mani\xE8\
               re automatique et r\xE9guli\xE8re"
             select_implementation_groups:
-            - _Q44.3_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
-            - _Q44.4_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+            - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-regulierement
     - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole
       assessable: true
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees
       implementation_groups:
-      - _Q44.1_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+      - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-ponctuellement
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-environnement-isole_niveau1
       questions:
@@ -4025,7 +4009,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees
       implementation_groups:
-      - _Q44.2_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+      - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-ponctuellement
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-ponctuellement-tiroir-sauvegarde-testee-regulierement_niveau1
       questions:
@@ -4051,7 +4035,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees
       implementation_groups:
-      - _Q44.3_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+      - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-regulierement
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole_niveau1
       questions:
@@ -4059,7 +4043,7 @@ objects:
         : type: unique_choice
           text: "Existe-t-il au moins un jeu de sauvegarde des donn\xE9es critiques\
             \ stock\xE9es dans un environnement isol\xE9 du r\xE9seau bureautique\
-            \ interne ou \"hors ligne\""
+            \ interne ou \"hors ligne\" ?"
           choices:
           - urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-environnement-isole:question:1:choice:1
             value: Non applicable
@@ -4078,7 +4062,7 @@ objects:
       depth: 3
       parent_urn: urn:intuitem:risk:req_node:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees
       implementation_groups:
-      - _Q44.4_DEPENDS_ON_reaction-sauvegardes-donnees-realisees
+      - _DEPENDS_ON_reaction-sauvegardes-donnees-realisees-regulierement
       reference_controls:
       - urn:intuitem:risk:function:anssi-monaidecyber:reaction-sauvegardes-donnees-realisees-oui-automatique-et-reguliere-tiroir-sauvegarde-testee-regulierement_niveau1
       questions:
