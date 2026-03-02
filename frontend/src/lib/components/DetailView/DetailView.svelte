@@ -4,14 +4,16 @@
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import SelectExistingModal from '$lib/components/Modals/SelectExistingModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { ISO_8601_REGEX } from '$lib/utils/constants';
-	import { type ModelMapEntry } from '$lib/utils/crud';
+	import { type ModelMapEntry, type ReverseForeignKeyField } from '$lib/utils/crud';
 	import { getModelInfo } from '$lib/utils/crud.js';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isURL } from '$lib/utils/helpers';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { toCamelCase } from '$lib/utils/locales.js';
+	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime.js';
 
@@ -51,6 +53,7 @@
 		widgets?: import('svelte').Snippet;
 		actions?: import('svelte').Snippet;
 		disableCreate?: boolean;
+		disableEdit?: boolean;
 		disableDelete?: boolean;
 	}
 
@@ -69,6 +72,7 @@
 			'revoked_at',
 			'eta',
 			'expiration_date',
+			'validation_deadline',
 			'timestamp',
 			'reported_at',
 			'due_date',
@@ -77,6 +81,7 @@
 		widgets,
 		actions,
 		disableCreate = false,
+		disableEdit = false,
 		disableDelete = false
 	}: Props = $props();
 
@@ -117,6 +122,29 @@
 	};
 
 	let hasWidgets = $derived(!!widgets);
+	let relatedFieldNames = $derived(
+		new Set(data.model?.foreignKeyFields?.map((field) => field.field) ?? [])
+	);
+
+	const getExpectedCount = (
+		urlmodel: string,
+		field?: ReverseForeignKeyField
+	): number | undefined => {
+		const candidates = [
+			field?.expectedCountField,
+			urlmodel ? urlmodel.replace(/-/g, '_') : undefined,
+			field?.field
+		].filter(Boolean) as string[];
+
+		for (const candidate of candidates) {
+			const value = data.data?.[candidate];
+			if (Array.isArray(value)) {
+				// Count how many {} (masked) objects are in the array
+				return value.filter((item) => isMaskedPlaceholder(item)).length;
+			}
+		}
+		return undefined;
+	};
 
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.metaKey || event.ctrlKey) return;
@@ -155,6 +183,29 @@
 			component: modalComponent,
 			// Data
 			title: safeTranslate('add-' + model.info.localName)
+		};
+		modalStore.trigger(modal);
+	}
+
+	function modalSelectExisting(field: ReverseForeignKeyField): void {
+		if (!field.addExisting || !data.updateForm) return;
+		const addExisting = field.addExisting;
+		const modalComponent: ModalComponent = {
+			ref: SelectExistingModal,
+			props: {
+				form: data.updateForm,
+				urlModel: data.urlModel,
+				field: addExisting.parentField,
+				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
+				label: addExisting.label,
+				optionsInfoFields: addExisting.optionsInfoFields,
+				lazy: addExisting.lazy
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: safeTranslate(addExisting.label ?? 'selectExisting')
 		};
 		modalStore.trigger(modal);
 	}
@@ -302,9 +353,26 @@
 
 	let expandedTable = $state(false);
 	const MAX_ROWS = 10;
+
+	// Check if there are non-visible objects and user can edit
+	let hasNonVisibleObjects = $derived(() => {
+		if (!canEditObject) return false;
+
+		for (const [key, value] of Object.entries(data.data)) {
+			if (Array.isArray(value)) {
+				const maskedCount = countMasked(value);
+				if (maskedCount > 0) return true;
+			} else if (isMaskedPlaceholder(value)) {
+				return true;
+			}
+		}
+		return false;
+	});
 </script>
 
 <div class="flex flex-col space-y-2">
+	<!-- Warning for non-visible objects (only for users with edit permissions) -->
+
 	{#if data.urlModel === 'risk-acceptances' && data.data.state === 'Created'}
 		<div class="flex flex-row items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2">
 			<div class="text-yelloW-900">
@@ -391,6 +459,8 @@
 			>
 				<dl class="-my-3 divide-y divide-gray-100 text-sm">
 					{#each orderedEntries().filter(([key, _]) => (fields.length > 0 ? fields.includes(key) : true) && !exclude.includes(key)) as [key, value], index}
+						{@const isRelatedField = relatedFieldNames.has(key)}
+						{@const hiddenCountForValue = isRelatedField ? countMasked(value) : 0}
 						<div
 							class="grid grid-cols-1 gap-1 py-3 px-2 even:bg-surface-50 sm:grid-cols-5 sm:gap-4 {index >=
 								MAX_ROWS && !expandedTable
@@ -405,22 +475,19 @@
 								{#if getFieldConfig(key)?.tooltip}
 									{@const tooltipKey = getFieldConfig(key)?.tooltip}
 									{@const tooltipText = m[tooltipKey] ? m[tooltipKey]() : tooltipKey}
-									<Tooltip
-										positioning={{ placement: 'right' }}
-										contentBase="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
-										openDelay={200}
-										closeDelay={100}
-										arrow
-										arrowBase="arrow bg-gray-800 border border-gray-700"
-									>
-										{#snippet trigger()}
+									<Tooltip positioning={{ placement: 'right' }} openDelay={200} closeDelay={100}>
+										<Tooltip.Trigger>
 											<i
 												class="fas fa-info-circle text-sm text-blue-500 hover:text-blue-600 cursor-help"
 											></i>
-										{/snippet}
-										{#snippet content()}
-											<p class="text-sm">{tooltipText}</p>
-										{/snippet}
+										</Tooltip.Trigger>
+										<Tooltip.Positioner>
+											<Tooltip.Content
+												class="card bg-gray-800 text-white p-3 max-w-xs shadow-xl border border-gray-700"
+											>
+												<p class="text-sm">{tooltipText}</p>
+											</Tooltip.Content>
+										</Tooltip.Positioner>
 									</Tooltip>
 								{/if}
 							</dt>
@@ -432,8 +499,12 @@
 											? key.replace('_', '-') + '-field-value'
 											: null}
 									>
-										{#if value !== null && value !== undefined && value !== ''}
-											{#if key === 'asset_class'}
+										{#if value !== null && value !== undefined && (value !== '' || hiddenCountForValue > 0)}
+											{#if hiddenCountForValue > 0 && isMaskedPlaceholder(value) && !Array.isArray(value)}
+												<p class="text-xs text-yellow-700">
+													{m.objectsNotVisible({ count: hiddenCountForValue })}
+												</p>
+											{:else if key === 'asset_class'}
 												<!-- Special case for asset_class - Always translate the value -->
 												{#if typeof value === 'object' && (value.str || value.name)}
 													{safeTranslate(value.str || value.name)}
@@ -490,24 +561,40 @@
 													--
 												{/if}
 											{:else if Array.isArray(value)}
-												{#if Object.keys(value).length > 0}
+												{@const visibleValues = isRelatedField
+													? value.filter((item) => !isMaskedPlaceholder(item))
+													: value}
+												{#if visibleValues.length > 0}
 													<ul>
-														{#each value.sort((a, b) => {
+														{#each [...visibleValues].sort((a, b) => {
 															if ((!a.str && typeof a === 'object') || (!b.str && typeof b === 'object')) return 0;
 															return safeTranslate(a.str || a).localeCompare(safeTranslate(b.str || b));
 														}) as val}
 															<li data-testid={key.replace('_', '-') + '-field-value'}>
-																{#if key === 'security_objectives' || key === 'security_capabilities'}
+																{#if key === 'purposes'}
+																	{@const itemHref = `/${
+																		data.model?.foreignKeyFields?.find((item) => item.field === key)
+																			?.urlModel ?? 'purposes'
+																	}/${val.id}`}
+																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																		>{val.name}</Anchor
+																	>
+																	{#if val.legal_basis}
+																		<span class="text-gray-600">
+																			- {safeTranslate(val.legal_basis)}
+																		</span>
+																	{/if}
+																{:else if key === 'security_objectives' || key === 'security_capabilities'}
 																	{@const [securityObjectiveName, securityObjectiveValue] =
 																		Object.entries(val)[0]}
 																	{safeTranslate(securityObjectiveName).toUpperCase()}: {securityObjectiveValue}
-																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship'}
+																{:else if val.str && val.id && key !== 'qualifications' && key !== 'relationship' && key !== 'nature'}
 																	{@const itemHref = `/${
 																		data.model?.foreignKeyFields?.find((item) => item.field === key)
 																			?.urlModel
 																	}/${val.id}`}
 																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{val.str}</Anchor
+																		>{safeTranslate(val.str)}</Anchor
 																	>
 																{:else if val.str}
 																	{safeTranslate(val.str)}
@@ -517,6 +604,15 @@
 															</li>
 														{/each}
 													</ul>
+													{#if hiddenCountForValue > 0}
+														<p class="mt-1 text-xs text-yellow-700">
+															{m.objectsNotVisible({ count: hiddenCountForValue })}
+														</p>
+													{/if}
+												{:else if hiddenCountForValue > 0}
+													<p class="text-xs text-yellow-700">
+														{m.objectsNotVisible({ count: hiddenCountForValue })}
+													</p>
 												{:else}
 													--
 												{/if}
@@ -532,7 +628,7 @@
 													>
 												{:else}
 													<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-														>{value.str || value.name}</Anchor
+														>{safeTranslate(value.str || value.name)}</Anchor
 													>
 												{/if}
 												<!-- Shortcut before DetailView refactoring -->
@@ -559,7 +655,7 @@
 												{formatDateOrDateTime(value, getLocale())}
 											{:else if key === 'description' || key === 'observation' || key === 'annotation'}
 												<MarkdownRenderer content={value} />
-											{:else if m[toCamelCase(value.str || value.name)]}
+											{:else if !['name', 'ref_id'].includes(key) && m[toCamelCase(value.str || value.name)]}
 												{safeTranslate((value.str || value.name) ?? value)}
 											{:else}
 												{(value.str || value.name) ?? value}
@@ -638,29 +734,31 @@
 						open={openStateRA && !data.data.approver}
 						onOpenChange={(e) => (openStateRA = e.open)}
 						positioning={{ placement: 'top' }}
-						contentBase="card preset-tonal-error p-4"
 						openDelay={200}
 						closeDelay={100}
-						arrow
-						arrowBase="arrow preset-tonal-surface border border-error-100"
-						onclick={() => {
-							if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						onkeydown={(_: any) => {
-							if (data.data.approver) return modalConfirm(data.data.id, data.data.name, '?/submit');
-						}}
-						triggerBase={data.data.approver
-							? 'btn preset-filled-primary-500 *:pointer-events-none'
-							: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
-						disabled={data.data.approver}
 					>
-						{#snippet trigger()}
+						<Tooltip.Trigger
+							onclick={() => {
+								if (data.data.approver) modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							onkeydown={(_: any) => {
+								if (data.data.approver)
+									return modalConfirm(data.data.id, data.data.name, '?/submit');
+							}}
+							class={data.data.approver
+								? 'btn preset-filled-primary-500 *:pointer-events-none'
+								: 'btn preset-filled-primary-500 opacity-50 *:pointer-events-none cursor-not-allowed'}
+						>
 							<i class="fas fa-paper-plane mr-2"></i>
 							{m.submit()}
-						{/snippet}
-						{#snippet content()}
-							<p>{m.riskAcceptanceMissingApproverMessage()}</p>
-						{/snippet}
+						</Tooltip.Trigger>
+						{#if !data.data.approver}
+							<Tooltip.Positioner>
+								<Tooltip.Content class="card preset-tonal-error p-4">
+									<p>{m.riskAcceptanceMissingApproverMessage()}</p>
+								</Tooltip.Content>
+							</Tooltip.Positioner>
+						{/if}
 					</Tooltip>
 				{/if}
 
@@ -690,58 +788,79 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-white">
+	<div class="card shadow-lg mt-8 bg-white py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
-			listJustify="justify-center"
-			listClasses="flex flex-wrap"
+			orientation="vertical"
+			class="w-full"
 		>
-			{#snippet list()}
+			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Control value={urlmodel}>
+					<Tabs.Trigger value={urlmodel} class="justify-start" data-testid="tabs-control">
 						{safeTranslate(model.info.localNamePlural)}
-						{#if model.table.body.length > 0}
-							<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
+						{#if model.count !== undefined && model.count > 0}
+							<span class="badge preset-tonal-secondary">{model.count}</span>
 						{/if}
-					</Tabs.Control>
+					</Tabs.Trigger>
 				{/each}
-			{/snippet}
-			{#snippet content()}
-				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Panel value={urlmodel}>
-						{#key urlmodel}
-							<div class="flex flex-row justify-between px-4 py-2">
-								<h4 class="font-semibold lowercase capitalize-first my-auto">
-									{safeTranslate('associated-' + model.info.localNamePlural)}
-								</h4>
-							</div>
-							{@const field = data.model.reverseForeignKeyFields.find(
-								(item) => item.urlModel === urlmodel
-							)}
-							{@const fieldsToUse =
-								field?.tableFields ||
-								getListViewFields({
-									key: urlmodel,
-									featureFlags: page.data?.featureflags
-								}).body.filter((v) => v !== field.field)}
-							{#if model.table}
-								<ModelTable
-									baseEndpoint={getReverseForeignKeyEndpoint({
-										parentModel: data.model,
-										targetUrlModel: urlmodel,
-										field: field.field,
-										id: data.data.id,
-										endpointUrl: field.endpointUrl
-									})}
-									source={model.table}
-									disableCreate={disableCreate || model.disableCreate}
-									disableDelete={disableDelete || model.disableDelete}
-									deleteForm={model.deleteForm}
-									URLModel={urlmodel}
-									fields={fieldsToUse}
-								>
-									{#snippet addButton()}
+				<Tabs.Indicator />
+			</Tabs.List>
+			{#each relatedModels as [urlmodel, model]}
+				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
+					{#key urlmodel}
+						<div class="py-2"></div>
+						{@const field = data.model.reverseForeignKeyFields.find(
+							(item) => item.urlModel === urlmodel
+						)}
+						{@const fieldsToUse =
+							field?.tableFields ||
+							getListViewFields({
+								key: urlmodel,
+								featureFlags: page.data?.featureflags
+							}).body.filter((v) => v !== field.field)}
+						{#if model.table}
+							<ModelTable
+								baseEndpoint={getReverseForeignKeyEndpoint({
+									parentModel: data.model,
+									targetUrlModel: urlmodel,
+									field: field.field,
+									id: data.data.id,
+									endpointUrl: field.endpointUrl
+								})}
+								source={model.table}
+								disableCreate={disableCreate || model.disableCreate}
+								disableEdit={disableEdit || model.disableEdit}
+								disableDelete={disableDelete || model.disableDelete}
+								deleteForm={model.deleteForm}
+								URLModel={urlmodel}
+								expectedCount={getExpectedCount(urlmodel, field)}
+								fields={fieldsToUse}
+								defaultFilters={field.defaultFilters || {}}
+							>
+								{#snippet addButton()}
+									{#if canEditObject && field?.addExisting}
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
+												data-testid="select-existing-button"
+												title={safeTranslate(field.addExisting.label ?? 'selectExisting')}
+												onclick={() => modalSelectExisting(field)}
+											>
+												<i class="fa-solid fa-hand-pointer"></i>
+											</button>
+										</span>
+										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
+											<button
+												class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+												data-testid="add-button"
+												title={safeTranslate('add-' + model.info.localName)}
+												onclick={(_) => modalCreateForm(model)}
+											>
+												<i class="fa-solid fa-file-circle-plus"></i>
+											</button>
+										</span>
+									{:else}
 										<button
 											class="btn preset-filled-primary-500 self-end my-auto"
 											data-testid="add-button"
@@ -750,13 +869,13 @@
 												'add-' + model.info.localName
 											)}</button
 										>
-									{/snippet}
-								</ModelTable>
-							{/if}
-						{/key}
-					</Tabs.Panel>
-				{/each}
-			{/snippet}
+									{/if}
+								{/snippet}
+							</ModelTable>
+						{/if}
+					{/key}
+				</Tabs.Content>
+			{/each}
 		</Tabs>
 	</div>
 {/if}

@@ -15,6 +15,7 @@
 	import AppliedControlsPoliciesForm from './ModelForm/AppliedControlPolicyForm.svelte';
 	import VulnerabilitiesForm from './ModelForm/VulnerabilitiesForm.svelte';
 	import RiskAcceptancesForm from './ModelForm/RiskAcceptanceForm.svelte';
+	import ValidationFlowForm from './ModelForm/ValidationFlowForm.svelte';
 	import ReferenceControlsForm from './ModelForm/ReferenceControlForm.svelte';
 	import EvidencesForm from './ModelForm/EvidenceForm.svelte';
 	import ComplianceAssessmentsForm from './ModelForm/ComplianceAssessmentForm.svelte';
@@ -27,6 +28,7 @@
 	import RepresentativesForm from './ModelForm/RepresentativeForm.svelte';
 	import FrameworksForm from './ModelForm/FrameworkForm.svelte';
 	import UsersForm from './ModelForm/UserForm.svelte';
+	import TeamForm from './ModelForm/TeamForm.svelte';
 	import SsoSettingsForm from './ModelForm/SsoSettingForm.svelte';
 	import FolderForm from './ModelForm/FolderForm.svelte';
 	import GeneralSettingsForm from './ModelForm/GeneralSettingForm.svelte';
@@ -69,6 +71,13 @@
 	import EvidenceRevisionForm from './ModelForm/EvidenceRevisionForm.svelte';
 	import GenericCollectionForm from './ModelForm/GenericCollectionForm.svelte';
 	import AccreditationForm from './ModelForm/AccreditationForm.svelte';
+	import MetricDefinitionForm from './ModelForm/MetricDefinitionForm.svelte';
+	import MetricInstanceForm from './ModelForm/MetricInstanceForm.svelte';
+	import CustomMetricSampleForm from './ModelForm/CustomMetricSampleForm.svelte';
+	import DashboardForm from './ModelForm/DashboardForm.svelte';
+	import DashboardWidgetForm from './ModelForm/DashboardWidgetForm.svelte';
+	import DashboardTextWidgetForm from './ModelForm/DashboardTextWidgetForm.svelte';
+	import DashboardBuiltinWidgetForm from './ModelForm/DashboardBuiltinWidgetForm.svelte';
 
 	import AutocompleteSelect from './AutocompleteSelect.svelte';
 
@@ -219,7 +228,7 @@
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
-			if (form.valid) {
+			if (form.valid && !form.message?.error) {
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}
@@ -395,6 +404,16 @@
 				{$page}
 				{...rest}
 			/>
+		{:else if URLModel === 'validation-flows'}
+			<ValidationFlowForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{initialData}
+				{...rest}
+			/>
 		{:else if URLModel === 'reference-controls'}
 			<ReferenceControlsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'evidences'}
@@ -452,7 +471,8 @@
 				{cacheLocks}
 				{formDataCache}
 				{initialData}
-				{data}
+				{object}
+				{context}
 				{...rest}
 			/>
 		{:else if URLModel === 'solutions'}
@@ -460,11 +480,21 @@
 		{:else if URLModel === 'contracts'}
 			<ContractsForm {form} {model} {cacheLocks} {formDataCache} {initialData} {...rest} />
 		{:else if URLModel === 'representatives'}
-			<RepresentativesForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
+			<RepresentativesForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{object}
+				{context}
+				{...rest}
+			/>
 		{:else if URLModel === 'frameworks'}
 			<FrameworksForm {form} {model} {cacheLocks} {formDataCache} {...rest} />
 		{:else if URLModel === 'users'}
 			<UsersForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
+		{:else if URLModel === 'teams'}
+			<TeamForm {form} {model} {cacheLocks} {formDataCache} {shape} {context} {...rest} />
 		{:else if URLModel === 'sso-settings'}
 			<SsoSettingsForm {form} {model} {cacheLocks} {formDataCache} {data} {...rest} />
 		{:else if URLModel === 'general-settings'}
@@ -692,6 +722,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>
@@ -758,8 +789,83 @@
 			/>
 		{:else if URLModel === 'accreditations'}
 			<AccreditationForm {form} {model} {cacheLocks} {formDataCache} {initialData} {object} />
+		{:else if URLModel === 'metric-definitions'}
+			<MetricDefinitionForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				{initialData}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'metric-instances'}
+			<MetricInstanceForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'custom-metric-samples'}
+			<CustomMetricSampleForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboards'}
+			<DashboardForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-widgets'}
+			<DashboardWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
+		{:else if URLModel === 'dashboard-text-widgets'}
+			<DashboardTextWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+			/>
+		{:else if URLModel === 'dashboard-builtin-widgets'}
+			<DashboardBuiltinWidgetForm
+				{form}
+				{model}
+				{cacheLocks}
+				{formDataCache}
+				initialData={{ ...initialData, ...additionalInitialData }}
+				{data}
+				{object}
+				{...rest}
+			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+		>
 			{#if closeModal}
 				<button
 					class="btn bg-gray-400 text-white font-semibold w-full"

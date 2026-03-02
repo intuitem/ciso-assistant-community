@@ -28,8 +28,11 @@ def client():
 @pytest.fixture
 def authenticated_client(app_config):
     """Get an authenticated client"""
-    admin = User.objects.create_superuser("admin@tests.com")
-    UserGroup.objects.get(name="BI-UG-ADM").user_set.add(admin)
+    admin = User.objects.create_superuser("admin@tests.com", is_published=True)
+    admin_group = UserGroup.objects.get(name="BI-UG-ADM")
+    admin.folder = admin_group.folder
+    admin.save()
+    admin_group.user_set.add(admin)
     client = APIClient()
     _auth_token = AuthToken.objects.create(user=admin)
     auth_token = _auth_token[1]

@@ -1,20 +1,22 @@
 from rest_framework import serializers
+from django.core.files.uploadedfile import UploadedFile
 
 
 class LoadFileSerializer(serializers.Serializer):
+    ALLOWED_FILE_EXTENSIONS = ["xlsx", "xls", "csv"]
     file = serializers.FileField(
         allow_empty_file=False,
         max_length=None,
         required=True,
-        help_text="Excel file to be processed (.xlsx, .xls)",
+        help_text=f"File to be processed ({', '.join(f'.{ext}' for ext in ALLOWED_FILE_EXTENSIONS)})",
     )
 
-    def validate_file(self, value):
+    def validate_file(self, value: UploadedFile):
         # Check if file extension is valid
         file_extension = value.name.split(".")[-1].lower()
-        if file_extension not in ["xlsx", "xls"]:
+        if file_extension not in self.ALLOWED_FILE_EXTENSIONS:
             raise serializers.ValidationError(
-                "Unsupported file format. Please upload an Excel file (.xlsx, .xls)."
+                f"Invalid file extension {repr(file_extension)}, valid file extensions are: {repr(self.ALLOWED_FILE_EXTENSIONS)}."
             )
 
         # Check file size (optional) - for example, limit to 10MB

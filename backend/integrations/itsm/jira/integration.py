@@ -15,6 +15,9 @@ from integrations.registry import IntegrationRegistry
 from .client import JiraClient
 from .mapper import JiraFieldMapper
 
+import hashlib
+import hmac
+
 logger = get_logger(__name__)
 
 
@@ -104,6 +107,33 @@ class JiraOrchestrator(BaseITSMOrchestrator):
         else:
             logger.warning(f"Unknown Jira webhook event: {event_type}")
             return False
+
+    def validate_webhook_request(self, request) -> bool:
+        signature_header = request.headers.get("X-Hub-Signature")
+        if not signature_header:
+            raise ValueError("Missing X-Hub-Signature header")
+
+        if not self.configuration.webhook_secret:
+            raise ValueError("Webhook secret not configured on server")
+
+        try:
+            method, provided_signature = signature_header.split("=", 1)
+        except ValueError:
+            raise ValueError("Invalid signature header format")
+
+        if method.lower() != "sha256":
+            raise ValueError("Unsupported signature method")
+
+        expected_signature = hmac.new(
+            self.configuration.webhook_secret.encode("utf-8"),
+            request.body,
+            hashlib.sha256,
+        ).hexdigest()
+
+        return hmac.compare_digest(provided_signature, expected_signature)
+
+    def extract_webhook_event_type(self, payload: dict) -> str:
+        return payload.get("webhookEvent")
 
 
 # Register the Jira integration

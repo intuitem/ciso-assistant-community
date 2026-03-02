@@ -34,8 +34,10 @@
 
 <AutocompleteSelect
 	{form}
+	lazy
 	optionsEndpoint="assets"
 	optionsExtraFields={[['folder', 'str']]}
+	optionsLabelField="auto"
 	optionsInfoFields={{
 		fields: [
 			{
@@ -48,13 +50,15 @@
 	cacheLock={cacheLocks['asset']}
 	bind:cachedValue={formDataCache['asset']}
 	label={m.asset()}
-	hidden={initialData.asset}
+	disabled={initialData.asset}
 	helpText={m.scopedAsset()}
 />
 <AutocompleteSelect
 	{form}
 	multiple
+	lazy
 	optionsEndpoint="assets"
+	optionsLabelField="auto"
 	optionsExtraFields={[['folder', 'str']]}
 	optionsInfoFields={{
 		fields: [

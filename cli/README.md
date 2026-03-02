@@ -12,7 +12,6 @@ CLICA is a command-line interface tool for interacting with the CISO Assistant R
   - [Import Commands](#import-commands)
   - [File Upload Commands](#file-upload-commands)
   - [Instance Management Commands](#instance-management-commands)
-- [Data Formats](#data-formats)
 - [MCP Integration](#mcp-integration)
 - [Examples](#examples)
 - [Troubleshooting](#troubleshooting)
@@ -31,8 +30,6 @@ pip install -r requirements.txt
 ### Dependencies
 
 The CLI requires the following Python packages:
-
-- pandas
 - rich
 - requests
 - click
@@ -113,101 +110,48 @@ python clica.py get-matrices
 
 ### Import Commands
 
-These commands import data from CSV files into CISO Assistant:
+Most import commands now leverage the same “Data Wizard” backend that powers the enterprise UI. These commands accept the Excel/CSV templates described in the [documentation](https://intuitem.gitbook.io/ciso-assistant/guide/data-import-wizard) and share a common set of options:
 
-#### `import_risk_assessment`
+- `--file` (required): Path to the template to upload.
+- `--folder`: Folder/domain name or UUID. Required for models that need a domain. Individual rows in the template can still override the folder via their `domain` column.
+- `--perimeter`: Perimeter name or UUID (only for models that require it).
+- `--framework`: Framework name or UUID (Compliance Assessments only).
+- `--matrix`: Risk matrix name or UUID (Risk Assessments and EBIOS RM studies).
 
-Imports a complete risk assessment from a CSV file, including risk scenarios, assets, threats, and controls.
+You can pass either UUIDs or human-readable names; the CLI resolves names through the `/ids/` endpoints.
 
-```bash
-python clica.py import-risk-assessment \
-  --file RA_sample.csv \
-  --folder "Business Unit 1" \
-  --perimeter "Network Infrastructure" \
-  --matrix "4x4 Risk Matrix" \
-  --name "Q1 2024 Risk Assessment" \
-  --create_all
-```
+Supported Data Wizard commands:
 
-**Parameters:**
+| Command | Model type | Required CLI options |
+| --- | --- | --- |
+| `import-assets` | Asset | `--folder` |
+| `import-applied-controls` | AppliedControl | `--folder` |
+| `import-evidences` | Evidence | `--folder` |
+| `import-users` | User | — |
+| `import-folders` | Folder | — |
+| `import-perimeters` | Perimeter | `--folder` |
+| `import-compliance-assessments` | ComplianceAssessment | `--perimeter`, `--framework` |
+| `import-findings-assessments` | FindingsAssessment | `--perimeter` |
+| `import-risk-assessment` | RiskAssessment | `--perimeter`, `--matrix` |
+| `import-elementary-actions` | ElementaryAction | `--folder` |
+| `import-reference-controls` | ReferenceControl | `--folder` |
+| `import-threats` | Threat | `--folder` |
+| `import-processings` | Processing | `--folder` |
+| `import-tprm` | TPRM | `--folder` |
+| `import-ebios-rm-study-arm` | EbiosRMStudyARM | `--folder`, `--matrix` |
+| `import-ebios-rm-study` | EbiosRMStudyExcel | `--folder`, `--matrix` |
 
-- `--file`: Path to the CSV file containing risk assessment data
-- `--folder`: Target folder name in CISO Assistant
-- `--perimeter`: Perimeter name to associate with the assessment
-- `--matrix`: Risk matrix name to use for impact/probability mapping
-- `--name`: Name for the new risk assessment
-- `--create_all`: (Optional) Automatically create associated objects (threats, assets, controls)
-
-**Features:**
-
-- Automatically creates missing assets, threats, and controls when `--create_all` is used
-- Maps risk matrix values to proper impact and probability levels
-- Supports multiple risk treatment options
-- Handles complex relationships between risk scenarios and their components
-
-#### `import_assets`
-
-Imports assets from a CSV file into the Global folder.
+Example:
 
 ```bash
-python clica.py import-assets --file sample_assets.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing asset data
-
-**CSV Format:**
-
-```csv
-name,description,domain,type
-Server01,Production web server,Global,Primary
-Backup Storage,Backup storage system,Global,Support
-```
-
-#### `import_controls`
-
-Imports applied controls (security measures) from a CSV file.
-
-```bash
-python clica.py import-controls --file sample_controls.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing control data
-
-**CSV Format:**
-
-```csv
-name,description,category,csf_function
-Firewall,Network traffic control,Technical,Protect
-Security Training,Employee awareness program,Process,Protect
-```
-
-#### `import_evidences`
-
-Imports evidence records from a CSV file.
-
-```bash
-python clica.py import-evidences --file evidences.csv
-```
-
-**Parameters:**
-
-- `--file`: Path to the CSV file containing evidence data
-
-**CSV Format:**
-
-```csv
-name,description
-Asset Management Policy,Documented asset management procedures
-Security Audit Report,Annual security assessment results
+python clica.py import-assets \
+  --file data-wizard-assets.xlsx \
+  --folder "Global"
 ```
 
 ### File Upload Commands
 
-#### `upload_attachment`
+#### `upload-attachment`
 
 Uploads a file as an attachment to an existing evidence record.
 
@@ -222,80 +166,120 @@ python clica.py upload-attachment \
 - `--file`: Path to the file to upload
 - `--name`: Name of the existing evidence record to attach the file to
 
-### Instance Management Commands
+### Backup and Restore Commands
 
-#### `clone_instance`
+#### `backup_full`
 
-Creates a complete clone of a CISO Assistant instance by copying both the SQLite database and evidence attachments directory. This is useful for creating backups, testing environments, or migrating instances.
+Creates a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted backups.
 
 ```bash
-python clica.py clone-instance \
-  --dest-db /path/to/backup/ciso-assistant.sqlite3 \
-  --dest-attachments /path/to/backup/attachments
+python clica.py backup-full --dest-dir ./db --batch-size 200 --resume
 ```
 
 **Parameters:**
 
-- `--source-db`: Path to source SQLite database (default: `../backend/db/ciso-assistant.sqlite3`)
-- `--dest-db`: Path to destination SQLite database (required)
-- `--source-attachments`: Path to source attachments directory (default: `../backend/db/attachments`)
-- `--dest-attachments`: Path to destination attachments directory (required)
-- `--force`: Overwrite destination files if they exist without prompting (optional)
+- `--dest-dir`: Destination directory to save backup files (default: `./db`)
+- `--batch-size`: Number of files to download per batch (default: 200)
+- `--resume/--no-resume`: Resume from existing manifest if backup was interrupted (default: True)
 
-**Features:**
+**Output:**
 
-- Validates source database is a valid SQLite file before cloning
-- Calculates and displays total size of data to be copied
-- Shows detailed summary before proceeding
-- Requires confirmation before starting the clone operation
-- Verifies copied database integrity after cloning
-- Provides detailed progress feedback
-- Creates necessary destination directories automatically
-- Handles permission errors and edge cases gracefully
+- `backup.json.gz`: Compressed database backup
+- `backup-manifest.jsonl`: JSON Lines manifest tracking all downloaded files with hashes
+- `attachments/evidence-revisions/`: Directory containing all attachment files with naming pattern `{evidence_id}_v{version}_{filename}`
 
-**Important Notes:**
+**How it works:**
 
-- The clone operation does not require API authentication (no TOKEN needed)
-- After cloning, update your CISO Assistant configuration to use the new database and attachments paths
-- For production use, consider stopping the CISO Assistant service before cloning to ensure data consistency
-- The cloned instance is a complete snapshot and can be used independently
+1. **Database Backup**: Downloads the database backup as `backup.json.gz`
+2. **Metadata Fetch**: Retrieves metadata for all attachments (pagination handled automatically)
+3. **Resume Logic**: Compares server metadata with local manifest to identify missing/changed files (based on SHA256 hash comparison)
+4. **Batch Download**: Downloads files in configurable batches using custom streaming protocol
+5. **Manifest Update**: Appends each successfully downloaded file to manifest (crash-safe, append-only)
 
-## Data Formats
+**Advantages:**
 
-### Risk Assessment CSV Format
+- **No ZIP Processing**: Avoids loading large ZIP files into memory
+- **Resume Capability**: Can continue interrupted backups without re-downloading existing files
+- **Hash Verification**: Uses SHA256 hashes to detect file changes and skip unchanged files
+- **Memory Efficient**: Streams files in 1MB chunks, never loads full files in memory
+- **Progress Tracking**: Shows batch progress and total data downloaded
 
-The risk assessment CSV file should use semicolon (`;`) as delimiter and include the following columns:
+**Notes:**
 
-```csv
-ref_id;assets;threats;name;description;existing_controls;current_impact;current_proba;current_risk;additional_controls;residual_impact;residual_proba;residual_risk;treatment
+- Requires `has_backup_permission` flag in your user profile
+- If backup is interrupted, simply run the same command again with `--resume` (default)
+- The manifest file tracks which files have been downloaded with their hashes
+- Files are only re-downloaded if their hash changes on the server
+
+#### `restore_full`
+
+Restores a complete backup of your CISO Assistant instance using a memory-efficient streaming approach. Supports resume capability for interrupted restores.
+
+```bash
+python clica.py restore-full --src-dir ./db --verify-hashes
 ```
 
-**Column Descriptions:**
+**Parameters:**
 
-- `ref_id`: Unique reference identifier for the risk scenario
-- `assets`: Comma-separated list of asset names
-- `threats`: Comma-separated list of threat names
-- `name`: Risk scenario name
-- `description`: Detailed description of the risk
-- `existing_controls`: Comma-separated list of current control names
-- `current_impact`: Current impact level (must match risk matrix values)
-- `current_proba`: Current probability level (must match risk matrix values)
-- `current_risk`: Current risk level (calculated)
-- `additional_controls`: Comma-separated list of additional control names
-- `residual_impact`: Residual impact level after controls
-- `residual_proba`: Residual probability level after controls
-- `residual_risk`: Residual risk level (calculated)
-- `treatment`: Risk treatment option
+- `--src-dir`: Source directory containing backup files (default: `./db`)
+- `--verify-hashes/--no-verify-hashes`: Verify local file hashes before upload (default: True)
 
-### Risk Treatment Options
+**Requirements:**
 
-The CLI supports the following risk treatment options:
+- The source directory must contain `backup.json.gz`
+- The source directory must contain `backup-manifest.jsonl` (for attachments restore)
+- Attachments should be in `attachments/evidence-revisions/` directory
+- Requires `has_backup_permission` flag in your user profile
 
-- `open`: Risk is identified but not yet treated
-- `mitigate`: Implement controls to reduce risk
-- `accept`: Accept the risk as is
-- `avoid`: Eliminate the risk by avoiding the activity
-- `transfer`: Transfer risk to a third party (e.g., insurance)
+**How it works:**
+
+1. **Database Restore**: Uploads and restores the database backup
+2. **Manifest Load**: Reads the backup manifest to identify files to upload
+3. **Hash Verification** (optional): Verifies local file hashes match manifest entries
+4. **Resume Logic**: Skips files already marked as uploaded in the manifest
+5. **Batch Upload**: Uploads files in configurable batches using custom streaming protocol
+6. **Server-Side Deduplication**: Server skips files if hash matches existing attachment (idempotent)
+7. **Manifest Update**: Marks successfully uploaded files in manifest after each batch
+
+**Advantages:**
+
+- **No ZIP Processing**: Avoids creating large ZIP files in memory
+- **Resume Capability**: Can continue interrupted restores without re-uploading existing files
+- **Hash Verification**: Validates file integrity before upload
+- **Idempotent**: Server skips files that already match (safe to re-run)
+- **Memory Efficient**: Streams files in batches, never loads all files in memory
+- **Partial Success Handling**: Continues processing even if some files fail, reports errors
+
+**Notes:**
+
+- The restore process happens in **two separate steps** (database first, then attachments)
+- After database restore, you'll need to regenerate your Personal Access Token
+- If restore is interrupted, run the same command again with `--resume` (default)
+- Files with hash mismatches (detected during `--verify-hashes`) are skipped and reported
+- Server validates uploaded file hashes and skips if they match existing attachments
+
+> [!WARNING]
+> Restoring a backup will **replace all existing data** in your CISO Assistant instance. Make sure you have a current backup before performing a restore operation.
+
+> [!TIP]
+> **Best Practices:**
+> - Run `backup-full` regularly to maintain disaster recovery capabilities
+> - Use `--batch-size` to tune performance based on your network and file sizes
+> - Keep the manifest file safe - it enables resume functionality
+> - After restore completes, regenerate your Personal Access Token immediately
+
+**Technical Details:**
+
+The backup/restore system uses a custom binary streaming protocol to avoid memory issues:
+
+- **Format**: Each file is transmitted as `[4-byte length][JSON header][file bytes]`
+- **Hashing**: SHA256 hashes computed using 1MB chunks (no full file in memory)
+- **Deduplication**: Files are skipped if their hash matches (both client and server-side)
+- **Manifest**: JSON Lines format allows incremental append (crash-safe)
+- **Batch Processing**: Configurable batch sizes balance efficiency vs memory usage
+
+### Instance Management Commands
+
 
 ## MCP Integration
 
@@ -341,27 +325,24 @@ python clica.py get-folders
 python clica.py get-perimeters
 python clica.py get-matrices
 
-# Import a complete risk assessment
+# Import a complete risk assessment via the Data Wizard backend
 python clica.py import-risk-assessment \
-  --file RA_sample.csv \
-  --folder "Business Unit 1" \
+  --file data-wizard-risk-assessments.xlsx \
   --perimeter "IT Infrastructure" \
-  --matrix "4x4 risk matrix from EBIOS-RM" \
-  --name "2024 Q1 Risk Assessment" \
-  --create_all
+  --matrix "4x4 risk matrix from EBIOS-RM"
 ```
 
 ### Import Supporting Data
 
 ```bash
-# Import assets
-python clica.py import-assets --file sample_assets.csv
+# Import assets using the Data Wizard backend
+python clica.py import-assets --file data-wizard-assets.xlsx --folder "Global"
 
-# Import security controls
-python clica.py import-controls --file sample_controls.csv
+# Import applied controls
+python clica.py import-applied-controls --file data-wizard-controls.xlsx --folder "Global"
 
 # Import evidence records
-python clica.py import-evidences --file evidences.csv
+python clica.py import-evidences --file data-wizard-evidences.xlsx --folder "Global"
 
 # Upload supporting documents
 python clica.py upload-attachment \
@@ -369,27 +350,21 @@ python clica.py upload-attachment \
   --name "Information Security Policy"
 ```
 
-### Clone Instance for Backup or Testing
+### Backup and Restore Operations
 
 ```bash
-# Create a complete backup of your instance
-python clica.py clone-instance \
-  --dest-db /backups/ciso-assistant-backup-$(date +%Y%m%d).sqlite3 \
-  --dest-attachments /backups/attachments-backup-$(date +%Y%m%d)
+# Create a full backup with timestamp
+BACKUP_DATE=$(date +%Y-%m-%d_%H-%M-%S)
+python clica.py backup-full --dest-dir "./backups/backup-$BACKUP_DATE"
 
-# Clone to a test environment
-python clica.py clone-instance \
-  --source-db /prod/db/ciso-assistant.sqlite3 \
-  --source-attachments /prod/db/attachments \
-  --dest-db /test/db/ciso-assistant.sqlite3 \
-  --dest-attachments /test/db/attachments
-```
-# Force database and attachments directory overwrite without prompts
-```bash
-python clica.py clone-instance \
-  --dest-db /backup/ciso-assistant.sqlite3 \
-  --dest-attachments /backup/attachments \
-  --force
+# List backups
+ls -lh ./backups/
+
+# Restore from a specific backup
+python clica.py restore-full --src-dir "./backups/backup-2024-01-15_10-30-00"
+
+# Automated daily backup (can be added to cron)
+python clica.py backup-full --dest-dir "/var/backups/ciso-assistant/$(date +%Y-%m-%d)"
 ```
 
 ## Troubleshooting
@@ -398,15 +373,13 @@ python clica.py clone-instance \
 
 - `"No authentication token available"`: Configure your PAT token in `.clica.env`
 - `"something went wrong. check authentication"`: Verify your token and API URL
-- `"Matrix doesn't match the labels used on your input file"`: Ensure impact/probability values match your risk matrix
-
 ### Getting Help
 
 For additional support:
 
 1. Check the CISO Assistant documentation
 2. Verify your API endpoint is accessible
-3. Review the sample CSV files for proper formatting
+3. Review the Data Wizard templates for proper formatting
 4. Ensure all required dependencies are installed
 5. Contact us on our Discord !
 

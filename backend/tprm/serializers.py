@@ -47,6 +47,20 @@ class EntityWriteSerializer(BaseModelSerializer):
         model = Entity
         exclude = ["owned_folders"]
 
+    def to_internal_value(self, data):
+        """Convert None to empty string for CharField DORA fields before validation"""
+        dora_char_fields = [
+            "country",
+            "currency",
+            "dora_entity_type",
+            "dora_entity_hierarchy",
+            "dora_provider_person_type",
+        ]
+        for field in dora_char_fields:
+            if field in data and data[field] is None:
+                data[field] = ""
+        return super().to_internal_value(data)
+
     def validate_legal_identifiers(self, value):
         """
         Validate legal identifiers, ensuring LEI is exactly 20 characters if provided.
@@ -74,6 +88,9 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    relationship = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = Entity
@@ -92,11 +109,12 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "dora_competent_authority",
             "created_at",
             "updated_at",
+            "relationship",
         ]
 
 
 class EntityAssessmentReadSerializer(BaseModelSerializer):
-    compliance_assessment = FieldsRelatedField()
+    compliance_assessment = FieldsRelatedField(fields=["id", "name"])
     evidence = FieldsRelatedField()
     perimeter = FieldsRelatedField()
     entity = FieldsRelatedField()
@@ -105,6 +123,16 @@ class EntityAssessmentReadSerializer(BaseModelSerializer):
     representatives = FieldsRelatedField(many=True)
     authors = FieldsRelatedField(many=True)
     reviewers = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = EntityAssessment
@@ -160,7 +188,7 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 enclave = Folder.objects.create(
                     content_type=Folder.ContentType.ENCLAVE,
-                    name=f"{instance.perimeter.name}/{instance.name}",
+                    name=f"{instance.entity.name}/{instance.name}",
                     parent_folder=instance.folder,
                 )
                 audit.folder = enclave
@@ -168,14 +196,16 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
 
                 audit.create_requirement_assessments()
                 audit.reviewers.set(instance.reviewers.all())
-                audit.authors.set(instance.representatives.all())
+                representatives = instance.representatives.all()
+                audit.authors.set([rep.actor for rep in representatives])
                 instance.compliance_assessment = audit
                 instance.save()
         else:
             if instance.compliance_assessment:
                 audit = instance.compliance_assessment
                 audit.reviewers.set(instance.reviewers.all())
-                audit.authors.set(instance.representatives.all())
+                representatives = instance.representatives.all()
+                audit.authors.set([rep.actor for rep in representatives])
             instance.save()
 
     def _assign_third_party_respondents(
@@ -224,6 +254,13 @@ class EntityAssessmentWriteSerializer(BaseModelSerializer):
         old_representatives = set(instance.representatives.all()) - set(
             validated_data.get("representatives", [])
         )
+
+        # If perimeter is being changed, update folder to match the new perimeter's folder
+        if "perimeter" in validated_data:
+            new_perimeter = validated_data["perimeter"]
+            if new_perimeter and new_perimeter.folder:
+                validated_data["folder"] = new_perimeter.folder
+
         with transaction.atomic():
             instance = super().update(instance, validated_data)
             self._create_or_update_audit(instance, audit_data)
@@ -251,6 +288,10 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
 
+    def validate_entity(self, value):
+        self._ensure_immutable("entity", value)
+        return value
+
     def _create_or_update_user(self, instance, user):
         if not user:
             return
@@ -264,12 +305,18 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     email=instance.email,
                     first_name=instance.first_name,
                     last_name=instance.last_name,
+                    is_third_party=True,
+                    keep_local_login=True,
                 )
             except Exception as e:
                 logger.error(e)
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
-                    user.is_third_party = True
+                    if not user.is_third_party:
+                        raise serializers.ValidationError(
+                            {"email": "errorUserAlreadyExistsAsInternal"}
+                        )
+                    user.keep_local_login = True
                     user.save()
                     instance.user = user
                     instance.save()
@@ -285,7 +332,11 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
-            user.is_third_party = True
+        if not user.is_third_party:
+            raise serializers.ValidationError(
+                {"email": "errorUserAlreadyExistsAsInternal"}
+            )
+        user.keep_local_login = True
         user.save()
         instance.user = user
         instance.save()
@@ -321,6 +372,30 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    def validate_provider_entity(self, value):
+        self._ensure_immutable("provider_entity", value)
+        return value
+
+    def to_internal_value(self, data):
+        """Convert None to empty string for CharField DORA fields before validation"""
+        dora_char_fields = [
+            "dora_ict_service_type",
+            "data_location_storage",
+            "data_location_processing",
+            "dora_data_sensitiveness",
+            "dora_reliance_level",
+            "dora_substitutability",
+            "dora_non_substitutability_reason",
+            "dora_has_exit_plan",
+            "dora_reintegration_possibility",
+            "dora_discontinuing_impact",
+            "dora_alternative_providers_identified",
+        ]
+        for field in dora_char_fields:
+            if field in data and data[field] is None:
+                data[field] = ""
+        return super().to_internal_value(data)
+
     class Meta:
         model = Solution
         exclude = ["recipient_entity"]
@@ -332,9 +407,19 @@ class ContractReadSerializer(BaseModelSerializer):
     provider_entity = FieldsRelatedField()
     beneficiary_entity = FieldsRelatedField()
     evidences = FieldsRelatedField(many=True)
-    solution = FieldsRelatedField()
+    solutions = FieldsRelatedField(many=True)
     overarching_contract = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Contract

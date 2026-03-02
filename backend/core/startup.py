@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL
+from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -26,6 +26,7 @@ READER_PERMISSIONS_LIST = [
     "view_referencecontrol",
     "view_representative",
     "view_requirementassessment",
+    "view_requirementassignment",
     "view_requirementmapping",
     "view_requirementmappingset",
     "view_requirementnode",
@@ -33,12 +34,15 @@ READER_PERMISSIONS_LIST = [
     "view_riskassessment",
     "view_riskmatrix",
     "view_riskscenario",
+    "view_validationflow",
     "view_solution",
     "view_contract",
     "view_storedlibrary",
     "view_threat",
     "view_vulnerability",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_usergroup",
     "view_ebiosrmstudy",
     "view_fearedevent",
@@ -85,8 +89,15 @@ READER_PERMISSIONS_LIST = [
     # pmbok
     "view_genericcollection",
     "view_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "view_custommetricsample",
+    "view_dashboard",
+    "view_dashboardwidget",
     # integrations
     "view_syncmapping",
+    "view_filteringlabel",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -97,6 +108,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_riskscenario",
     "view_riskacceptance",
     "approve_riskacceptance",
+    "view_validationflow",
+    "change_validationflow",
     "view_asset",
     "view_threat",
     "view_vulnerability",
@@ -113,6 +126,8 @@ APPROVER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_loadedlibrary",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_requirementmappingset",
     "view_requirementmapping",
     "view_ebiosrmstudy",
@@ -166,6 +181,7 @@ APPROVER_PERMISSIONS_LIST = [
 ANALYST_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -191,12 +207,19 @@ ANALYST_PERMISSIONS_LIST = [
     "change_vulnerability",
     "change_representative",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
     "change_solution",
     "change_contract",
     "change_threat",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
     "delete_appliedcontrol",
     "delete_asset",
     "delete_complianceassessment",
@@ -241,6 +264,8 @@ ANALYST_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_threat",
     "view_user",
+    "view_actor",
+    "view_team",
     "view_usergroup",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
@@ -394,6 +419,24 @@ ANALYST_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "view_integrationconfiguration",
     "add_syncmapping",
@@ -405,6 +448,7 @@ ANALYST_PERMISSIONS_LIST = [
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_filteringlabel",
     "view_filteringlabel",
+    "view_libraryfilteringlabel",
     "add_appliedcontrol",
     "add_asset",
     "add_complianceassessment",
@@ -433,6 +477,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_referencecontrol",
     "change_representative",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -440,6 +488,10 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_solution",
     "change_contract",
     "change_threat",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
+    "delete_validationflow",
     "delete_appliedcontrol",
     "delete_asset",
     "delete_complianceassessment",
@@ -488,6 +540,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_storedlibrary",
     "view_threat",
     "view_user",
+    "view_actor",
+    "add_team",
+    "view_team",
+    "change_team",
+    "delete_team",
     "view_usergroup",
     "change_usergroup",
     "delete_usergroup",
@@ -656,6 +713,27 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # integrations
     "add_integrationconfiguration",
     "view_integrationconfiguration",
@@ -669,6 +747,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
 ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_user",
     "view_user",
+    "view_actor",
+    "add_team",
+    "view_team",
+    "change_team",
+    "delete_team",
     "change_user",
     "delete_user",
     "view_usergroup",
@@ -728,6 +811,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_riskacceptance",
     "delete_riskacceptance",
     "approve_riskacceptance",
+    "add_validationflow",
+    "view_validationflow",
+    "change_validationflow",
+    "delete_validationflow",
     "add_riskmatrix",
     "view_riskmatrix",
     "change_riskmatrix",
@@ -738,6 +825,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_complianceassessment",
     "view_requirementassessment",
     "change_requirementassessment",
+    "add_requirementassignment",
+    "change_requirementassignment",
+    "delete_requirementassignment",
+    "view_requirementassignment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -791,6 +882,10 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_filteringlabel",
     "change_filteringlabel",
     "delete_filteringlabel",
+    "add_libraryfilteringlabel",
+    "view_libraryfilteringlabel",
+    "change_libraryfilteringlabel",
+    "delete_libraryfilteringlabel",
     "add_ebiosrmstudy",
     "view_ebiosrmstudy",
     "change_ebiosrmstudy",
@@ -954,6 +1049,27 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "add_accreditation",
     "change_accreditation",
     "delete_accreditation",
+    # metrology
+    "view_metricdefinition",
+    "add_metricdefinition",
+    "change_metricdefinition",
+    "delete_metricdefinition",
+    "view_metricinstance",
+    "add_metricinstance",
+    "change_metricinstance",
+    "delete_metricinstance",
+    "view_custommetricsample",
+    "add_custommetricsample",
+    "change_custommetricsample",
+    "delete_custommetricsample",
+    "view_dashboard",
+    "add_dashboard",
+    "change_dashboard",
+    "delete_dashboard",
+    "view_dashboardwidget",
+    "add_dashboardwidget",
+    "change_dashboardwidget",
+    "delete_dashboardwidget",
     # roles,
     "add_role",
     "view_role",
@@ -969,6 +1085,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # webhooks
+    "add_webhookendpoint",
+    "view_webhookendpoint",
+    "change_webhookendpoint",
+    "delete_webhookendpoint",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -984,6 +1105,27 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "change_evidencerevision",
     "delete_evidencerevision",
     "view_folder",
+]
+
+AUDITEE_PERMISSIONS_LIST = [
+    "view_complianceassessment",
+    "view_requirementassessment",
+    "change_requirementassessment",
+    "view_evidence",
+    "add_evidence",
+    "change_evidence",
+    "delete_evidence",
+    "view_evidencerevision",
+    "add_evidencerevision",
+    "change_evidencerevision",
+    "delete_evidencerevision",
+    "view_folder",
+    "view_requirementassignment",
+    "view_appliedcontrol",
+    "add_appliedcontrol",
+    "change_appliedcontrol",
+    "delete_appliedcontrol",
+    "view_framework",
 ]
 
 
@@ -1121,6 +1263,32 @@ def startup(sender: AppConfig, **kwargs):
     )
     third_party_respondent.permissions.set(third_party_respondent_permissions)
 
+    auditee_permissions = Permission.objects.filter(
+        codename__in=AUDITEE_PERMISSIONS_LIST
+    )
+    auditee, created = Role.objects.get_or_create(
+        name=RoleCodename.AUDITEE.value, builtin=True
+    )
+    auditee.permissions.set(auditee_permissions)
+
+    # if global auditees user group does not exist, then create it
+    if not UserGroup.objects.filter(
+        name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
+    ).exists():
+        global_auditees = UserGroup.objects.create(
+            name=UserGroupCodename.GLOBAL_AUDITEE.value,
+            folder=Folder.get_root_folder(),
+            builtin=True,
+        )
+        ra = RoleAssignment.objects.create(
+            user_group=global_auditees,
+            role=auditee,
+            is_recursive=True,
+            builtin=True,
+            folder=Folder.get_root_folder(),
+        )
+        ra.perimeter_folders.add(global_auditees.folder)
+
     # Create default Qualifications
     try:
         Terminology.create_default_qualifications()
@@ -1169,6 +1337,11 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error("Error creating default Entity Relationships", exc_info=True)
 
+    try:
+        Terminology.create_default_metric_units()
+    except Exception as e:
+        logger.error("Error creating default Metric Units", exc_info=True)
+
     # Init integration providers
 
     try:
@@ -1178,28 +1351,45 @@ def startup(sender: AppConfig, **kwargs):
         )
     except Exception as e:
         logger.error("Error creating Jira IntegrationProvider", exc_info=True)
+    try:
+        IntegrationProvider.objects.get_or_create(
+            name="servicenow",
+            defaults={"provider_type": IntegrationProvider.ProviderType.ITSM},
+        )
+    except Exception as e:
+        logger.error("Error creating servicenow IntegrationProvider", exc_info=True)
 
     call_command("storelibraries")
     call_command("autoloadlibraries")
+    call_command("sync_event_types")
 
-    # if superuser defined and does not exist, then create it
-    if (
-        CISO_ASSISTANT_SUPERUSER_EMAIL
-        and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
-    ):
-        try:
-            User.objects.create_superuser(
-                email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
-            )
-        except Exception as e:
-            logger.error("Error creating superuser", exc_info=True)
+    try:
+        call_command("backfill_builtin_metrics")
+    except Exception as e:
+        logger.error("Error backfilling builtin metrics", exc_info=True)
 
     # add administrators group to superusers (for resiliency)
     administrators = UserGroup.objects.get(
         name="BI-UG-ADM", folder=Folder.get_root_folder()
     )
-    for u in User.objects.filter(is_superuser=True):
-        u.user_groups.add(administrators)
+    if (
+        User.objects.filter(user_groups=administrators).distinct().count() == 0
+        or FORCE_CREATE_ADMIN
+    ):
+        # if superuser defined and does not exist, then create it
+        if (
+            CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+        ):
+            try:
+                User.objects.create_superuser(
+                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                )
+            except Exception as e:
+                logger.error("Error creating superuser", exc_info=True)
+
+        for u in User.objects.filter(is_superuser=True):
+            u.user_groups.add(administrators)
 
     # reset global setings in case of an issue
     default_settings = {
@@ -1212,6 +1402,10 @@ def startup(sender: AppConfig, **kwargs):
         "interface_agg_scenario_matrix": False,
         "currency": "€",
         "daily_rate": 500,
+        "mapping_max_depth": 3,
+        "show_warning_external_links": True,
+        "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
@@ -1226,7 +1420,10 @@ def startup(sender: AppConfig, **kwargs):
             logger.warning(
                 "ebios radar settings are invalid (None or 0). Reverting to default settings."
             )
-            updated_value = {**current_value, **default_settings}
+            # Merge defaults first, then apply current values to preserve user settings
+            # Finally force-reset the invalid ebios_radar_max to default
+            updated_value = {**default_settings, **current_value}
+            updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
             settings.value = updated_value
             settings.save()
             logger.info(

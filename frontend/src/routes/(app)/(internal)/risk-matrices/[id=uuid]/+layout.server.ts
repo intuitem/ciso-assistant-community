@@ -3,7 +3,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
-import { listViewFields } from '$lib/utils/table';
+import { headData } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
@@ -24,7 +24,7 @@ export const load: LayoutServerLoad = async ({ fetch, params }) => {
 		await Promise.all(
 			model.reverseForeignKeyFields.map(async (e) => {
 				const table: TableSource = {
-					head: listViewFields[e.urlModel].head,
+					head: headData(e.urlModel),
 					body: [],
 					meta: []
 				};

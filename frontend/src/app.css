@@ -2,16 +2,14 @@
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 @import '@skeletonlabs/skeleton';
-@import '@skeletonlabs/skeleton/optional/presets';
 
 /*
   Add your theme import for your theme: "ciso-theme" here
 */
 @import '../ciso-theme.css';
-@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+@import '@skeletonlabs/skeleton-svelte';
 
 @source './**/*.{html,js,svelte,ts}';
-@source '../node_modules/.pnpm/@skeletonlabs+skeleton@2.10.3_svelte@5.28.6/node_modules/@skeletonlabs/skeleton/dist/**/*.{html,js,svelte,ts}';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -42,12 +40,15 @@
 @utility btn-mini-tertiary {
 	@apply text-gray-50 bg-sky-500 hover:bg-sky-400;
 }
+@utility btn-mini-quaternary {
+	@apply text-gray-50 bg-teal-500 hover:bg-teal-400;
+}
 
 @layer utilities {
 	/* (all other styles here...) */
 	html,
 	body {
-		@apply h-auto overflow-auto;
+		@apply h-auto;
 	}
 	.capitalize-first:first-letter {
 		@apply capitalize;

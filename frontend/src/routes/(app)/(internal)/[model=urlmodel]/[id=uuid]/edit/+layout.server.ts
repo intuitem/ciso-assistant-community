@@ -18,6 +18,11 @@ export const load: LayoutServerLoad = async (event) => {
 		: `${BASE_API_URL}/${event.params.model}/${event.params.id}/object/`;
 	const object = await event.fetch(objectEndpoint).then((res) => res.json());
 
+	// Block editing for validation flows
+	if (URLModel === 'validation-flows') {
+		throw redirect(302, `/${URLModel}/${event.params.id}`);
+	}
+
 	const form = await superValidate(object, zod(schema), { errors: false });
 	const selectFields = model.selectFields;
 
@@ -63,5 +68,16 @@ export const load: LayoutServerLoad = async (event) => {
 		}
 	}
 	model.selectOptions = selectOptions;
-	return { form, model, object, selectOptions, URLModel, title: m.edit() };
+
+	// For dashboard widgets, fetch supported models for builtin metrics
+	let supportedModels = {};
+	if (URLModel === 'dashboard-widgets' || URLModel === 'dashboard-builtin-widgets') {
+		const supportedModelsEndpoint = `${BASE_API_URL}/metrology/builtin-metric-samples/supported_models/`;
+		const supportedModelsResponse = await event.fetch(supportedModelsEndpoint);
+		if (supportedModelsResponse.ok) {
+			supportedModels = await supportedModelsResponse.json();
+		}
+	}
+
+	return { form, model, object, selectOptions, URLModel, title: m.edit(), supportedModels };
 };

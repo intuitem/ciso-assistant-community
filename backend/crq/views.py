@@ -193,8 +193,35 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                         }
                     )
 
-        # 2. Use cached portfolio simulation for current risk
+        # 2. Use cached portfolio simulation
         portfolio_data = study.get_or_generate_portfolio_simulation()
+
+        # Add inherent portfolio curve if available
+        if portfolio_data.get("inherent") and not portfolio_data["inherent"].get(
+            "error"
+        ):
+            inherent_data = portfolio_data["inherent"]
+            inherent_loss_data = inherent_data.get("loss", [])
+            inherent_probability_data = inherent_data.get("probability", [])
+
+            if inherent_loss_data and inherent_probability_data:
+                combined_inherent_data = [
+                    [float(loss), float(prob)]
+                    for loss, prob in zip(inherent_loss_data, inherent_probability_data)
+                    if loss > 0
+                ]
+                curves.append(
+                    {
+                        "name": "Combined Inherent Risk",
+                        "type": "combined_inherent",
+                        "data": combined_inherent_data,
+                        "study_id": str(study.id),
+                        "study_name": study.name,
+                        "component_scenarios": inherent_data.get("scenarios", []),
+                        "total_scenarios": inherent_data.get("total_scenarios", 0),
+                        "simulation_method": inherent_data.get("method", "cached"),
+                    }
+                )
 
         # Add current portfolio curve if available
         if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
@@ -264,10 +291,24 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         )
 
         # Calculate scenario counts from portfolio data
+        inherent_scenario_count = 0
         current_scenario_count = 0
         residual_scenario_count = 0
+        inherent_threshold_probability = None
         current_threshold_probability = None
         residual_threshold_probability = None
+
+        if portfolio_data.get("inherent") and not portfolio_data["inherent"].get(
+            "error"
+        ):
+            inherent_scenario_count = portfolio_data["inherent"].get(
+                "total_scenarios", 0
+            )
+            # Get threshold probability from metrics if loss threshold is set
+            inherent_metrics = portfolio_data["inherent"].get("metrics", {})
+            inherent_threshold_probability = inherent_metrics.get(
+                "prob_above_threshold"
+            )
 
         if portfolio_data.get("current") and not portfolio_data["current"].get("error"):
             current_scenario_count = portfolio_data["current"].get("total_scenarios", 0)
@@ -295,6 +336,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "currency": currency,
                 "curves": curves,
                 "total_curves": len(curves),
+                "scenarios_with_inherent_data": inherent_scenario_count,
                 "scenarios_with_current_data": current_scenario_count,
                 "scenarios_with_residual_data": residual_scenario_count,
                 "total_scenarios": study.risk_scenarios.count(),
@@ -302,8 +344,12 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                 "simulation_methods_used": list(simulation_methods_used),
                 "loss_threshold": study.loss_threshold,
                 "loss_threshold_display": study.loss_threshold_display,
+                "inherent_threshold_probability": inherent_threshold_probability,
                 "current_threshold_probability": current_threshold_probability,
                 "residual_threshold_probability": residual_threshold_probability,
+                "inherent_threshold_probability_display": f"{inherent_threshold_probability * 100:.1f}%"
+                if inherent_threshold_probability is not None
+                else None,
                 "current_threshold_probability_display": f"{current_threshold_probability * 100:.1f}%"
                 if current_threshold_probability is not None
                 else None,
@@ -375,6 +421,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     for qual in scenario.qualifications.all()
                 ],
                 # ALE insights
+                "inherent_ale": scenario.inherent_ale,
+                "inherent_ale_display": scenario.inherent_ale_display,
                 "current_ale": scenario.current_ale,
                 "current_ale_display": scenario.current_ale_display,
                 "residual_ale": scenario.residual_ale,
@@ -434,7 +482,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             # Existing controls from current hypothesis
             if current_hypothesis:
-                scenario_info["existing_controls"] = [
+                scenario_info["existing_applied_controls"] = [
                     {
                         "id": str(control.id),
                         "name": control.name,
@@ -446,7 +494,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
                     for control in current_hypothesis.existing_applied_controls.all()
                 ]
             else:
-                scenario_info["existing_controls"] = []
+                scenario_info["existing_applied_controls"] = []
 
             # Additional controls from selected residual hypothesis
             if selected_residual_hypothesis:
@@ -478,6 +526,32 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             # LEC chart data
             lec_curves = []
+
+            # Inherent hypothesis curve
+            inherent_hypothesis = scenario.hypotheses.filter(
+                risk_stage="inherent"
+            ).first()
+            if inherent_hypothesis and inherent_hypothesis.simulation_data:
+                simulation_data = inherent_hypothesis.simulation_data
+                loss_data = simulation_data.get("loss", [])
+                probability_data = simulation_data.get("probability", [])
+
+                if loss_data and probability_data:
+                    chart_data = [
+                        [loss, prob]
+                        for loss, prob in zip(loss_data, probability_data)
+                        if loss > 0
+                    ]
+                    lec_curves.append(
+                        {
+                            "name": "Inherent Risk",
+                            "type": "inherent",
+                            "data": chart_data,
+                            "hypothesis_id": str(inherent_hypothesis.id),
+                            "hypothesis_name": inherent_hypothesis.name,
+                            "metrics": simulation_data.get("metrics", {}),
+                        }
+                    )
 
             # Current hypothesis curve (reuse the variable from above)
             if current_hypothesis and current_hypothesis.simulation_data:

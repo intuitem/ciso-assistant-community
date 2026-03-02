@@ -177,6 +177,57 @@ def format_evidence_list(evidences) -> str:
     return "\n".join(evidence_lines)
 
 
+def format_validation_list(validations) -> str:
+    """
+    Format a list of validation flows for email templates
+
+    Args:
+        validations: List of ValidationFlow objects
+
+    Returns:
+        Formatted string with validation flow information
+    """
+    validation_lines = []
+    for validation in validations:
+        deadline = (
+            validation.validation_deadline.strftime("%Y-%m-%d")
+            if validation.validation_deadline
+            else "Not set"
+        )
+        requester_name = (
+            f"{validation.requester.first_name} {validation.requester.last_name}".strip()
+            if validation.requester
+            and (validation.requester.first_name or validation.requester.last_name)
+            else validation.requester.email
+            if validation.requester
+            else "Unknown"
+        )
+        validation_lines.append(
+            f"- {validation.ref_id} (Requester: {requester_name}, Deadline: {deadline})"
+        )
+
+    return "\n".join(validation_lines)
+
+
+def format_task_node_list(task_nodes) -> str:
+    """
+    Format a list of task nodes for email templates
+
+    Args:
+        task_nodes: List of TaskNode objects
+
+    Returns:
+        Formatted string with task node information
+    """
+    task_lines = []
+    for node in task_nodes:
+        name = node.task_template.name if node.task_template else "Unknown"
+        due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
+        task_lines.append(f"- {name} (Due: {due_date}, Status: {node.status})")
+
+    return "\n".join(task_lines)
+
+
 def get_default_context() -> Dict[str, str]:
     """
     Get default context variables for email templates
@@ -209,7 +260,10 @@ def send_templated_notification(
     Returns:
         True if email was queued successfully, False otherwise
     """
-    from .tasks import send_notification_email
+    from .tasks import check_email_configuration, send_notification_email
+
+    if not check_email_configuration(recipient_email, []):
+        return False
 
     rendered = render_email_template(template_name, context, locale)
     if not rendered:

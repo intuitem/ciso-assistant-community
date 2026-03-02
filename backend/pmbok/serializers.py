@@ -18,7 +18,7 @@ class GenericCollectionReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     policies = FieldsRelatedField(many=True)
     dependencies = FieldsRelatedField(many=True)
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
 
     class Meta:
         model = GenericCollection
@@ -34,15 +34,25 @@ class GenericCollectionWriteSerializer(BaseModelSerializer):
 class AccreditationReadSerializer(BaseModelSerializer):
     path = PathField(read_only=True)
     folder = FieldsRelatedField()
-    author = FieldsRelatedField(["id", "first_name", "last_name"])
+    author = FieldsRelatedField()
     authority = FieldsRelatedField()
     linked_collection = FieldsRelatedField()
     collection_data = serializers.SerializerMethodField()
     checklist = FieldsRelatedField()
-    filtering_labels = FieldsRelatedField(["folder"], many=True)
+    filtering_labels = FieldsRelatedField(["id", "folder"], many=True)
     status = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     checklist_progress = serializers.SerializerMethodField()
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_status(self, obj):
         return obj.status.get_name_translated
@@ -59,7 +69,7 @@ class AccreditationReadSerializer(BaseModelSerializer):
     def get_checklist_progress(self, obj):
         """Get the progress percentage of the checklist compliance assessment"""
         if obj.checklist:
-            return obj.checklist.get_progress()
+            return obj.checklist.progress
         return None
 
     class Meta:

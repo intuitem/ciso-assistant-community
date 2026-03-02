@@ -1,8 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MaxValueValidator, MinValueValidator
-from core.base_models import NameDescriptionMixin, AbstractBaseModel
+from core.base_models import (
+    ActorSyncManager,
+    ActorSyncMixin,
+    NameDescriptionMixin,
+    AbstractBaseModel,
+)
 from core.models import (
+    Actor,
     Assessment,
     ComplianceAssessment,
     Evidence,
@@ -23,6 +29,7 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
@@ -33,11 +40,17 @@ from auditlog.registry import auditlog
 
 
 class Entity(
-    NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
+    ActorSyncMixin,
+    NameDescriptionMixin,
+    FolderMixin,
+    PublishInRootFolderMixin,
+    FilteringLabelMixin,
 ):
     """
     An entity represents a legal entity, a corporate body, an administrative body, an association
     """
+
+    objects = ActorSyncManager()
 
     ref_id = models.CharField(max_length=255, blank=True)
     is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
@@ -167,6 +180,10 @@ class Entity(
             .first()
         )
 
+    def get_emails(self) -> list[str]:
+        emails = self.representatives.exclude(email="").values_list("email", flat=True)
+        return sorted({e.strip() for e in emails if e and e.strip()})
+
 
 class EntityAssessment(Assessment):
     class Conclusion(models.TextChoices):
@@ -263,7 +280,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     reference_link = models.URLField(blank=True, null=True, max_length=2048)
     criticality = models.IntegerField(default=0, verbose_name=_("Criticality"))
     owner = models.ManyToManyField(
-        User,
+        Actor,
         blank=True,
         verbose_name=_("Owner"),
         related_name="solutions",
@@ -355,7 +372,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
     )
     dora_alternative_providers_identified = models.CharField(
         max_length=20,
-        choices=DORA_BINARY_CHOICES,
+        choices=DORA_YES_NO_ASSESSMENT_CHOICES,
         blank=True,
         verbose_name=_("Alternative providers identified"),
         help_text=_(
@@ -368,7 +385,7 @@ class Solution(NameDescriptionMixin, FilteringLabelMixin):
         help_text=_("Identification of alternative ICT third-party service providers"),
     )
 
-    fields_to_check = ["name"]
+    fields_to_check = ["name", "provider_entity"]
 
     class Meta:
         verbose_name = _("Solution")
@@ -387,7 +404,7 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         TERMINATED = "terminated", _("Terminated")
 
     owner = models.ManyToManyField(
-        User,
+        Actor,
         verbose_name=_("Owner"),
         related_name="contracts",
         blank=True,
@@ -417,14 +434,12 @@ class Contract(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
         verbose_name=_("Evidences"),
         help_text=_("Supporting evidence for this contract"),
     )
-    solution = models.ForeignKey(
+    solutions = models.ManyToManyField(
         "tprm.Solution",
-        on_delete=models.SET_NULL,
         blank=True,
-        null=True,
         related_name="contracts",
-        verbose_name=_("Solution"),
-        help_text=_("Solution covered by this contract"),
+        verbose_name=_("Solutions"),
+        help_text=_("Solutions covered by this contract"),
     )
     status = models.CharField(
         max_length=20,

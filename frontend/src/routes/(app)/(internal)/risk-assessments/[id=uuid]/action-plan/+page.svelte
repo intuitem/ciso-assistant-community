@@ -14,6 +14,7 @@
 		priority: 'priority',
 		category: 'category',
 		csf_function: 'csfFunction',
+		owner: 'owner',
 		eta: 'eta',
 		expiry_date: 'expiryDate',
 		effort: 'effort',
@@ -34,12 +35,20 @@
 
 <div class="bg-white p-2 shadow rounded-lg space-x-2 flex flex-row justify-center mb-2">
 	<p class="font-semibold text-lg">
-		{m.perimeter()}:
-		<a
-			class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
-			href="/perimeters/{data.risk_assessment.perimeter.id}/"
-			>{data.risk_assessment.perimeter.str}</a
-		>
+		{#if data.risk_assessment.perimeter}
+			{m.perimeter()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/perimeters/{data.risk_assessment.perimeter.id}/"
+				>{data.risk_assessment.perimeter.str}</a
+			>
+		{:else}
+			{m.folder()}:
+			<a
+				class="unstyled text-primary-500 hover:text-primary-700 cursor-pointer"
+				href="/folders/{data.risk_assessment.folder.id}/">{data.risk_assessment.folder.str}</a
+			>
+		{/if}
 	</p>
 	<p>/</p>
 	<p class="font-semibold text-lg">
@@ -85,6 +94,7 @@
 				'priority',
 				'category',
 				'csf_function',
+				'owner',
 				'eta',
 				'expiry_date',
 				'effort',

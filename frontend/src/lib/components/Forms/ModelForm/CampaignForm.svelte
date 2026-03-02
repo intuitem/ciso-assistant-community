@@ -83,7 +83,7 @@
 	cacheLock={cacheLocks['perimeters']}
 	bind:cachedValue={formDataCache['perimeters']}
 	label={m.perimeters()}
-	hidden={initialData.perimeters}
+	disabled={!!initialData.perimeters?.length}
 />
 <TextField
 	type="date"
@@ -117,6 +117,5 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 	helpText={m.campaignDomainHelpText()}
 />

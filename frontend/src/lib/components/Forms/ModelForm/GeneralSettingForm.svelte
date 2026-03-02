@@ -90,10 +90,20 @@
 	multiple
 >
 	<Accordion.Item value="notifications">
-		{#snippet control()}
-			<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-bell mr-2"></i><span class="flex-1 text-left"
+				>{m.settingsNotifications()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -101,30 +111,50 @@
 					label={m.settingsNotificationsMail()}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="assets">
-		{#snippet control()}
-			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
-		{/snippet}
-		{#snippet panel()}
-			<Select
-				{form}
-				field="security_objective_scale"
-				cacheLock={cacheLocks['security_objective_scale']}
-				bind:cachedValue={formDataCache['security_objective_scale']}
-				options={model.selectOptions['security_objective_scale']}
-				helpText={m.securityObjectiveScaleHelpText()}
-				label={m.securityObjectiveScale()}
-			/>
-		{/snippet}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-gem mr-2"></i><span class="flex-1 text-left">{m.assets()}</span>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4">
+				<Select
+					{form}
+					field="security_objective_scale"
+					cacheLock={cacheLocks['security_objective_scale']}
+					bind:cachedValue={formDataCache['security_objective_scale']}
+					options={model.selectOptions['security_objective_scale']}
+					helpText={m.securityObjectiveScaleHelpText()}
+					label={m.securityObjectiveScale()}
+				/>
+			</div>
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="riskMatrix">
-		{#snippet control()}
-			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="flex flex-row gap-4">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-table-cells-large mr-2"></i><span class="flex-1 text-left"
+				>{m.settingsRiskMatrix()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
 					<Checkbox
 						{form}
@@ -158,7 +188,7 @@
 				</div>
 				<div class="flex-1">
 					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<!-- Point d’origine -->
+						<!-- Point d'origine -->
 						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 
 						<!-- Axe horizontal -->
@@ -181,50 +211,72 @@
 					</div>
 				</div>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="ebiosRadar">
-		{#snippet control()}
-			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
-		{/snippet}
-		{#snippet panel()}
-			<NumberField
-				{form}
-				field="ebios_radar_green_zone_radius"
-				label={m.greenZoneRadius()}
-				min={0.1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_yellow_zone_radius"
-				label={m.yellowZoneRadius()}
-				min={0.5}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
-			/>
-			<NumberField
-				{form}
-				field="ebios_radar_red_zone_radius"
-				label={m.redZoneRadius()}
-				min={1}
-				max={16}
-				step={0.1}
-				cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
-				bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
-			/>
-		{/snippet}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-gopuram mr-2"></i><span class="flex-1 text-left"
+				>{m.ebiosRadarParameters()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<NumberField
+					{form}
+					field="ebios_radar_green_zone_radius"
+					label={m.greenZoneRadius()}
+					min={0.1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_green_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_green_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_yellow_zone_radius"
+					label={m.yellowZoneRadius()}
+					min={0.5}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_yellow_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_yellow_zone_radius']}
+				/>
+				<NumberField
+					{form}
+					field="ebios_radar_red_zone_radius"
+					label={m.redZoneRadius()}
+					min={1}
+					max={16}
+					step={0.1}
+					cacheLock={cacheLocks['ebios_radar_red_zone_radius']}
+					bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
+				/>
+			</div>
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="financial">
-		{#snippet control()}
-			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-coins mr-2"></i><span class="flex-1 text-left"
+				>{m.financialSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
 				<Select
 					{form}
@@ -236,7 +288,8 @@
 						{ label: 'Japanese Yen (¥)', value: '¥' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' },
-						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' }
+						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
@@ -251,6 +304,115 @@
 					step={1}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="mappings">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-diagram-project mr-2"></i><span class="flex-1 text-left"
+				>{m.requirementMappingSets()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4">
+				<NumberField
+					{form}
+					field="mapping_max_depth"
+					label={m.mappingMaxDepth()}
+					helpText={m.mappingMaxDepthHelpText()}
+					min={2}
+					max={5}
+					step={1}
+				/>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="workflows">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-code-branch mr-2"></i><span class="flex-1 text-left"
+				>{m.workflows()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="allow_self_validation"
+					label={m.allowSelfValidation()}
+					helpText={m.allowSelfValidationHelpText()}
+				/>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="security">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-shield-halved mr-2"></i><span class="flex-1 text-left"
+				>{m.security()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Checkbox
+					{form}
+					field="show_warning_external_links"
+					label={m.showWarningExternalLinks()}
+					helpText={m.showWarningExternalLinksHelpText()}
+				/>
+				<Checkbox
+					{form}
+					field="enforce_mfa"
+					label={m.enforceMfa()}
+					helpText={m.enforceMfaHelpText()}
+				/>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="assignments">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-clipboard-user mr-2"></i><span class="flex-1 text-left"
+				>{m.assignmentSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4">
+				<Checkbox
+					{form}
+					field="allow_assignments_to_entities"
+					label={m.allowAssignmentsToEntities()}
+					helpText={m.allowAssignmentsToEntitiesDescription()}
+				/>
+			</div>
+		</Accordion.ItemContent>
 	</Accordion.Item>
 </Accordion>

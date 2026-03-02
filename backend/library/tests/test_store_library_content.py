@@ -140,7 +140,7 @@ objects:
 class TestStoreLibraryContent:
     @pytest.mark.django_db
     def test_store_library_content_sets_autoload_to_true_if_lib_has_mappings(self):
-        stored_library = StoredLibrary.store_library_content(
+        stored_library, _ = StoredLibrary.store_library_content(
             SAMPLE_YAML_LIB_WITH_MAPPINGS
         )
         assert stored_library is not None
@@ -148,8 +148,23 @@ class TestStoreLibraryContent:
 
     @pytest.mark.django_db
     def test_store_library_content_sets_autoload_to_false_if_lib_has_no_mappings(self):
-        stored_library = StoredLibrary.store_library_content(
+        stored_library, _ = StoredLibrary.store_library_content(
             SAMPLE_YAML_LIB_NO_MAPPINGS
         )
         assert stored_library is not None
         assert stored_library.autoload is False
+
+    @pytest.mark.django_db
+    def test_store_library_content_dry_run(self):
+        library_data, error = StoredLibrary.store_library_content(
+            SAMPLE_YAML_LIB_NO_MAPPINGS, dry_run=True
+        )
+        assert error is None
+        assert isinstance(library_data, dict)
+        assert library_data["urn"] == "urn:intuitem:test:library:nist-csf-1.1"
+        assert library_data["version"] == 5
+        assert library_data["objects_meta"]["framework"] == 1
+        # Check that no object was created
+        assert not StoredLibrary.objects.filter(
+            urn="urn:intuitem:test:library:nist-csf-1.1"
+        ).exists()

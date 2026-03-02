@@ -15,6 +15,12 @@ GENERAL_SETTINGS_KEYS = [
     "risk_matrix_labels",
     "currency",
     "daily_rate",
+    "mapping_max_depth",
+    "allow_self_validation",
+    "show_warning_external_links",
+    "builtin_metrics_retention_days",
+    "allow_assignments_to_entities",
+    "enforce_mfa",
 ]
 
 
@@ -57,6 +63,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
         for key, value in validated_data["value"].items():
             if key not in GENERAL_SETTINGS_KEYS:
                 raise serializers.ValidationError(f"Invalid key: {key}")
+            # Validate builtin_metrics_retention_days minimum value
+            if key == "builtin_metrics_retention_days":
+                if not isinstance(value, int) or value < 1:
+                    raise serializers.ValidationError(
+                        {
+                            "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
             setattr(instance, "value", validated_data["value"])
 
         # Get new currency value
@@ -197,32 +211,44 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     reports = serializers.BooleanField(
         source="value.reports", required=False, default=False
     )
+    validation_flows = serializers.BooleanField(
+        source="value.validation_flows", required=False, default=False
+    )
+    outgoing_webhooks = serializers.BooleanField(
+        source="value.outgoing_webhooks", required=False, default=False
+    )
+    metrology = serializers.BooleanField(
+        source="value.metrology", required=False, default=True
+    )
+    personal_data = serializers.BooleanField(
+        source="value.personal_data", required=False, default=True
+    )
+    purposes = serializers.BooleanField(
+        source="value.purposes", required=False, default=True
+    )
+    right_requests = serializers.BooleanField(
+        source="value.right_requests", required=False, default=True
+    )
+    data_breaches = serializers.BooleanField(
+        source="value.data_breaches", required=False, default=True
+    )
+    auditee_mode = serializers.BooleanField(
+        source="value.auditee_mode", required=False, default=False
+    )
+    advanced_analytics = serializers.BooleanField(
+        source="value.advanced_analytics", required=False, default=False
+    )
 
     class Meta:
         model = GlobalSettings
-        fields = [
-            "xrays",
-            "incidents",
-            "tasks",
-            "risk_acceptances",
-            "exceptions",
-            "follow_up",
-            "ebiosrm",
-            "scoring_assistant",
-            "vulnerabilities",
-            "compliance",
-            "tprm",
-            "privacy",
-            "experimental",
-            "inherent_risk",
-            "organisation_objectives",
-            "organisation_issues",
-            "quantitative_risk_studies",
-            "terminologies",
-            "bia",
-            "project_management",
-            "contracts",
-            "reports",
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
         ]
         read_only_fields = ["name"]
 

@@ -1,12 +1,19 @@
 from core.constants import COUNTRY_CHOICES
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from core.models import Actor
+from core.serializers import ActorReadSerializer
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    ExportMixin,
+    escape_excel_formula,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import filters
 from django.db.models import Count
 from itertools import chain
 from collections import defaultdict
+
+from iam.models import Folder, RoleAssignment
 
 from .models import (
     ProcessingNature,
@@ -19,7 +26,9 @@ from .models import (
     Processing,
     RightRequest,
     DataBreach,
-    LEGAL_BASIS_CHOICES,
+    ART6_LAWFUL_BASIS_CHOICES,
+    ART9_SPECIAL_CATEGORY_CONDITION_CHOICES,
+    TRANSFER_MECHANISM_CHOICES,
 )
 
 EU_COUNTRIES_SET = {
@@ -63,11 +72,15 @@ class PurposeViewSet(BaseModelViewSet):
     """
 
     model = Purpose
-    filterset_fields = ["processing", "legal_basis"]
+    filterset_fields = ["processing", "legal_basis", "article_9_condition"]
 
     @action(detail=False, name="Get legal basis choices")
     def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+        return Response(dict(ART6_LAWFUL_BASIS_CHOICES))
+
+    @action(detail=False, name="Get article 9 condition choices")
+    def article_9_condition(self, request):
+        return Response(dict(ART9_SPECIAL_CATEGORY_CONDITION_CHOICES))
 
 
 class PersonalDataViewSet(BaseModelViewSet):
@@ -137,24 +150,28 @@ class DataTransferViewSet(BaseModelViewSet):
     """
 
     model = DataTransfer
-    filterset_fields = ["processing"]
+    filterset_fields = ["processing", "transfer_mechanism"]
 
     # this should be cached
     @action(detail=False, name="Get countries list")
     def country(self, request):
         return Response(dict(COUNTRY_CHOICES))
 
-    @action(detail=False, name="Get legal basis choices")
-    def legal_basis(self, request):
-        return Response(dict(LEGAL_BASIS_CHOICES))
+    @action(detail=False, name="Get transfer mechanism choices")
+    def transfer_mechanism(self, request):
+        return Response(dict(TRANSFER_MECHANISM_CHOICES))
 
 
-def agg_countries():
-    transfer_countries = DataTransfer.objects.values("country").annotate(
-        count=Count("id")
+def agg_countries(viewable_data_transfers, viewable_data_contractors):
+    transfer_countries = (
+        DataTransfer.objects.filter(id__in=viewable_data_transfers)
+        .values("country")
+        .annotate(count=Count("id"))
     )
-    contractor_countries = DataContractor.objects.values("country").annotate(
-        count=Count("id")
+    contractor_countries = (
+        DataContractor.objects.filter(id__in=viewable_data_contractors)
+        .values("country")
+        .annotate(count=Count("id"))
     )
     country_counts = defaultdict(int)
     for item in chain(transfer_countries, contractor_countries):
@@ -173,14 +190,75 @@ def agg_countries():
     return countries
 
 
-class ProcessingViewSet(BaseModelViewSet):
+class ProcessingViewSet(ExportMixin, BaseModelViewSet):
     model = Processing
 
-    filterset_fields = ["folder", "nature", "status", "filtering_labels"]
+    filterset_fields = [
+        "folder",
+        "nature",
+        "status",
+        "filtering_labels",
+        "assigned_to",
+        "perimeters",
+    ]
+
+    export_config = {
+        "fields": {
+            "internal_id": {"source": "id", "label": "internal_id"},
+            "ref_id": {"source": "ref_id", "label": "ref_id", "escape": True},
+            "name": {"source": "name", "label": "name", "escape": True},
+            "description": {
+                "source": "description",
+                "label": "description",
+                "escape": True,
+            },
+            "status": {"source": "get_status_display", "label": "status"},
+            "nature": {
+                "source": "nature",
+                "label": "processing_nature",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(n)) for n in qs.all()
+                ),
+            },
+            "folder": {"source": "folder.name", "label": "folder", "escape": True},
+            "assigned_to": {
+                "source": "assigned_to",
+                "label": "assigned_to",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(str(actor)) for actor in qs.all()
+                ),
+            },
+            "labels": {
+                "source": "filtering_labels",
+                "label": "labels",
+                "format": lambda qs: ",".join(
+                    escape_excel_formula(o.label) for o in qs.all()
+                ),
+            },
+            "dpia_required": {"source": "dpia_required", "label": "dpia_required"},
+            "dpia_reference": {
+                "source": "dpia_reference",
+                "label": "dpia_reference",
+                "escape": True,
+            },
+        },
+        "filename": "processings_export",
+        "select_related": ["folder"],
+        "prefetch_related": ["filtering_labels", "nature", "assigned_to"],
+    }
 
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(Processing.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all processing assigned_to actors")
+    def assigned_to(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_processings__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
     @action(detail=False, name="processing metrics")
     def metrics(self, request, pk=None):
@@ -188,31 +266,80 @@ class ProcessingViewSet(BaseModelViewSet):
 
     @action(detail=False, name="aggregated metrics")
     def agg_metrics(self, request):
-        pd_categories = PersonalData.get_categories_count()
+        (viewable_processings, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=Processing,
+        )
+        (viewable_data_contractors, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataContractor,
+        )
+        (viewable_data_transfers, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataTransfer,
+        )
+        (viewable_right_requests, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=RightRequest,
+        )
+        (viewable_data_breaches, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataBreach,
+        )
+        (viewable_personal_data, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=PersonalData,
+        )
+        (viewable_data_recipients, _, _) = RoleAssignment.get_accessible_object_ids(
+            folder=Folder.get_root_folder(),
+            user=request.user,
+            object_type=DataRecipient,
+        )
+        processings_count = len(viewable_processings)
+
+        pd_categories = PersonalData.get_categories_count(
+            filters={"id__in": viewable_personal_data}
+        )
         total_categories = len(pd_categories)
-        processings_count = Processing.objects.all().count()
+        # Recipients count was previously the sum of distinct entities from data contractors and data transfers
+        # contractor_entities = (
+        #     DataContractor.objects.filter(
+        #         id__in=viewable_data_contractors, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        # transfer_entities = (
+        #     DataTransfer.objects.filter(
+        #         id__in=viewable_data_transfers, entity__isnull=False
+        #     )
+        #     .values_list("entity", flat=True)
+        #     .distinct()
+        # )
+        recipients_count = len(viewable_data_recipients)
 
-        # Count distinct entities from data contractors and data transfers
-        contractor_entities = (
-            DataContractor.objects.filter(entity__isnull=False)
-            .values_list("entity", flat=True)
-            .distinct()
+        open_right_requests_count = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .exclude(status="done")
+            .count()
         )
-        transfer_entities = (
-            DataTransfer.objects.filter(entity__isnull=False)
-            .values_list("entity", flat=True)
-            .distinct()
+        open_data_breaches_count = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .exclude(status="privacy_closed")
+            .count()
         )
-        recipients_count = len(set(list(contractor_entities) + list(transfer_entities)))
-
-        open_right_requests_count = RightRequest.objects.exclude(status="done").count()
-        open_data_breaches_count = DataBreach.objects.exclude(
-            status="privacy_closed"
-        ).count()
 
         # Aggregate data breaches by breach type
-        breach_types = DataBreach.objects.values("breach_type").annotate(
-            count=Count("id")
+        breach_types = (
+            DataBreach.objects.filter(id__in=viewable_data_breaches)
+            .values("breach_type")
+            .annotate(count=Count("id"))
         )
         breach_type_data = [
             {"name": item["breach_type"], "value": item["count"]}
@@ -220,8 +347,10 @@ class ProcessingViewSet(BaseModelViewSet):
         ]
 
         # Aggregate right requests by request type
-        request_types = RightRequest.objects.values("request_type").annotate(
-            count=Count("id")
+        request_types = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .values("request_type")
+            .annotate(count=Count("id"))
         )
         request_type_data = [
             {"name": item["request_type"], "value": item["count"]}
@@ -237,7 +366,7 @@ class ProcessingViewSet(BaseModelViewSet):
         personal_data = (
             PersonalData.objects.select_related("processing")
             .prefetch_related("processing__purposes", "processing__data_transfers")
-            .all()
+            .filter(id__in=viewable_personal_data)
         )
 
         for pd in personal_data:
@@ -281,15 +410,12 @@ class ProcessingViewSet(BaseModelViewSet):
                     }
                 )
 
-            # Get legal bases from purposes and data transfers
+            # Get legal bases from purposes (Art. 6 legal bases only)
             legal_bases = set()
             if pd.processing:
                 for purpose in pd.processing.purposes.all():
                     if purpose.legal_basis:
                         legal_bases.add(purpose.legal_basis)
-                for transfer in pd.processing.data_transfers.all():
-                    if transfer.legal_basis:
-                        legal_bases.add(transfer.legal_basis)
 
             # Link processing to legal bases (depth 2)
             for legal_basis in legal_bases:
@@ -322,7 +448,9 @@ class ProcessingViewSet(BaseModelViewSet):
 
         return Response(
             {
-                "countries": agg_countries(),
+                "countries": agg_countries(
+                    viewable_data_transfers, viewable_data_contractors
+                ),
                 "processings_count": processings_count,
                 "recipients_count": recipients_count,
                 "pd_categories": pd_categories,
@@ -364,6 +492,15 @@ class RightRequestViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(RightRequest.STATUS_CHOICES))
+
+    @action(detail=False, name="Get all right request owners")
+    def owner(self, request):
+        return Response(
+            ActorReadSerializer(
+                Actor.objects.filter(assigned_right_requests__isnull=False).distinct(),
+                many=True,
+            ).data
+        )
 
 
 class DataBreachViewSet(BaseModelViewSet):

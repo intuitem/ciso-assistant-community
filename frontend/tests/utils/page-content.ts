@@ -3,6 +3,14 @@ import { FormContent, FormFieldType } from './form-content.js';
 import { BasePage } from './base-page.js';
 import { PageDetail } from './page-detail.js';
 
+interface Filter {
+	has?: Locator | undefined;
+	hasNot?: Locator;
+	hasNotText?: string | RegExp;
+	hasText?: string | RegExp;
+	visible?: boolean;
+}
+
 export class PageContent extends BasePage {
 	readonly form: FormContent;
 	readonly itemDetail: PageDetail;
@@ -67,7 +75,26 @@ export class PageContent extends BasePage {
 		if (page) {
 			await page.waitForLoadState('networkidle');
 		}
+
 		await this.form.fill(values);
+
+		// If parent_folder field is visible and enabled (enterprise edition) and not already provided, fill it with 'Global'
+		const parentFolderField = this.page.getByTestId('form-input-parent-folder');
+		if (
+			!values.parent_folder &&
+			(await parentFolderField.isVisible({ timeout: 1000 }).catch(() => false))
+		) {
+			const isDisabled = await parentFolderField
+				.locator('.disabled')
+				.first()
+				.isVisible()
+				.catch(() => false);
+			if (!isDisabled) {
+				await parentFolderField.click();
+				await parentFolderField.getByRole('option', { name: 'Global' }).first().click();
+			}
+		}
+
 		await this.form.saveButton.click();
 		await expect(this.form.formTitle).not.toBeVisible();
 		if (typeof this.name == 'string') {
@@ -89,38 +116,23 @@ export class PageContent extends BasePage {
 		await this.page.waitForTimeout(3000);
 		await this.page.getByRole('searchbox').first().clear();
 		await this.page.getByRole('searchbox').first().fill(name);
-		if (
-			(await this.tab('Loaded libraries').isVisible()) &&
-			(await this.tab('Loaded libraries').getAttribute('aria-selected')) === 'true'
-		) {
-			if (await this.getRow(name).isHidden()) {
-				await this.tab('Libraries store').click();
-				expect(this.tab('Libraries store').getAttribute('aria-selected')).toBeTruthy();
-			} else {
-				return;
-			}
-		}
-		// If the library is not visible, it might have already been loaded
 		await this.page.waitForTimeout(3000);
-		if (await this.importItemButton(name, language === 'any' ? undefined : language).isHidden()) {
-			if (await this.tab('Loaded libraries').isVisible()) {
-				await this.tab('Loaded libraries').click();
-				expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-				await this.page.getByRole('searchbox').first().clear();
-				await this.page.getByRole('searchbox').first().fill(name);
-			}
-			await expect(this.getRow(name)).toBeVisible();
-			return;
-		}
-		await this.importItemButton(name, language === 'any' ? undefined : language).click();
+
+		const filters = [
+			{ has: this.page.getByText(name, { exact: true }).first() },
+			{ has: this.page.getByText(language).first() }
+		];
+		const row = this.getRow(name, filters);
+
+		const isAlreadyLoaded = await row.getByTestId('tablerow-import-button').isHidden();
+		if (isAlreadyLoaded) return;
+
+		const importButton = row.getByTestId('tablerow-import-button');
+		await importButton.click();
+
 		await this.isToastVisible(`The library has been successfully loaded.+`, undefined, {
 			timeout: 15000
 		});
-		await this.tab('Loaded libraries').click();
-		expect(this.tab('Loaded libraries').getAttribute('aria-selected')).toBeTruthy();
-		await this.page.getByRole('searchbox').first().clear();
-		await this.page.getByRole('searchbox').first().fill(name);
-		await expect(this.getRow(name)).toBeVisible();
 	}
 
 	async viewItemDetail(value?: string) {
@@ -134,15 +146,23 @@ export class PageContent extends BasePage {
 		await this.page.waitForURL(new RegExp('^.*\\' + this.url + '/.+'));
 	}
 
-	getRow(value?: string, additional?: any) {
-		return value
-			? additional
-				? this.page
-						.getByRole('row', { name: value })
-						.filter({ has: this.page.getByText(additional).first() })
-						.first()
-				: this.page.getByRole('row', { name: value }).first()
-			: this.page.getByRole('row').first();
+	/**
+	 * Get the first table row that matches the given substring and optional filters
+	 *
+	 * @param substring Substring to look for within the row (case-insensitive search).
+	 * @param filters Extra filters passed to the locator with the `locator.filter` method.
+	 * @returns The first matching row.
+	 */
+	getRow(substring?: string, filters: Filter[] = []): Locator {
+		const substringSearch = { name: substring };
+		let rowLocator = this.page.getByRole('row', substringSearch);
+
+		for (const filterOptions of filters) {
+			rowLocator = rowLocator.filter(filterOptions);
+		}
+
+		const firstMatchingFound = rowLocator.first();
+		return firstMatchingFound;
 	}
 
 	collumnHeader(value: string) {
@@ -167,11 +187,5 @@ export class PageContent extends BasePage {
 
 	deletePromptConfirmButton() {
 		return this.page.getByTestId('delete-prompt-confirm-button');
-	}
-
-	importItemButton(value: string, language?: string) {
-		return language
-			? this.getRow(value, language).getByTestId('tablerow-import-button')
-			: this.getRow(value).getByTestId('tablerow-import-button');
 	}
 }

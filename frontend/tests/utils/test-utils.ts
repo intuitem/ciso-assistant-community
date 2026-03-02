@@ -38,8 +38,13 @@ type Fixtures = {
 	ebiosRmStudyPage: PageContent;
 	assetAssessmentsPage: PageContent;
 	escalationThresholdsPage: PageContent;
+	entitiesPage: PageContent;
+	solutionsPage: PageContent;
+	representativesPage: PageContent;
+	entityAssessmentsPage: PageContent;
 	settingsPage: PageContent;
 	logedPage: LoginPage;
+	thirdPartyAuthenticatedPage: LoginPage;
 	loginPage: LoginPage;
 	populateDatabase: void;
 };
@@ -81,6 +86,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			entitiesPage,
 			usersPage
 		},
 		use
@@ -105,6 +111,7 @@ export const test = base.extend<Fixtures>({
 			businessImpactAnalysisPage,
 			assetAssessmentsPage,
 			threatsPage,
+			entitiesPage,
 			usersPage
 		});
 	},
@@ -117,6 +124,7 @@ export const test = base.extend<Fixtures>({
 		const aPage = new PageContent(page, '/compliance-assessments', 'Audits', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			//{ name: 'version', type: type.TEXT },
 			//{ name: 'status', type: type.SELECT },
@@ -151,7 +159,11 @@ export const test = base.extend<Fixtures>({
 	},
 
 	foldersPage: async ({ page }, use) => {
-		const fPage = new PageContent(page, '/folders', 'Domains');
+		const fPage = new PageContent(page, '/folders', 'Domains', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'create_iam_groups', type: type.CHECKBOX }
+		]);
 		await use(fPage);
 	},
 
@@ -197,6 +209,7 @@ export const test = base.extend<Fixtures>({
 		const rPage = new PageContent(page, '/risk-assessments', 'Risk assessments', [
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'version', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
@@ -297,6 +310,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'ref_id', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'status', type: type.SELECT }
 		]);
@@ -319,6 +333,7 @@ export const test = base.extend<Fixtures>({
 			{ name: 'name', type: type.TEXT },
 			{ name: 'description', type: type.TEXT },
 			{ name: 'status', type: type.SELECT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'risk_matrix', type: type.SELECT_AUTOCOMPLETE },
 			{ name: 'authors', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
@@ -361,6 +376,54 @@ export const test = base.extend<Fixtures>({
 		await use(ePage);
 	},
 
+	entitiesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entities', /Entit(y|ies)/, [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	solutionsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/solutions', 'Solutions', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'assets', type: type.SELECT_MULTIPLE_AUTOCOMPLETE }
+		]);
+		await use(ePage);
+	},
+
+	representativesPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/representatives', 'Representatives', [
+			{ name: 'description', type: type.TEXT },
+			{ name: 'email', type: type.TEXT },
+			{ name: 'create_user', type: type.CHECKBOX },
+			{ name: 'entity', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'first_name', type: type.TEXT },
+			{ name: 'last_name', type: type.TEXT },
+			{ name: 'phone', type: type.TEXT },
+			{ name: 'role', type: type.TEXT }
+		]);
+		await use(ePage);
+	},
+
+	entityAssessmentsPage: async ({ page }, use) => {
+		const ePage = new PageContent(page, '/entity-assessments', 'Entity assessments', [
+			{ name: 'name', type: type.TEXT },
+			{ name: 'description', type: type.TEXT },
+			{ name: 'folder', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'perimeter', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'create_audit', type: type.CHECKBOX },
+			{ name: 'framework', type: type.SELECT_AUTOCOMPLETE },
+			{ name: 'solutions', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'due_date', type: type.DATE },
+			{ name: 'representatives', type: type.SELECT_MULTIPLE_AUTOCOMPLETE },
+			{ name: 'conclusion', type: type.SELECT }
+		]);
+		await use(ePage);
+	},
+
 	usersPage: async ({ page }, use) => {
 		const uPage = new PageContent(page, '/users', 'Users', [
 			{ name: 'email', type: type.TEXT },
@@ -379,6 +442,14 @@ export const test = base.extend<Fixtures>({
 		await loginPage.goto();
 		await loginPage.login();
 		await loginPage.skipWelcome();
+		await use(loginPage);
+	},
+
+	thirdPartyAuthenticatedPage: async ({ page }, use) => {
+		const loginPage = new LoginPage(page);
+		await loginPage.goto();
+		await loginPage.login(testData.thirdPartyUser.email, testData.thirdPartyUser.password);
+		await loginPage.skipWelcome(/^.*\/compliance-assessments$/);
 		await use(loginPage);
 	},
 
@@ -460,7 +531,8 @@ export class TestContent {
 				modelName: 'folder',
 				build: {
 					name: vars.folderName,
-					description: vars.description
+					description: vars.description,
+					create_iam_groups: true
 				},
 				editParams: {
 					name: '',
@@ -604,6 +676,7 @@ export class TestContent {
 				build: {
 					name: vars.assessmentName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					// status: 'Planned',
 					// version: "1.4.2",
@@ -645,6 +718,7 @@ export class TestContent {
 					str: `${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					name: vars.riskAssessmentName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					version: vars.riskAssessmentVersion,
 					status: 'Planned',
@@ -667,9 +741,10 @@ export class TestContent {
 				modelName: 'riskscenario',
 				dependency: vars.threat.library,
 				build: {
+					str: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`,
 					name: vars.riskScenarioName,
 					description: vars.description,
-					risk_assessment: `${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
+					risk_assessment: `${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}`,
 					threats: ['Global/' + vars.threat.name, 'Global/' + vars.threat2.name]
 				},
 				editParams: {
@@ -697,7 +772,7 @@ export class TestContent {
 					folder: vars.folderName,
 					approver: LoginPage.defaultEmail,
 					risk_scenarios: [
-						`${vars.folderName}/${vars.perimeterName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
+						`${vars.folderName}/${vars.riskAssessmentName} - ${vars.riskAssessmentVersion}/${vars.riskScenarioName}`
 					]
 				},
 				editParams: {
@@ -715,6 +790,7 @@ export class TestContent {
 					name: vars.findingsAssessmentName,
 					description: vars.description,
 					ref_id: 'FA.1234',
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					status: 'Planned'
 				},
@@ -752,6 +828,7 @@ export class TestContent {
 				build: {
 					name: vars.biaName,
 					description: vars.description,
+					folder: vars.folderName,
 					perimeter: vars.folderName + '/' + vars.perimeterName,
 					risk_matrix: vars.matrix.displayName,
 					due_date: '2025-05-01'
@@ -767,8 +844,21 @@ export class TestContent {
 				modelName: 'assetassessment',
 				build: {
 					str: vars.assetName,
-					asset: vars.folderName + '/' + vars.assetName,
+					asset: vars.assetName,
 					bia: vars.biaName
+				}
+			},
+			entitiesPage: {
+				displayName: 'Entities',
+				modelName: 'entity',
+				build: {
+					name: 'Test Entity',
+					description: 'Test description',
+					folder: vars.folderName
+				},
+				editParams: {
+					name: '',
+					description: ''
 				}
 			}
 		};

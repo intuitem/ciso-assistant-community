@@ -1,6 +1,12 @@
 """Update MCP tools for CISO Assistant"""
 
-from ..client import make_get_request, make_patch_request, get_paginated_results
+from ..client import (
+    make_get_request,
+    make_patch_request,
+    make_delete_request,
+    get_paginated_results,
+    fetch_all_results,
+)
 from ..resolvers import (
     resolve_asset_id,
     resolve_risk_scenario_id,
@@ -8,6 +14,8 @@ from ..resolvers import (
     resolve_folder_id,
     resolve_applied_control_id,
     resolve_requirement_assessment_id,
+    resolve_compliance_assessment_id,
+    resolve_task_template_id,
 )
 
 
@@ -219,6 +227,7 @@ async def update_applied_control(
     category: str = None,
     csf_function: str = None,
     effort: str = None,
+    cost: dict = None,
     control_impact: int = None,
     eta: str = None,
     start_date: str = None,
@@ -237,6 +246,15 @@ async def update_applied_control(
         category: policy | process | technical | physical
         csf_function: identify | protect | detect | respond | recover | govern
         effort: XS | S | M | L | XL
+        cost: is a JSON object composed by follwing keys :
+            currency: € (euros),
+            amortization_period (typically 1 year),
+            build: One-time implementation costs
+                fixed_cost: monetary amount,
+                people_days: person-days effort
+            run: Annual operational costs
+                fixed_cost: monetary amount
+                people_days: person-days effort
         control_impact: 1-5 (1=Very Low, 5=Very High)
         eta: ETA date YYYY-MM-DD
         start_date: Start date YYYY-MM-DD
@@ -265,6 +283,8 @@ async def update_applied_control(
             payload["csf_function"] = csf_function
         if effort is not None:
             payload["effort"] = effort
+        if cost is not None:
+            payload["cost"] = cost
         if control_impact is not None:
             payload["control_impact"] = control_impact
         if eta is not None:
@@ -302,6 +322,7 @@ async def update_requirement_assessment(
     eta: str = None,
     due_date: str = None,
     selected: bool = None,
+    applied_controls: list = None,
 ) -> str:
     """Update requirement assessment in audit. Use get_requirement_assessments() to find IDs
 
@@ -315,6 +336,7 @@ async def update_requirement_assessment(
         eta: ETA date YYYY-MM-DD
         due_date: Due date YYYY-MM-DD
         selected: Applicability flag
+        applied_controls: List of applied control IDs/names to associate with this requirement assessment. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
     """
     try:
         # Validate UUID
@@ -339,6 +361,12 @@ async def update_requirement_assessment(
             payload["due_date"] = due_date
         if selected is not None:
             payload["selected"] = selected
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
 
         if not payload:
             return "Error: No fields provided to update"
@@ -355,6 +383,103 @@ async def update_requirement_assessment(
             )
     except Exception as e:
         return f"Error in update_requirement_assessment: {str(e)}"
+
+
+async def update_requirement_assessments(
+    compliance_assessment_id: str,
+    updates: list,
+) -> str:
+    """Batch update requirement assessments of a compliance assessment. Each update targets a requirement by ref_id and sets its own fields. Ideal for importing audit results from files.
+
+    Before calling, normalize result values to: not_assessed | partially_compliant | non_compliant | compliant | not_applicable.
+    Common mappings: Yes/Oui/Conforme/Implemented/Met/Pass → compliant, No/Non/Non-conforme/Not implemented/Not met/Fail → non_compliant, Partial/In progress → partially_compliant, N/A → not_applicable.
+
+    Args:
+        compliance_assessment_id: Compliance assessment ID or name (required)
+        updates: List of update objects. Each object must have "ref_id" (str) to identify the requirement, plus any fields to update: "result" (not_assessed|partially_compliant|non_compliant|compliant|not_applicable), "status" (to_do|in_progress|in_review|done), "observation" (str), "score" (int), "is_scored" (bool), "eta" (YYYY-MM-DD), "due_date" (YYYY-MM-DD), "selected" (bool).
+    """
+    try:
+        if not updates:
+            return "Error: No updates provided"
+
+        # Resolve compliance assessment
+        resolved_ca_id = resolve_compliance_assessment_id(compliance_assessment_id)
+
+        # Fetch all requirement assessments for this compliance assessment once
+        all_ras, error = fetch_all_results(
+            "/requirement-assessments/",
+            params={"compliance_assessment": resolved_ca_id},
+        )
+        if error:
+            return f"Error fetching requirement assessments: {error}"
+
+        # Build a case-insensitive lookup: ref_id (lowered) → RA id
+        # The actual ref_id lives on the nested requirement object, not on the RA itself
+        ref_id_to_ra = {}
+        for ra in all_ras:
+            req_obj = ra.get("requirement") or {}
+            ref = req_obj.get("ref_id") if isinstance(req_obj, dict) else None
+            if not ref:
+                ref = ra.get("ref_id")
+            if ref:
+                ref_id_to_ra[ref.strip().lower()] = ra["id"]
+
+        succeeded = []
+        failed = []
+        not_found = []
+
+        for update in updates:
+            ref_id = update.get("ref_id")
+            if not ref_id:
+                failed.append("Missing ref_id in update entry")
+                continue
+
+            ra_id = ref_id_to_ra.get(ref_id.strip().lower())
+            if not ra_id:
+                not_found.append(ref_id)
+                continue
+
+            # Build payload from allowed fields
+            payload = {}
+            for field in (
+                "status",
+                "result",
+                "observation",
+                "score",
+                "is_scored",
+                "eta",
+                "due_date",
+                "selected",
+            ):
+                if field in update and update[field] is not None:
+                    payload[field] = update[field]
+
+            if not payload:
+                failed.append(f"{ref_id}: no fields to update")
+                continue
+
+            res = make_patch_request(f"/requirement-assessments/{ra_id}/", payload)
+            if res.status_code == 200:
+                succeeded.append(ref_id)
+            else:
+                failed.append(f"{ref_id}: {res.status_code} - {res.text}")
+
+        # Build response
+        total = len(updates)
+        parts = [
+            f"Processed {total} updates: {len(succeeded)} succeeded, {len(failed)} failed, {len(not_found)} not found"
+        ]
+        if not_found:
+            parts.append(
+                f"\nRef IDs not found in compliance assessment:\n"
+                + ", ".join(not_found)
+            )
+        if failed:
+            parts.append(f"\nFailed:\n" + "\n".join(f"  - {f}" for f in failed))
+
+        return "\n".join(parts)
+    except Exception as e:
+        return f"Error in update_requirement_assessments: {str(e)}"
 
 
 async def update_quantitative_risk_study(
@@ -703,3 +828,139 @@ async def update_quantitative_risk_hypothesis(
             return f"Error updating quantitative risk hypothesis: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in update_quantitative_risk_hypothesis: {str(e)}"
+
+
+async def update_task_template(
+    task_id: str,
+    name: str = None,
+    description: str = None,
+    status: str = None,
+    observation: str = None,
+    evidences: list = None,
+    is_published: bool = None,
+    task_date: str = None,
+    is_recurrent: bool = None,
+    ref_id: str = None,
+    schedule: str = None,
+    enabled: bool = None,
+    link: str = None,
+    folder_id: str = None,
+    assigned_to: list = None,
+    assets: list = None,
+    applied_controls: list = None,
+    compliance_assessments: list = None,
+    risk_assessments: list = None,
+    findings_assessment: list = None,
+) -> str:
+    """Update task template properties
+
+    Args:
+        task_id: Task template ID/name (required)
+        name: Task template name
+        description: Description
+        status: Status
+        observation: Observation text
+        evidences: Array of evidence UUIDs
+        is_published: Published flag
+        task_date: Task date (YYYY-MM-DD)
+        is_recurrent: Recurrent flag
+        ref_id: Reference ID
+        schedule: Schedule definition
+        enabled: Enabled flag
+        link: Link to evidence (e.g. Jira ticket)
+        folder_id: Folder ID/name
+        assigned_to: Array of user UUIDs
+        assets: Array of asset UUIDs
+        applied_controls: List of applied control IDs/names to associate with this task template. Can be None to leave unchanged, or empty list to clear associations. Elements should be strings representing control identifiers.
+        compliance_assessments: Array of compliance assessment UUIDs
+        risk_assessments: Array of risk assessment UUIDs
+        findings_assessment: Array of finding assessment UUIDs
+    """
+    try:
+        # Build update payload with only provided fields
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if status is not None:
+            valid_statuses = ["pending", "in_progress", "cancelled", "completed"]
+            if status not in valid_statuses:
+                return f"Error: Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
+            payload["status"] = status
+        if observation is not None:
+            payload["observation"] = observation
+        if evidences is not None:
+            payload["evidences"] = evidences
+        if is_published is not None:
+            payload["is_published"] = is_published
+        if task_date is not None:
+            payload["task_date"] = task_date
+        if is_recurrent is not None:
+            payload["is_recurrent"] = is_recurrent
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if schedule is not None:
+            payload["schedule"] = schedule
+        if enabled is not None:
+            payload["enabled"] = enabled
+        if link is not None:
+            payload["link"] = link
+        if assigned_to is not None:
+            payload["assigned_to"] = assigned_to
+        if assets is not None:
+            payload["assets"] = assets
+        if applied_controls is not None:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_control_id = resolve_applied_control_id(control)
+                resolved_controls.append(resolved_control_id)
+            payload["applied_controls"] = resolved_controls
+        if compliance_assessments is not None:
+            payload["compliance_assessments"] = compliance_assessments
+        if risk_assessments is not None:
+            payload["risk_assessments"] = risk_assessments
+        if findings_assessment is not None:
+            payload["findings_assessment"] = findings_assessment
+
+        # Resolve folder name to ID if provided
+        if folder_id is not None:
+            resolved_folder_id = resolve_folder_id(folder_id)
+            payload["folder"] = resolved_folder_id
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        # Resolve task name to ID if needed
+        resolved_task_id = resolve_task_template_id(task_id)
+
+        res = make_patch_request(f"/task-templates/{resolved_task_id}/", payload)
+
+        if res.status_code == 200:
+            task = res.json()
+            return f"Updated task template: {task.get('name')} (ID: {task.get('id')})"
+        else:
+            return f"Error updating task template: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_task_template: {str(e)}"
+
+
+async def delete_task_template(task_id: str) -> str:
+    """Delete task template
+
+    Args:
+        task_id: Task template ID/name
+    """
+    try:
+        # Resolve task name to ID if needed
+        resolved_task_id = resolve_task_template_id(task_id)
+
+        res = make_delete_request(f"/task-templates/{resolved_task_id}/")
+
+        if res.status_code == 204:
+            return f"Deleted task template (ID: {resolved_task_id})"
+        else:
+            return f"Error deleting task template: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in delete_task_template: {str(e)}"

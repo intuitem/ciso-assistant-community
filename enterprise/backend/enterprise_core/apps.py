@@ -28,6 +28,8 @@ class EnterpriseCoreConfig(AppConfig):
     label = "enterprise_core"
 
     def ready(self):
+        import enterprise_core.signals
+
         # avoid post_migrate handler if we are in the main, as it interferes with restore
         if not os.environ.get("RUN_MAIN"):
             post_migrate.connect(startup, sender=self)

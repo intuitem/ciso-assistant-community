@@ -38,8 +38,12 @@
 <AutocompleteSelect
 	{form}
 	multiple
-	optionsEndpoint="users?is_third_party=false"
-	optionsLabelField="email"
+	optionsEndpoint="actors"
+	optionsLabelField="str"
+	optionsInfoFields={{
+		fields: [{ field: 'type', translate: true }],
+		position: 'prefix'
+	}}
 	field="owner"
 	cacheLock={cacheLocks['owner']}
 	bind:cachedValue={formDataCache['owner']}
@@ -107,5 +111,4 @@
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
-	hidden={initialData.folder}
 />

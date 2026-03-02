@@ -1,0 +1,754 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility
+  Mode}'
+urn: urn:intuitem:risk:library:mapping-india-dpdpa-2023-and-scf-2025.2.2
+locale: en
+ref_id: mapping-india-dpdpa-2023-and-scf-2025.2.2
+name: india-dpdpa-2023 <-> scf-2025.2.2
+description: 'Mapping between India DPDPA 2023 and SCF: Secure Controls Framework
+  (2025.2.2)'
+copyright: SCF - CC BY-ND 4.0
+version: 1
+publication_date: 2025-12-15
+provider: SCF
+packager: intuitem
+dependencies:
+- urn:intuitem:risk:library:india-dpdpa-2023
+- urn:intuitem:risk:library:scf-2025.2.2
+objects:
+  requirement_mapping_sets:
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-india-dpdpa-2023-and-scf-2025.2.2
+    ref_id: mapping-india-dpdpa-2023-and-scf-2025.2.2
+    name: india-dpdpa-2023 <-> scf-2025.2.2
+    description: 'Mapping between India DPDPA 2023 and SCF: Secure Controls Framework
+      (2025.2.2)'
+    source_framework_urn: urn:intuitem:risk:framework:india-dpdpa-2023
+    target_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.4
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(ii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iv)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iv)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-03.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(ii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.2
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(ii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.7
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-14.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-12.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:18(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:19(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(d)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(e)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:23(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(d)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(e)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(ii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(iii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(ii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(iii)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(8)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(9)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(c)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(d)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(e)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(f)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(g)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(h)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(i)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(10)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(11)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(4)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(5)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.6
+      relationship: subset
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-04.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-09
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-09.3
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.2
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-18
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(a)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(b)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(9)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(1)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(2)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(3)
+      target_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      relationship: intersect
+  - urn: urn:intuitem:risk:req_mapping_set:mapping-india-dpdpa-2023-and-scf-2025.2.2-revert
+    ref_id: mapping-india-dpdpa-2023-and-scf-2025.2.2-revert
+    name: india-dpdpa-2023 <-> scf-2025.2.2
+    description: 'Mapping between India DPDPA 2023 and SCF: Secure Controls Framework
+      (2025.2.2)'
+    target_framework_urn: urn:intuitem:risk:framework:india-dpdpa-2023
+    source_framework_urn: urn:intuitem:risk:framework:scf-2025.2.2
+    requirement_mappings:
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(ii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iv)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(a)(iv)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-03.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:rsk-10
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(i)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-02.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(ii)
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:10(2)(c)(ii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.7
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-14.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(1)(c)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:11(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(1)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(1)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-12.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(2)(c)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:12(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-07
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:13(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:14(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:18(2)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-04
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:19(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(a)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(b)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(c)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(d)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(1)(e)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:21(2)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(1)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(2)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:22(3)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:23(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:26(c)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(c)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(d)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(1)(e)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:27(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(5)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:28(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(1)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:4(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(ii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(1)(iii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(ii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(a)(iii)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(2)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:5(3)
+      relationship: equal
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.10
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(7)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.9
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(8)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:hrs-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:6(9)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(b)(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(c)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(d)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(e)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(f)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(g)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(h)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:7(i)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(1)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(10)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(11)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(3)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:cpl-01
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(4)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.6
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(4)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.6
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(5)
+      relationship: superset
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:gov-01.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-04.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-09
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:iro-10
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(6)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-09.3
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-18
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-06.5
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-07.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:tpm-05.2
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(7)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:dch-18
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-02.1
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(a)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.4
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(8)(b)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-01.8
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:8(9)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.6
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(1)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(2)
+      relationship: intersect
+    - source_requirement_urn: urn:intuitem:risk:req_node:scf-2025.2.2:pri-03.9
+      target_requirement_urn: urn:intuitem:risk:req_node:india-dpdpa-2023:9(3)
+      relationship: intersect

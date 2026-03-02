@@ -1,20 +1,18 @@
-import hashlib
-import hmac
 import json
 import uuid
 
-from django_filters.rest_framework import DjangoFilterBackend
 import structlog
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import filters, generics, permissions, status, viewsets
-from rest_framework.decorators import action, permission_classes
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.views import BaseModelViewSet
 from integrations.models import (
     IntegrationConfiguration,
     IntegrationProvider,
@@ -23,7 +21,6 @@ from integrations.models import (
 from integrations.registry import IntegrationRegistry
 from integrations.serializers import (
     ConnectionTestSerializer,
-    IntegrationConfigurationSerializer,
     IntegrationProviderSerializer,
     SyncMappingSerializer,
 )
@@ -101,20 +98,15 @@ class IntegrationProviderListView(generics.ListAPIView):
     filterset_fields = ["provider_type", "name"]
 
 
-class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
+class IntegrationConfigurationViewSet(BaseModelViewSet):
     """
     API endpoint for creating, viewing, updating, and deleting Integration Configurations.
     """
 
-    queryset = IntegrationConfiguration.objects.select_related(
-        "provider", "folder"
-    ).all()
-    serializer_class = IntegrationConfigurationSerializer
+    model = IntegrationConfiguration
+    serializers_module = "integrations.serializers"
 
     filterset_fields = ["provider", "provider__name", "provider__provider_type"]
-
-    def get_queryset(self):
-        return super().get_queryset()
 
     @action(detail=True, methods=["post"], url_path="test-connection")
     def test_connection(self, request, pk=None):
@@ -123,7 +115,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
         URL: /api/integrations/configs/{id}/test-connection/
         """
         logger.info(f"Testing connection for integration config: {pk}")
-        instance = IntegrationConfiguration.objects.get(pk=pk)
+        instance = self.get_object()
 
         try:
             # Use the registry to get the correct client implementation
@@ -156,7 +148,7 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["get"], url_path="remote-objects")
     def list_remote_objects(self, request, pk=None):
-        instance = IntegrationConfiguration.objects.get(pk=pk)
+        instance = self.get_object()
         try:
             client = IntegrationRegistry.get_client(instance)
             remote_objects = client.list_remote_objects()
@@ -172,6 +164,62 @@ class IntegrationConfigurationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+    @action(detail=True, methods=["post"], url_path="rpc")
+    def execute_rpc(self, request, pk=None):
+        """
+        Generic endpoint for interactive integration commands.
+        Payload: { "action": "get_tables", "params": { ... } }
+        """
+        config = self.get_object()
+
+        action_name = request.data.get("action")
+        params = request.data.get("params", {})
+
+        if not action_name:
+            return Response(
+                {"error": "Action is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+
+            result = orchestrator.execute_action(action_name, params)
+
+            return Response({"result": result})
+
+        except NotImplementedError:
+            return Response(
+                {
+                    "error": f"Action '{action_name}' not supported by provider '{config.provider}'"
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except ValueError:
+            logger.warning(
+                "ValueError while executing integration RPC action",
+                action_name=action_name,
+                config_id=config.pk,
+                exc_info=True,
+            )
+            return Response(
+                {"error": "Invalid request parameters"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception:
+            # Catch connectivity errors from the client
+            logger.error(
+                "RPC execution for integration config raised an exception",
+                config_id=pk,
+                action_name=action_name,
+                exc_info=True,
+            )
+            return Response(
+                {
+                    "error": "An unexpected error occurred while executing the requested action."
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class IntegrationWebhookView(View):
@@ -183,88 +231,52 @@ class IntegrationWebhookView(View):
     for authentication.
     """
 
-    @permission_classes([permissions.AllowAny])
     def post(
         self, request: HttpRequest, config_id: uuid.UUID, *args, **kwargs
     ) -> HttpResponse:
+        # Use a generic rejection response to avoid leaking config existence
+        rejection = JsonResponse({"error": "Webhook rejected"}, status=403)
+
         try:
-            config = get_object_or_404(
-                IntegrationConfiguration, pk=config_id, is_active=True
-            )
-        except Exception:
+            config = IntegrationConfiguration.objects.get(pk=config_id, is_active=True)
+        except IntegrationConfiguration.DoesNotExist:
             logger.warning(
                 f"Webhook received for unknown or inactive config ID: {config_id}"
             )
-            return JsonResponse({"error": "Configuration not found"}, status=404)
+            return rejection
 
-        # Authenticate the webhook using HMAC Signature
-
-        # Get the signature from the header (Jira uses X-Hub-Signature)
-        signature_header = request.headers.get("X-Hub-Signature")
-
-        if not signature_header:
-            logger.warning(
-                f"Webhook for config {config_id} missing X-Hub-Signature header."
-            )
-            return JsonResponse(
-                {"error": "Authentication required: Missing signature"}, status=401
-            )
-
-        if not config.webhook_secret:
-            logger.error(f"Webhook secret not configured for config {config_id}.")
-            return JsonResponse({"error": "Internal configuration error"}, status=500)
-
-        # Extract the signature hash
+        # Instantiate the correct orchestrator
         try:
-            method, provided_signature = signature_header.split("=", 1)
-            if method.lower() != "sha256":
-                logger.warning(
-                    "Unsupported signature method for config",
-                    method=method,
-                    config_id=config_id,
-                )
-                return JsonResponse(
-                    {"error": "Unsupported signature method"}, status=400
-                )
-        except ValueError:
-            logger.warning(f"Invalid signature header format for config {config_id}.")
-            return JsonResponse({"error": "Invalid signature format"}, status=400)
+            orchestrator = IntegrationRegistry.get_orchestrator(config)
+        except Exception as e:
+            logger.error(f"Failed to load orchestrator for config {config_id}: {e}")
+            return rejection
 
-        # Calculate the expected signature
-        expected_signature = hmac.new(
-            config.webhook_secret.encode("utf-8"),
-            request.body,  # request.body is bytes
-            hashlib.sha256,
-        ).hexdigest()
+        # Delegate authentication/validation
+        # The orchestrator checks headers, secrets, signatures etc.
+        try:
+            if not orchestrator.validate_webhook_request(request):
+                return rejection
+        except Exception:
+            logger.warning(
+                "Webhook validation failed", config_id=config_id, exc_info=True
+            )
+            return rejection
 
-        # Compare signatures using a constant-time comparison
-        if not hmac.compare_digest(provided_signature, expected_signature):
-            logger.warning(f"Webhook signature mismatch for config {config_id}.")
-            return JsonResponse({"error": "Invalid signature"}, status=403)
-
-        # --- Signature is valid ---
-
-        # Parse the payload
+        # Parse payload
         try:
             payload = json.loads(request.body)
         except json.JSONDecodeError:
-            logger.warning(f"Webhook for config {config_id} sent invalid JSON.")
             return JsonResponse({"error": "Invalid JSON payload"}, status=400)
 
-        # Extract provider-specific event type
-        event_type = payload.get("webhookEvent")
+        # Extract event type
+        event_type = orchestrator.extract_webhook_event_type(payload)
         if not event_type:
-            logger.warning(
-                f"Webhook payload for config {config_id} missing 'webhookEvent' field."
-            )
-            return JsonResponse({"error": "Missing event type"}, status=400)
+            return JsonResponse({"error": "Could not determine event type"}, status=400)
 
-        # Dispatch to async task
+        # 5. Dispatch to Huey
         process_webhook_event.schedule(args=(config.id, event_type, payload), delay=1)
 
-        logger.info(
-            f"Webhook event '{event_type}' for config {config_id} accepted (signature validated)."
-        )
         return HttpResponse(status=202)
 
 
