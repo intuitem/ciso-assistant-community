@@ -13493,6 +13493,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "actor",
                 "requirement_assessments",
+                Prefetch(
+                    "events",
+                    queryset=RequirementAssignmentEvent.objects.select_related(
+                        "event_actor"
+                    ),
+                ),
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -13594,7 +13600,7 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-        # Handle reviewer_observation
+        # Handle reviewer_observation (stored as event_notes)
         obs_rule = config.get("observation")
         observation = request.data.get("reviewer_observation")
         if obs_rule == "required" and not observation:
@@ -13602,14 +13608,19 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 {"error": "Reviewer observation is required for this transition."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if obs_rule == "clear":
-            assignment.reviewer_observation = None
-        elif obs_rule in ("required", "optional") and observation:
-            assignment.reviewer_observation = observation
 
         # Apply transition
         assignment.status = target
-        assignment.save(update_fields=["status", "reviewer_observation"])
+        assignment.save(update_fields=["status"])
+
+        # Create event for traceability
+        RequirementAssignmentEvent.objects.create(
+            assignment=assignment,
+            event_type=target,
+            event_actor=request.user,
+            event_notes=observation if obs_rule in ("required", "optional") else None,
+            folder=assignment.folder,
+        )
 
         # Send notification
         try:

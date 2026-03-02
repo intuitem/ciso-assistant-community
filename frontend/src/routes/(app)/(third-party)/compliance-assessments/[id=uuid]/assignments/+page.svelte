@@ -558,6 +558,37 @@
 		changes_requested: () => m.assignmentStatusChangesRequested()
 	};
 
+	// History modal state
+	let showHistoryModal = $state(false);
+	let historyModalAssignment = $state<(typeof assignments)[0] | null>(null);
+
+	function openHistoryModal(assignment: (typeof assignments)[0]) {
+		historyModalAssignment = assignment;
+		showHistoryModal = true;
+	}
+
+	function closeHistoryModal() {
+		showHistoryModal = false;
+		historyModalAssignment = null;
+	}
+
+	// Get latest observation from events (most recent event with event_notes)
+	function getLatestObservation(
+		events: Array<{ event_notes: string | null; event_type: string }>
+	): string | null {
+		const event = events.find((e) => e.event_notes);
+		return event?.event_notes ?? null;
+	}
+
+	// Format event actor name
+	function formatEventActor(
+		actor: { first_name: string; last_name: string; email: string } | null
+	): string {
+		if (!actor) return '—';
+		const name = [actor.first_name, actor.last_name].filter(Boolean).join(' ');
+		return name || actor.email;
+	}
+
 	// State for reviewer observation modal
 	let showRequestChangesModal = $state(false);
 	let requestChangesAssignmentId = $state<string | null>(null);
@@ -953,14 +984,29 @@
 											{/if}
 										</div>
 
-										<!-- Reviewer observation display -->
-										{#if assignment.status === 'changes_requested' && assignment.reviewer_observation}
+										<!-- Latest observation display -->
+										{#if assignment.status === 'changes_requested' && getLatestObservation(assignment.events)}
 											<div
 												class="mt-2 bg-red-50/50 border-l-2 border-l-red-300 rounded-r-md pl-3 pr-2 py-2 text-xs text-red-700 whitespace-pre-line"
 											>
 												<i class="fa-solid fa-comment-dots mr-1 text-red-400"></i>
-												{assignment.reviewer_observation}
+												{getLatestObservation(assignment.events)}
 											</div>
+										{/if}
+
+										<!-- Event history button -->
+										{#if assignment.events.length > 0}
+											<button
+												class="mt-2 badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+												onclick={() => openHistoryModal(assignment)}
+												title={m.viewHistory()}
+											>
+												<i class="fa-solid fa-clock-rotate-left mr-1"></i>
+												{m.eventsHistory()}
+												<span class="badge bg-gray-200 text-gray-500 text-[10px] ml-1"
+													>{assignment.events.length}</span
+												>
+											</button>
 										{/if}
 									</div>
 									<div class="flex flex-col items-end gap-1">
@@ -1048,6 +1094,7 @@
 	onkeydown={(e) => {
 		if (e.key === 'Escape') {
 			if (showRequestChangesModal) closeRequestChangesModal();
+			else if (showHistoryModal) closeHistoryModal();
 			else if (showRequirementsModal) closeRequirementsModal();
 		}
 	}}
@@ -1190,6 +1237,98 @@
 				</button>
 				<button class="btn preset-outlined-surface-500 flex-1" onclick={closeRequestChangesModal}>
 					{m.cancel()}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- History Modal -->
+{#if showHistoryModal && historyModalAssignment}
+	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div
+			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="history-modal-title"
+		>
+			<!-- Header -->
+			<div class="flex items-center justify-between p-4 border-b">
+				<h2 id="history-modal-title" class="h4 font-semibold">
+					<i class="fa-solid fa-clock-rotate-left text-primary-500 mr-2"></i>
+					{m.eventsHistory()}
+				</h2>
+				<button
+					class="btn btn-sm preset-ghost-surface"
+					onclick={closeHistoryModal}
+					aria-label={m.close()}
+				>
+					<i class="fa-solid fa-times"></i>
+				</button>
+			</div>
+
+			<!-- Content -->
+			<div class="p-4 overflow-y-auto flex-1">
+				<div class="mb-3">
+					<span class="text-sm text-gray-600">
+						<i class="fa-solid fa-{actorIcon(historyModalAssignment.actor)} mr-1"></i>
+						{formatActors(historyModalAssignment.actor)}
+					</span>
+				</div>
+
+				<div class="space-y-3">
+					{#each historyModalAssignment.events as event}
+						<div class="flex gap-3">
+							<div class="flex flex-col items-center">
+								<div
+									class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {event.event_type ===
+									'changes_requested'
+										? 'bg-red-400'
+										: event.event_type === 'closed'
+											? 'bg-emerald-500'
+											: event.event_type === 'submitted'
+												? 'bg-blue-400'
+												: event.event_type === 'in_progress'
+													? 'bg-amber-400'
+													: 'bg-gray-300'}"
+								></div>
+								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+							</div>
+							<div class="pb-3 flex-1">
+								<div class="flex items-center gap-2 text-sm">
+									<span
+										class="font-medium px-1.5 py-0.5 rounded text-xs {assignmentStatusStyle[
+											event.event_type
+										] ?? 'bg-gray-100 text-gray-700'}"
+									>
+										{assignmentStatusLabel[event.event_type]?.() ?? event.event_type}
+									</span>
+									<span class="text-gray-500 text-xs">
+										{formatEventActor(event.event_actor)}
+									</span>
+								</div>
+								<span class="text-gray-400 text-xs">
+									{new Date(event.created_at).toLocaleString()}
+								</span>
+								{#if event.event_notes}
+									<div
+										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+									>
+										{event.event_notes}
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Footer -->
+			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+					{m.close()}
 				</button>
 			</div>
 		</div>

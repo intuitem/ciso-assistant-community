@@ -139,6 +139,7 @@
 	"setupMfa": "Set up multi-factor authentication",
 	"mfaRequiredByAdmin": "Your administrator requires all users to enable multi-factor authentication. Please set up an authenticator app to continue.",
 	"eventsHistory": "Events history",
+	"viewHistory": "View history",
 	"linkedModels": "Associated objects",
 	"notes": "notes",
 	"complianceAssessments": "Audits",
@@ -3542,5 +3543,7 @@
 	"assignmentChangesRequestedBanner": "The reviewer has requested changes to your responses.",
 	"assignmentAwaitingStart": "Not started yet",
 	"underReview": "Under Review",
-	"reviewResponses": "Review responses"
+	"reviewResponses": "Review responses",
+	"incompleteAssessmentWarning": "{remaining} of {total} assessable items still need to be assessed",
+	"incompleteAssessmentError": "All assessable items must be assessed before submitting"
 }

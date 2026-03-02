@@ -2602,11 +2602,20 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class RequirementAssignmentEventSerializer(BaseModelSerializer):
+    event_actor = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+
+    class Meta:
+        model = RequirementAssignmentEvent
+        fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
+
+
 class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = RequirementAssignment
@@ -2617,7 +2626,7 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssignment
         fields = "__all__"
-        read_only_fields = ["status", "reviewer_observation"]
+        read_only_fields = ["status"]
 
     def validate(self, attrs):
         """

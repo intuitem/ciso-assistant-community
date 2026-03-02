@@ -7264,11 +7264,6 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         default=Status.DRAFT,
         verbose_name=_("Status"),
     )
-    reviewer_observation = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name=_("Reviewer Observation"),
-    )
 
     class Meta:
         verbose_name = _("Requirement Assignment")
@@ -7278,6 +7273,37 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
+class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
+    assignment = models.ForeignKey(
+        RequirementAssignment,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=50,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+
+    class Meta:
+        verbose_name = _("Requirement assignment event")
+        verbose_name_plural = _("Requirement assignment events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class FindingsAssessment(Assessment):

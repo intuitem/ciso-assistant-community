@@ -50,7 +50,13 @@ export const load = (async ({ fetch, params }) => {
 			actor: Array<{ id: string; str: string; type?: string }>;
 			requirement_assessments: { id: string }[];
 			status: string;
-			reviewer_observation: string | null;
+			events: Array<{
+				id: string;
+				event_type: string;
+				event_actor: { id: string; email: string; first_name: string; last_name: string } | null;
+				event_notes: string | null;
+				created_at: string;
+			}>;
 		}) => ({
 			id: assignment.id,
 			actor: assignment.actor.map((a) => ({
@@ -60,7 +66,7 @@ export const load = (async ({ fetch, params }) => {
 			})),
 			requirement_assessments: assignment.requirement_assessments.map((ra) => ra.id),
 			status: assignment.status,
-			reviewer_observation: assignment.reviewer_observation
+			events: assignment.events ?? []
 		})
 	);
 

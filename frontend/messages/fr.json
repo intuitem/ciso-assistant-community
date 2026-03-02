@@ -133,6 +133,7 @@
 	"setupMfa": "Configurer l'authentification multi-facteurs",
 	"mfaRequiredByAdmin": "Votre administrateur exige que tous les utilisateurs activent l'authentification multi-facteurs. Veuillez configurer une application d'authentification pour continuer.",
 	"eventsHistory": "Historique des événements",
+	"viewHistory": "Voir l'historique",
 	"linkedModels": "Objets associés",
 	"complianceAssessments": "Audits",
 	"complianceAssessment": "Audit",
@@ -3509,5 +3510,7 @@
 	"assignmentChangesRequestedBanner": "Le relecteur a demandé des modifications à vos réponses.",
 	"assignmentAwaitingStart": "Pas encore démarré",
 	"underReview": "En cours de revue",
-	"reviewResponses": "Consulter les réponses"
+	"reviewResponses": "Consulter les réponses",
+	"incompleteAssessmentWarning": "{remaining} sur {total} éléments évaluables doivent encore être évalués",
+	"incompleteAssessmentError": "Tous les éléments évaluables doivent être évalués avant de soumettre"
 }

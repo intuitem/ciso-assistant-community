@@ -26,7 +26,7 @@ export const load = (async ({ fetch, params }) => {
 	const assignment = {
 		id: assignmentResult.id,
 		status: assignmentResult.status,
-		reviewer_observation: assignmentResult.reviewer_observation
+		events: assignmentResult.events ?? []
 	};
 
 	// Derive the compliance assessment from the assignment

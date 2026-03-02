@@ -1122,7 +1122,8 @@ def send_assignment_reviewed_notification(assignment_id, decision):
     context = {
         "assessment_name": ca.name,
         "decision": decision.replace("_", " ").title(),
-        "reviewer_observation": assignment.reviewer_observation or "",
+        "reviewer_observation": getattr(assignment.events.first(), "event_notes", "")
+        or "",
     }
 
     for actor in assignment.actor.all():
