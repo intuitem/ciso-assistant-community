@@ -19,6 +19,7 @@ Let's give some details on the 5 built-in roles:
 | Analyst        | read-write access to selected perimeters/domains. Read access to global and domain objects                                        |
 | Reader         | read access to selected perimeters/domains                                                                                        |
 | Approver       | like reader, but with additional capability to approve risk acceptances                                                           |
+| Respondent     | see [assignments-respondent-mode.md](../../features-focus/assignments-respondent-mode.md "mention") for more details              |
 
 {% hint style="info" %}
 Django superuser is given administrator rights automatically on startup.
@@ -32,6 +33,7 @@ Once your instance is created, four user groups are already present:
 * Global - Analyst
 * Global - Reader
 * Global - Approver
+* Global - Respondend
 
 They give corresponding permissions on Global scope so on every object of your instance.
 
@@ -43,5 +45,6 @@ They are created for each domain you add. For example, if you create a domain _R
 * R\&D - Analyst
 * R\&D - Reader
 * R\&D - Approver
+* R\&D - Respondent
 
 They give corresponding permissions on the domain scope so on every object inside _R\&D_.
