@@ -506,7 +506,7 @@
 					<p class="text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
 				</div>
 				{#if reviewerObservation}
-					<div class="bg-red-100 rounded-md p-3 text-sm text-red-700">
+					<div class="bg-red-100 rounded-md p-3 text-sm text-red-700 whitespace-pre-line">
 						<i class="fa-solid fa-comment-dots mr-1"></i>
 						{reviewerObservation}
 					</div>

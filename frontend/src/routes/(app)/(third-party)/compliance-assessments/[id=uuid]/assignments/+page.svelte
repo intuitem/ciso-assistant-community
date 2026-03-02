@@ -899,7 +899,7 @@
 										<!-- Reviewer observation display -->
 										{#if assignment.status === 'changes_requested' && assignment.reviewer_observation}
 											<div
-												class="mt-2 bg-red-50 border border-red-200 rounded-md p-2 text-xs text-red-700"
+												class="mt-2 bg-red-50 border border-red-200 rounded-md p-2 text-xs text-red-700 whitespace-pre-line"
 											>
 												<i class="fa-solid fa-comment-dots mr-1"></i>
 												{assignment.reviewer_observation}
