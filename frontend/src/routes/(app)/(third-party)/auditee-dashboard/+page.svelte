@@ -133,7 +133,7 @@
 								</button>
 							{:else if isCtaReadOnly(audit)}
 								<a
-									href="/auditee-assessments/{audit.id}?assignment={audit.assignment_id}"
+									href="/auditee-assessments/{audit.assignment_id}"
 									class="btn preset-outlined-primary-500 w-full text-center"
 								>
 									<i class="fa-solid fa-eye mr-2"></i>
@@ -141,7 +141,7 @@
 								</a>
 							{:else}
 								<a
-									href="/auditee-assessments/{audit.id}?assignment={audit.assignment_id}"
+									href="/auditee-assessments/{audit.assignment_id}"
 									class="btn preset-filled-primary-500 w-full text-center"
 								>
 									<i class="fa-solid fa-arrow-right mr-2"></i>

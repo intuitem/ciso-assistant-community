@@ -9,10 +9,32 @@ import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
-export const load = (async ({ fetch, params, url }) => {
+export const load = (async ({ fetch, params }) => {
+	// params.id is the assignment ID
+	const assignmentId = params.id;
+
+	// Fetch the assignment
+	const assignmentRes = await fetch(
+		`${BASE_API_URL}/requirement-assignments/?id=${assignmentId}`
+	);
+	if (!assignmentRes.ok) {
+		throw error(assignmentRes.status, 'Failed to load assignment');
+	}
+	const assignmentData = await assignmentRes.json();
+	const assignmentResult = assignmentData.results?.[0];
+	if (!assignmentResult) {
+		throw error(404, 'Assignment not found');
+	}
+	const assignment = {
+		id: assignmentResult.id,
+		status: assignmentResult.status,
+		reviewer_observation: assignmentResult.reviewer_observation
+	};
+
+	// Derive the compliance assessment from the assignment
+	const caId = assignmentResult.compliance_assessment.id;
 	const URLModel = 'compliance-assessments';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
-	const assignmentId = url.searchParams.get('assignment');
+	const endpoint = `${BASE_API_URL}/${URLModel}/${caId}/`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
@@ -20,11 +42,11 @@ export const load = (async ({ fetch, params, url }) => {
 	}
 	const compliance_assessment = await res.json();
 
-	const assignmentParam = assignmentId ? `?assignment=${assignmentId}` : '';
 	const [tableMode, scores] = await Promise.all(
-		[`${endpoint}requirements_list/${assignmentParam}`, `${endpoint}global_score/`].map(
-			(endpoint) => fetch(endpoint).then((res) => res.json())
-		)
+		[
+			`${endpoint}requirements_list/?assignment=${assignmentId}`,
+			`${endpoint}global_score/`
+		].map((endpoint) => fetch(endpoint).then((res) => res.json()))
 	);
 
 	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
@@ -110,23 +132,6 @@ export const load = (async ({ fetch, params, url }) => {
 		return requirement;
 	});
 
-	// Fetch the user's assignment(s) for this compliance assessment
-	const assignmentFilter = assignmentId
-		? `id=${assignmentId}`
-		: `compliance_assessment=${params.id}`;
-	const assignmentsRes = await fetch(
-		`${BASE_API_URL}/requirement-assignments/?${assignmentFilter}`
-	);
-	const assignmentsData = await assignmentsRes.json();
-	const assignments =
-		assignmentsData.results?.map(
-			(a: { id: string; status: string; reviewer_observation: string | null }) => ({
-				id: a.id,
-				status: a.status,
-				reviewer_observation: a.reviewer_observation
-			})
-		) ?? [];
-
 	return {
 		URLModel,
 		compliance_assessment,
@@ -135,7 +140,7 @@ export const load = (async ({ fetch, params, url }) => {
 		requirements,
 		measureModel,
 		evidenceModel,
-		assignments,
+		assignment,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;
@@ -166,10 +171,7 @@ export const actions: Actions = {
 		return nestedWriteFormAction({ event, action: 'edit' });
 	},
 	submitAssignment: async (event) => {
-		const formData = await event.request.formData();
-		const id = formData.get('id') as string;
-
-		const endpoint = `${BASE_API_URL}/requirement-assignments/${id}/set_status/`;
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${event.params.id}/set_status/`;
 		const res = await event.fetch(endpoint, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },

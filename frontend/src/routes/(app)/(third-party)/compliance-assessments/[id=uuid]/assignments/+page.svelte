@@ -829,8 +829,7 @@
 											</button>
 											{#if assignment.status !== 'draft'}
 												<a
-													href="/auditee-assessments/{data.compliance_assessment
-														.id}?assignment={assignment.id}"
+													href="/auditee-assessments/{assignment.id}"
 													class="badge bg-gray-100 text-gray-700 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
 													title={m.reviewResponses()}
 												>

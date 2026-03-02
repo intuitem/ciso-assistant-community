@@ -44,50 +44,32 @@
 	];
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
-	let assignments = $derived(data.assignments ?? []);
 
-	// Aggregate assignment status (priority: changes_requested > in_progress > draft > submitted > closed)
-	let assignmentStatus = $derived.by(() => {
-		if (assignments.length === 0) return null;
-		const statuses = assignments.map((a: { status: string }) => a.status);
-		if (statuses.includes('changes_requested')) return 'changes_requested';
-		if (statuses.includes('in_progress')) return 'in_progress';
-		if (statuses.includes('draft')) return 'draft';
-		if (statuses.includes('submitted')) return 'submitted';
-		if (statuses.includes('closed')) return 'closed';
-		return statuses[0];
-	});
+	// Single assignment scoped via ?assignment= query param
+	let assignment = $derived(data.assignment);
+	let assignmentStatus = $derived(assignment?.status ?? null);
 
 	let isReadOnly = $derived(
 		complianceAssessment.is_locked ||
 			complianceAssessment.status === 'in_review' ||
-			assignments.some((a: { status: string }) => a.status === 'submitted' || a.status === 'closed')
+			assignmentStatus === 'submitted' ||
+			assignmentStatus === 'closed'
 	);
 
-	// Can submit: at least one assignment is in_progress or changes_requested
 	let canSubmit = $derived(
-		assignments.some(
-			(a: { status: string }) => a.status === 'in_progress' || a.status === 'changes_requested'
-		)
+		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
 	);
 
-	// Reviewer observation from changes_requested assignments
-	let reviewerObservation = $derived.by(() => {
-		const changesRequested = assignments.find(
-			(a: { status: string }) => a.status === 'changes_requested'
-		);
-		return changesRequested?.reviewer_observation ?? null;
-	});
+	let reviewerObservation = $derived(
+		assignmentStatus === 'changes_requested' ? (assignment?.reviewer_observation ?? null) : null
+	);
 
 	const toastStore = getToastStore();
 
 	let isSubmitting = $state(false);
 
 	async function handleSubmitForReview() {
-		const submittableAssignments = assignments.filter(
-			(a: { status: string }) => a.status === 'in_progress' || a.status === 'changes_requested'
-		);
-		if (submittableAssignments.length === 0) return;
+		if (!assignment || !canSubmit) return;
 
 		const modal: ModalSettings = {
 			type: 'confirm',
@@ -97,33 +79,26 @@
 				if (!confirmed) return;
 				isSubmitting = true;
 				try {
-					for (const assignment of submittableAssignments) {
-						const formData = new FormData();
-						formData.append('id', assignment.id);
-						const response = await fetch(`?/submitAssignment`, {
-							method: 'POST',
-							body: formData
-						});
-						const result = deserialize(await response.text());
-						if (result.type === 'success' && result.data?.submitStatus === 200) {
-							await applyAction(result);
-						} else {
-							const errorMsg = result.data?.submitBody?.error || 'Failed to submit';
-							toastStore.trigger({
-								message: errorMsg,
-								background: 'variant-filled-error',
-								timeout: 5000
-							});
-							isSubmitting = false;
-							return;
-						}
-					}
-					await invalidateAll();
-					toastStore.trigger({
-						message: m.submitForReview() + ' ✓',
-						background: 'variant-filled-success',
-						timeout: 3000
+					const response = await fetch(`?/submitAssignment`, {
+						method: 'POST',
+						body: new FormData()
 					});
+					const result = deserialize(await response.text());
+					if (result.type === 'success' && result.data?.submitStatus === 200) {
+						await applyAction(result);
+						await invalidateAll();
+						toastStore.trigger({
+							message: m.statusUpdatedSuccessfully(),
+							background: 'variant-filled-success',
+							timeout: 3000
+						});
+					} else {
+						toastStore.trigger({
+							message: result.data?.submitBody?.error || 'Failed to submit',
+							background: 'variant-filled-error',
+							timeout: 5000
+						});
+					}
 				} catch (error) {
 					console.error('Error submitting assignment:', error);
 					toastStore.trigger({
