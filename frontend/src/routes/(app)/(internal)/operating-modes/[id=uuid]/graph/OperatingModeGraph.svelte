@@ -37,10 +37,10 @@
 		disableZoom = false,
 		linkFlow = false,
 		layoutType = GraphLayoutType.Parallel,
-		layoutParallelGroupSpacing = 250, // Increased from 200 for more space between columns
-		layoutParallelNodesPerColumn = 5, // Reduced from 4 to spread nodes more
-		layoutParallelSubGroupsPerRow = 3, // Control sub-groups per row
-		zoomLevel = 1.0 // Default zoom level
+		layoutParallelGroupSpacing = 400,
+		layoutParallelNodesPerColumn = 5,
+		layoutParallelSubGroupsPerRow = 3,
+		zoomLevel = 1.0
 	}: {
 		data: GraphData;
 		panelNodes?: {
@@ -69,7 +69,7 @@
 			sideIconSymbol: '&#xf002;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'pink',
-			sideIconFontSize: 30,
+			sideIconFontSize: '30px',
 			dashedOutline: true,
 			borderColor: 'pink'
 		},
@@ -80,7 +80,7 @@
 			sideIconSymbol: '&#xf504;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'violet',
-			sideIconFontSize: 30,
+			sideIconFontSize: '30px',
 			dashedOutline: true,
 			borderColor: 'violet'
 		},
@@ -91,7 +91,7 @@
 			sideIconSymbol: '&#xf140;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'orange',
-			sideIconFontSize: 30,
+			sideIconFontSize: '30px',
 			dashedOutline: true,
 			borderColor: 'orange'
 		},
@@ -102,7 +102,7 @@
 			sideIconSymbol: '&#xe4e9;',
 			sideIconShape: 'circle',
 			sideIconSymbolColor: 'red',
-			sideIconFontSize: 30,
+			sideIconFontSize: '30px',
 			borderColor: 'red',
 			dashedOutline: true
 		}
@@ -257,7 +257,7 @@
 			{linkArrow}
 			{linkFlow}
 			{linkArrowSize}
-			zoomScaleExtent={[zoomLevel, zoomLevel]}
+			zoomScaleExtent={[0.3, 1.25]}
 		/>
 	</VisSingleContainer>
 </div>

@@ -11,7 +11,7 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import { zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
-	import EventTypesSelect from './EventTypesSelect.svelte';
+	import ListSelector from '$lib/components/Forms/ListSelector.svelte';
 	import { SHOW_PAYLOAD_FORMAT, SHOW_TARGET_DOMAINS } from './constants';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
@@ -33,8 +33,6 @@
 
 	let { parent, form, formAction = '?/createWebhookEndpoint' }: Props = $props();
 
-	let eventTypeOptions = $state([]);
-
 	// Focus the first field when modal opens
 	onMount(async () => {
 		await tick(); // Wait for DOM to render
@@ -42,7 +40,6 @@
 		if (firstField instanceof HTMLElement) {
 			firstField.focus();
 		}
-		eventTypeOptions = await fetch('/settings/webhooks/event-types').then((res) => res.json());
 	});
 
 	const _form = superForm(form, {
@@ -116,11 +113,13 @@
 						multiple
 					/>
 				{/if}
-				<EventTypesSelect
+				<ListSelector
 					{form}
 					field="event_types"
 					label={m.events()}
-					options={eventTypeOptions}
+					optionsEndpoint="settings/webhooks/event-types"
+					optionsLabelField="name"
+					groupBy="model_name"
 				/>
 				<div class="flex flex-row justify-between space-x-4">
 					<button

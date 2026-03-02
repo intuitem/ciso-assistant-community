@@ -1,4 +1,5 @@
 import io
+import uuid
 
 import django_filters as df
 import pandas as pd
@@ -6,8 +7,8 @@ from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
 from core.models import Terminology
-from iam.models import RoleAssignment
 from openpyxl.styles import Alignment
+
 from .helpers import ecosystem_radar_chart_data, ebios_rm_visual_analysis
 from .models import (
     EbiosRMStudy,
@@ -26,9 +27,9 @@ from .serializers import EbiosRMStudyReadSerializer
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
-from django.shortcuts import get_object_or_404
 
 import structlog
 
@@ -123,7 +124,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Get EBIOS RM  study visual analysis")
     def visual_analysis(self, request, pk):
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
         return Response(ebios_rm_visual_analysis(study))
 
     @action(detail=True, name="Get EBIOS RM study report data", url_path="report-data")
@@ -132,7 +133,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
         Endpoint to prepare comprehensive report data for an EBIOS RM study.
         Returns all study attributes and associated objects in a structured format.
         """
-        study = get_object_or_404(EbiosRMStudy, id=pk)
+        study = self.get_object()
 
         from .serializers import (
             EbiosRMStudyReadSerializer,
@@ -267,7 +268,9 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                 RiskMatrixReadSerializer,
             )
 
-            risk_scenarios = study.last_risk_assessment.risk_scenarios.all()
+            risk_scenarios = study.last_risk_assessment.risk_scenarios.all().order_by(
+                "ref_id"
+            )
             risk_matrix_data = {
                 "risk_assessment": {
                     "id": str(study.last_risk_assessment.id),
@@ -366,8 +369,8 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
     @action(detail=True, name="Export EBIOS RM study as XLSX", url_path="export-xlsx")
     def export_xlsx(self, request, pk):
         """Export EBIOS RM study data to Excel with multiple sheets."""
-        study = get_object_or_404(EbiosRMStudy, id=pk)
 
+        study = self.get_object()
         # Get all related data
         feared_events = FearedEvent.objects.filter(ebios_rm_study=study)
         ro_to_couples = RoTo.objects.filter(ebios_rm_study=study).with_pertinence()
@@ -761,15 +764,14 @@ class FearedEventViewSet(BaseModelViewSet):
                     status=http_status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Verify study exists and user has access
-            if not RoleAssignment.is_object_readable(
-                request.user, EbiosRMStudy, study_id
-            ):
+            # Verify study exists
+            try:
+                study = EbiosRMStudy.objects.get(id=uuid.UUID(str(study_id)))
+            except (ValueError, AttributeError, EbiosRMStudy.DoesNotExist):
                 return Response(
                     {"error": "EBIOS RM Study not found"},
                     status=http_status.HTTP_404_NOT_FOUND,
                 )
-            study = EbiosRMStudy.objects.get(id=study_id)
 
             # Parse the feared events text
             lines = [
@@ -796,7 +798,7 @@ class FearedEventViewSet(BaseModelViewSet):
 
                 # Check if feared event already exists in the study
                 existing_feared_event = FearedEvent.objects.filter(
-                    name=feared_event_name, ebios_rm_study=study_id
+                    name=feared_event_name, ebios_rm_study=study
                 ).first()
 
                 if existing_feared_event:
@@ -813,7 +815,7 @@ class FearedEventViewSet(BaseModelViewSet):
                 # Create new feared event using the serializer to respect IAM
                 feared_event_data = {
                     "name": feared_event_name,
-                    "ebios_rm_study": study_id,
+                    "ebios_rm_study": str(study.id),
                 }
 
                 if ref_id:
@@ -824,7 +826,13 @@ class FearedEventViewSet(BaseModelViewSet):
                 )
 
                 if serializer.is_valid():
-                    feared_event = serializer.save()
+                    try:
+                        feared_event = serializer.save()
+                    except PermissionDenied as e:
+                        return Response(
+                            {"error": e.detail},
+                            status=http_status.HTTP_403_FORBIDDEN,
+                        )
 
                     created_feared_events.append(
                         {
@@ -1043,17 +1051,47 @@ class ElementaryActionFilter(GenericFilterSet):
         method="filter_operating_mode_available_actions",
         label="Operating mode available actions",
     )
+    operating_mode_available_antecedents = df.ModelChoiceFilter(
+        queryset=OperatingMode.objects.all(),
+        method="filter_operating_mode_available_antecedents",
+        label="Operating mode available antecedents",
+    )
 
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
-        used_elementary_actions = KillChain.objects.filter(
-            operating_mode=operating_mode
-        ).values_list("elementary_action", flat=True)
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        # When editing an existing kill chain step, exclude it from the "used"
+        # list so its elementary action remains available in the dropdown.
+        exclude_kill_chain = self.data.get("exclude_kill_chain")
+        if exclude_kill_chain:
+            kc_qs = kc_qs.exclude(id=exclude_kill_chain)
+        used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
         return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
+
+    def filter_operating_mode_available_antecedents(self, queryset, name, value):
+        operating_mode = value
+        kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
+        action_id = self.data.get("actual_action")
+        action = ElementaryAction.objects.filter(id=action_id).first()
+        used_elementary_actions_ids = kc_qs.values_list("elementary_action", flat=True)
+        used_elementary_actions = ElementaryAction.objects.filter(
+            id__in=used_elementary_actions_ids
+        ).exclude(id=action_id if action else None)
+        if action:
+            precedent_actions = used_elementary_actions.filter(
+                attack_stage__lte=action.attack_stage
+            )
+        else:
+            precedent_actions = used_elementary_actions
+        return value.elementary_actions.filter(id__in=precedent_actions)
 
     class Meta:
         model = ElementaryAction
-        fields = ["operating_modes", "operating_mode_available_actions"]
+        fields = [
+            "operating_modes",
+            "operating_mode_available_actions",
+            "operating_mode_available_antecedents",
+        ]
 
 
 class ElementaryActionViewSet(BaseModelViewSet):
@@ -1123,7 +1161,7 @@ class OperatingModeViewSet(BaseModelViewSet):
 
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
-        mo = get_object_or_404(OperatingMode, id=pk)
+        mo = self.get_object()
         nodes = []
         links = []
         groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}

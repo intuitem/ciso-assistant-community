@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "Ny revision",
 	"addEvidence": "Lägg till bevis",
 	"addDomain": "Lägg till domän",
+	"createIamGroups": "Skapa IAM-grupper",
+	"iamGroups": "IAM-grupper",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM-grupper används för att tilldela roller till användare",
+	"globalFolderMustKeepIamGroupsEnabled": "Den globala mappen måste hålla IAM-grupper aktiverade.",
+	"cannotDisableIamGroupsAssignedUsers": "Det går inte att inaktivera IAM-grupper så länge de är tilldelade användare.",
 	"addPerimeter": "Lägg till perimeter",
 	"addUser": "Lägg till användare",
 	"addPolicy": "Lägg till policy",
@@ -150,6 +155,8 @@
 	"selectDomain": "Välj domän",
 	"focusMode": "Fokusläge",
 	"focusModeTooltip": "Fokusera på en specifik domän",
+	"objectNotReachableFromCurrentFocus": "Det här objektet kan inte nås från den aktuella fokusen. Omdirigerar till listvisningen.",
+	"objectNotFound": "Objektet hittades inte. Omdirigerar till listvisningen.",
 	"clearFocus": "Rensa fokus",
 	"noDomainsAvailable": "Inga domäner tillgängliga",
 	"urn": "URN",
@@ -171,6 +178,7 @@
 	"next": "Nästa",
 	"previous": "Föregående",
 	"show": "Visa",
+	"showStakeholdersName": "Visa namn på intressenter",
 	"entries": "poster",
 	"searchPlaceholder": "Sök...",
 	"noEntriesFound": "Inga poster hittades",
@@ -1101,6 +1109,7 @@
 		}
 	],
 	"cascadeAffectedHint": "Objekten nedan förblir i systemet men deras länkar till detta objekt kommer att tas bort.",
+	"campaignsDescription": "Hantering av revisionskampanjer",
 	"libraryFilteringLabels": "Etiketter för bibliotek",
 	"appliedControlsPlaceholder": "Välj tillämpade kontroller...",
 	"assignmentSettings": "Tilldelningsinställningar",
@@ -1113,5 +1122,7 @@
 	"processingTimeout": "Bearbetningstidsgräns",
 	"maliciousFileDetected": "Skadlig fil upptäckt",
 	"serverConfigurationError": "Serverkonfigurationsfel",
-	"libraryLoadFailed": "Biblioteket kunde inte laddas"
+	"libraryLoadFailed": "Biblioteket kunde inte laddas",
+	"sortAscending": "Sortera A → Z",
+	"sortDescending": "Sortera Z → A"
 }

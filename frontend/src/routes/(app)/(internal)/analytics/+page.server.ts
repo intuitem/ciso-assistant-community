@@ -1,74 +1,52 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { composerSchema } from '$lib/utils/schemas';
-import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { m } from '$paraglide/messages';
 
 export const load: PageServerLoad = async ({ locals, fetch }) => {
-	const req_applied_control_status = await fetch(`${BASE_API_URL}/applied-controls/per_status/`);
-	const applied_control_status = await req_applied_control_status.json();
-
-	const req_task_template_status = await fetch(`${BASE_API_URL}/task-templates/per_status/`);
-	const task_template_status = await req_task_template_status.json();
-
-	const riskAssessmentsPerStatus = await fetch(`${BASE_API_URL}/risk-assessments/per_status/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
-	const complianceAssessmentsPerStatus = await fetch(
-		`${BASE_API_URL}/compliance-assessments/per_status/`
-	)
-		.then((res) => res.json())
-		.then((res) => res.results);
-	const riskScenariosPerStatus = await fetch(`${BASE_API_URL}/risk-scenarios/per_status/`)
-		.then((res) => res.json())
-		.then((res) => res.results);
-
-	const usedRiskMatrices: { id: string; name: string; risk_assessments_count: number }[] =
-		await fetch(`${BASE_API_URL}/risk-matrices/used/`)
-			.then((res) => res.json())
-			.then((res) => res.results);
-	const usedFrameworks: { id: string; name: string; compliance_assessments_count: number }[] =
-		await fetch(`${BASE_API_URL}/frameworks/used/`)
-			.then((res) => res.json())
-			.then((res) => res.results);
-	const req_get_risks_count_per_level = await fetch(
-		`${BASE_API_URL}/risk-scenarios/count_per_level/`
-	);
-	const risks_count_per_level: {
-		current: Record<string, any>[];
-		residual: Record<string, any>[];
-		inherent?: Record<string, any>[];
-	} = await req_get_risks_count_per_level.json().then((res) => res.results);
-
-	const threats_count = await fetch(`${BASE_API_URL}/threats/threats_count/`).then((res) =>
-		res.json()
-	);
-
-	const qualifications_count = await fetch(
-		`${BASE_API_URL}/risk-scenarios/qualifications_count/`
-	).then((res) => res.json());
-
-	const req_risk_assessments = await fetch(`${BASE_API_URL}/risk-assessments/`);
-	const risk_assessments = await req_risk_assessments.json();
-
-	const composerForm = await superValidate(zod(composerSchema));
-
-	const complianceAnalytics = await fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
-		.then((res) => res.json())
-		.catch((error) => {
-			console.error('Failed to fetch compliance analytics:', error);
-			return {};
-		});
-
-	// Start all streaming fetches immediately (before returning from load)
 	const currentYear = new Date().getFullYear();
+
+	// All data is streamed — nothing blocks the initial page render.
+
+	const appliedControlStatusPromise = fetch(`${BASE_API_URL}/applied-controls/per_status/`)
+		.then((res) => res.json())
+		.then((res) => res.results)
+		.catch(() => null);
+
+	const taskTemplateStatusPromise = fetch(`${BASE_API_URL}/task-templates/per_status/`)
+		.then((res) => res.json())
+		.then((res) => res.results)
+		.catch(() => null);
+
+	const risksCountPerLevelPromise = fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
+		.then((res) => res.json())
+		.then((res) => res.results)
+		.catch(() => ({ current: [], residual: [] }));
+
+	const threatsCountPromise = fetch(`${BASE_API_URL}/threats/threats_count/`)
+		.then((res) => res.json())
+		.catch(() => ({ results: { labels: [], values: [] } }));
+
+	const qualificationsCountPromise = fetch(`${BASE_API_URL}/risk-scenarios/qualifications_count/`)
+		.then((res) => res.json())
+		.catch(() => ({ results: { labels: [], values: [] } }));
+
+	const complianceAnalyticsPromise = fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
+		.then((res) => res.json())
+		.catch(() => ({}));
 
 	const metricsPromise = fetch(`${BASE_API_URL}/get_metrics/`)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('Failed to fetch or parse metrics:', error);
+			return null;
+		});
+
+	const auditsMetricsPromise = fetch(`${BASE_API_URL}/get_audits_metrics/`)
+		.then((res) => res.json())
+		.then((data) => data.results)
+		.catch((error) => {
+			console.error('Failed to fetch or parse audits metrics:', error);
 			return null;
 		});
 
@@ -208,29 +186,23 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	return {
-		composerForm,
-		usedRiskMatrices,
-		usedFrameworks,
-		riskAssessmentsPerStatus,
-		complianceAssessmentsPerStatus,
-		riskScenariosPerStatus,
-		risks_count_per_level,
-		threats_count,
-		qualifications_count,
-		risk_assessments: risk_assessments.results,
-		applied_control_status: applied_control_status.results,
-		task_template_status: task_template_status.results,
-		complianceAnalytics,
 		user: locals.user,
 		title: m.analytics(),
 		stream: {
 			metrics: metricsPromise,
+			auditsMetrics: auditsMetricsPromise,
 			counters: countersPromise,
 			combinedAssessmentsStatus: combinedAssessmentsStatusPromise,
 			governanceCalendarData: governanceCalendarDataPromise,
 			operationsAnalytics: operationsAnalyticsPromise,
 			vulnerabilitySankeyData: vulnerabilitySankeyDataPromise,
-			findingsAssessmentSunburstData: findingsAssessmentSunburstDataPromise
+			findingsAssessmentSunburstData: findingsAssessmentSunburstDataPromise,
+			appliedControlStatus: appliedControlStatusPromise,
+			taskTemplateStatus: taskTemplateStatusPromise,
+			risksCountPerLevel: risksCountPerLevelPromise,
+			threatsCount: threatsCountPromise,
+			qualificationsCount: qualificationsCountPromise,
+			complianceAnalytics: complianceAnalyticsPromise
 		}
 	};
 };

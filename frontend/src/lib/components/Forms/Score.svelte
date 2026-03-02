@@ -2,7 +2,7 @@
 	import { run } from 'svelte/legacy';
 
 	import { displayScoreColor } from '$lib/utils/helpers';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
 
 	interface ScoresDefinition {
@@ -34,6 +34,7 @@
 		label = undefined,
 		field,
 		isDoc = false,
+		fullDonut = false,
 		inversedColors = false,
 		styles = '',
 		min_score = 0,
@@ -96,17 +97,22 @@
 					{...constraints}
 				/>
 			</div>
-			<ProgressRing
-				meterStroke={displayScoreColor($value, max_score, inversedColors)}
-				value={$value}
-				label={$value}
-				onValueChange={(e) => ($value = e.value)}
-				classes="shrink-0"
-				size="size-12"
-				min={min_score}
-				max={max_score}
-				>{$value}
-			</ProgressRing>
+			<div class="shrink-0 relative">
+				<Progress
+					value={fullDonut ? max_score : $value}
+					min={0}
+					max={max_score}
+					data-testid="progress-ring-svg"
+				>
+					<Progress.Circle class="[--size:--spacing(12)]">
+						<Progress.CircleTrack />
+						<Progress.CircleRange class={displayScoreColor($value, max_score, inversedColors)} />
+					</Progress.Circle>
+					<div class="absolute inset-0 flex items-center justify-center">
+						<span class="text-xs font-bold">{$value}</span>
+					</div>
+				</Progress>
+			</div>
 		</div>
 		<div class="flex w-full items-center">
 			<div class="flex space-x-8 w-full justify-center">

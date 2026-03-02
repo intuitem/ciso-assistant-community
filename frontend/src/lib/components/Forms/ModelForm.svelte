@@ -228,7 +228,7 @@
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
-			if (form.valid) {
+			if (form.valid && !form.message?.error) {
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}
@@ -722,6 +722,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>
@@ -862,7 +863,9 @@
 				{...rest}
 			/>
 		{/if}
-		<div class="flex flex-row justify-between space-x-4">
+		<div
+			class="flex flex-row justify-between space-x-4 sticky bottom-0 backdrop-blur-sm pt-4 pb-2 border-t border-slate-200"
+		>
 			{#if closeModal}
 				<button
 					class="btn bg-gray-400 text-white font-semibold w-full"

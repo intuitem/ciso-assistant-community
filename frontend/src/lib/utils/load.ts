@@ -10,6 +10,9 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z, type AnyZodObject } from 'zod';
 import { canPerformAction } from './access-control';
+import { error, redirect } from '@sveltejs/kit';
+import { setFlash } from 'sveltekit-flash-message/server';
+import { m } from '$paraglide/messages';
 
 interface LoadValidationFlowFormDataParams {
 	event: { fetch: typeof fetch };
@@ -69,6 +72,22 @@ export const loadDetail = async ({ event, model, id }) => {
 	const endpoint = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/`;
 
 	const res = await event.fetch(endpoint);
+	if (!res.ok) {
+		if (res.status === 404) {
+			// Check if focus mode is active
+			const focusFolderId = event.cookies.get('focus_folder_id');
+			const focusModeEnabled = event.locals.featureflags?.focus_mode ?? false;
+			const isFocusModeActive = focusFolderId && focusModeEnabled;
+
+			const message = isFocusModeActive
+				? m.objectNotReachableFromCurrentFocus()
+				: m.objectNotFound();
+			setFlash({ type: 'warning', message }, event);
+			throw redirect(302, `/${model.urlModel}`);
+		}
+		// Let other errors (403, 500, etc.) propagate with appropriate error
+		throw error(res.status, res.statusText || `Failed to load ${model.urlModel}`);
+	}
 	const data = await res.json();
 
 	type RelatedModel = {
@@ -79,6 +98,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		createForm: SuperValidated<AnyZodObject>;
 		foreignKeys: Record<string, any>;
 		selectOptions: Record<string, any>;
+		count?: number;
 	};
 
 	type RelatedModels = {
@@ -218,10 +238,54 @@ export const loadDetail = async ({ event, model, id }) => {
 				})
 		);
 	}
+	// Fetch counts for each reverse FK tab in parallel
+	if (model.reverseForeignKeyFields) {
+		await Promise.all(
+			model.reverseForeignKeyFields
+				.filter((e) => relatedModels[e.urlModel])
+				.map(async (e) => {
+					try {
+						let countUrl: string;
+						if (e.endpointUrl?.startsWith('./')) {
+							const relPath = e.endpointUrl.slice(2);
+							const sep = relPath.includes('?') ? '&' : '?';
+							countUrl = `${BASE_API_URL}/${model.endpointUrl ?? model.urlModel}/${id}/${relPath}${sep}limit=1`;
+						} else {
+							const relatedModelInfo = getModelInfo(e.urlModel);
+							countUrl = `${BASE_API_URL}/${relatedModelInfo.endpointUrl ?? e.urlModel}/?${e.field}=${id}&limit=1`;
+						}
+						const countRes = await event.fetch(countUrl);
+						if (countRes.ok) {
+							const countData = await countRes.json();
+							if (typeof countData.count === 'number') {
+								relatedModels[e.urlModel].count = countData.count;
+							}
+						}
+					} catch {
+						// Graceful degradation — leave count as undefined
+					}
+				})
+		);
+	}
+
 	let title = data.str || data.name || data.email || data.label || data.id;
 	if (model.urlModel === 'reference-controls') {
 		const hasName = typeof data.name === 'string' && data.name.trim().length > 0;
 		title = hasName ? data.name : data.ref_id || title;
+	}
+
+	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
+	let updateForm: SuperValidated<AnyZodObject> | undefined;
+	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
+	if (hasAddExisting) {
+		const parentEndpointUrl = model.endpointUrl ?? model.urlModel;
+		const objectEndpoint = `${BASE_API_URL}/${parentEndpointUrl}/${id}/object/`;
+		const objectResponse = await event.fetch(objectEndpoint);
+		if (objectResponse.ok) {
+			const parentObject = await objectResponse.json();
+			const parentSchema = modelSchema(model.urlModel);
+			updateForm = await superValidate(parentObject, zod(parentSchema), { errors: false });
+		}
 	}
 
 	return {
@@ -231,6 +295,7 @@ export const loadDetail = async ({ event, model, id }) => {
 		relatedModels,
 		urlModel: model.urlModel as urlModel,
 		model,
-		modelVerboseName: urlParamModelVerboseName(model.urlModel)
+		modelVerboseName: urlParamModelVerboseName(model.urlModel),
+		updateForm
 	};
 };

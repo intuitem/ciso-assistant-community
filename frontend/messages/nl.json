@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "Audit starten",
 	"addEvidence": "Bewijs toevoegen",
 	"addDomain": "Domein toevoegen",
+	"createIamGroups": "IAM-groepen maken",
+	"iamGroups": "IAM-groepen",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM-groepen worden gebruikt om rollen aan gebruikers toe te wijzen",
+	"globalFolderMustKeepIamGroupsEnabled": "De globale map moet IAM-groepen ingeschakeld houden.",
+	"cannotDisableIamGroupsAssignedUsers": "IAM-groepen kunnen niet worden uitgeschakeld zolang ze aan gebruikers zijn toegewezen.",
 	"addPerimeter": "Perimeter toevoegen",
 	"addUser": "Gebruiker toevoegen",
 	"addPolicy": "Beleid toevoegen",
@@ -121,6 +126,8 @@
 	"selectDomain": "Selecteer domein",
 	"focusMode": "Focusmodus",
 	"focusModeTooltip": "Focus op een specifiek domein",
+	"objectNotReachableFromCurrentFocus": "Dit object is niet bereikbaar vanuit de huidige focus. Omleiden naar de lijstweergave.",
+	"objectNotFound": "Object niet gevonden. Omleiden naar de lijstweergave.",
 	"clearFocus": "Wis focus",
 	"noDomainsAvailable": "Geen domeinen beschikbaar",
 	"urn": "URN",
@@ -142,6 +149,7 @@
 	"next": "Volgende",
 	"previous": "Vorige",
 	"show": "Weergeven",
+	"showStakeholdersName": "Namen van belanghebbenden weergeven",
 	"entries": "ingangen",
 	"searchPlaceholder": "Zoeken...",
 	"noEntriesFound": "Geen ingangen gevonden",
@@ -2985,6 +2993,7 @@
 		}
 	],
 	"cascadeAffectedHint": "De onderstaande items blijven in het systeem maar hun verbindingen met dit object worden verwijderd.",
+	"campaignsDescription": "Beheer van auditcampagnes",
 	"libraryFilteringLabels": "Bibliotheeklabels",
 	"appliedControlsPlaceholder": "Selecteer toegepaste maatregelen...",
 	"assignmentSettings": "Toewijzingsinstellingen",
@@ -2997,5 +3006,7 @@
 	"processingTimeout": "Verwerkingstime-out",
 	"maliciousFileDetected": "Schadelijk bestand gedetecteerd",
 	"serverConfigurationError": "Serverconfiguratiefout",
-	"libraryLoadFailed": "Bibliotheek laden mislukt"
+	"libraryLoadFailed": "Bibliotheek laden mislukt",
+	"sortAscending": "Sorteren A → Z",
+	"sortDescending": "Sorteren Z → A"
 }

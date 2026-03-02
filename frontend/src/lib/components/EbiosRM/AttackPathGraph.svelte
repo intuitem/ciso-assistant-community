@@ -357,7 +357,7 @@
 	const linkFlow = true;
 	const linkBandWidth = 6;
 	const layoutType = GraphLayoutType.Parallel;
-	const layoutParallelGroupSpacing = 200;
+	const layoutParallelGroupSpacing = 300;
 	const layoutParallelNodesPerColumn = 8;
 
 	// Custom function to add labels after default rendering
@@ -429,6 +429,7 @@
 			{linkFlow}
 			{linkBandWidth}
 			{linkArrowColor}
+			zoomScaleExtent={[0.3, 1.25]}
 		/>
 	</VisSingleContainer>
 </div>

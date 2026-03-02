@@ -350,8 +350,10 @@ class TestRiskScenariosAuthenticated:
         )
         threat = Threat.objects.create(name="test", folder=test.folder)
         threat2 = Threat.objects.create(name="test2", folder=test.folder)
-        asset = Asset.objects.create(name="test", folder=folder)
-        applied_controls = AppliedControl.objects.create(name="test", folder=folder)
+        asset = Asset.objects.create(name="test", folder=test.folder)
+        applied_controls = AppliedControl.objects.create(
+            name="test", folder=test.folder
+        )
 
         EndpointTestsQueries.Auth.update_object(
             test.client,

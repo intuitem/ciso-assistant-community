@@ -88,6 +88,9 @@ class EntityWriteSerializer(BaseModelSerializer):
 class EntityImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     owned_folders = HashSlugRelatedField(slug_field="pk", many=True, read_only=True)
+    relationship = serializers.SlugRelatedField(
+        slug_field="name", read_only=True, many=True
+    )
 
     class Meta:
         model = Entity
@@ -106,6 +109,7 @@ class EntityImportExportSerializer(BaseModelSerializer):
             "dora_competent_authority",
             "created_at",
             "updated_at",
+            "relationship",
         ]
 
 
@@ -284,6 +288,10 @@ class RepresentativeReadSerializer(BaseModelSerializer):
 class RepresentativeWriteSerializer(BaseModelSerializer):
     create_user = serializers.BooleanField(default=False)
 
+    def validate_entity(self, value):
+        self._ensure_immutable("entity", value)
+        return value
+
     def _create_or_update_user(self, instance, user):
         if not user:
             return
@@ -304,7 +312,10 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                 logger.error(e)
                 user = User.objects.filter(email=instance.email).first()
                 if user and send_mail:
-                    user.is_third_party = True
+                    if not user.is_third_party:
+                        raise serializers.ValidationError(
+                            {"email": "errorUserAlreadyExistsAsInternal"}
+                        )
                     user.keep_local_login = True
                     user.save()
                     instance.user = user
@@ -321,7 +332,10 @@ class RepresentativeWriteSerializer(BaseModelSerializer):
                     raise serializers.ValidationError(
                         {"error": ["An error occurred while creating the user"]}
                     )
-        user.is_third_party = True
+        if not user.is_third_party:
+            raise serializers.ValidationError(
+                {"email": "errorUserAlreadyExistsAsInternal"}
+            )
         user.keep_local_login = True
         user.save()
         instance.user = user
@@ -358,6 +372,10 @@ class SolutionReadSerializer(BaseModelSerializer):
 
 
 class SolutionWriteSerializer(BaseModelSerializer):
+    def validate_provider_entity(self, value):
+        self._ensure_immutable("provider_entity", value)
+        return value
+
     def to_internal_value(self, data):
         """Convert None to empty string for CharField DORA fields before validation"""
         dora_char_fields = [
@@ -392,6 +410,16 @@ class ContractReadSerializer(BaseModelSerializer):
     solutions = FieldsRelatedField(many=True)
     overarching_contract = FieldsRelatedField()
     filtering_labels = FieldsRelatedField(many=True)
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     class Meta:
         model = Contract
