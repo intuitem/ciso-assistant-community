@@ -48,8 +48,14 @@ ART9_SPECIAL_CATEGORY_CONDITION_CHOICES = (
 # Chapter V Transfer Mechanisms (Articles 45-49)
 TRANSFER_MECHANISM_CHOICES = (
     ("privacy_adequacy_decision", "Adequacy Decision (Art. 45)"),
+    (
+        "privacy_standard_contractual_clauses",
+        "Standard Contractual Clauses (Art. 46.2c)",
+    ),
     ("privacy_appropriate_safeguards", "Appropriate Safeguards (Art. 46)"),
     ("privacy_binding_corporate_rules", "Binding Corporate Rules (Art. 47)"),
+    ("privacy_codes_of_conduct", "Codes of Conduct (Art. 46.2e)"),
+    ("privacy_certification_mechanisms", "Certification Mechanisms (Art. 46.2f)"),
     ("privacy_derogation", "Derogation for Specific Situations (Art. 49)"),
 )
 
@@ -426,7 +432,7 @@ class DataContractor(NameDescriptionFolderMixin):
     country = models.CharField(max_length=3, choices=COUNTRY_CHOICES)
     documentation_link = models.URLField(blank=True)
 
-    fields_to_check = ["name", "relationship_type", "processing"]
+    fields_to_check = ["entity", "relationship_type", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.relationship_type
@@ -457,7 +463,7 @@ class DataTransfer(NameDescriptionFolderMixin):
     guarantees = models.TextField(blank=True)
     documentation_link = models.URLField(blank=True)
 
-    fields_to_check = ["name", "country", "processing"]
+    fields_to_check = ["entity", "country", "processing"]
 
     def __str__(self):
         return self.name if self.name else self.country
