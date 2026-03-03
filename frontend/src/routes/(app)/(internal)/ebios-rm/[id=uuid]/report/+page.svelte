@@ -824,7 +824,7 @@
 													<h5 class="text-xs font-semibold text-surface-700 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="h-[400px]">
+													<div class="h-[400px]" data-chart="operating-mode-{mode.id}">
 														<OperatingModeEditor
 															elementaryActions={mode.graph.elementary_actions}
 															killChainSteps={mode.graph.kill_chain_steps}
@@ -1523,30 +1523,41 @@
 			page-break-before: always !important;
 		}
 
-		/* Fix operating mode graphs - scale to fit and wrap if needed */
+		/* Preserve SvelteFlow container height in print */
 		[data-chart^='operating-mode-'] {
+			height: 400px !important;
+			max-height: 400px !important;
 			max-width: 100% !important;
-			max-height: 18cm !important;
 			overflow: hidden !important;
 			page-break-inside: avoid !important;
 			margin: 1cm 0 !important;
 		}
 
 		[data-chart^='operating-mode-'] > * {
+			height: 100% !important;
+			max-height: 400px !important;
 			max-width: 100% !important;
-			max-height: 18cm !important;
-			transform: scale(0.85) !important;
-			transform-origin: top left !important;
+			transform: none !important;
 		}
 
-		/* Ensure operating mode SVG elements scale properly */
-		[data-chart^='operating-mode-'] svg {
-			max-width: 100% !important;
-			height: auto !important;
+		/* Hide SvelteFlow chrome in print */
+		:global(.svelte-flow__background),
+		:global(.svelte-flow__controls),
+		:global(.svelte-flow__minimap),
+		:global(.svelte-flow__panel) {
+			display: none !important;
+		}
+
+		/* Ensure SvelteFlow colors print correctly */
+		:global(.svelte-flow__edge-path),
+		:global(.svelte-flow__node),
+		:global(.svelte-flow svg) {
+			-webkit-print-color-adjust: exact !important;
+			print-color-adjust: exact !important;
 		}
 
 		/* Ensure chart containers don't create extra space */
-		:global([class*='h-[']) {
+		:global([class*='h-[']:not([data-chart^='operating-mode-'])) {
 			height: auto !important;
 			max-height: 25cm !important;
 		}

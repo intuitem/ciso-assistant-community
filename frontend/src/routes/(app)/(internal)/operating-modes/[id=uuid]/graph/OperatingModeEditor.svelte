@@ -292,6 +292,15 @@
 		return () => clearTimeout(timer);
 	});
 
+	// Re-fit graph before browser print to ensure proper layout
+	$effect(() => {
+		const handleBeforePrint = () => {
+			flowInstance?.fitView({ padding: 0.25 });
+		};
+		window.addEventListener('beforeprint', handleBeforePrint);
+		return () => window.removeEventListener('beforeprint', handleBeforePrint);
+	});
+
 	// ---- Derived ----
 
 	const placedNodeIds = $derived(
@@ -642,8 +651,8 @@
 				}}
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
-				<Controls showLock={false} />
 				{#if !readonly}
+					<Controls showLock={false} />
 					<MiniMap />
 				{/if}
 			</SvelteFlow>
