@@ -7,7 +7,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
-	import OperatingModeEditor from './graph/OperatingModeEditor.svelte';
+	import OperatingModeGraph from './graph/OperatingModeGraph.svelte';
 	import { invalidateAll } from '$app/navigation';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
@@ -149,7 +149,7 @@
 		{/if}
 	</div>
 	<div class="h-[80vh]">
-		<OperatingModeEditor
+		<OperatingModeGraph
 			elementaryActions={data.elementaryActions}
 			killChainSteps={data.killChainSteps}
 			operatingModeId={data.operatingModeId}

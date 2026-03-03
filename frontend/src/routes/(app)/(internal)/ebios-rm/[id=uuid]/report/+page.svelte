@@ -7,7 +7,7 @@
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
-	import OperatingModeEditor from '../../../operating-modes/[id=uuid]/graph/OperatingModeEditor.svelte';
+	import OperatingModeGraph from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
@@ -825,7 +825,7 @@
 														{m.killChain()}
 													</h5>
 													<div class="h-[400px]" data-chart="operating-mode-{mode.id}">
-														<OperatingModeEditor
+														<OperatingModeGraph
 															elementaryActions={mode.graph.elementary_actions}
 															killChainSteps={mode.graph.kill_chain_steps}
 															operatingModeId={mode.id}
