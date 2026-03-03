@@ -171,7 +171,12 @@ export const actions: Actions = {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ status: 'submitted' })
 		});
-		const body = await res.json();
+		let body;
+		try {
+			body = await res.json();
+		} catch {
+			body = { error: res.statusText };
+		}
 		return { submitStatus: res.status, submitBody: body };
 	}
 };
