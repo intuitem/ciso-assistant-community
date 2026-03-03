@@ -30,9 +30,11 @@ jobs:
           fetch-depth: 0
       - name: Generate version
         id: version
+        shell: bash
         run: |
-          echo "version=$(git describe --tags --always)" >> $GITHUB_OUTPUT
-          echo "build=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          echo "version=$(git describe --tags --always)" >> "$GITHUB_OUTPUT"
+          echo "build=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-frontend:
     needs: prepare
@@ -78,9 +80,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Create .meta file
+        shell: bash
+        env:
+          CISO_ASSISTANT_VERSION: ${{ needs.prepare.outputs.version }}
+          CISO_ASSISTANT_BUILD: ${{ needs.prepare.outputs.build }}
         run: |
-          echo "CISO_ASSISTANT_VERSION=${{ needs.prepare.outputs.version }}" > .meta
-          echo "CISO_ASSISTANT_BUILD=${{ needs.prepare.outputs.build }}" >> .meta
+          set -euo pipefail
+          {
+            echo "CISO_ASSISTANT_VERSION=$CISO_ASSISTANT_VERSION"
+            echo "CISO_ASSISTANT_BUILD=$CISO_ASSISTANT_BUILD"
+          } > .meta
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/
       - name: Set up Docker Buildx
@@ -111,15 +120,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create multi-arch manifests
+        shell: bash
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
+          set -euo pipefail
+
           # Frontend
-          docker buildx imagetools create -t ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest \
-            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/intuitem/ciso-assistant-enterprise-frontend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-amd64" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-arm64"
 
           # Backend
-          docker buildx imagetools create -t ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest \
-            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/intuitem/ciso-assistant-enterprise-backend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION" \
+            -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-amd64" \
+            "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-arm64"
