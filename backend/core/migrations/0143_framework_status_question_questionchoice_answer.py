@@ -15,7 +15,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0140_populate_tasknode_scheduled_date"),
+        ("core", "0142_alter_requirementassignment_options_and_more"),
         ("iam", "0019_add_view_globalsettings_in_custom_roles"),
     ]
 

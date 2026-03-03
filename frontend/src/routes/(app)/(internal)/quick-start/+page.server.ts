@@ -30,8 +30,8 @@ export const actions: Actions = {
 				response.errors.forEach((error) => {
 					setError(form, error.param, error.code);
 				});
-				return fail(res.status, { form });
 			}
+			return fail(res.status, { form });
 		}
 
 		const response = await res.json();

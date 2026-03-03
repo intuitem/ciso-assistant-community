@@ -2935,14 +2935,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'task-nodes/status'
-		},
-		{
-			type: 'change_folder',
-			label: 'changeDomain',
-			icon: 'fa-solid fa-folder',
-			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
-		},
-		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+		}
 	],
 	'requirement-assessments': [
 		{

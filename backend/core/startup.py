@@ -220,6 +220,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -496,6 +497,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -862,6 +864,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -1179,6 +1182,7 @@ AUDITEE_PERMISSIONS_LIST = [
     "delete_evidencerevision",
     "view_folder",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "view_appliedcontrol",
     "add_appliedcontrol",
     "change_appliedcontrol",
@@ -1463,6 +1467,7 @@ def startup(sender: AppConfig, **kwargs):
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
         "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(

@@ -121,7 +121,8 @@ export const RiskAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	ebios_rm_study: z.string().uuid().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -454,7 +455,8 @@ export const ComplianceAssessmentSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
@@ -524,7 +526,8 @@ export const GeneralSettingsSchema = z.object({
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
-	allow_assignments_to_entities: z.boolean().default(false).optional()
+	allow_assignments_to_entities: z.boolean().default(false).optional(),
+	enforce_mfa: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -559,7 +562,8 @@ export const FeatureFlagsSchema = z.object({
 	purposes: z.boolean().optional(),
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
-	auditee_mode: z.boolean().optional()
+	auditee_mode: z.boolean().optional(),
+	advanced_analytics: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

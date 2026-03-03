@@ -214,6 +214,8 @@
 	"focusModeTooltip": "Focus on a specific domain",
 	"objectNotReachableFromCurrentFocus": "Šis objektas nepasiekiamas iš dabartinio fokuso. Nukreipiama į sąrašo vaizdą.",
 	"objectNotFound": "Objektas nerastas. Nukreipiama į sąrašo vaizdą.",
+	"autoSync": "Automatinis kasdieninis sinchronizavimas su veiksmais",
+	"autoSyncHelpText": "Jei įjungta, užduotis bus automatiškai sinchronizuota su veiksmais kiekvieną dieną. Užraštytai įvertinimai bus praleisti.",
 	"clearFocus": "Clear focus",
 	"noDomainsAvailable": "No domains available",
 	"enclave": "Enclave",
@@ -3400,5 +3402,7 @@
 	"processingTimeout": "Processing timeout",
 	"maliciousFileDetected": "Malicious file detected",
 	"serverConfigurationError": "Server configuration error",
-	"libraryLoadFailed": "Library load failed"
+	"libraryLoadFailed": "Library load failed",
+	"sortAscending": "Rikiuoti A → Z",
+	"sortDescending": "Rikiuoti Z → A"
 }
