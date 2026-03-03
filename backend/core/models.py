@@ -115,6 +115,7 @@ def _create_questions_from_data(requirement_node, questions_data):
             ref_id=q_ref_id,
             annotation=q_data.get("text", ""),
             type=q_type,
+            config=q_data.get("config"),
             depends_on=q_data.get("depends_on"),
             order=order,
             weight=q_data.get("weight", 1),
