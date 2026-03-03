@@ -3094,6 +3094,17 @@ class CommentWriteSerializer(BaseModelSerializer):
                 )
         return data
 
+    def create(self, validated_data):
+        # Resolve folder from the parent object so the RBAC check in
+        # BaseModelSerializer.create() uses the correct folder instead
+        # of falling back to root (which auditees cannot access).
+        for field_name in self.PARENT_FIELDS:
+            parent_obj = validated_data.get(field_name)
+            if parent_obj is not None:
+                validated_data["folder"] = parent_obj.folder
+                break
+        return super().create(validated_data)
+
     class Meta:
         model = Comment
         exclude = ["created_at", "updated_at", "is_tainted", "author", "folder"]
