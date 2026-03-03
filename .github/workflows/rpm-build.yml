@@ -118,7 +118,6 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
           RPM_NAME: ${{ steps.rpm.outputs.name }}
           RPM_SIZE: ${{ steps.rpm.outputs.size }}
-          SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }} 
         run: |
           set -euo pipefail
           {
