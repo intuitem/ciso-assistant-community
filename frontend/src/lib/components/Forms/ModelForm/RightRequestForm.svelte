@@ -61,6 +61,7 @@
 
 <AutocompleteSelect
 	{form}
+	multiple
 	field="request_type"
 	options={model.selectOptions['request_type']}
 	cacheLock={cacheLocks['request_type']}

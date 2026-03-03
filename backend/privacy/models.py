@@ -499,9 +499,7 @@ class RightRequest(NameDescriptionFolderMixin):
     )
     requested_on = models.DateField()
     due_date = models.DateField(null=True, blank=True)
-    request_type = models.CharField(
-        max_length=30, choices=REQUEST_TYPE_CHOICES, default="other"
-    )
+    request_type = models.JSONField(default=list, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new")
     observation = models.TextField(blank=True)
     processings = models.ManyToManyField(

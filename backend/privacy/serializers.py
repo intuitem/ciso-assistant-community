@@ -1,5 +1,6 @@
 from core.serializers import BaseModelSerializer, ReferentialSerializer
 from django.db import transaction
+from rest_framework import serializers
 from core.serializer_fields import FieldsRelatedField
 from .models import (
     ProcessingNature,
@@ -179,6 +180,18 @@ class RightRequestWriteSerializer(BaseModelSerializer):
     class Meta:
         model = RightRequest
         fields = "__all__"
+
+    def validate_request_type(self, value):
+        if not isinstance(value, list):
+            raise serializers.ValidationError("request_type must be a list.")
+        valid_choices = {choice[0] for choice in RightRequest.REQUEST_TYPE_CHOICES}
+        invalid = set(value) - valid_choices
+        if invalid:
+            raise serializers.ValidationError(
+                f"Invalid request type(s): {', '.join(sorted(invalid))}. "
+                f"Valid choices are: {', '.join(sorted(valid_choices))}."
+            )
+        return value
 
 
 class RightRequestReadSerializer(BaseModelSerializer):

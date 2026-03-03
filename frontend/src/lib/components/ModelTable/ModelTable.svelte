@@ -840,7 +840,7 @@
 																					{val.split(':')[1]}</span
 																				>
 																			{:else}
-																				{val ?? '-'}
+																				{safeTranslate(val ?? '-')}
 																			{/if}
 																		</li>
 																	{/each}
