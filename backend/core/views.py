@@ -7462,6 +7462,16 @@ class FolderViewSet(BaseModelViewSet):
                             missing,
                             obj.question.urn,
                         )
+                    if (
+                        obj.question.type == Question.Type.UNIQUE_CHOICE
+                        and choices.count() > 1
+                    ):
+                        logger.warning(
+                            "Answer import: multiple choices provided for "
+                            "unique_choice question %s, keeping only first",
+                            obj.question.urn,
+                        )
+                        choices = choices[:1]
                     obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
