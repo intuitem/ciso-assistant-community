@@ -238,6 +238,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     advanced_analytics = serializers.BooleanField(
         source="value.advanced_analytics", required=False, default=False
     )
+    comments = serializers.BooleanField(
+        source="value.comments", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings

@@ -12552,6 +12552,50 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+class CommentViewSet(BaseModelViewSet):
+    model = Comment
+    filterset_fields = [
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+        "is_active",
+        "author",
+    ]
+    search_fields = ["body"]
+    ordering = ["created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "author",
+                "requirement_assessment",
+                "risk_scenario",
+                "applied_control",
+                "finding",
+            )
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author_id != self.request.user.id:
+            raise PermissionDenied({"error": "You can only edit your own comments."})
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.author_id != self.request.user.id:
+            if not self.request.user.is_admin():
+                raise PermissionDenied(
+                    {"error": "You can only delete your own comments."}
+                )
+        return super().perform_destroy(instance)
+
+
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
