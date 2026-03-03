@@ -933,137 +933,140 @@
 					<div class="space-y-3 max-h-[400px] overflow-y-auto">
 						{#each assignments as assignment}
 							<div
-								class="border border-l-[3px] rounded-lg p-3.5 transition-all duration-200 {editingAssignmentId ===
+								class="border border-l-[3px] rounded-lg transition-all duration-200 {editingAssignmentId ===
 								assignment.id
 									? 'bg-violet-50 border-violet-300 border-l-violet-500 ring-2 ring-violet-200'
 									: `bg-white hover:bg-gray-50 hover:shadow-sm ${statusAccentLeft[assignment.status] ?? 'border-l-gray-300'}`}"
 							>
-								<div class="flex items-start justify-between">
-									<div class="flex-1">
-										<div class="flex items-center gap-2 text-sm text-gray-900 font-medium">
-											<i class="fa-solid fa-{actorIcon(assignment.actor)}"></i>
-											<span>{formatActors(assignment.actor)}</span>
-											<span
-												class="text-xs font-medium px-2 py-0.5 rounded-md {assignmentStatusStyle[
-													assignment.status
-												] ?? 'bg-gray-100 text-gray-700'}"
+								<!-- Card body -->
+								<div class="p-3.5">
+									<div class="flex items-center gap-2 text-sm text-gray-900 font-medium">
+										<i class="fa-solid fa-{actorIcon(assignment.actor)}"></i>
+										<span class="truncate">{formatActors(assignment.actor)}</span>
+										<span
+											class="text-xs font-medium px-2 py-0.5 rounded-md whitespace-nowrap {assignmentStatusStyle[
+												assignment.status
+											] ?? 'bg-gray-100 text-gray-700'}"
+										>
+											{assignmentStatusLabel[assignment.status]?.() ?? assignment.status}
+										</span>
+									</div>
+									<div class="mt-2 flex flex-wrap items-center gap-1.5">
+										<button
+											class="badge bg-blue-100 text-blue-700 text-xs hover:bg-blue-200 cursor-pointer transition-colors"
+											onclick={() => openRequirementsModal(assignment)}
+											title={m.clickToViewRequirements()}
+										>
+											<i class="fa-solid fa-list-ul mr-1"></i>
+											{assignment.requirement_assessments.length}
+											{m.requirements()}
+										</button>
+										{#if assignment.status !== 'draft'}
+											<a
+												href="/auditee-assessments/{assignment.id}"
+												class="badge bg-gray-100 text-gray-700 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+												title={m.reviewResponses()}
 											>
-												{assignmentStatusLabel[assignment.status]?.() ?? assignment.status}
-											</span>
-										</div>
-										<div class="mt-2 flex flex-wrap items-center gap-2">
-											<button
-												class="badge bg-blue-100 text-blue-700 text-xs hover:bg-blue-200 cursor-pointer transition-colors"
-												onclick={() => openRequirementsModal(assignment)}
-												title={m.clickToViewRequirements()}
-											>
-												<i class="fa-solid fa-list-ul mr-1"></i>
-												{assignment.requirement_assessments.length}
-												{m.requirements()}
-											</button>
-											{#if assignment.status !== 'draft'}
-												<a
-													href="/auditee-assessments/{assignment.id}"
-													class="badge bg-gray-100 text-gray-700 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
-													title={m.reviewResponses()}
-												>
-													<i class="fa-solid fa-eye mr-1"></i>
-													{m.reviewResponses()}
-												</a>
-											{/if}
-											{#if hasImplementationGroups}
-												{#each getIGsForRequirements(assignment.requirement_assessments) as igRef}
-													<span
-														class="badge bg-purple-50 text-purple-600 text-[10px] border border-purple-200"
-														title={m.implementationGroups()}
-													>
-														<i class="fa-solid fa-layer-group mr-0.5"></i>
-														{igName(igRef)}
-													</span>
-												{/each}
-											{/if}
-										</div>
-
-										<!-- Latest observation display -->
-										{#if assignment.status === 'changes_requested' && getLatestObservation(assignment.events)}
-											<div
-												class="mt-2 bg-red-50/50 border-l-2 border-l-red-300 rounded-r-md pl-3 pr-2 py-2 text-xs text-red-700 whitespace-pre-line"
-											>
-												<i class="fa-solid fa-comment-dots mr-1 text-red-400"></i>
-												{getLatestObservation(assignment.events)}
-											</div>
+												<i class="fa-solid fa-eye mr-1"></i>
+												{m.reviewResponses()}
+											</a>
 										{/if}
-
-										<!-- Event history button -->
 										{#if assignment.events.length > 0}
 											<button
-												class="mt-2 badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+												class="badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
 												onclick={() => openHistoryModal(assignment)}
 												title={m.viewHistory()}
 											>
 												<i class="fa-solid fa-clock-rotate-left mr-1"></i>
-												{m.eventsHistory()}
-												<span class="badge bg-gray-200 text-gray-500 text-[10px] ml-1"
-													>{assignment.events.length}</span
-												>
+												{assignment.events.length}
 											</button>
+										{/if}
+										{#if hasImplementationGroups}
+											{#each getIGsForRequirements(assignment.requirement_assessments) as igRef}
+												<span
+													class="badge bg-purple-50 text-purple-600 text-[10px] border border-purple-200"
+													title={m.implementationGroups()}
+												>
+													<i class="fa-solid fa-layer-group mr-0.5"></i>
+													{igName(igRef)}
+												</span>
+											{/each}
 										{/if}
 									</div>
-									<div class="flex flex-col items-end gap-1">
-										<!-- Activate button (draft) -->
-										{#if assignment.status === 'draft' && !isReadOnly}
-											<button
-												class="btn btn-sm preset-filled-warning-500"
-												onclick={() => handleSetStatus(assignment.id, 'in_progress')}
-												title={m.activateAssignment()}
-											>
-												<i class="fa-solid fa-play mr-1"></i>
-												{m.activateAssignment()}
-											</button>
-										{/if}
 
-										<!-- Reviewer actions (submitted) -->
-										{#if assignment.status === 'submitted' && !isReadOnly}
-											<button
-												class="btn btn-sm preset-filled-success-500"
-												onclick={() => handleSetStatus(assignment.id, 'closed')}
-												title={m.closeAssignment()}
-											>
-												<i class="fa-solid fa-check mr-1"></i>
-												{m.closeAssignment()}
-											</button>
-											<button
-												class="btn btn-sm preset-filled-error-500"
-												onclick={() => openRequestChangesModal(assignment.id)}
-												title={m.requestChanges()}
-											>
-												<i class="fa-solid fa-rotate-left mr-1"></i>
-												{m.requestChanges()}
-											</button>
-										{/if}
+									<!-- Latest observation display -->
+									{#if assignment.status === 'changes_requested' && getLatestObservation(assignment.events)}
+										<div
+											class="mt-2 bg-red-50/50 border-l-2 border-l-red-300 rounded-r-md pl-3 pr-2 py-1.5 text-xs text-red-700 line-clamp-2"
+										>
+											<i class="fa-solid fa-comment-dots mr-1 text-red-400"></i>
+											{getLatestObservation(assignment.events)}
+										</div>
+									{/if}
+								</div>
 
-										<!-- Reopen (closed) -->
-										{#if assignment.status === 'closed' && !isReadOnly}
-											<button
-												class="btn btn-sm preset-filled-warning-500"
-												onclick={() => handleSetStatus(assignment.id, 'submitted')}
-												title={m.reopenAssignment()}
-											>
-												<i class="fa-solid fa-lock-open mr-1"></i>
-												{m.reopenAssignment()}
-											</button>
-										{/if}
+								<!-- Action bar -->
+								{#if !isReadOnly}
+									{@const hasActions =
+										assignment.status === 'draft' ||
+										assignment.status === 'submitted' ||
+										assignment.status === 'closed' ||
+										canModifyAssignment(assignment.status)}
+									{#if hasActions}
+										<div
+											class="flex flex-wrap items-center gap-1.5 px-3.5 py-2 border-t border-gray-100 bg-gray-50/50 rounded-b-lg"
+										>
+											<!-- Status transitions -->
+											{#if assignment.status === 'draft'}
+												<button
+													class="btn btn-sm preset-filled-warning-500 text-xs"
+													onclick={() => handleSetStatus(assignment.id, 'in_progress')}
+													title={m.activateAssignment()}
+												>
+													<i class="fa-solid fa-play mr-1"></i>
+													{m.activateAssignment()}
+												</button>
+											{/if}
+											{#if assignment.status === 'submitted'}
+												<button
+													class="btn btn-sm preset-filled-success-500 text-xs"
+													onclick={() => handleSetStatus(assignment.id, 'closed')}
+													title={m.closeAssignment()}
+												>
+													<i class="fa-solid fa-check mr-1"></i>
+													{m.closeAssignment()}
+												</button>
+												<button
+													class="btn btn-sm preset-filled-error-500 text-xs"
+													onclick={() => openRequestChangesModal(assignment.id)}
+													title={m.requestChanges()}
+												>
+													<i class="fa-solid fa-rotate-left mr-1"></i>
+													{m.requestChanges()}
+												</button>
+											{/if}
+											{#if assignment.status === 'closed'}
+												<button
+													class="btn btn-sm preset-filled-warning-500 text-xs"
+													onclick={() => handleSetStatus(assignment.id, 'submitted')}
+													title={m.reopenAssignment()}
+												>
+													<i class="fa-solid fa-lock-open mr-1"></i>
+													{m.reopenAssignment()}
+												</button>
+											{/if}
 
-										<!-- Edit/Delete (draft or in_progress only) -->
-										{#if !isReadOnly && canModifyAssignment(assignment.status)}
-											<div class="flex items-center gap-1">
+											<div class="flex-1"></div>
+
+											<!-- Edit/Delete always on the right -->
+											{#if canModifyAssignment(assignment.status)}
 												<button
 													class="btn btn-sm preset-ghost-surface"
 													onclick={() => startEdit(assignment)}
 													title={m.edit()}
 													disabled={editingAssignmentId !== null}
 												>
-													<i class="fa-solid fa-pen"></i>
+													<i class="fa-solid fa-pen text-xs"></i>
 												</button>
 												<button
 													class="btn btn-sm preset-ghost-error-500"
@@ -1072,15 +1075,15 @@
 													disabled={isDeleting === assignment.id || editingAssignmentId !== null}
 												>
 													{#if isDeleting === assignment.id}
-														<i class="fa-solid fa-spinner fa-spin"></i>
+														<i class="fa-solid fa-spinner fa-spin text-xs"></i>
 													{:else}
-														<i class="fa-solid fa-trash"></i>
+														<i class="fa-solid fa-trash text-xs"></i>
 													{/if}
 												</button>
-											</div>
-										{/if}
-									</div>
-								</div>
+											{/if}
+										</div>
+									{/if}
+								{/if}
 							</div>
 						{/each}
 					</div>
