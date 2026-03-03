@@ -206,6 +206,11 @@
 					description: m.webhooksDescription()
 				},
 				{
+					field: 'comments',
+					label: m.comments(),
+					description: m.commentsDescription()
+				},
+				{
 					field: 'experimental',
 					label: m.experimental(),
 					description: m.experimentalFeatures()
