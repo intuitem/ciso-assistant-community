@@ -41,6 +41,11 @@ Once you've retrieved the **IdP Entity ID,** the **Metadata URL** and the **Enti
   * IPv6
   * FQDN (e.g. https://www.example.com/)
   * `localhost`
+*   **Authn request signed**: allows the Service Provider (SP) to digitally sign the SAML authentication request sent to the Identity Provider (IdP).
+
+    This option should be enabled if your IdP requires signed authentication requests or if you are looking to enforce additional security on SAML authentication flows:
+
+    <figure><img src="../../.gitbook/assets/image (83).png" alt=""><figcaption></figcaption></figure>
 {% endtab %}
 {% endtabs %}
 
