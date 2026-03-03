@@ -7450,10 +7450,12 @@ class FolderViewSet(BaseModelViewSet):
 
             case "answer":
                 if ref_ids := many_to_many_map_ids.get("selected_choices_ref_ids"):
-                    choices = QuestionChoice.objects.filter(
-                        question=obj.question, ref_id__in=ref_ids
+                    choices = list(
+                        QuestionChoice.objects.filter(
+                            question=obj.question, ref_id__in=ref_ids
+                        )
                     )
-                    found_refs = set(choices.values_list("ref_id", flat=True))
+                    found_refs = {c.ref_id for c in choices}
                     missing = set(ref_ids) - found_refs
                     if missing:
                         logger.warning(
@@ -7464,7 +7466,7 @@ class FolderViewSet(BaseModelViewSet):
                         )
                     if (
                         obj.question.type == Question.Type.UNIQUE_CHOICE
-                        and choices.count() > 1
+                        and len(choices) > 1
                     ):
                         logger.warning(
                             "Answer import: multiple choices provided for "
