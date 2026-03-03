@@ -403,6 +403,8 @@
 		}
 	}
 
+	import { page } from '$app/state';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
@@ -998,6 +1000,9 @@
 							</Accordion>
 						</form>
 					{/key}
+				{/if}
+				{#if page.data?.featureflags?.comments}
+					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
 				{/if}
 			</div>
 
