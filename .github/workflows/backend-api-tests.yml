@@ -41,6 +41,8 @@ jobs:
         python-version: ["3.14"]
     steps:
       - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
@@ -82,6 +84,8 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
       - name: Find Test Files
         id: set-matrix
         working-directory: ${{ env.BACKEND_DIR }}
@@ -110,6 +114,8 @@ jobs:
       CISO_ASSISTANT_URL: http://127.0.0.1:5173
     steps:
       - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
 
       - name: Set up python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
@@ -148,16 +154,22 @@ jobs:
 
       - name: Run Test File
         working-directory: ${{ env.BACKEND_DIR }}
+        env:
+          TEST_FILE: ${{ matrix.test-file }}
+          JOB_INDEX: ${{ strategy.job-index }}
         run: |
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
-          poetry run pytest ${{ matrix.test-file }} --reuse-db --html=pytest-report-${{ strategy.job-index }}.html --self-contained-html
+          poetry run pytest "$TEST_FILE" --reuse-db --html=pytest-report-"$JOB_INDEX".html --self-contained-html
 
       - name: Prepare Artifact Name
         if: ${{ !cancelled() }}
+        env:
+          RAW_BRANCH: ${{ env.BRANCH_NAME }}
         run: |
-          SAFE_BRANCH=$(echo "${{ env.BRANCH_NAME }}" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
-          echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> $GITHUB_ENV
-          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+          set -euo pipefail
+          SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> "$GITHUB_ENV"
+          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

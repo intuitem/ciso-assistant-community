@@ -113,14 +113,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Job Summary
+        shell: bash
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          RPM_NAME: ${{ steps.rpm.outputs.name }}
+          RPM_SIZE: ${{ steps.rpm.outputs.size }}
+          SUMMARY: ${{ env.GITHUB_STEP_SUMMARY }} 
         run: |
-          echo "## RPM Build Complete 🎉" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Package:** \`${{ steps.rpm.outputs.name }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**Size:** ${{ steps.rpm.outputs.size }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Installation" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "sudo rpm -ivh ${{ steps.rpm.outputs.name }}" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          {
+            echo "## RPM Build Complete 🎉"
+            echo
+            echo "**Version:** \`$VERSION\`"
+            echo "**Package:** \`$RPM_NAME\`"
+            echo "**Size:** $RPM_SIZE"
+            echo
+            echo "### Installation"
+            echo '```bash'
+            echo "sudo rpm -ivh $RPM_NAME"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
