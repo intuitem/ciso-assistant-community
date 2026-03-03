@@ -2675,7 +2675,34 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     "Use 'selected_choices' (PKs) or 'value' (ref_ids), not both."
                 )
 
-            if q_type == Question.Type.UNIQUE_CHOICE:
+            # Reject selected_choices for non-choice question types
+            if (
+                q_type
+                not in (
+                    Question.Type.UNIQUE_CHOICE,
+                    Question.Type.MULTIPLE_CHOICE,
+                )
+                and selected_choices_list is not None
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "selected_choices": "selected_choices is only valid for choice questions."
+                    }
+                )
+
+            if q_type == Question.Type.TEXT:
+                if value is not None and not isinstance(value, str):
+                    raise serializers.ValidationError(
+                        {"value": "Text answers must be a string."}
+                    )
+
+            elif q_type == Question.Type.NUMBER:
+                if value is not None and not isinstance(value, (int, float)):
+                    raise serializers.ValidationError(
+                        {"value": "Number answers must be numeric."}
+                    )
+
+            elif q_type == Question.Type.UNIQUE_CHOICE:
                 # Legacy: value is a ref_id string → resolve to M2M
                 if value is not None:
                     if isinstance(value, list):
