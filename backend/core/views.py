@@ -9298,18 +9298,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
-        # Scope to a specific assignment if requested
-        assignment_id = request.query_params.get("assignment")
-        if assignment_id:
-            assigned_ra_ids = set(
+        # Auditee filtering: scope to assigned requirements only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
-                    id=assignment_id,
                     compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments = [
-                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments if ra.id in ra_ids
             ]
+
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -9349,18 +9351,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
-        # Scope to a specific assignment if requested
-        assignment_id = request.query_params.get("assignment")
-        if assignment_id:
-            assigned_ra_ids = set(
+        # Auditee filtering: scope to assigned requirements only
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
-                    id=assignment_id,
                     compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments_objects = [
-                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments_objects if ra.id in ra_ids
             ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -13479,7 +13483,8 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     """
 
     permission_overrides = {
-        "set_status": "change_requirementassignment",
+        "set_status": "transition_requirementassignment",
+        "requirements_list": "view_requirementassignment",
     }
 
     model = RequirementAssignment
@@ -13517,13 +13522,42 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             ).distinct()
         return qs
 
+    EDITABLE_STATUSES = ("draft", "in_progress")
+
+    def update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot delete assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
     # Valid transitions: (from_status, to_status) → config
     # reviewer_only: auditee-only users are forbidden
     # actor_only: only assigned actors can perform this transition
     # check_completion: all assessable requirements must be assessed
     # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
     TRANSITIONS = {
-        ("draft", "in_progress"): {},
+        ("draft", "in_progress"): {"reviewer_only": True},
         ("in_progress", "submitted"): {
             "actor_only": True,
             "check_completion": True,
@@ -13642,6 +13676,61 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             )
 
         return Response({"status": target})
+
+    @action(detail=True, methods=["get"])
+    def requirements_list(self, request, pk=None):
+        """Returns the scoped requirements list for this assignment.
+
+        Authorization is enforced by get_queryset() which filters
+        auditee-only users to their own assignments.
+        """
+        assignment = self.get_object()
+        compliance_assessment = assignment.compliance_assessment
+
+        assigned_ra_ids = set(
+            assignment.requirement_assessments.values_list("id", flat=True)
+        )
+
+        requirement_assessments_objects = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_assessments_objects = [
+            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+        ]
+
+        requirements_objects = list(
+            RequirementNode.objects.filter(framework=compliance_assessment.framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+        )
+        nodes_by_urn = {node.urn: node for node in requirements_objects}
+        for node in requirements_objects:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments_objects:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+
+        requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments_objects, many=True
+        ).data
+        requirements = RequirementNodeReadSerializer(
+            requirements_objects, many=True
+        ).data
+
+        return Response(
+            {
+                "requirements": requirements,
+                "requirement_assessments": requirement_assessments,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     @staticmethod
     def _send_transition_notification(assignment, transition_key, observation=""):

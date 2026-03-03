@@ -7266,6 +7266,12 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     )
 
     class Meta:
+        permissions = [
+            (
+                "transition_requirementassignment",
+                "Can transition requirement assignment status",
+            )
+        ]
         verbose_name = _("Requirement Assignment")
         verbose_name_plural = _("Requirement Assignments")
         ordering = ["created_at"]
@@ -7293,6 +7299,7 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
         verbose_name=_("Event actor"),
     )
     event_notes = models.TextField(
+        max_length=2000,
         null=True,
         blank=True,
         verbose_name=_("Event notes"),

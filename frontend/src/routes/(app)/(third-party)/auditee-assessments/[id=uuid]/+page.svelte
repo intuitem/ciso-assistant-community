@@ -51,6 +51,7 @@
 	let isReadOnly = $derived(
 		complianceAssessment.is_locked ||
 			complianceAssessment.status === 'in_review' ||
+			assignmentStatus === 'draft' ||
 			assignmentStatus === 'submitted' ||
 			assignmentStatus === 'closed'
 	);
@@ -385,6 +386,11 @@
 
 	// Keyboard navigation
 	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && showHistoryModal) {
+			event.preventDefault();
+			closeHistoryModal();
+			return;
+		}
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
 		if (event.key === 'ArrowRight' || event.key === 'n') {
@@ -783,7 +789,7 @@
 										form={scoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
-										scores_definition={data.scores.scores_definition}
+										scores_definition={complianceAssessment.scores_definition}
 										field="score"
 										label={complianceAssessment.show_documentation_score
 											? m.implementationScore()
@@ -819,7 +825,7 @@
 											form={docScoreForms[requirementAssessment.id]}
 											min_score={complianceAssessment.min_score}
 											max_score={complianceAssessment.max_score}
-											scores_definition={data.scores.scores_definition}
+											scores_definition={complianceAssessment.scores_definition}
 											field="documentation_score"
 											label={m.documentationScore()}
 											isDoc={true}

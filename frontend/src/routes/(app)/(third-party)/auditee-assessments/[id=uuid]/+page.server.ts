@@ -36,11 +36,13 @@ export const load = (async ({ fetch, params }) => {
 	}
 	const compliance_assessment = await res.json();
 
-	const [tableMode, scores] = await Promise.all(
-		[`${endpoint}requirements_list/?assignment=${assignmentId}`, `${endpoint}global_score/`].map(
-			(endpoint) => fetch(endpoint).then((res) => res.json())
-		)
+	const tableModeRes = await fetch(
+		`${BASE_API_URL}/requirement-assignments/${assignmentId}/requirements_list/`
 	);
+	if (!tableModeRes.ok) {
+		throw error(tableModeRes.status, tableModeRes.statusText);
+	}
+	const tableMode = await tableModeRes.json();
 
 	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
 	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
@@ -128,7 +130,6 @@ export const load = (async ({ fetch, params }) => {
 	return {
 		URLModel,
 		compliance_assessment,
-		scores,
 		requirement_assessments,
 		requirements,
 		measureModel,
