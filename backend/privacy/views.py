@@ -6,7 +6,6 @@ from core.views import (
     ExportMixin,
     escape_excel_formula,
 )
-import django_filters as df
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -347,19 +346,15 @@ class ProcessingViewSet(ExportMixin, BaseModelViewSet):
             for item in breach_types
         ]
 
-        # Aggregate right requests by request type (JSONField list)
-        request_type_counts = defaultdict(int)
-        for rr in RightRequest.objects.filter(
-            id__in=viewable_right_requests
-        ).values_list("request_type", flat=True):
-            if isinstance(rr, list):
-                for rt in rr:
-                    request_type_counts[rt] += 1
-            elif rr:
-                request_type_counts[rr] += 1
+        # Aggregate right requests by request type
+        request_types = (
+            RightRequest.objects.filter(id__in=viewable_right_requests)
+            .values("request_type")
+            .annotate(count=Count("id"))
+        )
         request_type_data = [
-            {"name": name, "value": count}
-            for name, count in request_type_counts.items()
+            {"name": item["request_type"], "value": item["count"]}
+            for item in request_types
         ]
 
         # Build Sankey diagram data: Personal Data → Processing → Legal Basis
@@ -475,35 +470,20 @@ class ProcessingNatureViewSet(BaseModelViewSet):
     search_fields = ["name"]
 
 
-class RightRequestFilter(df.FilterSet):
-    request_type = df.MultipleChoiceFilter(
-        choices=RightRequest.REQUEST_TYPE_CHOICES,
-        method="filter_request_type",
-    )
-
-    def filter_request_type(self, queryset, name, value):
-        if not value:
-            return queryset
-        # Use icontains on JSON text for SQLite compatibility
-        from django.db.models import Q
-
-        q = Q()
-        for v in value:
-            q |= Q(request_type__icontains=f'"{v}"')
-        return queryset.filter(q)
-
-    class Meta:
-        model = RightRequest
-        fields = ["name", "owner", "request_type", "status", "processings", "folder"]
-
-
 class RightRequestViewSet(BaseModelViewSet):
     """
     API endpoint that allows right requests to be viewed or edited.
     """
 
     model = RightRequest
-    filterset_class = RightRequestFilter
+    filterset_fields = [
+        "name",
+        "owner",
+        "request_type",
+        "status",
+        "processings",
+        "folder",
+    ]
 
     @action(detail=False, name="Get request type choices")
     def request_type(self, request):

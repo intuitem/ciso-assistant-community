@@ -390,9 +390,8 @@ class Command(BaseCommand):
                 ref_id=f"TEST-RR-{i + 1:04d}",
                 requested_on=requested_on,
                 due_date=due_date,
-                request_type=random.sample(
-                    [choice[0] for choice in RightRequest.REQUEST_TYPE_CHOICES],
-                    k=random.randint(1, 3),
+                request_type=random.choice(
+                    [choice[0] for choice in RightRequest.REQUEST_TYPE_CHOICES]
                 ),
                 status=random.choice(
                     [choice[0] for choice in RightRequest.STATUS_CHOICES]
@@ -579,8 +578,7 @@ class Command(BaseCommand):
             self.stdout.write(f"\nRight Requests by Type:")
             for req_type, req_label in RightRequest.REQUEST_TYPE_CHOICES:
                 count = RightRequest.objects.filter(
-                    name__startswith="TEST-",
-                    request_type__icontains=f'"{req_type}"',
+                    name__startswith="TEST-", request_type=req_type
                 ).count()
                 if count > 0:
                     self.stdout.write(f"  {req_label}: {count}")
