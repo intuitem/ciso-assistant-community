@@ -7,6 +7,8 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     OrganisationIssue,
+    RiskAssessment,
+    RiskScenario,
     TaskNode,
     TaskTemplate,
     ValidationFlow,
@@ -735,6 +737,38 @@ def send_compliance_assessment_assignment_notification(
 
 
 @task()
+def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails):
+    """Send notification when RiskScenario is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        scenario = RiskScenario.objects.get(id=scenario_id)
+    except RiskScenario.DoesNotExist:
+        logger.error(f"RiskScenario with id {scenario_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "scenario_name": scenario.name,
+        "scenario_description": scenario.description or "No description provided",
+        "scenario_ref_id": scenario.ref_id or "N/A",
+        "risk_assessment_name": scenario.risk_assessment.name
+        if scenario.risk_assessment
+        else "N/A",
+        "scenario_treatment": scenario.get_treatment_display(),
+        "folder_name": scenario.folder.name if scenario.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [scenario]):
+            rendered = render_email_template("risk_scenario_assignment", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
 def send_compliance_assessment_due_soon_notification(author_email, assessments, days):
     """Send notification when ComplianceAssessment is due soon"""
     if not check_email_configuration(author_email, assessments):
@@ -978,6 +1012,68 @@ def lock_overdue_compliance_assessments():
         logger.info(f"Successfully locked {count} overdue compliance assessments")
     else:
         logger.debug("No overdue compliance assessments found to lock")
+
+
+# @db_periodic_task(crontab(minute="*/5"))  # for testing
+@db_periodic_task(crontab(hour="2", minute="45"))
+def auto_sync_assessments():
+    """Automatically sync to actions for assessments with auto_sync enabled, skipping locked ones"""
+    risk_assessments = RiskAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ra_count = 0
+    for assessment in risk_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(
+                reset_residual=False, dry_run=False
+            )
+            if changes:
+                ra_count += 1
+                logger.info(
+                    "Auto-synced risk assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync risk assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ca_count = 0
+    for assessment in compliance_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(dry_run=False)
+            if changes:
+                ca_count += 1
+                logger.info(
+                    "Auto-synced compliance assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync compliance assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    if ra_count > 0 or ca_count > 0:
+        logger.info(
+            f"Auto-sync completed: {ra_count} risk assessments, {ca_count} compliance assessments synced"
+        )
+    else:
+        logger.debug("Auto-sync completed: no assessments needed syncing")
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
