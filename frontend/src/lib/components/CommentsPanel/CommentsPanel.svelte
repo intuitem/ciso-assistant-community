@@ -103,12 +103,17 @@
 	}
 
 	async function fetchComments() {
+		loading = true;
 		try {
 			const res = await fetch(`/fe-api/comments?${parentType}=${parentId}&ordering=created_at`);
 			if (res.ok) {
 				const data = await res.json();
 				comments = data.results ?? [];
+			} else {
+				comments = [];
 			}
+		} catch {
+			comments = [];
 		} finally {
 			loading = false;
 		}

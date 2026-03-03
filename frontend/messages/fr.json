@@ -3532,7 +3532,7 @@
 	"hoursAgo": "il y a {count} h",
 	"daysAgo": "il y a {count} j",
 	"processed": "traité",
-	"showProcessed": "Afficher traités ({count})",
-	"hideProcessed": "Masquer traités",
+	"showProcessed": "Afficher les commentaires traités ({count})",
+	"hideProcessed": "Masquer les commentaires traités",
 	"ctrlEnterToPost": "Ctrl+Entrée pour publier"
 }
