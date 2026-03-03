@@ -4,12 +4,12 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const endpoint = `${BASE_API_URL}/comments/${url.search}`;
 	const res = await fetch(endpoint);
-	const responseData = await res.json();
+	const responseData = await res.text();
 
-	return new Response(JSON.stringify(responseData), {
+	return new Response(responseData, {
 		status: res.status,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
 		}
 	});
 };
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 	return new Response(responseData, {
 		status: res.status,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
 		}
 	});
 };

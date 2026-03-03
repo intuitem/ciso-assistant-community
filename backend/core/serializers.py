@@ -3076,6 +3076,24 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
 
 
 class CommentWriteSerializer(BaseModelSerializer):
+    PARENT_FIELDS = [
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    ]
+
+    def validate(self, data):
+        # Only enforce the one-parent constraint on creation, not partial updates
+        if self.instance is None:
+            parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
+            if parent_count != 1:
+                raise serializers.ValidationError(
+                    "Exactly one parent (requirement_assessment, risk_scenario, "
+                    "applied_control, or finding) must be set."
+                )
+        return data
+
     class Meta:
         model = Comment
         exclude = ["created_at", "updated_at", "is_tainted", "author", "folder"]

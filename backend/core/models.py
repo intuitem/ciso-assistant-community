@@ -4288,6 +4288,12 @@ class Comment(AbstractBaseModel, FolderMixin):
         )
 
     def save(self, *args, **kwargs):
+        content_object = self.parent_object
+        if content_object is None:
+            raise ValidationError(
+                _("Comment must be attached to exactly one parent object.")
+            )
+
         if not self._state.adding and self.pk:
             try:
                 old = Comment.objects.get(pk=self.pk)
@@ -4295,7 +4301,7 @@ class Comment(AbstractBaseModel, FolderMixin):
                     self.is_tainted = True
             except Comment.DoesNotExist:
                 pass
-        self.folder = self.parent_object.folder
+        self.folder = content_object.folder
         super().save(*args, **kwargs)
 
     def __str__(self):

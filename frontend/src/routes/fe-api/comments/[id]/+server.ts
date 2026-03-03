@@ -16,7 +16,7 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	return new Response(responseData, {
 		status: res.status,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
 		}
 	});
 };
@@ -35,7 +35,7 @@ export const DELETE: RequestHandler = async ({ fetch, params }) => {
 	return new Response(responseData, {
 		status: res.status,
 		headers: {
-			'Content-Type': 'application/json'
+			'Content-Type': res.headers.get('Content-Type') ?? 'application/json'
 		}
 	});
 };

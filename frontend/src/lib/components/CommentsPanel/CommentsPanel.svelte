@@ -2,6 +2,11 @@
 	import { page } from '$app/state';
 	import { m } from '$paraglide/messages';
 	import { browser } from '$app/environment';
+	import {
+		getModalStore,
+		type ModalSettings,
+		type ModalStore
+	} from '$lib/components/Modals/stores';
 
 	type CommentParentType =
 		| 'requirement_assessment'
@@ -47,6 +52,7 @@
 
 	const currentUserId: string = page.data.user?.id ?? '';
 	const isAdmin: boolean = page.data.user?.is_admin ?? false;
+	const modalStore: ModalStore = getModalStore();
 
 	const avatarColors = [
 		'bg-violet-100 text-violet-700',
@@ -86,13 +92,13 @@
 		const date = new Date(dateStr).getTime();
 		const seconds = Math.floor((now - date) / 1000);
 
-		if (seconds < 60) return 'just now';
+		if (seconds < 60) return m.justNow();
 		const minutes = Math.floor(seconds / 60);
-		if (minutes < 60) return `${minutes}m ago`;
+		if (minutes < 60) return m.minutesAgo({ count: String(minutes) });
 		const hours = Math.floor(minutes / 60);
-		if (hours < 24) return `${hours}h ago`;
+		if (hours < 24) return m.hoursAgo({ count: String(hours) });
 		const days = Math.floor(hours / 24);
-		if (days < 30) return `${days}d ago`;
+		if (days < 30) return m.daysAgo({ count: String(days) });
 		return new Date(dateStr).toLocaleDateString();
 	}
 
@@ -173,12 +179,20 @@
 		await fetchComments();
 	}
 
-	async function deleteComment(commentId: string) {
-		if (!confirm(m.deleteCommentConfirmation())) return;
-		await fetch(`/fe-api/comments/${commentId}`, {
-			method: 'DELETE'
-		});
-		await fetchComments();
+	function deleteComment(commentId: string) {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.deleteCommentConfirmation(),
+			buttonTextConfirm: m.delete(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				await fetch(`/fe-api/comments/${commentId}`, {
+					method: 'DELETE'
+				});
+				await fetchComments();
+			}
+		};
+		modalStore.trigger(modal);
 	}
 
 	function canEdit(comment: Comment): boolean {
@@ -223,7 +237,7 @@
 				onclick={() => (hideProcessed = !hideProcessed)}
 			>
 				<i class="fa-solid {hideProcessed ? 'fa-eye' : 'fa-eye-slash'} text-[10px]"></i>
-				{hideProcessed ? `Show processed (${processedCount})` : 'Hide processed'}
+				{hideProcessed ? m.showProcessed({ count: String(processedCount) }) : m.hideProcessed()}
 			</button>
 		{/if}
 	</div>
@@ -288,7 +302,7 @@
 										text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200"
 									>
 										<i class="fa-solid fa-check text-[8px]"></i>
-										processed
+										{m.processed()}
 									</span>
 								{/if}
 							</div>
@@ -309,14 +323,14 @@
 											disabled={submitting || !editBody.trim()}
 											onclick={() => saveEdit(comment.id)}
 										>
-											Save
+											{m.save()}
 										</button>
 										<button
 											class="btn btn-sm text-xs rounded-md text-surface-500
 											hover:text-surface-700 hover:bg-surface-100 transition-colors duration-150"
 											onclick={cancelEdit}
 										>
-											Cancel
+											{m.cancel()}
 										</button>
 									</div>
 								</div>
@@ -388,7 +402,7 @@
 			<div class="flex items-center justify-between mt-1">
 				<span class="text-[10px] text-surface-400">
 					{#if composerFocused || newCommentBody.trim()}
-						Ctrl+Enter to post
+						{m.ctrlEnterToPost()}
 					{/if}
 				</span>
 				<button
