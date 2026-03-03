@@ -14,15 +14,11 @@ export const load = (async ({ fetch, params }) => {
 	const assignmentId = params.id;
 
 	// Fetch the assignment
-	const assignmentRes = await fetch(`${BASE_API_URL}/requirement-assignments/?id=${assignmentId}`);
+	const assignmentRes = await fetch(`${BASE_API_URL}/requirement-assignments/${assignmentId}/`);
 	if (!assignmentRes.ok) {
-		throw error(assignmentRes.status, 'Failed to load assignment');
+		throw error(assignmentRes.status, assignmentRes.statusText);
 	}
-	const assignmentData = await assignmentRes.json();
-	const assignmentResult = assignmentData.results?.[0];
-	if (!assignmentResult) {
-		throw error(404, 'Assignment not found');
-	}
+	const assignmentResult = await assignmentRes.json();
 	const assignment = {
 		id: assignmentResult.id,
 		status: assignmentResult.status,

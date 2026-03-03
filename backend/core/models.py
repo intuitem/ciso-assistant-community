@@ -7283,6 +7283,7 @@ class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
     )
     event_type = models.CharField(
         max_length=50,
+        choices=RequirementAssignment.Status.choices,
         verbose_name=_("Event type"),
     )
     event_actor = models.ForeignKey(

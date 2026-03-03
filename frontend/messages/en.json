@@ -693,6 +693,7 @@
 	"userHasNoRights": ". This user has no default permissions. Remember to edit their user groups",
 	"createdUserWillHaveNoRights": "Users have no default permission; remember to edit their user groups",
 	"anErrorOccurred": "An error has occurred",
+	"submissionFailed": "Failed to submit",
 	"attachmentDeleted": "The attachment has been successfully deleted",
 	"librarySuccessfullyLoaded": "The library has been successfully loaded",
 	"libraryStoredForUpdate": "A new version of the library has been stored. Please trigger the update to apply it.",

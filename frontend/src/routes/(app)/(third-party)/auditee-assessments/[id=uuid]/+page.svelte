@@ -119,7 +119,7 @@
 						});
 					} else {
 						toastStore.trigger({
-							message: result.data?.submitBody?.error || 'Failed to submit',
+							message: result.data?.submitBody?.error || m.submissionFailed(),
 							background: 'variant-filled-error',
 							timeout: 5000
 						});
@@ -127,7 +127,7 @@
 				} catch (error) {
 					console.error('Error submitting assignment:', error);
 					toastStore.trigger({
-						message: 'An error occurred',
+						message: m.anErrorOccurred(),
 						background: 'variant-filled-error',
 						timeout: 3000
 					});

@@ -1121,7 +1121,7 @@ def send_assignment_submitted_notification(assignment_id):
     }
 
     # Notify reviewers, fallback to authors
-    reviewers = ca.reviewers.all() if hasattr(ca, "reviewers") else None
+    reviewers = ca.reviewers.all()
     if not reviewers or not reviewers.exists():
         reviewers = ca.authors.all()
 
