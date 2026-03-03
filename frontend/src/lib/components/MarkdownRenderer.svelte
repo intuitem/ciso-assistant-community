@@ -36,7 +36,9 @@
 			'img',
 			'hr',
 			'br',
-			'input'
+			'input',
+			'abbr',
+			'sup'
 		],
 		allowedAttributes: {
 			a: ['href', 'name', 'target', 'rel'],
@@ -44,7 +46,9 @@
 			code: ['class'],
 			input: ['type', 'checked', 'disabled'],
 			li: ['class'],
-			ul: ['class']
+			ul: ['class'],
+			abbr: ['title'],
+			sup: ['class']
 		},
 		allowedSchemes: ['http', 'https'],
 		transformTags: {
