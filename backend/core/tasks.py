@@ -7,6 +7,7 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     OrganisationIssue,
+    RequirementAssignment,
     RiskAssessment,
     RiskScenario,
     TaskNode,
@@ -1126,3 +1127,107 @@ def mark_expired_evidences():
         logger.info(f"Successfully marked {count} evidences as expired")
     else:
         logger.debug("No expired evidences found to mark")
+
+
+@task()
+def send_assignment_activated_notification(assignment_id):
+    """Send notification when a RequirementAssignment is started (draft -> in_progress)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+            "compliance_assessment__framework",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "framework_name": ca.framework.name if ca.framework else "N/A",
+        "due_date": ca.due_date.strftime("%Y-%m-%d") if ca.due_date else "Not set",
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template("assignment_activated", context)
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"], rendered["body"], email
+                    )
+
+
+@task()
+def send_assignment_submitted_notification(assignment_id):
+    """Send notification when a RequirementAssignment is submitted for review."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    actor_names = ", ".join(str(a) for a in assignment.actor.all())
+    requirement_count = assignment.requirement_assessments.count()
+
+    context = {
+        "assessment_name": ca.name,
+        "actor_names": actor_names,
+        "requirement_count": str(requirement_count),
+    }
+
+    # Notify reviewers, fallback to authors
+    reviewers = ca.reviewers.all()
+    if not reviewers or not reviewers.exists():
+        reviewers = ca.authors.all()
+
+    recipient_emails = set()
+    for reviewer in reviewers:
+        for email in reviewer.get_emails():
+            if email:
+                recipient_emails.add(email)
+
+    for email in recipient_emails:
+        if check_email_configuration(email, [assignment]):
+            rendered = render_email_template("assignment_submitted", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
+def send_assignment_reviewed_notification(
+    assignment_id, decision, reviewer_observation=""
+):
+    """Send notification when a RequirementAssignment is reviewed (closed, reopened, or changes_requested)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "decision": decision.replace("_", " ").title(),
+        "reviewer_observation": reviewer_observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template("assignment_reviewed", context)
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"], rendered["body"], email
+                    )
