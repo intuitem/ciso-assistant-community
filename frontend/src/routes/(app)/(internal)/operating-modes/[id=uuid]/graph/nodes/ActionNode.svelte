@@ -38,10 +38,8 @@
 	onmouseenter={() => (hovered = true)}
 	onmouseleave={() => (hovered = false)}
 >
-	<!-- Stage accent bar -->
 	<div class="absolute left-0 top-0 bottom-0 w-1 rounded-l-base {stageClass.accent}"></div>
 
-	<!-- Content -->
 	<div class="flex items-center gap-2">
 		{#if data.iconClass}
 			<i class="{data.iconClass} text-[11px] text-surface-500"></i>
@@ -49,7 +47,6 @@
 		<span class="text-[11px] leading-tight text-surface-900 truncate">{data.label}</span>
 	</div>
 
-	<!-- Delete button on hover (edit mode only) -->
 	{#if hovered && !editor?.readonly}
 		<button
 			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
@@ -59,7 +56,6 @@
 		</button>
 	{/if}
 
-	<!-- Handles -->
 	<Handle
 		type="target"
 		position={Position.Left}

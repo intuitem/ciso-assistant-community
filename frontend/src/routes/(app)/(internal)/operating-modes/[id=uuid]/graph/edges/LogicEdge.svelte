@@ -37,7 +37,6 @@
 		})
 	);
 
-	// Position the label at the convergence point: just before the target handle
 	const convergenceX = $derived(targetX - 35);
 	const convergenceY = $derived(targetY);
 

@@ -22,8 +22,6 @@
 	import LogicEdgeComponent from './edges/LogicEdge.svelte';
 	import EditorSidebar from './EditorSidebar.svelte';
 
-	// ---- Types ----
-
 	interface ElementaryActionItem {
 		id: string;
 		name: string;
@@ -38,8 +36,6 @@
 		position_x?: number;
 		position_y?: number;
 	}
-
-	// ---- Props ----
 
 	interface GraphColumns {
 		[stageId: string]: { x: number; y: number; width: number; height: number };
@@ -62,8 +58,6 @@
 		onSaved,
 		readonly = false
 	}: Props = $props();
-
-	// ---- Constants ----
 
 	const COLUMN_GAP = 350;
 	const COLUMN_WIDTH = 280;
@@ -116,16 +110,12 @@
 		logic: LogicEdgeComponent
 	};
 
-	// ---- State ----
-
 	let nodes = $state<Node[]>([]);
 	let edges = $state<Edge[]>([]);
 	let logicOps = $state<Map<string, 'AND' | 'OR'>>(new Map());
 	let saving = $state(false);
 	let dirty = $state(false);
 	let dragOverStage = $state<number | null>(null);
-
-	// ---- Context for child components (ActionNode, StageColumnNode) ----
 
 	setContext('killChainEditor', {
 		get dragOverStage() {
@@ -139,14 +129,11 @@
 		markDirty: () => (dirty = true)
 	});
 
-	// ---- Viewport persistence (localStorage, personal) ----
-
 	const VIEWPORT_KEY = `mo-graph-viewport-${operatingModeId}`;
 	let flowInstance: ReturnType<typeof useSvelteFlow> | null = null;
 
 	function handleFlowInit() {
 		flowInstance = useSvelteFlow();
-		// Delay fitView to ensure nodes are rendered in the DOM
 		setTimeout(() => {
 			const saved = localStorage.getItem(VIEWPORT_KEY);
 			if (saved && !readonly) {
@@ -163,8 +150,6 @@
 		localStorage.setItem(VIEWPORT_KEY, JSON.stringify(vp));
 	}
 
-	// ---- Stage helpers ----
-
 	function getStageNumber(attackStage: string | number): number {
 		if (typeof attackStage === 'number') return attackStage;
 		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
@@ -173,8 +158,6 @@
 		if (attackStage.includes('Exploitation') || attackStage === 'ebiosExploitation') return 3;
 		return 0;
 	}
-
-	// ---- Build stage column parent nodes ----
 
 	function buildStageColumnNodes(): Node[] {
 		return STAGE_CONFIG.map((config, stage) => {
@@ -193,8 +176,6 @@
 			};
 		});
 	}
-
-	// ---- Initialize from existing kill chain ----
 
 	function initFromKillChain() {
 		const flowNodes: Node[] = buildStageColumnNodes();
@@ -219,7 +200,6 @@
 				ops.set(eaId, step.logic_operator as 'AND' | 'OR');
 			}
 
-			// Use saved position if available, otherwise auto-layout
 			const hasSavedPosition = (step.position_x ?? 0) !== 0 || (step.position_y ?? 0) !== 0;
 			const posX = hasSavedPosition ? step.position_x! : NODE_PADDING_X;
 			const posY = hasSavedPosition ? step.position_y! : NODE_PADDING_Y + count * NODE_GAP_Y;
@@ -266,10 +246,8 @@
 		logicOps = ops;
 	}
 
-	// Initialize nodes/edges immediately
 	initFromKillChain();
 
-	// Update node interactivity when readonly changes
 	let prevReadonly = readonly;
 	$effect(() => {
 		if (readonly !== prevReadonly) {
@@ -282,8 +260,6 @@
 		}
 	});
 
-	// Re-fit viewport after sidebar transition when toggling readonly,
-	// and also on initial mount to ensure nodes are visible
 	$effect(() => {
 		void readonly;
 		const timer = setTimeout(() => {
@@ -292,7 +268,6 @@
 		return () => clearTimeout(timer);
 	});
 
-	// Re-fit graph before browser print to ensure proper layout
 	$effect(() => {
 		const handleBeforePrint = () => {
 			flowInstance?.fitView({ padding: 0.25 });
@@ -301,13 +276,9 @@
 		return () => window.removeEventListener('beforeprint', handleBeforePrint);
 	});
 
-	// ---- Derived ----
-
 	const placedNodeIds = $derived(
 		new Set(nodes.filter((n) => n.type === 'action').map((n) => n.id))
 	);
-
-	// ---- Connection validation ----
 
 	function isValidConnection(connection: Connection): boolean {
 		const sourceNode = nodes.find((n) => n.id === connection.source);
@@ -324,8 +295,6 @@
 
 		return true;
 	}
-
-	// ---- Node logic operator helpers ----
 
 	function updateNodeLogicData(nodeId: string) {
 		const incomingEdges = edges.filter((e) => e.target === nodeId);
@@ -360,12 +329,9 @@
 		);
 	}
 
-	// ---- Event handlers ----
-
 	async function handleConnect(connection: Connection) {
 		dirty = true;
 
-		// Update the auto-created edge to use 'logic' type with proper data
 		const targetNode = nodes.find((n) => n.id === connection.target);
 		const targetStage = (targetNode?.data as any)?.stage ?? 0;
 		edges = edges.map((e) =>
@@ -462,8 +428,6 @@
 		dirty = true;
 	}
 
-	// ---- Drag & Drop from sidebar ----
-
 	function handleDragOver(event: DragEvent) {
 		event.preventDefault();
 		if (event.dataTransfer) {
@@ -517,8 +481,6 @@
 		dirty = true;
 	}
 
-	// ---- Save ----
-
 	function buildKillChainStepsJson(): string {
 		const actionNodes = nodes.filter((n) => n.type === 'action');
 
@@ -560,16 +522,13 @@
 </script>
 
 <div class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200">
-	<!-- Sidebar: only in edit mode, with slide transition -->
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
 			<EditorSidebar {elementaryActions} {placedNodeIds} />
 		</div>
 	{/if}
 
-	<!-- Canvas area -->
 	<div class="flex-1 flex flex-col overflow-hidden">
-		<!-- Toolbar: only in edit mode, with slide transition -->
 		{#if !readonly}
 			<div transition:slide={{ duration: 200 }}>
 				<div
@@ -621,7 +580,6 @@
 			</div>
 		{/if}
 
-		<!-- Svelte Flow Canvas -->
 		<div class="flex-1 min-h-0">
 			<SvelteFlow
 				bind:nodes

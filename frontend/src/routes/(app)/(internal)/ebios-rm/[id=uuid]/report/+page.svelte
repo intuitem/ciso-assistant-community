@@ -1523,7 +1523,6 @@
 			page-break-before: always !important;
 		}
 
-		/* Preserve SvelteFlow container height in print */
 		[data-chart^='operating-mode-'] {
 			height: 400px !important;
 			max-height: 400px !important;
@@ -1540,7 +1539,6 @@
 			transform: none !important;
 		}
 
-		/* Hide SvelteFlow chrome in print */
 		:global(.svelte-flow__background),
 		:global(.svelte-flow__controls),
 		:global(.svelte-flow__minimap),
