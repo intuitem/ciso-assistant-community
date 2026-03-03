@@ -12992,7 +12992,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                task_template = TaskTemplate.objects.get(id=task_template_id)
+                task_template = self.get_queryset().get(id=task_template_id)
                 try:
                     task_node, created = TaskNode.objects.get_or_create(
                         task_template=task_template,
@@ -13044,7 +13044,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     end_date = start_date
                 # Generate the task nodes
                 self.task_calendar(
-                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    task_templates=self.get_queryset().filter(id=task_template.id),
                     start=start_date,
                     end=end_date,
                 )
@@ -13069,7 +13069,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(enabled=True),
+                task_templates=self.get_queryset().filter(enabled=True),
                 start=start,
                 end=end,
             )
