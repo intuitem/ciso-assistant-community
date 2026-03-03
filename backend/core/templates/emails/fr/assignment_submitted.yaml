@@ -1,0 +1,14 @@
+subject: "CISO Assistant : Affectation soumise pour '${assessment_name}'"
+body: |
+  Bonjour,
+
+  Une affectation a été soumise pour revue sur l'audit suivant :
+
+  - Audit : ${assessment_name}
+  - Soumis par : ${actor_names}
+  - Exigences évaluées : ${requirement_count}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour examiner la soumission :
+  ${ciso_assistant_url}
+
+  Merci.

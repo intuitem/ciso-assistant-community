@@ -7242,6 +7242,13 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     Used to delegate audit work within a compliance assessment to specific users or teams.
     """
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        SUBMITTED = "submitted", _("Submitted")
+        CLOSED = "closed", _("Closed")
+        CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,
@@ -7259,8 +7266,20 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Requirement Assessments"),
         blank=True,
     )
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
 
     class Meta:
+        permissions = [
+            (
+                "transition_requirementassignment",
+                "Can transition requirement assignment status",
+            )
+        ]
         verbose_name = _("Requirement Assignment")
         verbose_name_plural = _("Requirement Assignments")
         ordering = ["created_at"]
@@ -7268,6 +7287,39 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
+class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
+    assignment = models.ForeignKey(
+        RequirementAssignment,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=50,
+        choices=RequirementAssignment.Status.choices,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        max_length=2000,
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+
+    class Meta:
+        verbose_name = _("Requirement assignment event")
+        verbose_name_plural = _("Requirement assignment events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class FindingsAssessment(Assessment):
