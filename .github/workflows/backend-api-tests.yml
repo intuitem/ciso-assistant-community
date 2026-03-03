@@ -153,7 +153,7 @@ jobs:
           JOB_INDEX: ${{ strategy.job-index }}
         run: |
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
-          poetry run pytest "$TEST_FILE" --reuse-db --html=pytest-report-"$JOB_INDEX".html --self-contained-html
+          poetry run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
 
       - name: Prepare Artifact Name
         if: ${{ !cancelled() }}
