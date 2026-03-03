@@ -768,6 +768,7 @@
 	"outdated": "Outdated",
 	"flashMode": "Flash mode",
 	"kanbanMode": "Kanban mode",
+	"modes": "Modes",
 	"noControlsInCategory": "No controls in this category",
 	"dropHereToChangeStatus": "Drop here to change status",
 	"goBackToAudit": "Go back to the audit",
