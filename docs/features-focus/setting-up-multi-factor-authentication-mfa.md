@@ -52,3 +52,11 @@ After enabling MFA, you'll receive a set of recovery codes. These codes are cruc
 
 * Test your MFA setup by logging out and back in
 * Reach out for support if you encounter any issues during setup
+
+
+
+## Enforce MFA for all users
+
+Starting v3.13.0 you can now enforce MFA for all users by enabling this flag. Users will see a persistent redirct to MFA configuration page until it is done. The feature doesn't interfere with SSO as long as the user doesn't have both a local account andd an SSO one.
+
+<figure><img src="../.gitbook/assets/image (81).png" alt=""><figcaption></figcaption></figure>
