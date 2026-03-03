@@ -890,7 +890,59 @@ class RiskScenarioWriteSerializer(BaseModelSerializer):
         # Set folder from risk_assessment before the permission check in parent class
         if "risk_assessment" in validated_data and validated_data["risk_assessment"]:
             validated_data["folder"] = validated_data["risk_assessment"].folder
-        return super().create(validated_data)
+
+        owner_data = validated_data.get("owner", [])
+        risk_scenario = super().create(validated_data)
+
+        # Send notification to newly assigned owners
+        if owner_data:
+            self._send_assignment_notifications(
+                risk_scenario, [actor.id for actor in owner_data]
+            )
+
+        return risk_scenario
+
+    def update(self, instance, validated_data):
+        # Track old owners before update
+        old_owner_ids = set(instance.owner.values_list("id", flat=True))
+
+        updated_instance = super().update(instance, validated_data)
+
+        # Get new owners after update
+        new_owner_ids = set(updated_instance.owner.values_list("id", flat=True))
+
+        # Send notifications only to newly assigned owners
+        newly_assigned_ids = new_owner_ids - old_owner_ids
+        if newly_assigned_ids:
+            self._send_assignment_notifications(
+                updated_instance, list(newly_assigned_ids)
+            )
+
+        return updated_instance
+
+    def _send_assignment_notifications(self, risk_scenario, owner_ids):
+        """Send assignment notifications to the specified owners"""
+        if not owner_ids:
+            return
+
+        try:
+            from core.models import Actor
+            from .tasks import send_risk_scenario_assignment_notification
+
+            assigned_actors = Actor.objects.filter(id__in=owner_ids)
+            assigned_emails = []
+            for actor in assigned_actors:
+                assigned_emails.extend(actor.get_emails())
+
+            if assigned_emails:
+                # Queue the task for async execution
+                send_risk_scenario_assignment_notification(
+                    risk_scenario.id, assigned_emails
+                )
+        except Exception as e:
+            logger.error(
+                f"Failed to send RiskScenario assignment notification: {str(e)}"
+            )
 
     class Meta:
         model = RiskScenario
@@ -2376,6 +2428,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
+        # Assignment-level locking for auditee users
+        request = self.context.get("request")
+        if request and self.instance and compliance_assessment:
+            from core.utils import get_auditee_filtered_folder_ids
+
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+                locked_assignment = self.instance.assignments.filter(
+                    status__in=["submitted", "closed"]
+                ).first()
+                if locked_assignment:
+                    raise serializers.ValidationError(
+                        "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
+
         # Validate extended_result against result
         extended_result = attrs.get("extended_result")
         if extended_result is None and self.instance:
@@ -2587,11 +2654,20 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class RequirementAssignmentEventSerializer(BaseModelSerializer):
+    event_actor = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+
+    class Meta:
+        model = RequirementAssignmentEvent
+        fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
+
+
 class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = RequirementAssignment
@@ -2599,6 +2675,11 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssignmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+        read_only_fields = ["status"]
+
     def validate(self, attrs):
         """
         Validate that requirement assessments belong to the specified compliance assessment
@@ -2639,10 +2720,6 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                 )
 
         return super().validate(attrs)
-
-    class Meta:
-        model = RequirementAssignment
-        fields = "__all__"
 
 
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
