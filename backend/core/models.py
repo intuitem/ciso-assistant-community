@@ -151,6 +151,131 @@ def _create_questions_from_data(requirement_node, questions_data):
             )
 
 
+def _sync_questions_from_data(requirement_node, questions_data):
+    """Sync Question and QuestionChoice objects for a RequirementNode.
+
+    For new nodes this behaves like a pure create. For existing nodes it
+    upserts questions by URN and choices by ref_id, then prunes stale rows.
+    """
+    from core.models import Question, QuestionChoice
+
+    existing_questions = {
+        q.urn: q for q in requirement_node.questions.prefetch_related("choices").all()
+    }
+    incoming_urns = set()
+
+    for order, (q_urn, q_data) in enumerate(questions_data.items()):
+        incoming_urns.add(q_urn)
+        raw_type = q_data.get("type", "text")
+        q_type = "unique_choice" if raw_type == "single_choice" else raw_type
+        parts = q_urn.split(":")
+        q_ref_id = parts[-1] if parts else q_urn
+
+        question_fields = {
+            "ref_id": q_ref_id,
+            "annotation": q_data.get("text", ""),
+            "type": q_type,
+            "config": q_data.get("config"),
+            "depends_on": q_data.get("depends_on"),
+            "order": order,
+            "weight": q_data.get("weight", 1),
+            "translations": q_data.get("translations"),
+        }
+
+        if q_urn in existing_questions:
+            question = existing_questions[q_urn]
+            for attr, value in question_fields.items():
+                setattr(question, attr, value)
+            question.save()
+        else:
+            question = Question.objects.create(
+                requirement_node=requirement_node,
+                urn=q_urn,
+                folder=requirement_node.folder,
+                is_published=True,
+                **question_fields,
+            )
+
+        # --- sync choices ---
+        existing_choices_by_ref = {}
+        existing_null_choices = []
+        for c in question.choices.all():
+            if c.ref_id is not None:
+                existing_choices_by_ref[c.ref_id] = c
+            else:
+                existing_null_choices.append(c)
+
+        incoming_ref_ids = set()
+        incoming_null_count = 0
+        incoming_choices = q_data.get("choices", [])
+
+        for c_order, choice in enumerate(incoming_choices):
+            c_urn = choice.get("urn", "")
+            c_parts = c_urn.split(":")
+            c_ref_id = c_parts[-1] if c_parts else c_urn
+            c_ref_id = c_ref_id or None
+
+            compute_result = choice.get("compute_result")
+            if compute_result is not None:
+                compute_result = str(compute_result).lower()
+
+            choice_fields = {
+                "annotation": choice.get("value", ""),
+                "add_score": choice.get("add_score"),
+                "compute_result": compute_result,
+                "order": c_order,
+                "description": choice.get("description"),
+                "color": choice.get("color"),
+                "select_implementation_groups": choice.get(
+                    "select_implementation_groups"
+                ),
+                "translations": choice.get("translations"),
+            }
+
+            if c_ref_id is not None:
+                incoming_ref_ids.add(c_ref_id)
+                if c_ref_id in existing_choices_by_ref:
+                    existing_choice = existing_choices_by_ref[c_ref_id]
+                    for attr, value in choice_fields.items():
+                        setattr(existing_choice, attr, value)
+                    existing_choice.save()
+                else:
+                    QuestionChoice.objects.create(
+                        question=question,
+                        ref_id=c_ref_id,
+                        folder=requirement_node.folder,
+                        is_published=True,
+                        **choice_fields,
+                    )
+            else:
+                incoming_null_count += 1
+                QuestionChoice.objects.create(
+                    question=question,
+                    ref_id=None,
+                    folder=requirement_node.folder,
+                    is_published=True,
+                    **choice_fields,
+                )
+
+        # Delete choices with ref_ids no longer in incoming data
+        stale_ref_ids = set(existing_choices_by_ref.keys()) - incoming_ref_ids
+        if stale_ref_ids:
+            question.choices.filter(ref_id__in=stale_ref_ids).delete()
+
+        # Replace null-ref_id choices: delete old ones (new ones were created above)
+        if existing_null_choices:
+            question.choices.filter(
+                pk__in=[c.pk for c in existing_null_choices]
+            ).delete()
+
+    # Delete questions whose URNs are no longer in the incoming data
+    stale_urns = set(existing_questions.keys()) - incoming_urns
+    if stale_urns:
+        Question.objects.filter(
+            requirement_node=requirement_node, urn__in=stale_urns
+        ).delete()
+
+
 ########################### Referential objects #########################
 
 
@@ -879,7 +1004,14 @@ class LibraryUpdater:
                     requirement_node_dict = {
                         k: v
                         for k, v in requirement_node.items()
-                        if k not in ["urn", "depth", "reference_controls", "threats"]
+                        if k
+                        not in [
+                            "urn",
+                            "depth",
+                            "reference_controls",
+                            "threats",
+                            "questions",
+                        ]
                     }
                     if requirement_node_dict.get("parent_urn"):
                         requirement_node_dict["parent_urn"] = requirement_node_dict[
@@ -904,11 +1036,6 @@ class LibraryUpdater:
                             **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
-                        # Create questions from the requirement_node data
-                        if questions:
-                            _create_questions_from_data(
-                                requirement_node_object, questions
-                            )
                         for ca in compliance_assessments:
                             requirement_assessment_objects_to_create.append(
                                 RequirementAssessment(
@@ -924,6 +1051,10 @@ class LibraryUpdater:
                                     ),
                                 )
                             )
+
+                    # Sync questions for both new and existing nodes
+                    if questions:
+                        _sync_questions_from_data(requirement_node_object, questions)
 
                     # update answers or score for each ra for the current requirement_node, when relevant
                     for ra in existing_requirement_assessment_objects.get(urn, []):
