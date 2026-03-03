@@ -3,6 +3,7 @@ import re
 import pandas as pd
 import string
 import requests
+import html
 from tqdm import tqdm
 
 # ========= CONFIG =========
@@ -112,12 +113,19 @@ def render_inline_markdown(node, note_refs: set[str]) -> str:
         if footnote_match:
             footnote_num = footnote_match.group(1)
             note_refs.add(footnote_num)
-            return f"({footnote_num})"
+            return f"[{footnote_num}]"
         if href.startswith("#") or href.lower().startswith("file://"):
             return f"**{label}**"
         if href:
             return f"[{label}]({href})"
         return label
+
+    if node.name == "abbr":
+        title = html.escape((node.get("title") or "").strip(), quote=True)
+        label = normalize_inline_text(
+            "".join(render_inline_markdown(c, note_refs) for c in node.contents)
+        )
+        return f'<abbr title="{title}">{label}</abbr>'
 
     return "".join(render_inline_markdown(c, note_refs) for c in node.contents)
 
@@ -264,7 +272,7 @@ def build_annotation(note_refs: set[str], footnotes_map: dict[str, str]) -> str:
     for num in sorted(note_refs, key=lambda x: int(x)):
         text = footnotes_map.get(num, "")
         if text:
-            parts.append(f"({num}) {text}")
+            parts.append(f"[{num}] {text}")
     return "\n\n".join(parts)
 
 
@@ -374,7 +382,9 @@ def parse_requirement_detail(details_tag: Tag, rows, footnotes_map: dict[str, st
             alpha = string.ascii_uppercase[idx]
             ref_a = f"{req_id}.{alpha}"
             note_refs = set()
-            text = li_direct_text(li, note_refs) or clean_text(li.get_text(" ", strip=True))
+            text = li_direct_text(li, note_refs) or clean_text(
+                li.get_text(" ", strip=True)
+            )
             add_row(rows, "x", 4, ref_a, "", text)
             rows[-1]["annotation"] = build_annotation(note_refs, footnotes_map)
             used_alpha = True
@@ -444,8 +454,7 @@ def parse_requirements_from_html(html: str) -> pd.DataFrame:
                         or t.name == "details"
                         or is_requirement_h4(t)
                     ),
-                )
-                ,
+                ),
                 sec_note_refs,
             )
             add_row(rows, "", 2, sec_id, sec_name, sec_desc)
@@ -458,7 +467,8 @@ def parse_requirements_from_html(html: str) -> pd.DataFrame:
                     parse_requirement_detail(req_el, rows, footnotes_map)
 
     return pd.DataFrame(
-        rows, columns=["assessable", "depth", "ref_id", "name", "description", "annotation"]
+        rows,
+        columns=["assessable", "depth", "ref_id", "name", "description", "annotation"],
     )
 
 
