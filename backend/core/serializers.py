@@ -3075,6 +3075,26 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
         exclude = []
 
 
+class CommentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = Comment
+        exclude = ["created_at", "updated_at", "is_tainted", "author", "folder"]
+
+
+class CommentReadSerializer(CommentWriteSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
+    author = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    folder = FieldsRelatedField()
+    requirement_assessment = FieldsRelatedField()
+    risk_scenario = FieldsRelatedField()
+    applied_control = FieldsRelatedField()
+    finding = FieldsRelatedField()
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
+
+
 class IncidentWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Incident
