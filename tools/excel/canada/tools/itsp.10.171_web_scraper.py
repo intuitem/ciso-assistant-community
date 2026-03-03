@@ -5,7 +5,6 @@ import string
 import html
 from urllib.parse import urlparse, unquote
 import unicodedata
-from tqdm import tqdm
 from playwright.sync_api import sync_playwright
 
 
@@ -116,6 +115,9 @@ def extract_href_fragment(href: str) -> str:
 
 def build_defn_abbr_html(definition_title: str) -> str:
     escaped_title = html.escape(definition_title or "", quote=True)
+    # Encode line breaks as HTML entities for tooltip/title compatibility.
+    escaped_title = escaped_title.replace("\r\n", "\n").replace("\r", "\n")
+    escaped_title = escaped_title.replace("\n", "&#10;")
     return (
         f'<abbr title="{escaped_title}">'
         '<sup class="fa-solid fa-circle-question"></sup>'
@@ -345,6 +347,15 @@ def extract_footnotes_map(
 
 
 def extract_definitions_map(soup: BeautifulSoup) -> dict[str, str]:
+    def join_title_and_body(title: str, body: str) -> str:
+        title = clean_text(title)
+        body = clean_text(body)
+        if title and body:
+            return f"{title}\n{body}"
+        if title:
+            return title
+        return body
+
     definitions: dict[str, str] = {}
     for node in soup.find_all(id=re.compile(r"^defn-")):
         node_id = normalize_defn_id(node.get("id", ""))
@@ -356,11 +367,7 @@ def extract_definitions_map(soup: BeautifulSoup) -> dict[str, str]:
         if title_span and body_span:
             first_text = clean_text(title_span.get_text(" ", strip=True))
             second_text = clean_text(body_span.get_text(" ", strip=True))
-            definitions[node_id] = (
-                f"{first_text}\n\n{second_text}"
-                if first_text and second_text
-                else first_text or second_text
-            )
+            definitions[node_id] = join_title_and_body(first_text, second_text)
             definitions[node_id.lower()] = definitions[node_id]
             continue
 
@@ -369,11 +376,7 @@ def extract_definitions_map(soup: BeautifulSoup) -> dict[str, str]:
         if len(child_spans) >= 2:
             first_text = clean_text(child_spans[0].get_text(" ", strip=True))
             second_text = clean_text(child_spans[1].get_text(" ", strip=True))
-            definitions[node_id] = (
-                f"{first_text}\n\n{second_text}"
-                if first_text and second_text
-                else first_text or second_text
-            )
+            definitions[node_id] = join_title_and_body(first_text, second_text)
             definitions[node_id.lower()] = definitions[node_id]
             continue
 
@@ -430,20 +433,20 @@ def parse_nested_list(
 def fetch_html(
     url: str, timeout: int = 30, progress_label: str = "Downloading page"
 ) -> str:
-    with tqdm(total=1, desc=progress_label, unit="page") as pbar:
-        with sync_playwright() as p:
-            browser = p.firefox.launch(headless=True)
-            context = browser.new_context(
-                user_agent="Mozilla/5.0 (compatible; ITSP10.171-Scraper/1.0)",
-                locale="fr-CA",
-            )
-            page = context.new_page()
-            page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000)
-            page.wait_for_timeout(1500)
-            html_content = page.content()
-            context.close()
-            browser.close()
-            pbar.update(1)
+    print(f"   > ⤵️  {progress_label}...")
+    with sync_playwright() as p:
+        browser = p.firefox.launch(headless=True)
+        context = browser.new_context(
+            user_agent="Mozilla/5.0 (compatible; ITSP10.171-Scraper/1.0)",
+            locale="fr-CA",
+        )
+        page = context.new_page()
+        page.goto(url, wait_until="domcontentloaded", timeout=timeout * 1000)
+        page.wait_for_timeout(1500)
+        html_content = page.content()
+        context.close()
+        browser.close()
+    print(f"   > ✅ {progress_label}: Download finished!")
     return html_content
 
 
@@ -607,6 +610,17 @@ def add_review_flag(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def normalize_assessable_flag(df: pd.DataFrame) -> pd.DataFrame:
+    def adjusted_assessable(row):
+        if row.get("assessable") != "x":
+            return row.get("assessable", "")
+        desc = str(row.get("description", "") or "").rstrip()
+        return "" if desc.endswith(":") else "x"
+
+    df["assessable"] = df.apply(adjusted_assessable, axis=1)
+    return df
+
+
 def build_meta_df(rows: list[tuple[str, str]]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
@@ -616,8 +630,9 @@ def build_excel_from_urls(
     source_url_en: str = SOURCE_URL_EN,
     output_xlsx: str = OUTPUT_XLSX,
 ) -> str:
-    html_fr = fetch_html(source_url_fr, progress_label="⤵️  Downloading [FR] page")
-    html_en = fetch_html(source_url_en, progress_label="⤵️  Downloading [EN] page")
+    print("⌛ Downloading pages...")
+    html_fr = fetch_html(source_url_fr, progress_label="Downloading [FR] page")
+    html_en = fetch_html(source_url_en, progress_label="Downloading [EN] page")
 
     df_fr = parse_requirements_from_html(html_fr)
     df_en = parse_requirements_from_html(html_en)[
@@ -644,6 +659,7 @@ def build_excel_from_urls(
             "annotation[en]",
         ]
     ]
+    df = normalize_assessable_flag(df)
     df = add_review_flag(df)
 
     library_meta_df = build_meta_df(LIBRARY_META_ROWS)
