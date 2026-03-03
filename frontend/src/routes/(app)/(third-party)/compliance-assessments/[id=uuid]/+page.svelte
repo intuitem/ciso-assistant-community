@@ -760,12 +760,17 @@
 				{/if}
 				<!-- Power-ups Command Palette Grid -->
 				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">
-					<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none">{m.powerUps()}</span>
+					<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none"
+						>{m.powerUps()}</span
+					>
 
 					<!-- Modes -->
 					{#if !data.compliance_assessment.is_locked}
 						<div>
-							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Modes</span>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.modes()}</span
+							>
 							<div class="grid grid-cols-2 gap-2">
 								{#if !page.data.user.is_third_party}
 									<Anchor
@@ -774,7 +779,9 @@
 										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 transition-colors cursor-pointer"
 										data-testid="flash-mode-button"
 									>
-										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 text-white shrink-0">
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 text-white shrink-0"
+										>
 											<i class="fa-solid fa-bolt text-sm"></i>
 										</div>
 										<span class="text-sm font-semibold">{m.flashMode()}</span>
@@ -786,7 +793,9 @@
 									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
 									data-testid="table-mode-button"
 								>
-									<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0">
+									<div
+										class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0"
+									>
 										<i class="fa-solid fa-table-list text-sm"></i>
 									</div>
 									<span class="text-sm font-semibold">{m.tableMode()}</span>
@@ -798,7 +807,10 @@
 					<!-- Actions -->
 					{#if !page.data.user.is_third_party}
 						<div>
-							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Actions</span>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.actions()}</span
+							>
 							<div class="grid grid-cols-2 gap-2">
 								<button
 									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
@@ -891,7 +903,7 @@
 										data-testid="assignments-button"
 									>
 										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
-										<span class="text-sm font-medium">{m.assignments?.() ?? 'Assignments'}</span>
+										<span class="text-sm font-medium">{m.assignments()}</span>
 									</Anchor>
 								{/if}
 							</div>
@@ -899,20 +911,27 @@
 					{/if}
 
 					<!-- Insights -->
-					{#if has_threats || (page.data?.featureflags?.advanced_analytics && !page.data.user.is_third_party)}
+					{#if (has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party}
 						<div>
-							<span class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block">Insights</span>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.insights()}</span
+							>
 							<div class="grid grid-cols-2 gap-2">
 								{#if has_threats && !page.data.user.is_third_party}
 									<button
 										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
 										onclick={openThreatsDialog}
 									>
-										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-white shrink-0">
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-white shrink-0"
+										>
 											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
 										</div>
 										<div class="flex flex-col">
-											<span class="text-lg font-bold leading-tight">{data.threats.total_unique_threats}</span>
+											<span class="text-lg font-bold leading-tight"
+												>{data.threats.total_unique_threats}</span
+											>
 											<span class="text-xs text-amber-600">{m.potentialThreats()}</span>
 										</div>
 									</button>
@@ -924,7 +943,9 @@
 										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
 										data-testid="advanced-analytics-button"
 									>
-										<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white shrink-0">
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white shrink-0"
+										>
 											<i class="fa-solid fa-chart-line text-sm"></i>
 										</div>
 										<span class="text-sm font-semibold">{m.advancedAnalytics()}</span>
