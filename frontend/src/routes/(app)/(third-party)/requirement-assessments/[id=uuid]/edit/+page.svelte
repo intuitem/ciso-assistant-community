@@ -260,7 +260,6 @@
 				{ taint: false }
 			);
 			form.newControls = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -275,7 +274,6 @@
 				{ taint: false }
 			);
 			form.newEvidence = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -290,7 +288,6 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
