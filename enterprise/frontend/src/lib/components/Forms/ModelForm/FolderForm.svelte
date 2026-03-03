@@ -4,6 +4,7 @@
 	import * as m from '$paraglide/messages.js';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import Checkbox from '../Checkbox.svelte';
 	import FileInput from '../FileInput.svelte';
 
@@ -64,16 +65,13 @@
 		helpText={m.loadMissingLibrariesHelpText()}
 	/>
 {:else}
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
-		optionsSelf={object}
 		field="parent_folder"
-		pathField="path"
+		optionsSelf={object}
 		cacheLock={cacheLocks['parent_folder']}
 		bind:cachedValue={formDataCache['parent_folder']}
 		label={m.parentDomain()}
-		hide={initialData.parent_folder}
 		onChange={handleParentFolderChange}
 	/>
 	<AutocompleteSelect
