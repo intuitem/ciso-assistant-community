@@ -1130,9 +1130,13 @@ class OperatingModeViewSet(BaseModelViewSet):
 
         mo = self.get_object()
         kill_chain_steps = request.data.get("kill_chain_steps", [])
+        if not isinstance(kill_chain_steps, list):
+            return Response(
+                {"errors": ["kill_chain_steps must be an array."]}, status=400
+            )
         graph_columns = request.data.get("graph_columns", None)
 
-        # Validate all steps — use RBAC to determine accessible EAs
+        # Validate all steps
         from iam.models import RoleAssignment, Folder
 
         accessible_ea_ids = set(
@@ -1144,6 +1148,9 @@ class OperatingModeViewSet(BaseModelViewSet):
         errors = []
 
         for i, step in enumerate(kill_chain_steps):
+            if not isinstance(step, dict):
+                errors.append(f"Step {i}: invalid step payload.")
+                continue
             ea_id = step.get("elementary_action")
             antecedent_ids = step.get("antecedents", [])
             logic_operator = step.get("logic_operator")

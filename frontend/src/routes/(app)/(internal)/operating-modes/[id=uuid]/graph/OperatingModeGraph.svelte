@@ -551,11 +551,13 @@
 							action="?/saveGraph"
 							use:enhance={() => {
 								saving = true;
-								return async ({ update }) => {
+								return async ({ result, update }) => {
 									saving = false;
-									dirty = false;
-									saveViewport();
-									onSaved?.();
+									if (result.type === 'success') {
+										dirty = false;
+										saveViewport();
+										onSaved?.();
+									}
 									await update();
 								};
 							}}

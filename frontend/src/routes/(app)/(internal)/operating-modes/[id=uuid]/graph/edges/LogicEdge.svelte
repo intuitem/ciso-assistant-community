@@ -61,6 +61,8 @@
 			</span>
 		{:else}
 			<button
+				type="button"
+				aria-label="Toggle logic operator"
 				class="nopan nodrag px-1.5 py-0.5 rounded-full text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 transition-colors {cls.bg} {cls.border} {cls.text}"
 				onclick={(e) => {
 					e.stopPropagation();

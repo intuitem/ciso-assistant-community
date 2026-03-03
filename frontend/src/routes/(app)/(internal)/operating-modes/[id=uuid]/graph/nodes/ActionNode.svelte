@@ -49,6 +49,8 @@
 
 	{#if hovered && !editor?.readonly}
 		<button
+			type="button"
+			aria-label="Delete node"
 			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
 			onclick={() => editor?.deleteNode(id)}
 		>

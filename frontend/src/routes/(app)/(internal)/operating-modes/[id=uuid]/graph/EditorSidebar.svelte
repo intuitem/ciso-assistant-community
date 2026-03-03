@@ -5,7 +5,7 @@
 	interface ElementaryActionItem {
 		id: string;
 		name: string;
-		attack_stage: string;
+		attack_stage: string | number;
 		icon_fa_class?: string;
 	}
 
@@ -19,10 +19,10 @@
 	let searchQuery = $state('');
 
 	const STAGE_CONFIG = [
-		{ key: 'ebiosReconnaissance', stage: 0, color: 'pink', icon: 'fa-magnifying-glass' },
-		{ key: 'ebiosInitialAccess', stage: 1, color: 'violet', icon: 'fa-right-to-bracket' },
-		{ key: 'ebiosDiscovery', stage: 2, color: 'orange', icon: 'fa-lightbulb' },
-		{ key: 'ebiosExploitation', stage: 3, color: 'red', icon: 'fa-bolt' }
+		{ key: 'ebiosReconnaissance', stage: 0, twText: 'text-pink-500', icon: 'fa-magnifying-glass' },
+		{ key: 'ebiosInitialAccess', stage: 1, twText: 'text-violet-500', icon: 'fa-right-to-bracket' },
+		{ key: 'ebiosDiscovery', stage: 2, twText: 'text-orange-500', icon: 'fa-lightbulb' },
+		{ key: 'ebiosExploitation', stage: 3, twText: 'text-red-500', icon: 'fa-bolt' }
 	];
 
 	const STAGE_COLORS: Record<number, string> = {
@@ -32,7 +32,8 @@
 		3: 'border-red-400 bg-red-50'
 	};
 
-	function getStageNumber(attackStage: string): number {
+	function getStageNumber(attackStage: string | number): number {
+		if (typeof attackStage === 'number') return attackStage;
 		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
 		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
 		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
@@ -95,7 +96,7 @@
 					onclick={() => toggleStage(stageConfig.stage)}
 				>
 					<span class="flex items-center gap-1.5">
-						<i class="fa-solid {stageConfig.icon} text-{stageConfig.color}-500"></i>
+						<i class="fa-solid {stageConfig.icon} {stageConfig.twText}"></i>
 						{safeTranslate(stageConfig.key)}
 					</span>
 					<span class="flex items-center gap-1">
