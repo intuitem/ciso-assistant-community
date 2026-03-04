@@ -9298,19 +9298,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
+        # Auditee filtering: scope to assigned requirements only
         auditee_folders = get_auditee_filtered_folder_ids(request.user)
         if auditee_folders and compliance_assessment.folder_id in auditee_folders:
             user_actors = Actor.get_all_for_user(request.user)
-            assigned_ra_ids = set(
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
                     compliance_assessment=compliance_assessment,
                     actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments = [
-                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments if ra.id in ra_ids
             ]
+
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -9350,19 +9351,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
+        # Auditee filtering: scope to assigned requirements only
         auditee_folders = get_auditee_filtered_folder_ids(request.user)
         if auditee_folders and compliance_assessment.folder_id in auditee_folders:
             user_actors = Actor.get_all_for_user(request.user)
-            assigned_ra_ids = set(
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
                     compliance_assessment=compliance_assessment,
                     actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments_objects = [
-                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments_objects if ra.id in ra_ids
             ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -9465,7 +9467,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="auditee-dashboard")
     def auditee_dashboard(self, request):
-        """Returns aggregated progress data for the auditee's assigned audits."""
+        """Returns per-assignment progress data for the auditee's dashboard."""
         user_actors = Actor.get_all_for_user(request.user)
         assignments = (
             RequirementAssignment.objects.filter(actor__in=user_actors)
@@ -9474,7 +9476,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment__framework",
                 "compliance_assessment__folder",
             )
-            .prefetch_related("requirement_assessments")
+            .prefetch_related("requirement_assessments", "actor")
+            .distinct()
         )
 
         # Only include compliance assessments the user can view
@@ -9482,34 +9485,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
 
-        # Group by compliance assessment
-        ca_map = defaultdict(list)
-        for assignment in assignments:
-            if assignment.compliance_assessment_id in viewable_ca_ids:
-                ca_map[assignment.compliance_assessment_id].append(assignment)
-
         dashboard_data = []
-        for ca_id, group in ca_map.items():
-            ca = group[0].compliance_assessment
-            ra_ids = set()
-            for assignment in group:
-                ra_ids.update(
-                    assignment.requirement_assessments.values_list("id", flat=True)
-                )
+        for assignment in assignments:
+            if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
 
+            ca = assignment.compliance_assessment
+            ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
             ras = RequirementAssessment.objects.filter(
                 id__in=ra_ids, requirement__assessable=True
             )
             total = ras.count()
             done = ras.exclude(result="not_assessed").count()
 
+            actor_names = ", ".join(str(a) for a in assignment.actor.all())
+
             dashboard_data.append(
                 {
                     "id": str(ca.id),
+                    "assignment_id": str(assignment.id),
                     "name": ca.name,
                     "folder": ca.folder.name if ca.folder else None,
                     "framework": ca.framework.name if ca.framework else None,
                     "status": ca.status,
+                    "assignment_status": assignment.status,
+                    "actor": actor_names,
                     "total_requirements": total,
                     "assessed_requirements": done,
                     "progress_percent": round(done / total * 100) if total > 0 else 0,
@@ -12552,6 +12552,50 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+class CommentViewSet(BaseModelViewSet):
+    model = Comment
+    filterset_fields = [
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+        "is_active",
+        "author",
+    ]
+    search_fields = ["body"]
+    ordering = ["created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "author",
+                "requirement_assessment",
+                "risk_scenario",
+                "applied_control",
+                "finding",
+            )
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author_id != self.request.user.id:
+            raise PermissionDenied({"error": "You can only edit your own comments."})
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.author_id != self.request.user.id:
+            if not self.request.user.is_admin():
+                raise PermissionDenied(
+                    {"error": "You can only delete your own comments."}
+                )
+        return super().perform_destroy(instance)
+
+
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
@@ -12992,7 +13036,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                task_template = TaskTemplate.objects.get(id=task_template_id)
+                task_template = self.get_queryset().get(id=task_template_id)
                 try:
                     task_node, created = TaskNode.objects.get_or_create(
                         task_template=task_template,
@@ -13044,7 +13088,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     end_date = start_date
                 # Generate the task nodes
                 self.task_calendar(
-                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    task_templates=self.get_queryset().filter(id=task_template.id),
                     start=start_date,
                     end=end_date,
                 )
@@ -13069,7 +13113,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(enabled=True),
+                task_templates=self.get_queryset().filter(enabled=True),
                 start=start,
                 end=end,
             )
@@ -13482,11 +13526,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     Requirement assignments delegate groups of requirement assessments to specific actors.
     """
 
+    permission_overrides = {
+        "set_status": "transition_requirementassignment",
+        "requirements_list": "view_requirementassignment",
+    }
+
     model = RequirementAssignment
     filterset_fields = [
         "folder",
         "compliance_assessment",
         "actor",
+        "status",
     ]
 
     def get_queryset(self):
@@ -13500,6 +13550,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "actor",
                 "requirement_assessments",
+                Prefetch(
+                    "events",
+                    queryset=RequirementAssignmentEvent.objects.select_related(
+                        "event_actor"
+                    ),
+                ),
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -13509,3 +13565,235 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
+
+    EDITABLE_STATUSES = ("draft", "in_progress")
+
+    def update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot delete assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    # Valid transitions: (from_status, to_status) → config
+    # reviewer_only: auditee-only users are forbidden
+    # actor_only: only assigned actors can perform this transition
+    # check_completion: all assessable requirements must be assessed
+    # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
+    TRANSITIONS = {
+        ("draft", "in_progress"): {"reviewer_only": True},
+        ("in_progress", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("submitted", "closed"): {
+            "reviewer_only": True,
+            "observation": "optional",
+        },
+        ("submitted", "changes_requested"): {
+            "reviewer_only": True,
+            "observation": "required",
+        },
+        ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+    }
+
+    @action(detail=True, methods=["post"], url_path="set_status")
+    def set_status(self, request, pk=None):
+        """Transition assignment to a new status.
+
+        Accepts {"status": "<target_status>", "reviewer_observation": "..."}.
+        Valid transitions and their constraints are defined in TRANSITIONS.
+        """
+        assignment = self.get_object()
+        target = request.data.get("status")
+        if not target:
+            return Response(
+                {"error": "Missing 'status' field."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        key = (assignment.status, target)
+        config = self.TRANSITIONS.get(key)
+        if config is None:
+            return Response(
+                {
+                    "error": f"Invalid transition from '{assignment.status}' to '{target}'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Reviewer-only check: auditee-only users are forbidden
+        if config.get("reviewer_only"):
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if (
+                auditee_folders
+                and assignment.compliance_assessment.folder_id in auditee_folders
+            ):
+                return Response(
+                    {"error": "Auditee users cannot perform this action."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Actor-only check: user must be an assigned actor
+        if config.get("actor_only"):
+            user_actors = Actor.get_all_for_user(request.user)
+            if not assignment.actor.filter(id__in=[a.id for a in user_actors]).exists():
+                return Response(
+                    {"error": "You are not assigned to this assignment."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Completion check: all assessable requirements must be assessed
+        if config.get("check_completion"):
+            unassessed_count = assignment.requirement_assessments.filter(
+                requirement__assessable=True, result="not_assessed"
+            ).count()
+            if unassessed_count > 0:
+                return Response(
+                    {
+                        "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
+                        "unassessed_count": unassessed_count,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Handle reviewer_observation (stored as event_notes)
+        obs_rule = config.get("observation")
+        observation = request.data.get("reviewer_observation")
+        if obs_rule == "required" and not observation:
+            return Response(
+                {"error": "Reviewer observation is required for this transition."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Apply transition
+        assignment.status = target
+        assignment.save(update_fields=["status"])
+
+        # Create event for traceability
+        RequirementAssignmentEvent.objects.create(
+            assignment=assignment,
+            event_type=target,
+            event_actor=request.user,
+            event_notes=observation if obs_rule in ("required", "optional") else None,
+            folder=assignment.folder,
+        )
+
+        # Send notification
+        try:
+            self._send_transition_notification(assignment, key, observation or "")
+        except Exception:
+            logger.error(
+                "Failed to send assignment notification",
+                assignment_id=str(assignment.id),
+                transition=f"{key[0]} -> {key[1]}",
+                exc_info=True,
+            )
+
+        return Response({"status": target})
+
+    @action(detail=True, methods=["get"])
+    def requirements_list(self, request, pk=None):
+        """Returns the scoped requirements list for this assignment.
+
+        Authorization is enforced by get_queryset() which filters
+        auditee-only users to their own assignments.
+        """
+        assignment = self.get_object()
+        compliance_assessment = assignment.compliance_assessment
+
+        assigned_ra_ids = set(
+            assignment.requirement_assessments.values_list("id", flat=True)
+        )
+
+        requirement_assessments_objects = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_assessments_objects = [
+            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+        ]
+
+        requirements_objects = list(
+            RequirementNode.objects.filter(framework=compliance_assessment.framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+        )
+        nodes_by_urn = {node.urn: node for node in requirements_objects}
+        for node in requirements_objects:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments_objects:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+
+        requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments_objects, many=True
+        ).data
+        requirements = RequirementNodeReadSerializer(
+            requirements_objects, many=True
+        ).data
+
+        return Response(
+            {
+                "requirements": requirements,
+                "requirement_assessments": requirement_assessments,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @staticmethod
+    def _send_transition_notification(assignment, transition_key, observation=""):
+        from_status, to_status = transition_key
+        if to_status == "in_progress":
+            from core.tasks import send_assignment_activated_notification
+
+            send_assignment_activated_notification(assignment.id)
+        elif to_status == "submitted" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_submitted_notification
+
+            send_assignment_submitted_notification(assignment.id)
+        elif to_status in ("closed", "changes_requested") or (
+            to_status == "submitted" and from_status == "closed"
+        ):
+            from core.tasks import send_assignment_reviewed_notification
+
+            decision = "reopened" if from_status == "closed" else to_status
+            send_assignment_reviewed_notification(assignment.id, decision, observation)

@@ -58,6 +58,7 @@ READER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
+    "view_comment",
     "view_tasknode",
     "view_tasktemplate",
     "view_businessimpactanalysis",
@@ -211,6 +212,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -317,6 +319,11 @@ ANALYST_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks
     "add_tasktemplate",
     "view_tasktemplate",
@@ -481,6 +488,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -598,6 +606,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks
     "add_tasktemplate",
     "view_tasktemplate",
@@ -829,6 +842,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -985,6 +999,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks,
     "add_tasktemplate",
     "view_tasktemplate",
@@ -1121,11 +1140,17 @@ AUDITEE_PERMISSIONS_LIST = [
     "delete_evidencerevision",
     "view_folder",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "view_appliedcontrol",
     "add_appliedcontrol",
     "change_appliedcontrol",
     "delete_appliedcontrol",
     "view_framework",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
 ]
 
 

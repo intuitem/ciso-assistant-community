@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables from .mcp.env file
-load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".mcp.env"))
+load_dotenv(".mcp.env")
 
 # Configuration dictionary (for backward compatibility)
 cli_cfg = dict()
