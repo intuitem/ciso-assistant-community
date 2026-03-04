@@ -59,8 +59,8 @@ Go into your **Keycloak admin console**
 1.  Open the sidebar menu > **Clients** and **Create client**
 
     <figure><img src="../../../.gitbook/assets/Screenshot 2024-08-20 09.40.06.png" alt=""><figcaption></figcaption></figure>
-2. Choose **OpenID Connect** client type and give it a **Client ID**, then click **Next**![](<../../../.gitbook/assets/image (1) (1).png>)
-3.  Enable **Client authentication**, make sure **Standard flow** is selected, then click **Next**![](<../../../.gitbook/assets/image (1) (1) (1).png>)
+2. Choose **OpenID Connect** client type and give it a **Client ID**, then click **Next**![](<../../../.gitbook/assets/image (1) (1) (1).png>)
+3.  Enable **Client authentication**, make sure **Standard flow** is selected, then click **Next**![](<../../../.gitbook/assets/image (1) (1) (1) (1).png>)
 
 
 4. Enter your deployment's **Root URL**. It is the URL of your frontend.
@@ -71,10 +71,10 @@ Go into your **Keycloak admin console**
    1. Set it to `<backend_url>/api/accounts/oidc/openid_connect/login/callback/`&#x20;
    2.  For cloud deployments, you must set it to `<base_url>/api/accounts/oidc/openid_connect/login/callback/`
 
-       <figure><img src="../../../.gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
+       <figure><img src="../../../.gitbook/assets/image (2) (1) (1).png" alt=""><figcaption></figcaption></figure>
 7.  Once your client is created, you can find its **Client secret** under the **Credentials** tab. You can copy it from there
 
-    <figure><img src="../../../.gitbook/assets/image (3) (1).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../../../.gitbook/assets/image (3) (1) (1).png" alt=""><figcaption></figcaption></figure>
 8.  Go into **Realm settings > General** to find the <mark style="color:purple;">**OpenID Endpoint Configuration**</mark><mark style="color:purple;">,</mark> which you will have to paste into CISO Assistant's **Server URL** SSO parameter
 
     <figure><img src="../../../.gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
