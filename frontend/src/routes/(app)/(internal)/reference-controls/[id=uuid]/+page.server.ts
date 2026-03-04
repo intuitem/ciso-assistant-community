@@ -18,7 +18,7 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
-			`${BASE_API_URL}/reference-controls/${event.params.id}/sync-applied-controls/`, //TODO: Wrong endpoint (the POST synchronize endpoint must be used here)
+			`${BASE_API_URL}/reference-controls/${event.params.id}/sync-applied-controls/`,
 			{
 				method: 'POST',
 				headers: {

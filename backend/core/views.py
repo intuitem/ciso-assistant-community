@@ -77,10 +77,11 @@ from django.core.cache import cache
 
 
 from django.apps import apps
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import AnonymousUser, Permission
 from django.conf import settings
 from django.core.exceptions import FieldDoesNotExist
 from django.core.files.storage import default_storage
+from django.contrib.auth.base_user import AbstractBaseUser
 
 from django.db import models, transaction
 from django.forms import ValidationError
@@ -2355,8 +2356,10 @@ class ReferenceControlViewSet(BaseModelViewSet):
         )
 
         return Response(
-            {"id": applied_control.id, "name": applied_control.name}
-            for applied_control in syncable_applied_controls
+            [
+                {"id": applied_control.id, "name": applied_control.name}
+                for applied_control in syncable_applied_controls
+            ]
         )
 
     @action(detail=True, methods=["post"], url_path="sync-applied-controls")
@@ -2382,6 +2385,8 @@ class ReferenceControlViewSet(BaseModelViewSet):
         AppliedControl.objects.bulk_update(
             syncable_applied_controls, FIELDS_TO_SYNC, batch_size=100
         )
+        for applied_control in syncable_applied_controls:
+            applied_control.save()
 
         return Response(
             [

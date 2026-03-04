@@ -485,7 +485,7 @@
 	"revoke": "Widerrufen",
 	"riskAcceptanceValidatedMessage": "Diese Risikoakzeptanz ist validiert. Sie kann widerrufen werden, jedoch nicht rückgängig gemacht werden. Erstellen Sie ggf. eine neue Version.",
 	"confirmModalTitle": "Bestätigen",
-	"confirmModalMessage": "Sind Sie sicher? Diese Aktion wirkt sich dauerhaft auf folgendes Objekt aus:",
+	"confirmModalMessage": "Sind Sie sicher? Diese Aktion wirkt sich dauerhaft auf folgendes Objekt aus",
 	"submit": "Einreichen",
 	"requirementAssessment": "Anforderungsbewertung",
 	"requirementAssessments": "Anforderungsbewertungen",
