@@ -4211,6 +4211,113 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
 
+class Comment(AbstractBaseModel, FolderMixin):
+    body = models.TextField(verbose_name=_("Body"))
+    is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Active"))
+    is_published = models.BooleanField(default=True)
+
+    author = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    risk_scenario = models.ForeignKey(
+        "RiskScenario",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    applied_control = models.ForeignKey(
+        "AppliedControl",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    finding = models.ForeignKey(
+        "Finding",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        requirement_assessment__isnull=False,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=False,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=False,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=False,
+                    )
+                ),
+                name="comment_exactly_one_parent",
+            )
+        ]
+
+    @property
+    def parent_object(self):
+        return (
+            self.requirement_assessment
+            or self.risk_scenario
+            or self.applied_control
+            or self.finding
+        )
+
+    def save(self, *args, **kwargs):
+        content_object = self.parent_object
+        if content_object is None:
+            raise ValidationError(
+                _("Comment must be attached to exactly one parent object.")
+            )
+
+        if not self._state.adding and self.pk:
+            try:
+                old = Comment.objects.get(pk=self.pk)
+                if old.body != self.body:
+                    self.is_tainted = True
+            except Comment.DoesNotExist:
+                pass
+        self.folder = content_object.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.created_at}"
+
+
 def _get_default_applied_control_cost():
     return {
         "currency": "€",
@@ -5002,6 +5109,10 @@ class RiskAssessment(Assessment):
         null=True,
         blank=True,
         related_name="risk_assessments",
+    )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
     )
 
     class Meta:
@@ -5961,6 +6072,10 @@ class ComplianceAssessment(Assessment):
         choices=CalculationMethod.choices,
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
+    )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
     )
 
     fields_to_check = ["name", "version"]
@@ -7244,6 +7359,13 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     Used to delegate audit work within a compliance assessment to specific users or teams.
     """
 
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        SUBMITTED = "submitted", _("Submitted")
+        CLOSED = "closed", _("Closed")
+        CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
     compliance_assessment = models.ForeignKey(
         ComplianceAssessment,
         on_delete=models.CASCADE,
@@ -7261,8 +7383,20 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
         verbose_name=_("Requirement Assessments"),
         blank=True,
     )
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
 
     class Meta:
+        permissions = [
+            (
+                "transition_requirementassignment",
+                "Can transition requirement assignment status",
+            )
+        ]
         verbose_name = _("Requirement Assignment")
         verbose_name_plural = _("Requirement Assignments")
         ordering = ["created_at"]
@@ -7270,6 +7404,39 @@ class RequirementAssignment(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         actors = ", ".join(str(a) for a in self.actor.all())
         return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
+class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
+    assignment = models.ForeignKey(
+        RequirementAssignment,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=50,
+        choices=RequirementAssignment.Status.choices,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        max_length=2000,
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+
+    class Meta:
+        verbose_name = _("Requirement assignment event")
+        verbose_name_plural = _("Requirement assignment events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class FindingsAssessment(Assessment):
@@ -8251,6 +8418,10 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Comment,
     exclude_fields=common_exclude,
 )
 auditlog.register(
