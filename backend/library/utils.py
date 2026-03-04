@@ -701,6 +701,12 @@ class LibraryImporter:
 
         library_objects = self._library.content
 
+        # Preset-only libraries don't need regular object imports
+        if "preset" in library_objects and not any(
+            object_field in library_objects for object_field in self.OBJECT_FIELDS
+        ):
+            return None
+
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
         ):

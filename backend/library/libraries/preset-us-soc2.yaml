@@ -1,0 +1,149 @@
+urn: urn:intuitem:risk:preset:us-soc2
+locale: en
+ref_id: preset-us-soc2
+name: US Company - SOC 2
+description: SOC 2 Type II readiness journey for US companies. Covers trust services criteria (security, availability, processing integrity, confidentiality, privacy), vendor management, and a guided path to audit readiness.
+version: 2
+provider: intuitem
+packager: intuitem
+
+dependencies:
+  - urn:intuitem:risk:library:soc2-2017-rev-2022
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - startup
+        - sme
+        - large
+      industry:
+        - saas
+        - technology
+        - general
+      region:
+        - us
+      goal: soc2-readiness
+
+    feature_flags:
+      enable:
+        - compliance
+        - tprm
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Information Security Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+      - type: compliance_assessment
+        name: "SOC 2 Type II Readiness Assessment"
+        framework: urn:intuitem:risk:library:soc2-2017-rev-2022
+        create_suggested_controls: true
+        ref: soc2_audit
+
+      # --- Organisation objectives ---
+      - type: organisation_objective
+        name: "Achieve SOC 2 Type II attestation"
+        description: "Obtain a SOC 2 Type II report from a licensed CPA firm demonstrating operating effectiveness of controls over a review period."
+        status: in_progress
+      - type: organisation_objective
+        name: "Establish continuous monitoring"
+        description: "Implement continuous monitoring of security controls to maintain SOC 2 compliance between audit periods."
+        status: draft
+
+      # --- Task templates ---
+      - type: task_template
+        name: "Access rights review"
+        description: "Review user access rights across all critical systems to ensure least-privilege and timely revocation (CC6.1, CC6.2, CC6.3)."
+        is_recurrent: true
+        schedule:
+          interval: 3
+          frequency: MONTHLY
+      - type: task_template
+        name: "Vendor security review"
+        description: "Review the security posture of critical vendors and update entity assessments with current due diligence information (CC9.2)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+      - type: task_template
+        name: "Incident response plan test"
+        description: "Test the incident response plan through tabletop exercises or simulations to validate detection and response capabilities (CC7.4)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+      - type: task_template
+        name: "Business continuity and disaster recovery test"
+        description: "Test backup restoration and disaster recovery procedures to validate recovery objectives (A1.2, A1.3)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+
+      # --- Typical US company vendor entities ---
+      - type: entity
+        name: "Cloud infrastructure provider"
+        description: "Primary cloud platform (e.g. AWS, GCP, Azure) hosting the application and customer data."
+      - type: entity
+        name: "Identity provider"
+        description: "SSO and identity management service (e.g. Okta, Auth0, Azure AD) used for employee and customer authentication."
+      - type: entity
+        name: "Background check provider"
+        description: "Third-party service conducting employee background checks as part of the hiring process (CC1.4)."
+      - type: entity
+        name: "Security monitoring / SIEM provider"
+        description: "Managed security or SIEM platform (e.g. Datadog, Splunk, CrowdStrike) for log aggregation, alerting, and threat detection."
+      - type: entity
+        name: "Payment processor"
+        description: "Payment service provider (e.g. Stripe, Braintree) processing customer billing and payment data."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify and classify assets"
+          description: "Inventory systems, applications, databases, and infrastructure components in scope for the SOC 2 examination."
+          target_model: assets
+        - key: soc2_compliance
+          title: "Assess SOC 2 trust services criteria"
+          description: "Walk through the SOC 2 trust services criteria, review auto-created controls, and assess your current compliance status."
+          target_model: compliance-assessments
+          target_ref: soc2_audit
+        - key: risk_assessment
+          title: "Conduct risk assessment"
+          description: "Identify threats and vulnerabilities, create risk scenarios, and assess likelihood and impact to prioritise remediation."
+          target_model: risk-scenarios
+          target_ref: main_ra
+        - key: risk_treatment
+          title: "Implement controls"
+          description: "Review the auto-created controls from SOC 2 criteria, assign owners, set implementation status, and document control descriptions."
+          target_model: applied-controls
+        - key: vendors
+          title: "Manage your vendors"
+          description: "Review vendor entities, add missing ones, and perform due diligence assessments. SOC 2 CC9.2 requires vendor risk management."
+          target_model: entities
+        - key: policies
+          title: "Write and approve policies"
+          description: "Draft security policies covering access control, incident response, change management, and data classification. SOC 2 requires documented and approved policies."
+          target_model: policies
+        - key: evidences
+          title: "Collect evidence"
+          description: "Gather and organise evidence of control effectiveness — screenshots, configurations, logs, and process documentation for your auditor."
+          target_model: evidences
+        - key: findings
+          title: "Track pentest and audit findings"
+          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          target_model: findings-assessments
+          target_ref: pentest_findings
+        - key: ongoing_tasks
+          title: "Configure recurring tasks"
+          description: "Review the periodic task templates (access reviews, vendor reviews, DR tests, incident response tests) and adjust schedules."
+          target_model: task-templates

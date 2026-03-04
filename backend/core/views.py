@@ -8262,6 +8262,78 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
+class PresetJourneyViewSet(BaseModelViewSet):
+    model = PresetJourney
+    filterset_fields = ["folder"]
+    search_fields = ["name", "description"]
+
+    @action(detail=True, methods=["get"])
+    def dashboard(self, request, pk=None):
+        journey = self.get_object()
+        from core.serializers import (
+            PresetJourneyReadSerializer,
+            PresetJourneyStepReadSerializer,
+        )
+
+        steps = PresetJourneyStepReadSerializer(journey.steps.all(), many=True).data
+        stats = self._compute_stats(journey)
+        journey_data = PresetJourneyReadSerializer(journey).data
+        return Response(
+            {
+                "journey": journey_data,
+                "steps": steps,
+                "stats": stats,
+            }
+        )
+
+    def _compute_stats(self, journey):
+        folder = journey.folder
+        steps = journey.steps.all()
+        total_steps = steps.count()
+        completed_steps = steps.filter(
+            status__in=[PresetJourneyStep.Status.DONE, PresetJourneyStep.Status.SKIPPED]
+        ).count()
+
+        stats = {
+            "total_steps": total_steps,
+            "completed_steps": completed_steps,
+            "progress_percent": (
+                round(completed_steps / total_steps * 100) if total_steps > 0 else 0
+            ),
+            "assets": Asset.objects.filter(folder=folder).count(),
+            "risk_scenarios": RiskScenario.objects.filter(
+                risk_assessment__folder=folder
+            ).count(),
+            "applied_controls": AppliedControl.objects.filter(folder=folder).count(),
+        }
+
+        # Compliance progress per compliance assessment in object_refs
+        compliance_stats = {}
+        for ref_name, obj_id in journey.object_refs.items():
+            try:
+                ca = ComplianceAssessment.objects.get(id=obj_id)
+                total_ra = ca.requirement_assessments.count()
+                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
+                compliance_stats[ref_name] = {
+                    "name": ca.name,
+                    "total": total_ra,
+                    "assessed": assessed_ra,
+                    "percent": (
+                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
+                    ),
+                }
+            except ComplianceAssessment.DoesNotExist:
+                continue
+        stats["compliance"] = compliance_stats
+        return stats
+
+
+class PresetJourneyStepViewSet(BaseModelViewSet):
+    model = PresetJourneyStep
+    filterset_fields = ["journey", "status"]
+    search_fields = ["title", "description"]
+
+
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 

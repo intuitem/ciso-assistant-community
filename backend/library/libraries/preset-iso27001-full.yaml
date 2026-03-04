@@ -1,0 +1,186 @@
+urn: urn:intuitem:risk:preset:iso27001-full
+locale: en
+ref_id: preset-iso27001-full
+name: "ISO 27001:2022 \u2014 Full Implementation"
+description: Comprehensive ISO 27001 implementation preset. Creates a compliance assessment with suggested controls auto-linked, organisational context (issues and objectives), a risk assessment, and periodic task templates for ongoing ISMS management.
+version: 5
+provider: intuitem
+packager: intuitem
+
+dependencies:
+  - urn:intuitem:risk:library:iso27001-2022
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+      region:
+        - global
+      goal: iso27001-certification
+
+    feature_flags:
+      enable:
+        - compliance
+
+    scaffolded_objects:
+      # --- Organisation issues (clause 4 - Context of the organisation) ---
+      - type: organisation_issue
+        name: "Regulatory and contractual requirements"
+        description: "Applicable laws, regulations, and contractual obligations that impose information security requirements on the organisation (e.g. GDPR, NIS2, sector-specific regulations)."
+        category: legal
+        origin: external
+        status: active
+
+      - type: organisation_issue
+        name: "Cyber threat landscape"
+        description: "External threat environment including ransomware, phishing, supply-chain attacks, and emerging threats relevant to the organisation's sector and geography."
+        category: technology
+        origin: external
+        status: active
+
+      - type: organisation_issue
+        name: "Current security maturity"
+        description: "Internal assessment of the organisation's existing security practices, gaps, and capabilities that influence the ISMS scope and priorities."
+        category: internalProcesses
+        origin: internal
+        status: active
+
+      # --- Organisation objectives (clause 6.2 - Information security objectives) ---
+      - type: organisation_objective
+        name: "Achieve ISO 27001 certification"
+        description: "Obtain ISO/IEC 27001:2022 certification through a successful Stage 1 and Stage 2 audit by an accredited certification body."
+        status: in_progress
+
+      - type: organisation_objective
+        name: "Maintain acceptable risk levels"
+        description: "Ensure all identified information security risks are treated to within the organisation's risk appetite, with residual risk formally accepted by management."
+        status: draft
+
+      - type: organisation_objective
+        name: "Foster a security-aware culture"
+        description: "Establish and maintain a security awareness programme so that all personnel understand their ISMS responsibilities and can recognise common threats."
+        status: draft
+
+      # --- Risk assessment ---
+      - type: risk_assessment
+        name: "Information Security Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+
+      # --- Compliance assessment with suggested controls ---
+      - type: compliance_assessment
+        name: "ISO 27001:2022 Compliance Assessment"
+        framework: urn:intuitem:risk:library:iso27001-2022
+        create_suggested_controls: true
+        ref: iso_audit
+
+      # --- Periodic task templates ---
+      - type: task_template
+        name: "Internal ISMS audit"
+        description: "Conduct a full internal audit of the ISMS to verify conformity with ISO 27001 requirements and the organisation's own policies (clause 9.2)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+
+      - type: task_template
+        name: "Management review"
+        description: "Hold a management review meeting to evaluate ISMS performance, risk treatment effectiveness, and opportunities for improvement (clause 9.3)."
+        is_recurrent: true
+        schedule:
+          interval: 6
+          frequency: MONTHLY
+
+      - type: task_template
+        name: "Access rights review"
+        description: "Review user access rights across all critical systems to ensure least-privilege and timely revocation of unnecessary access (Annex A 5.18)."
+        is_recurrent: true
+        schedule:
+          interval: 3
+          frequency: MONTHLY
+
+      - type: task_template
+        name: "Risk assessment review"
+        description: "Review and update the information security risk assessment to account for changes in threats, vulnerabilities, assets, and business context (clause 8.2)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+
+      - type: task_template
+        name: "Security awareness training"
+        description: "Deliver information security awareness training to all personnel, covering current threats, policies, and expected behaviours (Annex A 6.3)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+
+      - type: task_template
+        name: "Business continuity testing"
+        description: "Test business continuity and disaster recovery plans to verify they meet recovery objectives and address current risks (Annex A 5.30)."
+        is_recurrent: true
+        schedule:
+          interval: 1
+          frequency: YEARLY
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+
+    journey:
+      steps:
+        - key: context_issues
+          title: "Establish organisational context"
+          description: "Review and complete the organisational issues to document internal and external factors affecting your ISMS (clause 4.1)."
+          target_model: organisation-issues
+        - key: objectives
+          title: "Define information security objectives"
+          description: "Review and refine the security objectives to align with your business strategy and risk appetite (clause 6.2)."
+          target_model: organisation-objectives
+        - key: assets
+          title: "Identify and classify assets"
+          description: "Inventory primary assets (information, processes) and supporting assets (hardware, software, networks, personnel) within the ISMS scope."
+          target_model: assets
+        - key: compliance
+          title: "Assess ISO 27001 compliance"
+          description: "Walk through each ISO 27001 requirement, link evidence and controls, and assess your current compliance status."
+          target_model: compliance-assessments
+          target_ref: iso_audit
+        - key: risk_assessment
+          title: "Conduct risk assessment"
+          description: "Create risk scenarios by combining threats with assets, assess likelihood and impact, and prioritise risks for treatment."
+          target_model: risk-scenarios
+          target_ref: main_ra
+        - key: risk_treatment
+          title: "Plan risk treatment"
+          description: "Review the auto-created controls from ISO 27001 Annex A, assign owners, and define implementation plans for each applicable control."
+          target_model: applied-controls
+        - key: policies
+          title: "Write and approve policies"
+          description: "Draft your information security policies (e.g. acceptable use, access control, incident management) and submit them for management approval (clause 5.2, Annex A 5.1)."
+          target_model: policies
+        - key: evidences
+          title: "Review your evidences"
+          description: "Collect and organise the evidence that demonstrates your ISMS implementation — documents, screenshots, logs, and records needed for audit (clause 7.5)."
+          target_model: evidences
+        - key: findings
+          title: "Track pentest and audit findings"
+          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          target_model: findings-assessments
+          target_ref: pentest_findings
+        - key: ongoing_tasks
+          title: "Configure your ISMS run tasks"
+          description: "Review the periodic task templates (internal audits, management reviews, access reviews, etc.) and adjust schedules to fit your organisation."
+          target_model: task-templates
+        - key: audit_export
+          title: "Prepare the export for your lead auditor"
+          description: "Generate and review the compliance assessment export to share with your certification body's lead auditor ahead of the Stage 1 or Stage 2 audit."
+          target_model: compliance-assessments
+          target_ref: iso_audit

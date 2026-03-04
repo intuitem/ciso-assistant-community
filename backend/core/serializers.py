@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.db import models, transaction
 from django.db.models import F
+from django.utils import timezone
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -2944,6 +2945,46 @@ class FindingReadSerializer(FindingWriteSerializer):
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class PresetJourneyStepReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourneyStep
+        fields = "__all__"
+
+
+class PresetJourneyStepWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourneyStep
+        fields = ["status", "notes"]
+
+    def update(self, instance, validated_data):
+        new_status = validated_data.get("status", instance.status)
+        if new_status in (
+            PresetJourneyStep.Status.DONE,
+            PresetJourneyStep.Status.SKIPPED,
+        ):
+            validated_data["completed_at"] = timezone.now()
+            validated_data["completed_by"] = self.context["request"].user
+        elif new_status == PresetJourneyStep.Status.NOT_STARTED:
+            validated_data["completed_at"] = None
+            validated_data["completed_by"] = None
+        return super().update(instance, validated_data)
+
+
+class PresetJourneyReadSerializer(BaseModelSerializer):
+    steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = PresetJourney
+        fields = "__all__"
+
+
+class PresetJourneyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourney
+        fields = ["name", "description"]
 
 
 class QuickStartSerializer(serializers.Serializer):

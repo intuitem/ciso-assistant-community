@@ -341,7 +341,7 @@ class StoredLibrary(LibraryMixin):
 
         if dry_run:
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
             return (
@@ -387,7 +387,7 @@ class StoredLibrary(LibraryMixin):
                 outdated_library.delete()
 
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
 
@@ -469,6 +469,10 @@ class StoredLibrary(LibraryMixin):
             self.is_loaded = True
             self.save()
         return error_msg
+
+    @property
+    def is_preset(self) -> bool:
+        return bool(self.content and "preset" in self.content)
 
     def delete(self, *args, **kwargs):
         library_filtering_labels = list(self.filtering_labels.all())
@@ -8327,6 +8331,58 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
+class PresetJourney(NameDescriptionMixin, FolderMixin):
+    """Instance created when a user applies a preset definition."""
+
+    urn = models.CharField(max_length=255)
+    object_refs = models.JSONField(default=dict)
+    applied_at = models.DateTimeField(auto_now_add=True)
+    applied_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name="preset_journeys"
+    )
+
+    class Meta:
+        ordering = ["-applied_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class PresetJourneyStep(AbstractBaseModel):
+    """A step in a preset journey with explicit completion tracking."""
+
+    class Status(models.TextChoices):
+        NOT_STARTED = "not_started", _("Not Started")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        DONE = "done", _("Done")
+        SKIPPED = "skipped", _("Skipped")
+
+    journey = models.ForeignKey(
+        PresetJourney, related_name="steps", on_delete=models.CASCADE
+    )
+    key = models.CharField(max_length=100)
+    order = models.IntegerField()
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    target_model = models.CharField(max_length=100, blank=True, null=True)
+    target_ref = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.NOT_STARTED
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = [["journey", "key"]]
+
+    def __str__(self):
+        return f"{self.journey.name} - {self.title}"
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
@@ -8446,5 +8502,13 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    PresetJourney,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    PresetJourneyStep,
+    exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

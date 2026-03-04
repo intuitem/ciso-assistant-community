@@ -1,0 +1,125 @@
+urn: urn:intuitem:risk:preset:french-sme-anssi
+locale: en
+ref_id: preset-french-sme-anssi
+name: French SME - ANSSI Hygiene
+description: ANSSI Cybersecurity Hygiene guide + GDPR journey for French small and medium enterprises. Enables privacy and vendor management modules. Ideal starting point for organizations beginning their security and privacy compliance.
+version: 5
+provider: intuitem
+packager: intuitem
+
+dependencies:
+  - urn:intuitem:risk:library:anssi-guide-hygiene
+  - urn:intuitem:risk:library:gdpr
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+      industry:
+        - general
+      region:
+        - fr
+        - eu
+      goal: security-baseline
+
+    feature_flags:
+      enable:
+        - compliance
+        - privacy
+        - tprm
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Analyse de risques initiale"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+      - type: compliance_assessment
+        name: "ANSSI Hygiene Assessment"
+        framework: urn:intuitem:risk:library:anssi-guide-hygiene
+        ref: anssi_audit
+      - type: compliance_assessment
+        name: "GDPR Compliance"
+        framework: urn:intuitem:risk:library:gdpr
+        ref: gdpr_audit
+
+      # --- Processings (GDPR Article 30) ---
+      - type: processing
+        name: "Gestion des comptes clients"
+        description: "Collecte et traitement des données d'identité, de contact et de facturation des clients pour la création de compte, l'authentification et la gestion des abonnements."
+      - type: processing
+        name: "Gestion des ressources humaines"
+        description: "Traitement des données personnelles des employés pour la paie, les contrats, la gestion des performances et les obligations légales."
+      - type: processing
+        name: "Prospection commerciale"
+        description: "Traitement des données de contact pour l'envoi de communications marketing, de mises à jour produit et de newsletters aux clients et prospects."
+      - type: processing
+        name: "Support client"
+        description: "Traitement des données personnelles soumises via les canaux de support (email, téléphone, tickets) pour résoudre les demandes et fournir une assistance."
+      - type: processing
+        name: "Vidéosurveillance des locaux"
+        description: "Captation et stockage d'images vidéo dans les locaux de l'entreprise pour assurer la sécurité des biens et des personnes."
+      - type: processing
+        name: "Cookies et traceurs du site web"
+        description: "Utilisation de cookies, pixels de suivi et technologies similaires sur les sites web de l'entreprise à des fins d'analyse et de personnalisation."
+
+      # --- Typical SME vendor entities ---
+      - type: entity
+        name: "Hébergeur / infogérant"
+        description: "Prestataire d'hébergement ou d'infogérance gérant l'infrastructure informatique, les serveurs et les sauvegardes de l'entreprise."
+      - type: entity
+        name: "Éditeur de logiciels métier"
+        description: "Fournisseur de l'application métier principale (ERP, CRM, comptabilité) traitant des données clients et internes."
+      - type: entity
+        name: "Prestataire de messagerie"
+        description: "Fournisseur de la solution de messagerie électronique et de collaboration (ex. Microsoft 365, Google Workspace)."
+      - type: entity
+        name: "Cabinet comptable"
+        description: "Expert-comptable ou cabinet traitant les données financières, de paie et fiscales de l'entreprise."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify your assets"
+          description: "List primary and supporting assets in your information system"
+          target_model: assets
+        - key: anssi_hygiene
+          title: "Assess ANSSI Hygiene compliance"
+          description: "Go through the 42 ANSSI hygiene measures and assess your current status"
+          target_model: compliance-assessments
+          target_ref: anssi_audit
+        - key: risk_scenarios
+          title: "Create risk scenarios"
+          description: "Identify risks by combining threats with your assets"
+          target_model: risk-scenarios
+          target_ref: main_ra
+        - key: controls
+          title: "Define security controls"
+          description: "Create applied controls to address identified risks and compliance gaps"
+          target_model: applied-controls
+        - key: processings
+          title: "Map your data processings"
+          description: "Review and complete the record of processing activities required by GDPR Article 30 — document what personal data you process, why, and how."
+          target_model: processings
+        - key: vendors
+          title: "Manage your vendors"
+          description: "Review the pre-created vendor entities, add any missing ones, and create entity assessments using the due diligence framework to evaluate each vendor's security posture."
+          target_model: entities
+        - key: gdpr_compliance
+          title: "Assess GDPR compliance"
+          description: "Review GDPR requirements against your practices"
+          target_model: compliance-assessments
+          target_ref: gdpr_audit
+        - key: findings
+          title: "Track pentest and audit findings"
+          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          target_model: findings-assessments
+          target_ref: pentest_findings

@@ -1,0 +1,117 @@
+urn: urn:intuitem:risk:preset:belgian-cyfun
+locale: en
+ref_id: preset-belgian-cyfun
+name: Belgian Organisation - CyFun 2025
+description: CyberFundamentals 2025 (CyFun) compliance journey for Belgian organisations. Includes GDPR privacy management, vendor due diligence, and a guided path through the CCB framework.
+version: 2
+provider: intuitem
+packager: intuitem
+
+dependencies:
+  - urn:intuitem:risk:library:ccb-cyfun2025
+  - urn:intuitem:risk:library:gdpr
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+      region:
+        - be
+        - eu
+      goal: cyfun-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - privacy
+        - tprm
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+      - type: compliance_assessment
+        name: "CyFun 2025 Assessment"
+        framework: urn:intuitem:risk:library:ccb-cyfun2025
+        ref: cyfun_audit
+      - type: compliance_assessment
+        name: "GDPR Compliance"
+        framework: urn:intuitem:risk:library:gdpr
+        ref: gdpr_audit
+
+      # --- Processings (GDPR Article 30) ---
+      - type: processing
+        name: "Customer and member data management"
+        description: "Collection and processing of personal data for customer or member registration, communication, and service delivery."
+      - type: processing
+        name: "Employee and HR data management"
+        description: "Processing of employee personal data for payroll, contracts, performance management, and legal obligations."
+      - type: processing
+        name: "Marketing and communications"
+        description: "Processing of contact data for newsletters, marketing campaigns, and public communications."
+      - type: processing
+        name: "Website cookies and analytics"
+        description: "Use of cookies, tracking pixels, and analytics tools on the organisation's website for audience measurement and personalisation."
+
+      # --- Typical vendor entities ---
+      - type: entity
+        name: "IT infrastructure provider"
+        description: "Provider of hosting, cloud services, or managed IT infrastructure supporting the organisation's information systems."
+      - type: entity
+        name: "Business software provider"
+        description: "Vendor of the primary business application (ERP, CRM, accounting) processing organisational and customer data."
+      - type: entity
+        name: "Email and collaboration provider"
+        description: "Provider of email, messaging, and collaboration tools (e.g. Microsoft 365, Google Workspace)."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify your assets"
+          description: "Inventory primary assets (data, processes) and supporting assets (servers, applications, networks) within scope."
+          target_model: assets
+        - key: cyfun_compliance
+          title: "Assess CyFun 2025 compliance"
+          description: "Walk through the CyberFundamentals 2025 framework requirements and assess your current security posture against the CCB baseline."
+          target_model: compliance-assessments
+          target_ref: cyfun_audit
+        - key: risk_scenarios
+          title: "Conduct risk assessment"
+          description: "Create risk scenarios by combining threats with your assets, assess likelihood and impact."
+          target_model: risk-scenarios
+          target_ref: main_ra
+        - key: controls
+          title: "Define security controls"
+          description: "Create applied controls to address identified risks and compliance gaps from the CyFun assessment."
+          target_model: applied-controls
+        - key: processings
+          title: "Map your data processings"
+          description: "Document your processing activities as required by GDPR Article 30 — what personal data you process, why, and how."
+          target_model: processings
+        - key: vendors
+          title: "Manage your vendors"
+          description: "Review vendor entities, add missing ones, and create entity assessments using the due diligence framework."
+          target_model: entities
+        - key: gdpr_compliance
+          title: "Assess GDPR compliance"
+          description: "Review GDPR requirements against your practices and link evidence."
+          target_model: compliance-assessments
+          target_ref: gdpr_audit
+        - key: findings
+          title: "Track pentest and audit findings"
+          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          target_model: findings-assessments
+          target_ref: pentest_findings
