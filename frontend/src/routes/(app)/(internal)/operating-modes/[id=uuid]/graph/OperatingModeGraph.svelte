@@ -609,7 +609,7 @@
 							{#if showHelp}
 								<p
 									class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base px-3 py-2 max-w-xs leading-relaxed"
-									transition:slide={{ axis: 'x', duration: 200 }}
+									transition:slide={{ duration: 200 }}
 								>
 									{m.graphEditorHelp()}
 								</p>
