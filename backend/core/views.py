@@ -260,8 +260,6 @@ def escape_excel_formula(value):
     s = str(value)
     if not s:
         return ""
-
-    # Important: Excel ignore certains caractères en tête
     stripped = s.lstrip(" \t\r\n")
     if stripped and stripped[0] in ("=", "+", "-", "@"):
         return "'" + s
