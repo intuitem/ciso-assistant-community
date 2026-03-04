@@ -47,8 +47,7 @@
 			input: ['type', 'checked', 'disabled'],
 			li: ['class'],
 			ul: ['class'],
-			abbr: ['title'],
-			sup: ['class']
+			abbr: ['title']
 		},
 		allowedSchemes: ['http', 'https'],
 		transformTags: {

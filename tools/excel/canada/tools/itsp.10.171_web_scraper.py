@@ -120,7 +120,7 @@ def build_defn_abbr_html(definition_title: str) -> str:
     escaped_title = escaped_title.replace("\n", "&#10;")
     return (
         f'<abbr title="{escaped_title}">'
-        '<sup class="fa-solid fa-circle-question"></sup>'
+        "<sup>(?)</sup>"  # Old version of the "sup" tag: '<sup class="fa-solid fa-circle-question"></sup>'
         "</abbr>"
     )
 
