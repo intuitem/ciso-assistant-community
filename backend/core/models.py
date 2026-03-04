@@ -21,6 +21,7 @@ from django.core.validators import MaxValueValidator, RegexValidator, MinValueVa
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -1926,6 +1927,15 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     @property
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
+
+    def get_unsynced_applied_controls_queryset(self) -> QuerySet[AppliedControl]:
+        """Return a `QuerySet` selecting all `AppliedControl` objects linked to this `ReferenceControl` which are not currently synced to it."""
+
+        unsynced_applied_controls_query = self.appliedcontrol_set.exclude(
+            csf_function=self.csf_function,
+            category=self.category,
+        )
+        return unsynced_applied_controls_query
 
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):

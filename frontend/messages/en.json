@@ -1209,7 +1209,7 @@
 	"selectRequirementsToAssign": "Select requirements to include in a new assignment",
 	"makeSureActorsHavePermissions": "Make sure that the assigned users have access to the domain of this audit",
 	"selectAllAvailable": "Select all available",
-	"clearSelection": "Clear",
+	"clearSelection": "Clear selection",
 	"expandAll": "Expand all",
 	"collapseAll": "Collapse all",
 	"clickToSelect": "click to select",
@@ -2040,7 +2040,6 @@
 	"changeTreatment": "Change treatment",
 	"changeAssignee": "Change assignee",
 	"changeResult": "Change result",
-	"clearSelection": "Clear selection",
 	"itemsSelected": "{count} item(s) selected",
 	"batchActionConfirmDelete": "Are you sure you want to delete {count} item(s)?",
 	"batchActionConfirmChange": "Apply to {count} item(s):",
@@ -3523,5 +3522,7 @@
 	"appliedControlsPlaceholder": "Select applied controls...",
 	"jumpTo": "Jump to",
 	"sortAscending": "Sort A → Z",
-	"sortDescending": "Sort Z → A"
+	"sortDescending": "Sort Z → A",
+	"confirmModalMessagePlural": "Are you sure? This action will permanently affect the following objects",
+	"syncAppliedControlsMessage": "The applied controls using this reference control will be synced to it. Please note that this cannot be undone."
 }

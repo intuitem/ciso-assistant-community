@@ -3007,5 +3007,7 @@
 	"serverConfigurationError": "Serverkonfigurationsfehler",
 	"libraryLoadFailed": "Bibliothek konnte nicht geladen werden",
 	"sortAscending": "Sortieren A → Z",
-	"sortDescending": "Sortieren Z → A"
+	"sortDescending": "Sortieren Z → A",
+	"confirmModalMessagePlural": "Sind Sie sicher? Diese Aktion wirkt sich dauerhaft auf folgende Objekte aus",
+	"syncAppliedControlsMessage": "Die angewendeten Kontrollen, die diese Referenzkontrolle verwenden, werden mit ihr synchronisiert. Bitte beachten Sie, dass dies nicht rückgängig gemacht werden kann."
 }

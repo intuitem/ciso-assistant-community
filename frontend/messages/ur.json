@@ -1101,5 +1101,7 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "ترتیب الف ← ی",
-	"sortDescending": "ترتیب ی ← الف"
+	"sortDescending": "ترتیب ی ← الف",
+	"confirmModalMessagePlural": "کیا آپ کو یقین ہے؟ یہ کارروائی درج ذیل اشیاء کو مستقل طور پر متاثر کرے گی",
+	"syncAppliedControlsMessage": "اس حوالہ کنٹرول کو استعمال کرنے والے اطلاق شدہ کنٹرولز اس کے ساتھ ہم آہنگ کر دیے جائیں گے۔ براہ کرم نوٹ کریں کہ یہ عمل واپس نہیں لیا جا سکتا۔"
 }

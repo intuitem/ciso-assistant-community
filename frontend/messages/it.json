@@ -2365,5 +2365,7 @@
 	"serverConfigurationError": "Errore configurazione server",
 	"libraryLoadFailed": "Caricamento libreria fallito",
 	"sortAscending": "Ordina A → Z",
-	"sortDescending": "Ordina Z → A"
+	"sortDescending": "Ordina Z → A",
+	"confirmModalMessagePlural": "Sei sicuro? Questa azione avrà effetto permanente sui seguenti oggetti",
+	"syncAppliedControlsMessage": "I controlli applicati che utilizzano questo controllo di riferimento saranno sincronizzati con esso. Si prega di notare che questa operazione non può essere annullata."
 }

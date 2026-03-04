@@ -1101,5 +1101,7 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "ترتيب أ ← ي",
-	"sortDescending": "ترتيب ي ← أ"
+	"sortDescending": "ترتيب ي ← أ",
+	"confirmModalMessagePlural": "هل أنت متأكد؟ سيؤثر هذا الإجراء بشكل دائم على الكائنات التالية",
+	"syncAppliedControlsMessage": "سيتم مزامنة عناصر التحكم المطبقة التي تستخدم عنصر التحكم المرجعي هذا معه. يرجى ملاحظة أن هذا الإجراء لا يمكن التراجع عنه."
 }

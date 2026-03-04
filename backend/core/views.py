@@ -14,7 +14,7 @@ import uuid
 import zipfile
 import tempfile
 from datetime import date, datetime, timedelta
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Final
 import time
 from django.db.models import (
     F,
@@ -37,7 +37,7 @@ from django.db.models import (
     QuerySet,
     Prefetch,
 )
-from django.db.models.functions import Greatest, Coalesce
+from django.db.models.functions import Coalesce
 
 from collections import defaultdict
 import pytz
@@ -2329,6 +2329,66 @@ class ReferenceControlViewSet(BaseModelViewSet):
     @action(detail=False, name="Get function choices")
     def csf_function(self, request):
         return Response(dict(ReferenceControl.CSF_FUNCTION))
+
+    @staticmethod
+    def _get_syncable_applied_controls(
+        reference_control: ReferenceControl, user: AbstractBaseUser | AnonymousUser
+    ) -> list[AppliedControl]:
+        """Return the list of syncable `AppliedControl` objects (meaning they are currently unsynced) the `User` can synchronize (based on his permissions)."""
+
+        _, changeable_applied_controls, _ = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), user, AppliedControl
+        )
+
+        syncable_applied_controls = (
+            reference_control.get_unsynced_applied_controls_queryset().filter(
+                id__in=changeable_applied_controls,
+            )
+        )
+        return list(syncable_applied_controls)
+
+    @action(detail=True, methods=["get"], url_path="syncable-applied-controls")
+    def syncable_applied_controls(self, request, pk):
+        reference_control = self.get_object()
+        syncable_applied_controls = self._get_syncable_applied_controls(
+            reference_control, request.user
+        )
+
+        return Response(
+            {"id": applied_control.id, "name": applied_control.name}
+            for applied_control in syncable_applied_controls
+        )
+
+    @action(detail=True, methods=["post"], url_path="sync-applied-controls")
+    def sync_applied_controls(self, request, pk):
+        reference_control = self.get_object()
+        syncable_applied_controls = self._get_syncable_applied_controls(
+            reference_control, request.user
+        )
+
+        FIELDS_TO_SYNC: Final[list[str]] = [
+            "category",
+            "csf_function",
+        ]
+
+        for syncable_applied_control in syncable_applied_controls:
+            for field_to_sync in FIELDS_TO_SYNC:
+                reference_control_value = getattr(reference_control, field_to_sync)
+
+                setattr(
+                    syncable_applied_control, field_to_sync, reference_control_value
+                )
+
+        AppliedControl.objects.bulk_update(
+            syncable_applied_controls, FIELDS_TO_SYNC, batch_size=100
+        )
+
+        return Response(
+            [
+                {"id": applied_control.id, "name": applied_control.name}
+                for applied_control in syncable_applied_controls
+            ]
+        )
 
 
 class RiskMatrixViewSet(BaseModelViewSet):

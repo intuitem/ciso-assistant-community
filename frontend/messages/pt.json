@@ -1133,5 +1133,7 @@
 	"serverConfigurationError": "Erro de configuração do servidor",
 	"libraryLoadFailed": "Falha ao carregar biblioteca",
 	"sortAscending": "Ordenar A → Z",
-	"sortDescending": "Ordenar Z → A"
+	"sortDescending": "Ordenar Z → A",
+	"confirmModalMessagePlural": "Você tem certeza? Esta ação afetará permanentemente os seguintes objetos",
+	"syncAppliedControlsMessage": "Os controles aplicados que utilizam este controle de referência serão sincronizados com ele. Observe que esta ação não pode ser desfeita."
 }

@@ -1130,5 +1130,7 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Sortare A → Z",
-	"sortDescending": "Sortare Z → A"
+	"sortDescending": "Sortare Z → A",
+	"confirmModalMessagePlural": "Sunteți sigur? Această acțiune va afecta permanent următoarele obiecte",
+	"syncAppliedControlsMessage": "Controalele aplicate care utilizează acest control de referință vor fi sincronizate cu acesta. Vă rugăm să rețineți că această acțiune nu poate fi anulată."
 }

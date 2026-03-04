@@ -2102,5 +2102,7 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Sortiraj A → Z",
-	"sortDescending": "Sortiraj Z → A"
+	"sortDescending": "Sortiraj Z → A",
+	"confirmModalMessagePlural": "Jeste li sigurni? Ova radnja će trajno utjecati na sljedeće objekte",
+	"syncAppliedControlsMessage": "Primijenjene kontrole koje koriste ovu referentnu kontrolu bit će sinkronizirane s njom. Imajte na umu da se ova radnja ne može poništiti."
 }
