@@ -195,7 +195,10 @@
 		// Fetch org_tree right away
 
 		isLoading = true;
-		fetch('/folders/org_tree/?include_perimeters=false')
+		const includeEnclaves = contentTypes.includes('EN');
+		fetch(
+			`/folders/org_tree/?include_perimeters=false${includeEnclaves ? '&include_enclaves=true' : ''}`
+		)
 			.then((res) => {
 				if (res.ok) return res.json();
 			})
