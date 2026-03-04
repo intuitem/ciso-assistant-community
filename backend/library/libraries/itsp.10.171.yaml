@@ -30,7 +30,7 @@ description: "La protection de l\u2019information d\xE9sign\xE9e rev\xEAt une im
 copyright: "Centre de la s\xE9curit\xE9 des t\xE9l\xE9communications Canada. [Open\
   \ Government Licence - Canada](https://open.canada.ca/fr/licence-du-gouvernement-ouvert-canada)"
 version: 1
-publication_date: 2026-03-03
+publication_date: 2026-03-04
 provider: "Centre de la s\xE9curit\xE9 des t\xE9l\xE9communications Canada"
 packager: intuitem
 translations:
@@ -193,10 +193,9 @@ objects:
         Internet des objets <abbr title=\"Internet des objets&#10;R\xE9seau form\xE9\
         \ par les dispositifs Web utilis\xE9s couramment, qui peuvent se connecter\
         \ les uns aux autres et qui peuvent se transmettre de l&#x27;information.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr> (IdO), les dispositifs\
-        \ de l\u2019Internet industriel des objets (IIdO), les syst\xE8mes sp\xE9\
-        cialis\xE9s, les cybersyst\xE8mes physiques, les syst\xE8mes embarqu\xE9s\
-        \ et les capteurs."
+        ><sup>(?)</sup></abbr> (IdO), les dispositifs de l\u2019Internet industriel\
+        \ des objets (IIdO), les syst\xE8mes sp\xE9cialis\xE9s, les cybersyst\xE8\
+        mes physiques, les syst\xE8mes embarqu\xE9s et les capteurs."
       translations:
         en:
           name: Introduction
@@ -290,15 +289,15 @@ objects:
         \ (par exemple, la mise en \u0153uvre de sous-r\xE9seaux dot\xE9s de pare-feu\
         \ ou d\u2019autres dispositifs de protection de p\xE9rim\xE8tre <abbr title=\"\
         P\xE9rim\xE8tre&#10;Fronti\xE8re entre deux zones de s\xE9curit\xE9 r\xE9\
-        seau \xE0 travers laquelle le trafic est achemin\xE9.\"><sup class=\"fa-solid\
-        \ fa-circle-question\"></sup></abbr> et l\u2019utilisation de m\xE9canismes\
-        \ de contr\xF4le de flux d\u2019information). Les domaines de s\xE9curit\xE9\
-        \ peuvent utiliser une s\xE9paration physique, une s\xE9paration logique ou\
-        \ une combinaison des deux. Une telle approche peut fournir une s\xE9curit\xE9\
-        \ ad\xE9quate pour l\u2019information d\xE9sign\xE9e, tout en \xE9vitant d\u2019\
-        augmenter la posture de s\xE9curit\xE9 d\u2019une organisation ne relevant\
-        \ pas du <abbr title=\"gouvernement du Canada\">GC</abbr> au-del\xE0 du niveau\
-        \ requis afin de prot\xE9ger ses missions, ses op\xE9rations et ses actifs."
+        seau \xE0 travers laquelle le trafic est achemin\xE9.\"><sup>(?)</sup></abbr>\
+        \ et l\u2019utilisation de m\xE9canismes de contr\xF4le de flux d\u2019information).\
+        \ Les domaines de s\xE9curit\xE9 peuvent utiliser une s\xE9paration physique,\
+        \ une s\xE9paration logique ou une combinaison des deux. Une telle approche\
+        \ peut fournir une s\xE9curit\xE9 ad\xE9quate pour l\u2019information d\xE9\
+        sign\xE9e, tout en \xE9vitant d\u2019augmenter la posture de s\xE9curit\xE9\
+        \ d\u2019une organisation ne relevant pas du <abbr title=\"gouvernement du\
+        \ Canada\">GC</abbr> au-del\xE0 du niveau requis afin de prot\xE9ger ses missions,\
+        \ ses op\xE9rations et ses actifs."
       annotation: "[2] Les composants incluent les postes de travail, les serveurs,\
         \ les ordinateurs blocs-notes, les t\xE9l\xE9phones intelligents, les tablettes,\
         \ les dispositifs d\u2019entr\xE9e-sortie, les composants r\xE9seau, les syst\xE8\
@@ -487,51 +486,50 @@ objects:
         grit\xE9 permet de savoir si l&#x27;information est conforme \xE0 ce qu&#x27;elle\
         \ est cens\xE9e \xEAtre. L&#x27;int\xE9grit\xE9 s&#x27;applique \xE9galement\
         \ aux processus op\xE9rationnels, \xE0 la logique des applications logicielles,\
-        \ au mat\xE9riel ainsi qu&#x27;au personnel.\"><sup class=\"fa-solid fa-circle-question\"\
-        ></sup></abbr> moyenne, disponibilit\xE9 <abbr title=\"Disponibilit\xE9&#10;Caract\xE9\
-        ristique de l&#x27;information ou des syst\xE8mes qui sont accessibles aux\
-        \ personnes autoris\xE9es au moment o\xF9 celles-ci en ont besoin. La disponibilit\xE9\
+        \ au mat\xE9riel ainsi qu&#x27;au personnel.\"><sup>(?)</sup></abbr> moyenne,\
+        \ disponibilit\xE9 <abbr title=\"Disponibilit\xE9&#10;Caract\xE9ristique de\
+        \ l&#x27;information ou des syst\xE8mes qui sont accessibles aux personnes\
+        \ autoris\xE9es au moment o\xF9 celles-ci en ont besoin. La disponibilit\xE9\
         \ est un attribut des actifs informationnels, logiciels, et mat\xE9riels (l&#x27;infrastructure\
         \ et ses composantes). Il est \xE9galement entendu que la disponibilit\xE9\
         \ comprend la protection des actifs contre les acc\xE8s non autoris\xE9s ou\
-        \ les compromissions.\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr>\
-        \ moyenne (impact moyen) de l\u2019ITSP.10.033-01, les contr\xF4les ont \xE9\
-        t\xE9 adapt\xE9s afin d\u2019\xE9liminer les contr\xF4les ou les parties de\
-        \ contr\xF4les qui :\n\u2022 rel\xE8vent principalement du <abbr title=\"\
-        gouvernement du Canada\">GC</abbr> ;\n\u2022 ne sont pas directement li\xE9\
-        s \xE0 la protection de la confidentialit\xE9 de l\u2019information d\xE9\
-        sign\xE9e;\n\u2022 sont d\xE9j\xE0 abord\xE9s ad\xE9quatement par d\u2019\
-        autres contr\xF4les;\n\u2022 ne s\u2019appliquent pas.\n\nLes exigences de\
-        \ s\xE9curit\xE9 de l\u2019ITSP.10.171 repr\xE9sentent un sous-ensemble des\
-        \ contr\xF4les n\xE9cessaires \xE0 la protection de la confidentialit\xE9\
-        \ de l\u2019information d\xE9sign\xE9e. Les exigences de s\xE9curit\xE9 sont\
-        \ organis\xE9es en 17 familles, tel qu\u2019il est illustr\xE9 dans le tableau\
-        \ 1. Chaque famille contient les exigences associ\xE9es au sujet de s\xE9\
-        curit\xE9 d\u2019ordre g\xE9n\xE9ral qu\u2019elle aborde. Certaines familles\
-        \ de l\u2019ITSP.10.033 n\u2019ont pas \xE9t\xE9 incluses dans la pr\xE9sente,\
-        \ car elles ne contribuent pas directement \xE0 la confidentialit\xE9. Par\
-        \ exemple, les activit\xE9s de la famille Traitement des renseignements personnels\
-        \ et transparence (PT) ne sont pas incluses, car elles portent sur le traitement\
-        \ de renseignements personnels et non leur confidentialit\xE9. La famille\
-        \ Gestion des programmes (PM) n\u2019est pas incluse, car elle n\u2019est\
-        \ pas associ\xE9e \xE0 la confidentialit\xE9. Enfin, la famille Planification\
-        \ d\u2019urgence (CP) n\u2019est pas incluse, car elle traite de la disponibilit\xE9\
-        \ de l\u2019information.\n\nLa liste qui suit donne les familles d\u2019exigences\
-        \ de s\xE9curit\xE9 :\n\u2022 Contr\xF4le d\u2019acc\xE8s\n\u2022 Sensibilisation\
-        \ et formation\n\u2022 V\xE9rification et responsabilit\xE9\n\u2022 Gestion\
-        \ des configurations\n\u2022 Identification et authentification\n\u2022 Intervention\
-        \ en cas d\u2019incident\n\u2022 Maintenance\n\u2022 Protection des supports\n\
-        \u2022 S\xE9curit\xE9 du personnel\n\u2022 Protection physique\n\u2022 \xC9\
-        valuation des risques\n\u2022 \xC9valuation de s\xE9curit\xE9 et surveillance\n\
-        \u2022 Protection des syst\xE8mes et des communications\n\u2022 Int\xE9grit\xE9\
-        \ de l\u2019information et des syst\xE8mes\n\u2022 Planification\n\u2022 Acquisition\
-        \ des syst\xE8mes et des services\n\u2022 Gestion des risques li\xE9s \xE0\
-        \ la cha\xEEne d\u2019approvisionnement\n\nLes param\xE8tres d\xE9finis par\
-        \ l\u2019organisation (ODP pour Organization-defined Parameter) sont inclus\
-        \ dans certaines exigences de s\xE9curit\xE9. Les <abbr title=\"param\xE8\
-        tres d\xE9finis par l\u2019organisation\">ODP</abbr> offrent une meilleure\
-        \ souplesse avec l\u2019utilisation d\u2019affectations et de s\xE9lections\
-        \ permettant aux minist\xE8res et organismes du <abbr title=\"gouvernement\
+        \ les compromissions.\"><sup>(?)</sup></abbr> moyenne (impact moyen) de l\u2019\
+        ITSP.10.033-01, les contr\xF4les ont \xE9t\xE9 adapt\xE9s afin d\u2019\xE9\
+        liminer les contr\xF4les ou les parties de contr\xF4les qui :\n\u2022 rel\xE8\
+        vent principalement du <abbr title=\"gouvernement du Canada\">GC</abbr> ;\n\
+        \u2022 ne sont pas directement li\xE9s \xE0 la protection de la confidentialit\xE9\
+        \ de l\u2019information d\xE9sign\xE9e;\n\u2022 sont d\xE9j\xE0 abord\xE9\
+        s ad\xE9quatement par d\u2019autres contr\xF4les;\n\u2022 ne s\u2019appliquent\
+        \ pas.\n\nLes exigences de s\xE9curit\xE9 de l\u2019ITSP.10.171 repr\xE9sentent\
+        \ un sous-ensemble des contr\xF4les n\xE9cessaires \xE0 la protection de la\
+        \ confidentialit\xE9 de l\u2019information d\xE9sign\xE9e. Les exigences de\
+        \ s\xE9curit\xE9 sont organis\xE9es en 17 familles, tel qu\u2019il est illustr\xE9\
+        \ dans le tableau 1. Chaque famille contient les exigences associ\xE9es au\
+        \ sujet de s\xE9curit\xE9 d\u2019ordre g\xE9n\xE9ral qu\u2019elle aborde.\
+        \ Certaines familles de l\u2019ITSP.10.033 n\u2019ont pas \xE9t\xE9 incluses\
+        \ dans la pr\xE9sente, car elles ne contribuent pas directement \xE0 la confidentialit\xE9\
+        . Par exemple, les activit\xE9s de la famille Traitement des renseignements\
+        \ personnels et transparence (PT) ne sont pas incluses, car elles portent\
+        \ sur le traitement de renseignements personnels et non leur confidentialit\xE9\
+        . La famille Gestion des programmes (PM) n\u2019est pas incluse, car elle\
+        \ n\u2019est pas associ\xE9e \xE0 la confidentialit\xE9. Enfin, la famille\
+        \ Planification d\u2019urgence (CP) n\u2019est pas incluse, car elle traite\
+        \ de la disponibilit\xE9 de l\u2019information.\n\nLa liste qui suit donne\
+        \ les familles d\u2019exigences de s\xE9curit\xE9 :\n\u2022 Contr\xF4le d\u2019\
+        acc\xE8s\n\u2022 Sensibilisation et formation\n\u2022 V\xE9rification et responsabilit\xE9\
+        \n\u2022 Gestion des configurations\n\u2022 Identification et authentification\n\
+        \u2022 Intervention en cas d\u2019incident\n\u2022 Maintenance\n\u2022 Protection\
+        \ des supports\n\u2022 S\xE9curit\xE9 du personnel\n\u2022 Protection physique\n\
+        \u2022 \xC9valuation des risques\n\u2022 \xC9valuation de s\xE9curit\xE9 et\
+        \ surveillance\n\u2022 Protection des syst\xE8mes et des communications\n\u2022\
+        \ Int\xE9grit\xE9 de l\u2019information et des syst\xE8mes\n\u2022 Planification\n\
+        \u2022 Acquisition des syst\xE8mes et des services\n\u2022 Gestion des risques\
+        \ li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement\n\nLes param\xE8tres\
+        \ d\xE9finis par l\u2019organisation (ODP pour Organization-defined Parameter)\
+        \ sont inclus dans certaines exigences de s\xE9curit\xE9. Les <abbr title=\"\
+        param\xE8tres d\xE9finis par l\u2019organisation\">ODP</abbr> offrent une\
+        \ meilleure souplesse avec l\u2019utilisation d\u2019affectations et de s\xE9\
+        lections permettant aux minist\xE8res et organismes du <abbr title=\"gouvernement\
         \ du Canada\">GC</abbr>, ainsi qu\u2019aux organisations ne relevant pas du\
         \ <abbr title=\"gouvernement du Canada\">GC</abbr>, de sp\xE9cifier des valeurs\
         \ pour les param\xE8tres d\xE9sign\xE9s dans les exigences. Les affectations\
@@ -624,78 +622,77 @@ objects:
             \ when needed. Availability is applied to information assets, software,\
             \ and hardware (infrastructure and its components). Implied in its definition\
             \ is that availability includes the protection of assets from unauthorized\
-            \ access and compromise.\"><sup class=\"fa-solid fa-circle-question\"\
-            ></sup></abbr>.\n\nThe following are the security requirements families:\n\
-            \u2022 Access control\n\u2022 Awareness and training\n\u2022 Audit and\
-            \ accountability\n\u2022 Configuration management\n\u2022 Identification\
-            \ and authentication\n\u2022 Incident response\n\u2022 Maintenance\n\u2022\
-            \ Media protection\n\u2022 Personnel security\n\u2022 Physical protection\n\
-            \u2022 Risk assessment\n\u2022 Security assessment and monitoring\n\u2022\
-            \ System and communications protection\n\u2022 System and information\
-            \ integrity\n\u2022 Planning\n\u2022 System and services acquisition\n\
-            \u2022 Supply chain risk management\n\nOrganization-defined parameters\
-            \ (ODPs) are included in certain security requirements. <abbr title=\"\
-            organization-defined parameter\">ODP</abbr>s provide flexibility through\
-            \ the use of assignment and selection operations to allow <abbr title=\"\
-            Government of Canada\">GC</abbr> departments and agencies and non-<abbr\
-            \ title=\"Government of Canada\">GC</abbr> organizations to specify values\
-            \ for the designated parameters in the requirements. Assignment and selection\
-            \ operations allow security requirements to be customized based on specific\
-            \ protection needs. The determination of <abbr title=\"organization-defined\
-            \ parameter\">ODP</abbr> values can be guided and informed by laws, Orders\
-            \ in Council, directives, regulations, policies, standards, guidance,\
-            \ or mission and business needs. Once specified, <abbr title=\"organization-defined\
-            \ parameter\">ODP</abbr> values become part of the requirement. When present\
-            \ in a control or activity statement, the square brackets indicate that\
-            \ there is an <abbr title=\"organization-defined parameter\">ODP</abbr>\
-            \ that needs to be inserted by the reader in order for an organization\
-            \ to tailor the control to their context.\n\n<abbr title=\"organization-defined\
-            \ parameter\">ODP</abbr>s are an important part of specifying a security\
-            \ requirement. <abbr title=\"organization-defined parameter\">ODP</abbr>s\
-            \ provide both the flexibility and the specificity needed by organizations\
-            \ to clearly define their specified information security requirements\
-            \ according to their particular missions, business functions, operational\
-            \ environments and risk tolerance. In addition, <abbr title=\"organization-defined\
-            \ parameter\">ODP</abbr>s support consistent security assessments to determine\
-            \ if specified security requirements have been satisfied. If a <abbr title=\"\
-            Government of Canada\">GC</abbr> department or agency, or a group of departments\
-            \ or agencies, does not specify a particular value or range of values\
-            \ for an <abbr title=\"organization-defined parameter\">ODP</abbr>, non-<abbr\
-            \ title=\"Government of Canada\">GC</abbr> organizations must assign the\
-            \ value or values to complete the security requirement.\n\nEach requirement\
-            \ includes a discussion section, derived from the control discussion sections\
-            \ in NIST SP 800-53. These sections provide additional information to\
-            \ facilitate the implementation and assessment of the requirements. They\
-            \ are informative, not normative. The discussion sections are not intended\
-            \ to extend the scope of a requirement or to influence the solutions that\
-            \ organizations may use to satisfy a requirement. Examples provided are\
-            \ notional, not exhaustive, and do not reflect all the potential options\
-            \ available to organizations. The \u201CReferences\u201D section provides\
-            \ the source controls or assurance activities from ITSP.10.033, and a\
-            \ list of relevant publications with additional information on the topic\
-            \ described in the requirement.\n\nBecause this is the first iteration\
-            \ of the Canadian publication, controls that were withdrawn in NIST SP\
-            \ 800-171 Revision 3 have been labelled as \u201Cnot allocated\u201D to\
-            \ keep the same numbering for interoperability purposes.\n\nThe structure\
-            \ and content of a typical security requirement is provided in the example\
-            \ below.\n\nThe term \u201Corganization\u201D is used in many security\
-            \ requirements, and its meaning depends on context. For example, in a\
-            \ security requirement with an <abbr title=\"organization-defined parameter\"\
-            >ODP</abbr>, an organization can refer to either the <abbr title=\"Government\
-            \ of Canada\">GC</abbr> department or agency or to the non-<abbr title=\"\
-            Government of Canada\">GC</abbr> organization establishing the parameter\
-            \ values for the requirement.\n\nAnnex A describes the security control\
-            \ <abbr title=\"Security control&#10;A management, operational, or technical\
-            \ high-level security requirement needed for an information system to\
-            \ protect the confidentiality, integrity, and availability of its IT assets.\
-            \ Security controls can be applied by using a variety of security solutions\
-            \ that can include security products, security policies, security practices,\
-            \ and security procedures.\"><sup class=\"fa-solid fa-circle-question\"\
-            ></sup></abbr> tailoring criteria used to develop the security requirements\
-            \ and the results of the tailoring process. It provides a list of controls\
-            \ and activities from ITSP.10.033 that support the requirements and the\
-            \ controls and activities that have been eliminated from the Medium impact\
-            \ profile in accordance with the tailoring criteria."
+            \ access and compromise.\"><sup>(?)</sup></abbr>.\n\nThe following are\
+            \ the security requirements families:\n\u2022 Access control\n\u2022 Awareness\
+            \ and training\n\u2022 Audit and accountability\n\u2022 Configuration\
+            \ management\n\u2022 Identification and authentication\n\u2022 Incident\
+            \ response\n\u2022 Maintenance\n\u2022 Media protection\n\u2022 Personnel\
+            \ security\n\u2022 Physical protection\n\u2022 Risk assessment\n\u2022\
+            \ Security assessment and monitoring\n\u2022 System and communications\
+            \ protection\n\u2022 System and information integrity\n\u2022 Planning\n\
+            \u2022 System and services acquisition\n\u2022 Supply chain risk management\n\
+            \nOrganization-defined parameters (ODPs) are included in certain security\
+            \ requirements. <abbr title=\"organization-defined parameter\">ODP</abbr>s\
+            \ provide flexibility through the use of assignment and selection operations\
+            \ to allow <abbr title=\"Government of Canada\">GC</abbr> departments\
+            \ and agencies and non-<abbr title=\"Government of Canada\">GC</abbr>\
+            \ organizations to specify values for the designated parameters in the\
+            \ requirements. Assignment and selection operations allow security requirements\
+            \ to be customized based on specific protection needs. The determination\
+            \ of <abbr title=\"organization-defined parameter\">ODP</abbr> values\
+            \ can be guided and informed by laws, Orders in Council, directives, regulations,\
+            \ policies, standards, guidance, or mission and business needs. Once specified,\
+            \ <abbr title=\"organization-defined parameter\">ODP</abbr> values become\
+            \ part of the requirement. When present in a control or activity statement,\
+            \ the square brackets indicate that there is an <abbr title=\"organization-defined\
+            \ parameter\">ODP</abbr> that needs to be inserted by the reader in order\
+            \ for an organization to tailor the control to their context.\n\n<abbr\
+            \ title=\"organization-defined parameter\">ODP</abbr>s are an important\
+            \ part of specifying a security requirement. <abbr title=\"organization-defined\
+            \ parameter\">ODP</abbr>s provide both the flexibility and the specificity\
+            \ needed by organizations to clearly define their specified information\
+            \ security requirements according to their particular missions, business\
+            \ functions, operational environments and risk tolerance. In addition,\
+            \ <abbr title=\"organization-defined parameter\">ODP</abbr>s support consistent\
+            \ security assessments to determine if specified security requirements\
+            \ have been satisfied. If a <abbr title=\"Government of Canada\">GC</abbr>\
+            \ department or agency, or a group of departments or agencies, does not\
+            \ specify a particular value or range of values for an <abbr title=\"\
+            organization-defined parameter\">ODP</abbr>, non-<abbr title=\"Government\
+            \ of Canada\">GC</abbr> organizations must assign the value or values\
+            \ to complete the security requirement.\n\nEach requirement includes a\
+            \ discussion section, derived from the control discussion sections in\
+            \ NIST SP 800-53. These sections provide additional information to facilitate\
+            \ the implementation and assessment of the requirements. They are informative,\
+            \ not normative. The discussion sections are not intended to extend the\
+            \ scope of a requirement or to influence the solutions that organizations\
+            \ may use to satisfy a requirement. Examples provided are notional, not\
+            \ exhaustive, and do not reflect all the potential options available to\
+            \ organizations. The \u201CReferences\u201D section provides the source\
+            \ controls or assurance activities from ITSP.10.033, and a list of relevant\
+            \ publications with additional information on the topic described in the\
+            \ requirement.\n\nBecause this is the first iteration of the Canadian\
+            \ publication, controls that were withdrawn in NIST SP 800-171 Revision\
+            \ 3 have been labelled as \u201Cnot allocated\u201D to keep the same numbering\
+            \ for interoperability purposes.\n\nThe structure and content of a typical\
+            \ security requirement is provided in the example below.\n\nThe term \u201C\
+            organization\u201D is used in many security requirements, and its meaning\
+            \ depends on context. For example, in a security requirement with an <abbr\
+            \ title=\"organization-defined parameter\">ODP</abbr>, an organization\
+            \ can refer to either the <abbr title=\"Government of Canada\">GC</abbr>\
+            \ department or agency or to the non-<abbr title=\"Government of Canada\"\
+            >GC</abbr> organization establishing the parameter values for the requirement.\n\
+            \nAnnex A describes the security control <abbr title=\"Security control&#10;A\
+            \ management, operational, or technical high-level security requirement\
+            \ needed for an information system to protect the confidentiality, integrity,\
+            \ and availability of its IT assets. Security controls can be applied\
+            \ by using a variety of security solutions that can include security products,\
+            \ security policies, security practices, and security procedures.\"><sup>(?)</sup></abbr>\
+            \ tailoring criteria used to develop the security requirements and the\
+            \ results of the tailoring process. It provides a list of controls and\
+            \ activities from ITSP.10.033 that support the requirements and the controls\
+            \ and activities that have been eliminated from the Medium impact profile\
+            \ in accordance with the tailoring criteria."
     - urn: urn:intuitem:risk:req_node:itsp.10.171:3
       assessable: false
       depth: 1
@@ -773,9 +770,8 @@ objects:
             restricted area (e.g. screening visitors and materials at entry points,
             escorting visitors). For IT assets, access controls may be required for
             networks, systems, and information (e.g. restricting users on specific
-            systems, limiting account privileges)."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            family support the ability to permit or deny user access to resources
-            within the system.
+            systems, limiting account privileges)."><sup>(?)</sup></abbr> family support
+            the ability to permit or deny user access to resources within the system.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.01
       assessable: false
       depth: 3
@@ -1060,12 +1056,11 @@ objects:
             anonymous, emergency, developer, and service accounts. Users who require
             administrative privileges <abbr title="Administrative privileges&#10;The
             permissions that allow a user to perform certain functions on a system
-            or network, such as installing software and changing configuration settings."><sup
-            class="fa-solid fa-circle-question"></sup></abbr> on system accounts receive
-            additional scrutiny by organizational personnel responsible for approving
-            such accounts and privileged access. Types of accounts that organizations
-            may prohibit due to increased risk include group, emergency, guest, anonymous,
-            and temporary accounts.
+            or network, such as installing software and changing configuration settings."><sup>(?)</sup></abbr>
+            on system accounts receive additional scrutiny by organizational personnel
+            responsible for approving such accounts and privileged access. Types of
+            accounts that organizations may prohibit due to increased risk include
+            group, emergency, guest, anonymous, and temporary accounts.
 
 
             Organizations may choose to define access privileges or other attributes
@@ -1305,43 +1300,41 @@ objects:
         partir les responsabilit\xE9s de nature sensible ou essentielle entre plusieurs\
         \ entit\xE9s (comme le personnel ou les processus) plut\xF4t que les attribuer\
         \ \xE0 une seule, afin de pr\xE9venir les infractions \xE0 la s\xE9curit\xE9\
-        .\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr> permet d\u2019\
-        \xE9liminer l\u2019abus possible des privil\xE8ges autoris\xE9s et r\xE9duit\
-        \ le risque d\u2019activit\xE9s malveillantes sans collusion. Les m\xE9canismes\
-        \ de s\xE9paration des t\xE2ches comprennent notamment : la division des fonctions\
-        \ li\xE9es \xE0 la mission et des fonctions de soutien entre les personnes\
-        \ ou r\xF4les, l\u2019ex\xE9cution de fonctions de soutien li\xE9es au syst\xE8\
-        me par diff\xE9rentes personnes ou diff\xE9rents r\xF4les (par exemple, l\u2019\
-        assurance de la qualit\xE9, la gestion de la configuration, la gestion du\
-        \ syst\xE8me, les \xE9valuations, la programmation et la s\xE9curit\xE9 r\xE9\
-        seau) et l\u2019assurance que le personnel qui administre les fonctions de\
-        \ contr\xF4le d\u2019acc\xE8s n\u2019administre pas \xE9galement les fonctions\
-        \ de v\xE9rification. Puisque les violations de s\xE9paration des t\xE2ches\
-        \ peuvent s\u2019\xE9tendre sur plusieurs syst\xE8mes et domaines d\u2019\
-        application, les organisations doivent prendre en consid\xE9ration l\u2019\
-        ensemble de leurs syst\xE8mes et de leurs composants de syst\xE8me lors de\
-        \ l\u2019\xE9laboration des strat\xE9gies sur la s\xE9paration des t\xE2ches.\
-        \ Cette exigence est appliqu\xE9e par l\u2019exigence **Application de l'acc\xE8\
-        s 03.01.02**."
+        .\"><sup>(?)</sup></abbr> permet d\u2019\xE9liminer l\u2019abus possible des\
+        \ privil\xE8ges autoris\xE9s et r\xE9duit le risque d\u2019activit\xE9s malveillantes\
+        \ sans collusion. Les m\xE9canismes de s\xE9paration des t\xE2ches comprennent\
+        \ notamment : la division des fonctions li\xE9es \xE0 la mission et des fonctions\
+        \ de soutien entre les personnes ou r\xF4les, l\u2019ex\xE9cution de fonctions\
+        \ de soutien li\xE9es au syst\xE8me par diff\xE9rentes personnes ou diff\xE9\
+        rents r\xF4les (par exemple, l\u2019assurance de la qualit\xE9, la gestion\
+        \ de la configuration, la gestion du syst\xE8me, les \xE9valuations, la programmation\
+        \ et la s\xE9curit\xE9 r\xE9seau) et l\u2019assurance que le personnel qui\
+        \ administre les fonctions de contr\xF4le d\u2019acc\xE8s n\u2019administre\
+        \ pas \xE9galement les fonctions de v\xE9rification. Puisque les violations\
+        \ de s\xE9paration des t\xE2ches peuvent s\u2019\xE9tendre sur plusieurs syst\xE8\
+        mes et domaines d\u2019application, les organisations doivent prendre en consid\xE9\
+        ration l\u2019ensemble de leurs syst\xE8mes et de leurs composants de syst\xE8\
+        me lors de l\u2019\xE9laboration des strat\xE9gies sur la s\xE9paration des\
+        \ t\xE2ches. Cette exigence est appliqu\xE9e par l\u2019exigence **Application\
+        \ de l'acc\xE8s 03.01.02**."
       translations:
         en:
           name: Discussion
           description: Separation of duties <abbr title="Separation of duties&#10;A
             security principle stating that sensitive or critical responsibilities
             should be shared by multiple entities (e.g. staff or processes), rather
-            than a single entity, to prevent a security breach."><sup class="fa-solid
-            fa-circle-question"></sup></abbr> addresses the potential for abuse of
-            authorized privileges and reduces the risk of malicious activity without
-            collusion. Separation of duties includes dividing mission functions and
-            support functions among different individuals or roles, conducting system
-            support functions with different individuals or roles (e.g., quality assurance,
-            configuration management, system management, assessments, programming,
-            and network security), and ensuring that personnel who administer access
-            control functions do not also administer audit functions. Because separation
-            of duty violations can span systems and application domains, organizations
-            consider the entirety of their systems and system components when developing
-            policies on separation of duties. This requirement is enforced by **Access
-            enforcement 03.01.02**.
+            than a single entity, to prevent a security breach."><sup>(?)</sup></abbr>
+            addresses the potential for abuse of authorized privileges and reduces
+            the risk of malicious activity without collusion. Separation of duties
+            includes dividing mission functions and support functions among different
+            individuals or roles, conducting system support functions with different
+            individuals or roles (e.g., quality assurance, configuration management,
+            system management, assessments, programming, and network security), and
+            ensuring that personnel who administer access control functions do not
+            also administer audit functions. Because separation of duty violations
+            can span systems and application domains, organizations consider the entirety
+            of their systems and system components when developing policies on separation
+            of duties. This requirement is enforced by **Access enforcement 03.01.02**.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.05
       assessable: false
       depth: 3
@@ -1413,31 +1406,29 @@ objects:
         \ ont \xE9t\xE9 d\xFBment attribu\xE9es. Ce principe permet de limiter les\
         \ dommages pouvant r\xE9sulter d&#x27;une utilisation non autoris\xE9e \u2013\
         \ abusive ou accidentelle \u2013 d&#x27;un syst\xE8me d&#x27;information.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr> pour des t\xE2ches\
-        \ pr\xE9cises et les acc\xE8s autoris\xE9s pour les utilisatrices et utilisateurs\
-        \ et les processus syst\xE8me. Le principe de droit d\u2019acc\xE8s minimal\
-        \ s\u2019applique au d\xE9veloppement, \xE0 la mise en \u0153uvre et \xE0\
-        \ l\u2019exploitation du syst\xE8me. Les organisations doivent envisager de\
-        \ cr\xE9er des processus, des r\xF4les et des comptes syst\xE8me suppl\xE9\
-        mentaires afin de r\xE9pondre \xE0 ce principe. Les fonctions de s\xE9curit\xE9\
-        \ comprennent notamment l\u2019\xE9tablissement de comptes syst\xE8me, l\u2019\
-        attribution de privil\xE8ges, l\u2019installation de logiciels, la configuration\
-        \ des autorisations d\u2019acc\xE8s, la configuration des param\xE8tres pour\
-        \ les \xE9v\xE9nements qui seront v\xE9rifi\xE9s, l\u2019\xE9tablissement\
-        \ des param\xE8tres de balayage des vuln\xE9rabilit\xE9s, l\u2019\xE9tablissement\
-        \ des param\xE8tres de d\xE9tection <abbr title=\"D\xE9tection&#10;Surveillance\
+        ><sup>(?)</sup></abbr> pour des t\xE2ches pr\xE9cises et les acc\xE8s autoris\xE9\
+        s pour les utilisatrices et utilisateurs et les processus syst\xE8me. Le principe\
+        \ de droit d\u2019acc\xE8s minimal s\u2019applique au d\xE9veloppement, \xE0\
+        \ la mise en \u0153uvre et \xE0 l\u2019exploitation du syst\xE8me. Les organisations\
+        \ doivent envisager de cr\xE9er des processus, des r\xF4les et des comptes\
+        \ syst\xE8me suppl\xE9mentaires afin de r\xE9pondre \xE0 ce principe. Les\
+        \ fonctions de s\xE9curit\xE9 comprennent notamment l\u2019\xE9tablissement\
+        \ de comptes syst\xE8me, l\u2019attribution de privil\xE8ges, l\u2019installation\
+        \ de logiciels, la configuration des autorisations d\u2019acc\xE8s, la configuration\
+        \ des param\xE8tres pour les \xE9v\xE9nements qui seront v\xE9rifi\xE9s, l\u2019\
+        \xE9tablissement des param\xE8tres de balayage des vuln\xE9rabilit\xE9s, l\u2019\
+        \xE9tablissement des param\xE8tres de d\xE9tection <abbr title=\"D\xE9tection&#10;Surveillance\
         \ et analyse des \xE9v\xE9nements d&#x27;un syst\xE8me en vue de relever les\
         \ tentatives d\u2019acc\xE8s non autoris\xE9es aux ressources du syst\xE8\
-        me.\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr> d\u2019intrusion\
-        \ et la gestion de l\u2019information de v\xE9rification. L\u2019information\
-        \ li\xE9e \xE0 la s\xE9curit\xE9 comprend notamment l\u2019information sur\
-        \ les menaces et les vuln\xE9rabilit\xE9s, les r\xE8gles de filtrage pour\
-        \ les routeurs et les pare-feu, les param\xE8tres de configuration pour les\
-        \ services de s\xE9curit\xE9, l\u2019architecture de s\xE9curit\xE9, l\u2019\
-        information de gestion des cl\xE9s <abbr title=\"Gestion des cl\xE9s&#10;Proc\xE9\
-        dures et m\xE9canismes de g\xE9n\xE9ration, de distribution, de remplacement,\
-        \ de stockage, d&#x27;archivage et de destruction des cl\xE9s cryptographiques.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr> cryptographiques,\
+        me.\"><sup>(?)</sup></abbr> d\u2019intrusion et la gestion de l\u2019information\
+        \ de v\xE9rification. L\u2019information li\xE9e \xE0 la s\xE9curit\xE9 comprend\
+        \ notamment l\u2019information sur les menaces et les vuln\xE9rabilit\xE9\
+        s, les r\xE8gles de filtrage pour les routeurs et les pare-feu, les param\xE8\
+        tres de configuration pour les services de s\xE9curit\xE9, l\u2019architecture\
+        \ de s\xE9curit\xE9, l\u2019information de gestion des cl\xE9s <abbr title=\"\
+        Gestion des cl\xE9s&#10;Proc\xE9dures et m\xE9canismes de g\xE9n\xE9ration,\
+        \ de distribution, de remplacement, de stockage, d&#x27;archivage et de destruction\
+        \ des cl\xE9s cryptographiques.\"><sup>(?)</sup></abbr> cryptographiques,\
         \ les listes de contr\xF4le d\u2019acc\xE8s et l\u2019information de v\xE9\
         rification."
       translations:
@@ -1447,29 +1438,27 @@ objects:
             title="Least privilege&#10;The principle of giving an individual only
             the set of privileges that are essential to performing authorized tasks.
             This principle limits the damage that can result from the accidental,
-            incorrect, or unauthorized use of an information system."><sup class="fa-solid
-            fa-circle-question"></sup></abbr> for specific duties and authorized access
-            for users and system processes. Least privilege is applied to the development,
-            implementation, and operation of the system. Organizations consider creating
-            additional processes, roles, and system accounts to achieve least privilege.
-            Security functions include establishing system accounts and assigning
-            privileges, installing software, configuring access authorizations, configuring
-            settings for events to be audited, establishing vulnerability <abbr title="Vulnerability&#10;A
+            incorrect, or unauthorized use of an information system."><sup>(?)</sup></abbr>
+            for specific duties and authorized access for users and system processes.
+            Least privilege is applied to the development, implementation, and operation
+            of the system. Organizations consider creating additional processes, roles,
+            and system accounts to achieve least privilege. Security functions include
+            establishing system accounts and assigning privileges, installing software,
+            configuring access authorizations, configuring settings for events to
+            be audited, establishing vulnerability <abbr title="Vulnerability&#10;A
             flaw or weakness in the design or implementation of an information system
             or its environment that could be exploited to adversely affect an organization&#x27;s
-            assets or operations."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            scanning parameters, establishing intrusion detection <abbr title="Intrusion
-            detection&#10;A security service that monitors and analyzes network or
-            system events to warn of unauthorized access attempts. The findings are
-            provided in real-time (or near real-time)."><sup class="fa-solid fa-circle-question"></sup></abbr>
+            assets or operations."><sup>(?)</sup></abbr> scanning parameters, establishing
+            intrusion detection <abbr title="Intrusion detection&#10;A security service
+            that monitors and analyzes network or system events to warn of unauthorized
+            access attempts. The findings are provided in real-time (or near real-time)."><sup>(?)</sup></abbr>
             parameters, and managing audit information. Security-relevant information
             includes threat and vulnerability information, filtering rules for routers
             or firewalls, configuration parameters for security services, security
             architecture, cryptographic key <abbr title="Cryptographic key&#10;A numerical
             value used in cryptographic processes, such as encryption, decryption,
-            signature generation, and signature verification."><sup class="fa-solid
-            fa-circle-question"></sup></abbr> management information, access control
-            lists, and audit information.
+            signature generation, and signature verification."><sup>(?)</sup></abbr>
+            management information, access control lists, and audit information.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.06
       assessable: false
       depth: 3
@@ -1635,13 +1624,12 @@ objects:
             \ to protect information from being modified or deleted unintentionally\
             \ or when it\u2019s not supposed to be. Integrity helps determine that\
             \ information is what it claims to be. Integrity also applies to business\
-            \ processes, software application logic, hardware, and personnel.\"><sup\
-            \ class=\"fa-solid fa-circle-question\"></sup></abbr> checks, conducting\
-            \ patching operations, or administering cryptographic key management activities.\
-            \ Non-privileged users do not possess the authorizations to execute privileged\
-            \ functions. Bypassing intrusion detection and prevention mechanisms or\
-            \ malicious code protection mechanisms are examples of privileged functions\
-            \ that require protection from non-privileged users. This requirement\
+            \ processes, software application logic, hardware, and personnel.\"><sup>(?)</sup></abbr>\
+            \ checks, conducting patching operations, or administering cryptographic\
+            \ key management activities. Non-privileged users do not possess the authorizations\
+            \ to execute privileged functions. Bypassing intrusion detection and prevention\
+            \ mechanisms or malicious code protection mechanisms are examples of privileged\
+            \ functions that require protection from non-privileged users. This requirement\
             \ represents a condition to be achieved by the definition of authorized\
             \ privileges in **Account management 03.01.01** and privilege enforcement\
             \ in **Access enforcement 03.01.02**.\n\nThe misuse of privileged functions\
@@ -2022,24 +2010,23 @@ objects:
         Vuln\xE9rabilit\xE9&#10;D\xE9fectuosit\xE9 ou lacune inh\xE9rente \xE0 la\
         \ conception ou \xE0 la mise en \u0153uvre d\u2019un syst\xE8me d\u2019information\
         \ ou \xE0 son environnement, qui pourrait \xEAtre exploit\xE9e en vue de compromettre\
-        \ les biens ou les activit\xE9s d\u2019une organisation.\"><sup class=\"fa-solid\
-        \ fa-circle-question\"></sup></abbr> potentielle importante pouvant \xEAtre\
-        \ exploit\xE9e par des adversaires. La restriction des commandes et des acc\xE8\
-        s privil\xE9gi\xE9s \xE0 l\u2019information li\xE9e \xE0 la s\xE9curit\xE9\
-        \ au moyen d\u2019un acc\xE8s \xE0 distance r\xE9duit l\u2019exposition des\
-        \ organisations et leur vuln\xE9rabilit\xE9 aux menaces provenant des adversaires.\
-        \ Une commande privil\xE9gi\xE9e est une commande lanc\xE9e par un humain\
-        \ et ex\xE9cut\xE9e sur un syst\xE8me impliquant le contr\xF4le, la surveillance\
-        \ ou l\u2019administration du syst\xE8me, y compris les fonctions de s\xE9\
-        curit\xE9 ou l\u2019information li\xE9e \xE0 la s\xE9curit\xE9. L\u2019information\
-        \ li\xE9e \xE0 la s\xE9curit\xE9 constitue de l\u2019information susceptible\
-        \ d\u2019influer sur l\u2019ex\xE9cution des fonctions de s\xE9curit\xE9 ou\
-        \ la prestation des services de s\xE9curit\xE9, de telle fa\xE7on qu\u2019\
-        elle nuirait \xE0 l\u2019application des strat\xE9gies de s\xE9curit\xE9 du\
-        \ syst\xE8me ou \xE0 l\u2019isolation du code et des donn\xE9es. Les commandes\
-        \ privil\xE9gi\xE9es permettent aux personnes d\u2019ex\xE9cuter des fonctions\
-        \ sensibles, essentielles \xE0 la s\xE9curit\xE9 ou li\xE9es \xE0 la s\xE9\
-        curit\xE9 du syst\xE8me."
+        \ les biens ou les activit\xE9s d\u2019une organisation.\"><sup>(?)</sup></abbr>\
+        \ potentielle importante pouvant \xEAtre exploit\xE9e par des adversaires.\
+        \ La restriction des commandes et des acc\xE8s privil\xE9gi\xE9s \xE0 l\u2019\
+        information li\xE9e \xE0 la s\xE9curit\xE9 au moyen d\u2019un acc\xE8s \xE0\
+        \ distance r\xE9duit l\u2019exposition des organisations et leur vuln\xE9\
+        rabilit\xE9 aux menaces provenant des adversaires. Une commande privil\xE9\
+        gi\xE9e est une commande lanc\xE9e par un humain et ex\xE9cut\xE9e sur un\
+        \ syst\xE8me impliquant le contr\xF4le, la surveillance ou l\u2019administration\
+        \ du syst\xE8me, y compris les fonctions de s\xE9curit\xE9 ou l\u2019information\
+        \ li\xE9e \xE0 la s\xE9curit\xE9. L\u2019information li\xE9e \xE0 la s\xE9\
+        curit\xE9 constitue de l\u2019information susceptible d\u2019influer sur l\u2019\
+        ex\xE9cution des fonctions de s\xE9curit\xE9 ou la prestation des services\
+        \ de s\xE9curit\xE9, de telle fa\xE7on qu\u2019elle nuirait \xE0 l\u2019application\
+        \ des strat\xE9gies de s\xE9curit\xE9 du syst\xE8me ou \xE0 l\u2019isolation\
+        \ du code et des donn\xE9es. Les commandes privil\xE9gi\xE9es permettent aux\
+        \ personnes d\u2019ex\xE9cuter des fonctions sensibles, essentielles \xE0\
+        \ la s\xE9curit\xE9 ou li\xE9es \xE0 la s\xE9curit\xE9 du syst\xE8me."
       translations:
         en:
           name: Discussion
@@ -2137,25 +2124,24 @@ objects:
         s par des technologies sans fil. Les r\xE9seaux sans fil utilisent des protocoles\
         \ d\u2019authentification <abbr title=\"Authentification&#10;Processus ou\
         \ mesure permettant de v\xE9rifier l\u2019identit\xE9 d\u2019un utilisateur.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr> afin de fournir\
-        \ une protection au moyen de justificatifs d\u2019identit\xE9 et d\u2019une\
-        \ authentification mutuelle. Les organisations authentifient les personnes\
-        \ et les dispositifs afin de prot\xE9ger les acc\xE8s sans fil au syst\xE8\
-        me. Une attention particuli\xE8re doit \xEAtre accord\xE9e \xE0 la vari\xE9\
-        t\xE9 des appareils dot\xE9s d\u2019un acc\xE8s sans fil au syst\xE8me, y\
-        \ compris les appareils mobiles de petite taille (par exemple, les t\xE9l\xE9\
-        phones intelligents, les tablettes et les montres intelligentes). Les capacit\xE9\
-        s de r\xE9seau sans fil int\xE9gr\xE9es aux composants syst\xE8me repr\xE9\
-        sentent une vuln\xE9rabilit\xE9 potentielle importante pouvant \xEAtre exploit\xE9\
-        e par des adversaires. Un m\xE9canisme rigoureux d\u2019authentification des\
-        \ utilisatrices et utilisateurs et des appareils, un chiffrement <abbr title=\"\
-        Chiffrement&#10;Proc\xE9dure par laquelle une information est convertie d\u2019\
-        une forme \xE0 une autre afin d\u2019en dissimuler le contenu et d&#x27;en\
-        \ interdire l\u2019acc\xE8s aux entit\xE9s non autoris\xE9es.\"><sup class=\"\
-        fa-solid fa-circle-question\"></sup></abbr> robuste et la d\xE9sactivation\
-        \ des capacit\xE9s sans fil non n\xE9cessaires \xE0 la mission ou aux activit\xE9\
-        s peuvent r\xE9duire sensiblement les menaces que font peser les adversaires\
-        \ exploitant des technologies sans fil."
+        ><sup>(?)</sup></abbr> afin de fournir une protection au moyen de justificatifs\
+        \ d\u2019identit\xE9 et d\u2019une authentification mutuelle. Les organisations\
+        \ authentifient les personnes et les dispositifs afin de prot\xE9ger les acc\xE8\
+        s sans fil au syst\xE8me. Une attention particuli\xE8re doit \xEAtre accord\xE9\
+        e \xE0 la vari\xE9t\xE9 des appareils dot\xE9s d\u2019un acc\xE8s sans fil\
+        \ au syst\xE8me, y compris les appareils mobiles de petite taille (par exemple,\
+        \ les t\xE9l\xE9phones intelligents, les tablettes et les montres intelligentes).\
+        \ Les capacit\xE9s de r\xE9seau sans fil int\xE9gr\xE9es aux composants syst\xE8\
+        me repr\xE9sentent une vuln\xE9rabilit\xE9 potentielle importante pouvant\
+        \ \xEAtre exploit\xE9e par des adversaires. Un m\xE9canisme rigoureux d\u2019\
+        authentification des utilisatrices et utilisateurs et des appareils, un chiffrement\
+        \ <abbr title=\"Chiffrement&#10;Proc\xE9dure par laquelle une information\
+        \ est convertie d\u2019une forme \xE0 une autre afin d\u2019en dissimuler\
+        \ le contenu et d&#x27;en interdire l\u2019acc\xE8s aux entit\xE9s non autoris\xE9\
+        es.\"><sup>(?)</sup></abbr> robuste et la d\xE9sactivation des capacit\xE9\
+        s sans fil non n\xE9cessaires \xE0 la mission ou aux activit\xE9s peuvent\
+        \ r\xE9duire sensiblement les menaces que font peser les adversaires exploitant\
+        \ des technologies sans fil."
       translations:
         en:
           name: Discussion
@@ -2164,24 +2150,23 @@ objects:
             restrictions, configuration requirements, and connection requirements
             for wireless access to the system provides criteria to support access
             authorization <abbr title="Authorization&#10;Access privileges granted
-            to a user, program, or process."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            decisions. These restrictions and requirements reduce susceptibility to
-            unauthorized system access through wireless technologies. Wireless networks
-            use authentication <abbr title="Authentication&#10;A process or measure
-            used to verify a users identity."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            protocols that provide credential protection and mutual authentication.
-            Organizations authenticate individuals and devices to protect wireless
-            access to the system. Special attention is given to the variety of devices
-            with potential wireless access to the system, including small form factor
-            mobile devices (e.g., smart phones, tablets, smart watches). Wireless
-            networking capabilities that are embedded within system components represent
-            a significant potential vulnerability that can be exploited by adversaries.
-            Strong authentication of users and devices, strong encryption <abbr title="Encryption&#10;Converting
-            information from one form to another to hide its content and prevent unauthorized
-            access."><sup class="fa-solid fa-circle-question"></sup></abbr>, and disabling
-            wireless capabilities that are not needed for essential missions or business
-            functions can reduce susceptibility to threats by adversaries involving
-            wireless technologies.
+            to a user, program, or process."><sup>(?)</sup></abbr> decisions. These
+            restrictions and requirements reduce susceptibility to unauthorized system
+            access through wireless technologies. Wireless networks use authentication
+            <abbr title="Authentication&#10;A process or measure used to verify a
+            users identity."><sup>(?)</sup></abbr> protocols that provide credential
+            protection and mutual authentication. Organizations authenticate individuals
+            and devices to protect wireless access to the system. Special attention
+            is given to the variety of devices with potential wireless access to the
+            system, including small form factor mobile devices (e.g., smart phones,
+            tablets, smart watches). Wireless networking capabilities that are embedded
+            within system components represent a significant potential vulnerability
+            that can be exploited by adversaries. Strong authentication of users and
+            devices, strong encryption <abbr title="Encryption&#10;Converting information
+            from one form to another to hide its content and prevent unauthorized
+            access."><sup>(?)</sup></abbr>, and disabling wireless capabilities that
+            are not needed for essential missions or business functions can reduce
+            susceptibility to threats by adversaries involving wireless technologies.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.18
       assessable: false
       depth: 3
@@ -2305,17 +2290,17 @@ objects:
             viruses spread from one computer to another, usually without the knowledge
             of the user. Viruses can have harmful effects, ranging from displaying
             irritating messages to stealing data or giving other users control over
-            the infected computer."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            protection software, scanning for critical software updates and patches,
-            conducting primary operating system and possibly other software integrity
-            checks, and disabling unnecessary hardware. On mobile devices, secure
-            containers provide software-based data isolation designed to segment enterprise
-            applications and information from personal apps and data. Containers may
-            present multiple user interfaces, one of the most common being a mobile
-            application that acts as a portal to a suite of business productivity
-            apps, such as email, contacts, and calendar. Organizations can employ
-            full-device encryption or container-based encryption to protect the confidentiality
-            of specified information on mobile devices.'
+            the infected computer."><sup>(?)</sup></abbr> protection software, scanning
+            for critical software updates and patches, conducting primary operating
+            system and possibly other software integrity checks, and disabling unnecessary
+            hardware. On mobile devices, secure containers provide software-based
+            data isolation designed to segment enterprise applications and information
+            from personal apps and data. Containers may present multiple user interfaces,
+            one of the most common being a mobile application that acts as a portal
+            to a suite of business productivity apps, such as email, contacts, and
+            calendar. Organizations can employ full-device encryption or container-based
+            encryption to protect the confidentiality of specified information on
+            mobile devices.'
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.20
       assessable: false
       depth: 3
@@ -2460,9 +2445,8 @@ objects:
             that the external systems satisfy the necessary security requirements
             so as not to compromise <abbr title="Compromise&#10;The intentional or
             unintentional disclosure of information, which adversely impacts its confidentiality,
-            integrity, or availability."><sup class="fa-solid fa-circle-question"></sup></abbr>,
-            damage, or harm the system. This requirement is related to **External
-            system services 03.16.03**.'
+            integrity, or availability."><sup>(?)</sup></abbr>, damage, or harm the
+            system. This requirement is related to **External system services 03.16.03**.'
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.01.22
       assessable: false
       depth: 3
@@ -2616,44 +2600,43 @@ objects:
         \ maintenir la s\xE9curit\xE9 et d\u2019intervenir en cas d\u2019incident\
         \ <abbr title=\"Incident&#10;Incident r\xE9el au cours duquel un agent de\
         \ menace exploite une vuln\xE9rabilit\xE9 d\u2019un bien de TI de valeur.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr>. Le contenu devrait\
-        \ \xE9galement inclure les mesures n\xE9cessaires en mati\xE8re de s\xE9curit\xE9\
-        \ op\xE9rationnelle et de traitement de l\u2019information d\xE9sign\xE9e.\n\
-        \nLes techniques de sensibilisation \xE0 la s\xE9curit\xE9 et \xE0 la protection\
-        \ de la vie priv\xE9e comprennent des affiches, des objets affichant des rappels\
-        \ de s\xE9curit\xE9, des messages au moment de la connexion, des avis envoy\xE9\
-        s par courriel ou de la part des responsables de l\u2019organisation et des\
-        \ \xE9v\xE9nements de sensibilisation au moyen de balados, de vid\xE9os ou\
-        \ de webinaires. La formation sur la s\xE9curit\xE9 et la protection de la\
-        \ vie priv\xE9e doit \xEAtre men\xE9e \xE0 une fr\xE9quence conforme aux lois,\
-        \ aux directives, aux r\xE9glementations et aux politiques applicables. La\
-        \ mise \xE0 jour p\xE9riodique du contenu de formation permet de s\u2019assurer\
-        \ que le contenu reste pertinent. Les \xE9v\xE9nements qui peuvent pr\xE9\
-        cipiter une mise \xE0 jour du contenu de la formation comprennent les conclusions\
-        \ d\u2019une \xE9valuation ou d\u2019une v\xE9rification, des incidents ou\
-        \ violations de s\xE9curit\xE9, et des chargements apport\xE9s aux lois, aux\
-        \ d\xE9crets, aux directives, aux r\xE9glementations, aux politiques, aux\
-        \ normes et aux lignes directrices applicables.\n\nLes indicateurs potentiels\
-        \ et les possibles signes pr\xE9curseurs de menace interne peuvent comprendre\
-        \ des comportements comme les suivants : des comportements excessifs, de l\u2019\
-        insatisfaction de longue dur\xE9e li\xE9e au travail, des tentatives d\u2019\
-        acc\xE8s \xE0 de l\u2019information qui n\u2019est pas n\xE9cessaire pour\
-        \ la r\xE9alisation du travail, un acc\xE8s inexpliqu\xE9 \xE0 des ressources\
-        \ financi\xE8res, de l\u2019intimidation ou du harc\xE8lement sexuel envers\
-        \ des coll\xE8gues, de la violence en milieu de travail et d\u2019autres manquements\
-        \ graves aux politiques, aux proc\xE9dures, aux r\xE8gles, aux directives\
-        \ ou aux pratiques de l\u2019organisation. Les organisations peuvent adapter\
-        \ le sujet de la sensibilisation aux menaces internes en fonction du r\xF4\
-        le (par exemple, la formation des gestionnaires peut se concentrer sur les\
-        \ changements particuliers dans les comportements des membres de l\u2019\xE9\
-        quipe, alors que la formation des employ\xE9es et employ\xE9s peut porter\
-        \ sur des observations plus g\xE9n\xE9rales).\n\nLe piratage psychologique\
-        \ <abbr title=\"Piratage psychologique&#10;Pratique qui a pour but d&#x27;extorquer\
-        \ des informations confidentielles en manipulant les utilisateurs. Un pirate\
-        \ psychologique utilise souvent le t\xE9l\xE9phone ou l&#x27;Internet pour\
-        \ tromper les individus et parvenir \xE0 obtenir leurs renseignements personnels.\
-        \ L&#x27;hame\xE7onnage est une forme de piratage psychologique.\"><sup class=\"\
-        fa-solid fa-circle-question\"></sup></abbr> vise \xE0 tromper une personne\
+        ><sup>(?)</sup></abbr>. Le contenu devrait \xE9galement inclure les mesures\
+        \ n\xE9cessaires en mati\xE8re de s\xE9curit\xE9 op\xE9rationnelle et de traitement\
+        \ de l\u2019information d\xE9sign\xE9e.\n\nLes techniques de sensibilisation\
+        \ \xE0 la s\xE9curit\xE9 et \xE0 la protection de la vie priv\xE9e comprennent\
+        \ des affiches, des objets affichant des rappels de s\xE9curit\xE9, des messages\
+        \ au moment de la connexion, des avis envoy\xE9s par courriel ou de la part\
+        \ des responsables de l\u2019organisation et des \xE9v\xE9nements de sensibilisation\
+        \ au moyen de balados, de vid\xE9os ou de webinaires. La formation sur la\
+        \ s\xE9curit\xE9 et la protection de la vie priv\xE9e doit \xEAtre men\xE9\
+        e \xE0 une fr\xE9quence conforme aux lois, aux directives, aux r\xE9glementations\
+        \ et aux politiques applicables. La mise \xE0 jour p\xE9riodique du contenu\
+        \ de formation permet de s\u2019assurer que le contenu reste pertinent. Les\
+        \ \xE9v\xE9nements qui peuvent pr\xE9cipiter une mise \xE0 jour du contenu\
+        \ de la formation comprennent les conclusions d\u2019une \xE9valuation ou\
+        \ d\u2019une v\xE9rification, des incidents ou violations de s\xE9curit\xE9\
+        , et des chargements apport\xE9s aux lois, aux d\xE9crets, aux directives,\
+        \ aux r\xE9glementations, aux politiques, aux normes et aux lignes directrices\
+        \ applicables.\n\nLes indicateurs potentiels et les possibles signes pr\xE9\
+        curseurs de menace interne peuvent comprendre des comportements comme les\
+        \ suivants : des comportements excessifs, de l\u2019insatisfaction de longue\
+        \ dur\xE9e li\xE9e au travail, des tentatives d\u2019acc\xE8s \xE0 de l\u2019\
+        information qui n\u2019est pas n\xE9cessaire pour la r\xE9alisation du travail,\
+        \ un acc\xE8s inexpliqu\xE9 \xE0 des ressources financi\xE8res, de l\u2019\
+        intimidation ou du harc\xE8lement sexuel envers des coll\xE8gues, de la violence\
+        \ en milieu de travail et d\u2019autres manquements graves aux politiques,\
+        \ aux proc\xE9dures, aux r\xE8gles, aux directives ou aux pratiques de l\u2019\
+        organisation. Les organisations peuvent adapter le sujet de la sensibilisation\
+        \ aux menaces internes en fonction du r\xF4le (par exemple, la formation des\
+        \ gestionnaires peut se concentrer sur les changements particuliers dans les\
+        \ comportements des membres de l\u2019\xE9quipe, alors que la formation des\
+        \ employ\xE9es et employ\xE9s peut porter sur des observations plus g\xE9\
+        n\xE9rales).\n\nLe piratage psychologique <abbr title=\"Piratage psychologique&#10;Pratique\
+        \ qui a pour but d&#x27;extorquer des informations confidentielles en manipulant\
+        \ les utilisateurs. Un pirate psychologique utilise souvent le t\xE9l\xE9\
+        phone ou l&#x27;Internet pour tromper les individus et parvenir \xE0 obtenir\
+        \ leurs renseignements personnels. L&#x27;hame\xE7onnage est une forme de\
+        \ piratage psychologique.\"><sup>(?)</sup></abbr> vise \xE0 tromper une personne\
         \ pour l\u2019inciter \xE0 r\xE9v\xE9ler de l\u2019information ou \xE0 faire\
         \ une op\xE9ration pouvant servir \xE0 s\u2019introduire dans un syst\xE8\
         me, \xE0 le compromettre ou \xE0 nuire \xE0 un syst\xE8me. Le piratage psychologique\
@@ -2665,20 +2648,19 @@ objects:
         \ malfaiteurs incitent les utilisateurs \xE0 partager leurs renseignements\
         \ personnels (num\xE9ros de carte de cr\xE9dit, informations bancaires ou\
         \ autres renseignements) afin de s\u2019en servir pour commettre des actes\
-        \ frauduleux.\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr>,\
-        \ le faux-semblant, l\u2019usurpation d\u2019identit\xE9, l\u2019app\xE2tage,\
-        \ l\u2019arnaque de la contrepartie, le d\xE9tournement de cha\xEEnes de courriels,\
-        \ l\u2019exploitation des m\xE9dias sociaux et le talonnage. L\u2019exploration\
-        \ de donn\xE9es dans les m\xE9dias sociaux vise \xE0 recueillir de l\u2019\
-        information \xE0 propos de l\u2019organisation qui pourrait servir \xE0 appuyer\
-        \ des attaques \xE0 venir. La formation en mati\xE8re de s\xE9curit\xE9 et\
-        \ de protection de la vie priv\xE9e porte notamment sur la fa\xE7on dont les\
-        \ membres du personnel et de la direction peuvent communiquer leurs pr\xE9\
-        occupations concernant des indicateurs potentiels de menace interne et des\
-        \ instances r\xE9elles et potentielles de piratage psychologique et d\u2019\
-        exploration de donn\xE9es, au moyen des voies de communication appropri\xE9\
-        es de l\u2019organisation, conform\xE9ment aux politiques et aux proc\xE9\
-        dures \xE9tablies."
+        \ frauduleux.\"><sup>(?)</sup></abbr>, le faux-semblant, l\u2019usurpation\
+        \ d\u2019identit\xE9, l\u2019app\xE2tage, l\u2019arnaque de la contrepartie,\
+        \ le d\xE9tournement de cha\xEEnes de courriels, l\u2019exploitation des m\xE9\
+        dias sociaux et le talonnage. L\u2019exploration de donn\xE9es dans les m\xE9\
+        dias sociaux vise \xE0 recueillir de l\u2019information \xE0 propos de l\u2019\
+        organisation qui pourrait servir \xE0 appuyer des attaques \xE0 venir. La\
+        \ formation en mati\xE8re de s\xE9curit\xE9 et de protection de la vie priv\xE9\
+        e porte notamment sur la fa\xE7on dont les membres du personnel et de la direction\
+        \ peuvent communiquer leurs pr\xE9occupations concernant des indicateurs potentiels\
+        \ de menace interne et des instances r\xE9elles et potentielles de piratage\
+        \ psychologique et d\u2019exploration de donn\xE9es, au moyen des voies de\
+        \ communication appropri\xE9es de l\u2019organisation, conform\xE9ment aux\
+        \ politiques et aux proc\xE9dures \xE9tablies."
       translations:
         en:
           name: Discussion
@@ -2723,24 +2705,23 @@ objects:
             obtaining confidential information by manipulation of legitimate users.
             A social engineer will commonly use the telephone or internet to trick
             people into revealing sensitive information. For example, phishing is
-            a type of social engineering."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            is an attempt to deceive an individual into revealing information or taking
-            an action that can be used to breach, compromise, or otherwise adversely
-            impact a system. Social engineering includes phishing <abbr title="Phishing&#10;An
-            attempt by a third party to solicit confidential information from an individual,
+            a type of social engineering."><sup>(?)</sup></abbr> is an attempt to
+            deceive an individual into revealing information or taking an action that
+            can be used to breach, compromise, or otherwise adversely impact a system.
+            Social engineering includes phishing <abbr title="Phishing&#10;An attempt
+            by a third party to solicit confidential information from an individual,
             group, or organization by mimicking or spoofing a specific, usually well-known
             brand, usually for financial gain. Phishers attempt to trick users into
             disclosing personal data, such as credit card numbers, online banking
             credentials, and other sensitive information, which they may then use
-            to commit fraudulent acts."><sup class="fa-solid fa-circle-question"></sup></abbr>,
-            pretexting, impersonation, baiting, quid pro quo, threadjacking, social
-            media exploitation, and tailgating. Social mining is an attempt to gather
-            information about the organization that may be used to support future
-            attacks. Security and privacy literacy training includes how to communicate
-            employee and management concerns regarding potential indicators of insider
-            threat and potential and actual instances of social engineering and data
-            mining through appropriate organizational channels in accordance with
-            established policies and procedures.'
+            to commit fraudulent acts."><sup>(?)</sup></abbr>, pretexting, impersonation,
+            baiting, quid pro quo, threadjacking, social media exploitation, and tailgating.
+            Social mining is an attempt to gather information about the organization
+            that may be used to support future attacks. Security and privacy literacy
+            training includes how to communicate employee and management concerns
+            regarding potential indicators of insider threat and potential and actual
+            instances of social engineering and data mining through appropriate organizational
+            channels in accordance with established policies and procedures.'
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.02.02
       assessable: false
       depth: 3
@@ -4411,9 +4392,8 @@ objects:
         es d\u2019un support de mani\xE8re d\xE9finitive. Le support d\u2019enregistrement\
         \ peut \xEAtre r\xE9utilis\xE9 conform\xE9ment aux politiques de s\xE9curit\xE9\
         \ des TI, mais il est impossible de r\xE9cup\xE9rer les donn\xE9es qui s\u2019\
-        y trouvaient ou d\u2019y acc\xE9der.\"><sup class=\"fa-solid fa-circle-question\"\
-        ></sup></abbr> de la m\xE9moire ou la recr\xE9ation de l\u2019image de la\
-        \ m\xE9moire de l\u2019appareil."
+        y trouvaient ou d\u2019y acc\xE9der.\"><sup>(?)</sup></abbr> de la m\xE9moire\
+        \ ou la recr\xE9ation de l\u2019image de la m\xE9moire de l\u2019appareil."
       translations:
         en:
           name: Discussion
@@ -4606,9 +4586,8 @@ objects:
             authentication&#10;A tactic that can add an additional layer of security
             to your devices and account. Multi-factor authentication requires additional
             verification (like a PIN or fingerprint) to access your devices or accounts.
-            Two-factor authentication is a type of multi-factor authentication."><sup
-            class="fa-solid fa-circle-question"></sup></abbr> (MFA) for access to
-            privileged and non-privileged accounts.
+            Two-factor authentication is a type of multi-factor authentication."><sup>(?)</sup></abbr>
+            (MFA) for access to privileged and non-privileged accounts.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.05.03.disc
       assessable: false
       depth: 4
@@ -4624,15 +4603,15 @@ objects:
         \ <abbr title=\"Cl\xE9 cryptographique&#10;Valeur num\xE9rique employ\xE9\
         e dans des processus cryptographiques, notamment le chiffrement et le d\xE9\
         chiffrement, la g\xE9n\xE9ration des signatures ou encore la v\xE9rification\
-        \ des signatures.\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr>\
-        \ priv\xE9e) ou un attribut personnel (par exemple, une authentification biom\xE9\
-        trique). Les solutions d\u2019authentification multifacteur qui pr\xE9sentent\
-        \ des authentifiants physiques comprennent les authentifiants mat\xE9riels\
-        \ qui fournissent des sorties \xE0 dur\xE9e limit\xE9e ou de type d\xE9fi-r\xE9\
-        ponse ainsi que des cartes \xE0 puce. En plus d\u2019authentifier les utilisatrices\
-        \ et utilisateurs au niveau du syst\xE8me, les organisations peuvent \xE9\
-        galement avoir recours \xE0 des m\xE9canismes d\u2019authentification au niveau\
-        \ de l\u2019application pour accro\xEEtre la s\xE9curit\xE9 de l\u2019information."
+        \ des signatures.\"><sup>(?)</sup></abbr> priv\xE9e) ou un attribut personnel\
+        \ (par exemple, une authentification biom\xE9trique). Les solutions d\u2019\
+        authentification multifacteur qui pr\xE9sentent des authentifiants physiques\
+        \ comprennent les authentifiants mat\xE9riels qui fournissent des sorties\
+        \ \xE0 dur\xE9e limit\xE9e ou de type d\xE9fi-r\xE9ponse ainsi que des cartes\
+        \ \xE0 puce. En plus d\u2019authentifier les utilisatrices et utilisateurs\
+        \ au niveau du syst\xE8me, les organisations peuvent \xE9galement avoir recours\
+        \ \xE0 des m\xE9canismes d\u2019authentification au niveau de l\u2019application\
+        \ pour accro\xEEtre la s\xE9curit\xE9 de l\u2019information."
       translations:
         en:
           name: Discussion
@@ -4886,10 +4865,10 @@ objects:
         \ ce qui permet de r\xE9duire les possibilit\xE9s de compromission <abbr title=\"\
         Compromission&#10;Divulgation intentionnelle ou non intentionnelle d\u2019\
         information mettant en p\xE9ril la confidentialit\xE9, l&#x27;int\xE9grit\xE9\
-        \ ou la disponibilit\xE9 de ladite information.\"><sup class=\"fa-solid fa-circle-question\"\
-        ></sup></abbr> d\u2019authentifiants. Il peut \xEAtre possible d\u2019utiliser\
-        \ de longs mots de passe ou des phrases de passe dans le but d\u2019augmenter\
-        \ la complexit\xE9 des mots de passe."
+        \ ou la disponibilit\xE9 de ladite information.\"><sup>(?)</sup></abbr> d\u2019\
+        authentifiants. Il peut \xEAtre possible d\u2019utiliser de longs mots de\
+        \ passe ou des phrases de passe dans le but d\u2019augmenter la complexit\xE9\
+        \ des mots de passe."
       translations:
         en:
           name: Discussion
@@ -5138,9 +5117,9 @@ objects:
             an operational incident handling capability for organizational systems
             that includes adequate preparation, monitoring, detection <abbr title="Detection&#10;The
             monitoring and analyzing of system events in order to identify unauthorized
-            attempts to access system resources."><sup class="fa-solid fa-circle-question"></sup></abbr>,
-            analysis, containment, recovery, and response. Incidents are monitored,
-            documented, and reported to appropriate organizational officials and authorities.
+            attempts to access system resources."><sup>(?)</sup></abbr>, analysis,
+            containment, recovery, and response. Incidents are monitored, documented,
+            and reported to appropriate organizational officials and authorities.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.06.01
       assessable: false
       depth: 3
@@ -5900,17 +5879,17 @@ objects:
             or software maintenance on the system, while **Physical access authorizations
             03.10.01** addresses physical access for individuals whose maintenance
             duties place them within the physical protection perimeter <abbr title="Perimeter&#10;The
-            boundary between two network security zones through which traffic is routed."><sup
-            class="fa-solid fa-circle-question"></sup></abbr> of the system. The technical
-            competence of supervising individuals relates to the maintenance performed
-            on the system, while having required access authorizations refers to maintenance
-            on and near the system. Individuals who have not been previously identified
-            as authorized maintenance personnel (e.g., manufacturers, consultants,
-            systems integrators, and vendors) may require privileged access to the
-            system, such as when they are required to conduct maintenance with little
-            or no notice. Organizations may choose to issue temporary credentials
-            to these individuals based on their risk assessments. Temporary credentials
-            may be for one-time use or for very limited time periods.
+            boundary between two network security zones through which traffic is routed."><sup>(?)</sup></abbr>
+            of the system. The technical competence of supervising individuals relates
+            to the maintenance performed on the system, while having required access
+            authorizations refers to maintenance on and near the system. Individuals
+            who have not been previously identified as authorized maintenance personnel
+            (e.g., manufacturers, consultants, systems integrators, and vendors) may
+            require privileged access to the system, such as when they are required
+            to conduct maintenance with little or no notice. Organizations may choose
+            to issue temporary credentials to these individuals based on their risk
+            assessments. Temporary credentials may be for one-time use or for very
+            limited time periods.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:3.8
       assessable: false
       depth: 2
@@ -5992,11 +5971,10 @@ objects:
             logical techniques to sanitize data in all user-addressable storage locations
             to protect against simple ways of recovering data. This is done by overwriting
             data with a new value, or if overwriting is not supported, by using a
-            menu option to reset the device to factory settings."><sup class="fa-solid
-            fa-circle-question"></sup></abbr>, and purging) prevent the disclosure
-            of specified information to unauthorized individuals. The sanitization
-            process removes specified information from media such that the information
-            cannot be retrieved or reconstructed.
+            menu option to reset the device to factory settings."><sup>(?)</sup></abbr>,
+            and purging) prevent the disclosure of specified information to unauthorized
+            individuals. The sanitization process removes specified information from
+            media such that the information cannot be retrieved or reconstructed.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.08.02
       assessable: false
       depth: 3
@@ -6069,10 +6047,9 @@ objects:
           description: Sanitize <abbr title="Sanitize&#10;Sanitization is a process
             through which data is irreversibly removed from media. The storage media
             is left in a re-usable condition in accordance with IT security policy,
-            but the data that was previously on it cannot be recovered or accessed."><sup
-            class="fa-solid fa-circle-question"></sup></abbr> system media containing
-            specified information prior to disposal, release out of organizational
-            control, or release for reuse.
+            but the data that was previously on it cannot be recovered or accessed."><sup>(?)</sup></abbr>
+            system media containing specified information prior to disposal, release
+            out of organizational control, or release for reuse.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.08.03.disc
       assessable: false
       depth: 4
@@ -6231,21 +6208,20 @@ objects:
         \ d\xE9sign\xE9e et des syst\xE8mes. La protection des supports durant le\
         \ transport peut comprendre la cryptographie <abbr title=\"Cryptographie&#10;\xC9\
         tude des techniques permettant de chiffrer l\u2019information pour la rendre\
-        \ inintelligible ou de rendre lisible une information chiffr\xE9e.\"><sup\
-        \ class=\"fa-solid fa-circle-question\"></sup></abbr> et/ou des contenants\
-        \ verrouill\xE9s. Les activit\xE9s associ\xE9es au transport des supports\
-        \ comprennent la remise des supports aux fins de transport, la v\xE9rification\
-        \ que les supports suivent les processus de transport ad\xE9quats et le transport\
-        \ en tant que tel. Le personnel autoris\xE9 responsable du transport et de\
-        \ la messagerie peut inclure des personnes de l\u2019ext\xE9rieur de l\u2019\
-        organisation. Pr\xE9server la responsabilisation des supports durant le transport\
-        \ comprend la restriction des activit\xE9s de transport au personnel autoris\xE9\
-        \ et le suivi ou l\u2019obtention des enregistrements officiels des activit\xE9\
-        s de transport, \xE0 mesure que les supports se d\xE9placent dans le syst\xE8\
-        me de transport, afin de pr\xE9venir et de d\xE9tecter les pertes, les destructions\
-        \ ou les modifications. Cette exigence est associ\xE9e aux exigences **Confidentialit\xE9\
-        \ lors de la transmission et du stockage 03.13.08** et **Protection cryptographique\
-        \ 03.13.11**."
+        \ inintelligible ou de rendre lisible une information chiffr\xE9e.\"><sup>(?)</sup></abbr>\
+        \ et/ou des contenants verrouill\xE9s. Les activit\xE9s associ\xE9es au transport\
+        \ des supports comprennent la remise des supports aux fins de transport, la\
+        \ v\xE9rification que les supports suivent les processus de transport ad\xE9\
+        quats et le transport en tant que tel. Le personnel autoris\xE9 responsable\
+        \ du transport et de la messagerie peut inclure des personnes de l\u2019ext\xE9\
+        rieur de l\u2019organisation. Pr\xE9server la responsabilisation des supports\
+        \ durant le transport comprend la restriction des activit\xE9s de transport\
+        \ au personnel autoris\xE9 et le suivi ou l\u2019obtention des enregistrements\
+        \ officiels des activit\xE9s de transport, \xE0 mesure que les supports se\
+        \ d\xE9placent dans le syst\xE8me de transport, afin de pr\xE9venir et de\
+        \ d\xE9tecter les pertes, les destructions ou les modifications. Cette exigence\
+        \ est associ\xE9e aux exigences **Confidentialit\xE9 lors de la transmission\
+        \ et du stockage 03.13.08** et **Protection cryptographique 03.13.11**."
       translations:
         en:
           name: Discussion
@@ -6257,18 +6233,17 @@ objects:
             the requirements established for protecting specified information and
             systems. Media protection during transport can include cryptography <abbr
             title="Cryptography&#10;The study of techniques used to make plain information
-            unreadable, as well as to convert it back to a readable form."><sup class="fa-solid
-            fa-circle-question"></sup></abbr> and/or locked containers. Activities
-            associated with media transport include releasing media for transport,
-            ensuring that media enter the appropriate transport processes, and the
-            actual transport. Authorized transport and courier personnel may include
-            individuals external to the organization. Maintaining accountability of
-            media during transport includes restricting transport activities to authorized
-            personnel and tracking or obtaining records of transport activities as
-            the media move through the transportation system to prevent and detect
-            loss, destruction, or tampering. This requirement is related to **Transmission
-            and storage confidentiality 03.13.08** and **Cryptographic protection
-            03.13.11**.
+            unreadable, as well as to convert it back to a readable form."><sup>(?)</sup></abbr>
+            and/or locked containers. Activities associated with media transport include
+            releasing media for transport, ensuring that media enter the appropriate
+            transport processes, and the actual transport. Authorized transport and
+            courier personnel may include individuals external to the organization.
+            Maintaining accountability of media during transport includes restricting
+            transport activities to authorized personnel and tracking or obtaining
+            records of transport activities as the media move through the transportation
+            system to prevent and detect loss, destruction, or tampering. This requirement
+            is related to **Transmission and storage confidentiality 03.13.08** and
+            **Cryptographic protection 03.13.11**.
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.08.07
       assessable: false
       depth: 3
@@ -7621,9 +7596,9 @@ objects:
         \ deux syst\xE8mes. Il peut s\u2019agir d\u2019un connecteur mat\xE9riel utilis\xE9\
         \ pour la connexion \xE0 d\u2019autres dispositifs ou d\u2019une convention\
         \ permettant d\u2019\xE9tablir des communications entre deux syst\xE8mes logiciels.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr>, les exigences de\
-        \ s\xE9curit\xE9 et de protection de la vie priv\xE9e, les contr\xF4les et\
-        \ les responsabilit\xE9s pour chaque syst\xE8me."
+        ><sup>(?)</sup></abbr>, les exigences de s\xE9curit\xE9 et de protection de\
+        \ la vie priv\xE9e, les contr\xF4les et les responsabilit\xE9s pour chaque\
+        \ syst\xE8me."
       translations:
         en:
           name: Discussion
@@ -7649,9 +7624,9 @@ objects:
             in exchange agreements include the interface <abbr title="Interface&#10;A
             boundary across which two systems communicate. An interface might be a
             hardware connector used to link to other devices, or it might be a convention
-            used to allow communication between two software systems."><sup class="fa-solid
-            fa-circle-question"></sup></abbr> characteristics, security and privacy
-            requirements, controls, and responsibilities for each system.'
+            used to allow communication between two software systems."><sup>(?)</sup></abbr>
+            characteristics, security and privacy requirements, controls, and responsibilities
+            for each system.'
     - urn: urn:intuitem:risk:req_node:itsp.10.171:3.13
       assessable: false
       depth: 2
@@ -7728,13 +7703,12 @@ objects:
         \ d\u2019une architecture de s\xE9curit\xE9. Les sous-r\xE9seaux qui sont\
         \ s\xE9par\xE9s physiquement ou logiquement des r\xE9seaux internes sont appel\xE9\
         s commun\xE9ment des zones d\xE9militaris\xE9es (ZD) ou DMZ <abbr title=\"\
-        DMZ&#10;Voir Zone d\xE9militaris\xE9e.\"><sup class=\"fa-solid fa-circle-question\"\
-        ></sup></abbr> (pour Demilitarized Zones). La restriction ou l\u2019interdiction\
-        \ d\u2019interfaces au sein des syst\xE8mes organisationnels comprend la restriction\
-        \ du trafic Web externe vers les serveurs Web d\xE9sign\xE9s dans des interfaces\
-        \ g\xE9r\xE9es et l\u2019interdiction de la mystification d\u2019adresses\
-        \ (internes et externes) pour les protocoles franchissant le p\xE9rim\xE8\
-        tre."
+        DMZ&#10;Voir Zone d\xE9militaris\xE9e.\"><sup>(?)</sup></abbr> (pour Demilitarized\
+        \ Zones). La restriction ou l\u2019interdiction d\u2019interfaces au sein\
+        \ des syst\xE8mes organisationnels comprend la restriction du trafic Web externe\
+        \ vers les serveurs Web d\xE9sign\xE9s dans des interfaces g\xE9r\xE9es et\
+        \ l\u2019interdiction de la mystification d\u2019adresses (internes et externes)\
+        \ pour les protocoles franchissant le p\xE9rim\xE8tre."
       translations:
         en:
           name: Discussion
@@ -7989,9 +7963,9 @@ objects:
           description: 'Establish and manage cryptographic keys in the system in accordance
             with the following key management <abbr title="Key management&#10;The
             procedures and mechanisms for generating, disseminating, replacing, storing,
-            archiving, and destroying cryptographic keys."><sup class="fa-solid fa-circle-question"></sup></abbr>
-            requirements: [Assignment: organization-defined requirements for key generation,
-            distribution, storage, access, and destruction].'
+            archiving, and destroying cryptographic keys."><sup>(?)</sup></abbr> requirements:
+            [Assignment: organization-defined requirements for key generation, distribution,
+            storage, access, and destruction].'
     - urn: urn:intuitem:risk:req_node:itsp.10.171:03.13.10.disc
       assessable: false
       depth: 4
@@ -8177,9 +8151,8 @@ objects:
         \ de code mobile non acceptable au sein du syst\xE8me, y compris exiger la\
         \ signature num\xE9rique <abbr title=\"Signature num\xE9rique&#10;M\xE9canisme\
         \ cryptographique employ\xE9 pour v\xE9rifier l&#x27;authenticit\xE9 et l&#x27;int\xE9\
-        grit\xE9 d&#x27;un article (p. ex. un document, un logiciel).\"><sup class=\"\
-        fa-solid fa-circle-question\"></sup></abbr> du code mobile par une source\
-        \ de confiance."
+        grit\xE9 d&#x27;un article (p. ex. un document, un logiciel).\"><sup>(?)</sup></abbr>\
+        \ du code mobile par une source de confiance."
       translations:
         en:
           name: Discussion
@@ -8310,18 +8283,18 @@ objects:
         \ anti-virus proc\xE8de \xE0 l&#x27;analyse des fichiers afin d&#x27;identifier\
         \ des programmes qui sont ou pourraient \xEAtre malveillants. L&#x27;analyse\
         \ permet d&#x27;identifier : les virus connus, les virus auparavant inconnus\
-        \ et les fichiers suspects.\"><sup class=\"fa-solid fa-circle-question\"></sup></abbr>.\
-        \ Les organisations doivent corriger les d\xE9fauts d\xE9couverts au cours\
-        \ des \xE9valuations de s\xE9curit\xE9, de la surveillance continue, des activit\xE9\
-        s d\u2019intervention en cas d\u2019incident et du traitement des erreurs\
-        \ du syst\xE8me. Les organisations peuvent tirer parti des ressources offertes\
-        \ (par exemple, les bases de donn\xE9es CWE ou CVE) pour corriger les d\xE9\
-        fauts des syst\xE8mes. Les p\xE9riodes d\xE9finies par l\u2019organisation\
-        \ pour la mise \xE0 jour de s\xE9curit\xE9 des logiciels et des micrologiciels\
-        \ peuvent varier en fonction de divers facteurs, notamment la criticit\xE9\
-        \ de la mise \xE0 jour (c\u2019est-\xE0-dire la gravit\xE9 de la vuln\xE9\
-        rabilit\xE9 associ\xE9e \xE0 la faille d\xE9couverte). Certains types de correctifs\
-        \ peuvent n\xE9cessiter plus de mises \xE0 l\u2019essai que d\u2019autres."
+        \ et les fichiers suspects.\"><sup>(?)</sup></abbr>. Les organisations doivent\
+        \ corriger les d\xE9fauts d\xE9couverts au cours des \xE9valuations de s\xE9\
+        curit\xE9, de la surveillance continue, des activit\xE9s d\u2019intervention\
+        \ en cas d\u2019incident et du traitement des erreurs du syst\xE8me. Les organisations\
+        \ peuvent tirer parti des ressources offertes (par exemple, les bases de donn\xE9\
+        es CWE ou CVE) pour corriger les d\xE9fauts des syst\xE8mes. Les p\xE9riodes\
+        \ d\xE9finies par l\u2019organisation pour la mise \xE0 jour de s\xE9curit\xE9\
+        \ des logiciels et des micrologiciels peuvent varier en fonction de divers\
+        \ facteurs, notamment la criticit\xE9 de la mise \xE0 jour (c\u2019est-\xE0\
+        -dire la gravit\xE9 de la vuln\xE9rabilit\xE9 associ\xE9e \xE0 la faille d\xE9\
+        couverte). Certains types de correctifs peuvent n\xE9cessiter plus de mises\
+        \ \xE0 l\u2019essai que d\u2019autres."
       translations:
         en:
           name: Discussion
@@ -8428,54 +8401,53 @@ objects:
         insu de l\u2019utilisateur, et causent des dommages de toutes sortes. Ils\
         \ peuvent faire afficher des messages irritants, voler des donn\xE9es ou m\xEA\
         me permettre \xE0 d\u2019autres utilisateurs de prendre le contr\xF4le de\
-        \ l\u2019ordinateur infect\xE9.\"><sup class=\"fa-solid fa-circle-question\"\
-        ></sup></abbr>, les vers, les chevaux de Troie et les logiciels espions. Le\
-        \ code malveillant peut \xEAtre encod\xE9 sous diff\xE9rents formats, contenu\
-        \ dans des fichiers compress\xE9s ou cach\xE9s, ou encore dissimul\xE9 dans\
-        \ des fichiers en utilisant des techniques comme la st\xE9ganographie. Le\
-        \ code malveillant peut \xEAtre pr\xE9sent dans des logiciels commerciaux\
-        \ sur \xE9tag\xE8re et dans des logiciels con\xE7us sur mesure et peut comprendre\
-        \ des bombes logiques, des portes d\xE9rob\xE9es et d\u2019autres types d\u2019\
-        attaques qui peuvent affecter la mission et les activit\xE9s de l\u2019organisation.\
-        \ Des analyses p\xE9riodiques du syst\xE8me et des balayages en temps r\xE9\
-        el des fichiers provenant de sources externes lorsqu\u2019ils sont t\xE9l\xE9\
-        charg\xE9s, ouverts ou ex\xE9cut\xE9s peuvent faciliter la d\xE9tection de\
-        \ code malveillant. Les m\xE9canismes de protection contre les programmes\
-        \ malveillants peuvent \xE9galement surveiller les syst\xE8mes afin de d\xE9\
-        tecter les comportements anormaux ou inattendus et prendre les mesures appropri\xE9\
-        es.\n\nCes m\xE9canismes comprennent des technologies ax\xE9es ou non sur\
-        \ les signatures. Les m\xE9canismes de d\xE9tection qui ne sont pas ax\xE9\
-        s sur les signatures int\xE8grent des techniques d\u2019intelligence artificielle\
-        \ <abbr title=\"Intelligence artificielle&#10;Sous-domaine de l&#x27;informatique\
-        \ ayant trait au d\xE9veloppement de programmes informatiques aptes \xE0 r\xE9\
-        soudre des probl\xE8mes, \xE0 apprendre, \xE0 comprendre des langages, \xE0\
-        \ interpr\xE9ter des sc\xE8nes visuelles, bref, \xE0 se comporter de fa\xE7\
-        on \xE0 reproduire les facult\xE9s cognitives de l&#x27;intelligence humaine.\"\
-        ><sup class=\"fa-solid fa-circle-question\"></sup></abbr> (IA) qui utilisent\
-        \ des heuristiques afin de d\xE9tecter, d\u2019analyser et de d\xE9crire les\
-        \ caract\xE9ristiques ou les comportements des programmes malveillants. Ils\
-        \ fournissent \xE9galement des contr\xF4les contre de tels programmes malveillants\
-        \ pour lesquels il n\u2019existe pas encore de signature ou de telles signatures\
-        \ s\u2019av\xE8rent inefficaces. Les cas o\xF9 les signatures sont inexistantes\
-        \ ou inefficaces incluent les programmes malveillants polymorphiques (c\u2019\
-        est-\xE0-dire le code pour lequel les signatures sont modifi\xE9es lors de\
-        \ la r\xE9plication). Les m\xE9canismes qui ne sont pas ax\xE9s sur les signatures\
-        \ incluent les technologies bas\xE9es sur la r\xE9putation. Une gestion omnipr\xE9\
-        sente des configurations, des logiciels anti-exploitation et des contr\xF4\
-        les d\u2019int\xE9grit\xE9 logicielle peuvent \xE9galement \xEAtre efficaces\
-        \ pour emp\xEAcher l\u2019ex\xE9cution de code non autoris\xE9.\n\nS\u2019\
-        il n\u2019est pas possible de d\xE9tecter le code malveillant \xE0 l\u2019\
-        aide de m\xE9thodes ou de technologies de d\xE9tection, les organisations\
-        \ peuvent miser sur des pratiques de codage s\xE9curis\xE9es, le contr\xF4\
-        le et la gestion des configurations, des processus d\u2019approvisionnement\
-        \ de confiance et des pratiques de suivi pour veiller \xE0 ce que les logiciels\
-        \ n\u2019ex\xE9cutent que les fonctions pr\xE9vues. Les organisations peuvent\
-        \ d\xE9terminer que d\u2019autres mesures s\u2019imposent en r\xE9ponse \xE0\
-        \ une d\xE9tection de code malveillant. Par exemple, les organisations peuvent\
-        \ d\xE9finir des mesures \xE0 prendre en r\xE9ponse \xE0 une d\xE9tection\
-        \ de code malveillant au cours d\u2019analyses, de t\xE9l\xE9chargements malveillants\
-        \ ou d\u2019activit\xE9s malveillantes associ\xE9s \xE0 une tentative d\u2019\
-        ouverture ou d\u2019ex\xE9cution de fichier."
+        \ l\u2019ordinateur infect\xE9.\"><sup>(?)</sup></abbr>, les vers, les chevaux\
+        \ de Troie et les logiciels espions. Le code malveillant peut \xEAtre encod\xE9\
+        \ sous diff\xE9rents formats, contenu dans des fichiers compress\xE9s ou cach\xE9\
+        s, ou encore dissimul\xE9 dans des fichiers en utilisant des techniques comme\
+        \ la st\xE9ganographie. Le code malveillant peut \xEAtre pr\xE9sent dans des\
+        \ logiciels commerciaux sur \xE9tag\xE8re et dans des logiciels con\xE7us\
+        \ sur mesure et peut comprendre des bombes logiques, des portes d\xE9rob\xE9\
+        es et d\u2019autres types d\u2019attaques qui peuvent affecter la mission\
+        \ et les activit\xE9s de l\u2019organisation. Des analyses p\xE9riodiques\
+        \ du syst\xE8me et des balayages en temps r\xE9el des fichiers provenant de\
+        \ sources externes lorsqu\u2019ils sont t\xE9l\xE9charg\xE9s, ouverts ou ex\xE9\
+        cut\xE9s peuvent faciliter la d\xE9tection de code malveillant. Les m\xE9\
+        canismes de protection contre les programmes malveillants peuvent \xE9galement\
+        \ surveiller les syst\xE8mes afin de d\xE9tecter les comportements anormaux\
+        \ ou inattendus et prendre les mesures appropri\xE9es.\n\nCes m\xE9canismes\
+        \ comprennent des technologies ax\xE9es ou non sur les signatures. Les m\xE9\
+        canismes de d\xE9tection qui ne sont pas ax\xE9s sur les signatures int\xE8\
+        grent des techniques d\u2019intelligence artificielle <abbr title=\"Intelligence\
+        \ artificielle&#10;Sous-domaine de l&#x27;informatique ayant trait au d\xE9\
+        veloppement de programmes informatiques aptes \xE0 r\xE9soudre des probl\xE8\
+        mes, \xE0 apprendre, \xE0 comprendre des langages, \xE0 interpr\xE9ter des\
+        \ sc\xE8nes visuelles, bref, \xE0 se comporter de fa\xE7on \xE0 reproduire\
+        \ les facult\xE9s cognitives de l&#x27;intelligence humaine.\"><sup>(?)</sup></abbr>\
+        \ (IA) qui utilisent des heuristiques afin de d\xE9tecter, d\u2019analyser\
+        \ et de d\xE9crire les caract\xE9ristiques ou les comportements des programmes\
+        \ malveillants. Ils fournissent \xE9galement des contr\xF4les contre de tels\
+        \ programmes malveillants pour lesquels il n\u2019existe pas encore de signature\
+        \ ou de telles signatures s\u2019av\xE8rent inefficaces. Les cas o\xF9 les\
+        \ signatures sont inexistantes ou inefficaces incluent les programmes malveillants\
+        \ polymorphiques (c\u2019est-\xE0-dire le code pour lequel les signatures\
+        \ sont modifi\xE9es lors de la r\xE9plication). Les m\xE9canismes qui ne sont\
+        \ pas ax\xE9s sur les signatures incluent les technologies bas\xE9es sur la\
+        \ r\xE9putation. Une gestion omnipr\xE9sente des configurations, des logiciels\
+        \ anti-exploitation et des contr\xF4les d\u2019int\xE9grit\xE9 logicielle\
+        \ peuvent \xE9galement \xEAtre efficaces pour emp\xEAcher l\u2019ex\xE9cution\
+        \ de code non autoris\xE9.\n\nS\u2019il n\u2019est pas possible de d\xE9tecter\
+        \ le code malveillant \xE0 l\u2019aide de m\xE9thodes ou de technologies de\
+        \ d\xE9tection, les organisations peuvent miser sur des pratiques de codage\
+        \ s\xE9curis\xE9es, le contr\xF4le et la gestion des configurations, des processus\
+        \ d\u2019approvisionnement de confiance et des pratiques de suivi pour veiller\
+        \ \xE0 ce que les logiciels n\u2019ex\xE9cutent que les fonctions pr\xE9vues.\
+        \ Les organisations peuvent d\xE9terminer que d\u2019autres mesures s\u2019\
+        imposent en r\xE9ponse \xE0 une d\xE9tection de code malveillant. Par exemple,\
+        \ les organisations peuvent d\xE9finir des mesures \xE0 prendre en r\xE9ponse\
+        \ \xE0 une d\xE9tection de code malveillant au cours d\u2019analyses, de t\xE9\
+        l\xE9chargements malveillants ou d\u2019activit\xE9s malveillantes associ\xE9\
+        s \xE0 une tentative d\u2019ouverture ou d\u2019ex\xE9cution de fichier."
       translations:
         en:
           name: Discussion
@@ -8483,17 +8455,17 @@ objects:
             system vulnerabilities. Malicious code can be inserted into the system
             in a variety of ways, including email, the Internet, and portable storage
             devices. Malicious code includes viruses, worms, Trojan <abbr title="Trojan&#10;A
-            malicious program that is disguised as or embedded within legitimate software."><sup
-            class="fa-solid fa-circle-question"></sup></abbr> horses, and spyware.
-            Malicious code can be encoded in various formats, contained in compressed
-            or hidden files, or hidden in files using techniques such as steganography.
-            Malicious code may be present in commercial off-the-shelf software and
-            custom-built software and could include logic bombs, backdoors, and other
-            types of attacks that could affect organizational mission and business
-            functions. Periodic scans of the system and real-time scans of files from
-            external sources as files are downloaded, opened, or executed can detect
-            malicious code. Malicious code protection mechanisms can also monitor
-            systems for anomalous or unexpected behaviours and take appropriate actions.
+            malicious program that is disguised as or embedded within legitimate software."><sup>(?)</sup></abbr>
+            horses, and spyware. Malicious code can be encoded in various formats,
+            contained in compressed or hidden files, or hidden in files using techniques
+            such as steganography. Malicious code may be present in commercial off-the-shelf
+            software and custom-built software and could include logic bombs, backdoors,
+            and other types of attacks that could affect organizational mission and
+            business functions. Periodic scans of the system and real-time scans of
+            files from external sources as files are downloaded, opened, or executed
+            can detect malicious code. Malicious code protection mechanisms can also
+            monitor systems for anomalous or unexpected behaviours and take appropriate
+            actions.
 
 
             Malicious code protection mechanisms include signature- and non-signature-based
@@ -8502,16 +8474,16 @@ objects:
             science that develops intelligent computer programs to behave in a way
             that would be considered intelligent if observed in a human (e.g. solve
             problems, learn from experience, understand language, interpret visual
-            scenes)."><sup class="fa-solid fa-circle-question"></sup></abbr> (AI)
-            techniques that use heuristics to detect, analyze, and describe the characteristics
-            or behaviour of malicious code. They also provide controls against such
-            code for which signatures do not yet exist or for which existing signatures
-            may not be effective. Malicious code for which active signatures do not
-            yet exist or may be ineffective includes polymorphic malicious code (i.e.,
-            code that changes signatures when it replicates). Non-signature-based
-            mechanisms include reputation-based technologies. Pervasive configuration
-            management, anti-exploitation software, and software integrity controls
-            may also be effective in preventing unauthorized code execution.
+            scenes)."><sup>(?)</sup></abbr> (AI) techniques that use heuristics to
+            detect, analyze, and describe the characteristics or behaviour of malicious
+            code. They also provide controls against such code for which signatures
+            do not yet exist or for which existing signatures may not be effective.
+            Malicious code for which active signatures do not yet exist or may be
+            ineffective includes polymorphic malicious code (i.e., code that changes
+            signatures when it replicates). Non-signature-based mechanisms include
+            reputation-based technologies. Pervasive configuration management, anti-exploitation
+            software, and software integrity controls may also be effective in preventing
+            unauthorized code execution.
 
 
             If malicious code cannot be detected by detection methods or technologies,
@@ -8857,13 +8829,13 @@ objects:
         \ \xE0 jour la documentation dans les applications en r\xE9seau.\n\nLe retrait\
         \ de l\u2019acc\xE8s Internet public des postes de travail administratifs\
         \ r\xE9duit consid\xE9rablement les risques de compromission. Les passerelles\
-        \ RPV <abbr title=\"RPV&#10;Voir R\xE9seau priv\xE9 virtuel.\"><sup class=\"\
-        fa-solid fa-circle-question\"></sup></abbr> expos\xE9es \xE0 Internet ne sont\
-        \ pas privil\xE9gi\xE9es pour les activit\xE9s d\u2019administration \xE0\
-        \ distance. Les op\xE9rateurs priv\xE9s offrent une meilleure protection,\
-        \ mais n\xE9cessitent tout de m\xEAme un chiffrement de RPV au sein de r\xE9\
-        seau. Le poste de travail administratif d\xE9di\xE9 ne doit pas devenir un\
-        \ moyen de d\xE9placement lat\xE9ral entre les domaines de s\xE9curit\xE9."
+        \ RPV <abbr title=\"RPV&#10;Voir R\xE9seau priv\xE9 virtuel.\"><sup>(?)</sup></abbr>\
+        \ expos\xE9es \xE0 Internet ne sont pas privil\xE9gi\xE9es pour les activit\xE9\
+        s d\u2019administration \xE0 distance. Les op\xE9rateurs priv\xE9s offrent\
+        \ une meilleure protection, mais n\xE9cessitent tout de m\xEAme un chiffrement\
+        \ de RPV au sein de r\xE9seau. Le poste de travail administratif d\xE9di\xE9\
+        \ ne doit pas devenir un moyen de d\xE9placement lat\xE9ral entre les domaines\
+        \ de s\xE9curit\xE9."
       translations:
         en:
           name: Discussion
@@ -9682,23 +9654,23 @@ objects:
         rob\xE9e <abbr title=\"Porte d\xE9rob\xE9e&#10;Moyen non recens\xE9 qui permet,\
         \ discr\xE8tement ou anonymement, d&#x27;acc\xE9der \xE0 distance \xE0 un\
         \ ordinateur apr\xE8s avoir contourn\xE9 les m\xE9canismes d&#x27;authentification\
-        \ et s&#x27;\xEAtre donn\xE9 acc\xE8s au texte en clair.\"><sup class=\"fa-solid\
-        \ fa-circle-question\"></sup></abbr> et les mauvaises pratiques de d\xE9veloppement\
-        \ tout au long du cycle de vie du syst\xE8me.\n\nLes organisations peuvent\
-        \ \xE9galement penser \xE0 offrir des mesures incitatives pour les fournisseurs\
-        \ afin de mettre en \u0153uvre des contr\xF4les et de favoriser la transparence\
-        \ des processus et des pratiques de s\xE9curit\xE9. Elles peuvent \xE9galement\
-        \ fournir un libell\xE9 de contrat qui traite de l\u2019interdiction d\u2019\
-        utiliser des composants contamin\xE9s ou contrefaits et restreindre les achats\
-        \ des fournisseurs qui ne sont pas dignes de confiance. Les organisations\
-        \ doivent consid\xE9rer fournir des programmes de formation et de sensibilisation\
-        \ pour le personnel concernant les risques li\xE9s \xE0 la cha\xEEne d\u2019\
-        approvisionnement, les strat\xE9gies d\u2019att\xE9nuation disponibles et\
-        \ les circonstances appropri\xE9es pour utiliser les programmes. Les m\xE9\
-        thodes pour examiner et prot\xE9ger les plans de d\xE9veloppement, la documentation\
-        \ et les preuves doivent \xEAtre appropri\xE9es selon les exigences de s\xE9\
-        curit\xE9 de l\u2019organisation. Les contrats peuvent \xE9galement indiquer\
-        \ les exigences concernant la protection des documents."
+        \ et s&#x27;\xEAtre donn\xE9 acc\xE8s au texte en clair.\"><sup>(?)</sup></abbr>\
+        \ et les mauvaises pratiques de d\xE9veloppement tout au long du cycle de\
+        \ vie du syst\xE8me.\n\nLes organisations peuvent \xE9galement penser \xE0\
+        \ offrir des mesures incitatives pour les fournisseurs afin de mettre en \u0153\
+        uvre des contr\xF4les et de favoriser la transparence des processus et des\
+        \ pratiques de s\xE9curit\xE9. Elles peuvent \xE9galement fournir un libell\xE9\
+        \ de contrat qui traite de l\u2019interdiction d\u2019utiliser des composants\
+        \ contamin\xE9s ou contrefaits et restreindre les achats des fournisseurs\
+        \ qui ne sont pas dignes de confiance. Les organisations doivent consid\xE9\
+        rer fournir des programmes de formation et de sensibilisation pour le personnel\
+        \ concernant les risques li\xE9s \xE0 la cha\xEEne d\u2019approvisionnement,\
+        \ les strat\xE9gies d\u2019att\xE9nuation disponibles et les circonstances\
+        \ appropri\xE9es pour utiliser les programmes. Les m\xE9thodes pour examiner\
+        \ et prot\xE9ger les plans de d\xE9veloppement, la documentation et les preuves\
+        \ doivent \xEAtre appropri\xE9es selon les exigences de s\xE9curit\xE9 de\
+        \ l\u2019organisation. Les contrats peuvent \xE9galement indiquer les exigences\
+        \ concernant la protection des documents."
       translations:
         en:
           name: Discussion
