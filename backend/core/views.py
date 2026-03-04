@@ -2385,8 +2385,13 @@ class ReferenceControlViewSet(BaseModelViewSet):
         AppliedControl.objects.bulk_update(
             syncable_applied_controls, FIELDS_TO_SYNC, batch_size=100
         )
+
+        skip_sync = all(
+            field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
+            for field_to_sync in FIELDS_TO_SYNC
+        )
         for applied_control in syncable_applied_controls:
-            applied_control.save()
+            applied_control.save(skip_sync=skip_sync)
 
         return Response(
             [
