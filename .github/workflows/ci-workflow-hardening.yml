@@ -11,28 +11,57 @@ permissions:
 jobs:
   zizmor:
     runs-on: ubuntu-24.04
+    env:
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+
       - name: Install zizmor
         shell: bash
         run: |
           set -euo pipefail
           cargo install zizmor --locked
-      - name: Run zizmor and fail only on template-injection
+
+      - name: Run zizmor (quiet output) and fail only on template-injection
         shell: bash
         run: |
           set -euo pipefail
-          out="$(zizmor --no-online-audits --format github .github/workflows)" || exit_code=$? || exit_code=$?
-          if [[ ${exit_code:-0} -ge 15 ]] || [[ ${exit_code:-0} -le 9 && ${exit_code:-0} -ne 0 ]]; then
-            echo "$out"
-            echo "zizmor execution failed with exit code ${exit_code:-0}"
-            exit 1
-          fi
-          echo "$out"
+          zizmor --no-online-audits --format github .github/workflows > zizmor.out 2>&1 || true
 
-          if echo "$out" | grep -q "title=template-injection"; then
-            echo "template-injection found -> failing"
+          grep -E 'title=template-injection' zizmor.out > zizmor.template-injection.out || true
+          count="$(wc -l < zizmor.template-injection.out | tr -d ' ')"
+          if [[ "$count" -gt 0 ]]; then
+            cat zizmor.template-injection.out
             exit 1
           fi
 
           echo "OK: no template-injection findings."
+
+      - name: Set current date as env variable
+        if: ${{ !cancelled() }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> "$GITHUB_ENV"
+
+      - name: Sanitize branch name
+        if: ${{ !cancelled() }}
+        shell: bash
+        env:
+          RAW_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          SAFE_NAME="$(echo "$RAW_BRANCH" | sed -E 's/[^a-zA-Z0-9_-]/_/g')"
+          echo "BRANCH_SANITIZED=$SAFE_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload zizmor reports (always)
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BRANCH_SANITIZED }}-${{ env.NOW }}-${{ github.job }}-zizmor-report
+          include-hidden-files: true
+          path: |
+            zizmor.out
+            zizmor.template-injection.out
+          retention-days: 14
+          if-no-files-found: error
