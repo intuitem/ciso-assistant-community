@@ -38,14 +38,18 @@ Once the feature flag is enabled, the design is as follows:
 ### Workflow
 
 The intereaction between the auditor and respondents follows these steps:\
-\
-<img src="../.gitbook/assets/image (1).png" alt="" data-size="original">
+<br>
+
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 The default state is `draft` and you can set them and send feedbacks individually:\
-![](<../.gitbook/assets/image (2).png>) &#x20;
+&#x20;&#x20;
+
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 
 
 For review, if the auditors don't have the permissions to update the requirements compliance result, which will be the general case to keep consistent inputs from the respondent side, they can interact with comments on each one:\
-\
-![](<../.gitbook/assets/image (3).png>)
+<br>
+
+<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
