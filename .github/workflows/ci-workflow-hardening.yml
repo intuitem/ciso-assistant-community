@@ -22,7 +22,7 @@ jobs:
           set -euo pipefail
           cargo install zizmor --locked
 
-      - name: Run zizmor (quiet output) and fail only on template-injection
+      - name: Run zizmor - fail only on template-injection
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +54,7 @@ jobs:
           SAFE_NAME="$(echo "$RAW_BRANCH" | sed -E 's/[^a-zA-Z0-9_-]/_/g')"
           echo "BRANCH_SANITIZED=$SAFE_NAME" >> "$GITHUB_ENV"
 
-      - name: Upload zizmor reports (always)
+      - name: Upload zizmor reports 
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
