@@ -1,0 +1,3 @@
+- name: BAD TEST
+  run: |
+    echo "${{ github.sha }}"
