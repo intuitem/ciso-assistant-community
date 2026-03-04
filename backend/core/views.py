@@ -6225,7 +6225,15 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        return Response({"name": "Global", "children": folders_list})
+        root_folder = Folder.get_root_folder()
+        return Response(
+            {
+                "name": root_folder.name,
+                "uuid": str(root_folder.id),
+                "content_type": root_folder.content_type,
+                "children": folders_list,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):

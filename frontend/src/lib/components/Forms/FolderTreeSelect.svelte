@@ -26,6 +26,11 @@
 		 * Accepts the object itself or a plain UUID string.
 		 */
 		optionsSelf?: any;
+		/**
+		 * Defaults to ['DO', 'GL']
+		 * previous optionsEndpoint="folders?content_type=DO&content_type=GL".
+		 */
+		contentTypes?: string[];
 	}
 
 	let {
@@ -43,7 +48,8 @@
 		cachedValue = $bindable(),
 		onChange = () => {},
 		mount: mountCallback = () => null,
-		optionsSelf = null
+		optionsSelf = null,
+		contentTypes = ['DO', 'GL']
 	}: Props = $props();
 
 	const { value, errors, constraints } = formFieldProxy(form, field);
@@ -65,7 +71,10 @@
 		return () => clearTimeout(t);
 	});
 
-	const topNodes = $derived(orgTree?.children ?? []);
+	// Include the GL root as a flat first entry
+	const topNodes = $derived(
+		orgTree ? [{ ...orgTree, children: undefined }, ...(orgTree.children ?? [])] : []
+	);
 	const hasNodes = $derived(topNodes.length > 0);
 
 	//  optionsSelf exclusion
@@ -104,7 +113,8 @@
 		if (!q) return null;
 		const results: SearchResult[] = [];
 		function visit(n: TreeNode, ancestors: string[]) {
-			if (n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
+			const selectable = !n.content_type || contentTypes.includes(n.content_type);
+			if (selectable && n.uuid !== excludedId && n.uuid && n.name.toLowerCase().includes(q)) {
 				results.push({ node: n, path: ancestors });
 			}
 			(n.children ?? []).forEach((c) => visit(c, [...ancestors, n.name]));
@@ -211,7 +221,7 @@
 {#if hidden}
 	<input type="hidden" name={field} value={$value ?? ''} />
 {:else}
-	<div class="{selectorClass} relative">
+	<div data-testid="form-input-{field.replace(/_/g, '-')}" class="{selectorClass} relative">
 		{#if label !== undefined}
 			<label class="block text-sm font-semibold mb-1" for="folder-tree-select-btn-{field}">
 				{label}
@@ -239,7 +249,6 @@
 				class="input bg-surface-100 flex items-center gap-2 w-full text-left px-3 py-2 text-sm
 					{disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
 					{$errors && $errors.length > 0 ? 'border-red-400' : ''}"
-				data-testid="form-input-{field.replace(/_/g, '-')}"
 			>
 				<i class="fa-solid fa-folder text-slate-400 flex-shrink-0 text-xs"></i>
 				<span class="flex-1 truncate {selectedName ? 'text-surface-900' : 'text-surface-500'}">
@@ -289,7 +298,7 @@
 								class="fa-solid fa-magnifying-glass absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"
 							></i>
 							<input
-								type="search"
+								type="text"
 								class="w-full pl-6 pr-2 py-1 text-sm border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-indigo-300"
 								placeholder={m.searchPlaceholder()}
 								bind:value={searchQuery}
@@ -327,6 +336,8 @@
 							<li class="list-none">
 								<button
 									type="button"
+									role="option"
+									aria-selected={$value === String(result.node.uuid)}
 									class="w-full px-2 py-1.5 text-left hover:bg-indigo-50 rounded transition-colors
 										{$value === String(result.node.uuid) ? 'bg-indigo-100' : ''}"
 									onclick={(e) => {
@@ -370,6 +381,7 @@
 							<FolderTreeNode
 								{node}
 								{sortAsc}
+								{contentTypes}
 								focusId={$value ? String($value) : null}
 								onSelect={handleSelect}
 								depth={0}
