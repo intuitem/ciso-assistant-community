@@ -143,7 +143,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
 5. SOC2 🇺🇸
-6. PCI DSS 4.0 💳
+6. PCI DSS 4.0.1 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
