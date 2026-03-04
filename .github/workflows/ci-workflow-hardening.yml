@@ -23,11 +23,11 @@ jobs:
         run: |
           set -euo pipefail
           out="$(zizmor --no-online-audits --format github .github/workflows)" || exit_code=$? || exit_code=$?
-+         if [[ ${exit_code:-0} -ge 15 ]] || [[ ${exit_code:-0} -le 9 && ${exit_code:-0} -ne 0 ]]; then
-+           echo "$out"
-+           echo "zizmor execution failed with exit code ${exit_code:-0}"
-+           exit 1
-+         fi
+          if [[ ${exit_code:-0} -ge 15 ]] || [[ ${exit_code:-0} -le 9 && ${exit_code:-0} -ne 0 ]]; then
+            echo "$out"
+            echo "zizmor execution failed with exit code ${exit_code:-0}"
+            exit 1
+          fi
           echo "$out"
 
           if echo "$out" | grep -q "title=template-injection"; then
