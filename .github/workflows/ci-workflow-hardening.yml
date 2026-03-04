@@ -1,0 +1,33 @@
+name: CI - zizmor
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  zizmor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install zizmor
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo install zizmor --locked
+      - name: Run zizmor and fail only on template-injection
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$(zizmor --no-online-audits --format github .github/workflows || true)"
+          echo "$out"
+
+          if echo "$out" | grep -q "title=template-injection"; then
+            echo "template-injection found -> failing"
+            exit 1
+          fi
+
+          echo "OK: no template-injection findings."
