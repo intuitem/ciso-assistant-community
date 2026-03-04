@@ -2428,6 +2428,21 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                 "⚠️ Cannot modify the requirement when the audit is in review."
             )
 
+        # Assignment-level locking for auditee users
+        request = self.context.get("request")
+        if request and self.instance and compliance_assessment:
+            from core.utils import get_auditee_filtered_folder_ids
+
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+                locked_assignment = self.instance.assignments.filter(
+                    status__in=["submitted", "closed"]
+                ).first()
+                if locked_assignment:
+                    raise serializers.ValidationError(
+                        "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
+
         # Validate extended_result against result
         extended_result = attrs.get("extended_result")
         if extended_result is None and self.instance:
@@ -2639,11 +2654,20 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
         ]
 
 
+class RequirementAssignmentEventSerializer(BaseModelSerializer):
+    event_actor = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+
+    class Meta:
+        model = RequirementAssignmentEvent
+        fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
+
+
 class RequirementAssignmentReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     compliance_assessment = FieldsRelatedField()
     actor = FieldsRelatedField(many=True)
     requirement_assessments = FieldsRelatedField(many=True)
+    events = RequirementAssignmentEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = RequirementAssignment
@@ -2651,6 +2675,11 @@ class RequirementAssignmentReadSerializer(BaseModelSerializer):
 
 
 class RequirementAssignmentWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = RequirementAssignment
+        fields = "__all__"
+        read_only_fields = ["status"]
+
     def validate(self, attrs):
         """
         Validate that requirement assessments belong to the specified compliance assessment
@@ -2691,10 +2720,6 @@ class RequirementAssignmentWriteSerializer(BaseModelSerializer):
                 )
 
         return super().validate(attrs)
-
-    class Meta:
-        model = RequirementAssignment
-        fields = "__all__"
 
 
 class RequirementMappingSetWriteSerializer(RequirementMappingSetReadSerializer):
@@ -3048,6 +3073,55 @@ class TimelineEntryReadSerializer(TimelineEntryWriteSerializer):
     class Meta:
         model = TimelineEntry
         exclude = []
+
+
+class CommentWriteSerializer(BaseModelSerializer):
+    PARENT_FIELDS = [
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+    ]
+
+    def validate(self, data):
+        # Only enforce the one-parent constraint on creation, not partial updates
+        if self.instance is None:
+            parent_count = sum(1 for f in self.PARENT_FIELDS if data.get(f) is not None)
+            if parent_count != 1:
+                raise serializers.ValidationError(
+                    "Exactly one parent (requirement_assessment, risk_scenario, "
+                    "applied_control, or finding) must be set."
+                )
+        return data
+
+    def create(self, validated_data):
+        # Resolve folder from the parent object so the RBAC check in
+        # BaseModelSerializer.create() uses the correct folder instead
+        # of falling back to root (which auditees cannot access).
+        for field_name in self.PARENT_FIELDS:
+            parent_obj = validated_data.get(field_name)
+            if parent_obj is not None:
+                validated_data["folder"] = parent_obj.folder
+                break
+        return super().create(validated_data)
+
+    class Meta:
+        model = Comment
+        exclude = ["created_at", "updated_at", "is_tainted", "author", "folder"]
+
+
+class CommentReadSerializer(CommentWriteSerializer):
+    str = serializers.CharField(source="__str__", read_only=True)
+    author = FieldsRelatedField(["id", "email", "first_name", "last_name"])
+    folder = FieldsRelatedField()
+    requirement_assessment = FieldsRelatedField()
+    risk_scenario = FieldsRelatedField()
+    applied_control = FieldsRelatedField()
+    finding = FieldsRelatedField()
+
+    class Meta:
+        model = Comment
+        fields = "__all__"
 
 
 class IncidentWriteSerializer(BaseModelSerializer):
