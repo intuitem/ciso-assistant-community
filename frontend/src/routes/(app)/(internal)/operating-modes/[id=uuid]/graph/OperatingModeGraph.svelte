@@ -10,6 +10,7 @@
 		Background,
 		BackgroundVariant,
 		MiniMap,
+		Panel,
 		type Node,
 		type Edge,
 		type Connection,
@@ -47,6 +48,7 @@
 		operatingModeId: string;
 		graphColumns?: GraphColumns;
 		onSaved?: () => void;
+		onCreateAction?: () => void;
 		readonly?: boolean;
 	}
 
@@ -56,6 +58,7 @@
 		operatingModeId,
 		graphColumns = {},
 		onSaved,
+		onCreateAction,
 		readonly = false
 	}: Props = $props();
 
@@ -116,6 +119,7 @@
 	let saving = $state(false);
 	let dirty = $state(false);
 	let dragOverStage = $state<number | null>(null);
+	let showHelp = $state(false);
 
 	setContext('killChainEditor', {
 		get dragOverStage() {
@@ -244,6 +248,11 @@
 		nodes = flowNodes;
 		edges = flowEdges;
 		logicOps = ops;
+	}
+
+	function resetGraph() {
+		initFromKillChain();
+		dirty = false;
 	}
 
 	initFromKillChain();
@@ -524,64 +533,11 @@
 <div class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200">
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
-			<EditorSidebar {elementaryActions} {placedNodeIds} />
+			<EditorSidebar {elementaryActions} {placedNodeIds} {onCreateAction} />
 		</div>
 	{/if}
 
 	<div class="flex-1 flex flex-col overflow-hidden">
-		{#if !readonly}
-			<div transition:slide={{ duration: 200 }}>
-				<div
-					class="flex items-center justify-between px-4 py-2 bg-surface-50 border-b border-surface-200"
-				>
-					<div class="flex items-center gap-2">
-						<span class="badge preset-tonal text-xs"
-							><i class="fa-solid fa-info-circle mr-1"></i>{m.graphEditorHelp()}</span
-						>
-					</div>
-					<div class="flex items-center gap-2">
-						{#if dirty}
-							<span class="text-xs text-warning-500 flex items-center gap-1">
-								<i class="fa-solid fa-circle text-[6px]"></i>
-								{m.unsavedChanges()}
-							</span>
-						{/if}
-						<form
-							method="POST"
-							action="?/saveGraph"
-							use:enhance={() => {
-								saving = true;
-								return async ({ result, update }) => {
-									saving = false;
-									if (result.type === 'success') {
-										dirty = false;
-										saveViewport();
-										onSaved?.();
-									}
-									await update();
-								};
-							}}
-						>
-							<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
-							<input type="hidden" name="graph_columns" value={buildGraphColumnsJson()} />
-							<button
-								type="submit"
-								class="btn preset-filled-primary-500 text-sm"
-								disabled={saving || !dirty}
-							>
-								{#if saving}
-									<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-								{:else}
-									<i class="fa-solid fa-save mr-1"></i>
-								{/if}
-								{m.save()}
-							</button>
-						</form>
-					</div>
-				</div>
-			</div>
-		{/if}
-
 		<div class="flex-1 min-h-0">
 			<SvelteFlow
 				bind:nodes
@@ -612,6 +568,75 @@
 			>
 				<Background variant={BackgroundVariant.Dots} gap={20} />
 				{#if !readonly}
+					<Panel position="top-left">
+						<div class="flex items-start gap-2">
+							<button
+								type="button"
+								aria-label="Toggle help"
+								class="nopan nodrag w-6 h-6 rounded-full preset-tonal flex items-center justify-center cursor-pointer hover:brightness-90 transition-colors"
+								onclick={() => (showHelp = !showHelp)}
+							>
+								<i class="fa-solid fa-info text-xs"></i>
+							</button>
+							{#if showHelp}
+								<span
+									class="badge preset-tonal text-xs max-w-xs"
+									transition:slide={{ axis: 'x', duration: 200 }}
+								>
+									{m.graphEditorHelp()}
+								</span>
+							{/if}
+						</div>
+					</Panel>
+					{#if dirty}
+						<Panel position="top-right">
+							<div class="flex items-center gap-2">
+								<span class="text-xs text-warning-500 flex items-center gap-1">
+									<i class="fa-solid fa-circle text-[6px]"></i>
+									{m.unsavedChanges()}
+								</span>
+								<button
+									type="button"
+									class="btn preset-tonal text-sm"
+									onclick={resetGraph}
+								>
+									<i class="fa-solid fa-rotate-left mr-1"></i>
+									{m.discardChanges()}
+								</button>
+								<form
+									method="POST"
+									action="?/saveGraph"
+									use:enhance={() => {
+										saving = true;
+										return async ({ result, update }) => {
+											saving = false;
+											if (result.type === 'success') {
+												dirty = false;
+												saveViewport();
+												onSaved?.();
+											}
+											await update();
+										};
+									}}
+								>
+									<input type="hidden" name="kill_chain_steps" value={buildKillChainStepsJson()} />
+									<input type="hidden" name="graph_columns" value={buildGraphColumnsJson()} />
+									<button
+										type="submit"
+										class="btn preset-filled-primary-500 text-sm"
+										disabled={saving}
+									>
+										{#if saving}
+											<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+										{:else}
+											<i class="fa-solid fa-save mr-1"></i>
+										{/if}
+										{m.save()}
+									</button>
+								</form>
+							</div>
+						</Panel>
+					{/if}
 					<Controls showLock={false} />
 					<MiniMap />
 				{/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { BaseEdge, EdgeLabel, getSmoothStepPath, type EdgeProps } from '@xyflow/svelte';
 	import { getContext } from 'svelte';
+	import { m } from '$paraglide/messages';
 
 	let {
 		sourceX,
@@ -41,6 +42,7 @@
 	const convergenceY = $derived(targetY);
 
 	const logicOp = $derived(data?.logicOp as 'AND' | 'OR' | null);
+	const logicOpLabel = $derived(logicOp === 'AND' ? m.logicAnd() : logicOp === 'OR' ? m.logicOr() : null);
 	const targetStage = $derived((data?.targetStage as number) ?? 1);
 	const cls = $derived(STAGE_CLASSES[targetStage] ?? STAGE_CLASSES[1]);
 </script>
@@ -57,7 +59,7 @@
 			<span
 				class="px-1.5 py-0.5 rounded-full text-[9px] font-bold border {cls.bg} {cls.border} {cls.text}"
 			>
-				{logicOp}
+				{logicOpLabel}
 			</span>
 		{:else}
 			<button
@@ -69,7 +71,7 @@
 					if (data?.targetNodeId) editor?.toggleOperator(data.targetNodeId as string);
 				}}
 			>
-				{logicOp}
+				{logicOpLabel}
 			</button>
 		{/if}
 	</EdgeLabel>
