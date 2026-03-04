@@ -4698,7 +4698,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             field_value = getattr(applied_control, field_name)
             setattr(duplicated_applied_control, field_name, field_value)
 
-        duplicated_applied_control.save()
+        duplicated_applied_control.save(skip_sync=True)
 
         duplicated_applied_control.owner.set(applied_control.owner.all())
         duplicated_applied_control.filtering_labels.set(
@@ -4708,7 +4708,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             duplicate_related_objects(
                 applied_control, duplicated_applied_control, new_folder, "evidences"
             )
-            duplicated_applied_control.save()
+            duplicated_applied_control.save(skip_sync=True)
 
         return Response(
             {"results": AppliedControlReadSerializer(duplicated_applied_control).data}
