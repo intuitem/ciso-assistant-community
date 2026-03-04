@@ -14,7 +14,6 @@ import { m } from '$paraglide/messages';
 export const load: PageServerLoad = async (event) => {
 	const URLModel = 'operating-modes';
 	const model = getModelInfo(URLModel);
-	const updateSchema = modelSchema(URLModel);
 	const objectEndpoint = `${BASE_API_URL}/${model.endpointUrl}/${event.params.id}/object/`;
 	const eaEndpoint = `${BASE_API_URL}/ebios-rm/elementary-actions/`;
 	const killChainEndpoint = `${BASE_API_URL}/ebios-rm/kill-chains/?operating_mode=${event.params.id}`;
@@ -32,7 +31,6 @@ export const load: PageServerLoad = async (event) => {
 	]);
 
 	const object = await objectResponse.json();
-	const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 	const eaData = await eaRes.json();
 	const kcData = await kcRes.json();
 
@@ -63,7 +61,6 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		...detail,
-		updateForm,
 		model,
 		object,
 		elementaryActions: eaData.results ?? eaData,
@@ -86,7 +83,7 @@ export const actions: Actions = {
 		return nestedDeleteFormAction({ event });
 	},
 	update: async (event) => {
-		return defaultWriteFormAction({ event, urlModel: 'operating-modes', action: 'edit' });
+		return nestedWriteFormAction({ event, action: 'edit', redirectToWrittenObject: false });
 	},
 	saveGraph: async (event) => {
 		const formData = await event.request.formData();

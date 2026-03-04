@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import { page } from '$app/state';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
+	import UpdateModal from '$lib/components/Modals/UpdateModal.svelte';
 	import ModelTable from '$lib/components/ModelTable/ModelTable.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
@@ -19,6 +20,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { superValidate } from 'sveltekit-superforms';
+	import { zod } from 'sveltekit-superforms/adapters';
+	import { modelSchema } from '$lib/utils/schemas';
+	import { createModalCache } from '$lib/utils/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -56,6 +61,50 @@
 		if (data.eaModel) {
 			modalCreateForm(data.eaModel);
 		}
+	}
+
+	function getStageNumber(attackStage: string | number): number {
+		if (typeof attackStage === 'number') return attackStage;
+		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
+		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
+		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
+		if (attackStage.includes('Exploitation') || attackStage === 'ebiosExploitation') return 3;
+		return 0;
+	}
+
+	async function modalUpdateForm(eaId: string): void {
+		const ea = data.elementaryActions.find((a: any) => a.id === eaId);
+		if (!ea) return;
+
+		delete createModalCache.data['elementary-actions'];
+
+		const eaData = {
+			...ea,
+			folder: ea.folder?.id ?? ea.folder ?? data.data.folder,
+			attack_stage: getStageNumber(ea.attack_stage),
+			icon: ea.icon?.toLowerCase(),
+			threat: ea.threat?.id ?? ea.threat ?? null
+		};
+
+		const eaSchema = modelSchema('elementary-actions');
+		const updateForm = await superValidate(eaData, zod(eaSchema), { errors: false });
+
+		let modalComponent: ModalComponent = {
+			ref: UpdateModal,
+			props: {
+				form: updateForm,
+				model: data.eaModel,
+				object: eaData,
+				customNameDescription: false,
+				formAction: `?/update&id=${ea.id}`
+			}
+		};
+		let modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.edit() + ' ' + ea.name
+		};
+		modalStore.trigger(modal);
 	}
 
 	const user = page.data.user;
@@ -163,6 +212,7 @@
 			readonly={!editMode}
 			onSaved={handleSaved}
 			onCreateAction={canEditObject ? handleCreateEA : undefined}
+			onEditAction={canEditObject ? modalUpdateForm : undefined}
 		/>
 	</div>
 </div>

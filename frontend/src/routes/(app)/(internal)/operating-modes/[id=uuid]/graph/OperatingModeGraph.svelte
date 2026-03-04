@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { enhance } from '$app/forms';
-	import { setContext, tick } from 'svelte';
+	import { setContext, tick, untrack } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import {
 		SvelteFlow,
@@ -49,6 +49,7 @@
 		graphColumns?: GraphColumns;
 		onSaved?: () => void;
 		onCreateAction?: () => void;
+		onEditAction?: (eaId: string) => void;
 		readonly?: boolean;
 	}
 
@@ -59,6 +60,7 @@
 		graphColumns = {},
 		onSaved,
 		onCreateAction,
+		onEditAction,
 		readonly = false
 	}: Props = $props();
 
@@ -130,6 +132,7 @@
 		},
 		deleteNode: (id: string) => handleDeleteNode(id),
 		toggleOperator: (id: string) => handleToggleOperator(id),
+		editNode: (id: string) => onEditAction?.(id),
 		markDirty: () => (dirty = true)
 	});
 
@@ -256,6 +259,30 @@
 	}
 
 	initFromKillChain();
+
+	// Sync action node display data when elementaryActions change (e.g., after modal edit)
+	$effect(() => {
+		const eaMap = new Map(elementaryActions.map((ea) => [ea.id, ea]));
+
+		untrack(() => {
+			nodes = nodes.map((n) => {
+				if (n.type !== 'action') return n;
+				const ea = eaMap.get(n.id);
+				if (!ea) return n;
+				const newStage = getStageNumber(ea.attack_stage);
+				return {
+					...n,
+					parentId: stageColumnId(newStage),
+					data: {
+						...n.data,
+						label: ea.name,
+						iconClass: ea.icon_fa_class ?? '',
+						stage: newStage
+					}
+				};
+			});
+		});
+	});
 
 	let prevReadonly = readonly;
 	$effect(() => {
@@ -595,11 +622,7 @@
 									<i class="fa-solid fa-circle text-[6px]"></i>
 									{m.unsavedChanges()}
 								</span>
-								<button
-									type="button"
-									class="btn preset-tonal text-sm"
-									onclick={resetGraph}
-								>
+								<button type="button" class="btn preset-tonal text-sm" onclick={resetGraph}>
 									<i class="fa-solid fa-rotate-left mr-1"></i>
 									{m.discardChanges()}
 								</button>

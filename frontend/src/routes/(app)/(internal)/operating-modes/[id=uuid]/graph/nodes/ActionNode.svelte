@@ -17,6 +17,7 @@
 	const editor = getContext<{
 		deleteNode: (id: string) => void;
 		toggleOperator: (id: string) => void;
+		editNode: (id: string) => void;
 		readonly: boolean;
 	}>('killChainEditor');
 
@@ -51,10 +52,18 @@
 		<button
 			type="button"
 			aria-label="Delete node"
-			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
+			class="nopan nodrag absolute -top-2 -left-2 w-4 h-4 rounded-full bg-error-500 text-white text-[8px] flex items-center justify-center hover:bg-error-600 cursor-pointer"
 			onclick={() => editor?.deleteNode(id)}
 		>
 			✕
+		</button>
+		<button
+			type="button"
+			aria-label="Edit node"
+			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-primary-500 text-white text-[8px] flex items-center justify-center hover:bg-primary-600 cursor-pointer"
+			onclick={() => editor?.editNode(id)}
+		>
+			<i class="fa-solid fa-pen text-[6px]"></i>
 		</button>
 	{/if}
 

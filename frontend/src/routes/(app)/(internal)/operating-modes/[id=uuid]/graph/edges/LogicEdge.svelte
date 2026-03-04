@@ -42,7 +42,9 @@
 	const convergenceY = $derived(targetY);
 
 	const logicOp = $derived(data?.logicOp as 'AND' | 'OR' | null);
-	const logicOpLabel = $derived(logicOp === 'AND' ? m.logicAnd() : logicOp === 'OR' ? m.logicOr() : null);
+	const logicOpLabel = $derived(
+		logicOp === 'AND' ? m.logicAnd() : logicOp === 'OR' ? m.logicOr() : null
+	);
 	const targetStage = $derived((data?.targetStage as number) ?? 1);
 	const cls = $derived(STAGE_CLASSES[targetStage] ?? STAGE_CLASSES[1]);
 </script>

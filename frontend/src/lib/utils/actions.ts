@@ -188,7 +188,6 @@ export async function nestedWriteFormAction({
 	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
-
 	action: FormAction;
 	redirectToWrittenObject: boolean;
 }) {
