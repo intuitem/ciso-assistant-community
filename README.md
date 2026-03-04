@@ -230,6 +230,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 90. Microsoft cloud security benchmark v1 - ☁️🌐
 91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
 92. ANSSI : Questionnaire MonAideCyber 🇫🇷
+93. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
 
 ### Community contributions
 
