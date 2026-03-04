@@ -12,9 +12,10 @@
 	interface Props {
 		elementaryActions: ElementaryActionItem[];
 		placedNodeIds: Set<string>;
+		onCreateAction?: () => void;
 	}
 
-	let { elementaryActions, placedNodeIds }: Props = $props();
+	let { elementaryActions, placedNodeIds, onCreateAction }: Props = $props();
 
 	let searchQuery = $state('');
 
@@ -76,9 +77,21 @@
 
 <div class="w-64 bg-surface-50 border-r border-surface-200 flex flex-col h-full overflow-hidden">
 	<div class="p-3 border-b border-surface-200">
-		<h3 class="text-sm font-semibold text-surface-700 mb-2">
-			{m.elementaryActions()}
-		</h3>
+		<div class="flex items-center justify-between mb-2">
+			<h3 class="text-sm font-semibold text-surface-700">
+				{m.elementaryActions()}
+			</h3>
+			{#if onCreateAction}
+				<button
+					type="button"
+					class="btn-mini-primary w-7 h-7 flex items-center justify-center rounded-base"
+					title={safeTranslate('add-elementary-action')}
+					onclick={onCreateAction}
+				>
+					<i class="fa-solid fa-file-circle-plus text-xs"></i>
+				</button>
+			{/if}
+		</div>
 		<input
 			type="text"
 			placeholder={m.searchPlaceholder()}

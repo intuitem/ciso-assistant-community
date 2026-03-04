@@ -19,17 +19,47 @@ export const load: PageServerLoad = async (event) => {
 	const eaEndpoint = `${BASE_API_URL}/ebios-rm/elementary-actions/`;
 	const killChainEndpoint = `${BASE_API_URL}/ebios-rm/kill-chains/?operating_mode=${event.params.id}`;
 
-	const [detail, objectResponse, eaRes, kcRes] = await Promise.all([
+	const eaModel = getModelInfo('elementary-actions');
+	const eaCreateSchema = modelSchema('elementary-actions');
+
+	const [detail, objectResponse, eaRes, kcRes, attackStageRes, iconRes] = await Promise.all([
 		loadDetail({ event, model: model, id: event.params.id }),
 		event.fetch(objectEndpoint),
 		event.fetch(eaEndpoint),
-		event.fetch(killChainEndpoint)
+		event.fetch(killChainEndpoint),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/attack_stage/`),
+		event.fetch(`${BASE_API_URL}/${eaModel.endpointUrl}/icon/`)
 	]);
 
 	const object = await objectResponse.json();
 	const updateForm = await superValidate(object, zod(updateSchema), { errors: false });
 	const eaData = await eaRes.json();
 	const kcData = await kcRes.json();
+
+	const eaInitialData: Record<string, any> = {};
+	if (object.folder) {
+		eaInitialData['folder'] = object.folder.id ?? object.folder;
+	}
+	if (object.ebios_rm_study) {
+		eaInitialData['ebios_rm_study'] = object.ebios_rm_study.id ?? object.ebios_rm_study;
+	}
+	const eaCreateForm = await superValidate(eaInitialData, zod(eaCreateSchema), { errors: false });
+
+	const eaSelectOptions: Record<string, any> = {};
+	if (attackStageRes.ok) {
+		const attackStageData = await attackStageRes.json();
+		eaSelectOptions['attack_stage'] = Object.entries(attackStageData).map(([key, value]) => ({
+			label: value,
+			value: parseInt(key)
+		}));
+	}
+	if (iconRes.ok) {
+		const iconData = await iconRes.json();
+		eaSelectOptions['icon'] = Object.entries(iconData).map(([key, value]) => ({
+			label: value,
+			value: key
+		}));
+	}
 
 	return {
 		...detail,
@@ -38,7 +68,13 @@ export const load: PageServerLoad = async (event) => {
 		object,
 		elementaryActions: eaData.results ?? eaData,
 		killChainSteps: kcData.results ?? kcData,
-		operatingModeId: event.params.id
+		operatingModeId: event.params.id,
+		eaModel: {
+			urlModel: 'elementary-actions',
+			info: eaModel,
+			createForm: eaCreateForm,
+			selectOptions: eaSelectOptions
+		}
 	};
 };
 

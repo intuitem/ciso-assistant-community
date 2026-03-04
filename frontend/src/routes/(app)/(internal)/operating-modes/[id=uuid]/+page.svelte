@@ -52,6 +52,12 @@
 		invalidateAll();
 	}
 
+	function handleCreateEA() {
+		if (data.eaModel) {
+			modalCreateForm(data.eaModel);
+		}
+	}
+
 	const user = page.data.user;
 	const canEditObject: boolean = canPerformAction({
 		user,
@@ -140,10 +146,10 @@
 			>
 				{#if editMode}
 					<i class="fa-solid fa-eye"></i>
-					{m.viewMode()}
+					{m.viewGraph()}
 				{:else}
 					<i class="fa-solid fa-pen"></i>
-					{m.editMode()}
+					{m.editGraph()}
 				{/if}
 			</button>
 		{/if}
@@ -156,6 +162,7 @@
 			graphColumns={data.data.graph_columns ?? {}}
 			readonly={!editMode}
 			onSaved={handleSaved}
+			onCreateAction={canEditObject ? handleCreateEA : undefined}
 		/>
 	</div>
 </div>
