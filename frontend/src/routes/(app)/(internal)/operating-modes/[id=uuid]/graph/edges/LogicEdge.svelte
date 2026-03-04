@@ -49,8 +49,7 @@
 	const cls = $derived(STAGE_CLASSES[targetStage] ?? STAGE_CLASSES[1]);
 </script>
 
-<BaseEdge {path} {markerEnd} {style} />
-
+<BaseEdge {path} {markerEnd} />
 {#if logicOp}
 	<EdgeLabel
 		x={convergenceX}

@@ -63,7 +63,7 @@
 			class="nopan nodrag absolute -top-2 -right-2 w-4 h-4 rounded-full bg-primary-500 text-white text-[8px] flex items-center justify-center hover:bg-primary-600 cursor-pointer"
 			onclick={() => editor?.editNode(id)}
 		>
-			<i class="fa-solid fa-pen text-[6px]"></i>
+			<i class="fa-solid fa-pen text-[8px]"></i>
 		</button>
 	{/if}
 

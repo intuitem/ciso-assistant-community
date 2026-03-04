@@ -430,8 +430,8 @@
 		updateNodeLogicData(edge.target);
 	}
 
-	function handleEdgeClick(_event: MouseEvent, edge: Edge) {
-		handleDeleteEdge(edge.id);
+	function handleEdgeClick(edge: Edge, event: MouseEvent) {
+		handleDeleteEdge(edge.edge.id);
 	}
 
 	async function handleDelete({
