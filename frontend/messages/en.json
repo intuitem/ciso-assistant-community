@@ -2263,7 +2263,7 @@
 	"graphAnimate": "Animate",
 	"graphStop": "Stop",
 	"graphMoHelp": "You can move the graph nodes to improve the rendering and reduce links crossover. It's better to have one killchain per operating mode for readibility and independent quotation.",
-	"graphEditorHelp": "Drag actions from the sidebar and connect them. Logic operators (AND/OR) appear automatically when multiple edges target a node. Click to toggle.",
+	"graphEditorHelp": "Drag actions from the sidebar and connect them. Logic operators (AND/OR) appear automatically when multiple edges target a node — click to toggle. To remove a connection, click on it (it turns red) then press Delete.",
 	"viewMode": "View",
 	"editMode": "Edit",
 	"editGraph": "Edit graph",

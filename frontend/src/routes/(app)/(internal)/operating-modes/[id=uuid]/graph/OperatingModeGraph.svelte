@@ -557,6 +557,7 @@
 	}
 </script>
 
+<!-- svelte-ignore a11y_no_static_element_interactions -->
 <div class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200">
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
@@ -606,12 +607,12 @@
 								<i class="fa-solid fa-info text-xs"></i>
 							</button>
 							{#if showHelp}
-								<span
-									class="badge preset-tonal text-xs max-w-xs"
+								<p
+									class="text-xs bg-surface-100 text-surface-700 border border-surface-300 rounded-base px-3 py-2 max-w-xs leading-relaxed"
 									transition:slide={{ axis: 'x', duration: 200 }}
 								>
 									{m.graphEditorHelp()}
-								</span>
+								</p>
 							{/if}
 						</div>
 					</Panel>
