@@ -30,7 +30,7 @@
 {/if}
 
 <div
-	class="w-full h-full rounded-xl transition-all duration-200 overflow-hidden border-2 border-dashed {data.twBorder} {data.twBg}"
+	class="w-full h-full rounded-xl transition-all duration-200 overflow-hidden border-2 border-dashed {data.twBorder} bg-transparent cursor-grab active:cursor-grabbing"
 	class:opacity-70={!isHighlighted}
 >
 	<div class="flex items-center justify-center gap-2 py-3 {data.twBg}">
