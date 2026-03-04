@@ -222,6 +222,8 @@
 	<input type="hidden" name={field} value={$value ?? ''} />
 {:else}
 	<div data-testid="form-input-{field.replace(/_/g, '-')}" class="{selectorClass} relative">
+		<!-- Needed for multipart/form-data forms (e.g. with file attachments) -->
+		<input type="hidden" name={field} value={$value ?? ''} />
 		{#if label !== undefined}
 			<label class="block text-sm font-semibold mb-1" for="folder-tree-select-btn-{field}">
 				{label}
