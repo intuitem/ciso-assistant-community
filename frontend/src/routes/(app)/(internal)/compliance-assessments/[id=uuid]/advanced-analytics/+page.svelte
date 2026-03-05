@@ -229,11 +229,15 @@
 							seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
 						/>
 					</div>
-					{@const scoredSections = sections.filter((s: any) => s.score !== null && s.scored_count > 0)}
+					{@const scoredSections = sections.filter(
+						(s: any) => s.score !== null && s.scored_count > 0
+					)}
 					{#if scoredSections.length > 0}
 						{@const isSum = sectionData.score_calculation_method === 'sum'}
 						{@const baseMax = sectionData.max_score ?? 100}
-						{@const showDocRadar = data.compliance_assessment.show_documentation_score && scoredSections.some((s: any) => s.documentation_score !== null)}
+						{@const showDocRadar =
+							data.compliance_assessment.show_documentation_score &&
+							scoredSections.some((s: any) => s.documentation_score !== null)}
 						<div class="mt-5 border-t border-slate-100 pt-5">
 							<div class="grid {showDocRadar ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-5">
 								<div class="h-[400px]">
@@ -249,7 +253,9 @@
 									/>
 								</div>
 								{#if showDocRadar}
-									{@const docScoredSections = scoredSections.filter((s: any) => s.documentation_score !== null)}
+									{@const docScoredSections = scoredSections.filter(
+										(s: any) => s.documentation_score !== null
+									)}
 									<div class="h-[400px]">
 										<RadarChart
 											name="section_doc_scores_radar"
