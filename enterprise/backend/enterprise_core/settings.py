@@ -217,6 +217,7 @@ if USE_S3:
     if AWS_S3_REGION_NAME:
         logger.info("AWS_S3_REGION_NAME: %s", AWS_S3_REGION_NAME)
 
+    AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
 
 else:
