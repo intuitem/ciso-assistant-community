@@ -440,7 +440,7 @@ def ebios_rm_visual_analysis(study):
     ).prefetch_related(
         "threats",
         "attack_path__strategic_scenario",
-        "operating_modes__elementary_actions",
+        "operating_modes__kill_chain_steps__elementary_action",
     )
     for os in operational_scenarios:
         # Use strategic scenario name + attack path name as display name
@@ -483,8 +483,9 @@ def ebios_rm_visual_analysis(study):
                 }
             )
 
-            # Link operating mode to its elementary actions
-            for ea in om.elementary_actions.all():
+            # Link operating mode to its elementary actions (from kill chain)
+            for step in om.kill_chain_steps.all():
+                ea = step.elementary_action
                 if nodes_idx.get(f"{ea.id}-EA") is None:
                     nodes.append({"name": ea.name, "category": 9, "symbol": "triangle"})
                     nodes_idx[f"{ea.id}-EA"] = N
