@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.14"
-django = "^6.0.2"
+django = "^6.0.3"
 weasyprint = "^68.0"
 psycopg2-binary = "^2.9.11"
 gunicorn = "^23.0.0"
