@@ -3,7 +3,7 @@ convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any
 urn: urn:intuitem:risk:library:pcidss-4_0
 locale: en
 ref_id: PCI DSS 4.0.1
-name: Payment Card Industry Data Security Standard
+name: Payment Card Industry Data Security Standard (PCI-DSS) 4.0.1
 description: 'Payment Card Industry Data Security Standard: Requirements and Testing
   Procedures, v4.0.1 (June 2024)
 
