@@ -3611,5 +3611,7 @@
 	"journeyUpgraded": "Journey upgraded successfully",
 	"alreadyUpToDate": "Already up to date",
 	"journeyNotFound": "Journey not found.",
-	"stats": "Stats"
+	"stats": "Stats",
+	"continueJourney": "Continue",
+	"noMatchingPresets": "No presets match this filter."
 }

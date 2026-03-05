@@ -3576,5 +3576,7 @@
 	"journeyUpgraded": "Parcours mis à jour avec succès",
 	"alreadyUpToDate": "Déjà à jour",
 	"journeyNotFound": "Parcours introuvable.",
-	"stats": "Statistiques"
+	"stats": "Statistiques",
+	"continueJourney": "Continuer",
+	"noMatchingPresets": "Aucun preset ne correspond à ce filtre."
 }
