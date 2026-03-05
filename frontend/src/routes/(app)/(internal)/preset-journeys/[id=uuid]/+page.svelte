@@ -72,7 +72,7 @@
 
 	// --- Edit mode for step links ---
 	let editMode = $state(false);
-	let choicesCache: Record<string, { id: string; str: string }[]> = $state({});
+	let choicesCache: Record<string, { id: string; str: string; folder: string }[]> = $state({});
 	// Track in-flight requests without $state to avoid mutation-in-template errors
 	const _loadingChoices: Set<string> = new Set();
 
@@ -80,14 +80,16 @@
 		if (choicesCache[targetModel] || _loadingChoices.has(targetModel)) return;
 		_loadingChoices.add(targetModel);
 		try {
-			const folderId = data.journey?.folder?.id;
-			const url = folderId ? `/${targetModel}?folder=${folderId}` : `/${targetModel}`;
-			const resp = await fetch(url, { headers: { Accept: 'application/json' } });
+			const resp = await fetch(`/${targetModel}`, { headers: { Accept: 'application/json' } });
 			if (resp.ok) {
 				const json = await resp.json();
 				const results = json.results ?? json;
 				choicesCache[targetModel] = Array.isArray(results)
-					? results.map((r: any) => ({ id: r.id, str: r.str ?? r.name ?? r.id }))
+					? results.map((r: any) => ({
+							id: r.id,
+							str: r.str ?? r.name ?? r.id,
+							folder: r.folder?.str ?? r.folder?.name ?? ''
+						}))
 					: [];
 			}
 		} catch (e) {
@@ -97,11 +99,13 @@
 		}
 	}
 
-	// Prefetch choices when edit mode is toggled on
+	// Prefetch choices when edit mode is toggled on — only for direct-link steps
 	$effect(() => {
 		if (editMode && data.steps) {
 			const models = new Set(
-				data.steps.filter((s: any) => s.target_model).map((s: any) => s.target_model)
+				data.steps
+					.filter((s: any) => s.target_model && s.target_ref != null)
+					.map((s: any) => s.target_model)
 			);
 			for (const model of models) {
 				fetchChoices(model);
@@ -287,7 +291,7 @@
 								{#if step.description}
 									<p class="text-sm text-gray-400 mt-0.5">{step.description}</p>
 								{/if}
-								{#if editMode && step.target_model && choicesCache[step.target_model]}
+								{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
 									<div class="mt-2">
 										<select
 											class="select select-sm text-sm max-w-xs"
@@ -299,7 +303,9 @@
 										>
 											<option value="">{m.noLinkedObject()}</option>
 											{#each choicesCache[step.target_model] ?? [] as choice}
-												<option value={choice.id}>{choice.str}</option>
+												<option value={choice.id}>
+													{choice.str}{choice.folder ? ` — ${choice.folder}` : ''}
+												</option>
 											{/each}
 										</select>
 									</div>

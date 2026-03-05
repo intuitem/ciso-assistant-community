@@ -180,6 +180,9 @@ class PresetExecutor:
             new_keys.add(key)
             target_ref_key = step_def.get("target_ref")
             resolved_ref = object_refs.get(target_ref_key) if target_ref_key else None
+            step_target_ref = (
+                resolved_ref if resolved_ref else ("" if target_ref_key else None)
+            )
 
             if key in existing_steps:
                 step = existing_steps[key]
@@ -188,7 +191,7 @@ class PresetExecutor:
                 step.description = step_def.get("description", "")
                 step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
-                step.target_ref = resolved_ref
+                step.target_ref = step_target_ref
                 to_update.append(step)
             else:
                 PresetJourneyStep.objects.create(
@@ -199,7 +202,7 @@ class PresetExecutor:
                     description=step_def.get("description", ""),
                     translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
-                    target_ref=resolved_ref,
+                    target_ref=step_target_ref,
                     status=PresetJourneyStep.Status.NOT_STARTED,
                 )
 
@@ -580,8 +583,12 @@ class PresetExecutor:
     def _create_steps(self, journey: PresetJourney, object_refs: dict):
         steps_config = self._preset_content.get("journey", {}).get("steps", [])
         for order, step_def in enumerate(steps_config):
-            target_ref = step_def.get("target_ref")
-            resolved_ref = object_refs.get(target_ref) if target_ref else None
+            target_ref_key = step_def.get("target_ref")
+            resolved_ref = object_refs.get(target_ref_key) if target_ref_key else None
+            # "" = linkable but no object yet, None = not a direct-link step
+            step_target_ref = (
+                resolved_ref if resolved_ref else ("" if target_ref_key else None)
+            )
 
             PresetJourneyStep.objects.create(
                 journey=journey,
@@ -591,6 +598,6 @@ class PresetExecutor:
                 description=step_def.get("description", ""),
                 translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
-                target_ref=resolved_ref,
+                target_ref=step_target_ref,
                 status=PresetJourneyStep.Status.NOT_STARTED,
             )

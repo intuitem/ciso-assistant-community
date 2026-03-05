@@ -3,7 +3,7 @@ locale: fr
 ref_id: preset-cyber-resilience
 name: "Programme de cyber-résilience"
 description: "Programme complet de cyber-résilience basé sur le guide ANSSI de maturité en gestion de crise et la norme ISO 22301. Couvre l'analyse d'impact métier (BIA), les actifs critiques, la gestion de crise et la continuité d'activité."
-version: 3
+version: 4
 provider: intuitem
 packager: intuitem
 translations:
@@ -191,7 +191,7 @@ objects:
         - key: bia
           title: "Réaliser l'analyse d'impact métier (BIA)"
           description: "Évaluez l'impact de l'indisponibilité de chaque processus métier — définissez les DMIA (durée maximale d'interruption admissible) et PDMA (perte de données maximale admissible)"
-          target_model: business-impact-analyses
+          target_model: business-impact-analysis
           target_ref: main_bia
           translations:
             en:
