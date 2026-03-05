@@ -333,7 +333,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
         except Exception as e:
             logger.error("Failed to apply preset", error=e)
             return Response(
-                {"error": str(e)},
+                {"error": "Failed to apply preset."},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
