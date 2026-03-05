@@ -37,6 +37,8 @@ from ebios_rm.models import EbiosRMStudy
 from ebios_rm.serializers import EbiosRMStudyWriteSerializer
 from privacy.models import Processing
 from privacy.serializers import ProcessingWriteSerializer
+from resilience.models import BusinessImpactAnalysis
+from resilience.serializers import BusinessImpactAnalysisWriteSerializer
 from tprm.models import Entity
 from tprm.serializers import EntityWriteSerializer
 from global_settings.models import GlobalSettings
@@ -73,6 +75,7 @@ class PresetExecutor:
         self,
         folder_name: str | None = None,
         folder_id: str | None = None,
+        create_objects: bool = True,
     ) -> PresetJourney:
         self._load_dependencies()
         self._apply_feature_flags()
@@ -93,8 +96,12 @@ class PresetExecutor:
                 )
         else:
             folder = self._create_folder(folder_name)
-        perimeter = self._create_default_perimeter(folder)
-        object_refs = self._create_objects(folder, perimeter)
+
+        if create_objects:
+            perimeter = self._create_default_perimeter(folder)
+            object_refs = self._create_objects(folder, perimeter)
+        else:
+            object_refs = {}
 
         # Resolve translated library name/description
         locale = get_language() or "en"
@@ -303,6 +310,7 @@ class PresetExecutor:
         "organisation_issue": OrganisationIssue,
         "processing": Processing,
         "entity": Entity,
+        "business_impact_analysis": BusinessImpactAnalysis,
         "findings_assessment": FindingsAssessment,
         "asset": Asset,
         "risk_scenario": RiskScenario,
@@ -452,6 +460,21 @@ class PresetExecutor:
                     "category": item.get("category", "pentest"),
                 }
                 serializer = FindingsAssessmentWriteSerializer(
+                    data=data, context=context
+                )
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "business_impact_analysis":
+                matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+                data = {
+                    "folder": str(folder.id),
+                    "perimeter": str(default_perimeter.id),
+                    "risk_matrix": str(matrix.id),
+                    "name": name,
+                    "description": description,
+                }
+                serializer = BusinessImpactAnalysisWriteSerializer(
                     data=data, context=context
                 )
                 serializer.is_valid(raise_exception=True)

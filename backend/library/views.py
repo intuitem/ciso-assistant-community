@@ -305,9 +305,14 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
         folder_name = request.data.get("folder_name")
         folder_id = request.data.get("folder_id")
+        create_objects = request.data.get("create_objects", True)
         try:
             executor = PresetExecutor(library, request.user, request)
-            journey = executor.apply(folder_name=folder_name, folder_id=folder_id)
+            journey = executor.apply(
+                folder_name=folder_name,
+                folder_id=folder_id,
+                create_objects=create_objects,
+            )
             return Response(
                 {"journey_id": str(journey.id)},
                 status=HTTP_201_CREATED,

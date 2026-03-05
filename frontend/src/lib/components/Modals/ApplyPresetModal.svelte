@@ -9,6 +9,7 @@
 		onApply: (data: {
 			folder_name?: string;
 			folder_id?: string;
+			create_objects?: boolean;
 		}) => Promise<{ ok: boolean; error?: string }>;
 	}
 
@@ -19,6 +20,7 @@
 	let mode: 'new' | 'existing' = $state('new');
 	let folderName: string = $state(presetName);
 	let selectedFolderId: string = $state('');
+	let createObjects: boolean = $state(true);
 	let errorMessage: string = $state('');
 	let submitting: boolean = $state(false);
 
@@ -28,13 +30,13 @@
 		submitting = true;
 
 		try {
-			let payload: { folder_name?: string; folder_id?: string };
+			let payload: { folder_name?: string; folder_id?: string; create_objects?: boolean };
 			if (mode === 'new') {
 				if (!folderName.trim()) return;
-				payload = { folder_name: folderName.trim() };
+				payload = { folder_name: folderName.trim(), create_objects: createObjects };
 			} else {
 				if (!selectedFolderId) return;
-				payload = { folder_id: selectedFolderId };
+				payload = { folder_id: selectedFolderId, create_objects: createObjects };
 			}
 
 			const result = await onApply(payload);
@@ -107,6 +109,15 @@
 					</select>
 				</label>
 			{/if}
+
+			<!-- Create objects toggle -->
+			<label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 border border-gray-200">
+				<input type="checkbox" class="checkbox mt-0.5" bind:checked={createObjects} />
+				<div>
+					<span class="text-sm font-medium">{m.createUnderlyingObjects()}</span>
+					<p class="text-xs text-gray-500 mt-0.5">{m.createUnderlyingObjectsHelp()}</p>
+				</div>
+			</label>
 
 			<footer class="flex justify-end space-x-2">
 				<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>

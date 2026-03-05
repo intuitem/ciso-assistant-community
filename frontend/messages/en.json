@@ -3613,5 +3613,10 @@
 	"journeyNotFound": "Journey not found.",
 	"stats": "Stats",
 	"continueJourney": "Continue",
-	"noMatchingPresets": "No presets match this filter."
+	"noMatchingPresets": "No presets match this filter.",
+	"createUnderlyingObjects": "Create underlying objects",
+	"createUnderlyingObjectsHelp": "When unchecked, the journey is created as a pure checklist without auto-creating assessments, assets, or other objects.",
+	"editStepLinks": "Edit links",
+	"doneEditing": "Done editing",
+	"noLinkedObject": "— No linked object —"
 }

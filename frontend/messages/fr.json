@@ -3578,5 +3578,10 @@
 	"journeyNotFound": "Parcours introuvable.",
 	"stats": "Statistiques",
 	"continueJourney": "Continuer",
-	"noMatchingPresets": "Aucun preset ne correspond à ce filtre."
+	"noMatchingPresets": "Aucun preset ne correspond à ce filtre.",
+	"createUnderlyingObjects": "Créer les objets sous-jacents",
+	"createUnderlyingObjectsHelp": "Si décoché, le parcours est créé comme une simple checklist sans créer automatiquement les évaluations, actifs ou autres objets.",
+	"editStepLinks": "Modifier les liens",
+	"doneEditing": "Terminé",
+	"noLinkedObject": "— Aucun objet lié —"
 }

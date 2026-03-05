@@ -61,6 +61,56 @@
 		return `/${step.target_model}`;
 	}
 
+	// --- Edit mode for step links ---
+	let editMode = $state(false);
+	let choicesCache: Record<string, { id: string; str: string }[]> = $state({});
+	// Track in-flight requests without $state to avoid mutation-in-template errors
+	const _loadingChoices: Set<string> = new Set();
+
+	async function fetchChoices(targetModel: string) {
+		if (choicesCache[targetModel] || _loadingChoices.has(targetModel)) return;
+		_loadingChoices.add(targetModel);
+		try {
+			const folderId = data.journey?.folder?.id;
+			const url = folderId
+				? `/${targetModel}?folder=${folderId}`
+				: `/${targetModel}`;
+			const resp = await fetch(url, { headers: { Accept: 'application/json' } });
+			if (resp.ok) {
+				const json = await resp.json();
+				const results = json.results ?? json;
+				choicesCache[targetModel] = Array.isArray(results)
+					? results.map((r: any) => ({ id: r.id, str: r.str ?? r.name ?? r.id }))
+					: [];
+			}
+		} catch (e) {
+			console.error('Failed to fetch choices for', targetModel, e);
+		} finally {
+			_loadingChoices.delete(targetModel);
+		}
+	}
+
+	// Prefetch choices when edit mode is toggled on
+	$effect(() => {
+		if (editMode && data.steps) {
+			const models = new Set(
+				data.steps.filter((s: any) => s.target_model).map((s: any) => s.target_model)
+			);
+			for (const model of models) {
+				fetchChoices(model);
+			}
+		}
+	});
+
+	async function updateStepTargetRef(stepId: string, targetRef: string | null) {
+		await fetch(`/preset-journeys/${$page.params.id}/step/${stepId}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ target_ref: targetRef })
+		});
+		invalidateAll();
+	}
+
 	let upgrading = $state(false);
 
 	async function upgradeJourney() {
@@ -139,6 +189,14 @@
 				{/if}
 				<button
 					type="button"
+					class="btn btn-sm preset-tonal-surface border border-surface-500"
+					onclick={() => (editMode = !editMode)}
+				>
+					<i class="fa-solid {editMode ? 'fa-check' : 'fa-pen'} mr-1"></i>
+					{editMode ? m.doneEditing() : m.editStepLinks()}
+				</button>
+				<button
+					type="button"
 					class="btn btn-sm preset-tonal-surface border border-red-300 text-red-600 hover:bg-red-50"
 					onclick={deleteJourney}
 				>
@@ -190,6 +248,23 @@
 								<h4 class="font-medium">{step.title}</h4>
 								{#if step.description}
 									<p class="text-sm text-gray-400 mt-0.5">{step.description}</p>
+								{/if}
+								{#if editMode && step.target_model && choicesCache[step.target_model]}
+									<div class="mt-2">
+										<select
+											class="select select-sm text-sm max-w-xs"
+											value={step.target_ref ?? ''}
+											onchange={(e) => {
+												const val = (e.target as HTMLSelectElement).value;
+												updateStepTargetRef(step.id, val || null);
+											}}
+										>
+											<option value="">{m.noLinkedObject()}</option>
+											{#each choicesCache[step.target_model] ?? [] as choice}
+												<option value={choice.id}>{choice.str}</option>
+											{/each}
+										</select>
+									</div>
 								{/if}
 							</div>
 

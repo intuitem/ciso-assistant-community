@@ -40,7 +40,11 @@
 				props: {
 					presetName,
 					domains: data.domains,
-					onApply: async (payload: { folder_name?: string; folder_id?: string }) => {
+					onApply: async (payload: {
+						folder_name?: string;
+						folder_id?: string;
+						create_objects?: boolean;
+					}) => {
 						try {
 							const response = await fetch(`/presets/apply`, {
 								method: 'POST',
