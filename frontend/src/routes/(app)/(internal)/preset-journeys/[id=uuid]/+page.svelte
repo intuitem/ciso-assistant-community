@@ -182,23 +182,25 @@
 		<!-- Main content -->
 		<div class="flex-1 min-w-0 space-y-4">
 			<!-- Header -->
-			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-				<div class="flex items-start gap-3">
-					<a
-						href="/presets"
-						class="mt-0.5 flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors"
-					>
-						<i class="fa-solid fa-arrow-left"></i>
-					</a>
-					<div class="flex-1 min-w-0">
-						<h2 class="text-lg font-semibold text-gray-800">{data.journey.name}</h2>
-						{#if data.journey.description}
-							<p class="text-sm text-gray-600 mt-0.5">{data.journey.description}</p>
-						{/if}
+			<div class="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+				<div class="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-3">
+					<div class="flex items-start gap-3">
+						<a
+							href="/presets"
+							class="mt-0.5 flex items-center justify-center w-8 h-8 rounded-md text-violet-200 hover:text-white hover:bg-white/10 transition-colors"
+						>
+							<i class="fa-solid fa-arrow-left"></i>
+						</a>
+						<div class="flex-1 min-w-0">
+							<h2 class="text-lg font-semibold text-white">{data.journey.name}</h2>
+							{#if data.journey.description}
+								<p class="text-sm text-violet-100 mt-0.5">{data.journey.description}</p>
+							{/if}
+						</div>
 					</div>
 				</div>
 				<!-- Toolbar -->
-				<div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+				<div class="flex items-center gap-2 px-4 py-2.5">
 					{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
 						<button
 							type="button"
@@ -292,9 +294,15 @@
 					{@const style = STATUS_STYLES[step.status] || STATUS_STYLES.not_started}
 					{@const link = getStepLink(step)}
 					{@const isLast = i === data.steps.length - 1}
-					<div class="flex gap-4 {isLast ? '' : 'pb-3'}">
-						<!-- Timeline rail -->
-						<div class="flex flex-col items-center" style="min-width: 2rem;">
+					<div class="relative flex gap-4 {isLast ? '' : 'pb-3'}">
+						<!-- Timeline connector (spans full row height including padding) -->
+						{#if !isLast}
+							<div
+								class="absolute left-[0.8125rem] top-[1.75rem] bottom-0 w-0.5 {step.status === 'done' ? 'bg-green-500' : 'bg-gray-400'}"
+							></div>
+						{/if}
+						<!-- Timeline dot -->
+						<div class="relative flex flex-col items-center" style="min-width: 2rem;">
 							<div
 								class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-semibold {style.dot} {step.status === 'done' ? 'text-white' : step.status === 'in_progress' ? 'text-white' : 'text-gray-500 bg-white'}"
 							>
@@ -306,9 +314,6 @@
 									{i + 1}
 								{/if}
 							</div>
-							{#if !isLast}
-								<div class="w-0.5 flex-1 min-h-3 {step.status === 'done' ? 'bg-green-300' : 'bg-gray-200'}"></div>
-							{/if}
 						</div>
 
 						<!-- Step card -->
