@@ -111,7 +111,9 @@
 			{/if}
 
 			<!-- Create objects toggle -->
-			<label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 border border-gray-200">
+			<label
+				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 border border-gray-200"
+			>
 				<input type="checkbox" class="checkbox mt-0.5" bind:checked={createObjects} />
 				<div>
 					<span class="text-sm font-medium">{m.createUnderlyingObjects()}</span>

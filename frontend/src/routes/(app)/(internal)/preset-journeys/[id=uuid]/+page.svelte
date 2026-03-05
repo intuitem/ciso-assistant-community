@@ -10,6 +10,15 @@
 
 	const modalStore = getModalStore();
 
+	// Four-state progress counts
+	const stepTotal = $derived(data.steps.length || 1);
+	const stepCounts = $derived({
+		done: data.steps.filter((s: any) => s.status === 'done').length,
+		in_progress: data.steps.filter((s: any) => s.status === 'in_progress').length,
+		skipped: data.steps.filter((s: any) => s.status === 'skipped').length,
+		not_started: data.steps.filter((s: any) => s.status === 'not_started').length
+	});
+
 	const STATUS_STYLES: Record<
 		string,
 		{ label: () => string; icon: string; bg: string; text: string }
@@ -72,9 +81,7 @@
 		_loadingChoices.add(targetModel);
 		try {
 			const folderId = data.journey?.folder?.id;
-			const url = folderId
-				? `/${targetModel}?folder=${folderId}`
-				: `/${targetModel}`;
+			const url = folderId ? `/${targetModel}?folder=${folderId}` : `/${targetModel}`;
 			const resp = await fetch(url, { headers: { Accept: 'application/json' } });
 			if (resp.ok) {
 				const json = await resp.json();
@@ -205,24 +212,55 @@
 				</button>
 			</div>
 
-			<!-- Progress bar -->
+			<!-- Progress bar (four-state) -->
 			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 				<div class="flex items-center justify-between mb-2">
 					<span class="font-medium text-sm">{m.journeyProgress()}</span>
 					<span class="text-sm font-mono text-gray-500">{data.stats.progress_percent ?? 0}%</span>
 				</div>
-				<div class="h-3 rounded-full bg-gray-100 overflow-hidden">
-					<div
-						class="h-full rounded-full bg-violet-500 transition-all duration-500"
-						style="width: {data.stats.progress_percent ?? 0}%"
-					></div>
+				<div class="flex h-3 rounded-full bg-gray-100 overflow-hidden">
+					{#if stepCounts.done}
+						<div
+							class="h-full bg-green-500 transition-all duration-500"
+							style="width: {(stepCounts.done / stepTotal) * 100}%"
+						></div>
+					{/if}
+					{#if stepCounts.in_progress}
+						<div
+							class="h-full bg-amber-400 transition-all duration-500"
+							style="width: {(stepCounts.in_progress / stepTotal) * 100}%"
+						></div>
+					{/if}
+					{#if stepCounts.skipped}
+						<div
+							class="h-full bg-gray-300 transition-all duration-500"
+							style="width: {(stepCounts.skipped / stepTotal) * 100}%"
+						></div>
+					{/if}
 				</div>
-				<p class="text-xs text-gray-400 mt-1.5">
-					{m.stepsCompleted({
-						completed: String(data.stats.completed_steps ?? 0),
-						total: String(data.stats.total_steps ?? 0)
-					})}
-				</p>
+				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+					<span class="flex items-center gap-1.5">
+						<span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+						{m.done()}
+						{stepCounts.done}
+					</span>
+					<span class="flex items-center gap-1.5">
+						<span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+						{m.inProgress()}
+						{stepCounts.in_progress}
+					</span>
+					<span class="flex items-center gap-1.5">
+						<span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+						{m.skipped()}
+						{stepCounts.skipped}
+					</span>
+					<span class="flex items-center gap-1.5">
+						<span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-100 border border-gray-300"
+						></span>
+						{m.notStarted()}
+						{stepCounts.not_started}
+					</span>
+				</div>
 			</div>
 
 			<!-- Steps -->
