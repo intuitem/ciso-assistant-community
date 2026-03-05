@@ -36,6 +36,9 @@ importers:
       '@unovis/ts':
         specifier: 1.6.4
         version: 1.6.4
+      '@xyflow/svelte':
+        specifier: ^1.5.1
+        version: 1.5.1(svelte@5.53.5)
       bits-ui:
         specifier: ^2.15.4
         version: 2.15.4(@internationalized/date@3.10.1)(@sveltejs/kit@2.52.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.5)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.53.5)(typescript@5.8.3)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.53.5)
@@ -177,7 +180,7 @@ importers:
         version: 5.53.5
       svelte-check:
         specifier: ^4.2.2
-        version: 4.2.2(picomatch@4.0.3)(svelte@5.53.5)(typescript@5.8.3)
+        version: 4.2.2(picomatch@4.0.2)(svelte@5.53.5)(typescript@5.8.3)
       sveltekit-flash-message:
         specifier: ^2.4.6
         version: 2.4.6(@sveltejs/kit@2.52.2(@sveltejs/vite-plugin-svelte@4.0.4(svelte@5.53.5)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.53.5)(typescript@5.8.3)(vite@5.4.21(@types/node@20.19.1)(lightningcss@1.30.1)))(svelte@5.53.5)
@@ -950,6 +953,11 @@ packages:
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0 || ^5.0.0
 
+  '@svelte-put/shortcut@4.1.0':
+    resolution: {integrity: sha512-wImNEIkbxAIWFqlfuhcbC+jRPDeRa/uJGIXHMEVVD+jqL9xCwWNnkGQJ6Qb2XVszuRLHlb8SGZDL3Io/h3vs8w==}
+    peerDependencies:
+      svelte: ^5.1.0
+
   '@sveltejs/acorn-typescript@1.0.8':
     resolution: {integrity: sha512-esgN+54+q0NjB0Y/4BomT9samII7jGwNy/2a3wNZbT2A2RpmXsXwUt24LvLhx6jUq2gVk4cWEvcRO6MFQbOfNA==}
     peerDependencies:
@@ -1458,6 +1466,14 @@ packages:
 
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
+
+  '@xyflow/svelte@1.5.1':
+    resolution: {integrity: sha512-PsurMZxEaTrAwt+PzQtzEkwZwJ9dSc92kusz1rNJTogU1ATxIwheznO2R+RCf2GNuyRuExeDn26WwwBTqkCIhg==}
+    peerDependencies:
+      svelte: ^5.25.0
+
+  '@xyflow/system@0.0.75':
+    resolution: {integrity: sha512-iXs+AGFLi8w/VlAoc/iSxk+CxfT6o64Uw/k0CKASOPqjqz6E0rb5jFZgJtXGZCpfQI6OQpu5EnumP5fGxQheaQ==}
 
   '@zag-js/accordion@1.32.0':
     resolution: {integrity: sha512-sTn7xuaPvuG/YNO8aZIMBC0DMy+IacpxjduYUTdrjHrbvMKHuFdWuh9C7qg7AufM53bF1aWqVGltdIBXD9F8WA==}
@@ -4228,6 +4244,10 @@ snapshots:
       qrcode-generator: 1.5.2
       svelte: 5.53.5
 
+  '@svelte-put/shortcut@4.1.0(svelte@5.53.5)':
+    dependencies:
+      svelte: 5.53.5
+
   '@sveltejs/acorn-typescript@1.0.8(acorn@8.15.0)':
     dependencies:
       acorn: 8.15.0
@@ -4906,6 +4926,24 @@ snapshots:
       '@vitest/pretty-format': 3.2.4
       loupe: 3.1.4
       tinyrainbow: 2.0.0
+
+  '@xyflow/svelte@1.5.1(svelte@5.53.5)':
+    dependencies:
+      '@svelte-put/shortcut': 4.1.0(svelte@5.53.5)
+      '@xyflow/system': 0.0.75
+      svelte: 5.53.5
+
+  '@xyflow/system@0.0.75':
+    dependencies:
+      '@types/d3-drag': 3.0.7
+      '@types/d3-interpolate': 3.0.4
+      '@types/d3-selection': 3.0.11
+      '@types/d3-transition': 3.0.9
+      '@types/d3-zoom': 3.0.8
+      d3-drag: 3.0.0
+      d3-interpolate: 3.0.1
+      d3-selection: 3.0.0
+      d3-zoom: 3.0.0
 
   '@zag-js/accordion@1.32.0':
     dependencies:
@@ -5884,10 +5922,6 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.2
 
-  fdir@6.4.6(picomatch@4.0.3):
-    optionalDependencies:
-      picomatch: 4.0.3
-
   fdir@6.5.0(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
@@ -6719,11 +6753,11 @@ snapshots:
     dependencies:
       svelte: 5.53.5
 
-  svelte-check@4.2.2(picomatch@4.0.3)(svelte@5.53.5)(typescript@5.8.3):
+  svelte-check@4.2.2(picomatch@4.0.2)(svelte@5.53.5)(typescript@5.8.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
       chokidar: 4.0.3
-      fdir: 6.4.6(picomatch@4.0.3)
+      fdir: 6.4.6(picomatch@4.0.2)
       picocolors: 1.1.1
       sade: 1.8.1
       svelte: 5.53.5
