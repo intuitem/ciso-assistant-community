@@ -21,31 +21,35 @@
 
 	const STATUS_STYLES: Record<
 		string,
-		{ label: () => string; icon: string; bg: string; text: string }
+		{ label: () => string; icon: string; bg: string; text: string; dot: string }
 	> = {
 		not_started: {
 			label: () => m.notStarted(),
 			icon: 'fa-circle',
 			bg: 'bg-gray-100',
-			text: 'text-gray-500'
+			text: 'text-gray-500',
+			dot: 'bg-gray-300 border-gray-300'
 		},
 		in_progress: {
 			label: () => m.inProgress(),
 			icon: 'fa-circle-half-stroke',
 			bg: 'bg-amber-50',
-			text: 'text-amber-600'
+			text: 'text-amber-600',
+			dot: 'bg-amber-400 border-amber-400'
 		},
 		done: {
 			label: () => m.done(),
 			icon: 'fa-circle-check',
 			bg: 'bg-green-50',
-			text: 'text-green-600'
+			text: 'text-green-600',
+			dot: 'bg-green-500 border-green-500'
 		},
 		skipped: {
 			label: () => m.skipped(),
 			icon: 'fa-forward',
 			bg: 'bg-gray-50',
-			text: 'text-gray-400'
+			text: 'text-gray-400',
+			dot: 'bg-gray-200 border-gray-300'
 		}
 	};
 
@@ -167,7 +171,7 @@
 
 {#if !data.journey}
 	<div class="flex flex-col items-center justify-center p-10">
-		<p class="text-gray-400 mb-4">{m.journeyNotFound()}</p>
+		<p class="text-gray-500 mb-4">{m.journeyNotFound()}</p>
 		<a href="/presets" class="btn preset-tonal-surface border border-surface-500">
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			{m.presets()}
@@ -178,60 +182,70 @@
 		<!-- Main content -->
 		<div class="flex-1 min-w-0 space-y-4">
 			<!-- Header -->
-			<div class="flex items-center gap-3">
-				<a href="/presets" class="btn-icon btn-icon-sm text-gray-400 hover:text-gray-600">
-					<i class="fa-solid fa-arrow-left"></i>
-				</a>
-				<div class="flex-1 min-w-0">
-					<h2 class="text-xl font-semibold">{data.journey.name}</h2>
-					{#if data.journey.description}
-						<p class="text-sm text-gray-600">{data.journey.description}</p>
-					{/if}
+			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+				<div class="flex items-start gap-3">
+					<a
+						href="/presets"
+						class="mt-0.5 flex items-center justify-center w-8 h-8 rounded-md text-gray-500 hover:text-violet-600 hover:bg-violet-50 transition-colors"
+					>
+						<i class="fa-solid fa-arrow-left"></i>
+					</a>
+					<div class="flex-1 min-w-0">
+						<h2 class="text-lg font-semibold text-gray-800">{data.journey.name}</h2>
+						{#if data.journey.description}
+							<p class="text-sm text-gray-600 mt-0.5">{data.journey.description}</p>
+						{/if}
+					</div>
 				</div>
-				{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
+				<!-- Toolbar -->
+				<div class="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+					{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
+						<button
+							type="button"
+							class="btn btn-sm preset-filled-warning-500"
+							onclick={upgradeJourney}
+							disabled={upgrading}
+						>
+							<i class="fa-solid fa-arrow-up mr-1"></i>
+							{m.upgradeAvailable()}
+						</button>
+					{/if}
 					<button
 						type="button"
-						class="btn btn-sm preset-filled-warning-500"
-						onclick={upgradeJourney}
-						disabled={upgrading}
+						class="btn btn-sm preset-tonal-surface border border-surface-500"
+						onclick={() => (compactMode = !compactMode)}
+						title={compactMode ? m.showDescriptions() : m.hideDescriptions()}
 					>
-						<i class="fa-solid fa-arrow-up mr-1"></i>
-						{m.upgradeAvailable()}
+						<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'} mr-1"></i>
+						{compactMode ? m.showDescriptions() : m.hideDescriptions()}
 					</button>
-				{/if}
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal-surface border border-surface-500"
-					onclick={() => (compactMode = !compactMode)}
-					title={compactMode ? m.showDescriptions() : m.hideDescriptions()}
-				>
-					<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'}"></i>
-				</button>
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal-surface border border-surface-500"
-					onclick={() => (editMode = !editMode)}
-				>
-					<i class="fa-solid {editMode ? 'fa-check' : 'fa-pen'} mr-1"></i>
-					{editMode ? m.doneEditing() : m.editStepLinks()}
-				</button>
-				<button
-					type="button"
-					class="btn btn-sm preset-tonal-surface border border-red-300 text-red-600 hover:bg-red-50"
-					onclick={deleteJourney}
-				>
-					<i class="fa-solid fa-trash-can mr-1"></i>
-					{m.delete()}
-				</button>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-surface border border-surface-500"
+						onclick={() => (editMode = !editMode)}
+					>
+						<i class="fa-solid {editMode ? 'fa-check' : 'fa-pen'} mr-1"></i>
+						{editMode ? m.doneEditing() : m.editStepLinks()}
+					</button>
+					<div class="flex-1"></div>
+					<button
+						type="button"
+						class="btn btn-sm preset-tonal-surface border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-300"
+						onclick={deleteJourney}
+					>
+						<i class="fa-solid fa-trash-can mr-1"></i>
+						{m.delete()}
+					</button>
+				</div>
 			</div>
 
 			<!-- Progress bar (four-state) -->
 			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
 				<div class="flex items-center justify-between mb-2">
-					<span class="font-medium text-sm">{m.journeyProgress()}</span>
+					<span class="font-medium text-sm text-gray-800">{m.journeyProgress()}</span>
 					<span class="text-sm font-mono text-gray-500">{data.stats.progress_percent ?? 0}%</span>
 				</div>
-				<div class="flex h-3 rounded-full bg-gray-100 overflow-hidden">
+				<div class="flex h-2.5 rounded-full bg-gray-100 overflow-hidden">
 					{#if stepCounts.done}
 						<div
 							class="h-full bg-green-500 transition-all duration-500"
@@ -251,126 +265,135 @@
 						></div>
 					{/if}
 				</div>
-				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-500">
+				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-600">
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
-						{m.done()}
-						{stepCounts.done}
+						<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+						{m.done()} {stepCounts.done}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-						{m.inProgress()}
-						{stepCounts.in_progress}
+						<span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+						{m.inProgress()} {stepCounts.in_progress}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-300"></span>
-						{m.skipped()}
-						{stepCounts.skipped}
+						<span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
+						{m.skipped()} {stepCounts.skipped}
 					</span>
 					<span class="flex items-center gap-1.5">
-						<span class="inline-block w-2.5 h-2.5 rounded-full bg-gray-100 border border-gray-300"
+						<span class="inline-block w-2 h-2 rounded-full bg-gray-100 border border-gray-300"
 						></span>
-						{m.notStarted()}
-						{stepCounts.not_started}
+						{m.notStarted()} {stepCounts.not_started}
 					</span>
 				</div>
 			</div>
 
-			<!-- Steps -->
-			<div class="space-y-2">
+			<!-- Steps with timeline -->
+			<div class="relative">
 				{#each data.steps as step, i}
 					{@const style = STATUS_STYLES[step.status] || STATUS_STYLES.not_started}
 					{@const link = getStepLink(step)}
-					<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-						<div class="flex items-start gap-3">
-							<!-- Step number & status -->
-							<div class="flex flex-col items-center gap-1.5 pt-0.5" style="min-width: 2rem;">
-								<span class="text-xs font-mono text-gray-300">{i + 1}</span>
-								<span
-									class="inline-flex items-center rounded-full px-2 py-0.5 text-xs {style.bg} {style.text}"
-								>
-									<i class="fa-solid {style.icon} mr-1"></i>
-									{style.label()}
-								</span>
-							</div>
-
-							<!-- Content -->
-							<div class="flex-1 min-w-0">
-								{#if getStepLink(step)}
-									<a
-										href={getStepLink(step)}
-										class="font-medium hover:text-indigo-600 transition-colors"
-									>
-										{step.title}
-									</a>
+					{@const isLast = i === data.steps.length - 1}
+					<div class="flex gap-4 {isLast ? '' : 'pb-3'}">
+						<!-- Timeline rail -->
+						<div class="flex flex-col items-center" style="min-width: 2rem;">
+							<div
+								class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-semibold {style.dot} {step.status === 'done' ? 'text-white' : step.status === 'in_progress' ? 'text-white' : 'text-gray-500 bg-white'}"
+							>
+								{#if step.status === 'done'}
+									<i class="fa-solid fa-check text-[10px]"></i>
+								{:else if step.status === 'skipped'}
+									<i class="fa-solid fa-forward text-[9px] text-gray-400"></i>
 								{:else}
-									<h4 class="font-medium">{step.title}</h4>
-								{/if}
-								{#if step.description && !compactMode}
-									<p class="text-sm text-gray-400 mt-0.5">{step.description}</p>
-								{/if}
-								{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
-									<div class="mt-2">
-										<select
-											class="select select-sm text-sm max-w-xs"
-											value={step.target_ref ?? ''}
-											onchange={(e) => {
-												const val = (e.target as HTMLSelectElement).value;
-												updateStepTargetRef(step.id, val || null);
-											}}
-										>
-											<option value="">{m.noLinkedObject()}</option>
-											{#each choicesCache[step.target_model] ?? [] as choice}
-												<option value={choice.id}>
-													{choice.str}{choice.folder ? ` — ${choice.folder}` : ''}
-												</option>
-											{/each}
-										</select>
-									</div>
+									{i + 1}
 								{/if}
 							</div>
+							{#if !isLast}
+								<div class="w-0.5 flex-1 min-h-3 {step.status === 'done' ? 'bg-green-300' : 'bg-gray-200'}"></div>
+							{/if}
+						</div>
 
-							<!-- Actions -->
-							<div class="flex items-center gap-2 shrink-0">
-								{#if link}
-									<a href={link} class="btn btn-sm preset-tonal-surface border border-surface-500">
-										<i class="fa-solid fa-arrow-up-right-from-square mr-1"></i>
-										{m.goToStep()}
-									</a>
-								{/if}
-								{#if step.status === 'not_started'}
-									<button
-										type="button"
-										class="btn btn-sm preset-filled-warning-500"
-										onclick={() => updateStepStatus(step.id, 'in_progress')}
-									>
-										{m.startStep()}
-									</button>
-								{:else if step.status === 'in_progress'}
-									<button
-										type="button"
-										class="btn btn-sm preset-filled-success-500"
-										onclick={() => updateStepStatus(step.id, 'done')}
-									>
-										<i class="fa-solid fa-check mr-1"></i>
-										{m.markAsDone()}
-									</button>
-									<button
-										type="button"
-										class="btn btn-sm preset-tonal-surface border border-surface-500"
-										onclick={() => updateStepStatus(step.id, 'skipped')}
-									>
-										{m.markAsSkipped()}
-									</button>
-								{:else if step.status === 'done' || step.status === 'skipped'}
-									<button
-										type="button"
-										class="btn btn-sm preset-tonal-surface border border-surface-500"
-										onclick={() => updateStepStatus(step.id, 'not_started')}
-									>
-										<i class="fa-solid fa-rotate-left"></i>
-									</button>
-								{/if}
+						<!-- Step card -->
+						<div class="flex-1 min-w-0 rounded-lg border bg-white shadow-sm {step.status === 'in_progress' ? 'border-amber-200' : step.status === 'done' ? 'border-green-200' : 'border-gray-200'} p-3.5">
+							<div class="flex items-start gap-3">
+								<div class="flex-1 min-w-0">
+									<div class="flex items-center gap-2">
+										{#if link}
+											<a
+												href={link}
+												class="font-medium text-gray-800 hover:text-violet-600 transition-colors"
+											>
+												{step.title}
+												<i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 opacity-40"></i>
+											</a>
+										{:else}
+											<h4 class="font-medium text-gray-800">{step.title}</h4>
+										{/if}
+										<span
+											class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] leading-tight {style.bg} {style.text}"
+										>
+											{style.label()}
+										</span>
+									</div>
+									{#if step.description && !compactMode}
+										<p class="text-sm text-gray-500 mt-1">{step.description}</p>
+									{/if}
+									{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
+										<div class="mt-2">
+											<select
+												class="select select-sm text-sm max-w-xs"
+												value={step.target_ref ?? ''}
+												onchange={(e) => {
+													const val = (e.target as HTMLSelectElement).value;
+													updateStepTargetRef(step.id, val || null);
+												}}
+											>
+												<option value="">{m.noLinkedObject()}</option>
+												{#each choicesCache[step.target_model] ?? [] as choice}
+													<option value={choice.id}>
+														{choice.str}{choice.folder ? ` — ${choice.folder}` : ''}
+													</option>
+												{/each}
+											</select>
+										</div>
+									{/if}
+								</div>
+
+								<!-- Actions -->
+								<div class="flex items-center gap-1.5 shrink-0">
+									{#if step.status === 'not_started'}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-warning-500"
+											onclick={() => updateStepStatus(step.id, 'in_progress')}
+										>
+											{m.startStep()}
+										</button>
+									{:else if step.status === 'in_progress'}
+										<button
+											type="button"
+											class="btn btn-sm preset-filled-success-500"
+											onclick={() => updateStepStatus(step.id, 'done')}
+										>
+											<i class="fa-solid fa-check mr-1"></i>
+											{m.markAsDone()}
+										</button>
+										<button
+											type="button"
+											class="btn btn-sm preset-tonal-surface border border-surface-500"
+											onclick={() => updateStepStatus(step.id, 'skipped')}
+										>
+											{m.markAsSkipped()}
+										</button>
+									{:else if step.status === 'done' || step.status === 'skipped'}
+										<button
+											type="button"
+											class="btn btn-sm preset-tonal-surface border border-surface-500"
+											onclick={() => updateStepStatus(step.id, 'not_started')}
+											title={m.notStarted()}
+										>
+											<i class="fa-solid fa-rotate-left"></i>
+										</button>
+									{/if}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -381,26 +404,26 @@
 		<!-- Stats sidebar -->
 		<div class="lg:w-72 shrink-0 space-y-4">
 			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-				<h3 class="font-semibold text-sm">{m.stats()}</h3>
+				<h3 class="font-semibold text-sm text-gray-800">{m.stats()}</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-gray-400">{m.assets()}</span>
-						<span class="font-mono">{data.stats.assets ?? 0}</span>
+						<span class="text-gray-600">{m.assets()}</span>
+						<span class="font-mono text-gray-800">{data.stats.assets ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-400">{m.riskScenarios()}</span>
-						<span class="font-mono">{data.stats.risk_scenarios ?? 0}</span>
+						<span class="text-gray-600">{m.riskScenarios()}</span>
+						<span class="font-mono text-gray-800">{data.stats.risk_scenarios ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-400">{m.appliedControls()}</span>
-						<span class="font-mono">{data.stats.applied_controls ?? 0}</span>
+						<span class="text-gray-600">{m.appliedControls()}</span>
+						<span class="font-mono text-gray-800">{data.stats.applied_controls ?? 0}</span>
 					</div>
 				</div>
 			</div>
 
 			{#if data.stats.compliance && Object.keys(data.stats.compliance).length > 0}
 				<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-					<h3 class="font-semibold text-sm">{m.compliance()}</h3>
+					<h3 class="font-semibold text-sm text-gray-800">{m.compliance()}</h3>
 					{#each Object.entries(data.stats.compliance) as [, info]}
 						{@const compInfo = info as {
 							name: string;
@@ -410,8 +433,8 @@
 						}}
 						<div class="space-y-1">
 							<div class="flex justify-between text-sm">
-								<span class="text-gray-400 truncate mr-2">{compInfo.name}</span>
-								<span class="font-mono shrink-0">{compInfo.percent}%</span>
+								<span class="text-gray-600 truncate mr-2">{compInfo.name}</span>
+								<span class="font-mono shrink-0 text-gray-800">{compInfo.percent}%</span>
 							</div>
 							<div class="h-1.5 rounded-full bg-gray-100 overflow-hidden">
 								<div
