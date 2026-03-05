@@ -140,7 +140,7 @@
 								{#if action.icon_fa_class}
 									<i class="{action.icon_fa_class} text-[10px]"></i>
 								{/if}
-								<span class="truncate flex-1">{action.name}</span>
+								<span class="text-wrap flex-1">{action.name}</span>
 								{#if isPlaced}
 									<i class="fa-solid fa-check text-[10px] text-success-500"></i>
 								{/if}

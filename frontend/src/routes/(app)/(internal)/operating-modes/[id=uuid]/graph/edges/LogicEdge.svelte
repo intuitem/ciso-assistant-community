@@ -12,7 +12,7 @@
 		targetPosition,
 		data,
 		markerEnd,
-		style
+		selected
 	}: EdgeProps = $props();
 
 	const editor = getContext<{
@@ -21,10 +21,10 @@
 	}>('killChainEditor');
 
 	const STAGE_CLASSES: Record<number, { bg: string; border: string; text: string }> = {
-		0: { bg: 'bg-pink-50', border: 'border-pink-400', text: 'text-pink-700' },
-		1: { bg: 'bg-violet-50', border: 'border-violet-400', text: 'text-violet-700' },
-		2: { bg: 'bg-orange-50', border: 'border-orange-400', text: 'text-orange-700' },
-		3: { bg: 'bg-red-50', border: 'border-red-400', text: 'text-red-700' }
+		0: { bg: 'bg-white', border: 'border-pink-400', text: 'text-pink-700' },
+		1: { bg: 'bg-white', border: 'border-violet-400', text: 'text-violet-700' },
+		2: { bg: 'bg-white', border: 'border-orange-400', text: 'text-orange-700' },
+		3: { bg: 'bg-white', border: 'border-red-400', text: 'text-red-700' }
 	};
 
 	const [path] = $derived(
@@ -49,7 +49,11 @@
 	const cls = $derived(STAGE_CLASSES[targetStage] ?? STAGE_CLASSES[1]);
 </script>
 
-<BaseEdge {path} {markerEnd} />
+<BaseEdge
+	{path}
+	{markerEnd}
+	style={selected ? 'stroke: var(--color-secondary-500); stroke-width:3;' : ''}
+/>
 {#if logicOp}
 	<EdgeLabel
 		x={convergenceX}
@@ -58,7 +62,7 @@
 	>
 		{#if editor?.readonly}
 			<span
-				class="px-1.5 py-0.5 rounded-full text-[9px] font-bold border {cls.bg} {cls.border} {cls.text}"
+				class="px-3 py-1 rounded-full text-[10px] font-bold border {cls.bg} {cls.border} {cls.text}"
 			>
 				{logicOpLabel}
 			</span>
@@ -66,7 +70,7 @@
 			<button
 				type="button"
 				aria-label="Toggle logic operator"
-				class="nopan nodrag px-1.5 py-0.5 rounded-full text-[9px] font-bold border cursor-pointer select-none hover:brightness-90 transition-colors {cls.bg} {cls.border} {cls.text}"
+				class="nopan nodrag px-3 py-1 rounded-full text-[10px] font-bold border cursor-pointer select-none hover:brightness-90 transition-colors {cls.bg} {cls.border} {cls.text}"
 				onclick={(e) => {
 					e.stopPropagation();
 					if (data?.targetNodeId) editor?.toggleOperator(data.targetNodeId as string);

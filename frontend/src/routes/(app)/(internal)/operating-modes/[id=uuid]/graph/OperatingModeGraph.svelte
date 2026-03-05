@@ -122,6 +122,7 @@
 	let dirty = $state(false);
 	let dragOverStage = $state<number | null>(null);
 	let showHelp = $state(false);
+	let selectedEdgeId = $state<string | null>(null);
 
 	setContext('killChainEditor', {
 		get dragOverStage() {
@@ -420,18 +421,17 @@
 		dirty = true;
 	}
 
-	async function handleDeleteEdge(edgeId: string) {
-		const edge = edges.find((e) => e.id === edgeId);
-		if (!edge) return;
-		edges = edges.filter((e) => e.id !== edgeId);
-		dirty = true;
-
-		await tick();
-		updateNodeLogicData(edge.target);
+	function handleEdgeClick({ event, edge }: { event: MouseEvent; edge: Edge }) {
+		event.stopPropagation();
 	}
 
-	function handleEdgeClick(edge: Edge, event: MouseEvent) {
-		handleDeleteEdge(edge.edge.id);
+	function handlePaneClick() {
+		selectedEdgeId = null;
+
+		edges = edges.map((e) => ({
+			...e,
+			style: 'stroke: var(--color-surface-500); stroke-width: 2;'
+		}));
 	}
 
 	async function handleDelete({
@@ -558,7 +558,10 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200">
+<div
+	class="flex h-full bg-surface-50 rounded-base overflow-hidden border border-surface-200"
+	class:editor-mode={!readonly}
+>
 	{#if !readonly}
 		<div transition:slide={{ axis: 'x', duration: 300 }}>
 			<EditorSidebar {elementaryActions} {placedNodeIds} {onCreateAction} />
@@ -580,6 +583,7 @@
 				ondragover={readonly ? undefined : handleDragOver}
 				ondragleave={readonly ? undefined : handleDragLeave}
 				ondrop={readonly ? undefined : handleDrop}
+				onpaneclick={handlePaneClick}
 				nodesDraggable={!readonly}
 				nodesConnectable={!readonly}
 				elementsSelectable={!readonly}
@@ -678,8 +682,9 @@
 	:global(.svelte-flow .svelte-flow__edge-path) {
 		stroke-width: 2;
 	}
-	:global(.svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
-		stroke: var(--color-error-500);
+	:global(.editor-mode .svelte-flow .svelte-flow__edge:hover .svelte-flow__edge-path) {
+		stroke: var(--color-secondary-300);
+		stroke-width: 3;
 		cursor: pointer;
 	}
 </style>
