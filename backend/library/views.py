@@ -325,7 +325,7 @@ class StoredLibraryViewSet(BaseModelViewSet):
             elif hasattr(e, "message_dict"):
                 detail = e.message_dict
             else:
-                detail = str(e)
+                detail = "Validation failed."
             return Response(
                 {"error": detail},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,

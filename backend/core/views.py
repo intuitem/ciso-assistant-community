@@ -8325,9 +8325,10 @@ class PresetJourneyViewSet(BaseModelViewSet):
 
         # Compliance progress per compliance assessment in object_refs
         compliance_stats = {}
-        for ref_name, obj_id in journey.object_refs.items():
+        readable_ca_qs = ComplianceAssessment.objects.all()
+        for ref_name, obj_id in (journey.object_refs or {}).items():
             try:
-                ca = ComplianceAssessment.objects.get(id=obj_id)
+                ca = readable_ca_qs.get(id=obj_id, folder=folder)
                 total_ra = ca.requirement_assessments.count()
                 assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
                 compliance_stats[ref_name] = {
@@ -8338,7 +8339,7 @@ class PresetJourneyViewSet(BaseModelViewSet):
                         round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
                     ),
                 }
-            except ComplianceAssessment.DoesNotExist:
+            except (ComplianceAssessment.DoesNotExist, ValueError):
                 continue
         stats["compliance"] = compliance_stats
         return stats
