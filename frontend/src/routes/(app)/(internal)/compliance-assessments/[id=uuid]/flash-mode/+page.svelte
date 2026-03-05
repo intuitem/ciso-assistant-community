@@ -197,7 +197,9 @@
 		compliant: '#4ade80',
 		not_applicable: '#1e293b'
 	};
-	let accentColor = $derived(resultAccentColorMap[currentRequirementAssessment.result] ?? '#d1d5db');
+	let accentColor = $derived(
+		resultAccentColorMap[currentRequirementAssessment.result] ?? '#d1d5db'
+	);
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -207,10 +209,7 @@
 		{#if currentRequirementAssessment}
 			<!-- Top bar: back link + progress -->
 			<div class="flash-header">
-				<a
-					href="/compliance-assessments/{data.compliance_assessment.id}"
-					class="back-link"
-				>
+				<a href="/compliance-assessments/{data.compliance_assessment.id}" class="back-link">
 					<i class="fa-solid fa-arrow-left"></i>
 					<span>{m.goBackToAudit()}</span>
 				</a>
@@ -270,14 +269,8 @@
 
 			<!-- Progress bar -->
 			<div class="progress-track">
-				<div
-					class="progress-fill-assessed"
-					style="width: {progressPercent}%"
-				></div>
-				<div
-					class="progress-cursor"
-					style="left: {currentProgressPercent}%"
-				></div>
+				<div class="progress-fill-assessed" style="width: {progressPercent}%"></div>
+				<div class="progress-cursor" style="left: {currentProgressPercent}%"></div>
 			</div>
 
 			<!-- Read-only banner -->
@@ -295,7 +288,11 @@
 			<!-- Main content area with slide transition -->
 			<div class="flash-body">
 				{#key transitionKey}
-					<div class="flash-content" class:slide-in-right={slideDirection === 'next'} class:slide-in-left={slideDirection === 'prev'}>
+					<div
+						class="flash-content"
+						class:slide-in-right={slideDirection === 'next'}
+						class:slide-in-left={slideDirection === 'prev'}
+					>
 						<div class="content-section-label">{title}</div>
 
 						{#if currentRequirementAssessment.description}
@@ -487,7 +484,9 @@
 		border-radius: 50%;
 		transform: translateX(-50%);
 		transition: left 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-		box-shadow: 0 0 0 2px #fff, 0 0 0 3px rgba(59, 130, 246, 0.3);
+		box-shadow:
+			0 0 0 2px #fff,
+			0 0 0 3px rgba(59, 130, 246, 0.3);
 	}
 
 	/* ── Read-only ── */
@@ -607,7 +606,9 @@
 		resize: none;
 		background: #fff;
 		color: #334155;
-		transition: border-color 0.15s, box-shadow 0.15s;
+		transition:
+			border-color 0.15s,
+			box-shadow 0.15s;
 		font-family: inherit;
 	}
 	.observation-textarea::placeholder {
