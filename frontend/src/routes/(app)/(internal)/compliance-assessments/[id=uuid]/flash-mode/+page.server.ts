@@ -19,7 +19,8 @@ export const load = (async ({ fetch, params }) => {
 		URLModel,
 		compliance_assessment,
 		requirement_assessments,
-		requirements
+		requirements,
+		title: 'flashMode'
 	};
 }) satisfies PageServerLoad;
 
