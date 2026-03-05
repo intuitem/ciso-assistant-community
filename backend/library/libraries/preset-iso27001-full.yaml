@@ -2,19 +2,20 @@ urn: urn:intuitem:risk:preset:iso27001-full
 locale: en
 ref_id: preset-iso27001-full
 name: "ISO 27001:2022 \u2014 Full Implementation"
-description: Comprehensive ISO 27001 implementation preset. Creates a compliance assessment with suggested controls auto-linked, organisational context (issues and objectives), a risk assessment, and periodic task templates for ongoing ISMS management.
-version: 1
+description: "Comprehensive ISO 27001 ISMS implementation following the Plan\u2013Do\u2013Check\u2013Act cycle. Creates a compliance assessment with suggested controls, organisational context, a risk assessment, metric definitions for KPIs, and periodic task templates for ongoing management."
+version: 6
 provider: intuitem
 packager: intuitem
 translations:
   fr:
     name: "ISO 27001:2022 \u2014 Mise en \u0153uvre compl\u00e8te"
-    description: "Preset complet de mise en \u0153uvre ISO 27001. Cr\u00e9e une \u00e9valuation de conformit\u00e9 avec des contr\u00f4les sugg\u00e9r\u00e9s, le contexte organisationnel (enjeux et objectifs), une analyse de risques et des mod\u00e8les de t\u00e2ches p\u00e9riodiques pour la gestion continue du SMSI."
+    description: "Mise en \u0153uvre compl\u00e8te du SMSI ISO 27001 suivant le cycle Plan\u2013Do\u2013Check\u2013Act. Cr\u00e9e une \u00e9valuation de conformit\u00e9 avec contr\u00f4les sugg\u00e9r\u00e9s, le contexte organisationnel, une analyse de risques, des d\u00e9finitions de m\u00e9triques pour les KPI et des mod\u00e8les de t\u00e2ches p\u00e9riodiques."
 
 dependencies:
   - urn:intuitem:risk:library:iso27001-2022
   - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
   - urn:intuitem:risk:library:intuitem-common-catalog
+  - urn:intuitem:risk:library:core-cybersecurity-metrics
 
 objects:
   preset:
@@ -31,6 +32,8 @@ objects:
     feature_flags:
       enable:
         - compliance
+        - metrology
+        - tprm
 
     scaffolded_objects:
       # --- Organisation issues (clause 4 - Context of the organisation) ---
@@ -196,91 +199,259 @@ objects:
           fr:
             name: "R\u00e9sultats des tests d\u2019intrusion"
 
+      # --- Metric instances (clause 9.1 - KPIs) ---
+      - type: metric_instance
+        name: "Compliance Score"
+        description: "Overall compliance score against ISO 27001 requirements and Annex A controls."
+        metric_definition: urn:intuitem:risk:metric:core:gov-01
+        collection_frequency: monthly
+        target_value: 85.0
+        status: active
+        translations:
+          fr:
+            name: "Score de conformit\u00e9"
+            description: "Score de conformit\u00e9 global par rapport aux exigences ISO 27001 et aux contr\u00f4les de l\u2019Annexe A."
+      - type: metric_instance
+        name: "Security Program Maturity"
+        description: "Qualitative assessment of the ISMS maturity level across governance, processes, and technology."
+        metric_definition: urn:intuitem:risk:metric:core:gov-02
+        collection_frequency: quarterly
+        status: active
+        translations:
+          fr:
+            name: "Maturit\u00e9 du programme de s\u00e9curit\u00e9"
+            description: "\u00c9valuation qualitative du niveau de maturit\u00e9 du SMSI en termes de gouvernance, processus et technologie."
+      - type: metric_instance
+        name: "Open Critical/High Vulnerabilities"
+        description: "Number of unresolved critical or high-severity vulnerabilities across systems in scope."
+        metric_definition: urn:intuitem:risk:metric:core:vuln-01
+        collection_frequency: monthly
+        target_value: 0.0
+        status: active
+        translations:
+          fr:
+            name: "Vuln\u00e9rabilit\u00e9s critiques/hautes ouvertes"
+            description: "Nombre de vuln\u00e9rabilit\u00e9s non r\u00e9solues de s\u00e9v\u00e9rit\u00e9 critique ou haute sur les syst\u00e8mes du p\u00e9rim\u00e8tre."
+      - type: metric_instance
+        name: "Vulnerability Remediation Time"
+        description: "Average number of days to remediate critical and high vulnerabilities from detection to closure."
+        metric_definition: urn:intuitem:risk:metric:core:vuln-02
+        collection_frequency: monthly
+        target_value: 30.0
+        status: active
+        translations:
+          fr:
+            name: "D\u00e9lai de rem\u00e9diation des vuln\u00e9rabilit\u00e9s"
+            description: "Nombre moyen de jours pour rem\u00e9dier les vuln\u00e9rabilit\u00e9s critiques et hautes, de la d\u00e9tection \u00e0 la cl\u00f4ture."
+      - type: metric_instance
+        name: "Security Incidents Count"
+        description: "Total number of confirmed security incidents over the measurement period."
+        metric_definition: urn:intuitem:risk:metric:core:inc-01
+        collection_frequency: monthly
+        target_value: 0.0
+        status: active
+        translations:
+          fr:
+            name: "Nombre d\u2019incidents de s\u00e9curit\u00e9"
+            description: "Nombre total d\u2019incidents de s\u00e9curit\u00e9 confirm\u00e9s sur la p\u00e9riode de mesure."
+      - type: metric_instance
+        name: "MFA Adoption Rate"
+        description: "Percentage of user accounts with multi-factor authentication enabled (Annex A 8.5)."
+        metric_definition: urn:intuitem:risk:metric:core:iam-01
+        collection_frequency: monthly
+        target_value: 100.0
+        status: active
+        translations:
+          fr:
+            name: "Taux d\u2019adoption du MFA"
+            description: "Pourcentage de comptes utilisateurs avec authentification multi-facteurs activ\u00e9e (Annexe A 8.5)."
+      - type: metric_instance
+        name: "Security Training Completion"
+        description: "Percentage of personnel who completed the mandatory security awareness training (Annex A 6.3)."
+        metric_definition: urn:intuitem:risk:metric:core:awr-01
+        collection_frequency: quarterly
+        target_value: 95.0
+        status: active
+        translations:
+          fr:
+            name: "Taux de compl\u00e9tion de la formation s\u00e9curit\u00e9"
+            description: "Pourcentage du personnel ayant suivi la formation obligatoire de sensibilisation \u00e0 la s\u00e9curit\u00e9 (Annexe A 6.3)."
+      - type: metric_instance
+        name: "Phishing Click Rate"
+        description: "Percentage of users who clicked on a simulated phishing link during the latest campaign."
+        metric_definition: urn:intuitem:risk:metric:core:awr-02
+        collection_frequency: quarterly
+        target_value: 5.0
+        status: active
+        translations:
+          fr:
+            name: "Taux de clic sur phishing"
+            description: "Pourcentage d\u2019utilisateurs ayant cliqu\u00e9 sur un lien de phishing simul\u00e9 lors de la derni\u00e8re campagne."
+
     journey:
       steps:
+        # ═══════════════ PLAN ═══════════════
         - key: context_issues
           title: "Establish organisational context"
-          description: "Review and complete the organisational issues to document internal and external factors affecting your ISMS (clause 4.1)."
+          description: "Document internal and external factors affecting your ISMS \u2014 threats, regulatory environment, business strategy, and existing capabilities (clause 4.1)."
           target_model: organisation-issues
           translations:
             fr:
               title: "\u00c9tablir le contexte organisationnel"
-              description: "Examinez et compl\u00e9tez les enjeux organisationnels pour documenter les facteurs internes et externes affectant votre SMSI (clause 4.1)."
+              description: "Documentez les facteurs internes et externes affectant votre SMSI \u2014 menaces, environnement r\u00e9glementaire, strat\u00e9gie m\u00e9tier et capacit\u00e9s existantes (clause 4.1)."
+
+        - key: interested_parties
+          title: "Identify interested parties and their requirements"
+          description: "List the stakeholders relevant to your ISMS (customers, regulators, partners, employees) and document their information security requirements (clause 4.2). Use entities to model each interested party."
+          target_model: entities
+          translations:
+            fr:
+              title: "Identifier les parties int\u00e9ress\u00e9es et leurs exigences"
+              description: "Recensez les parties prenantes pertinentes pour votre SMSI (clients, r\u00e9gulateurs, partenaires, employ\u00e9s) et documentez leurs exigences en mati\u00e8re de s\u00e9curit\u00e9 de l\u2019information (clause 4.2). Utilisez les entit\u00e9s pour mod\u00e9liser chaque partie int\u00e9ress\u00e9e."
+
+        - key: scope
+          title: "Determine ISMS scope"
+          description: "Define the boundaries and applicability of the ISMS \u2014 which sites, systems, processes, and information are covered (clause 4.3)."
+          target_model: perimeters
+          translations:
+            fr:
+              title: "D\u00e9terminer le domaine d\u2019application du SMSI"
+              description: "D\u00e9finissez les limites et l\u2019applicabilit\u00e9 du SMSI \u2014 quels sites, syst\u00e8mes, processus et informations sont couverts (clause 4.3)."
+
         - key: objectives
           title: "Define information security objectives"
-          description: "Review and refine the security objectives to align with your business strategy and risk appetite (clause 6.2)."
+          description: "Set preliminary ISMS objectives aligned with your business strategy and risk appetite (clause 6.2)."
           target_model: organisation-objectives
           translations:
             fr:
               title: "D\u00e9finir les objectifs de s\u00e9curit\u00e9 de l\u2019information"
-              description: "Examinez et affinez les objectifs de s\u00e9curit\u00e9 pour les aligner avec votre strat\u00e9gie m\u00e9tier et votre app\u00e9tence au risque (clause 6.2)."
+              description: "D\u00e9finissez les objectifs pr\u00e9liminaires du SMSI align\u00e9s avec votre strat\u00e9gie m\u00e9tier et votre app\u00e9tence au risque (clause 6.2)."
+
         - key: assets
-          title: "Identify and classify assets"
-          description: "Inventory primary assets (information, processes) and supporting assets (hardware, software, networks, personnel) within the ISMS scope."
+          title: "Identify key processes and assets"
+          description: "Inventory primary assets (information, business processes) and supporting assets (hardware, software, networks, personnel) within the ISMS scope."
           target_model: assets
           translations:
             fr:
-              title: "Identifier et classifier les actifs"
-              description: "Inventoriez les actifs primaires (informations, processus) et les actifs supports (mat\u00e9riel, logiciel, r\u00e9seaux, personnel) dans le p\u00e9rim\u00e8tre du SMSI."
-        - key: compliance
-          title: "Assess ISO 27001 compliance"
-          description: "Walk through each ISO 27001 requirement, link evidence and controls, and assess your current compliance status."
+              title: "Identifier les processus cl\u00e9s et les actifs"
+              description: "Inventoriez les actifs primaires (informations, processus m\u00e9tier) et les actifs supports (mat\u00e9riel, logiciel, r\u00e9seaux, personnel) dans le p\u00e9rim\u00e8tre du SMSI."
+
+        - key: roles
+          title: "Define roles and responsibilities"
+          description: "Assign ISMS roles: information security manager, risk owners, asset owners. Create teams to reflect your organisation and ensure top management commitment is documented (clause 5.3)."
+          target_model: actors
+          translations:
+            fr:
+              title: "D\u00e9finir les r\u00f4les et responsabilit\u00e9s"
+              description: "Attribuez les r\u00f4les SMSI\u00a0: responsable s\u00e9curit\u00e9, propri\u00e9taires de risques, propri\u00e9taires d\u2019actifs. Cr\u00e9ez des \u00e9quipes pour refl\u00e9ter votre organisation et documentez l\u2019engagement de la direction (clause 5.3)."
+
+        - key: maturity_baseline
+          title: "Measure current cyber maturity"
+          description: "Perform an initial self-assessment of the ISO 27001 requirements to baseline your current maturity level and identify the main gaps to address (clause 6.1)."
           target_model: compliance-assessments
           target_ref: iso_audit
           translations:
             fr:
-              title: "\u00c9valuer la conformit\u00e9 ISO 27001"
-              description: "Parcourez chaque exigence ISO 27001, liez les preuves et les contr\u00f4les, et \u00e9valuez votre \u00e9tat de conformit\u00e9 actuel."
+              title: "Mesurer le niveau de maturit\u00e9 cyber actuel"
+              description: "R\u00e9alisez une premi\u00e8re auto-\u00e9valuation des exigences ISO 27001 pour \u00e9tablir votre niveau de maturit\u00e9 actuel et identifier les principaux \u00e9carts \u00e0 combler (clause 6.1)."
+
+        - key: action_plan
+          title: "Establish ISMS action plan"
+          description: "Based on the maturity baseline, define the ISMS implementation plan: priorities, resource needs (HR, budget), milestones, and timeline."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "\u00c9tablir le plan d\u2019action du SMSI"
+              description: "\u00c0 partir du bilan de maturit\u00e9, d\u00e9finissez le plan de mise en \u0153uvre du SMSI\u00a0: priorit\u00e9s, besoins en ressources (RH, budget), jalons et calendrier."
+
+        # ═══════════════ DO ═══════════════
         - key: risk_assessment
-          title: "Conduct a risk assessment"
-          description: "Create risk scenarios by combining threats with assets, assess likelihood and impact, and prioritise risks for treatment."
+          title: "Conduct risk assessment"
+          description: "Define risk criteria, choose an analysis method, create risk scenarios by combining threats with assets, and assess likelihood and impact (clauses 6.1.1\u20136.1.2)."
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
-              title: "Mener une analyse de risque"
-              description: "Créez des scénarios de risque en combinant les menaces avec les actifs, évaluez la vraisemblance et l'impact, et priorisez les risques à traiter."
+              title: "Mener l\u2019analyse de risque"
+              description: "D\u00e9finissez les crit\u00e8res d\u2019appr\u00e9ciation des risques, choisissez une m\u00e9thode d\u2019analyse, cr\u00e9ez les sc\u00e9narios de risque en combinant menaces et actifs, et \u00e9valuez la vraisemblance et l\u2019impact (clauses 6.1.1\u20136.1.2)."
+
+        - key: soa
+          title: "Annex A self-assessment and Statement of Applicability"
+          description: "Walk through each Annex A control, assess applicability, and produce the Statement of Applicability (SoA) documenting which controls are included or excluded and why (clause 6.1.3)."
+          target_model: compliance-assessments
+          target_ref: iso_audit
+          translations:
+            fr:
+              title: "Auto-\u00e9valuation Annexe A et D\u00e9claration d\u2019Applicabilit\u00e9"
+              description: "Parcourez chaque contr\u00f4le de l\u2019Annexe A, \u00e9valuez l\u2019applicabilit\u00e9 et produisez la D\u00e9claration d\u2019Applicabilit\u00e9 (DdA) documentant les contr\u00f4les inclus ou exclus et leurs justifications (clause 6.1.3)."
+
         - key: risk_treatment
           title: "Plan risk treatment"
-          description: "Review the auto-created controls from ISO 27001 Annex A, assign owners, and define implementation plans for each applicable control."
+          description: "Review the auto-created controls from ISO 27001 Annex A, assign owners, and define implementation plans for each applicable control (clause 8.3)."
           target_model: applied-controls
           translations:
             fr:
               title: "Planifier le traitement des risques"
-              description: "Examinez les contr\u00f4les auto-cr\u00e9\u00e9s de l\u2019Annexe A ISO 27001, assignez des responsables et d\u00e9finissez les plans de mise en \u0153uvre pour chaque contr\u00f4le applicable."
+              description: "Examinez les contr\u00f4les auto-cr\u00e9\u00e9s de l\u2019Annexe A ISO 27001, assignez des responsables et d\u00e9finissez les plans de mise en \u0153uvre pour chaque contr\u00f4le applicable (clause 8.3)."
+
         - key: policies
           title: "Write and approve policies"
-          description: "Draft your information security policies (e.g. acceptable use, access control, incident management) and submit them for management approval (clause 5.2, Annex A 5.1)."
+          description: "Draft your information security policies (e.g. acceptable use, access control, incident management), define the target state of the ISMS, and submit them for management approval (clause 5.2, 7.5.1, Annex A 5.1)."
           target_model: policies
           translations:
             fr:
               title: "R\u00e9diger et approuver les politiques"
-              description: "R\u00e9digez vos politiques de s\u00e9curit\u00e9 de l\u2019information (ex. utilisation acceptable, contr\u00f4le d\u2019acc\u00e8s, gestion des incidents) et soumettez-les \u00e0 l\u2019approbation de la direction (clause 5.2, Annexe A 5.1)."
+              description: "R\u00e9digez vos politiques de s\u00e9curit\u00e9 de l\u2019information (ex. utilisation acceptable, contr\u00f4le d\u2019acc\u00e8s, gestion des incidents), d\u00e9finissez l\u2019\u00e9tat cible du SMSI et soumettez-les \u00e0 l\u2019approbation de la direction (clauses 5.2, 7.5.1, Annexe A 5.1)."
+
         - key: evidences
-          title: "Review your evidences"
-          description: "Collect and organise the evidence that demonstrates your ISMS implementation \u2014 documents, screenshots, logs, and records needed for audit (clause 7.5)."
+          title: "Collect evidence"
+          description: "Gather and organise the evidence demonstrating your ISMS implementation \u2014 documents, screenshots, logs, and records needed for audit (clause 7.5)."
           target_model: evidences
           translations:
             fr:
-              title: "Examiner vos preuves"
-              description: "Collectez et organisez les preuves d\u00e9montrant la mise en \u0153uvre de votre SMSI \u2014 documents, captures d\u2019\u00e9cran, journaux et enregistrements n\u00e9cessaires pour l\u2019audit (clause 7.5)."
+              title: "Collecter les preuves"
+              description: "Rassemblez et organisez les preuves d\u00e9montrant la mise en \u0153uvre de votre SMSI \u2014 documents, captures d\u2019\u00e9cran, journaux et enregistrements n\u00e9cessaires pour l\u2019audit (clause 7.5)."
+
+        # ═══════════════ CHECK ═══════════════
+        - key: kpis
+          title: "Define and track KPIs"
+          description: "Set up metric instances to monitor ISMS effectiveness: compliance score, vulnerability remediation time, incident count, and other relevant KPIs (clause 9.1)."
+          target_model: metric-instances
+          translations:
+            fr:
+              title: "D\u00e9finir et suivre les KPI"
+              description: "Configurez des instances de m\u00e9triques pour suivre l\u2019efficacit\u00e9 du SMSI\u00a0: score de conformit\u00e9, d\u00e9lai de rem\u00e9diation des vuln\u00e9rabilit\u00e9s, nombre d\u2019incidents et autres KPI pertinents (clause 9.1)."
+
         - key: findings
-          title: "Track pentest and audit findings"
+          title: "Track audit and pentest findings"
           description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
           target_model: findings-assessments
           target_ref: pentest_findings
           translations:
             fr:
-              title: "Suivre les r\u00e9sultats de tests et d\u2019audits"
+              title: "Suivre les r\u00e9sultats d\u2019audits et de tests"
               description: "Importez ou cr\u00e9ez des r\u00e9sultats de tests d\u2019intrusion, de scans de vuln\u00e9rabilit\u00e9s et d\u2019audits. Attribuez des responsables, d\u00e9finissez des priorit\u00e9s et suivez la rem\u00e9diation."
+
+        # ═══════════════ ACT ═══════════════
+        - key: nonconformities
+          title: "Treat non-conformities and corrective actions"
+          description: "Review your compliance assessment to identify non-conformities, document root causes, and implement corrective actions to close the gaps (clause 10.1)."
+          target_model: compliance-assessments
+          target_ref: iso_audit
+          translations:
+            fr:
+              title: "Traiter les non-conformit\u00e9s et actions correctives"
+              description: "Examinez votre \u00e9valuation de conformit\u00e9 pour identifier les non-conformit\u00e9s, documentez les causes racines et mettez en \u0153uvre des actions correctives pour combler les \u00e9carts (clause 10.1)."
+
         - key: ongoing_tasks
-          title: "Configure your ISMS run tasks"
-          description: "Review the periodic task templates (internal audits, management reviews, access reviews, etc.) and adjust schedules to fit your organisation."
+          title: "Configure recurring ISMS tasks"
+          description: "Review the periodic task templates (internal audits, management reviews, access reviews, awareness training) and adjust schedules to fit your organisation."
           target_model: task-templates
           translations:
             fr:
-              title: "Configurer vos t\u00e2ches r\u00e9currentes SMSI"
-              description: "Examinez les mod\u00e8les de t\u00e2ches p\u00e9riodiques (audits internes, revues de direction, revues d\u2019acc\u00e8s, etc.) et ajustez les plannings selon votre organisation."
+              title: "Configurer les t\u00e2ches r\u00e9currentes du SMSI"
+              description: "Examinez les mod\u00e8les de t\u00e2ches p\u00e9riodiques (audits internes, revues de direction, revues d\u2019acc\u00e8s, sensibilisation) et ajustez les plannings selon votre organisation."
+
         - key: audit_export
           title: "Prepare the export for your lead auditor"
           description: "Generate and review the compliance assessment export to share with your certification body's lead auditor ahead of the Stage 1 or Stage 2 audit."

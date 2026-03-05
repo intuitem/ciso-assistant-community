@@ -88,9 +88,12 @@ test('User can load demo data', async ({ logedPage, page }) => {
 	await test.step('Load demo data', async () => {
 		const initialRowCount = await getRowCount(page);
 
-		// Trigger loading demo data via the sidebar.
+		// Open the "Get Started" modal via the sidebar more menu.
 		await page.getByTestId('sidebar-more-btn').click();
-		await page.getByTestId('load-demo-data-button').click();
+		await page.getByTestId('get-started-button').click();
+
+		// Click the "Load Demo Data" action (index 2) in the FirstLoginModal.
+		await page.getByTestId('first-login-action-2').click();
 
 		// Verify that a toast with demo data success message appears.
 		const toast = page.getByTestId('toast');

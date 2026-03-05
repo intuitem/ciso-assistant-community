@@ -3618,5 +3618,7 @@
 	"createUnderlyingObjectsHelp": "When unchecked, the journey is created as a pure checklist without auto-creating assessments, assets, or other objects.",
 	"editStepLinks": "Edit links",
 	"doneEditing": "Done editing",
-	"noLinkedObject": "— No linked object —"
+	"noLinkedObject": "— No linked object —",
+	"showDescriptions": "Show descriptions",
+	"hideDescriptions": "Hide descriptions"
 }

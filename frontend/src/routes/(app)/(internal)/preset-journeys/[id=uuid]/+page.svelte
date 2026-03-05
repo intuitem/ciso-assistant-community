@@ -122,6 +122,7 @@
 		invalidateAll();
 	}
 
+	let compactMode = $state(false);
 	let upgrading = $state(false);
 
 	async function upgradeJourney() {
@@ -198,6 +199,14 @@
 						{m.upgradeAvailable()}
 					</button>
 				{/if}
+				<button
+					type="button"
+					class="btn btn-sm preset-tonal-surface border border-surface-500"
+					onclick={() => (compactMode = !compactMode)}
+					title={compactMode ? m.showDescriptions() : m.hideDescriptions()}
+				>
+					<i class="fa-solid {compactMode ? 'fa-expand' : 'fa-compress'}"></i>
+				</button>
 				<button
 					type="button"
 					class="btn btn-sm preset-tonal-surface border border-surface-500"
@@ -287,8 +296,17 @@
 
 							<!-- Content -->
 							<div class="flex-1 min-w-0">
-								<h4 class="font-medium">{step.title}</h4>
-								{#if step.description}
+								{#if getStepLink(step)}
+									<a
+										href={getStepLink(step)}
+										class="font-medium hover:text-indigo-600 transition-colors"
+									>
+										{step.title}
+									</a>
+								{:else}
+									<h4 class="font-medium">{step.title}</h4>
+								{/if}
+								{#if step.description && !compactMode}
 									<p class="text-sm text-gray-400 mt-0.5">{step.description}</p>
 								{/if}
 								{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}

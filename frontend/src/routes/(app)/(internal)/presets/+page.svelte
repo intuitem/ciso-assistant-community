@@ -22,6 +22,8 @@
 			: data.presets.filter((p: any) => (p.profile?.region ?? []).includes(activeFilter))
 	);
 
+	let presetsCollapsed = $state(false);
+
 	// --- Expanded preset detail ---
 	let expandedPresetId: string | null = $state(null);
 
@@ -277,12 +279,20 @@
 	<!-- ═══════════════ AVAILABLE PRESETS ═══════════════ -->
 	<section>
 		<div class="flex items-center justify-between mb-4">
-			<div class="flex items-center gap-3">
+			<button
+				class="flex items-center gap-3 cursor-pointer"
+				onclick={() => (presetsCollapsed = !presetsCollapsed)}
+			>
 				<div class="flex items-center justify-center w-8 h-8 rounded-lg bg-violet-100">
 					<i class="fa-solid fa-box-open text-violet-600 text-sm"></i>
 				</div>
 				<h2 class="text-lg font-semibold text-gray-800">{m.availablePresets()}</h2>
-			</div>
+				<i
+					class="fa-solid fa-chevron-down text-xs text-gray-400 transition-transform duration-200 {presetsCollapsed
+						? '-rotate-90'
+						: ''}"
+				></i>
+			</button>
 
 			<!-- Region filter pills -->
 			{#if allRegions.length > 1}
@@ -312,101 +322,103 @@
 			{/if}
 		</div>
 
-		{#if data.presets.length === 0}
-			<div
-				class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-10 text-center"
-			>
-				<i class="fa-solid fa-box-open text-3xl text-gray-300 mb-2"></i>
-				<p class="text-sm text-gray-400">{m.noPresetsAvailable()}</p>
-			</div>
-		{:else}
-			<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-				{#each filteredPresets as preset (preset.id)}
-					{@const isExpanded = expandedPresetId === preset.id}
-					<div
-						class="group flex flex-col rounded-xl border bg-white shadow-sm transition-all duration-200
+		{#if !presetsCollapsed}
+			{#if data.presets.length === 0}
+				<div
+					class="flex flex-col items-center justify-center rounded-xl border border-dashed border-gray-300 bg-white/60 p-10 text-center"
+				>
+					<i class="fa-solid fa-box-open text-3xl text-gray-300 mb-2"></i>
+					<p class="text-sm text-gray-400">{m.noPresetsAvailable()}</p>
+				</div>
+			{:else}
+				<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+					{#each filteredPresets as preset (preset.id)}
+						{@const isExpanded = expandedPresetId === preset.id}
+						<div
+							class="group flex flex-col rounded-xl border bg-white shadow-sm transition-all duration-200
 							{isExpanded
-							? 'border-violet-300 shadow-md ring-1 ring-violet-100'
-							: 'border-gray-200 hover:shadow-md hover:border-gray-300'}"
-					>
-						<!-- Card header — always visible -->
-						<button
-							class="flex items-start gap-3 p-4 pb-3 text-left w-full cursor-pointer"
-							onclick={() => toggleExpand(preset.id)}
+								? 'border-violet-300 shadow-md ring-1 ring-violet-100'
+								: 'border-gray-200 hover:shadow-md hover:border-gray-300'}"
 						>
-							<div class="flex-1 min-w-0">
-								<h3 class="font-semibold text-[15px] text-gray-800 leading-tight">
-									{preset.name}
-								</h3>
-								{#if preset.description}
-									<p class="text-sm text-gray-400 mt-1" class:line-clamp-2={!isExpanded}>
-										{preset.description}
-									</p>
-								{/if}
-							</div>
-							<i
-								class="fa-solid fa-chevron-down text-[10px] text-gray-300 mt-1.5 transition-transform duration-200
+							<!-- Card header — always visible -->
+							<button
+								class="flex items-start gap-3 p-4 pb-3 text-left w-full cursor-pointer"
+								onclick={() => toggleExpand(preset.id)}
+							>
+								<div class="flex-1 min-w-0">
+									<h3 class="font-semibold text-[15px] text-gray-800 leading-tight">
+										{preset.name}
+									</h3>
+									{#if preset.description}
+										<p class="text-sm text-gray-400 mt-1" class:line-clamp-2={!isExpanded}>
+											{preset.description}
+										</p>
+									{/if}
+								</div>
+								<i
+									class="fa-solid fa-chevron-down text-[10px] text-gray-300 mt-1.5 transition-transform duration-200
 									{isExpanded ? 'rotate-180' : ''}"
-							></i>
-						</button>
+								></i>
+							</button>
 
-						<!-- Tags — always visible -->
-						{#if preset.profile}
-							<div class="flex flex-wrap gap-1 px-4 pb-3">
-								{#each getProfileTags(preset.profile) as tag}
-									{@const flag = REGION_FLAGS[tag]}
-									<span
-										class="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-100 px-2 py-0.5 text-[11px] text-gray-500"
-									>
-										{#if flag}{flag}{/if}
-										{tag}
-									</span>
-								{/each}
-							</div>
-						{/if}
-
-						<!-- Expanded detail -->
-						{#if isExpanded && preset.scaffolded_objects?.length}
-							<div class="px-4 pb-3 border-t border-gray-100 pt-3">
-								<div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
-									{#each preset.scaffolded_objects as obj}
-										{@const meta = OBJECT_TYPE_META[obj.type]}
-										{#if meta}
-											<div class="flex items-center gap-1.5 text-xs text-gray-500">
-												<i class="fa-solid {meta.icon} w-3.5 text-center text-gray-400"></i>
-												<span
-													>{obj.count}
-													{meta.label()}{obj.count > 1 ? 's' : ''}</span
-												>
-											</div>
-										{/if}
+							<!-- Tags — always visible -->
+							{#if preset.profile}
+								<div class="flex flex-wrap gap-1 px-4 pb-3">
+									{#each getProfileTags(preset.profile) as tag}
+										{@const flag = REGION_FLAGS[tag]}
+										<span
+											class="inline-flex items-center gap-1 rounded-full bg-gray-50 border border-gray-100 px-2 py-0.5 text-[11px] text-gray-500"
+										>
+											{#if flag}{flag}{/if}
+											{tag}
+										</span>
 									{/each}
 								</div>
-							</div>
-						{/if}
+							{/if}
 
-						<!-- Apply button -->
-						<div class="px-4 pb-4 mt-auto">
-							<button
-								type="button"
-								class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+							<!-- Expanded detail -->
+							{#if isExpanded && preset.scaffolded_objects?.length}
+								<div class="px-4 pb-3 border-t border-gray-100 pt-3">
+									<div class="grid grid-cols-2 gap-x-4 gap-y-1.5">
+										{#each preset.scaffolded_objects as obj}
+											{@const meta = OBJECT_TYPE_META[obj.type]}
+											{#if meta}
+												<div class="flex items-center gap-1.5 text-xs text-gray-500">
+													<i class="fa-solid {meta.icon} w-3.5 text-center text-gray-400"></i>
+													<span
+														>{obj.count}
+														{meta.label()}{obj.count > 1 ? 's' : ''}</span
+													>
+												</div>
+											{/if}
+										{/each}
+									</div>
+								</div>
+							{/if}
+
+							<!-- Apply button -->
+							<div class="px-4 pb-4 mt-auto">
+								<button
+									type="button"
+									class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
 									transition-all duration-150 cursor-pointer
 									bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
-								onclick={() => applyPreset(preset.id, preset.name)}
-							>
-								<i class="fa-solid fa-play text-[10px]"></i>
-								{m.applyPreset()}
-							</button>
+									onclick={() => applyPreset(preset.id, preset.name)}
+								>
+									<i class="fa-solid fa-play text-[10px]"></i>
+									{m.applyPreset()}
+								</button>
+							</div>
 						</div>
-					</div>
-				{/each}
-			</div>
-
-			{#if filteredPresets.length === 0}
-				<div class="flex flex-col items-center py-10 text-gray-400">
-					<i class="fa-solid fa-filter-circle-xmark text-2xl mb-2"></i>
-					<p class="text-sm">{m.noMatchingPresets()}</p>
+					{/each}
 				</div>
+
+				{#if filteredPresets.length === 0}
+					<div class="flex flex-col items-center py-10 text-gray-400">
+						<i class="fa-solid fa-filter-circle-xmark text-2xl mb-2"></i>
+						<p class="text-sm">{m.noMatchingPresets()}</p>
+					</div>
+				{/if}
 			{/if}
 		{/if}
 	</section>

@@ -69,6 +69,7 @@
 					{@const isPreset = i === 0}
 					{@const isLoading = loadingAction === i}
 					<button
+						data-testid="first-login-action-{i}"
 						onclick={(e) => handleAction(action, i, e)}
 						disabled={loadingAction !== null}
 						class="group w-full text-left rounded-xl border-2 p-4 transition-all duration-200

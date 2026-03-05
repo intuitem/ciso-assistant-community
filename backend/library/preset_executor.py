@@ -41,6 +41,8 @@ from resilience.models import BusinessImpactAnalysis
 from resilience.serializers import BusinessImpactAnalysisWriteSerializer
 from tprm.models import Entity
 from tprm.serializers import EntityWriteSerializer
+from metrology.models import MetricInstance, MetricDefinition
+from metrology.serializers import MetricInstanceWriteSerializer
 from global_settings.models import GlobalSettings
 from iam.models import Folder, User
 
@@ -315,6 +317,7 @@ class PresetExecutor:
         "entity": Entity,
         "business_impact_analysis": BusinessImpactAnalysis,
         "findings_assessment": FindingsAssessment,
+        "metric_instance": MetricInstance,
         "asset": Asset,
         "risk_scenario": RiskScenario,
     }
@@ -480,6 +483,30 @@ class PresetExecutor:
                 serializer = BusinessImpactAnalysisWriteSerializer(
                     data=data, context=context
                 )
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "metric_instance":
+                metric_def_urn = item.get("metric_definition")
+                metric_def = MetricDefinition.objects.filter(urn=metric_def_urn).first()
+                if not metric_def:
+                    logger.warning(
+                        "Metric definition not found, skipping",
+                        urn=metric_def_urn,
+                        name=name,
+                    )
+                    continue
+                data = {
+                    "folder": str(folder.id),
+                    "metric_definition": str(metric_def.id),
+                    "name": name,
+                    "description": description,
+                    "status": item.get("status", "active"),
+                    "collection_frequency": item.get("collection_frequency", "monthly"),
+                }
+                if item.get("target_value") is not None:
+                    data["target_value"] = item["target_value"]
+                serializer = MetricInstanceWriteSerializer(data=data, context=context)
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
 

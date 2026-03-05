@@ -3583,5 +3583,7 @@
 	"createUnderlyingObjectsHelp": "Si décoché, le parcours est créé comme une simple checklist sans créer automatiquement les évaluations, actifs ou autres objets.",
 	"editStepLinks": "Modifier les liens",
 	"doneEditing": "Terminé",
-	"noLinkedObject": "— Aucun objet lié —"
+	"noLinkedObject": "— Aucun objet lié —",
+	"showDescriptions": "Afficher les descriptions",
+	"hideDescriptions": "Masquer les descriptions"
 }
