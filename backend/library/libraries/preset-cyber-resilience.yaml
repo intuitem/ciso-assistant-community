@@ -3,7 +3,7 @@ locale: fr
 ref_id: preset-cyber-resilience
 name: "Programme de cyber-résilience"
 description: "Programme complet de cyber-résilience basé sur le guide ANSSI de maturité en gestion de crise et la norme ISO 22301. Couvre l'analyse d'impact métier (BIA), les actifs critiques, la gestion de crise et la continuité d'activité."
-version: 1
+version: 2
 provider: intuitem
 packager: intuitem
 translations:
@@ -186,15 +186,6 @@ objects:
             en:
               title: "Conduct business impact analysis (BIA)"
               description: "Assess the impact of unavailability for each business process — define MTD (maximum tolerable downtime) and RPO (recovery point objective)"
-        - key: anssi_crisis
-          title: "Évaluer la maturité en gestion de crise"
-          description: "Parcourez le référentiel ANSSI de maturité en gestion de crise cyber et évaluez votre niveau de préparation actuel"
-          target_model: compliance-assessments
-          target_ref: anssi_crisis_audit
-          translations:
-            en:
-              title: "Assess crisis management maturity"
-              description: "Go through the ANSSI cyber crisis management maturity framework and assess your current readiness level"
         - key: iso22301
           title: "Évaluer la conformité ISO 22301"
           description: "Parcourez les exigences ISO 22301 pour structurer votre système de management de la continuité d'activité"
@@ -204,6 +195,15 @@ objects:
             en:
               title: "Assess ISO 22301 compliance"
               description: "Go through ISO 22301 requirements to structure your business continuity management system"
+        - key: anssi_crisis
+          title: "Évaluer la maturité en gestion de crise"
+          description: "Parcourez le référentiel ANSSI de maturité en gestion de crise cyber et évaluez votre niveau de préparation actuel"
+          target_model: compliance-assessments
+          target_ref: anssi_crisis_audit
+          translations:
+            en:
+              title: "Assess crisis management maturity"
+              description: "Go through the ANSSI cyber crisis management maturity framework and assess your current readiness level"
         - key: risk_assessment
           title: "Mener une analyse de risque"
           description: "Examinez les scénarios de risque liés à la résilience, évaluez la vraisemblance et l'impact sur la continuité d'activité"
@@ -229,3 +229,11 @@ objects:
             en:
               title: "Plan and conduct crisis exercises"
               description: "Organise regular crisis exercises to test your plans, train your teams, and identify improvement areas"
+        - key: evidences
+          title: "Rassembler les preuves et documents"
+          description: "Collectez et attachez toutes les preuves nécessaires — plans de continuité, procédures de crise, comptes-rendus d'exercices, contrats de reprise, rapports de tests"
+          target_model: evidences
+          translations:
+            en:
+              title: "Gather evidence and documents"
+              description: "Collect and attach all required evidence — continuity plans, crisis procedures, exercise reports, recovery contracts, test results"

@@ -1,4 +1,5 @@
 import structlog
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils.translation import get_language
 
@@ -77,6 +78,19 @@ class PresetExecutor:
         self._apply_feature_flags()
         if folder_id:
             folder = Folder.objects.get(id=folder_id)
+            # Check for existing journey with the same preset in this folder
+            existing_journey = PresetJourney.objects.filter(
+                urn=self._stored_library.urn, folder=folder
+            ).first()
+            if existing_journey:
+                raise ValidationError(
+                    {
+                        "folder_id": [
+                            "This preset has already been applied to this domain. "
+                            "You can upgrade the existing journey from the journey dashboard."
+                        ]
+                    }
+                )
         else:
             folder = self._create_folder(folder_name)
         perimeter = self._create_default_perimeter(folder)
