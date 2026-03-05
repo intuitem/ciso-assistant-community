@@ -231,18 +231,38 @@
 					</div>
 					{@const scoredSections = sections.filter((s: any) => s.score !== null && s.scored_count > 0)}
 					{#if scoredSections.length > 0}
-						{@const maxScore = data.compliance_assessment.max_score ?? 100}
+						{@const isSum = sectionData.score_calculation_method === 'sum'}
+						{@const baseMax = sectionData.max_score ?? 100}
+						{@const showDocRadar = data.compliance_assessment.show_documentation_score && scoredSections.some((s: any) => s.documentation_score !== null)}
 						<div class="mt-5 border-t border-slate-100 pt-5">
-							<div class="h-[400px]">
-								<RadarChart
-									name="section_scores_radar"
-									labels={scoredSections.map((s: any) => ({
-										name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
-										max: maxScore
-									}))}
-									values={scoredSections.map((s: any) => s.score)}
-									height="h-full"
-								/>
+							<div class="grid {showDocRadar ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'} gap-5">
+								<div class="h-[400px]">
+									<RadarChart
+										name="section_scores_radar"
+										title={m.score()}
+										labels={scoredSections.map((s: any) => ({
+											name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+											max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+										}))}
+										values={scoredSections.map((s: any) => s.score)}
+										height="h-full"
+									/>
+								</div>
+								{#if showDocRadar}
+									{@const docScoredSections = scoredSections.filter((s: any) => s.documentation_score !== null)}
+									<div class="h-[400px]">
+										<RadarChart
+											name="section_doc_scores_radar"
+											title={m.documentationScore()}
+											labels={docScoredSections.map((s: any) => ({
+												name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+												max: isSum ? baseMax * (s.total_weight || 1) : baseMax
+											}))}
+											values={docScoredSections.map((s: any) => s.documentation_score)}
+											height="h-full"
+										/>
+									</div>
+								{/if}
 							</div>
 						</div>
 					{/if}

@@ -10097,6 +10097,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                     "score": section_score,
                     "documentation_score": section_doc_score,
                     "scored_count": scored_count,
+                    "total_weight": total_weight,
                 }
             )
 

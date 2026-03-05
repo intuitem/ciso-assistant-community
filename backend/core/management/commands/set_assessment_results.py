@@ -88,17 +88,25 @@ class Command(BaseCommand):
                         if compliance_assessment.max_score is not None
                         else 100
                     )
+                    show_doc_score = compliance_assessment.show_documentation_score
                     assessments_to_update = list(requirement_assessments)
                     for req_assessment in assessments_to_update:
                         req_assessment.result = random.choice(result_choices)
                         req_assessment.is_scored = True
                         req_assessment.score = random.randint(min_score, max_score)
+                        if show_doc_score:
+                            req_assessment.documentation_score = random.randint(
+                                min_score, max_score
+                            )
                         logger.debug(
                             f"Will update RequirementAssessment {req_assessment.id} with result: {req_assessment.result}, score: {req_assessment.score}"
                         )
+                    update_fields = ["result", "is_scored", "score"]
+                    if show_doc_score:
+                        update_fields.append("documentation_score")
                     RequirementAssessment.objects.bulk_update(
                         assessments_to_update,
-                        ["result", "is_scored", "score"],
+                        update_fields,
                         batch_size=1000,
                     )
                     updated_count = len(assessments_to_update)
