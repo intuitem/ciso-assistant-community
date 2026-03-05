@@ -9,7 +9,13 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, modelName, modelDescription, clientSideToast, getStartedTrigger } from '$lib/utils/stores';
+	import {
+		pageTitle,
+		modelName,
+		modelDescription,
+		clientSideToast,
+		getStartedTrigger
+	} from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
@@ -17,10 +23,7 @@
 
 	import type { PageData, ActionData } from './$types';
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-	import {
-		getModalStore,
-		type ModalStore
-	} from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import {

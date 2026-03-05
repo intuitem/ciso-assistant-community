@@ -32,6 +32,8 @@ from core.serializers import (
     OrganisationObjectiveWriteSerializer,
     OrganisationIssueWriteSerializer,
 )
+from ebios_rm.models import EbiosRMStudy
+from ebios_rm.serializers import EbiosRMStudyWriteSerializer
 from privacy.models import Processing
 from privacy.serializers import ProcessingWriteSerializer
 from tprm.models import Entity
@@ -281,6 +283,7 @@ class PresetExecutor:
         "perimeter": Perimeter,
         "risk_assessment": RiskAssessment,
         "compliance_assessment": ComplianceAssessment,
+        "ebios_rm_study": EbiosRMStudy,
         "task_template": TaskTemplate,
         "organisation_objective": OrganisationObjective,
         "organisation_issue": OrganisationIssue,
@@ -437,6 +440,18 @@ class PresetExecutor:
                 serializer = FindingsAssessmentWriteSerializer(
                     data=data, context=context
                 )
+                serializer.is_valid(raise_exception=True)
+                obj = serializer.save()
+
+            elif obj_type == "ebios_rm_study":
+                matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+                data = {
+                    "folder": str(folder.id),
+                    "risk_matrix": str(matrix.id),
+                    "name": name,
+                    "description": description,
+                }
+                serializer = EbiosRMStudyWriteSerializer(data=data, context=context)
                 serializer.is_valid(raise_exception=True)
                 obj = serializer.save()
 

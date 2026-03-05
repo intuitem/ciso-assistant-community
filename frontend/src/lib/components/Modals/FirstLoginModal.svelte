@@ -81,10 +81,10 @@
 							<div
 								class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-transform duration-200 group-hover:scale-110
 								{isPreset
-								? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-md shadow-violet-200'
-								: i === 1
-									? 'bg-amber-100 text-amber-600'
-									: 'bg-gray-100 text-gray-500'}"
+									? 'bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white shadow-md shadow-violet-200'
+									: i === 1
+										? 'bg-amber-100 text-amber-600'
+										: 'bg-gray-100 text-gray-500'}"
 							>
 								{#if isLoading}
 									<i class="fa-solid fa-spinner fa-spin text-lg"></i>

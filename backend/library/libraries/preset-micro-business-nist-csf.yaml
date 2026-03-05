@@ -1,0 +1,176 @@
+urn: urn:intuitem:risk:preset:micro-business-nist-csf
+locale: en
+ref_id: preset-micro-business-nist-csf
+name: "Micro-Business — NIST CSF 2.0"
+description: "Lightweight cybersecurity baseline for very small organisations (< 50 employees). Uses the NIST Cybersecurity Framework 2.0 as a practical, risk-based starting point — no heavy compliance overhead."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "TPE — NIST CSF 2.0"
+    description: "Socle de cybersécurité léger pour les très petites entreprises (< 50 salariés). Utilise le NIST Cybersecurity Framework 2.0 comme point de départ pratique et basé sur les risques — sans surcharge de conformité."
+
+dependencies:
+  - urn:intuitem:risk:library:nist-csf-2.0
+  - urn:intuitem:risk:library:risk-matrix-3x3-mult
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - micro
+        - startup
+      industry:
+        - general
+      region:
+        - global
+      goal: security-baseline
+
+    feature_flags:
+      enable:
+        - compliance
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Initial Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-3x3-mult
+        ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques initiale"
+      - type: compliance_assessment
+        name: "NIST CSF 2.0 Assessment"
+        framework: urn:intuitem:risk:library:nist-csf-2.0
+        create_suggested_controls: true
+        ref: csf_audit
+        translations:
+          fr:
+            name: "Évaluation NIST CSF 2.0"
+
+      # --- Assets ---
+      - type: asset
+        name: "Office network"
+        description: "Internet connection, Wi-Fi router, and any local networking equipment."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          fr:
+            name: "Réseau du bureau"
+            description: "Connexion Internet, routeur Wi-Fi et tout équipement réseau local."
+      - type: asset
+        name: "Computers and mobile devices"
+        description: "Laptops, desktops, tablets, and smartphones used by staff."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          fr:
+            name: "Ordinateurs et appareils mobiles"
+            description: "Ordinateurs portables, fixes, tablettes et smartphones utilisés par le personnel."
+      - type: asset
+        name: "Email and collaboration"
+        description: "Email service and shared file storage (e.g. Google Workspace, Microsoft 365)."
+        asset_type: SP
+        ref: asset_email
+        translations:
+          fr:
+            name: "Messagerie et collaboration"
+            description: "Service de messagerie et stockage de fichiers partagé (ex. Google Workspace, Microsoft 365)."
+      - type: asset
+        name: "Business application"
+        description: "Main application used to run the business (invoicing, CRM, e-commerce, etc.)."
+        asset_type: SP
+        ref: asset_app
+        translations:
+          fr:
+            name: "Application métier"
+            description: "Application principale utilisée pour faire fonctionner l'activité (facturation, CRM, e-commerce, etc.)."
+      - type: asset
+        name: "Customer and business data"
+        description: "Customer records, financial data, contracts, and other critical business information."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          fr:
+            name: "Données clients et métier"
+            description: "Fichiers clients, données financières, contrats et autres informations critiques."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "Ransomware on business data"
+        description: "Ransomware encrypts files on computers and shared storage, blocking access to critical business data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
+        translations:
+          fr:
+            name: "Rançongiciel sur les données métier"
+            description: "Un rançongiciel chiffre les fichiers sur les ordinateurs et le stockage partagé, bloquant l'accès aux données critiques."
+      - type: risk_scenario
+        name: "Credential theft via phishing"
+        description: "An employee falls for a phishing email and discloses credentials, giving attackers access to email and business applications."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_email, asset_app]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-002]
+        translations:
+          fr:
+            name: "Vol d'identifiants par hameçonnage"
+            description: "Un employé se fait piéger par un email d'hameçonnage et divulgue ses identifiants, donnant accès à la messagerie et aux applications."
+      - type: risk_scenario
+        name: "Data loss from device theft"
+        description: "A laptop or phone is stolen or lost, exposing customer data and business files stored locally."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-020]
+        translations:
+          fr:
+            name: "Perte de données par vol d'appareil"
+            description: "Un ordinateur portable ou un téléphone est volé ou perdu, exposant les données clients et fichiers métier stockés localement."
+      - type: risk_scenario
+        name: "Internet outage or system failure"
+        description: "An internet outage or failure of the main business application disrupts operations."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_app]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        translations:
+          fr:
+            name: "Coupure Internet ou panne système"
+            description: "Une coupure Internet ou une panne de l'application métier principale perturbe l'activité."
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify your assets"
+          description: "Review and complete the list of devices, applications, and data that matter most to your business"
+          target_model: assets
+          translations:
+            fr:
+              title: "Identifier vos actifs"
+              description: "Examinez et complétez la liste des équipements, applications et données essentiels à votre activité"
+        - key: csf_assessment
+          title: "Assess your cybersecurity posture"
+          description: "Go through the NIST CSF 2.0 functions and assess where you stand today"
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "Évaluer votre posture cybersécurité"
+              description: "Parcourez les fonctions du NIST CSF 2.0 et évaluez votre situation actuelle"
+        - key: risk_assessment
+          title: "Conduct a risk assessment"
+          description: "Review the pre-created risk scenarios, adjust likelihood and impact, and add any missing risks"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener une analyse de risque"
+              description: "Examinez les scénarios de risque pré-créés, ajustez la vraisemblance et l'impact, et ajoutez les risques manquants"
+        - key: controls
+          title: "Implement and track security controls"
+          description: "Review the suggested controls, assign owners, and start implementing the most critical ones first"
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Examinez les mesures suggérées, assignez des responsables et commencez par les plus critiques"

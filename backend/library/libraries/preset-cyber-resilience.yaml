@@ -1,0 +1,231 @@
+urn: urn:intuitem:risk:preset:cyber-resilience
+locale: fr
+ref_id: preset-cyber-resilience
+name: "Programme de cyber-résilience"
+description: "Programme complet de cyber-résilience basé sur le guide ANSSI de maturité en gestion de crise et la norme ISO 22301. Couvre l'analyse d'impact métier (BIA), les actifs critiques, la gestion de crise et la continuité d'activité."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  en:
+    name: "Cyber Resilience Programme"
+    description: "Comprehensive cyber resilience programme based on the ANSSI crisis management maturity guide and ISO 22301. Covers business impact analysis (BIA), critical assets, crisis management, and business continuity."
+
+dependencies:
+  - urn:intuitem:risk:library:anssi-maturite-gestion-crise-1.0.2
+  - urn:intuitem:risk:library:iso22301-2019
+  - urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+      region:
+        - fr
+        - eu
+      goal: cyber-resilience
+
+    feature_flags:
+      enable:
+        - compliance
+        - bia
+        - incidents
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Analyse de risques résilience"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+        ref: main_ra
+        translations:
+          en:
+            name: "Resilience Risk Assessment"
+      - type: compliance_assessment
+        name: "Maturité gestion de crise ANSSI"
+        framework: urn:intuitem:risk:library:anssi-maturite-gestion-crise-1.0.2
+        create_suggested_controls: true
+        ref: anssi_crisis_audit
+        translations:
+          en:
+            name: "ANSSI Crisis Management Maturity"
+      - type: compliance_assessment
+        name: "Continuité d'activité ISO 22301"
+        framework: urn:intuitem:risk:library:iso22301-2019
+        ref: iso22301_audit
+        translations:
+          en:
+            name: "Business Continuity ISO 22301"
+
+      # --- Assets (critical for resilience) ---
+      - type: asset
+        name: "Infrastructure réseau"
+        description: "Infrastructure réseau principale incluant routeurs, commutateurs, pare-feu et connexions Internet — indispensable à la continuité des communications."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          en:
+            name: "Network infrastructure"
+            description: "Core network infrastructure including routers, switches, firewalls, and internet connections — essential for communications continuity."
+      - type: asset
+        name: "Système d'information métier"
+        description: "Applications métier principales (ERP, CRM, SI métier) et leurs bases de données, nécessaires au fonctionnement de l'activité."
+        asset_type: SP
+        ref: asset_business_system
+        translations:
+          en:
+            name: "Business information system"
+            description: "Primary business applications (ERP, CRM, business IS) and their databases, required for business operations."
+      - type: asset
+        name: "Messagerie et outils collaboratifs"
+        description: "Services de messagerie électronique, visioconférence et partage de documents — canaux de communication critiques en situation de crise."
+        asset_type: SP
+        ref: asset_comms
+        translations:
+          en:
+            name: "Email and collaboration tools"
+            description: "Email services, video conferencing, and document sharing — critical communication channels during a crisis."
+      - type: asset
+        name: "Systèmes de sauvegarde et de reprise"
+        description: "Infrastructure de sauvegarde, sites de reprise après sinistre et systèmes de basculement."
+        asset_type: SP
+        ref: asset_backup
+        translations:
+          en:
+            name: "Backup and recovery systems"
+            description: "Backup infrastructure, disaster recovery sites, and failover systems."
+      - type: asset
+        name: "Données métier critiques"
+        description: "Données essentielles à la continuité d'activité : données clients, données financières, données contractuelles et données de production."
+        asset_type: PR
+        ref: asset_critical_data
+        translations:
+          en:
+            name: "Critical business data"
+            description: "Data essential to business continuity: customer data, financial data, contractual data, and production data."
+      - type: asset
+        name: "Locaux et infrastructures physiques"
+        description: "Bâtiments, salles serveurs, alimentations électriques et systèmes de climatisation nécessaires au fonctionnement des systèmes d'information."
+        asset_type: SP
+        ref: asset_premises
+        translations:
+          en:
+            name: "Premises and physical infrastructure"
+            description: "Buildings, server rooms, power supplies, and cooling systems required for information system operations."
+
+      # --- Risk scenarios (resilience-focused) ---
+      - type: risk_scenario
+        name: "Attaque par rançongiciel paralysant l'activité"
+        description: "Un rançongiciel chiffre les systèmes métier et les sauvegardes, provoquant un arrêt prolongé de l'activité et nécessitant l'activation du plan de continuité."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_business_system, asset_backup]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
+        translations:
+          en:
+            name: "Ransomware attack paralysing operations"
+            description: "Ransomware encrypts business systems and backups, causing prolonged operational shutdown and requiring business continuity plan activation."
+      - type: risk_scenario
+        name: "Perte du site principal (sinistre physique)"
+        description: "Un incendie, une inondation ou un autre sinistre physique rend les locaux principaux et les équipements inaccessibles."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_premises, asset_network]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        translations:
+          en:
+            name: "Loss of primary site (physical disaster)"
+            description: "A fire, flood, or other physical disaster makes the primary premises and equipment inaccessible."
+      - type: risk_scenario
+        name: "Perte des communications et de la collaboration"
+        description: "La messagerie électronique et les outils de collaboration sont indisponibles, empêchant la coordination de la réponse de crise."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_comms]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-007]
+        translations:
+          en:
+            name: "Loss of communications and collaboration"
+            description: "Email and collaboration tools are unavailable, preventing crisis response coordination."
+      - type: risk_scenario
+        name: "Défaillance des sauvegardes lors de la reprise"
+        description: "Les sauvegardes sont corrompues, incomplètes ou trop anciennes pour permettre une reprise dans les délais acceptables."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_backup, asset_critical_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        translations:
+          en:
+            name: "Backup failure during recovery"
+            description: "Backups are corrupted, incomplete, or too old to allow recovery within acceptable timeframes."
+      - type: risk_scenario
+        name: "Fuite de données pendant la gestion de crise"
+        description: "Pendant la gestion d'une crise, des données sensibles sont exposées en raison de procédures d'urgence contournant les contrôles de sécurité habituels."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_critical_data, asset_business_system]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-019]
+        translations:
+          en:
+            name: "Data leak during crisis management"
+            description: "During crisis management, sensitive data is exposed because emergency procedures bypass normal security controls."
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identifier les actifs critiques"
+          description: "Cartographiez les systèmes, applications, données et infrastructures physiques essentiels à la continuité de votre activité"
+          target_model: assets
+          translations:
+            en:
+              title: "Identify critical assets"
+              description: "Map the systems, applications, data, and physical infrastructure essential to your business continuity"
+        - key: bia
+          title: "Réaliser l'analyse d'impact métier (BIA)"
+          description: "Évaluez l'impact de l'indisponibilité de chaque processus métier — définissez les DMIA (durée maximale d'interruption admissible) et PDMA (perte de données maximale admissible)"
+          target_model: assets
+          translations:
+            en:
+              title: "Conduct business impact analysis (BIA)"
+              description: "Assess the impact of unavailability for each business process — define MTD (maximum tolerable downtime) and RPO (recovery point objective)"
+        - key: anssi_crisis
+          title: "Évaluer la maturité en gestion de crise"
+          description: "Parcourez le référentiel ANSSI de maturité en gestion de crise cyber et évaluez votre niveau de préparation actuel"
+          target_model: compliance-assessments
+          target_ref: anssi_crisis_audit
+          translations:
+            en:
+              title: "Assess crisis management maturity"
+              description: "Go through the ANSSI cyber crisis management maturity framework and assess your current readiness level"
+        - key: iso22301
+          title: "Évaluer la conformité ISO 22301"
+          description: "Parcourez les exigences ISO 22301 pour structurer votre système de management de la continuité d'activité"
+          target_model: compliance-assessments
+          target_ref: iso22301_audit
+          translations:
+            en:
+              title: "Assess ISO 22301 compliance"
+              description: "Go through ISO 22301 requirements to structure your business continuity management system"
+        - key: risk_assessment
+          title: "Mener une analyse de risque"
+          description: "Examinez les scénarios de risque liés à la résilience, évaluez la vraisemblance et l'impact sur la continuité d'activité"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Conduct a risk assessment"
+              description: "Review the resilience-related risk scenarios, assess likelihood and impact on business continuity"
+        - key: controls
+          title: "Implémenter et suivre les mesures de sécurité"
+          description: "Examinez les mesures suggérées, assignez des responsables — concentrez-vous sur les plans de continuité, les procédures de crise et les capacités de reprise"
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Implement and track security controls"
+              description: "Review the suggested controls, assign owners — focus on continuity plans, crisis procedures, and recovery capabilities"
+        - key: exercise
+          title: "Planifier et conduire des exercices de crise"
+          description: "Organisez des exercices de crise réguliers pour tester vos plans, former vos équipes et identifier les axes d'amélioration"
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Plan and conduct crisis exercises"
+              description: "Organise regular crisis exercises to test your plans, train your teams, and identify improvement areas"

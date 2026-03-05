@@ -13,13 +13,7 @@
 
 	// Collect all unique region tags across presets
 	const allRegions: string[] = $derived(
-		[
-			...new Set(
-				data.presets.flatMap(
-					(p: any) => p.profile?.region ?? []
-				)
-			)
-		].sort()
+		[...new Set(data.presets.flatMap((p: any) => p.profile?.region ?? []))].sort()
 	);
 
 	const filteredPresets = $derived(
@@ -115,6 +109,7 @@
 	const OBJECT_TYPE_META: Record<string, { label: () => string; icon: string }> = {
 		risk_assessment: { label: () => m.riskAssessment(), icon: 'fa-chart-line' },
 		compliance_assessment: { label: () => m.complianceAssessment(), icon: 'fa-list-check' },
+		ebios_rm_study: { label: () => m.ebiosRmStudy(), icon: 'fa-shield-halved' },
 		task_template: { label: () => m.taskTemplate(), icon: 'fa-calendar-check' },
 		organisation_objective: { label: () => m.organisationObjective(), icon: 'fa-bullseye' },
 		organisation_issue: { label: () => m.organisationIssue(), icon: 'fa-triangle-exclamation' },
@@ -185,9 +180,7 @@
 							hover:shadow-md hover:border-indigo-200 transition-all duration-200"
 					>
 						<!-- Progress accent bar at top -->
-						<div
-							class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-gray-100 overflow-hidden"
-						>
+						<div class="absolute top-0 left-0 right-0 h-1 rounded-t-xl bg-gray-100 overflow-hidden">
 							<div
 								class="h-full rounded-t-xl transition-all duration-500 ease-out"
 								class:bg-indigo-500={progress < 100}
@@ -307,7 +300,8 @@
 								: 'bg-white text-gray-500 border border-gray-200 hover:border-gray-300 hover:text-gray-700'}"
 							onclick={() => (activeFilter = region)}
 						>
-							{REGION_FLAGS[region] ?? ''} {REGION_LABELS[region] ?? region.toUpperCase()}
+							{REGION_FLAGS[region] ?? ''}
+							{REGION_LABELS[region] ?? region.toUpperCase()}
 						</button>
 					{/each}
 				</div>
@@ -341,10 +335,7 @@
 									{preset.name}
 								</h3>
 								{#if preset.description}
-									<p
-										class="text-sm text-gray-400 mt-1"
-										class:line-clamp-2={!isExpanded}
-									>
+									<p class="text-sm text-gray-400 mt-1" class:line-clamp-2={!isExpanded}>
 										{preset.description}
 									</p>
 								{/if}
@@ -378,9 +369,7 @@
 										{@const meta = OBJECT_TYPE_META[obj.type]}
 										{#if meta}
 											<div class="flex items-center gap-1.5 text-xs text-gray-500">
-												<i
-													class="fa-solid {meta.icon} w-3.5 text-center text-gray-400"
-												></i>
+												<i class="fa-solid {meta.icon} w-3.5 text-center text-gray-400"></i>
 												<span
 													>{obj.count}
 													{meta.label()}{obj.count > 1 ? 's' : ''}</span
