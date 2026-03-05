@@ -3,7 +3,7 @@ locale: fr
 ref_id: preset-french-homologation
 name: "Homologation de sécurité"
 description: "Parcours complet d'homologation de sécurité d'un système d'information conformément au cadre français. Inclut l'étude EBIOS RM, le guide d'hygiène ANSSI comme socle de sécurité, et la checklist du dossier d'homologation pour piloter la démarche de bout en bout."
-version: 2
+version: 1
 provider: intuitem
 packager: intuitem
 translations:

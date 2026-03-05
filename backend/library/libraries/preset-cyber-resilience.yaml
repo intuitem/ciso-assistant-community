@@ -3,7 +3,7 @@ locale: fr
 ref_id: preset-cyber-resilience
 name: "Programme de cyber-résilience"
 description: "Programme complet de cyber-résilience basé sur le guide ANSSI de maturité en gestion de crise et la norme ISO 22301. Couvre l'analyse d'impact métier (BIA), les actifs critiques, la gestion de crise et la continuité d'activité."
-version: 4
+version: 1
 provider: intuitem
 packager: intuitem
 translations:
