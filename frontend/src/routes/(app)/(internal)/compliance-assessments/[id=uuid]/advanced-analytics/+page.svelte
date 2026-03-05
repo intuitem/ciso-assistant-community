@@ -2,6 +2,7 @@
 	import DonutChart from '$lib/components/Chart/DonutChart.svelte';
 	import StackedBarsNormalized from '$lib/components/Chart/StackedBarsNormalized.svelte';
 	import BarChart from '$lib/components/Chart/BarChart.svelte';
+	import RadarChart from '$lib/components/Chart/RadarChart.svelte';
 	import LoadingSpinner from '$lib/components/utils/LoadingSpinner.svelte';
 	import { complianceResultColorMap } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -228,6 +229,23 @@
 							seriesNames={RESULT_KEYS.map((k) => safeTranslate(k))}
 						/>
 					</div>
+					{@const scoredSections = sections.filter((s: any) => s.score !== null && s.scored_count > 0)}
+					{#if scoredSections.length > 0}
+						{@const maxScore = data.compliance_assessment.max_score ?? 100}
+						<div class="mt-5 border-t border-slate-100 pt-5">
+							<div class="h-[400px]">
+								<RadarChart
+									name="section_scores_radar"
+									labels={scoredSections.map((s: any) => ({
+										name: (s.ref_id ? s.ref_id + ' ' : '') + s.name,
+										max: maxScore
+									}))}
+									values={scoredSections.map((s: any) => s.score)}
+									height="h-full"
+								/>
+							</div>
+						</div>
+					{/if}
 					{#if sections.some((s: any) => s.scored_count > 0)}
 						<div class="mt-5 border-t border-slate-100 pt-5">
 							<table class="w-full text-sm">

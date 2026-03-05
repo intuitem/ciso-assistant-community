@@ -77,18 +77,32 @@ class Command(BaseCommand):
                     action = "set to compliant"
 
                 else:  # random
-                    # Randomize results using bulk_update
+                    # Randomize results and scores using bulk_update
+                    min_score = (
+                        compliance_assessment.min_score
+                        if compliance_assessment.min_score is not None
+                        else 0
+                    )
+                    max_score = (
+                        compliance_assessment.max_score
+                        if compliance_assessment.max_score is not None
+                        else 100
+                    )
                     assessments_to_update = list(requirement_assessments)
                     for req_assessment in assessments_to_update:
                         req_assessment.result = random.choice(result_choices)
+                        req_assessment.is_scored = True
+                        req_assessment.score = random.randint(min_score, max_score)
                         logger.debug(
-                            f"Will update RequirementAssessment {req_assessment.id} with result: {req_assessment.result}"
+                            f"Will update RequirementAssessment {req_assessment.id} with result: {req_assessment.result}, score: {req_assessment.score}"
                         )
                     RequirementAssessment.objects.bulk_update(
-                        assessments_to_update, ["result"], batch_size=1000
+                        assessments_to_update,
+                        ["result", "is_scored", "score"],
+                        batch_size=1000,
                     )
                     updated_count = len(assessments_to_update)
-                    action = "randomized"
+                    action = f"randomized (scores: {min_score}-{max_score})"
 
             self.stdout.write(
                 self.style.SUCCESS(
