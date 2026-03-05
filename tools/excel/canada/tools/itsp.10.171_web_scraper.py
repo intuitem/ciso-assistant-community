@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup, NavigableString, Tag
+import argparse
 import re
 import pandas as pd
 import string
@@ -625,10 +626,58 @@ def build_meta_df(rows: list[tuple[str, str]]) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def get_localized_names(requirements_only: bool) -> tuple[str, str]:
+    if requirements_only:
+        return f"{FR_NAME} - Exigences", f"{EN_NAME} - Requirements"
+    return FR_NAME, EN_NAME
+
+
+def build_library_meta_rows(requirements_only: bool) -> list[tuple[str, str]]:
+    fr_name, en_name = get_localized_names(requirements_only)
+    rows = []
+    for key, value in LIBRARY_META_ROWS:
+        if key == "name":
+            rows.append((key, fr_name))
+        elif key == "name[en]":
+            rows.append((key, en_name))
+        else:
+            rows.append((key, value))
+    return rows
+
+
+def build_fwk_meta_rows(requirements_only: bool) -> list[tuple[str, str]]:
+    fr_name, en_name = get_localized_names(requirements_only)
+    rows = []
+    for key, value in FWK_META_ROWS:
+        if key == "name":
+            rows.append((key, fr_name))
+        elif key == "name[en]":
+            rows.append((key, en_name))
+        else:
+            rows.append((key, value))
+    return rows
+
+
+def apply_requirements_only_mode(
+    df: pd.DataFrame, start_ref_id: str = "3.1"
+) -> pd.DataFrame:
+    start_matches = df.index[df["ref_id"] == start_ref_id].tolist()
+    if not start_matches:
+        raise ValueError(f'ref_id "{start_ref_id}" introuvable pour le mode requirements-only.')
+
+    start_idx = start_matches[0]
+    filtered = df.loc[start_idx:].copy()
+    filtered["depth"] = (
+        pd.to_numeric(filtered["depth"], errors="coerce").fillna(1).astype(int) - 1
+    ).clip(lower=1)
+    return filtered.reset_index(drop=True)
+
+
 def build_excel_from_urls(
     source_url_fr: str = SOURCE_URL_FR,
     source_url_en: str = SOURCE_URL_EN,
     output_xlsx: str = OUTPUT_XLSX,
+    requirements_only: bool = False,
 ) -> str:
     print("⌛ Downloading pages...")
     html_fr = fetch_html(source_url_fr, progress_label="Downloading [FR] page")
@@ -659,11 +708,15 @@ def build_excel_from_urls(
             "annotation[en]",
         ]
     ]
+
+    if requirements_only:
+        df = apply_requirements_only_mode(df, start_ref_id="3.1")
+
     df = normalize_assessable_flag(df)
     df = add_review_flag(df)
 
-    library_meta_df = build_meta_df(LIBRARY_META_ROWS)
-    fwk_meta_df = build_meta_df(FWK_META_ROWS)
+    library_meta_df = build_meta_df(build_library_meta_rows(requirements_only))
+    fwk_meta_df = build_meta_df(build_fwk_meta_rows(requirements_only))
 
     with pd.ExcelWriter(output_xlsx, engine="openpyxl") as writer:
         library_meta_df.to_excel(
@@ -676,7 +729,27 @@ def build_excel_from_urls(
 
 
 def main():
-    output_path = build_excel_from_urls()
+    parser = argparse.ArgumentParser(
+        description="Scrape ITSP.10.171 (FR/EN) and generate framework Excel."
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default=OUTPUT_XLSX,
+        help=f"Output Excel file path (default: {OUTPUT_XLSX})",
+    )
+    parser.add_argument(
+        "-r",
+        "--requirements-only",
+        action="store_true",
+        help='Keep only rows from ref_id "3.1" and shift depth to depth-1.',
+    )
+    args = parser.parse_args()
+
+    output_path = build_excel_from_urls(
+        output_xlsx=args.output,
+        requirements_only=args.requirements_only,
+    )
     print(f'✅ Export complete: "{output_path}"')
 
 
