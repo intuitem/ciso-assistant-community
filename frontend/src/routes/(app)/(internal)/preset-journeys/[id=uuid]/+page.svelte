@@ -270,20 +270,24 @@
 				<div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-gray-600">
 					<span class="flex items-center gap-1.5">
 						<span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-						{m.done()} {stepCounts.done}
+						{m.done()}
+						{stepCounts.done}
 					</span>
 					<span class="flex items-center gap-1.5">
 						<span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-						{m.inProgress()} {stepCounts.in_progress}
+						{m.inProgress()}
+						{stepCounts.in_progress}
 					</span>
 					<span class="flex items-center gap-1.5">
 						<span class="inline-block w-2 h-2 rounded-full bg-gray-300"></span>
-						{m.skipped()} {stepCounts.skipped}
+						{m.skipped()}
+						{stepCounts.skipped}
 					</span>
 					<span class="flex items-center gap-1.5">
 						<span class="inline-block w-2 h-2 rounded-full bg-gray-100 border border-gray-300"
 						></span>
-						{m.notStarted()} {stepCounts.not_started}
+						{m.notStarted()}
+						{stepCounts.not_started}
 					</span>
 				</div>
 			</div>
@@ -298,13 +302,21 @@
 						<!-- Timeline connector (spans full row height including padding) -->
 						{#if !isLast}
 							<div
-								class="absolute left-[0.8125rem] top-[1.75rem] bottom-0 w-0.5 {step.status === 'done' ? 'bg-green-500' : 'bg-gray-400'}"
+								class="absolute left-[0.8125rem] top-[1.75rem] bottom-0 w-0.5 {step.status ===
+								'done'
+									? 'bg-green-500'
+									: 'bg-gray-400'}"
 							></div>
 						{/if}
 						<!-- Timeline dot -->
 						<div class="relative flex flex-col items-center" style="min-width: 2rem;">
 							<div
-								class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-semibold {style.dot} {step.status === 'done' ? 'text-white' : step.status === 'in_progress' ? 'text-white' : 'text-gray-500 bg-white'}"
+								class="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-semibold {style.dot} {step.status ===
+								'done'
+									? 'text-white'
+									: step.status === 'in_progress'
+										? 'text-white'
+										: 'text-gray-500 bg-white'}"
 							>
 								{#if step.status === 'done'}
 									<i class="fa-solid fa-check text-[10px]"></i>
@@ -317,7 +329,14 @@
 						</div>
 
 						<!-- Step card -->
-						<div class="flex-1 min-w-0 rounded-lg border bg-white shadow-sm {step.status === 'in_progress' ? 'border-amber-200' : step.status === 'done' ? 'border-green-200' : 'border-gray-200'} p-3.5">
+						<div
+							class="flex-1 min-w-0 rounded-lg border bg-white shadow-sm {step.status ===
+							'in_progress'
+								? 'border-amber-200'
+								: step.status === 'done'
+									? 'border-green-200'
+									: 'border-gray-200'} p-3.5"
+						>
 							<div class="flex items-start gap-3">
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2">
@@ -327,7 +346,9 @@
 												class="font-medium text-gray-800 hover:text-violet-600 transition-colors"
 											>
 												{step.title}
-												<i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 opacity-40"></i>
+												<i
+													class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 opacity-40"
+												></i>
 											</a>
 										{:else}
 											<h4 class="font-medium text-gray-800">{step.title}</h4>
