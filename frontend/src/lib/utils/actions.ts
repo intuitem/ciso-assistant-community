@@ -86,7 +86,11 @@ export async function handleErrorResponse({
 		return message(form, { error: res.error || res.detail });
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, safeTranslate(value));
+		if (Array.isArray(value)) {
+			value.forEach((item: string) => setError(form, key, safeTranslate(item)));
+		} else {
+			setError(form, key, safeTranslate(value));
+		}
 	});
 	return message(form, { status: response.status });
 }

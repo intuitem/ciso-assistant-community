@@ -2152,6 +2152,7 @@
 	"logicOperator": "Opérateur logique",
 	"logicOperatorHelpText": "Permet de combiner plusieurs antécédents",
 	"isHighlighted": "Mise en évidence",
+	"killChainConsistencyError": "La modification de la phase d'attaque romprait la cohérence des chaînes d'attaque dans les modes opératoires suivants :",
 	"killChains": "Enchaînement",
 	"killChain": "Étape de l'enchaînement",
 	"associatedKillChains": "Étapes",

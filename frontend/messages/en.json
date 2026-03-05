@@ -2249,6 +2249,7 @@
 	"logicOperator": "Logic operator",
 	"logicOperatorHelpText": "Antecedents (two or more) can be grouped using logical operations.",
 	"isHighlighted": "Is highlighted",
+	"killChainConsistencyError": "Changing the attack stage would break kill chain consistency in the following operating modes:",
 	"killChains": "Kill chain",
 	"killChain": "Kill chain step",
 	"associatedKillChains": "Kill chain steps",
