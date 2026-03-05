@@ -185,7 +185,7 @@
 				<div class="flex-1 min-w-0">
 					<h2 class="text-xl font-semibold">{data.journey.name}</h2>
 					{#if data.journey.description}
-						<p class="text-sm text-gray-400">{data.journey.description}</p>
+						<p class="text-sm text-gray-600">{data.journey.description}</p>
 					{/if}
 				</div>
 				{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
