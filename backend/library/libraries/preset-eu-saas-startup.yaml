@@ -304,22 +304,22 @@ objects:
               title: "Gérer vos fournisseurs"
               description: "Examinez les entités fournisseurs pré-créées, ajoutez celles manquantes et créez des évaluations en utilisant le cadre de due diligence pour évaluer la posture sécurité de chaque fournisseur."
         - key: risk_scenarios
-          title: "Create risk scenarios"
-          description: "Combine threats with assets to identify what could go wrong"
+          title: "Conduct a risk assessment"
+          description: "Combine threats with assets to identify what could go wrong, assess likelihood and impact"
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
-              title: "Créer des scénarios de risque"
-              description: "Combinez les menaces avec les actifs pour identifier ce qui pourrait mal tourner"
+              title: "Mener une analyse de risque"
+              description: "Combinez les menaces avec les actifs pour identifier ce qui pourrait mal tourner, évaluez la vraisemblance et l'impact"
         - key: controls
-          title: "Define controls"
-          description: "Create applied controls to mitigate your risk scenarios"
+          title: "Implement and track security controls"
+          description: "Create applied controls to mitigate your risk scenarios and track their progress"
           target_model: applied-controls
           translations:
             fr:
-              title: "Définir les mesures"
-              description: "Créez des mesures appliquées pour atténuer vos scénarios de risque"
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Créez des mesures appliquées pour atténuer vos scénarios de risque et suivez leur avancement"
         - key: iso_compliance
           title: "Assess ISO 27001 compliance"
           description: "Go through requirements and map your controls"

@@ -144,22 +144,22 @@ objects:
               title: "\xC9valuer la conformit\xE9 CyFun 2025"
               description: "Parcourez les exigences du cadre CyberFundamentals 2025 et \xE9valuez votre posture de s\xE9curit\xE9 actuelle par rapport au socle CCB."
         - key: risk_scenarios
-          title: "Conduct risk assessment"
+          title: "Conduct a risk assessment"
           description: "Create risk scenarios by combining threats with your assets, assess likelihood and impact."
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
-              title: "Conduire l'analyse de risques"
-              description: "Cr\xE9ez des sc\xE9narios de risque en combinant les menaces avec vos actifs, \xE9valuez la vraisemblance et l'impact."
+              title: "Mener une analyse de risque"
+              description: "Créez des scénarios de risque en combinant les menaces avec vos actifs, évaluez la vraisemblance et l'impact."
         - key: controls
-          title: "Define security controls"
-          description: "Create applied controls to address identified risks and compliance gaps from the CyFun assessment."
+          title: "Implement and track security controls"
+          description: "Create applied controls to address identified risks and compliance gaps from the CyFun assessment, and track their progress."
           target_model: applied-controls
           translations:
             fr:
-              title: "D\xE9finir les mesures de s\xE9curit\xE9"
-              description: "Cr\xE9ez des mesures appliqu\xE9es pour traiter les risques identifi\xE9s et les \xE9carts de conformit\xE9 de l'\xE9valuation CyFun."
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Créez des mesures appliquées pour traiter les risques identifiés et les écarts de conformité de l'évaluation CyFun, et suivez leur avancement."
         - key: processings
           title: "Map your data processings"
           description: "Document your processing activities as required by GDPR Article 30 — what personal data you process, why, and how."

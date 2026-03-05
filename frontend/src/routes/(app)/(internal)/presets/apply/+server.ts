@@ -6,9 +6,15 @@ export const POST: RequestHandler = async ({ request, fetch }) => {
 	const body = await request.json();
 	const { preset_id, folder_name, folder_id } = body;
 
+	const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+	const acceptLanguage = request.headers.get('Accept-Language');
+	if (acceptLanguage) {
+		headers['Accept-Language'] = acceptLanguage;
+	}
+
 	const response = await fetch(`${BASE_API_URL}/stored-libraries/${preset_id}/apply/`, {
 		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
+		headers,
 		body: JSON.stringify({ folder_name, folder_id })
 	});
 

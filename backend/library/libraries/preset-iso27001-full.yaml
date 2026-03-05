@@ -232,14 +232,14 @@ objects:
               title: "\u00c9valuer la conformit\u00e9 ISO 27001"
               description: "Parcourez chaque exigence ISO 27001, liez les preuves et les contr\u00f4les, et \u00e9valuez votre \u00e9tat de conformit\u00e9 actuel."
         - key: risk_assessment
-          title: "Conduct risk assessment"
+          title: "Conduct a risk assessment"
           description: "Create risk scenarios by combining threats with assets, assess likelihood and impact, and prioritise risks for treatment."
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
-              title: "Conduire l\u2019analyse de risques"
-              description: "Cr\u00e9ez des sc\u00e9narios de risque en combinant les menaces avec les actifs, \u00e9valuez la vraisemblance et l\u2019impact, et priorisez les risques \u00e0 traiter."
+              title: "Mener une analyse de risque"
+              description: "Créez des scénarios de risque en combinant les menaces avec les actifs, évaluez la vraisemblance et l'impact, et priorisez les risques à traiter."
         - key: risk_treatment
           title: "Plan risk treatment"
           description: "Review the auto-created controls from ISO 27001 Annex A, assign owners, and define implementation plans for each applicable control."

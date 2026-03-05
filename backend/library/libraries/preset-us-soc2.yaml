@@ -184,14 +184,14 @@ objects:
               title: "\xC9valuer les crit\xE8res de services de confiance SOC 2"
               description: "Parcourez les crit\xE8res de services de confiance SOC 2, examinez les contr\xF4les auto-cr\xE9\xE9s et \xE9valuez votre \xE9tat de conformit\xE9 actuel."
         - key: risk_assessment
-          title: "Conduct risk assessment"
+          title: "Conduct a risk assessment"
           description: "Identify threats and vulnerabilities, create risk scenarios, and assess likelihood and impact to prioritise remediation."
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
-              title: "Conduire l\u2019analyse de risques"
-              description: "Identifiez les menaces et vuln\xE9rabilit\xE9s, cr\xE9ez des sc\xE9narios de risque et \xE9valuez la vraisemblance et l\u2019impact pour prioriser la rem\xE9diation."
+              title: "Mener une analyse de risque"
+              description: "Identifiez les menaces et vulnérabilités, créez des scénarios de risque et évaluez la vraisemblance et l'impact pour prioriser la remédiation."
         - key: risk_treatment
           title: "Implement controls"
           description: "Review the auto-created controls from SOC 2 criteria, assign owners, set implementation status, and document control descriptions."

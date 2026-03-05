@@ -273,70 +273,70 @@ objects:
     journey:
       steps:
         - key: assets
-          title: "Identify your assets"
-          description: "List primary and supporting assets in your information system"
+          title: "Identifier vos actifs"
+          description: "Listez les actifs primaires et supports de votre système d'information"
           target_model: assets
           translations:
-            fr:
-              title: "Identifier vos actifs"
-              description: "Listez les actifs primaires et supports de votre système d'information"
+            en:
+              title: "Identify your assets"
+              description: "List primary and supporting assets in your information system"
         - key: anssi_hygiene
-          title: "Assess ANSSI Hygiene compliance"
-          description: "Go through the 42 ANSSI hygiene measures and assess your current status"
+          title: "Évaluer la conformité ANSSI Hygiène"
+          description: "Parcourez les 42 mesures d'hygiène ANSSI et évaluez votre état actuel"
           target_model: compliance-assessments
           target_ref: anssi_audit
           translations:
-            fr:
-              title: "Évaluer la conformité ANSSI Hygiène"
-              description: "Parcourez les 42 mesures d'hygiène ANSSI et évaluez votre état actuel"
+            en:
+              title: "Assess ANSSI Hygiene compliance"
+              description: "Go through the 42 ANSSI hygiene measures and assess your current status"
         - key: risk_scenarios
-          title: "Create risk scenarios"
-          description: "Identify risks by combining threats with your assets"
+          title: "Mener une analyse de risque"
+          description: "Identifiez les risques en combinant les menaces avec vos actifs, évaluez la vraisemblance et l'impact"
           target_model: risk-assessments
           target_ref: main_ra
           translations:
-            fr:
-              title: "Créer des scénarios de risque"
-              description: "Identifiez les risques en combinant les menaces avec vos actifs"
+            en:
+              title: "Conduct a risk assessment"
+              description: "Identify risks by combining threats with your assets, assess likelihood and impact"
         - key: controls
-          title: "Define security controls"
-          description: "Create applied controls to address identified risks and compliance gaps"
+          title: "Implémenter et suivre les mesures de sécurité"
+          description: "Créez des mesures appliquées pour traiter les risques identifiés et les écarts de conformité, et suivez leur avancement"
           target_model: applied-controls
           translations:
-            fr:
-              title: "Définir les mesures de sécurité"
-              description: "Créez des mesures appliquées pour traiter les risques identifiés et les écarts de conformité"
+            en:
+              title: "Implement and track security controls"
+              description: "Create applied controls to address identified risks and compliance gaps, and track their progress"
         - key: processings
-          title: "Map your data processings"
-          description: "Review and complete the record of processing activities required by GDPR Article 30 — document what personal data you process, why, and how."
+          title: "Cartographier vos traitements de données"
+          description: "Examinez et complétez le registre des activités de traitement exigé par l'article 30 du RGPD — documentez quelles données personnelles vous traitez, pourquoi et comment."
           target_model: processings
           translations:
-            fr:
-              title: "Cartographier vos traitements de données"
-              description: "Examinez et complétez le registre des activités de traitement exigé par l'article 30 du RGPD — documentez quelles données personnelles vous traitez, pourquoi et comment."
+            en:
+              title: "Map your data processings"
+              description: "Review and complete the record of processing activities required by GDPR Article 30 — document what personal data you process, why, and how."
         - key: vendors
-          title: "Manage your vendors"
-          description: "Review the pre-created vendor entities, add any missing ones, and create entity assessments using the due diligence framework to evaluate each vendor's security posture."
+          title: "Gérer vos fournisseurs"
+          description: "Examinez les entités fournisseurs pré-créées, ajoutez celles manquantes et créez des évaluations en utilisant le cadre de due diligence pour évaluer la posture sécurité de chaque fournisseur."
           target_model: entities
           translations:
-            fr:
-              title: "Gérer vos fournisseurs"
-              description: "Examinez les entités fournisseurs pré-créées, ajoutez celles manquantes et créez des évaluations en utilisant le cadre de due diligence pour évaluer la posture sécurité de chaque fournisseur."
+            en:
+              title: "Manage your vendors"
+              description: "Review the pre-created vendor entities, add any missing ones, and create entity assessments using the due diligence framework to evaluate each vendor's security posture."
         - key: gdpr_compliance
-          title: "Assess GDPR compliance"
-          description: "Review GDPR requirements against your practices"
+          title: "Évaluer la conformité RGPD"
+          description: "Passez en revue les exigences du RGPD par rapport à vos pratiques"
           target_model: compliance-assessments
           target_ref: gdpr_audit
           translations:
-            fr:
-              title: "Évaluer la conformité RGPD"
-              description: "Passez en revue les exigences du RGPD par rapport à vos pratiques"
+            en:
+              title: "Assess GDPR compliance"
+              description: "Review GDPR requirements against your practices"
         - key: findings
-          title: "Track pentest and audit findings"
-          description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
+          title: "Suivre les résultats de tests et d'audits"
+          description: "Importez ou créez des résultats de tests d'intrusion, de scans de vulnérabilités et d'audits. Attribuez des responsables, définissez des priorités et suivez la remédiation."
           target_model: findings-assessments
           target_ref: pentest_findings
           translations:
-            fr:
-              title: "Suivre les résultats de tests et d'audits"
-              description: "Importez ou créez des résultats de tests d'intrusion, de scans de vulnérabilités et d'audits. Attribuez des responsables, définissez des priorités et suivez la remédiation."
+            en:
+              title: "Track pentest and audit findings"
+              description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."

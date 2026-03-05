@@ -2948,9 +2948,14 @@ class FindingReadSerializer(FindingWriteSerializer):
 
 
 class PresetJourneyStepReadSerializer(BaseModelSerializer):
+    title = serializers.CharField(source="get_title_translated")
+    description = serializers.CharField(
+        source="get_description_translated", allow_blank=True
+    )
+
     class Meta:
         model = PresetJourneyStep
-        fields = "__all__"
+        exclude = ["translations"]
 
 
 class PresetJourneyStepWriteSerializer(BaseModelSerializer):

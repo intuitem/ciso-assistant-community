@@ -8365,6 +8365,7 @@ class PresetJourneyStep(AbstractBaseModel):
     order = models.IntegerField()
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
+    translations = models.JSONField(null=True, blank=True)
     target_model = models.CharField(max_length=100, blank=True, null=True)
     target_ref = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(
@@ -8379,6 +8380,22 @@ class PresetJourneyStep(AbstractBaseModel):
     class Meta:
         ordering = ["order"]
         unique_together = [["journey", "key"]]
+
+    @property
+    def get_title_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("title", self.title)
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("description", self.description)
 
     def __str__(self):
         return f"{self.journey.name} - {self.title}"

@@ -161,8 +161,9 @@ class PresetExecutor:
             if key in existing_steps:
                 step = existing_steps[key]
                 step.order = order
-                step.title = self._tr(step_def, "title")
-                step.description = self._tr(step_def, "description")
+                step.title = step_def.get("title", "")
+                step.description = step_def.get("description", "")
+                step.translations = step_def.get("translations")
                 step.target_model = step_def.get("target_model")
                 step.target_ref = resolved_ref
                 to_update.append(step)
@@ -171,8 +172,9 @@ class PresetExecutor:
                     journey=journey,
                     key=key,
                     order=order,
-                    title=self._tr(step_def, "title"),
-                    description=self._tr(step_def, "description"),
+                    title=step_def.get("title", ""),
+                    description=step_def.get("description", ""),
+                    translations=step_def.get("translations"),
                     target_model=step_def.get("target_model"),
                     target_ref=resolved_ref,
                     status=PresetJourneyStep.Status.NOT_STARTED,
@@ -181,7 +183,14 @@ class PresetExecutor:
         if to_update:
             PresetJourneyStep.objects.bulk_update(
                 to_update,
-                ["order", "title", "description", "target_model", "target_ref"],
+                [
+                    "order",
+                    "title",
+                    "description",
+                    "translations",
+                    "target_model",
+                    "target_ref",
+                ],
             )
 
         # Delete orphaned steps
@@ -526,8 +535,9 @@ class PresetExecutor:
                 journey=journey,
                 key=step_def["key"],
                 order=order,
-                title=self._tr(step_def, "title"),
-                description=self._tr(step_def, "description"),
+                title=step_def.get("title", ""),
+                description=step_def.get("description", ""),
+                translations=step_def.get("translations"),
                 target_model=step_def.get("target_model"),
                 target_ref=resolved_ref,
                 status=PresetJourneyStep.Status.NOT_STARTED,
