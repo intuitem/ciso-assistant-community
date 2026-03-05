@@ -2975,10 +2975,19 @@ class PresetJourneyStepWriteSerializer(BaseModelSerializer):
 class PresetJourneyReadSerializer(BaseModelSerializer):
     steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
     folder = FieldsRelatedField()
+    latest_version = serializers.SerializerMethodField()
 
     class Meta:
         model = PresetJourney
         fields = "__all__"
+
+    def get_latest_version(self, obj):
+        return (
+            StoredLibrary.objects.filter(urn=obj.urn)
+            .order_by("-version")
+            .values_list("version", flat=True)
+            .first()
+        )
 
 
 class PresetJourneyWriteSerializer(BaseModelSerializer):

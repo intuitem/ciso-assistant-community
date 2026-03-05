@@ -3594,5 +3594,11 @@
 	"noActiveJourneys": "No active journeys yet. Apply a preset to begin.",
 	"startStep": "Start",
 	"goToStep": "Go to",
-	"journeyProgress": "Journey Progress"
+	"journeyProgress": "Journey Progress",
+	"upgradeAvailable": "Upgrade available",
+	"upgradeJourney": "Upgrade journey",
+	"journeyUpgraded": "Journey upgraded successfully",
+	"alreadyUpToDate": "Already up to date",
+	"journeyNotFound": "Journey not found.",
+	"stats": "Stats"
 }

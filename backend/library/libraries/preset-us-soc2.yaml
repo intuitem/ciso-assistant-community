@@ -3,14 +3,19 @@ locale: en
 ref_id: preset-us-soc2
 name: US Company - SOC 2
 description: SOC 2 Type II readiness journey for US companies. Covers trust services criteria (security, availability, processing integrity, confidentiality, privacy), vendor management, and a guided path to audit readiness.
-version: 2
+version: 1
 provider: intuitem
 packager: intuitem
+translations:
+  fr:
+    name: "Entreprise am\xE9ricaine - SOC 2"
+    description: "Parcours de pr\xE9paration SOC 2 Type II pour les entreprises am\xE9ricaines. Couvre les crit\xE8res de services de confiance (s\xE9curit\xE9, disponibilit\xE9, int\xE9grit\xE9 du traitement, confidentialit\xE9, vie priv\xE9e), la gestion des fournisseurs et un chemin guid\xE9 vers la pr\xE9paration \xE0 l\u2019audit."
 
 dependencies:
   - urn:intuitem:risk:library:soc2-2017-rev-2022
   - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
   - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
 
 objects:
   preset:
@@ -37,21 +42,35 @@ objects:
         name: "Information Security Risk Assessment"
         risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
         ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques s\xE9curit\xE9 de l\u2019information"
       - type: compliance_assessment
         name: "SOC 2 Type II Readiness Assessment"
         framework: urn:intuitem:risk:library:soc2-2017-rev-2022
         create_suggested_controls: true
         ref: soc2_audit
+        translations:
+          fr:
+            name: "\xC9valuation de pr\xE9paration SOC 2 Type II"
 
       # --- Organisation objectives ---
       - type: organisation_objective
         name: "Achieve SOC 2 Type II attestation"
         description: "Obtain a SOC 2 Type II report from a licensed CPA firm demonstrating operating effectiveness of controls over a review period."
         status: in_progress
+        translations:
+          fr:
+            name: "Obtenir l\u2019attestation SOC 2 Type II"
+            description: "Obtenir un rapport SOC 2 Type II d\u2019un cabinet CPA agr\xE9\xE9 d\xE9montrant l\u2019efficacit\xE9 op\xE9rationnelle des contr\xF4les sur une p\xE9riode d\u2019examen."
       - type: organisation_objective
         name: "Establish continuous monitoring"
         description: "Implement continuous monitoring of security controls to maintain SOC 2 compliance between audit periods."
         status: draft
+        translations:
+          fr:
+            name: "Mettre en place une surveillance continue"
+            description: "Impl\xE9menter une surveillance continue des contr\xF4les de s\xE9curit\xE9 pour maintenir la conformit\xE9 SOC 2 entre les p\xE9riodes d\u2019audit."
 
       # --- Task templates ---
       - type: task_template
@@ -61,6 +80,10 @@ objects:
         schedule:
           interval: 3
           frequency: MONTHLY
+        translations:
+          fr:
+            name: "Revue des droits d\u2019acc\xE8s"
+            description: "Passer en revue les droits d\u2019acc\xE8s des utilisateurs sur tous les syst\xE8mes critiques pour garantir le moindre privil\xE8ge et la r\xE9vocation en temps utile (CC6.1, CC6.2, CC6.3)."
       - type: task_template
         name: "Vendor security review"
         description: "Review the security posture of critical vendors and update entity assessments with current due diligence information (CC9.2)."
@@ -68,6 +91,10 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Revue de s\xE9curit\xE9 des fournisseurs"
+            description: "Passer en revue la posture de s\xE9curit\xE9 des fournisseurs critiques et mettre \xE0 jour les \xE9valuations avec les informations actuelles de due diligence (CC9.2)."
       - type: task_template
         name: "Incident response plan test"
         description: "Test the incident response plan through tabletop exercises or simulations to validate detection and response capabilities (CC7.4)."
@@ -75,6 +102,10 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Test du plan de r\xE9ponse aux incidents"
+            description: "Tester le plan de r\xE9ponse aux incidents par des exercices sur table ou des simulations pour valider les capacit\xE9s de d\xE9tection et de r\xE9ponse (CC7.4)."
       - type: task_template
         name: "Business continuity and disaster recovery test"
         description: "Test backup restoration and disaster recovery procedures to validate recovery objectives (A1.2, A1.3)."
@@ -82,29 +113,56 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Test de continuit\xE9 d\u2019activit\xE9 et de reprise apr\xE8s sinistre"
+            description: "Tester les proc\xE9dures de restauration des sauvegardes et de reprise apr\xE8s sinistre pour valider les objectifs de reprise (A1.2, A1.3)."
 
       # --- Typical US company vendor entities ---
       - type: entity
         name: "Cloud infrastructure provider"
         description: "Primary cloud platform (e.g. AWS, GCP, Azure) hosting the application and customer data."
+        translations:
+          fr:
+            name: "Fournisseur d\u2019infrastructure cloud"
+            description: "Plateforme cloud principale (ex. AWS, GCP, Azure) h\xE9bergeant l\u2019application et les donn\xE9es clients."
       - type: entity
         name: "Identity provider"
         description: "SSO and identity management service (e.g. Okta, Auth0, Azure AD) used for employee and customer authentication."
+        translations:
+          fr:
+            name: "Fournisseur d\u2019identit\xE9"
+            description: "Service SSO et de gestion d\u2019identit\xE9 (ex. Okta, Auth0, Azure AD) utilis\xE9 pour l\u2019authentification des employ\xE9s et des clients."
       - type: entity
         name: "Background check provider"
         description: "Third-party service conducting employee background checks as part of the hiring process (CC1.4)."
+        translations:
+          fr:
+            name: "Prestataire de v\xE9rification des ant\xE9c\xE9dents"
+            description: "Service tiers r\xE9alisant les v\xE9rifications des ant\xE9c\xE9dents des employ\xE9s dans le cadre du processus de recrutement (CC1.4)."
       - type: entity
         name: "Security monitoring / SIEM provider"
         description: "Managed security or SIEM platform (e.g. Datadog, Splunk, CrowdStrike) for log aggregation, alerting, and threat detection."
+        translations:
+          fr:
+            name: "Fournisseur de surveillance s\xE9curit\xE9 / SIEM"
+            description: "Plateforme de s\xE9curit\xE9 manag\xE9e ou SIEM (ex. Datadog, Splunk, CrowdStrike) pour l\u2019agr\xE9gation de journaux, les alertes et la d\xE9tection de menaces."
       - type: entity
         name: "Payment processor"
         description: "Payment service provider (e.g. Stripe, Braintree) processing customer billing and payment data."
+        translations:
+          fr:
+            name: "Processeur de paiement"
+            description: "Prestataire de services de paiement (ex. Stripe, Braintree) traitant la facturation et les donn\xE9es de paiement des clients."
 
       # --- Findings assessment ---
       - type: findings_assessment
         name: "Penetration Test Findings"
         category: pentest
         ref: pentest_findings
+        translations:
+          fr:
+            name: "R\xE9sultats des tests d\u2019intrusion"
 
     journey:
       steps:
@@ -112,38 +170,74 @@ objects:
           title: "Identify and classify assets"
           description: "Inventory systems, applications, databases, and infrastructure components in scope for the SOC 2 examination."
           target_model: assets
+          translations:
+            fr:
+              title: "Identifier et classifier les actifs"
+              description: "Inventoriez les syst\xE8mes, applications, bases de donn\xE9es et composants d\u2019infrastructure dans le p\xE9rim\xE8tre de l\u2019examen SOC 2."
         - key: soc2_compliance
           title: "Assess SOC 2 trust services criteria"
           description: "Walk through the SOC 2 trust services criteria, review auto-created controls, and assess your current compliance status."
           target_model: compliance-assessments
           target_ref: soc2_audit
+          translations:
+            fr:
+              title: "\xC9valuer les crit\xE8res de services de confiance SOC 2"
+              description: "Parcourez les crit\xE8res de services de confiance SOC 2, examinez les contr\xF4les auto-cr\xE9\xE9s et \xE9valuez votre \xE9tat de conformit\xE9 actuel."
         - key: risk_assessment
           title: "Conduct risk assessment"
           description: "Identify threats and vulnerabilities, create risk scenarios, and assess likelihood and impact to prioritise remediation."
-          target_model: risk-scenarios
+          target_model: risk-assessments
           target_ref: main_ra
+          translations:
+            fr:
+              title: "Conduire l\u2019analyse de risques"
+              description: "Identifiez les menaces et vuln\xE9rabilit\xE9s, cr\xE9ez des sc\xE9narios de risque et \xE9valuez la vraisemblance et l\u2019impact pour prioriser la rem\xE9diation."
         - key: risk_treatment
           title: "Implement controls"
           description: "Review the auto-created controls from SOC 2 criteria, assign owners, set implementation status, and document control descriptions."
           target_model: applied-controls
+          translations:
+            fr:
+              title: "Mettre en \u0153uvre les contr\xF4les"
+              description: "Examinez les contr\xF4les auto-cr\xE9\xE9s des crit\xE8res SOC 2, assignez des responsables, d\xE9finissez le statut de mise en \u0153uvre et documentez les descriptions des contr\xF4les."
         - key: vendors
           title: "Manage your vendors"
           description: "Review vendor entities, add missing ones, and perform due diligence assessments. SOC 2 CC9.2 requires vendor risk management."
           target_model: entities
+          translations:
+            fr:
+              title: "G\xE9rer vos fournisseurs"
+              description: "Examinez les entit\xE9s fournisseurs, ajoutez celles manquantes et r\xE9alisez des \xE9valuations de due diligence. Le SOC 2 CC9.2 exige la gestion du risque fournisseur."
         - key: policies
           title: "Write and approve policies"
           description: "Draft security policies covering access control, incident response, change management, and data classification. SOC 2 requires documented and approved policies."
           target_model: policies
+          translations:
+            fr:
+              title: "R\xE9diger et approuver les politiques"
+              description: "R\xE9digez les politiques de s\xE9curit\xE9 couvrant le contr\xF4le d\u2019acc\xE8s, la r\xE9ponse aux incidents, la gestion des changements et la classification des donn\xE9es. Le SOC 2 exige des politiques document\xE9es et approuv\xE9es."
         - key: evidences
           title: "Collect evidence"
           description: "Gather and organise evidence of control effectiveness — screenshots, configurations, logs, and process documentation for your auditor."
           target_model: evidences
+          translations:
+            fr:
+              title: "Collecter les preuves"
+              description: "Rassemblez et organisez les preuves d\u2019efficacit\xE9 des contr\xF4les \u2014 captures d\u2019\xE9cran, configurations, journaux et documentation des processus pour votre auditeur."
         - key: findings
           title: "Track pentest and audit findings"
           description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
           target_model: findings-assessments
           target_ref: pentest_findings
+          translations:
+            fr:
+              title: "Suivre les r\xE9sultats de tests et d\u2019audits"
+              description: "Importez ou cr\xE9ez des r\xE9sultats de tests d\u2019intrusion, de scans de vuln\xE9rabilit\xE9s et d\u2019audits. Attribuez des responsables, d\xE9finissez des priorit\xE9s et suivez la rem\xE9diation."
         - key: ongoing_tasks
           title: "Configure recurring tasks"
           description: "Review the periodic task templates (access reviews, vendor reviews, DR tests, incident response tests) and adjust schedules."
           target_model: task-templates
+          translations:
+            fr:
+              title: "Configurer les t\xE2ches r\xE9currentes"
+              description: "Examinez les mod\xE8les de t\xE2ches p\xE9riodiques (revues d\u2019acc\xE8s, revues fournisseurs, tests DR, tests de r\xE9ponse aux incidents) et ajustez les plannings."

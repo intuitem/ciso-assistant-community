@@ -8286,6 +8286,22 @@ class PresetJourneyViewSet(BaseModelViewSet):
             }
         )
 
+    @action(detail=True, methods=["post"])
+    def upgrade(self, request, pk=None):
+        journey = self.get_object()
+        stored_lib = (
+            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
+        )
+        if not stored_lib or stored_lib.version <= journey.version:
+            return Response({"detail": "Already up to date."})
+        from library.preset_executor import PresetExecutor
+
+        executor = PresetExecutor(stored_lib, request.user, request)
+        executor.upgrade_journey(journey)
+        from core.serializers import PresetJourneyReadSerializer
+
+        return Response(PresetJourneyReadSerializer(journey).data)
+
     def _compute_stats(self, journey):
         folder = journey.folder
         steps = journey.steps.all()

@@ -3,13 +3,18 @@ locale: en
 ref_id: preset-iso27001-full
 name: "ISO 27001:2022 \u2014 Full Implementation"
 description: Comprehensive ISO 27001 implementation preset. Creates a compliance assessment with suggested controls auto-linked, organisational context (issues and objectives), a risk assessment, and periodic task templates for ongoing ISMS management.
-version: 5
+version: 1
 provider: intuitem
 packager: intuitem
+translations:
+  fr:
+    name: "ISO 27001:2022 \u2014 Mise en \u0153uvre compl\u00e8te"
+    description: "Preset complet de mise en \u0153uvre ISO 27001. Cr\u00e9e une \u00e9valuation de conformit\u00e9 avec des contr\u00f4les sugg\u00e9r\u00e9s, le contexte organisationnel (enjeux et objectifs), une analyse de risques et des mod\u00e8les de t\u00e2ches p\u00e9riodiques pour la gestion continue du SMSI."
 
 dependencies:
   - urn:intuitem:risk:library:iso27001-2022
   - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:intuitem-common-catalog
 
 objects:
   preset:
@@ -35,6 +40,10 @@ objects:
         category: legal
         origin: external
         status: active
+        translations:
+          fr:
+            name: "Exigences r\u00e9glementaires et contractuelles"
+            description: "Lois, r\u00e9glementations et obligations contractuelles applicables imposant des exigences de s\u00e9curit\u00e9 de l\u2019information \u00e0 l\u2019organisation (ex. RGPD, NIS2, r\u00e9glementations sectorielles)."
 
       - type: organisation_issue
         name: "Cyber threat landscape"
@@ -42,6 +51,10 @@ objects:
         category: technology
         origin: external
         status: active
+        translations:
+          fr:
+            name: "Paysage des cybermenaces"
+            description: "Environnement de menaces externes incluant les ran\u00e7ongiciels, l\u2019hame\u00e7onnage, les attaques de la cha\u00eene d\u2019approvisionnement et les menaces \u00e9mergentes pertinentes pour le secteur et la g\u00e9ographie de l\u2019organisation."
 
       - type: organisation_issue
         name: "Current security maturity"
@@ -49,28 +62,47 @@ objects:
         category: internalProcesses
         origin: internal
         status: active
+        translations:
+          fr:
+            name: "Maturit\u00e9 s\u00e9curit\u00e9 actuelle"
+            description: "\u00c9valuation interne des pratiques de s\u00e9curit\u00e9 existantes, des lacunes et des capacit\u00e9s de l\u2019organisation qui influencent le p\u00e9rim\u00e8tre et les priorit\u00e9s du SMSI."
 
       # --- Organisation objectives (clause 6.2 - Information security objectives) ---
       - type: organisation_objective
         name: "Achieve ISO 27001 certification"
         description: "Obtain ISO/IEC 27001:2022 certification through a successful Stage 1 and Stage 2 audit by an accredited certification body."
         status: in_progress
+        translations:
+          fr:
+            name: "Obtenir la certification ISO 27001"
+            description: "Obtenir la certification ISO/IEC 27001:2022 par un audit de Phase 1 et Phase 2 r\u00e9ussi aupr\u00e8s d\u2019un organisme de certification accr\u00e9dit\u00e9."
 
       - type: organisation_objective
         name: "Maintain acceptable risk levels"
         description: "Ensure all identified information security risks are treated to within the organisation's risk appetite, with residual risk formally accepted by management."
         status: draft
+        translations:
+          fr:
+            name: "Maintenir des niveaux de risque acceptables"
+            description: "S\u2019assurer que tous les risques de s\u00e9curit\u00e9 de l\u2019information identifi\u00e9s sont trait\u00e9s dans les limites de l\u2019app\u00e9tence au risque de l\u2019organisation, avec un risque r\u00e9siduel formellement accept\u00e9 par la direction."
 
       - type: organisation_objective
         name: "Foster a security-aware culture"
         description: "Establish and maintain a security awareness programme so that all personnel understand their ISMS responsibilities and can recognise common threats."
         status: draft
+        translations:
+          fr:
+            name: "Favoriser une culture de sensibilisation \u00e0 la s\u00e9curit\u00e9"
+            description: "\u00c9tablir et maintenir un programme de sensibilisation \u00e0 la s\u00e9curit\u00e9 pour que tout le personnel comprenne ses responsabilit\u00e9s SMSI et puisse reconna\u00eetre les menaces courantes."
 
       # --- Risk assessment ---
       - type: risk_assessment
         name: "Information Security Risk Assessment"
         risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
         ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques s\u00e9curit\u00e9 de l\u2019information"
 
       # --- Compliance assessment with suggested controls ---
       - type: compliance_assessment
@@ -78,6 +110,9 @@ objects:
         framework: urn:intuitem:risk:library:iso27001-2022
         create_suggested_controls: true
         ref: iso_audit
+        translations:
+          fr:
+            name: "\u00c9valuation de conformit\u00e9 ISO 27001:2022"
 
       # --- Periodic task templates ---
       - type: task_template
@@ -87,6 +122,10 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Audit interne du SMSI"
+            description: "R\u00e9aliser un audit interne complet du SMSI pour v\u00e9rifier la conformit\u00e9 aux exigences ISO 27001 et aux politiques propres de l\u2019organisation (clause 9.2)."
 
       - type: task_template
         name: "Management review"
@@ -95,6 +134,10 @@ objects:
         schedule:
           interval: 6
           frequency: MONTHLY
+        translations:
+          fr:
+            name: "Revue de direction"
+            description: "Tenir une r\u00e9union de revue de direction pour \u00e9valuer les performances du SMSI, l\u2019efficacit\u00e9 du traitement des risques et les opportunit\u00e9s d\u2019am\u00e9lioration (clause 9.3)."
 
       - type: task_template
         name: "Access rights review"
@@ -103,6 +146,10 @@ objects:
         schedule:
           interval: 3
           frequency: MONTHLY
+        translations:
+          fr:
+            name: "Revue des droits d\u2019acc\u00e8s"
+            description: "Passer en revue les droits d\u2019acc\u00e8s des utilisateurs sur tous les syst\u00e8mes critiques pour garantir le moindre privil\u00e8ge et la r\u00e9vocation en temps utile des acc\u00e8s inutiles (Annexe A 5.18)."
 
       - type: task_template
         name: "Risk assessment review"
@@ -111,6 +158,10 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Revue de l\u2019analyse de risques"
+            description: "Revoir et mettre \u00e0 jour l\u2019analyse de risques s\u00e9curit\u00e9 de l\u2019information pour tenir compte des \u00e9volutions des menaces, vuln\u00e9rabilit\u00e9s, actifs et contexte m\u00e9tier (clause 8.2)."
 
       - type: task_template
         name: "Security awareness training"
@@ -119,6 +170,10 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Formation de sensibilisation \u00e0 la s\u00e9curit\u00e9"
+            description: "Dispenser une formation de sensibilisation \u00e0 la s\u00e9curit\u00e9 de l\u2019information \u00e0 tout le personnel, couvrant les menaces actuelles, les politiques et les comportements attendus (Annexe A 6.3)."
 
       - type: task_template
         name: "Business continuity testing"
@@ -127,12 +182,19 @@ objects:
         schedule:
           interval: 1
           frequency: YEARLY
+        translations:
+          fr:
+            name: "Test de continuit\u00e9 d\u2019activit\u00e9"
+            description: "Tester les plans de continuit\u00e9 d\u2019activit\u00e9 et de reprise apr\u00e8s sinistre pour v\u00e9rifier qu\u2019ils r\u00e9pondent aux objectifs de reprise et traitent les risques actuels (Annexe A 5.30)."
 
       # --- Findings assessment ---
       - type: findings_assessment
         name: "Penetration Test Findings"
         category: pentest
         ref: pentest_findings
+        translations:
+          fr:
+            name: "R\u00e9sultats des tests d\u2019intrusion"
 
     journey:
       steps:
@@ -140,47 +202,91 @@ objects:
           title: "Establish organisational context"
           description: "Review and complete the organisational issues to document internal and external factors affecting your ISMS (clause 4.1)."
           target_model: organisation-issues
+          translations:
+            fr:
+              title: "\u00c9tablir le contexte organisationnel"
+              description: "Examinez et compl\u00e9tez les enjeux organisationnels pour documenter les facteurs internes et externes affectant votre SMSI (clause 4.1)."
         - key: objectives
           title: "Define information security objectives"
           description: "Review and refine the security objectives to align with your business strategy and risk appetite (clause 6.2)."
           target_model: organisation-objectives
+          translations:
+            fr:
+              title: "D\u00e9finir les objectifs de s\u00e9curit\u00e9 de l\u2019information"
+              description: "Examinez et affinez les objectifs de s\u00e9curit\u00e9 pour les aligner avec votre strat\u00e9gie m\u00e9tier et votre app\u00e9tence au risque (clause 6.2)."
         - key: assets
           title: "Identify and classify assets"
           description: "Inventory primary assets (information, processes) and supporting assets (hardware, software, networks, personnel) within the ISMS scope."
           target_model: assets
+          translations:
+            fr:
+              title: "Identifier et classifier les actifs"
+              description: "Inventoriez les actifs primaires (informations, processus) et les actifs supports (mat\u00e9riel, logiciel, r\u00e9seaux, personnel) dans le p\u00e9rim\u00e8tre du SMSI."
         - key: compliance
           title: "Assess ISO 27001 compliance"
           description: "Walk through each ISO 27001 requirement, link evidence and controls, and assess your current compliance status."
           target_model: compliance-assessments
           target_ref: iso_audit
+          translations:
+            fr:
+              title: "\u00c9valuer la conformit\u00e9 ISO 27001"
+              description: "Parcourez chaque exigence ISO 27001, liez les preuves et les contr\u00f4les, et \u00e9valuez votre \u00e9tat de conformit\u00e9 actuel."
         - key: risk_assessment
           title: "Conduct risk assessment"
           description: "Create risk scenarios by combining threats with assets, assess likelihood and impact, and prioritise risks for treatment."
-          target_model: risk-scenarios
+          target_model: risk-assessments
           target_ref: main_ra
+          translations:
+            fr:
+              title: "Conduire l\u2019analyse de risques"
+              description: "Cr\u00e9ez des sc\u00e9narios de risque en combinant les menaces avec les actifs, \u00e9valuez la vraisemblance et l\u2019impact, et priorisez les risques \u00e0 traiter."
         - key: risk_treatment
           title: "Plan risk treatment"
           description: "Review the auto-created controls from ISO 27001 Annex A, assign owners, and define implementation plans for each applicable control."
           target_model: applied-controls
+          translations:
+            fr:
+              title: "Planifier le traitement des risques"
+              description: "Examinez les contr\u00f4les auto-cr\u00e9\u00e9s de l\u2019Annexe A ISO 27001, assignez des responsables et d\u00e9finissez les plans de mise en \u0153uvre pour chaque contr\u00f4le applicable."
         - key: policies
           title: "Write and approve policies"
           description: "Draft your information security policies (e.g. acceptable use, access control, incident management) and submit them for management approval (clause 5.2, Annex A 5.1)."
           target_model: policies
+          translations:
+            fr:
+              title: "R\u00e9diger et approuver les politiques"
+              description: "R\u00e9digez vos politiques de s\u00e9curit\u00e9 de l\u2019information (ex. utilisation acceptable, contr\u00f4le d\u2019acc\u00e8s, gestion des incidents) et soumettez-les \u00e0 l\u2019approbation de la direction (clause 5.2, Annexe A 5.1)."
         - key: evidences
           title: "Review your evidences"
-          description: "Collect and organise the evidence that demonstrates your ISMS implementation — documents, screenshots, logs, and records needed for audit (clause 7.5)."
+          description: "Collect and organise the evidence that demonstrates your ISMS implementation \u2014 documents, screenshots, logs, and records needed for audit (clause 7.5)."
           target_model: evidences
+          translations:
+            fr:
+              title: "Examiner vos preuves"
+              description: "Collectez et organisez les preuves d\u00e9montrant la mise en \u0153uvre de votre SMSI \u2014 documents, captures d\u2019\u00e9cran, journaux et enregistrements n\u00e9cessaires pour l\u2019audit (clause 7.5)."
         - key: findings
           title: "Track pentest and audit findings"
           description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."
           target_model: findings-assessments
           target_ref: pentest_findings
+          translations:
+            fr:
+              title: "Suivre les r\u00e9sultats de tests et d\u2019audits"
+              description: "Importez ou cr\u00e9ez des r\u00e9sultats de tests d\u2019intrusion, de scans de vuln\u00e9rabilit\u00e9s et d\u2019audits. Attribuez des responsables, d\u00e9finissez des priorit\u00e9s et suivez la rem\u00e9diation."
         - key: ongoing_tasks
           title: "Configure your ISMS run tasks"
           description: "Review the periodic task templates (internal audits, management reviews, access reviews, etc.) and adjust schedules to fit your organisation."
           target_model: task-templates
+          translations:
+            fr:
+              title: "Configurer vos t\u00e2ches r\u00e9currentes SMSI"
+              description: "Examinez les mod\u00e8les de t\u00e2ches p\u00e9riodiques (audits internes, revues de direction, revues d\u2019acc\u00e8s, etc.) et ajustez les plannings selon votre organisation."
         - key: audit_export
           title: "Prepare the export for your lead auditor"
           description: "Generate and review the compliance assessment export to share with your certification body's lead auditor ahead of the Stage 1 or Stage 2 audit."
           target_model: compliance-assessments
           target_ref: iso_audit
+          translations:
+            fr:
+              title: "Pr\u00e9parer l\u2019export pour votre auditeur principal"
+              description: "G\u00e9n\u00e9rez et examinez l\u2019export de l\u2019\u00e9valuation de conformit\u00e9 \u00e0 partager avec l\u2019auditeur principal de votre organisme de certification avant l\u2019audit de Phase 1 ou Phase 2."

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { goto } from '$app/navigation';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import ApplyPresetModal from '$lib/components/Modals/ApplyPresetModal.svelte';
 
@@ -31,7 +30,7 @@
 							});
 							if (response.ok) {
 								const result = await response.json();
-								goto(`/preset-journeys/${result.journey_id}`);
+								window.location.href = `/preset-journeys/${result.journey_id}`;
 								return { ok: true };
 							}
 							const err = await response.json().catch(() => ({}));
@@ -78,7 +77,9 @@
 		perimeter: { label: () => m.perimeter(), icon: 'fa-draw-polygon' },
 		processing: { label: () => m.processing(), icon: 'fa-gears' },
 		entity: { label: () => m.entity(), icon: 'fa-building' },
-		findings_assessment: { label: () => m.findingsAssessment(), icon: 'fa-binoculars' }
+		findings_assessment: { label: () => m.findingsAssessment(), icon: 'fa-binoculars' },
+		asset: { label: () => m.asset(), icon: 'fa-gem' },
+		risk_scenario: { label: () => m.riskScenario(), icon: 'fa-biohazard' }
 	};
 
 	function getProgressPercent(journey: any): number {
@@ -88,6 +89,10 @@
 			(s: any) => s.status === 'done' || s.status === 'skipped'
 		).length;
 		return Math.round((completed / steps.length) * 100);
+	}
+
+	function hasUpgrade(journey: any): boolean {
+		return journey.latest_version && journey.latest_version > journey.version;
 	}
 </script>
 
@@ -177,7 +182,17 @@
 						class="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md hover:border-violet-200 transition-all"
 					>
 						<div class="flex-1 min-w-0">
-							<h3 class="font-semibold truncate">{journey.name}</h3>
+							<div class="flex items-center gap-2">
+								<h3 class="font-semibold truncate">{journey.name}</h3>
+								{#if hasUpgrade(journey)}
+									<span
+										class="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700"
+									>
+										<i class="fa-solid fa-arrow-up mr-1"></i>
+										{m.upgradeAvailable()}
+									</span>
+								{/if}
+							</div>
 							{#if journey.description}
 								<p class="text-sm text-gray-400 truncate">{journey.description}</p>
 							{/if}

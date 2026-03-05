@@ -51,10 +51,32 @@
 
 	function getStepLink(step: any): string | null {
 		if (!step.target_model) return null;
+		const folderId = data.journey?.folder?.id;
 		if (step.target_ref) {
 			return `/${step.target_model}/${step.target_ref}`;
 		}
+		if (folderId) {
+			return `/${step.target_model}?folder=${folderId}`;
+		}
 		return `/${step.target_model}`;
+	}
+
+	let upgrading = $state(false);
+
+	async function upgradeJourney() {
+		upgrading = true;
+		try {
+			const response = await fetch(`/preset-journeys/${$page.params.id}/upgrade`, {
+				method: 'POST'
+			});
+			if (response.ok) {
+				invalidateAll();
+			}
+		} catch (e) {
+			console.error('Failed to upgrade journey', e);
+		} finally {
+			upgrading = false;
+		}
 	}
 
 	function deleteJourney() {
@@ -83,7 +105,7 @@
 
 {#if !data.journey}
 	<div class="flex flex-col items-center justify-center p-10">
-		<p class="text-gray-400 mb-4">Journey not found.</p>
+		<p class="text-gray-400 mb-4">{m.journeyNotFound()}</p>
 		<a href="/presets" class="btn preset-tonal-surface border border-surface-500">
 			<i class="fa-solid fa-arrow-left mr-2"></i>
 			{m.presets()}
@@ -104,6 +126,17 @@
 						<p class="text-sm text-gray-400">{data.journey.description}</p>
 					{/if}
 				</div>
+				{#if data.journey.latest_version && data.journey.latest_version > data.journey.version}
+					<button
+						type="button"
+						class="btn btn-sm preset-filled-warning-500"
+						onclick={upgradeJourney}
+						disabled={upgrading}
+					>
+						<i class="fa-solid fa-arrow-up mr-1"></i>
+						{m.upgradeAvailable()}
+					</button>
+				{/if}
 				<button
 					type="button"
 					class="btn btn-sm preset-tonal-surface border border-red-300 text-red-600 hover:bg-red-50"
@@ -211,18 +244,18 @@
 		<!-- Stats sidebar -->
 		<div class="lg:w-72 shrink-0 space-y-4">
 			<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-				<h3 class="font-semibold text-sm">Stats</h3>
+				<h3 class="font-semibold text-sm">{m.stats()}</h3>
 				<div class="space-y-2 text-sm">
 					<div class="flex justify-between">
-						<span class="text-gray-400">Assets</span>
+						<span class="text-gray-400">{m.assets()}</span>
 						<span class="font-mono">{data.stats.assets ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-400">Risk Scenarios</span>
+						<span class="text-gray-400">{m.riskScenarios()}</span>
 						<span class="font-mono">{data.stats.risk_scenarios ?? 0}</span>
 					</div>
 					<div class="flex justify-between">
-						<span class="text-gray-400">Applied Controls</span>
+						<span class="text-gray-400">{m.appliedControls()}</span>
 						<span class="font-mono">{data.stats.applied_controls ?? 0}</span>
 					</div>
 				</div>
@@ -230,7 +263,7 @@
 
 			{#if data.stats.compliance && Object.keys(data.stats.compliance).length > 0}
 				<div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm space-y-3">
-					<h3 class="font-semibold text-sm">Compliance</h3>
+					<h3 class="font-semibold text-sm">{m.compliance()}</h3>
 					{#each Object.entries(data.stats.compliance) as [, info]}
 						{@const compInfo = info as {
 							name: string;
