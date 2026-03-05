@@ -48,6 +48,7 @@
 
 	// Function to handle the "Next" button click
 	function nextItem() {
+		flushObservation();
 		if (currentIndex < requirementAssessments.length - 1) {
 			currentIndex += 1;
 		} else {
@@ -57,6 +58,7 @@
 
 	// Function to handle the "Back" button click
 	function previousItem() {
+		flushObservation();
 		if (currentIndex > 0) {
 			currentIndex -= 1;
 		} else {
@@ -66,9 +68,42 @@
 
 	// svelte-ignore state_referenced_locally
 	let result = $state(currentRequirementAssessment.result);
+	// svelte-ignore state_referenced_locally
+	let observation = $state(currentRequirementAssessment.observation ?? '');
 	$effect(() => {
 		result = currentRequirementAssessment.result;
+		observation = currentRequirementAssessment.observation ?? '';
 	});
+
+	// Debounce timer for observation saves
+	let observationTimer: ReturnType<typeof setTimeout> | null = null;
+
+	function flushObservation() {
+		if (observationTimer) {
+			clearTimeout(observationTimer);
+			observationTimer = null;
+			saveObservation(observation);
+		}
+	}
+
+	function saveObservation(value: string) {
+		currentRequirementAssessment.observation = value;
+		const form = document.getElementById('flashModeForm');
+		const formData = {
+			id: currentRequirementAssessment.id,
+			observation: value
+		};
+		fetch(form!.action, {
+			method: 'POST',
+			body: JSON.stringify(formData)
+		});
+	}
+
+	function handleObservationInput(value: string) {
+		observation = value;
+		if (observationTimer) clearTimeout(observationTimer);
+		observationTimer = setTimeout(() => saveObservation(value), 500);
+	}
 
 	// Function to update the result of the current item
 	function updateResult(newResult: string | null) {
@@ -79,7 +114,7 @@
 			id: currentRequirementAssessment.id,
 			result: newResult
 		};
-		fetch(form.action, {
+		fetch(form!.action, {
 			method: 'POST',
 			body: JSON.stringify(formData)
 		});
@@ -90,6 +125,7 @@
 	let jumpToInput = $state('');
 
 	function jumpToItem(index: number) {
+		flushObservation();
 		if (index >= 0 && index < requirementAssessments.length) {
 			currentIndex = index;
 			showNavigation = false;
@@ -236,7 +272,7 @@
 			</div>
 
 			<!-- Options and Navigation -->
-			<div class="flex flex-col space-y-6">
+			<div class="flex flex-col space-y-4">
 				<div class="flex justify-center">
 					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
 						<ul
@@ -258,6 +294,18 @@
 							/>
 						</ul>
 					</form>
+				</div>
+
+				<!-- Observation -->
+				<div class="w-full">
+					<textarea
+						class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-400 transition-colors"
+						rows="2"
+						placeholder={m.observation()}
+						value={observation}
+						disabled={isReadOnly}
+						oninput={(e) => handleObservationInput(e.currentTarget.value)}
+					></textarea>
 				</div>
 
 				<div class="flex justify-between">
