@@ -347,12 +347,12 @@ For the following executions, use "docker compose up" directly.
 ### Requirements
 
 - Python 3.14+
-- pip 20.3+
+- pip 25.3+
 - poetry 2.0+
 - node 24+
 - npm 10.2+
-- pnpm 10.18+
-- yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
+- pnpm 10.30+
+- yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
 
 ### Running the backend
 
