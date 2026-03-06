@@ -1315,7 +1315,6 @@ export const OperatingModeSchema = z.object({
 	...NameDescriptionMixin,
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
-	elementary_actions: z.string().uuid().optional().array().optional(),
 	likelihood: z.number().optional().default(-1),
 	folder: z.string()
 });
