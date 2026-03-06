@@ -3837,7 +3837,7 @@ class LoadFileView(APIView):
 
                 # Build a lookup for RoTo couples by risk_origin + target_objective
                 roto_lookup = {}
-                for roto in study.roto_set.all():
+                for roto in study.rotos.all():
                     # Store both the normalized name and the original for flexible matching
                     key = (
                         roto.risk_origin.name.lower(),
