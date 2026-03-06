@@ -36,7 +36,7 @@ export function formatSelectFieldData(
 	responseData: Record<string, string>,
 	selectField: SelectField
 ): SelectFieldData[] {
-	const isNumber = selectField.valueType;
+	const isNumber = selectField.valueType === 'number';
 
 	const fieldOptions = Object.entries(responseData).map(([key, value]) => ({
 		label: value,

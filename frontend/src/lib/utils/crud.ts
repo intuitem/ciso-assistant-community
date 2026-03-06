@@ -142,7 +142,7 @@ export interface SelectField {
 }
 
 export interface SelectFieldData {
-	key: string;
+	label: string;
 	value: string | number;
 }
 

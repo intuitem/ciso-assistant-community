@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 			const url = `${BASE_API_URL}/settings/feature-flags/feature_flags/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				const responseData = await reponse.json();
+				const responseData = await response.json();
 				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
