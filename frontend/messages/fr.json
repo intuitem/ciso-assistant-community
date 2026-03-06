@@ -3560,6 +3560,7 @@
 	"activeJourneys": "Parcours actifs",
 	"applyPreset": "Démarrer ce parcours",
 	"applyPresetConfirm": "Choisissez où créer les objets du parcours.",
+	"presetFeatureFlagsWarning": "L'application de ce parcours ajustera les fonctionnalités visibles sur le menu. Certains modules pourront être activés ou désactivés selon la configuration du parcours, et vous pouvez les ajuster par la suite.",
 	"deleteJourney": "Supprimer le parcours",
 	"deleteJourneyConfirm": "Êtes-vous sûr de vouloir supprimer ce parcours ? Cela ne supprimera pas les objets créés par ce dernier.",
 	"createNewDomain": "Créer un nouveau domaine",

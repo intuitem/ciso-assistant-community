@@ -60,7 +60,7 @@ export const navData = {
 					name: 'presets',
 					fa_icon: 'fa-solid fa-rocket',
 					href: '/presets',
-					permissions: ['add_loadedlibrary']
+					permissions: ['add_loadedlibrary', 'view_presetjourney']
 				}
 			]
 		},

@@ -3,8 +3,13 @@
 	import { m } from '$paraglide/messages';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import ApplyPresetModal from '$lib/components/Modals/ApplyPresetModal.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import { goto } from '$lib/utils/breadcrumbs';
+	import { page } from '$app/stores';
 
 	let { data }: { data: PageData } = $props();
+
+	const canApplyPreset = $derived(Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary'));
 
 	const modalStore = getModalStore();
 
@@ -58,7 +63,10 @@
 							});
 							if (response.ok) {
 								const result = await response.json();
-								window.location.href = `/preset-journeys/${result.journey_id}`;
+								goto(`/preset-journeys/${result.journey_id}`, {
+									label: result.journey_name ?? presetName,
+									breadcrumbAction: 'push'
+								});
 								return { ok: true };
 							}
 							const err = await response.json().catch(() => ({}));
@@ -172,8 +180,10 @@
 				{#each data.journeys as journey}
 					{@const progress = getProgressPercent(journey)}
 					{@const counts = getStepCounts(journey)}
-					<a
+					<Anchor
 						href="/preset-journeys/{journey.id}"
+						breadcrumbAction="push"
+						label={journey.name}
 						class="group relative flex flex-col rounded-xl border border-gray-200 bg-white p-5 shadow-sm
 							hover:shadow-md hover:border-indigo-200 transition-all duration-200"
 					>
@@ -270,7 +280,7 @@
 								></i>
 							</span>
 						</div>
-					</a>
+					</Anchor>
 				{/each}
 			</div>
 		{/if}
@@ -397,18 +407,20 @@
 							{/if}
 
 							<!-- Apply button -->
-							<div class="px-4 pb-4 mt-auto">
-								<button
-									type="button"
-									class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
-									transition-all duration-150 cursor-pointer
-									bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
-									onclick={() => applyPreset(preset.id, preset.name)}
-								>
-									<i class="fa-solid fa-play text-[10px]"></i>
-									{m.applyPreset()}
-								</button>
-							</div>
+							{#if canApplyPreset}
+								<div class="px-4 pb-4 mt-auto">
+									<button
+										type="button"
+										class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
+										transition-all duration-150 cursor-pointer
+										bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm"
+										onclick={() => applyPreset(preset.id, preset.name)}
+									>
+										<i class="fa-solid fa-play text-[10px]"></i>
+										{m.applyPreset()}
+									</button>
+								</div>
+							{/if}
 						</div>
 					{/each}
 				</div>

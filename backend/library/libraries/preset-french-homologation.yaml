@@ -198,6 +198,15 @@ objects:
             en:
               title: "Conduct an EBIOS RM study"
               description: "Run through the 5 EBIOS RM workshops — scoping, risk sources, strategic scenarios, operational scenarios, risk treatment"
+        - key: risk_analysis
+          title: "Examiner les scénarios de risque"
+          description: "Passez en revue les scénarios de risque pré-alimentés, ajustez leur vraisemblance et leur gravité, et ajoutez de nouveaux scénarios si nécessaire"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Review risk scenarios"
+              description: "Review the pre-seeded risk scenarios, adjust their likelihood and severity, and add new scenarios as needed"
         - key: controls
           title: "Implémenter et suivre les mesures de sécurité"
           description: "Examinez les mesures suggérées par l'évaluation ANSSI, assignez des responsables et suivez la mise en œuvre"

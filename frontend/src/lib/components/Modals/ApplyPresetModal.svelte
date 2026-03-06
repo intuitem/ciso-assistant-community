@@ -110,7 +110,13 @@
 				</label>
 			{/if}
 
-			<!-- Create objects toggle -->
+			<!-- Feature flags warning -->
+		<div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800 flex items-start gap-2">
+			<i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
+			<p>{m.presetFeatureFlagsWarning()}</p>
+		</div>
+
+		<!-- Create objects toggle -->
 			<label
 				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 border border-gray-200"
 			>

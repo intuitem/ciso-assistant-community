@@ -3595,6 +3595,7 @@
 	"activeJourneys": "Active Journeys",
 	"applyPreset": "Apply Preset",
 	"applyPresetConfirm": "Choose where to apply the preset objects.",
+	"presetFeatureFlagsWarning": "Applying this preset will adjust which features are visible in the sidebar. Some modules may be enabled or disabled to match the preset's scope, but you can change that later.",
 	"deleteJourney": "Delete journey",
 	"deleteJourneyConfirm": "Are you sure you want to delete this journey? This will not remove the objects created by the preset.",
 	"createNewDomain": "Create a new domain",

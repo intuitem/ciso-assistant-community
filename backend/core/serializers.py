@@ -2964,30 +2964,32 @@ class PresetJourneyStepWriteSerializer(BaseModelSerializer):
         fields = ["status", "notes", "target_ref"]
 
     def update(self, instance, validated_data):
-        new_status = validated_data.get("status", instance.status)
-        if new_status in (
-            PresetJourneyStep.Status.DONE,
-            PresetJourneyStep.Status.SKIPPED,
-        ):
-            validated_data["completed_at"] = timezone.now()
-            validated_data["completed_by"] = self.context["request"].user
-        elif new_status == PresetJourneyStep.Status.NOT_STARTED:
-            validated_data["completed_at"] = None
-            validated_data["completed_by"] = None
+        if "status" in validated_data:
+            new_status = validated_data["status"]
+            if new_status in (
+                PresetJourneyStep.Status.DONE,
+                PresetJourneyStep.Status.SKIPPED,
+            ):
+                validated_data["completed_at"] = timezone.now()
+                validated_data["completed_by"] = self.context["request"].user
+            elif new_status == PresetJourneyStep.Status.NOT_STARTED:
+                validated_data["completed_at"] = None
+                validated_data["completed_by"] = None
 
-        # Sync target_ref change to parent journey's object_refs
-        if "target_ref" in validated_data:
-            new_ref = validated_data["target_ref"]
-            journey = instance.journey
-            object_refs = dict(journey.object_refs or {})
-            if new_ref:
-                object_refs[instance.key] = new_ref
-            else:
-                object_refs.pop(instance.key, None)
-            journey.object_refs = object_refs
-            journey.save(update_fields=["object_refs"])
+        with transaction.atomic():
+            # Sync target_ref change to parent journey's object_refs
+            if "target_ref" in validated_data:
+                new_ref = validated_data["target_ref"]
+                journey = instance.journey
+                object_refs = dict(journey.object_refs or {})
+                if new_ref:
+                    object_refs[instance.key] = new_ref
+                else:
+                    object_refs.pop(instance.key, None)
+                journey.object_refs = object_refs
+                journey.save(update_fields=["object_refs"])
 
-        return super().update(instance, validated_data)
+            return super().update(instance, validated_data)
 
 
 class PresetJourneyReadSerializer(BaseModelSerializer):
