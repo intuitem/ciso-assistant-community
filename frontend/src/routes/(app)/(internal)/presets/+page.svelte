@@ -9,7 +9,9 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const canApplyPreset = $derived(Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary'));
+	const canApplyPreset = $derived(
+		Object.hasOwn($page.data.user?.permissions ?? {}, 'add_loadedlibrary')
+	);
 
 	const modalStore = getModalStore();
 
