@@ -1,0 +1,1083 @@
+convert_library_version: 'v2 ; Compat Mode: [0] {[v2.1] (DEFAULT) Don''t use any Compatibility Mode}'
+urn: urn:intuitem:risk:library:cisa-cpg-2.0
+locale: en
+ref_id: CISA-CPG-2.0
+name: CISA Cybersecurity Performance Goals v2.0
+description: CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions
+  aligned to the NIST Cybersecurity Framework.
+copyright: This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.
+version: 1
+publication_date: '2025-03-04'
+provider: CISA
+packager: intuitem
+objects:
+  reference_controls:
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-01
+    ref_id: RC.01
+    name: Cybersecurity Roles and Responsibilities Policy
+    category: policy
+    csf_function: govern
+    description: Document all cybersecurity roles, responsibilities, and authorities in organizational policy. Distribute
+      responsibilities across the organization, including third parties. Ensure legal and regulatory compliance.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-02
+    ref_id: RC.02
+    name: Cybersecurity Policy Lifecycle Management
+    category: policy
+    csf_function: govern
+    description: Review cybersecurity policies annually and update when requirements, risks, threats, or technology changes.
+      Communicate and enforce policies reflecting organizational strategy and priorities.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-03
+    ref_id: RC.03
+    name: OT-Specific Security Policy
+    category: policy
+    csf_function: govern
+    description: Develop OT-specific cybersecurity policies acknowledging IT program limitations and critical function priorities.
+      Establish governance encompassing regulatory, legal, risk, environmental, and operational obligations.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-04
+    ref_id: RC.04
+    name: Incident Response Plan Management
+    category: process
+    csf_function: govern
+    description: Develop, maintain, update, and regularly exercise incident response plans for common and organizationally
+      specific scenarios. Ensure realistic drills including all relevant stakeholders. Review and drill IR plans minimum annually.
+      Account for OT-specific safety and containment considerations.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-05
+    ref_id: RC.05
+    name: Supply Chain Incident Notification SLAs
+    category: process
+    csf_function: govern
+    description: Require vendors and service providers to notify customers of security incidents and vulnerabilities within
+      risk-informed timeframes via SLAs and contracts.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-06
+    ref_id: RC.06
+    name: OT Supply Chain Authenticity Verification
+    category: process
+    csf_function: govern
+    description: Document and track OT asset serial numbers, checksums, digital certificates/signatures to verify authenticity
+      of hardware, software, and firmware.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-07
+    ref_id: RC.07
+    name: Managed Service Provider Risk Management
+    category: process
+    csf_function: govern
+    description: Develop understanding of MSP services and security products. Understand contractual agreements and proactively
+      address security gaps. Ensure contracts detail how and when MSPs notify customers of incidents.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-08
+    ref_id: RC.08
+    name: Asset Inventory Management
+    category: process
+    csf_function: identify
+    description: Maintain regularly updated inventory of all organizational assets including data, hardware, software, systems,
+      facilities, and personnel. Update critical IT/OT assets more frequently.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-09
+    ref_id: RC.09
+    name: Vulnerability Management Program
+    category: process
+    csf_function: identify
+    description: Implement vulnerability management program to patch and mitigate misconfigured software timely. Monitor risk
+      response progress via POA&M, risk registers, and risk detail reports. Assign responsibilities for processing cybersecurity
+      threat, vulnerability, or incident disclosures.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-10
+    ref_id: RC.10
+    name: Legacy System Compensating Controls
+    category: technical
+    csf_function: identify
+    description: Incorporate compensating security controls for legacy systems where patching is infeasible. For OT assets,
+      apply compensating controls such as segmentation and monitoring, making assets inaccessible from public internet.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-11
+    ref_id: RC.11
+    name: Independent Security Validation
+    category: process
+    csf_function: identify
+    description: Regularly engage third-party cybersecurity experts for penetration tests, bug bounties, incident simulations,
+      and table-top exercises. Assess ability of adversaries to infiltrate and move laterally within networks. Ensure findings
+      are addressed.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-12
+    ref_id: RC.12
+    name: Vulnerability Disclosure Program
+    category: process
+    csf_function: identify
+    description: Maintain public, easily discoverable method for notifying security teams of vulnerable, misconfigured, or
+      exploitable assets. Acknowledge valid submissions and respond timely. Protect good-faith reporters under safe harbor
+      provisions. Apply security.txt files conforming to RFC 9116 on all public-facing web domains.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-13
+    ref_id: RC.13
+    name: Network Topology Documentation
+    category: process
+    csf_function: identify
+    description: Maintain accurate documentation describing current network topology across all IT and OT networks. Perform
+      network reviews and track annually; update when topology changes.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-14
+    ref_id: RC.14
+    name: Default Password Elimination
+    category: technical
+    csf_function: protect
+    description: Require changing default manufacturer passwords for all hardware, software, and firmware before network connection.
+      If infeasible (hard-coded passwords), document and implement compensating controls; monitor logs for network traffic
+      and login attempts.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-15
+    ref_id: RC.15
+    name: Password Strength Policy
+    category: technical
+    csf_function: protect
+    description: Enforce system policy establishing minimum password strength including 16+ character length for all password-protected
+      IT and OT assets. Leverage passphrases and password managers. Prioritize upgrade/replacement of assets unable to support
+      sufficient strength passwords.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-16
+    ref_id: RC.16
+    name: Unique Credential Management
+    category: process
+    csf_function: protect
+    description: Create distinct, separate credentials for similar services and asset access across IT/OT networks. Ensure
+      no password reuse across accounts. Unique passwords for admin/machine accounts. No universal NPE account passwords.
+      Utilize role-based accounts.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-17
+    ref_id: RC.17
+    name: Credential Revocation and Offboarding
+    category: process
+    csf_function: protect
+    description: Establish defined, enforced administrative offboarding process for staff, contractors, and vendors including
+      return of physical tokens/badges and revocation of all system/facility access. Disable inactive accounts after specified
+      period (e.g., 30 days) via automated process.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
+    ref_id: RC.18
+    name: Failed Login Monitoring and Alerting
+    category: technical
+    csf_function: protect
+    description: Capture and log all unsuccessful logins per security policy. Alert security personnel after consecutive unsuccessful
+      attempts and deviations from normal user behavior. Store alerts in security or ticketing system for retroactive analysis.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-19
+    ref_id: RC.19
+    name: Multi-Factor Authentication Deployment
+    category: technical
+    csf_function: protect
+    description: Require MFA using strongest available method for assets with remote access. Prioritize phishing-resistant
+      MFA (FIDO/WebAuthn or PKI-based), then mobile app-based soft tokens, then SMS/voice as last resort. Enable MFA on all
+      remotely accessible OT accounts/systems.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-20
+    ref_id: RC.20
+    name: Privileged Account Separation
+    category: process
+    csf_function: protect
+    description: Ensure user accounts lack administrator privileges. Administrators maintain separate user accounts for non-admin
+      activities. Re-evaluate privileges on recurring basis. Maintain separation of duties across multiple individuals/roles.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-21
+    ref_id: RC.21
+    name: Least Privilege Implementation
+    category: process
+    csf_function: protect
+    description: All user accounts, system roles, and processes operate with minimum privileges necessary for their tasks.
+      Perform quarterly reviews of access permissions and role assignments validating policy compliance.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
+    ref_id: RC.22
+    name: Network Segmentation
+    category: technical
+    csf_function: protect
+    description: Place routers between networks creating boundaries, increasing broadcast domains, and filtering broadcast
+      traffic. Use boundaries to contain security breaches by restricting traffic to separate segments. Physically segment
+      OT enclaves (e.g., data diodes) when applicable.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-23
+    ref_id: RC.23
+    name: Cybersecurity Awareness and Training Program
+    category: process
+    csf_function: protect
+    description: Provide initial cybersecurity training before new employees access systems. Provide at least annual training
+      covering social engineering, attack reporting, acceptable use, and basic cyber hygiene. Identify specialized roles requiring
+      additional training. Provide OT personnel security awareness training.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-24
+    ref_id: RC.24
+    name: Encryption and Cryptographic Controls
+    category: technical
+    csf_function: protect
+    description: Use encryption, digital signatures, and cryptographic hashes protecting network communication confidentiality
+      and integrity. Identify critical data for protection in transit and at rest. Prevent plaintext storage of sensitive
+      data and passwords. Use encryption for OT external connections where latency permits.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-25
+    ref_id: RC.25
+    name: Email Security Configuration
+    category: technical
+    csf_function: protect
+    description: Enable STARTTLS, SPF, DKIM, and DMARC (set to reject) on all corporate email infrastructure to reduce risk
+      from spoofing, phishing, and interception.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-26
+    ref_id: RC.26
+    name: Macro and Autorun Restriction
+    category: technical
+    csf_function: protect
+    description: Enforce system-wide policy disabling macros or similar embedded code by default. Establish policy for authorized
+      macro enablement on specific assets. Disable Autorun/AutoPlay by default preventing unintentional code execution.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-27
+    ref_id: RC.27
+    name: Secure Change Management Process
+    category: process
+    csf_function: protect
+    description: Implement policies and processes for secure change management. Enforce configuration restrictions preventing
+      unauthorized changes. Test and document proposed changes in non-production environments. Implement OT limited functionality
+      permitting only necessary functions, protocols, and services.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-28
+    ref_id: RC.28
+    name: Backup and Recovery Program
+    category: process
+    csf_function: protect
+    description: Develop list of all maintained backups including installation media, license keys, configuration information,
+      and retention periods. Back up critical operations in near-real-time. Securely store backups offsite and offline. Test
+      backups and recovery minimum annually. Validate integrity before restoration. Include OT device configurations and engineering
+      drawings.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-29
+    ref_id: RC.29
+    name: Hardware and Software Approval Process
+    category: process
+    csf_function: protect
+    description: Implement administrative policy requiring review, testing, and approval before new hardware, firmware, or
+      software installation. Maintain approved list including versions. Consider OT environment additional requirements for
+      patches/updates ensuring no operational or safety impact.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-30
+    ref_id: RC.30
+    name: Security Log Collection and Management
+    category: technical
+    csf_function: protect
+    description: Collect and store administrative/security-focused logs (OS, applications, IDS/IPS, firewalls, DLP, VPNs).
+      Store logs centrally in SIEM or database with restricted access. Store logs per risk-informed duration or regulatory
+      guidelines. For OT assets with non-standard logs, collect network traffic.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-31
+    ref_id: RC.31
+    name: Removable Media and Unauthorized Device Controls
+    category: technical
+    csf_function: protect
+    description: Maintain policies ensuring unauthorized media and hardware don't connect to IT/OT assets. Establish procedures
+      removing, disabling, or securing physical ports preventing unauthorized device connection.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-32
+    ref_id: RC.32
+    name: Internet-Facing Device Hardening
+    category: technical
+    csf_function: protect
+    description: Minimize internet-facing assets. Prioritize timely patches/updates. Disable unnecessary OS applications and
+      network protocols. Never expose network management interfaces to public internet. Logically segment networks per trust
+      boundaries and platform types.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-33
+    ref_id: RC.33
+    name: Malicious Code Detection and Prevention
+    category: technical
+    csf_function: detect
+    description: Implement signature-based and non-signature-based mechanisms (behavior, heuristics, anomalies) detecting/eradicating
+      malicious code at endpoints. Ensure antivirus software is updated, active, and configured for auto-scanning. Use OT-compatible
+      antivirus with special change management practices.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-34
+    ref_id: RC.34
+    name: Adverse Event Identification and Analysis
+    category: process
+    csf_function: detect
+    description: Define clear adverse event criteria and processes. Escalate suspected events per incident response plan.
+      Automate event information analysis. Conduct analyst role-specific training. Account for OT-specific events and anomalies.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-35
+    ref_id: RC.35
+    name: Incident Communication Procedures
+    category: process
+    csf_function: respond
+    description: Design communications plan identifying stakeholders and coordination mechanisms during incidents. Securely
+      share information per response plans. Regularly update senior leadership. Notify HR on insider threats. Establish media
+      communications procedures.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-36
+    ref_id: RC.36
+    name: Incident Reporting Procedures
+    category: process
+    csf_function: respond
+    description: Maintain policy and procedures on reporting confirmed incidents to external entities (regulators, SRMAs,
+      ISACs, ISAOs, CISA). Report within regulatory timeframes or as soon as safely feasible.
+  - urn: urn:intuitem:risk:function:cisa-cpg-2.0:rc-37
+    ref_id: RC.37
+    name: Incident Recovery and Lessons Learned
+    category: process
+    csf_function: recover
+    description: Execute plans recovering/restoring service to critical assets impacted by incidents. Enable degraded operations
+      (paper, radio). Complete post-incident analysis identifying improvement areas. Incorporate lessons learned. Update policies,
+      procedures, and training.
+  framework:
+    urn: urn:intuitem:risk:framework:cisa-cpg-2.0
+    ref_id: CISA-CPG-2.0
+    name: CISA CPG v2.0
+    description: CISA Cross-Sector Cybersecurity Performance Goals 2.0
+    min_score: 1
+    max_score: 4
+    scores_definition:
+    - score: 1
+      name: Not Implemented
+      description: The goal is not addressed. The organization has not taken action on the recommended practices, or actions
+        are entirely ad hoc with no documented approach.
+    - score: 2
+      name: Partially Implemented
+      description: Some recommended actions are in place but implementation is incomplete or inconsistent. Practices may be
+        ad hoc or limited to specific areas of the organization.
+    - score: 3
+      name: Largely Implemented
+      description: Most recommended actions are systematically applied across the organization. Practices are documented,
+        repeatable, and cover the majority of relevant assets and processes.
+    - score: 4
+      name: Fully Implemented
+      description: All recommended actions are in place, tested, and continuously improved. Practices are organization-wide,
+        regularly reviewed, and adapted based on lessons learned and evolving threats.
+    requirement_nodes:
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      assessable: false
+      depth: 1
+      ref_id: GV
+      name: GOVERN
+      description: The organization's cybersecurity risk management strategy, expectations, and policy are established, communicated,
+        and monitored.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      assessable: false
+      depth: 1
+      ref_id: ID
+      name: IDENTIFY
+      description: The organization's current cybersecurity risks are understood.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      assessable: false
+      depth: 1
+      ref_id: PR
+      name: PROTECT
+      description: Safeguards to manage the organization's cybersecurity risks are used.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:de
+      assessable: false
+      depth: 1
+      ref_id: DE
+      name: DETECT
+      description: Possible cybersecurity attacks and compromises are found and analyzed.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:rs
+      assessable: false
+      depth: 1
+      ref_id: RS
+      name: RESPOND
+      description: Actions regarding a detected cybersecurity incident are taken.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:rc
+      assessable: false
+      depth: 1
+      ref_id: RC
+      name: RECOVER
+      description: Assets and operations affected by a cybersecurity incident are restored.
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      ref_id: 1.A
+      name: Establish Cybersecurity Responsibilities
+      description: Roles, responsibilities, and authorities related to the organization's cybersecurity program are established,
+        communicated, enforced, and aligned within the organization and external partners.
+      annotation: |-
+        Outcome: Roles, responsibilities, and authorities related to the organization's cybersecurity program are established, communicated, enforced, and aligned within the organization and external partners.
+
+        TTP/Risk Addressed: Lack of sufficient cybersecurity accountability, investment, or effectiveness.
+
+        Recommended Actions:
+        - Document all cybersecurity roles and responsibilities in organizational policy
+        - Distribute cybersecurity responsibilities across the organization; third parties may assist
+        - Implement legal and regulatory cybersecurity requirements, including privacy
+        - Establish continuous IT/OT team collaboration for security and operational effectiveness
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-01
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-03
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      ref_id: 1.B
+      name: Manage Cybersecurity Oversight
+      description: The organization's cybersecurity risk management strategy, expectations, and policies are established.
+      annotation: |-
+        Outcome: The organization's cybersecurity risk management strategy, expectations, and policies are established.
+
+        TTP/Risk Addressed: Insufficient cybersecurity policies and procedures/practices that can manage cybersecurity risk for the organization's technologies and processes.
+
+        Recommended Actions:
+        - Review cybersecurity policies annually; update when requirements, risks, threats, or technology changes
+        - Communicate and enforce policies reflecting organizational strategy and priorities
+        - Establish governance encompassing regulatory, legal, risk, environmental, and operational obligations
+        - Develop OT-specific policies acknowledging IT program limitations and critical function priorities
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-02
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-03
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      ref_id: 1.C
+      name: Manage Incident Response Plans
+      description: Identify improvements by practicing cybersecurity and incident response plans to maintain and update the
+        organization's cybersecurity program.
+      annotation: |-
+        Outcome: Identify improvements by practicing cybersecurity and incident response plans to maintain and update the organization's cybersecurity program.
+
+        TTP/Risk Addressed: Inability to quickly and effectively isolate, contain, eradicate, remediate, and communicate about cybersecurity incidents.
+
+        Recommended Actions:
+        - Develop, maintain, update, and regularly exercise IR plans for common and organizationally specific scenarios
+        - Ensure realistic drills including all relevant stakeholders
+        - Review and drill IR plans minimum annually
+        - Account for OT-specific safety and containment considerations
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-04
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      ref_id: 1.D
+      name: Supply Chain Incident Reporting & Vulnerability Disclosure
+      description: Organizations more rapidly learn about and respond to known incidents or breaches across vendors and service
+        providers.
+      annotation: |-
+        Outcome: Organizations more rapidly learn about and respond to known incidents or breaches across vendors and service providers.
+
+        TTP/Risk Addressed: Insufficient cybersecurity supply chain risk management (C-SCRM) practices that cannot securely support the organization's technologies and processes.
+
+        Recommended Actions:
+        - Require vendors/service providers to notify customers of security incidents and vulnerabilities within risk-informed timeframes via SLAs and contracts
+        - Document and track OT asset serial numbers, checksums, digital certificates/signatures to verify authenticity of hardware, software, and firmware
+
+        Cost: Moderate | Impact: Moderate | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-05
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-06
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:gv
+      ref_id: 1.E
+      name: Manage Risks from Managed Service Providers
+      description: The risks posed by a managed service provider (MSP) are identified, recorded, assessed, prioritized, monitored,
+        and updated over the course of the relationship.
+      annotation: |-
+        Outcome: The risks posed by a managed service provider (MSP) are identified, recorded, assessed, prioritized, monitored, and updated over the course of the relationship.
+
+        TTP/Risk Addressed: Adversaries can exploit vulnerabilities by abusing trusted third-party relationships.
+
+        Recommended Actions:
+        - Develop understanding of MSP services and security products
+        - Understand contractual agreements and proactively address security gaps outside contract scope
+        - Ensure contracts detail how and when MSPs notify customers of incidents affecting their environment
+
+        Cost: Moderate | Impact: Moderate | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-07
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      ref_id: 2.A
+      name: Manage Organizational Assets
+      description: A maintained asset inventory to improve cybersecurity resilience by reducing downtime, aiding recovery,
+        bolstering defenses, and improving preparedness.
+      annotation: |-
+        Outcome: A maintained asset inventory to improve cybersecurity resilience by reducing downtime, aiding recovery, bolstering defenses, and improving preparedness.
+
+        TTP/Risk Addressed: Adversaries might use computer accessories, networking hardware, or other devices as entry points to infiltrate systems or networks.
+
+        Recommended Actions:
+        - Maintain regularly updated inventory of all organizational assets including data, hardware, software, systems, facilities, and personnel
+        - Update critical IT/OT assets more frequently
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-08
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      ref_id: 2.B
+      name: Mitigate Known Vulnerabilities
+      description: Reduced likelihood of threat actors exploiting known vulnerabilities to breach organizational networks.
+      annotation: |-
+        Outcome: Reduced likelihood of threat actors exploiting known vulnerabilities to breach organizational networks.
+
+        TTP/Risk Addressed: Adversaries frequently target unpatched and misconfigured systems, particularly those exposed to the internet. Adversaries often leverage software vulnerabilities, temporary malfunctions, or configuration errors to gain initial access to a network.
+
+        Recommended Actions:
+        - Implement vulnerability management program to patch and mitigate misconfigured software timely
+        - Monitor risk response progress via POA&M, risk registers, and risk detail reports
+        - Document potential risks of proposed changes; provide rollback guidance
+        - Assign responsibilities for processing cybersecurity threat, vulnerability, or incident disclosures
+        - Incorporate compensating security controls for legacy systems where possible
+        - For OT assets where patching is infeasible, apply compensating controls (segmentation, monitoring)
+
+        Cost: High | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-09
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-10
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      ref_id: 2.C
+      name: Obtain Independent Validation of Cybersecurity Controls
+      description: Validate that implemented security controls are properly configured and working as intended.
+      annotation: |-
+        Outcome: Validate that implemented security controls are properly configured and working as intended.
+
+        TTP/Risk Addressed: Gaps in cyber defenses or overconfidence in existing protections.
+
+        Recommended Actions:
+        - Regularly engage third-party cybersecurity experts for penetration tests, bug bounties, incident simulations, and table-top exercises
+        - Assess ability of adversaries to infiltrate and move laterally within networks targeting critical systems
+        - Ensure findings from tests are addressed
+
+        Cost: High | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-11
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      ref_id: 2.D
+      name: Maintain Vulnerability Disclosure/Reporting Process
+      description: Organizations more rapidly learn about vulnerabilities or weaknesses.
+      annotation: |-
+        Outcome: Organizations more rapidly learn about vulnerabilities or weaknesses.
+
+        TTP/Risk Addressed: Unreported security vulnerabilities in software, networks, devices, and systems can be exploited by adversaries before they are mitigated.
+
+        Recommended Actions:
+        - Maintain public, easily discoverable method for notifying security teams of vulnerable, misconfigured, or exploitable assets via email or web form
+        - Acknowledge valid submissions and respond timely considering completeness and complexity
+        - Mitigate validated, exploitable weaknesses consistently with severity
+        - Protect individuals identifying/reporting vulnerabilities in good faith under safe harbor provisions
+        - Apply security.txt files conforming to RFC 9116 on all public-facing web domains
+
+        Cost: Low | Impact: Low | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-12
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:id
+      ref_id: 2.E
+      name: Document Network Topology
+      description: More efficiently and effectively respond to incidents and maintain service continuity.
+      annotation: |-
+        Outcome: More efficiently and effectively respond to incidents and maintain service continuity.
+
+        TTP/Risk Addressed: Incomplete or inaccurate understanding of network topology inhibits effective incident response and recovery.
+
+        Recommended Actions:
+        - Maintain accurate documentation describing current network topology and relevant information across all IT and OT networks
+        - Perform network reviews and track annually; update when topology changes
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-13
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.A
+      name: Changing Default Passwords
+      description: Prevent threat actors from using default passwords to achieve initial access and move laterally in a network.
+      annotation: |-
+        Outcome: Prevent threat actors from using default passwords to achieve initial access and move laterally in a network.
+
+        TTP/Risk Addressed: Adversaries might acquire and exploit default account credentials to gain initial access, maintain persistence, escalate privileges, or evade defenses.
+
+        Recommended Actions:
+        - Require changing default manufacturer passwords for all hardware, software, and firmware before network connection
+        - If infeasible (hard-coded passwords), document and implement compensating controls; monitor logs for network traffic and login attempts
+        - Change default passwords on existing OT systems; establish policy for all new/future devices
+
+        Cost: Low | Impact: High | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-14
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.B
+      name: Establish Minimum Password Strength
+      description: Organizational passwords are harder for threat actors to guess or crack.
+      annotation: |-
+        Outcome: Organizational passwords are harder for threat actors to guess or crack.
+
+        TTP/Risk Addressed: Adversaries use brute force techniques to crack passwords when unknown or hashes are obtained. They systematically guess passwords using repetitive or iterative methods.
+
+        Recommended Actions:
+        - Enforce system policy establishing minimum password strength including 16+ character length for all password-protected IT and OT assets
+        - Leverage passphrases and password managers for longer passwords
+        - When minimum lengths are infeasible, apply compensating controls and record them; log all login attempts
+        - Prioritize upgrade/replacement of assets unable to support sufficient strength passwords
+
+        Cost: Low | Impact: High | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-15
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-c
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.C
+      name: Create Unique Credentials
+      description: Adversaries are unable to reuse compromised credentials to move laterally across the organization, particularly
+        between IT and OT networks.
+      annotation: |-
+        Outcome: Adversaries are unable to reuse compromised credentials to move laterally across the organization, particularly between IT and OT networks.
+
+        TTP/Risk Addressed: Adversaries can obtain and exploit account credentials to gain access, maintain persistence, escalate privileges, or evade defenses. Compromised credentials can bypass network access controls.
+
+        Recommended Actions:
+        - Create distinct, separate credentials for similar services and asset access across IT/OT networks
+        - Users refrain from reusing passwords across accounts, applications, and services
+        - System administrators and service/machine accounts have unique passwords
+        - No universal non-person entity (NPE) account passwords
+        - Utilize role-based accounts for IT/OT systems when possible
+
+        Cost: Low | Impact: High | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-16
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-d
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.D
+      name: Revoking Credentials for Departing Staff
+      description: Prevent unauthorized access to organizational accounts or resources by former staff.
+      annotation: |-
+        Outcome: Prevent unauthorized access to organizational accounts or resources by former staff.
+
+        TTP/Risk Addressed: Adversaries can exploit inactive accounts of former staff to evade detection.
+
+        Recommended Actions:
+        - Establish defined, enforced administrative offboarding process for staff, contractors, vendors including return of physical tokens/badges and revocation of all system/facility access
+        - Review user access and disable inactive accounts after specified period (e.g., 30 days), ideally via automated process
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-17
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-e
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.E
+      name: Monitor Unsuccessful (Automated) Login Attempts
+      description: Protect organizations from automated, credential-based attacks.
+      annotation: |-
+        Outcome: Protect organizations from automated, credential-based attacks.
+
+        TTP/Risk Addressed: Adversaries might acquire and exploit default account credentials to gain access, maintain persistence, escalate privileges, or evade defenses.
+
+        Recommended Actions:
+        - Capture and log all unsuccessful logins per organization's security policy
+        - Notify security personnel after consecutive unsuccessful attempts and deviations from normal behavior
+        - Log and store alerts in relevant security or ticketing system for retroactive analysis
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-f
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.F
+      name: Implement Multi-factor Authentication
+      description: Add a critical, additional layer of security to protect asset accounts.
+      annotation: |-
+        Outcome: Add a critical, additional layer of security to protect asset accounts.
+
+        TTP/Risk Addressed: Adversaries without prior knowledge of legitimate credentials might try commonly used passwords across various accounts. They might also systematically guess passwords using repetitive or iterative methods.
+
+        Recommended Actions:
+        - Require MFA using strongest available method for assets with remote access
+        - MFA options ranked by strength: (1) Phishing-resistant MFA (FIDO/WebAuthn or PKI-based), (2) Mobile app-based soft tokens, (3) SMS/voice only when no other options available
+        - All IT accounts leverage MFA; prioritize highest-risk accounts
+        - OT: Enable MFA on all remotely accessible accounts/systems; if unavailable, remove remote access, add segmentation
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-19
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-g
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.G
+      name: Administrators Maintain Separate User and Privileged Accounts
+      description: Make it harder for threat actors to gain access to administrator or privileged accounts, even if common
+        user accounts are compromised.
+      annotation: |-
+        Outcome: Make it harder for threat actors to gain access to administrator or privileged accounts, even if common user accounts are compromised.
+
+        TTP/Risk Addressed: Adversaries might obtain and exploit credentials from existing accounts for initial access, persistence, privilege escalation, or defense evasion.
+
+        Recommended Actions:
+        - User accounts lack administrator privileges
+        - Administrators maintain separate user accounts for non-admin activities
+        - Re-evaluate privileges on recurring basis validating continued need
+        - Maintain separation of duties distributing responsibilities across multiple individuals/roles
+
+        Cost: Low | Impact: High | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-20
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-h
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.H
+      name: Implement the Principles of Least Privilege
+      description: Minimizes unauthorized access to systems, data, and processes, reduces human error, and prevents malicious
+        actions.
+      annotation: |-
+        Outcome: Minimizes unauthorized access to systems, data, and processes, reduces human error, and prevents malicious actions.
+
+        TTP/Risk Addressed: Unauthorized access to network resources and the potential for adversaries to move across systems undetected, compromising sensitive data and critical systems.
+
+        Recommended Actions:
+        - All user accounts, system roles, and processes operate with minimum privileges necessary
+        - Perform quarterly reviews of access permissions and role assignments validating policy compliance
+
+        Cost: Low | Impact: High | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-21
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-i
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.I
+      name: Implement Logical/Physical Network Segmentation
+      description: Limiting the impact of a potential breach and preventing adversaries from accessing sensitive data, spaces,
+        and/or critical infrastructure.
+      annotation: |-
+        Outcome: Limiting the impact of a potential breach and preventing adversaries from accessing sensitive data, spaces, and/or critical infrastructure.
+
+        TTP/Risk Addressed: If a network is compromised by an unauthorized user, a securely segregated network can contain malicious occurrences.
+
+        Recommended Actions:
+        - Place routers between networks creating boundaries, increasing broadcast domains, and filtering broadcast traffic
+        - Use boundaries to contain security breaches by restricting traffic to separate segments and shutting down segments during intrusion
+        - Physically segment OT enclaves (e.g., data diodes) when applicable
+
+        Cost: High | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-j
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.J
+      name: Implement Cybersecurity Training
+      description: Organizational users learn and perform more secure behaviors.
+      annotation: |-
+        Outcome: Organizational users learn and perform more secure behaviors.
+
+        TTP/Risk Addressed: Users vulnerable to spear phishing, social engineering, and other techniques that involve user interaction.
+
+        Recommended Actions:
+        - Provide initial cybersecurity training before new employees access computer systems
+        - Provide at least annual training covering social engineering recognition, attack reporting, acceptable use, and basic cyber hygiene
+        - Identify specialized roles requiring additional training
+        - Provide role-based training to specialized roles including contractors, partners, suppliers
+        - Provide OT personnel security awareness training
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-23
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-k
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.K
+      name: Utilize Strong Encryption
+      description: Encryption is deployed to maintain confidentiality and integrity of sensitive data across the organization's
+        network.
+      annotation: |-
+        Outcome: Encryption is deployed to maintain confidentiality and integrity of sensitive data across the organization's network.
+
+        TTP/Risk Addressed: Adversaries can position themselves between networked devices to enable network sniffing and data manipulation, or steal operational data for personal gain or future operations.
+
+        Recommended Actions:
+        - Use encryption, digital signatures, and cryptographic hashes protecting network communication confidentiality and integrity
+        - Identify critical data for protection in transit and at rest (PII, proprietary information, PLC programs, CAD/CAM files)
+        - Prevent plaintext electronic storage of sensitive data and passwords
+        - Store credentials securely via credential/password managers
+        - Use encryption for OT external connections where latency permits
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-24
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-l
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.L
+      name: Enable Email Security
+      description: Reduce risk from common email-based threats, such as spoofing, phishing, and interception.
+      annotation: |-
+        Outcome: Reduce risk from common email-based threats, such as spoofing, phishing, and interception.
+
+        TTP/Risk Addressed: Adversaries might send victims emails with malicious attachments or links, aiming to run harmful code on their systems. They can also conduct phishing through third-party services.
+
+        Recommended Actions:
+        - Enable STARTTLS on all corporate email infrastructure
+        - Enable Sender Policy Framework (SPF)
+        - Enable DomainKeys Identified Mail (DKIM)
+        - Enable DMARC and set to 'reject'
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-25
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-m
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.M
+      name: Disable Autorun & Macros By Default
+      description: Reduce the risk from embedded macros and similar executable code.
+      annotation: |-
+        Outcome: Reduce the risk from embedded macros and similar executable code.
+
+        TTP/Risk Addressed: Adversaries rely on users to open malicious files to execute code. Social engineering tactics could be used to convince users to open such files.
+
+        Recommended Actions:
+        - Enforce system-wide policy disabling macros or similar embedded code by default
+        - Establish policy for authorized users requesting macro enablement on specific assets
+        - Disable Autorun/AutoPlay by default
+
+        Cost: Low | Impact: Moderate | Complexity: Simple
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-26
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-n
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.N
+      name: Establish Change Management Processes
+      description: Policies and procedures exist to manage system changes and configurations.
+      annotation: |-
+        Outcome: Policies and procedures exist to manage system changes and configurations.
+
+        TTP/Risk Addressed: Delayed, insufficient, or incomplete ability to maintain or restore functionality of critical devices and service operations.
+
+        Recommended Actions:
+        - Implement policies and processes for secure change management
+        - Enforce configuration restrictions preventing unauthorized changes
+        - Test and document proposed changes in non-production environments; analyze security impacts
+        - Implement OT limited functionality permitting only necessary functions, protocols, and services
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-27
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-o
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.O
+      name: Maintain System Backups & Restoration Ability
+      description: Organizations reduce data loss and service disruption risks while efficiently managing, responding to,
+        and recovering from incidents.
+      annotation: |-
+        Outcome: Organizations reduce data loss and service disruption risks while efficiently managing, responding to, and recovering from incidents.
+
+        TTP/Risk Addressed: Adversaries can disrupt critical systems, delete data, and disable recovery services to prevent system recovery.
+
+        Recommended Actions:
+        - Develop list of all maintained backups including installation media, license keys, configuration information, and retention periods
+        - Back up critical operations systems in near-real-time; frequently back up all operational systems
+        - Securely store backups offsite and offline
+        - Test backups and recovery minimum annually
+        - Validate backup integrity before initiating restoration
+        - Check restoration assets for indicators of compromise
+        - OT: Include device configurations, roles, engineering drawings, and tools
+
+        Cost: High | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-28
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-p
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.P
+      name: Maintain Hardware & Software Approval Process
+      description: Increase visibility into deployed technology assets and reduce the likelihood of breach by users installing
+        unapproved hardware, firmware, or software.
+      annotation: |-
+        Outcome: Increase visibility into deployed technology assets and reduce the likelihood of breach by users installing unapproved hardware, firmware, or software.
+
+        TTP/Risk Addressed: Adversaries can manipulate products or delivery mechanisms before they reach final users and attempt data or system compromise.
+
+        Recommended Actions:
+        - Implement administrative policy requiring review, testing, and approval before new hardware, firmware, or software installation
+        - Maintain approved hardware, firmware, and software list including approved versions
+        - Consider OT environment additional requirements for patches/updates ensuring no operational or safety impact
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-29
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-q
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.Q
+      name: Maintain Log Collection & Storage
+      description: Enhance visibility to detect and respond to cyber incidents while ensuring security logs are protected
+        from unauthorized access and tampering.
+      annotation: |-
+        Outcome: Enhance visibility to detect and respond to cyber incidents while ensuring security logs are protected from unauthorized access and tampering.
+
+        TTP/Risk Addressed: Delayed, insufficient, or incomplete ability to detect and respond to potential cyber incidents.
+
+        Recommended Actions:
+        - Collect and store administrative/security-focused logs (OS, applications, IDS/IPS, firewalls, DLP, VPNs)
+        - Store logs centrally (SIEM tool or database); only authorized, authenticated users access/modify
+        - Store logs per risk-informed duration or regulatory guidelines
+        - Notify security teams when critical log functions are disabled
+        - For OT assets with non-standard logs, collect network traffic between those assets
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-30
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-r
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.R
+      name: Prohibit Connection of Unauthorized Devices
+      description: Prevent malicious actors from achieving initial access or data exfiltration via unauthorized portable media
+        devices.
+      annotation: |-
+        Outcome: Prevent malicious actors from achieving initial access or data exfiltration via unauthorized portable media devices.
+
+        TTP/Risk Addressed: Adversaries might infiltrate systems, including disconnected or air-gapped networks, by copying malware to removable media.
+
+        Recommended Actions:
+        - Maintain policies ensuring unauthorized media and hardware don't connect to IT/OT assets
+        - Establish procedures removing, disabling, or securing physical ports preventing unauthorized device connection
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-31
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-s
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:pr
+      ref_id: 3.S
+      name: Secure Internet Facing Devices
+      description: Unauthorized users cannot gain an initial system foothold by exploiting known weaknesses in internet-facing
+        assets.
+      annotation: |-
+        Outcome: Unauthorized users cannot gain an initial system foothold by exploiting known weaknesses in internet-facing assets.
+
+        TTP/Risk Addressed: Adversaries might exploit weaknesses in internet-facing hosts or systems targeting software bugs, temporary glitches, or misconfigurations.
+
+        Recommended Actions:
+        - Minimize internet-facing assets whenever possible
+        - Prioritize keeping software current via timely patches/updates
+        - Disable all unnecessary OS applications, software, and network protocols on internet-facing assets
+        - Never expose network management interfaces to public internet
+        - Logically segment enterprise and production networks per trust boundaries and platform types
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-32
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:4-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:de
+      ref_id: 4.A
+      name: Establish Malicious Code Detection
+      description: Enables early threat identification, strengthens system integrity, provides insights for faster remediation,
+        and minimizes downtime.
+      annotation: |-
+        Outcome: Enables early threat identification, strengthens system integrity, provides insights for faster remediation, and minimizes downtime.
+
+        TTP/Risk Addressed: Malicious software can involve payloads, droppers, backdoors, etc. Adversaries use malware to control remote machines, evade defenses, and execute post-compromise actions.
+
+        Recommended Actions:
+        - Implement signature-based and non-signature-based mechanisms detecting/eradicating malicious code at endpoints
+        - Ensure antivirus software is updated, active, and configured for auto-scanning emails and removable media
+        - Use OT-compatible antivirus with special practices including compatibility checks and performance testing
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-33
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:4-b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:de
+      ref_id: 4.B
+      name: Identify Adverse Events
+      description: Organizations can identify adverse security events.
+      annotation: |-
+        Outcome: Organizations can identify adverse security events.
+
+        TTP/Risk Addressed: Initial access, privilege escalation, and lateral movement.
+
+        Recommended Actions:
+        - Define clear adverse event criteria and processes; escalate suspected events per incident response plan
+        - Automate event information analysis accelerating investigative timelines
+        - Conduct analyst role-specific training on proper protocols for suspected cyber incidents
+        - Account for OT-specific events and anomalies
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-34
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:5-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:rs
+      ref_id: 5.A
+      name: Establish Incident Communication Procedures
+      description: Coordinate crisis communication methods between internal and external organization partners and critical
+        suppliers.
+      annotation: |-
+        Outcome: Coordinate crisis communication methods between internal and external organization partners and critical suppliers.
+
+        TTP/Risk Addressed: Without established communication procedures, incidents can disrupt coordination among response teams, slowing incident resolution, increasing downtime, and amplifying overall damage.
+
+        Recommended Actions:
+        - Design communications plan identifying stakeholders and coordination mechanisms during incidents
+        - Collaborate with stakeholders; securely share information per response plans
+        - Regularly update senior leadership on major incident status
+        - Notify human resources when malicious insider activity occurs
+        - Establish and follow media communications procedures
+
+        Cost: Low | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-35
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:5-b
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:rs
+      ref_id: 5.B
+      name: Establish Incident Reporting Procedures
+      description: CISA and other organizations are better able to provide assistance or understand the broader scope of a
+        cyber incident.
+      annotation: |-
+        Outcome: CISA and other organizations are better able to provide assistance or understand the broader scope of a cyber incident.
+
+        TTP/Risk Addressed: Without timely incident reporting, CISA and other groups are less able to assist affected organizations and lack critical insight into the broader threat landscape.
+
+        Recommended Actions:
+        - Maintain policy and procedures on reporting confirmed incidents to external entities (regulators, SRMAs, ISACs, ISAOs, CISA)
+        - Report known incidents within regulatory timeframes or as soon as safely feasible
+
+        Cost: Moderate | Impact: High | Complexity: Moderate
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-36
+    - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:6-a
+      assessable: true
+      depth: 2
+      parent_urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:rc
+      ref_id: 6.A
+      name: Incident Planning and Preparedness
+      description: Organizations are capable of safely and effectively recovering from a cybersecurity incident.
+      annotation: |-
+        Outcome: Organizations are capable of safely and effectively recovering from a cybersecurity incident.
+
+        TTP/Risk Addressed: Disruption to the availability of an asset, service, or system.
+
+        Recommended Actions:
+        - Execute plans recovering/restoring service to critical assets impacted by incidents
+        - Enable degraded operations (paper-based, radio communications) without critical assets or internet
+        - Complete post-incident analysis identifying improvement areas
+        - Incorporate lessons learned; enhance detection/response capabilities
+        - Update policies, procedures, and training; ensure stakeholder awareness of changes
+
+        Cost: Moderate | Impact: High | Complexity: Complex
+      reference_controls:
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-37
