@@ -235,12 +235,8 @@ export const loadDetail = async ({ event, model, id }) => {
 								}
 								const response = await event.fetch(url);
 								if (response.ok) {
-									selectOptions[selectField.field] = await response.json().then((data) =>
-										Object.entries(data).map(([key, value]) => ({
-											label: value,
-											value: selectField.valueType === 'number' ? parseInt(key) : key
-										}))
-									);
+									const responseData = await response.json();
+									selectOptions[selectField.field] = formatSelectFieldData(responseData);
 								} else {
 									console.error(
 										`Failed to fetch data for ${selectField.field}: ${response.statusText}`
