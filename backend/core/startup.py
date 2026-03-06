@@ -99,6 +99,9 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -177,6 +180,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_accreditation",
     # integrations
     "view_syncmapping",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -450,6 +456,13 @@ ANALYST_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -755,6 +768,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1109,6 +1129,13 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

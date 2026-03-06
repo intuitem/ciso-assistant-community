@@ -4,6 +4,7 @@ from typing import Any
 import structlog
 from django.db import models, transaction
 from django.db.models import F
+from django.utils import timezone
 
 from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
 from core.models import *
@@ -2944,6 +2945,75 @@ class FindingReadSerializer(FindingWriteSerializer):
     class Meta:
         model = Finding
         fields = "__all__"
+
+
+class PresetJourneyStepReadSerializer(BaseModelSerializer):
+    title = serializers.CharField(source="get_title_translated")
+    description = serializers.CharField(
+        source="get_description_translated", allow_blank=True
+    )
+
+    class Meta:
+        model = PresetJourneyStep
+        exclude = ["translations"]
+
+
+class PresetJourneyStepWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourneyStep
+        fields = ["status", "notes", "target_ref"]
+
+    def update(self, instance, validated_data):
+        if "status" in validated_data:
+            new_status = validated_data["status"]
+            if new_status in (
+                PresetJourneyStep.Status.DONE,
+                PresetJourneyStep.Status.SKIPPED,
+            ):
+                validated_data["completed_at"] = timezone.now()
+                validated_data["completed_by"] = self.context["request"].user
+            elif new_status == PresetJourneyStep.Status.NOT_STARTED:
+                validated_data["completed_at"] = None
+                validated_data["completed_by"] = None
+
+        with transaction.atomic():
+            # Sync target_ref change to parent journey's object_refs
+            if "target_ref" in validated_data:
+                new_ref = validated_data["target_ref"]
+                journey = instance.journey
+                object_refs = dict(journey.object_refs or {})
+                if new_ref:
+                    object_refs[instance.key] = new_ref
+                else:
+                    object_refs.pop(instance.key, None)
+                journey.object_refs = object_refs
+                journey.save(update_fields=["object_refs"])
+
+            return super().update(instance, validated_data)
+
+
+class PresetJourneyReadSerializer(BaseModelSerializer):
+    steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
+    folder = FieldsRelatedField()
+    latest_version = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PresetJourney
+        fields = "__all__"
+
+    def get_latest_version(self, obj):
+        return (
+            StoredLibrary.objects.filter(urn=obj.urn)
+            .order_by("-version")
+            .values_list("version", flat=True)
+            .first()
+        )
+
+
+class PresetJourneyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourney
+        fields = ["name", "description"]
 
 
 class QuickStartSerializer(serializers.Serializer):
