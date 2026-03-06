@@ -195,6 +195,12 @@
 						</a>
 						<div class="flex-1 min-w-0">
 							<h2 class="text-lg font-semibold text-white">{data.journey.name}</h2>
+							{#if data.journey.folder?.str}
+								<span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-100 mt-1 max-w-fit">
+									<i class="fa-solid fa-sitemap text-[9px]"></i>
+									<span class="truncate">{data.journey.folder.str}</span>
+								</span>
+							{/if}
 							{#if data.journey.description}
 								<p class="text-sm text-violet-100 mt-0.5">{data.journey.description}</p>
 							{/if}

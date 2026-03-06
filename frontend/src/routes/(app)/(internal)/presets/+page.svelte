@@ -204,6 +204,12 @@
 										</span>
 									{/if}
 								</div>
+								{#if journey.folder?.str}
+									<span class="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 text-[11px] font-medium text-indigo-600 mb-0.5 max-w-fit">
+										<i class="fa-solid fa-sitemap text-[9px]"></i>
+										<span class="truncate">{journey.folder.str}</span>
+									</span>
+								{/if}
 								{#if journey.description}
 									<p class="text-sm text-gray-400 line-clamp-1">{journey.description}</p>
 								{/if}
