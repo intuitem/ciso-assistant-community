@@ -1,4 +1,6 @@
 export function formatDateOrDateTime(isoString: string, locale = 'en-US'): string {
+	console.log(isoString);
+	console.log(locale);
 	if (typeof isoString !== 'string') {
 		return isoString;
 	}
