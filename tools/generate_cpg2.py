@@ -388,7 +388,7 @@ GOALS = [
         "High",
         "High",
         "Complex",
-        ["RC.09", "RC.10"],
+        ["RC.09", "RC.10", "RC.27"],
     ),
     (
         "2.C",
@@ -436,7 +436,7 @@ GOALS = [
         "Low",
         "High",
         "Simple",
-        ["RC.14"],
+        ["RC.14", "RC.18"],
     ),
     (
         "3.B",
@@ -448,7 +448,7 @@ GOALS = [
         "Low",
         "High",
         "Simple",
-        ["RC.15"],
+        ["RC.15", "RC.18"],
     ),
     (
         "3.C",
@@ -484,7 +484,7 @@ GOALS = [
         "Moderate",
         "High",
         "Moderate",
-        ["RC.18"],
+        ["RC.18", "RC.30"],
     ),
     (
         "3.F",
@@ -496,7 +496,7 @@ GOALS = [
         "Moderate",
         "High",
         "Moderate",
-        ["RC.19"],
+        ["RC.19", "RC.22"],
     ),
     (
         "3.G",
@@ -652,7 +652,7 @@ GOALS = [
         "Moderate",
         "High",
         "Complex",
-        ["RC.32"],
+        ["RC.32", "RC.22", "RC.09"],
     ),
     (
         "4.A",
@@ -676,7 +676,7 @@ GOALS = [
         "Moderate",
         "High",
         "Complex",
-        ["RC.34"],
+        ["RC.34", "RC.04"],
     ),
     (
         "5.A",
@@ -712,7 +712,7 @@ GOALS = [
         "Moderate",
         "High",
         "Complex",
-        ["RC.37"],
+        ["RC.37", "RC.02", "RC.23"],
     ),
 ]
 
@@ -726,7 +726,7 @@ def build_library():
         "name": "CISA Cybersecurity Performance Goals v2.0",
         "description": "CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions aligned to the NIST Cybersecurity Framework.",
         "copyright": "This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.",
-        "version": 1,
+        "version": 2,
         "publication_date": "2025-03-04",
         "provider": "CISA",
         "packager": "intuitem",

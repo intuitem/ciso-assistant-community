@@ -6,7 +6,7 @@ name: CISA Cybersecurity Performance Goals v2.0
 description: CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions
   aligned to the NIST Cybersecurity Framework.
 copyright: This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.
-version: 1
+version: 2
 publication_date: '2025-03-04'
 provider: CISA
 packager: intuitem
@@ -507,6 +507,7 @@ objects:
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-09
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-10
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-27
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-c
       assessable: true
       depth: 2
@@ -588,6 +589,7 @@ objects:
         Cost: Low | Impact: High | Complexity: Simple
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-14
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-b
       assessable: true
       depth: 2
@@ -609,6 +611,7 @@ objects:
         Cost: Low | Impact: High | Complexity: Simple
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-15
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-c
       assessable: true
       depth: 2
@@ -671,6 +674,7 @@ objects:
         Cost: Moderate | Impact: High | Complexity: Moderate
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-30
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-f
       assessable: true
       depth: 2
@@ -692,6 +696,7 @@ objects:
         Cost: Moderate | Impact: High | Complexity: Moderate
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-19
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-g
       assessable: true
       depth: 2
@@ -974,6 +979,8 @@ objects:
         Cost: Moderate | Impact: High | Complexity: Complex
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-32
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-09
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:4-a
       assessable: true
       depth: 2
@@ -1016,6 +1023,7 @@ objects:
         Cost: Moderate | Impact: High | Complexity: Complex
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-34
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-04
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:5-a
       assessable: true
       depth: 2
@@ -1081,3 +1089,5 @@ objects:
         Cost: Moderate | Impact: High | Complexity: Complex
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-37
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-02
+      - urn:intuitem:risk:function:cisa-cpg-2.0:rc-23
