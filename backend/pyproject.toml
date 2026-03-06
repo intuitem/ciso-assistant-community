@@ -23,7 +23,7 @@ structlog = "^24.4.0"
 python-dotenv = "^1.2.1"
 drf-spectacular = "^0.29.0"
 django-rest-knox = "^5.0.2"
-django-allauth = { version = "^65.13.1", extras = [
+django-allauth = { version = "^65.14.1", extras = [
   "socialaccount",
   "saml",
   "mfa",
