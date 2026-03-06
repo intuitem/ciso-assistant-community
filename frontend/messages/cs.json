@@ -157,6 +157,8 @@
 	"focusModeTooltip": "Zaměřit se na konkrétní doménu",
 	"objectNotReachableFromCurrentFocus": "Tento objekt není dosažitelný z aktuálního zaměření. Přesměrování na zobrazení seznamu.",
 	"objectNotFound": "Objekt nebyl nalezen. Přesměrování na zobrazení seznamu.",
+	"autoSync": "Automatická denní synchronizace s akcemi",
+	"autoSyncHelpText": "Je-li povoleno, úkol bude automaticky synchronizovat akce na denní bázi. Uzamčená hodnocení se přeskakují.",
 	"clearFocus": "Vymazat zaměření",
 	"noDomainsAvailable": "Žádné domény nejsou k dispozici",
 	"urn": "URN",
