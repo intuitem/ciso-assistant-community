@@ -58,7 +58,7 @@ def framework_with_questions(app_config):
     # Single-choice question
     q_sc = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:backup:q_sc",
+        urn="urn:test:bqsc",
         ref_id="BQSC",
         text="Pick one",
         type=Question.Type.UNIQUE_CHOICE,
@@ -68,6 +68,7 @@ def framework_with_questions(app_config):
     )
     QuestionChoice.objects.create(
         question=q_sc,
+        urn="urn:test:choice:bqsc:ac1",
         ref_id="AC1",
         value="Choice A",
         add_score=10,
@@ -78,6 +79,7 @@ def framework_with_questions(app_config):
     )
     QuestionChoice.objects.create(
         question=q_sc,
+        urn="urn:test:choice:bqsc:ac2",
         ref_id="AC2",
         value="Choice B",
         add_score=0,
@@ -90,7 +92,7 @@ def framework_with_questions(app_config):
     # Multiple-choice question
     q_mc = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:backup:q_mc",
+        urn="urn:test:bqmc",
         ref_id="BQMC",
         text="Select all",
         type=Question.Type.MULTIPLE_CHOICE,
@@ -100,6 +102,7 @@ def framework_with_questions(app_config):
     )
     QuestionChoice.objects.create(
         question=q_mc,
+        urn="urn:test:choice:bqmc:mc1",
         ref_id="MC1",
         value="Option 1",
         add_score=3,
@@ -110,6 +113,7 @@ def framework_with_questions(app_config):
     )
     QuestionChoice.objects.create(
         question=q_mc,
+        urn="urn:test:choice:bqmc:mc2",
         ref_id="MC2",
         value="Option 2",
         add_score=2,
@@ -120,6 +124,7 @@ def framework_with_questions(app_config):
     )
     QuestionChoice.objects.create(
         question=q_mc,
+        urn="urn:test:choice:bqmc:mc3",
         ref_id="MC3",
         value="Option 3",
         add_score=1,
@@ -132,7 +137,7 @@ def framework_with_questions(app_config):
     # Text question
     q_text = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:backup:q_text",
+        urn="urn:test:bqtxt",
         ref_id="BQTXT",
         text="Describe",
         type=Question.Type.TEXT,

@@ -34,7 +34,7 @@ def scoring_setup(db):
     )
     q1 = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:score:q1",
+        urn="urn:test:sq1",
         ref_id="SQ1",
         text="Question 1",
         type=Question.Type.UNIQUE_CHOICE,
@@ -45,6 +45,7 @@ def scoring_setup(db):
     )
     choice_good = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:choice:sq1:sc1a",
         ref_id="SC1A",
         value="Good",
         add_score=10,
@@ -55,6 +56,7 @@ def scoring_setup(db):
     )
     choice_bad = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:choice:sq1:sc1b",
         ref_id="SC1B",
         value="Bad",
         add_score=0,
@@ -211,7 +213,7 @@ class TestScoring:
         # Question with weight=3
         q1 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:weight:q1",
+            urn="urn:test:wq1",
             ref_id="WQ1",
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
@@ -221,6 +223,7 @@ class TestScoring:
         )
         choice_yes = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:wq1:wc1a",
             ref_id="WC1A",
             value="Yes",
             add_score=10,
@@ -231,6 +234,7 @@ class TestScoring:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:wq1:wc1b",
             ref_id="WC1B",
             value="No",
             add_score=0,
@@ -295,7 +299,7 @@ class TestScoring:
         # Q1: single_choice
         q1 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:depends:q1",
+            urn="urn:test:dq1",
             ref_id="DQ1",
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
@@ -304,6 +308,7 @@ class TestScoring:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:dq1:dc1a",
             ref_id="DC1A",
             value="Yes",
             add_score=10,
@@ -314,6 +319,7 @@ class TestScoring:
         )
         choice_no = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:dq1:dc1b",
             ref_id="DC1B",
             value="No",
             add_score=0,
@@ -326,12 +332,12 @@ class TestScoring:
         # Q2: depends on Q1 answer being "DC1A"
         q2 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:depends:q2",
+            urn="urn:test:dq2",
             ref_id="DQ2",
             type=Question.Type.UNIQUE_CHOICE,
             depends_on={
-                "question": "DQ1",
-                "answers": ["DC1A"],
+                "question": "urn:test:dq1",
+                "answers": ["urn:test:choice:dq1:dc1a"],
                 "condition": "any",
             },
             order=1,
@@ -340,6 +346,7 @@ class TestScoring:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:dq2:dc2a",
             ref_id="DC2A",
             value="Sub-Yes",
             add_score=5,
@@ -350,6 +357,7 @@ class TestScoring:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:dq2:dc2b",
             ref_id="DC2B",
             value="Sub-No",
             add_score=0,
@@ -412,7 +420,7 @@ class TestScoring:
         )
         q = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:multi:q1",
+            urn="urn:test:mq1",
             ref_id="MQ1",
             type=Question.Type.MULTIPLE_CHOICE,
             order=0,
@@ -422,6 +430,7 @@ class TestScoring:
         )
         c1 = QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:mq1:mc1",
             ref_id="MC1",
             value="A",
             add_score=5,
@@ -432,6 +441,7 @@ class TestScoring:
         )
         c2 = QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:mq1:mc2",
             ref_id="MC2",
             value="B",
             add_score=3,

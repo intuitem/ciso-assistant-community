@@ -36,7 +36,7 @@ def node_with_questions(db):
     # Single-choice question
     q_sc = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:dict:q_sc",
+        urn="urn:test:qsc",
         ref_id="QSC",
         text="Pick one color",
         type=Question.Type.UNIQUE_CHOICE,
@@ -46,6 +46,7 @@ def node_with_questions(db):
     )
     c_sc_1 = QuestionChoice.objects.create(
         question=q_sc,
+        urn="urn:test:choice:qsc:sc1",
         ref_id="SC1",
         value="Red",
         add_score=10,
@@ -59,6 +60,7 @@ def node_with_questions(db):
     )
     c_sc_2 = QuestionChoice.objects.create(
         question=q_sc,
+        urn="urn:test:choice:qsc:sc2",
         ref_id="SC2",
         value="Blue",
         add_score=5,
@@ -71,7 +73,7 @@ def node_with_questions(db):
     # Multiple-choice question
     q_mc = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:dict:q_mc",
+        urn="urn:test:qmc",
         ref_id="QMC",
         text="Select all that apply",
         type=Question.Type.MULTIPLE_CHOICE,
@@ -81,6 +83,7 @@ def node_with_questions(db):
     )
     c_mc_1 = QuestionChoice.objects.create(
         question=q_mc,
+        urn="urn:test:choice:qmc:mc1",
         ref_id="MC1",
         value="Option A",
         add_score=3,
@@ -91,6 +94,7 @@ def node_with_questions(db):
     )
     c_mc_2 = QuestionChoice.objects.create(
         question=q_mc,
+        urn="urn:test:choice:qmc:mc2",
         ref_id="MC2",
         value="Option B",
         add_score=2,
@@ -103,7 +107,7 @@ def node_with_questions(db):
     # Text question
     q_text = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:dict:q_text",
+        urn="urn:test:qtxt",
         ref_id="QTXT",
         text="Describe your approach",
         type=Question.Type.TEXT,
@@ -115,17 +119,22 @@ def node_with_questions(db):
     # Question with depends_on
     q_dep = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:dict:q_dep",
+        urn="urn:test:qdep",
         ref_id="QDEP",
         text="Follow-up",
         type=Question.Type.UNIQUE_CHOICE,
         order=3,
-        depends_on={"question": "QSC", "answers": ["SC1"], "condition": "any"},
+        depends_on={
+            "question": "urn:test:qsc",
+            "answers": ["urn:test:choice:qsc:sc1"],
+            "condition": "any",
+        },
         folder=folder,
         is_published=True,
     )
     c_dep_1 = QuestionChoice.objects.create(
         question=q_dep,
+        urn="urn:test:choice:qdep:dep1",
         ref_id="DEP1",
         value="Yes",
         add_score=1,
@@ -136,6 +145,7 @@ def node_with_questions(db):
     )
     QuestionChoice.objects.create(
         question=q_dep,
+        urn="urn:test:choice:qdep:dep2",
         ref_id="DEP2",
         value="No",
         add_score=0,
@@ -183,26 +193,26 @@ class TestBuildQuestionsDict:
         result = build_questions_dict(d["rn"])
 
         assert result is not None
-        sc_entry = result["urn:test:dict:q_sc"]
+        sc_entry = result["urn:test:qsc"]
         assert sc_entry["type"] == "unique_choice"
         assert sc_entry["text"] == "Pick one color"
         assert len(sc_entry["choices"]) == 2
-        assert sc_entry["choices"][0]["urn"] == "SC1"
+        assert sc_entry["choices"][0]["urn"] == "urn:test:choice:qsc:sc1"
         assert sc_entry["choices"][0]["value"] == "Red"
 
     def test_type_mapping(self, node_with_questions):
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
-        assert result["urn:test:dict:q_sc"]["type"] == "unique_choice"
-        assert result["urn:test:dict:q_mc"]["type"] == "multiple_choice"
-        assert result["urn:test:dict:q_text"]["type"] == "text"
+        assert result["urn:test:qsc"]["type"] == "unique_choice"
+        assert result["urn:test:qmc"]["type"] == "multiple_choice"
+        assert result["urn:test:qtxt"]["type"] == "text"
 
     def test_optional_fields_present(self, node_with_questions):
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
-        sc_choices = result["urn:test:dict:q_sc"]["choices"]
+        sc_choices = result["urn:test:qsc"]["choices"]
         # First choice has description, color, select_implementation_groups
         first_choice = sc_choices[0]
         assert first_choice["description"] == "A red choice"
@@ -213,7 +223,7 @@ class TestBuildQuestionsDict:
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
-        sc_choices = result["urn:test:dict:q_sc"]["choices"]
+        sc_choices = result["urn:test:qsc"]["choices"]
         # Second choice has no description, color, select_implementation_groups
         second_choice = sc_choices[1]
         assert "description" not in second_choice
@@ -224,10 +234,10 @@ class TestBuildQuestionsDict:
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
-        dep_entry = result["urn:test:dict:q_dep"]
+        dep_entry = result["urn:test:qdep"]
         assert "depends_on" in dep_entry
-        assert dep_entry["depends_on"]["question"] == "QSC"
-        assert dep_entry["depends_on"]["answers"] == ["SC1"]
+        assert dep_entry["depends_on"]["question"] == "urn:test:qsc"
+        assert dep_entry["depends_on"]["answers"] == ["urn:test:choice:qsc:sc1"]
         assert dep_entry["depends_on"]["condition"] == "any"
 
     def test_returns_none_for_no_questions(self, db):
@@ -252,7 +262,7 @@ class TestBuildQuestionsDict:
         d = node_with_questions
         result = build_questions_dict(d["rn"])
 
-        sc_choices = result["urn:test:dict:q_sc"]["choices"]
+        sc_choices = result["urn:test:qsc"]["choices"]
         # compute_result="true" -> True
         assert sc_choices[0]["compute_result"] is True
         # compute_result="false" -> False
@@ -279,7 +289,7 @@ class TestBuildAnswersDict:
         result = build_answers_dict(answers_qs)
 
         # Single choice returns a string, not a list
-        assert result[d["q_sc"].urn] == "SC1"
+        assert result[d["q_sc"].urn] == "urn:test:choice:qsc:sc1"
 
     def test_multiple_choice_returns_list(self, node_with_questions):
         d = node_with_questions
@@ -300,7 +310,10 @@ class TestBuildAnswersDict:
 
         # Multiple choice returns a list
         assert isinstance(result[d["q_mc"].urn], list)
-        assert set(result[d["q_mc"].urn]) == {"MC1", "MC2"}
+        assert set(result[d["q_mc"].urn]) == {
+            "urn:test:choice:qmc:mc1",
+            "urn:test:choice:qmc:mc2",
+        }
 
     def test_text_type_returns_raw_value(self, node_with_questions):
         d = node_with_questions

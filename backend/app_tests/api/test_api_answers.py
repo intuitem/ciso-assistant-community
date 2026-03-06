@@ -38,7 +38,7 @@ def framework_with_questions(app_config):
     )
     q = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:ans:q1",
+        urn="urn:test:aq1",
         ref_id="AQ1",
         text="Pick one",
         type=Question.Type.UNIQUE_CHOICE,
@@ -48,6 +48,7 @@ def framework_with_questions(app_config):
     )
     c1 = QuestionChoice.objects.create(
         question=q,
+        urn="urn:test:choice:aq1:ac1",
         ref_id="AC1",
         value="Choice A",
         add_score=10,
@@ -58,6 +59,7 @@ def framework_with_questions(app_config):
     )
     c2 = QuestionChoice.objects.create(
         question=q,
+        urn="urn:test:choice:aq1:ac2",
         ref_id="AC2",
         value="Choice B",
         add_score=0,
@@ -115,7 +117,7 @@ def framework_with_multi_choice(app_config):
     )
     q = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:multi:q1",
+        urn="urn:test:mq1",
         ref_id="MQ1",
         type=Question.Type.MULTIPLE_CHOICE,
         order=0,
@@ -124,6 +126,7 @@ def framework_with_multi_choice(app_config):
     )
     c1 = QuestionChoice.objects.create(
         question=q,
+        urn="urn:test:choice:mq1:mc1",
         ref_id="MC1",
         value="A",
         order=0,
@@ -132,6 +135,7 @@ def framework_with_multi_choice(app_config):
     )
     c2 = QuestionChoice.objects.create(
         question=q,
+        urn="urn:test:choice:mq1:mc2",
         ref_id="MC2",
         value="B",
         order=1,
@@ -140,6 +144,7 @@ def framework_with_multi_choice(app_config):
     )
     c3 = QuestionChoice.objects.create(
         question=q,
+        urn="urn:test:choice:mq1:mc3",
         ref_id="MC3",
         value="C",
         order=2,
@@ -332,7 +337,7 @@ class TestAnswerEndpoints:
         rn = data["requirement_node"]
         other_q = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:ans:q_other",
+            urn="urn:test:aq_other",
             ref_id="AQ_OTHER",
             type=Question.Type.UNIQUE_CHOICE,
             order=1,
@@ -341,6 +346,7 @@ class TestAnswerEndpoints:
         )
         other_choice = QuestionChoice.objects.create(
             question=other_q,
+            urn="urn:test:choice:aq_other:oc1",
             ref_id="OC1",
             value="Other",
             order=0,

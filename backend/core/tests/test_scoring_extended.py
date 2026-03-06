@@ -36,7 +36,7 @@ def scoring_setup(db):
     # Q1: single choice
     q1 = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:extscore:q1",
+        urn="urn:test:eq1",
         ref_id="EQ1",
         text="Question 1",
         type=Question.Type.UNIQUE_CHOICE,
@@ -47,6 +47,7 @@ def scoring_setup(db):
     )
     q1_good = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:choice:eq1:ec1a",
         ref_id="EC1A",
         value="Good",
         add_score=10,
@@ -57,6 +58,7 @@ def scoring_setup(db):
     )
     q1_bad = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:choice:eq1:ec1b",
         ref_id="EC1B",
         value="Bad",
         add_score=0,
@@ -69,7 +71,7 @@ def scoring_setup(db):
     # Q2: single choice
     q2 = Question.objects.create(
         requirement_node=rn,
-        urn="urn:test:extscore:q2",
+        urn="urn:test:eq2",
         ref_id="EQ2",
         text="Question 2",
         type=Question.Type.UNIQUE_CHOICE,
@@ -80,6 +82,7 @@ def scoring_setup(db):
     )
     q2_good = QuestionChoice.objects.create(
         question=q2,
+        urn="urn:test:choice:eq2:ec2a",
         ref_id="EC2A",
         value="Good",
         add_score=10,
@@ -90,6 +93,7 @@ def scoring_setup(db):
     )
     q2_bad = QuestionChoice.objects.create(
         question=q2,
+        urn="urn:test:choice:eq2:ec2b",
         ref_id="EC2B",
         value="Bad",
         add_score=0,
@@ -216,7 +220,7 @@ class TestScoringExtended:
         )
         q = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:clamp:q1",
+            urn="urn:test:clq1",
             ref_id="CLQ1",
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
@@ -226,6 +230,7 @@ class TestScoringExtended:
         )
         c_high = QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:clq1:clc1",
             ref_id="CLC1",
             value="Very high",
             add_score=100,
@@ -236,6 +241,7 @@ class TestScoringExtended:
         )
         QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:clq1:clc2",
             ref_id="CLC2",
             value="Placeholder",
             order=1,
@@ -374,9 +380,12 @@ class TestVisibilityEdgeCases:
             folder=folder,
             is_published=True,
         )
+        q1_urn = "urn:test:vq1"
+        if q2_depends_on and q2_depends_on.get("question") == "VQ1":
+            q2_depends_on["question"] = q1_urn
         q1 = Question.objects.create(
             requirement_node=rn,
-            urn=f"urn:test:vis:{id(q2_depends_on)}:q1",
+            urn=q1_urn,
             ref_id="VQ1",
             type=q1_type,
             order=0,
@@ -385,7 +394,7 @@ class TestVisibilityEdgeCases:
         )
         q2 = Question.objects.create(
             requirement_node=rn,
-            urn=f"urn:test:vis:{id(q2_depends_on)}:q2",
+            urn="urn:test:vq2",
             ref_id="VQ2",
             type=Question.Type.UNIQUE_CHOICE,
             depends_on=q2_depends_on,
@@ -401,10 +410,15 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.MULTIPLE_CHOICE,
-            {"question": "VQ1", "answers": ["VA", "VB"], "condition": "all"},
+            {
+                "question": "VQ1",
+                "answers": ["urn:test:choice:vq1:va", "urn:test:choice:vq1:vb"],
+                "condition": "all",
+            },
         )
         c_a = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:va",
             ref_id="VA",
             value="A",
             add_score=5,
@@ -415,6 +429,7 @@ class TestVisibilityEdgeCases:
         )
         c_b = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vb",
             ref_id="VB",
             value="B",
             add_score=5,
@@ -426,6 +441,7 @@ class TestVisibilityEdgeCases:
         # Q2 choices
         q2_c = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vq2a",
             ref_id="VQ2A",
             value="X",
             add_score=1,
@@ -436,6 +452,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vq2b",
             ref_id="VQ2B",
             value="Y",
             add_score=0,
@@ -488,10 +505,15 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.MULTIPLE_CHOICE,
-            {"question": "VQ1", "answers": ["VA2", "VB2"], "condition": "all"},
+            {
+                "question": "VQ1",
+                "answers": ["urn:test:choice:vq1:va2", "urn:test:choice:vq1:vb2"],
+                "condition": "all",
+            },
         )
         c_a = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:va2",
             ref_id="VA2",
             value="A",
             add_score=5,
@@ -502,6 +524,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vb2",
             ref_id="VB2",
             value="B",
             add_score=5,
@@ -512,6 +535,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vq2c",
             ref_id="VQ2C",
             value="X",
             order=0,
@@ -520,6 +544,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vq2d",
             ref_id="VQ2D",
             value="Y",
             order=1,
@@ -543,7 +568,7 @@ class TestVisibilityEdgeCases:
             folder=folder,
         )
 
-        # Answer Q1 with only ["VA2"] - Q2 should be hidden (condition=all needs both)
+        # Answer Q1 with only ["urn:test:choice:vq1:va2"] - Q2 should be hidden (condition=all needs both)
         a1 = Answer.objects.create(
             requirement_assessment=ra,
             question=q1,
@@ -563,10 +588,15 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.UNIQUE_CHOICE,
-            {"question": "VQ1", "answers": ["VSA"], "condition": "all"},
+            {
+                "question": "VQ1",
+                "answers": ["urn:test:choice:vq1:vsa"],
+                "condition": "all",
+            },
         )
         c_a = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vsa",
             ref_id="VSA",
             value="A",
             add_score=5,
@@ -577,6 +607,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vsb",
             ref_id="VSB",
             value="B",
             add_score=0,
@@ -587,6 +618,7 @@ class TestVisibilityEdgeCases:
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vsq2a",
             ref_id="VSQ2A",
             value="X",
             add_score=1,
@@ -597,6 +629,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vsq2b",
             ref_id="VSQ2B",
             value="Y",
             add_score=0,
@@ -661,7 +694,7 @@ class TestVisibilityEdgeCases:
         )
         q1 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:chain:q1",
+            urn="urn:test:chq1",
             ref_id="CHQ1",
             type=Question.Type.UNIQUE_CHOICE,
             order=0,
@@ -670,6 +703,7 @@ class TestVisibilityEdgeCases:
         )
         q1_c = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:chq1:chc1a",
             ref_id="CHC1A",
             value="Yes",
             add_score=1,
@@ -680,6 +714,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:chq1:chc1b",
             ref_id="CHC1B",
             value="No",
             add_score=0,
@@ -691,16 +726,21 @@ class TestVisibilityEdgeCases:
 
         q2 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:chain:q2",
+            urn="urn:test:chq2",
             ref_id="CHQ2",
             type=Question.Type.UNIQUE_CHOICE,
             order=1,
-            depends_on={"question": "CHQ1", "answers": ["CHC1A"], "condition": "any"},
+            depends_on={
+                "question": "urn:test:chq1",
+                "answers": ["urn:test:choice:chq1:chc1a"],
+                "condition": "any",
+            },
             folder=folder,
             is_published=True,
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:chq2:chc2a",
             ref_id="CHC2A",
             value="Sub-Yes",
             add_score=1,
@@ -711,6 +751,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:chq2:chc2b",
             ref_id="CHC2B",
             value="Sub-No",
             add_score=0,
@@ -722,16 +763,21 @@ class TestVisibilityEdgeCases:
 
         q3 = Question.objects.create(
             requirement_node=rn,
-            urn="urn:test:chain:q3",
+            urn="urn:test:chq3",
             ref_id="CHQ3",
             type=Question.Type.UNIQUE_CHOICE,
             order=2,
-            depends_on={"question": "CHQ2", "answers": ["CHC2A"], "condition": "any"},
+            depends_on={
+                "question": "urn:test:chq2",
+                "answers": ["urn:test:choice:chq2:chc2a"],
+                "condition": "any",
+            },
             folder=folder,
             is_published=True,
         )
         q3_c = QuestionChoice.objects.create(
             question=q3,
+            urn="urn:test:choice:chq3:chc3a",
             ref_id="CHC3A",
             value="Deep-Yes",
             add_score=1,
@@ -742,6 +788,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q3,
+            urn="urn:test:choice:chq3:chc3b",
             ref_id="CHC3B",
             value="Deep-No",
             add_score=0,
@@ -799,10 +846,15 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.UNIQUE_CHOICE,
-            {"question": "VQ1", "answers": ["VUA"], "condition": "any"},
+            {
+                "question": "urn:test:vq1",
+                "answers": ["urn:test:choice:vq1:vua"],
+                "condition": "any",
+            },
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vua",
             ref_id="VUA",
             value="A",
             add_score=5,
@@ -813,6 +865,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vub",
             ref_id="VUB",
             value="B",
             add_score=0,
@@ -823,6 +876,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vuq2a",
             ref_id="VUQ2A",
             value="X",
             order=0,
@@ -831,6 +885,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vuq2b",
             ref_id="VUQ2B",
             value="Y",
             order=1,
@@ -867,10 +922,11 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.UNIQUE_CHOICE,
-            {"question": "VQ1", "answers": [], "condition": "any"},
+            {"question": "urn:test:vq1", "answers": [], "condition": "any"},
         )
         c_a = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vea",
             ref_id="VEA",
             value="A",
             add_score=5,
@@ -881,6 +937,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:veb",
             ref_id="VEB",
             value="B",
             add_score=0,
@@ -891,6 +948,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:veq2a",
             ref_id="VEQ2A",
             value="X",
             order=0,
@@ -899,6 +957,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:veq2b",
             ref_id="VEQ2B",
             value="Y",
             order=1,
@@ -942,10 +1001,15 @@ class TestVisibilityEdgeCases:
         fw, rn, q1, q2 = self._make_visibility_setup(
             folder,
             Question.Type.UNIQUE_CHOICE,
-            {"question": "VQ1", "answers": ["VFA"], "condition": "foo"},
+            {
+                "question": "urn:test:vq1",
+                "answers": ["urn:test:choice:vq1:vfa"],
+                "condition": "foo",
+            },
         )
         c_a = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vfa",
             ref_id="VFA",
             value="A",
             add_score=5,
@@ -956,6 +1020,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:choice:vq1:vfb",
             ref_id="VFB",
             value="B",
             add_score=0,
@@ -966,6 +1031,7 @@ class TestVisibilityEdgeCases:
         )
         q2_c = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vfq2a",
             ref_id="VFQ2A",
             value="X",
             add_score=1,
@@ -976,6 +1042,7 @@ class TestVisibilityEdgeCases:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:choice:vq2:vfq2b",
             ref_id="VFQ2B",
             value="Y",
             add_score=0,

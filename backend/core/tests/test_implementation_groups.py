@@ -52,6 +52,7 @@ def dynamic_framework_setup(db):
     )
     c_basic = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:ig:choice:q1:basic",
         ref_id="IGC1A",
         value="Basic",
         add_score=5,
@@ -63,6 +64,7 @@ def dynamic_framework_setup(db):
     )
     c_advanced = QuestionChoice.objects.create(
         question=q1,
+        urn="urn:test:ig:choice:q1:advanced",
         ref_id="IGC1B",
         value="Advanced",
         add_score=10,
@@ -135,6 +137,7 @@ class TestIsDynamic:
         )
         QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:static:choice:q1:a",
             ref_id="STC1A",
             value="A",
             order=0,
@@ -143,6 +146,7 @@ class TestIsDynamic:
         )
         QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:static:choice:q1:b",
             ref_id="STC1B",
             value="B",
             order=1,
@@ -178,6 +182,7 @@ class TestIsDynamic:
         )
         QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:emptyig:choice:q1:a",
             ref_id="EIGC1",
             value="A",
             order=0,
@@ -187,6 +192,7 @@ class TestIsDynamic:
         )
         QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:emptyig:choice:q1:b",
             ref_id="EIGC2",
             value="B",
             order=1,
@@ -261,6 +267,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         c_no = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:hig:choice:q1:no",
             ref_id="HIGC1A",
             value="No",
             add_score=0,
@@ -271,6 +278,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:hig:choice:q1:yes",
             ref_id="HIGC1B",
             value="Yes",
             add_score=5,
@@ -285,12 +293,17 @@ class TestUpdateSelectedImplementationGroups:
             ref_id="HIGQ2",
             type=Question.Type.UNIQUE_CHOICE,
             order=1,
-            depends_on={"question": "HIGQ1", "answers": ["HIGC1B"], "condition": "any"},
+            depends_on={
+                "question": "urn:test:hig:q1",
+                "answers": ["urn:test:hig:choice:q1:yes"],
+                "condition": "any",
+            },
             folder=folder,
             is_published=True,
         )
         c_ig = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:hig:choice:q2:select",
             ref_id="HIGC2A",
             value="Select",
             order=0,
@@ -300,6 +313,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:hig:choice:q2:skip",
             ref_id="HIGC2B",
             value="Skip",
             order=1,
@@ -385,6 +399,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         c1 = QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:mig:choice:q1:a",
             ref_id="MIGC1A",
             value="A",
             order=0,
@@ -394,6 +409,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         QuestionChoice.objects.create(
             question=q1,
+            urn="urn:test:mig:choice:q1:b",
             ref_id="MIGC1B",
             value="B",
             order=1,
@@ -412,6 +428,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         c2 = QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:mig:choice:q2:c",
             ref_id="MIGC2A",
             value="C",
             order=0,
@@ -421,6 +438,7 @@ class TestUpdateSelectedImplementationGroups:
         )
         QuestionChoice.objects.create(
             question=q2,
+            urn="urn:test:mig:choice:q2:d",
             ref_id="MIGC2B",
             value="D",
             order=1,

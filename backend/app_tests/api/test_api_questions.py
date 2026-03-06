@@ -219,6 +219,7 @@ class TestQuestionChoiceEndpoints:
         )
         c = QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:updchoice:c1",
             ref_id="UC1",
             value="Original",
             order=0,
@@ -249,6 +250,7 @@ class TestQuestionChoiceEndpoints:
         )
         c = QuestionChoice.objects.create(
             question=q,
+            urn="urn:test:choice:delchoice:c1",
             ref_id="DC1",
             value="Delete me",
             order=0,
