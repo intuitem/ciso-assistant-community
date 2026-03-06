@@ -143,9 +143,7 @@ export const defaultLangLabels = {
 	hr: 'Hrvatski',
 	zh: '简体中文',
 	lt: 'Lietuvių'
-} as const;
-
-export type Locale = keyof typeof defaultLangLabels;
+};
 
 export function toCamelCase(str: string) {
 	if (typeof str !== 'string') return str;
