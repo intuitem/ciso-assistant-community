@@ -1,3 +1,4 @@
+import json
 import time
 
 from .helpers import get_referential_translation
@@ -701,6 +702,10 @@ class LibraryImporter:
 
         library_objects = self._library.content
 
+        # Guard against double-serialised content (old databases may store JSON as a string)
+        if isinstance(library_objects, str):
+            library_objects = json.loads(library_objects)
+
         # Preset-only libraries don't need regular object imports
         if "preset" in library_objects and not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
@@ -801,11 +806,14 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
+        content = self._library.content
+        if isinstance(content, str):
+            content = json.loads(content)
         if (
             not self._library.dependencies
-            or self._library.content.get(
+            or content.get(
                 "requirement_mapping_set",
-                self._library.content.get("requirement_mapping_sets"),
+                content.get("requirement_mapping_sets"),
             )
             is not None
         ):
