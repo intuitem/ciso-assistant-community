@@ -493,9 +493,9 @@ if "POSTGRES_NAME" in os.environ:
     }
     # Allow for SSL connections to PostgreSQL databases that require it
     if "POSTGRES_SSL_MODE" in os.environ:
-        DATABASES["default"]["OPTIONS"] = {
-            "sslmode": os.environ["POSTGRES_SSL_MODE"],
-        }
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = os.environ[
+            "POSTGRES_SSL_MODE"
+        ]
 else:
     DATABASES = {
         "default": {
