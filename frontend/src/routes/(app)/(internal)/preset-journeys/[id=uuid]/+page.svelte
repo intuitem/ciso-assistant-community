@@ -389,7 +389,12 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-filled-warning-500"
-											onclick={() => updateStepStatus(step.id, 'in_progress')}
+											title={m.startStepTooltip()}
+											onclick={async () => {
+												await updateStepStatus(step.id, 'in_progress');
+												const href = getStepLink(step);
+												if (href) goto(href);
+											}}
 										>
 											{m.startStep()}
 										</button>
@@ -397,6 +402,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-filled-success-500"
+											title={m.markAsDoneTooltip()}
 											onclick={() => updateStepStatus(step.id, 'done')}
 										>
 											<i class="fa-solid fa-check mr-1"></i>
@@ -405,6 +411,7 @@
 										<button
 											type="button"
 											class="btn btn-sm preset-tonal-surface border border-surface-500"
+											title={m.markAsSkippedTooltip()}
 											onclick={() => updateStepStatus(step.id, 'skipped')}
 										>
 											{m.markAsSkipped()}
@@ -414,7 +421,7 @@
 											type="button"
 											class="btn btn-sm preset-tonal-surface border border-surface-500"
 											onclick={() => updateStepStatus(step.id, 'not_started')}
-											title={m.notStarted()}
+											title={m.resetStepTooltip()}
 										>
 											<i class="fa-solid fa-rotate-left"></i>
 										</button>
