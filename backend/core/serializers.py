@@ -2586,15 +2586,19 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
 
                     if question.type == Question.Type.UNIQUE_CHOICE:
                         if answer_value:
-                            choice = question.choices.filter(
-                                ref_id=answer_value
-                            ).first()
+                            # Try URN first, then ref_id
+                            choice = question.choices.filter(urn=answer_value).first()
+                            if not choice:
+                                choice = question.choices.filter(
+                                    ref_id=answer_value
+                                ).first()
+
                             answer.selected_choices.set([choice] if choice else [])
                             if not choice:
                                 logger.warning(
                                     "Choice not found for answer",
                                     q_urn=q_urn,
-                                    ref_id=answer_value,
+                                    value=answer_value,
                                 )
                         else:
                             answer.selected_choices.clear()
@@ -2602,8 +2606,30 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         answer.save(update_fields=["value"])
                     elif question.type == Question.Type.MULTIPLE_CHOICE:
                         if isinstance(answer_value, list) and answer_value:
-                            choices = question.choices.filter(ref_id__in=answer_value)
+                            # Try matching by URNs
+                            choices = question.choices.filter(urn__in=answer_value)
+                            found_identifiers = set(choices.values_list("urn", flat=True))
+                            missing = set(answer_value) - found_identifiers
+
+                            # If some missing, try matching by ref_id
+                            if missing:
+                                additional_choices = question.choices.filter(
+                                    ref_id__in=list(missing)
+                                )
+                                if additional_choices.exists():
+                                    choices = choices | additional_choices
+                                    found_identifiers.update(
+                                        additional_choices.values_list("ref_id", flat=True)
+                                    )
+                                    missing = set(answer_value) - found_identifiers
+
                             answer.selected_choices.set(choices)
+                            if missing:
+                                logger.warning(
+                                    "Some choices not found for answer",
+                                    q_urn=q_urn,
+                                    missing_values=list(missing),
+                                )
                         else:
                             answer.selected_choices.clear()
                         answer.value = None
@@ -2753,7 +2779,7 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     )
 
             elif q_type == Question.Type.UNIQUE_CHOICE:
-                # Legacy: value is a ref_id string → resolve to M2M
+                # Legacy: value is a URN or ref_id string → resolve to M2M
                 if value is not None:
                     if isinstance(value, list):
                         raise serializers.ValidationError(
@@ -2762,7 +2788,11 @@ class AnswerWriteSerializer(BaseModelSerializer):
                             }
                         )
                     if value:
-                        choice = question.choices.filter(ref_id=value).first()
+                        # Try URN first, then ref_id
+                        choice = question.choices.filter(urn=value).first()
+                        if not choice:
+                            choice = question.choices.filter(ref_id=value).first()
+
                         if not choice:
                             raise serializers.ValidationError(
                                 {"value": f"Invalid choice '{value}'."}
@@ -2792,19 +2822,33 @@ class AnswerWriteSerializer(BaseModelSerializer):
                     attrs["value"] = None
 
             elif q_type == Question.Type.MULTIPLE_CHOICE:
-                # Legacy: value is a list of ref_id strings → resolve to M2M
+                # Legacy: value is a list of URN or ref_id strings → resolve to M2M
                 if value is not None:
                     if not isinstance(value, list):
                         raise serializers.ValidationError(
                             {"value": "Multiple choice answers must be a list."}
                         )
                     if value:
-                        choices = question.choices.filter(ref_id__in=value)
-                        found_refs = set(choices.values_list("ref_id", flat=True))
-                        invalid = [v for v in value if v not in found_refs]
-                        if invalid:
+                        # Try matching by URNs
+                        choices = question.choices.filter(urn__in=value)
+                        found_identifiers = set(choices.values_list("urn", flat=True))
+                        missing = [v for v in value if v not in found_identifiers]
+
+                        # If some missing, try matching by ref_id
+                        if missing:
+                            additional_choices = question.choices.filter(
+                                ref_id__in=missing
+                            )
+                            if additional_choices.exists():
+                                choices = choices | additional_choices
+                                found_identifiers.update(
+                                    additional_choices.values_list("ref_id", flat=True)
+                                )
+                                missing = [v for v in value if v not in found_identifiers]
+
+                        if missing:
                             raise serializers.ValidationError(
-                                {"value": f"Invalid choices: {invalid}"}
+                                {"value": f"Invalid choices: {missing}"}
                             )
                         attrs["_m2m_choices"] = list(choices)
                     else:

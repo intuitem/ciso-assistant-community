@@ -5,7 +5,7 @@
 - Add ComplianceAssessment.computed_outcome field
 - Create Question, QuestionChoice, Answer models
 - Answer includes selected_choices M2M to QuestionChoice
-- QuestionChoice has unique_together on (question, ref_id)
+- QuestionChoice has unique_together on (question, urn)
 """
 
 import django.db.models.deletion
@@ -259,7 +259,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "Question choice",
                 "verbose_name_plural": "Question choices",
                 "ordering": ["order"],
-                "unique_together": {("question", "ref_id")},
+                "unique_together": {("question", "urn")},
             },
         ),
         migrations.CreateModel(
