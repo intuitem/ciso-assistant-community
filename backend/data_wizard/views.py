@@ -49,6 +49,7 @@ from ebios_rm.models import (
     StrategicScenario,
     AttackPath,
     ElementaryAction,
+    KillChain,
 )
 from ebios_rm.serializers import (
     ElementaryActionWriteSerializer,
@@ -4871,9 +4872,16 @@ class LoadFileView(APIView):
                                         "elementary_actions", []
                                     ):
                                         if ea_name in ea_lookup:
-                                            existing_om.elementary_actions.add(
-                                                ea_lookup[ea_name]
-                                            )
+                                            ea = ea_lookup[ea_name]
+                                            if not KillChain.objects.filter(
+                                                operating_mode=existing_om,
+                                                elementary_action=ea,
+                                            ).exists():
+                                                KillChain.objects.create(
+                                                    operating_mode=existing_om,
+                                                    elementary_action=ea,
+                                                    folder=folder,
+                                                )
                                     results["details"]["operating_modes_updated"] += 1
                                     continue
 
@@ -4885,10 +4893,14 @@ class LoadFileView(APIView):
                             likelihood=om_likelihood,
                             folder=folder,
                         )
-                        # Link elementary actions
+                        # Create kill chain steps for elementary actions
                         for ea_name in om_data.get("elementary_actions", []):
                             if ea_name in ea_lookup:
-                                om.elementary_actions.add(ea_lookup[ea_name])
+                                KillChain.objects.create(
+                                    operating_mode=om,
+                                    elementary_action=ea_lookup[ea_name],
+                                    folder=folder,
+                                )
                         results["details"]["operating_modes_created"] += 1
 
                 if not stopped:

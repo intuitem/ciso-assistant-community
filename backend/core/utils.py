@@ -728,7 +728,7 @@ def update_selected_implementation_groups(compliance_assessment):
             if not isinstance(question_answers, list):
                 question_answers = [question_answers]
 
-            for choice in question["choices"]:
+            for choice in question.get("choices", []):
                 if choice["urn"] in question_answers:
                     igs_to_select.update(choice.get("select_implementation_groups", []))
 
