@@ -67,7 +67,7 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_evidencerevision"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}
@@ -77,7 +77,7 @@
 <!-- {#if !(initialData.applied_controls || initialData.requirement_assessments || initialData.evidence)}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
+		optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_evidencerevision"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}

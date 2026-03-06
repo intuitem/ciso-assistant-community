@@ -445,7 +445,7 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_appliedcontrol"
 	optionsDetailedUrlParameters={origin === 'requirement-assessments'
 		? [['scope_folder_id', initialData.folder]]
 		: []}

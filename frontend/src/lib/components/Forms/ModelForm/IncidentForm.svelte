@@ -57,7 +57,7 @@
 />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_incident"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}

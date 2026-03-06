@@ -64,7 +64,7 @@
 	/>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO"
+		optionsEndpoint="folders?content_type=DO&writable=add_ebiosrmstudy"
 		field="folder"
 		pathField="path"
 		cacheLock={cacheLocks['folder']}
