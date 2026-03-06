@@ -4362,52 +4362,83 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def get_controls_info(self, request):
-        nodes = list()
-        links = list()
-        for ac in AppliedControl.objects.all():
-            related_items_count = 0
-            for ca in ComplianceAssessment.objects.filter(
-                requirement_assessments__applied_controls=ac
-            ).distinct():
-                audit_coverage = (
-                    RequirementAssessment.objects.filter(compliance_assessment=ca)
-                    .filter(applied_controls=ac)
-                    .count()
-                )
-                related_items_count += audit_coverage
-                links.append(
-                    {
-                        "source": ca.id,
-                        "target": ac.id,
-                        "coverage": audit_coverage,
-                    }
-                )
-            for ra in RiskAssessment.objects.filter(
-                risk_scenarios__applied_controls=ac
-            ).distinct():
-                risk_coverage = (
-                    RiskScenario.objects.filter(risk_assessment=ra)
-                    .filter(applied_controls=ac)
-                    .count()
-                )
-                related_items_count += risk_coverage
-                links.append(
-                    {
-                        "source": ra.id,
-                        "target": ac.id,
-                        "coverage": risk_coverage,
-                    }
-                )
+        folder_id = request.query_params.get("folder", None)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+
+        (view_ac_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, AppliedControl
+        )
+        (view_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, ComplianceAssessment
+        )
+        (view_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, RiskAssessment
+        )
+
+        ac_qs = AppliedControl.objects.filter(id__in=view_ac_ids).only("id", "name")
+        ca_qs = ComplianceAssessment.objects.filter(id__in=view_ca_ids).only(
+            "id", "name"
+        )
+        ra_qs = RiskAssessment.objects.filter(id__in=view_ra_ids).only("id", "name")
+
+        ac_ids = list(ac_qs.values_list("id", flat=True))
+        ca_ids = set(ca_qs.values_list("id", flat=True))
+        ra_ids = set(ra_qs.values_list("id", flat=True))
+
+        audit_rows = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=ca_ids, applied_controls__id__in=ac_ids
+            )
+            .values("compliance_assessment_id", "applied_controls")
+            .annotate(coverage=Count("id"))
+        )
+
+        risk_rows = (
+            RiskScenario.objects.filter(
+                risk_assessment_id__in=ra_ids, applied_controls__id__in=ac_ids
+            )
+            .values("risk_assessment_id", "applied_controls")
+            .annotate(coverage=Count("id"))
+        )
+
+        links = []
+        used_audit_ids = set()
+        used_ra_ids = set()
+
+        ac_counter = {ac_id: 0 for ac_id in ac_ids}
+
+        for row in audit_rows:
+            ca_id = row["compliance_assessment_id"]
+            ac_id = row["applied_controls"]
+            cov = row["coverage"]
+            links.append({"source": ca_id, "target": ac_id, "coverage": cov})
+            used_audit_ids.add(ca_id)
+            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
+
+        for row in risk_rows:
+            ra_id = row["risk_assessment_id"]
+            ac_id = row["applied_controls"]
+            cov = row["coverage"]
+            links.append({"source": ra_id, "target": ac_id, "coverage": cov})
+            used_ra_ids.add(ra_id)
+            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
+
+        nodes = []
+
+        for ac in ac_qs:
             nodes.append(
                 {
                     "id": ac.id,
                     "label": ac.name,
                     "shape": "hexagon",
-                    "counter": related_items_count,
+                    "counter": ac_counter.get(ac.id, 0),
                     "color": "#47e845",
                 }
             )
-        for audit in ComplianceAssessment.objects.all():
+
+        for audit in ca_qs.filter(id__in=used_audit_ids):
             nodes.append(
                 {
                     "id": audit.id,
@@ -4416,21 +4447,13 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                     "color": "#5D4595",
                 }
             )
-        for ra in RiskAssessment.objects.all():
+
+        for ra in ra_qs.filter(id__in=used_ra_ids):
             nodes.append(
-                {
-                    "id": ra.id,
-                    "label": ra.name,
-                    "shape": "square",
-                    "color": "#E6499F",
-                }
+                {"id": ra.id, "label": ra.name, "shape": "square", "color": "#E6499F"}
             )
-        return Response(
-            {
-                "nodes": nodes,
-                "links": links,
-            }
-        )
+
+        return Response({"nodes": nodes, "links": links})
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
