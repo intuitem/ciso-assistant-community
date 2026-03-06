@@ -3615,6 +3615,7 @@
 	"markAsDoneTooltip": "Mark this step as completed",
 	"markAsSkippedTooltip": "Skip this step",
 	"resetStepTooltip": "Reset this step to not started",
+	"rename": "Rename",
 	"goToStep": "Go to",
 	"journeyProgress": "Journey Progress",
 	"upgradeAvailable": "Upgrade available",

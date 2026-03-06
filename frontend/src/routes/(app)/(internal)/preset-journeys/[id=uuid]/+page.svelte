@@ -128,6 +128,29 @@
 		invalidateAll();
 	}
 
+	let renaming = $state(false);
+	let renameValue = $state('');
+
+	function startRename() {
+		renameValue = data.journey?.name ?? '';
+		renaming = true;
+	}
+
+	async function submitRename() {
+		const trimmed = renameValue.trim();
+		if (!trimmed || trimmed === data.journey?.name) {
+			renaming = false;
+			return;
+		}
+		await fetch(`/preset-journeys/${$page.params.id}/rename`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name: trimmed })
+		});
+		renaming = false;
+		invalidateAll();
+	}
+
 	let compactMode = $state(false);
 	let upgrading = $state(false);
 
@@ -194,7 +217,38 @@
 							<i class="fa-solid fa-arrow-left"></i>
 						</a>
 						<div class="flex-1 min-w-0">
-							<h2 class="text-lg font-semibold text-white">{data.journey.name}</h2>
+							{#if renaming}
+								<form
+									class="flex items-center gap-2"
+									onsubmit={(e) => { e.preventDefault(); submitRename(); }}
+								>
+									<input
+										type="text"
+										class="input input-sm bg-white text-gray-800 placeholder-gray-400 border-white/30 focus:border-white rounded-md text-lg font-semibold flex-1 min-w-0"
+										bind:value={renameValue}
+										autofocus
+										onkeydown={(e) => { if (e.key === 'Escape') renaming = false; }}
+									/>
+									<button type="submit" class="btn btn-sm bg-white/20 text-white hover:bg-white/30" title={m.save()}>
+										<i class="fa-solid fa-check"></i>
+									</button>
+									<button type="button" class="btn btn-sm bg-white/10 text-white/70 hover:bg-white/20" onclick={() => (renaming = false)} title={m.cancel()}>
+										<i class="fa-solid fa-xmark"></i>
+									</button>
+								</form>
+							{:else}
+								<div class="flex items-center gap-2 group">
+									<h2 class="text-lg font-semibold text-white">{data.journey.name}</h2>
+									<button
+										type="button"
+										class="text-violet-200 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+										onclick={startRename}
+										title={m.rename()}
+									>
+										<i class="fa-solid fa-pen text-xs"></i>
+									</button>
+								</div>
+							{/if}
 							{#if data.journey.folder?.str}
 								<span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-100 mt-1 max-w-fit">
 									<i class="fa-solid fa-sitemap text-[9px]"></i>
@@ -375,7 +429,7 @@
 									{#if editMode && step.target_ref != null && step.target_model && choicesCache[step.target_model]}
 										<div class="mt-2">
 											<select
-												class="select select-sm text-sm max-w-xs"
+												class="select select-sm text-sm max-w-xs bg-white text-gray-800 border-gray-300"
 												value={step.target_ref ?? ''}
 												onchange={(e) => {
 													const val = (e.target as HTMLSelectElement).value;

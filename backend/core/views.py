@@ -8336,6 +8336,20 @@ class PresetJourneyViewSet(BaseModelViewSet):
         )
 
     @action(detail=True, methods=["post"])
+    def rename(self, request, pk=None):
+        journey = self.get_object()
+        name = request.data.get("name", "").strip()
+        if not name:
+            return Response(
+                {"detail": "Name is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        journey.name = name
+        journey.save(update_fields=["name"])
+        from core.serializers import PresetJourneyReadSerializer
+
+        return Response(PresetJourneyReadSerializer(journey).data)
+
+    @action(detail=True, methods=["post"])
     def upgrade(self, request, pk=None):
         journey = self.get_object()
         stored_lib = (
