@@ -21,8 +21,8 @@ copyright: "Copyright 2020, 2021 Carnegie Mellon University and The Johns Hopkin
   FREEDOM FROM PATENT,\nTRADEMARK, OR COPYRIGHT INFRINGEMENT.\n[DISTRIBUTION STATEMENT
   A] Approved for public release.\nThis work is licensed to the public under the Creative
   Commons Attribution 4.0 International\nLicense."
-version: 5
-publication_date: 2024-03-02
+version: 6
+publication_date: 2026-03-05
 provider: DoD
 packager: intuitem
 objects:
@@ -4719,16 +4719,6 @@ objects:
         implementation_groups:
           - L2
         questions:
-          urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6:question:1:
-            type: unique_choice
-            text: ''
-            choices:
-              - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6:question:1:choice:1
-                value: 'Yes'
-              - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6:question:1:choice:2
-                value: 'No'
-              - urn: urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6:question:1:choice:3
-                value: N/A
           urn:intuitem:risk:req_node:cmmc-2.0:si.l2-3.14.6:question:2:
             type: unique_choice
             text: '[a] the system is monitored to detect attacks and indicators of
