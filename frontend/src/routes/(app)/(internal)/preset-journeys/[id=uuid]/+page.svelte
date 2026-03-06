@@ -220,19 +220,33 @@
 							{#if renaming}
 								<form
 									class="flex items-center gap-2"
-									onsubmit={(e) => { e.preventDefault(); submitRename(); }}
+									onsubmit={(e) => {
+										e.preventDefault();
+										submitRename();
+									}}
 								>
 									<input
 										type="text"
 										class="input input-sm bg-white text-gray-800 placeholder-gray-400 border-white/30 focus:border-white rounded-md text-lg font-semibold flex-1 min-w-0"
 										bind:value={renameValue}
 										autofocus
-										onkeydown={(e) => { if (e.key === 'Escape') renaming = false; }}
+										onkeydown={(e) => {
+											if (e.key === 'Escape') renaming = false;
+										}}
 									/>
-									<button type="submit" class="btn btn-sm bg-white/20 text-white hover:bg-white/30" title={m.save()}>
+									<button
+										type="submit"
+										class="btn btn-sm bg-white/20 text-white hover:bg-white/30"
+										title={m.save()}
+									>
 										<i class="fa-solid fa-check"></i>
 									</button>
-									<button type="button" class="btn btn-sm bg-white/10 text-white/70 hover:bg-white/20" onclick={() => (renaming = false)} title={m.cancel()}>
+									<button
+										type="button"
+										class="btn btn-sm bg-white/10 text-white/70 hover:bg-white/20"
+										onclick={() => (renaming = false)}
+										title={m.cancel()}
+									>
 										<i class="fa-solid fa-xmark"></i>
 									</button>
 								</form>
@@ -250,7 +264,9 @@
 								</div>
 							{/if}
 							{#if data.journey.folder?.str}
-								<span class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-100 mt-1 max-w-fit">
+								<span
+									class="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-[11px] font-medium text-violet-100 mt-1 max-w-fit"
+								>
 									<i class="fa-solid fa-sitemap text-[9px]"></i>
 									<span class="truncate">{data.journey.folder.str}</span>
 								</span>
