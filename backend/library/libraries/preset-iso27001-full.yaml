@@ -3,7 +3,7 @@ locale: en
 ref_id: preset-iso27001-full
 name: "ISO 27001:2022 \u2014 Full Implementation"
 description: "Comprehensive ISO 27001 ISMS implementation following the Plan\u2013Do\u2013Check\u2013Act cycle. Creates a compliance assessment with suggested controls, organisational context, a risk assessment, metric definitions for KPIs, and periodic task templates for ongoing management."
-version: 6
+version: 1
 provider: intuitem
 packager: intuitem
 translations:
