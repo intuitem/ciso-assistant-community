@@ -50,8 +50,8 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
         if filters:
             result += f" ({', '.join(f'{k}={v}' for k, v in filters.items())})"
         result += "\n\n"
-        result += "|Ref|Name|Assets|Threats|Current|Residual|\n"
-        result += "|---|---|---|---|---|---|\n"
+        result += "|Ref|Name|Assets|Threats|Existing Controls|Additional Controls|Current|Residual|\n"
+        result += "|---|---|---|---|---|---|---|---|\n"
 
         for rs in scenarios:
             ref_id = rs.get("ref_id") or "N/A"
@@ -75,7 +75,25 @@ async def get_risk_scenarios(folder: str = None, risk_assessment: str = None):
                 else "-"
             )
 
-            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{current_level}|{residual_level}|\n"
+            # Extract existing applied control names (current risk)
+            existing_applied_controls = rs.get("existing_applied_controls", [])
+            existing_applied_control_names = (
+                ", ".join(
+                    a.get("name", a.get("str", "?")) for a in existing_applied_controls
+                )
+                if existing_applied_controls
+                else "-"
+            )
+
+            # Extract applied control names (additional/treatment controls for residual risk)
+            applied_controls = rs.get("applied_controls", [])
+            applied_control_names = (
+                ", ".join(a.get("name", a.get("str", "?")) for a in applied_controls)
+                if applied_controls
+                else "-"
+            )
+
+            result += f"|{ref_id}|{name}|{asset_names}|{threat_names}|{existing_applied_control_names}|{applied_control_names}|{current_level}|{residual_level}|\n"
 
         return success_response(
             result,
