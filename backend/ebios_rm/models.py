@@ -344,10 +344,6 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
     ) -> tuple["EbiosRMStudy", None] | tuple[None, str]:
         try:
             with transaction.atomic():
-                for step in range(1, 6):
-                    # All the workshop 5 steps (steps 1 to 5) must be set to "in_progress" as we don't duplicate the EBIOS risk assessment for now.
-                    self.update_workshop_step_status(5, step, "in_progress")
-
                 duplicated_ebios_rm_study = EbiosRMStudy.objects.create(
                     name=new_name,
                     version=new_version,
@@ -367,6 +363,20 @@ class EbiosRMStudy(NameDescriptionMixin, ETADueDateMixin, FolderMixin):
                 )
                 duplicated_ebios_rm_study.reviewers.set(self.reviewers.all())
                 duplicated_ebios_rm_study.authors.set(self.authors.all())
+
+                risk_assessment = RiskAssessment.objects.filter(
+                    ebios_rm_study=self
+                ).first()
+                if risk_assessment is not None:
+                    risk_assessment.duplicate(
+                        risk_assessment.name,
+                        risk_assessment.description,
+                        risk_assessment.perimeter,
+                        risk_assessment.version,
+                        risk_assessment.ref_id,
+                        ebios_rm_study=duplicated_ebios_rm_study,
+                        folder=duplicated_ebios_rm_study.folder,
+                    )
 
                 RELATED_NAMES: Final[list[str]] = [
                     "feared_events",
