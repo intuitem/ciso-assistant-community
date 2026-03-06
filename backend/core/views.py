@@ -258,7 +258,12 @@ def escape_excel_formula(value):
     if value is None:
         return ""
     s = str(value)
-    return "'" + s if s and s[0] in "=" else s
+    if not s:
+        return ""
+    stripped = s.lstrip(" \t\r\n")
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return "'" + s
+    return s
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -365,8 +370,9 @@ class ExportMixin:
         if format_func:
             value = format_func(value)
 
-        if field_config.get("escape") and value:
-            value = escape_excel_formula(value)
+        if isinstance(value, str):
+            if field_config.get("escape", True):
+                value = escape_excel_formula(value)
 
         return value if value is not None else ""
 
