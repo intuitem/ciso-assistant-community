@@ -79,8 +79,10 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         # Fallback: check preferred_username / upn (common in Entra ID / Azure AD)
         if not email_address:
             for source in [extra, extra.get("userinfo", {}), extra.get("id_token", {})]:
-                email_address = source.get("preferred_username") or source.get("upn")
-                if email_address:
+                candidate = source.get("preferred_username") or source.get("upn")
+                # preferred_username/upn can be a non-email identifier, only accept if it contains '@'
+                if candidate and "@" in candidate:
+                    email_address = candidate
                     break
         # Fallback: first string value containing '@'
         if not email_address:
