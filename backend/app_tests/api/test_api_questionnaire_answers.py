@@ -56,7 +56,6 @@ def framework_with_questions(app_config):
         urn="urn:test:answers:fw",
         folder=root,
         library=lib,
-        status=Framework.Status.DRAFT,
         is_published=True,
         locale="en",
         default_locale=True,

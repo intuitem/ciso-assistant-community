@@ -24,7 +24,6 @@ def framework_with_questions(app_config):
     fw = Framework.objects.create(
         name="Answer Test Framework",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         min_score=0,
         max_score=100,
@@ -104,7 +103,6 @@ def framework_with_multi_choice(app_config):
     fw = Framework.objects.create(
         name="Multi Choice FW",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
     )
     rn = RequirementNode.objects.create(

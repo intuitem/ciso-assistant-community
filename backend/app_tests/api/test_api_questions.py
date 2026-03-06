@@ -21,7 +21,6 @@ def draft_framework(app_config):
     fw = Framework.objects.create(
         name="Test Framework",
         folder=folder,
-        status=Framework.Status.DRAFT,
         is_published=True,
     )
     rn = RequirementNode.objects.create(
@@ -42,7 +41,6 @@ def published_framework(app_config):
     fw = Framework.objects.create(
         name="Published Framework",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
     )
     rn = RequirementNode.objects.create(

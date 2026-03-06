@@ -1766,7 +1766,7 @@ class FrameworkReadSerializer(ReferentialSerializer):
 
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
-    status = serializers.CharField(read_only=True)
+    pass
 
 
 class FrameworkImportExportSerializer(BaseModelSerializer):
@@ -1816,16 +1816,6 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
 
 
 class RequirementNodeWriteSerializer(BaseModelSerializer):
-    def validate(self, attrs):
-        framework = attrs.get("framework") or (
-            self.instance.framework if self.instance else None
-        )
-        if framework and framework.status == Framework.Status.PUBLISHED:
-            raise serializers.ValidationError(
-                "Cannot modify requirement nodes on a published framework."
-            )
-        return super().validate(attrs)
-
     def update(self, instance, validated_data):
         # Skip the URN-based "imported objects" guard from BaseModelSerializer
         # because requirement nodes on draft frameworks should be editable.
@@ -2655,18 +2645,6 @@ class QuestionChoiceReadSerializer(BaseModelSerializer):
 
 
 class QuestionChoiceWriteSerializer(BaseModelSerializer):
-    def validate(self, attrs):
-        question = attrs.get("question") or (
-            self.instance.question if self.instance else None
-        )
-        if question:
-            framework = question.requirement_node.framework
-            if framework and framework.status == Framework.Status.PUBLISHED:
-                raise serializers.ValidationError(
-                    "Cannot modify choices on a published framework."
-                )
-        return super().validate(attrs)
-
     def update(self, instance, validated_data):
         # Skip the URN-based "imported objects" guard from BaseModelSerializer
         # because choices on draft frameworks should be editable.
@@ -2694,18 +2672,6 @@ class QuestionReadSerializer(BaseModelSerializer):
 
 
 class QuestionWriteSerializer(BaseModelSerializer):
-    def validate(self, attrs):
-        requirement_node = attrs.get("requirement_node") or (
-            self.instance.requirement_node if self.instance else None
-        )
-        if requirement_node:
-            framework = requirement_node.framework
-            if framework and framework.status == Framework.Status.PUBLISHED:
-                raise serializers.ValidationError(
-                    "Cannot modify questions on a published framework."
-                )
-        return super().validate(attrs)
-
     def update(self, instance, validated_data):
         # Skip the URN-based "imported objects" guard from BaseModelSerializer
         # because questions on draft frameworks should be editable.

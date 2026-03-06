@@ -22,7 +22,6 @@ def dynamic_framework_setup(db):
     fw = Framework.objects.create(
         name="Dynamic IG Framework",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         min_score=0,
         max_score=100,
@@ -115,7 +114,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Static FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
         )
         rn = RequirementNode.objects.create(
@@ -159,7 +157,6 @@ class TestIsDynamic:
         fw = Framework.objects.create(
             name="Empty IG FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
         )
         rn = RequirementNode.objects.create(
@@ -239,7 +236,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Hidden IG FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "base", "default_selected": True},
@@ -355,7 +351,6 @@ class TestUpdateSelectedImplementationGroups:
         fw = Framework.objects.create(
             name="Merge IG FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             implementation_groups_definition=[
                 {"ref_id": "ig_a"},

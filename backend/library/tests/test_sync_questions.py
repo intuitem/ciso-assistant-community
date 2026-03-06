@@ -31,7 +31,6 @@ def requirement_node(db):
         urn="urn:test:sync:fw",
         folder=folder,
         library=lib,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         locale="en",
         default_locale=True,

@@ -1,7 +1,7 @@
 """Schema migration: questionnaire models.
 
 - Rename old JSON fields (questions → questions_json, answers → answers_json)
-- Add Framework.status and outcomes_definition field
+- Add outcomes_definition field
 - Add ComplianceAssessment.computed_outcome field
 - Create Question, QuestionChoice, Answer models
 - Answer includes selected_choices M2M to QuestionChoice
@@ -31,16 +31,6 @@ class Migration(migrations.Migration):
             model_name="requirementassessment",
             old_name="answers",
             new_name="answers_json",
-        ),
-        migrations.AddField(
-            model_name="framework",
-            name="status",
-            field=models.CharField(
-                choices=[("draft", "Draft"), ("published", "Published")],
-                default="draft",
-                max_length=20,
-                verbose_name="Status",
-            ),
         ),
         migrations.AddField(
             model_name="complianceassessment",
@@ -187,6 +177,15 @@ class Migration(migrations.Migration):
                         max_length=100,
                         null=True,
                         verbose_name="Reference ID",
+                    ),
+                ),
+                (
+                    "urn",
+                    models.CharField(
+                        blank=True,
+                        max_length=255,
+                        null=True,
+                        verbose_name="URN",
                     ),
                 ),
                 (

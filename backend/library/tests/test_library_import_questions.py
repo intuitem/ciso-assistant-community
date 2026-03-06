@@ -31,7 +31,6 @@ def library_framework(db):
         urn="urn:test:qimport:fw",
         folder=folder,
         library=lib,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         locale="en",
         default_locale=True,

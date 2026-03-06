@@ -1,11 +1,10 @@
 """Data migration: questionnaire data.
 
-1. Set all existing frameworks to status="published"
-2. Migrate RequirementNode.questions_json → Question + QuestionChoice rows
-3. Deduplicate QuestionChoice (question, ref_id) before unique constraint
-4. Migrate RequirementAssessment.answers_json → Answer rows
-5. Populate Answer.selected_choices M2M from Answer.value for choice-type questions
-6. Normalize scores_definition from list to dict format
+1. Migrate RequirementNode.questions_json → Question + QuestionChoice rows
+2. Deduplicate QuestionChoice (question, ref_id) before unique constraint
+3. Migrate RequirementAssessment.answers_json → Answer rows
+4. Populate Answer.selected_choices M2M from Answer.value for choice-type questions
+5. Normalize scores_definition from list to dict format
 """
 
 import logging
@@ -36,9 +35,6 @@ def migrate_forward(apps, schema_editor):
     QuestionChoice = apps.get_model("core", "QuestionChoice")
     Answer = apps.get_model("core", "Answer")
     Folder = apps.get_model("iam", "Folder")
-
-    # 1. Set all existing frameworks to published
-    Framework.objects.all().update(status="published")
 
     # Get root folder for FK
     root_folder = Folder.objects.filter(content_type="GL").first()
@@ -79,7 +75,7 @@ def migrate_forward(apps, schema_editor):
                 urn=q_urn,
                 ref_id=q_ref_id,
                 text=q_data.get("text", ""),
-                annotation=q_data.get("annotation", ""),
+                annotation=q_data.get("annotation", q_data.get("text", "")),
                 type=q_type,
                 depends_on=q_data.get("depends_on"),
                 order=order,
@@ -97,7 +93,7 @@ def migrate_forward(apps, schema_editor):
     for q in created_questions:
         question_urn_to_obj[q.urn] = q
 
-    # Now create choices for each question (pre-deduplicate by question+ref_id)
+    # Now create choices for each question (pre-deduplicate by question+urn)
     seen_choice_keys = set()
     for node in nodes_with_questions.iterator(chunk_size=500):
         if not isinstance(node.questions_json, dict):
@@ -116,26 +112,29 @@ def migrate_forward(apps, schema_editor):
                 c_parts = c_urn.split(":")
                 c_ref_id = c_parts[-1] if c_parts else c_urn
 
-                choice_key = (question.pk, c_ref_id)
-                if choice_key in seen_choice_keys:
+                choice_key = (question.pk, c_urn)
+                if c_urn and choice_key in seen_choice_keys:
                     logger.warning(
-                        "Skipping duplicate choice ref_id=%s for question %s",
-                        c_ref_id,
+                        "Skipping duplicate choice urn=%s for question %s",
+                        c_urn,
                         question.pk,
                     )
                     continue
-                seen_choice_keys.add(choice_key)
+                if c_urn:
+                    seen_choice_keys.add(choice_key)
 
                 compute_result = choice.get("compute_result")
                 if compute_result is not None:
                     compute_result = str(compute_result).lower()
 
+                choice_value = choice.get("value", "")
                 choice_bulk.append(
                     QuestionChoice(
                         question=question,
+                        urn=c_urn or None,
                         ref_id=c_ref_id,
-                        value=choice.get("value", ""),
-                        annotation=choice.get("annotation", ""),
+                        value=choice_value,
+                        annotation=choice.get("annotation", choice_value),
                         add_score=choice.get("add_score"),
                         compute_result=compute_result,
                         order=c_order,
@@ -152,16 +151,17 @@ def migrate_forward(apps, schema_editor):
 
     QuestionChoice.objects.bulk_create(choice_bulk, batch_size=1000)
 
-    # 3. Deduplicate QuestionChoice (question, ref_id) before unique constraint
+    # 3. Deduplicate QuestionChoice (question, urn) before unique constraint
     duplicates = (
-        QuestionChoice.objects.values("question", "ref_id")
+        QuestionChoice.objects.filter(urn__isnull=False)
+        .values("question", "urn")
         .annotate(cnt=Count("id"))
         .filter(cnt__gt=1)
     )
 
     for dup in duplicates:
         choices = QuestionChoice.objects.filter(
-            question_id=dup["question"], ref_id=dup["ref_id"]
+            question_id=dup["question"], urn=dup["urn"]
         ).order_by("order", "pk")
         keeper = choices.first()
         to_remove = choices.exclude(pk=keeper.pk)
@@ -176,10 +176,10 @@ def migrate_forward(apps, schema_editor):
         to_remove.delete()
         if removed_count:
             logger.info(
-                "Deduplicated %d QuestionChoice rows for question=%s ref_id=%s",
+                "Deduplicated %d QuestionChoice rows for question=%s urn=%s",
                 removed_count,
                 dup["question"],
-                dup["ref_id"],
+                dup["urn"],
             )
 
     # 4. Migrate RequirementAssessment.answers → Answer rows
@@ -232,17 +232,22 @@ def migrate_forward(apps, schema_editor):
     for answer in single_choice_qs.iterator(chunk_size=BATCH_SIZE):
         if not answer.value:
             continue
+        # Try URN first, then ref_id
         choice = QuestionChoice.objects.filter(
-            question=answer.question, ref_id=answer.value
+            question=answer.question, urn=answer.value
         ).first()
+        if not choice:
+            choice = QuestionChoice.objects.filter(
+                question=answer.question, ref_id=answer.value
+            ).first()
+
         if choice:
             answer.selected_choices.set([choice])
             answer.value = None
             batch.append(answer)
         else:
             logger.warning(
-                "Answer %s: could not resolve single-choice ref_id '%s' "
-                "for question %s",
+                "Answer %s: could not resolve single-choice value '%s' for question %s",
                 answer.pk,
                 answer.value,
                 answer.question_id,
@@ -261,14 +266,28 @@ def migrate_forward(apps, schema_editor):
     batch = []
     for answer in multi_choice_qs.iterator(chunk_size=BATCH_SIZE):
         if isinstance(answer.value, list) and answer.value:
+            # Try matching by URNs
             choices = QuestionChoice.objects.filter(
-                question=answer.question, ref_id__in=answer.value
+                question=answer.question, urn__in=answer.value
             )
-            found_refs = set(choices.values_list("ref_id", flat=True))
-            missing = set(answer.value) - found_refs
+            found_identifiers = set(choices.values_list("urn", flat=True))
+            missing = set(answer.value) - found_identifiers
+
+            # If some missing, try matching by ref_id
+            if missing:
+                additional_choices = QuestionChoice.objects.filter(
+                    question=answer.question, ref_id__in=list(missing)
+                )
+                if additional_choices.exists():
+                    choices = choices | additional_choices
+                    found_identifiers.update(
+                        additional_choices.values_list("ref_id", flat=True)
+                    )
+                    missing = set(answer.value) - found_identifiers
+
             if missing:
                 logger.warning(
-                    "Answer %s: could not resolve multiple-choice ref_ids %s "
+                    "Answer %s: could not resolve multiple-choice values %s "
                     "for question %s",
                     answer.pk,
                     missing,
@@ -305,7 +324,6 @@ def migrate_backward(apps, schema_editor):
     Answer.objects.all().delete()
     QuestionChoice.objects.all().delete()
     Question.objects.all().delete()
-    Framework.objects.all().update(status="draft")
 
 
 class Migration(migrations.Migration):

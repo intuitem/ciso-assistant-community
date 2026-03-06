@@ -43,7 +43,6 @@ def framework_with_questions(app_config):
         name="Backup Test Framework",
         urn="urn:test:backup:fw",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         min_score=0,
         max_score=100,

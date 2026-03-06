@@ -20,9 +20,8 @@ def node_with_questions(db):
     """RequirementNode with questions of various types and choices with all optional fields."""
     folder = Folder.get_root_folder()
     fw = Framework.objects.create(
-        name="Dict Test FW",
+        name="Test Framework",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
     )
     rn = RequirementNode.objects.create(
@@ -236,7 +235,6 @@ class TestBuildQuestionsDict:
         fw = Framework.objects.create(
             name="Empty Q FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
         )
         rn = RequirementNode.objects.create(

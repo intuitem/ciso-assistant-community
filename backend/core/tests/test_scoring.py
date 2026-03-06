@@ -20,7 +20,6 @@ def scoring_setup(db):
     fw = Framework.objects.create(
         name="Scoring Test Framework",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         min_score=0,
         max_score=100,
@@ -141,7 +140,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Empty Q FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
         )
         rn = RequirementNode.objects.create(
@@ -197,7 +195,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Weight FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=100,
@@ -282,7 +279,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Depends FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=100,
@@ -402,7 +398,6 @@ class TestScoring:
         fw = Framework.objects.create(
             name="Multi FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=100,

@@ -21,7 +21,6 @@ def scoring_setup(db):
     fw = Framework.objects.create(
         name="Extended Scoring FW",
         folder=folder,
-        status=Framework.Status.PUBLISHED,
         is_published=True,
         min_score=0,
         max_score=100,
@@ -203,7 +202,6 @@ class TestScoringExtended:
         fw = Framework.objects.create(
             name="Clamp FW",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=50,
@@ -364,7 +362,6 @@ class TestVisibilityEdgeCases:
         fw = Framework.objects.create(
             name=f"Vis FW {q2_depends_on}",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=100,
@@ -648,9 +645,8 @@ class TestVisibilityEdgeCases:
         """Q1->Q2->Q3 chain. Q3 visible only if Q2 is answered."""
         folder = Folder.get_root_folder()
         fw = Framework.objects.create(
-            name="Chain FW",
+            name="Max Agg Framework",
             folder=folder,
-            status=Framework.Status.PUBLISHED,
             is_published=True,
             min_score=0,
             max_score=100,

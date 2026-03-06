@@ -7729,9 +7729,6 @@ class FrameworkViewSet(BaseModelViewSet):
     model = Framework
     filterset_class = FrameworkFilter
     search_fields = ["name", "description"]
-    permission_overrides = {
-        "publish": "change_framework",
-    }
 
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related("requirement_nodes")
@@ -7819,25 +7816,6 @@ class FrameworkViewSet(BaseModelViewSet):
             available_target_frameworks_objects, many=True
         ).data
         return Response({"results": available_target_frameworks})
-
-    @action(detail=True, methods=["post"], url_path="publish")
-    def publish(self, request, pk=None):
-        """Publish a draft framework after validation."""
-        framework = self.get_object()
-        try:
-            framework.publish()
-        except ValidationError as e:
-            logger.warning(
-                "Validation error while publishing framework",
-                framework_id=str(framework.id),
-                error=str(e),
-                exc_info=True,
-            )
-            return Response(
-                {"error": "couldNotPublishFramework"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return Response({"status": "published"}, status=status.HTTP_200_OK)
 
     @action(detail=False, name="Get provider choices")
     def provider(self, request):

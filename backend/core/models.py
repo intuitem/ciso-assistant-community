@@ -76,23 +76,6 @@ def match_urn(urn_string):
         return None
 
 
-def transform_questions_to_answers(questions):
-    """
-    Used during Requirement Assessment creation to prepare the answers from the questions
-    DEPRECATED: Kept for backward compatibility during migration. Use Answer model instead.
-
-    Args:
-        questions (json): the questions from the requirement
-
-    Returns:
-        json: the answers formatted as a json
-    """
-    answers = {}
-    for question_urn, question in questions.items():
-        answers[question_urn] = [] if question["type"] == "multiple_choice" else None
-    return answers
-
-
 def _create_questions_from_data(requirement_node, questions_data):
     """Create Question and QuestionChoice objects from the old JSON questions format.
 
@@ -109,12 +92,13 @@ def _create_questions_from_data(requirement_node, questions_data):
         parts = q_urn.split(":")
         q_ref_id = parts[-1] if parts else q_urn
 
+        question_text = q_data.get("text", "")
         question = Question.objects.create(
             requirement_node=requirement_node,
             urn=q_urn,
             ref_id=q_ref_id,
-            text=q_data.get("text", ""),
-            annotation=q_data.get("annotation", ""),
+            text=question_text,
+            annotation=q_data.get("annotation", question_text),
             type=q_type,
             config=q_data.get("config"),
             depends_on=q_data.get("depends_on"),
@@ -136,11 +120,13 @@ def _create_questions_from_data(requirement_node, questions_data):
             if compute_result is not None:
                 compute_result = str(compute_result).lower()
 
+            choice_value = choice.get("value", "")
             QuestionChoice.objects.create(
                 question=question,
+                urn=c_urn,
                 ref_id=c_ref_id,
-                value=choice.get("value", ""),
-                annotation=choice.get("annotation", ""),
+                value=choice_value,
+                annotation=choice.get("annotation", choice_value),
                 add_score=choice.get("add_score"),
                 compute_result=compute_result,
                 order=c_order,
@@ -173,9 +159,11 @@ def _sync_questions_from_data(requirement_node, questions_data):
         parts = q_urn.split(":")
         q_ref_id = parts[-1] if parts else q_urn
 
+        question_text = q_data.get("text", "")
         question_fields = {
             "ref_id": q_ref_id,
-            "annotation": q_data.get("text", ""),
+            "text": question_text,
+            "annotation": q_data.get("annotation", question_text),
             "type": q_type,
             "config": q_data.get("config"),
             "depends_on": q_data.get("depends_on"),
@@ -199,30 +187,49 @@ def _sync_questions_from_data(requirement_node, questions_data):
             )
 
         # --- sync choices ---
-        existing_choices_by_ref = {}
+        existing_choices_by_urn = {}
         existing_null_choices = []
         for c in question.choices.all():
-            if c.ref_id is not None:
-                existing_choices_by_ref[c.ref_id] = c
+            if c.urn is not None:
+                existing_choices_by_urn[c.urn] = c
             else:
                 existing_null_choices.append(c)
 
-        incoming_ref_ids = set()
+        incoming_urns_choices = set()
         incoming_null_count = 0
         incoming_choices = q_data.get("choices", [])
 
+        # 1. Collect incoming URNs
+        for choice in incoming_choices:
+            c_urn = choice.get("urn") or None
+            if c_urn:
+                incoming_urns_choices.add(c_urn)
+
+        # 2. Delete choices with URNs no longer in incoming data
+        stale_urns_choices = set(existing_choices_by_urn.keys()) - incoming_urns_choices
+        if stale_urns_choices:
+            question.choices.filter(urn__in=stale_urns_choices).delete()
+
+        # 3. Replace null-ref_id choices: delete old ones BEFORE creating new ones
+        if existing_null_choices:
+            question.choices.filter(
+                pk__in=[c.pk for c in existing_null_choices]
+            ).delete()
+
+        # 4. Create/Update choices
         for c_order, choice in enumerate(incoming_choices):
-            c_urn = choice.get("urn", "")
-            c_parts = c_urn.split(":")
-            c_ref_id = c_parts[-1] if c_parts else c_urn
-            c_ref_id = c_ref_id or None
+            c_urn = choice.get("urn") or None
+            c_parts = c_urn.split(":") if c_urn else []
+            c_ref_id = c_parts[-1] if c_parts else None
 
             compute_result = choice.get("compute_result")
             if compute_result is not None:
                 compute_result = str(compute_result).lower()
 
+            choice_value = choice.get("value", "")
             choice_fields = {
-                "annotation": choice.get("value", ""),
+                "value": choice_value,
+                "annotation": choice.get("annotation", choice_value),
                 "add_score": choice.get("add_score"),
                 "compute_result": compute_result,
                 "order": c_order,
@@ -232,19 +239,19 @@ def _sync_questions_from_data(requirement_node, questions_data):
                     "select_implementation_groups"
                 ),
                 "translations": choice.get("translations"),
+                "ref_id": c_ref_id,
             }
 
-            if c_ref_id is not None:
-                incoming_ref_ids.add(c_ref_id)
-                if c_ref_id in existing_choices_by_ref:
-                    existing_choice = existing_choices_by_ref[c_ref_id]
+            if c_urn is not None:
+                if c_urn in existing_choices_by_urn:
+                    existing_choice = existing_choices_by_urn[c_urn]
                     for attr, value in choice_fields.items():
                         setattr(existing_choice, attr, value)
                     existing_choice.save()
                 else:
                     QuestionChoice.objects.create(
                         question=question,
-                        ref_id=c_ref_id,
+                        urn=c_urn,
                         folder=requirement_node.folder,
                         is_published=True,
                         **choice_fields,
@@ -253,22 +260,11 @@ def _sync_questions_from_data(requirement_node, questions_data):
                 incoming_null_count += 1
                 QuestionChoice.objects.create(
                     question=question,
-                    ref_id=None,
+                    urn=None,
                     folder=requirement_node.folder,
                     is_published=True,
                     **choice_fields,
                 )
-
-        # Delete choices with ref_ids no longer in incoming data
-        stale_ref_ids = set(existing_choices_by_ref.keys()) - incoming_ref_ids
-        if stale_ref_ids:
-            question.choices.filter(ref_id__in=stale_ref_ids).delete()
-
-        # Replace null-ref_id choices: delete old ones (new ones were created above)
-        if existing_null_choices:
-            question.choices.filter(
-                pk__in=[c.pk for c in existing_null_choices]
-            ).delete()
 
     # Delete questions whose URNs are no longer in the incoming data
     stale_urns = set(existing_questions.keys()) - incoming_urns
@@ -2197,10 +2193,6 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
 
 
 class Framework(ReferentialObjectMixin, I18nObjectMixin):
-    class Status(models.TextChoices):
-        DRAFT = "draft", _("Draft")
-        PUBLISHED = "published", _("Published")
-
     min_score = models.IntegerField(default=0, verbose_name=_("Minimum score"))
     max_score = models.IntegerField(default=100, verbose_name=_("Maximum score"))
     scores_definition = models.JSONField(
@@ -2218,12 +2210,6 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
         null=True,
         blank=True,
         related_name="frameworks",
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=Status.choices,
-        default=Status.DRAFT,
-        verbose_name=_("Status"),
     )
 
     class Meta:
@@ -2299,99 +2285,16 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
             .exists()
         )
 
-    def publish(self):
-        """Validate and publish a draft framework."""
-        if self.status == self.Status.PUBLISHED:
-            raise ValidationError("Framework is already published.")
-
-        errors = []
-
-        # Validate all choice/multiple_choice questions have >= 2 choices
-        questions_with_choices = Question.objects.filter(
-            requirement_node__framework=self,
-            type__in=[Question.Type.UNIQUE_CHOICE, Question.Type.MULTIPLE_CHOICE],
-        ).prefetch_related("choices")
-        for q in questions_with_choices:
-            if len(q.choices.all()) < 2:
-                errors.append(
-                    f"Question '{q.ref_id}' ({q.type}) must have at least 2 choices."
-                )
-
-        # Validate depends_on references point to valid question ref_ids within same requirement node
-        questions_with_depends = Question.objects.filter(
-            requirement_node__framework=self,
-            depends_on__isnull=False,
-        ).select_related("requirement_node")
-
-        # Build set of (requirement_node_id, ref_id) for all questions in this framework
-        valid_question_refs = set(
-            Question.objects.filter(
-                requirement_node__framework=self,
-            ).values_list("requirement_node_id", "ref_id")
-        )
-
-        for q in questions_with_depends:
-            dep = q.depends_on
-            if dep and dep.get("question"):
-                dep_ref = dep["question"]
-                if (q.requirement_node_id, dep_ref) not in valid_question_refs:
-                    errors.append(
-                        f"Question '{q.ref_id}' depends_on references unknown question '{dep_ref}'."
-                    )
-
-        # Validate scores_definition
-        if self.scores_definition:
-            sd = self.scores_definition
-            if isinstance(sd, dict):
-                scale = sd.get("scale", [])
-                if scale:
-                    scores_seen = set()
-                    for entry in scale:
-                        if "score" not in entry or "name" not in entry:
-                            errors.append(
-                                "scores_definition scale entries must have 'score' and 'name'."
-                            )
-                            break
-                        if entry["score"] in scores_seen:
-                            errors.append(
-                                f"Duplicate score value {entry['score']} in scores_definition."
-                            )
-                        scores_seen.add(entry["score"])
-                agg = sd.get("aggregation")
-                if agg and agg not in ("sum", "mean"):
-                    errors.append(
-                        f"Invalid aggregation method '{agg}'. Must be 'sum' or 'mean'."
-                    )
-
-        if errors:
-            raise ValidationError(errors)
-
-        self.status = self.Status.PUBLISHED
-        self.save(update_fields=["status", "updated_at"])
-
     def __str__(self) -> str:
         return f"{self.provider} - {self.name}"
 
     def save(self, *args, **kwargs):
         from core.mappings.engine import engine
 
-        # Prevent un-publishing: if the framework was published, it stays published
-        if self.pk:
-            try:
-                old = Framework.objects.get(pk=self.pk)
-                if (
-                    old.status == self.Status.PUBLISHED
-                    and self.status == self.Status.DRAFT
-                ):
-                    raise ValidationError("Cannot un-publish a published framework.")
-            except Framework.DoesNotExist:
-                pass
-
         obj = super().save(*args, **kwargs)
 
         if self.urn not in engine.frameworks:
             transaction.on_commit(lambda: engine.load_frameworks())
-
         return obj
 
 
@@ -2499,7 +2402,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         def _translate_choice(choice):
             tr = (choice.translations or {}).get(current_lang, {})
             choice_data = {
-                "urn": choice.ref_id,
+                "urn": choice.urn,
                 "value": tr.get("value", choice.value or ""),
             }
             description = tr.get("description", choice.description)
@@ -2595,6 +2498,7 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         related_name="choices",
         verbose_name=_("Question"),
     )
+    urn = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("URN"))
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
@@ -7559,8 +7463,8 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         # Build lookup: question_id → set of selected choice PKs
         selected_choice_pks_by_qid = {}
-        answers_by_ref = {}
-        questions_by_ref = {}
+        answers_by_urn = {}
+        questions_by_urn = {}
         has_answer_by_qid = {}
 
         for a in answers_qs:
@@ -7575,12 +7479,12 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             else:
                 has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
 
-            # For depends_on resolution, pass ref_id strings
-            if a.question.ref_id:
-                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
+            # For depends_on resolution, pass URN strings
+            if a.question.urn:
+                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
 
         for q in questions_qs:
-            questions_by_ref[q.ref_id] = q
+            questions_by_urn[q.urn] = q
 
         total_score = 0
         total_weight = 0
@@ -7608,7 +7512,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 aggregation = "mean"
 
         for question in questions_qs:
-            if not _is_question_visible(question, answers_by_ref, questions_by_ref):
+            if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
             visible_questions += 1
@@ -7784,13 +7688,13 @@ class Answer(AbstractBaseModel, FolderMixin):
     def __str__(self) -> str:
         return f"Answer to {self.question} for {self.requirement_assessment}"
 
-    def get_choice_ref_ids(self):
-        """Return list of selected choice ref_ids for choice-type questions."""
+    def get_choice_urns(self):
+        """Return list of selected choice URNs for choice-type questions."""
         if self.question.type in (
             Question.Type.UNIQUE_CHOICE,
             Question.Type.MULTIPLE_CHOICE,
         ):
-            return [c.ref_id for c in self.selected_choices.all()]
+            return [c.urn for c in self.selected_choices.all()]
         return []
 
     def save(self, *args, **kwargs) -> None:

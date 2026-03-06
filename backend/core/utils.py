@@ -687,14 +687,14 @@ def _generate_occurrences(template, start_date, end_date):
     return occurrences
 
 
-def _is_question_visible(question, answers_by_ref, questions_by_ref=None, visited=None):
+def _is_question_visible(question, answers_by_urn, questions_by_urn=None, visited=None):
     """Check if a question is visible based on depends_on logic.
 
     Works with Question model objects (new relational models).
     - question: a Question model instance
-    - answers_by_ref: dict of {question.ref_id: answer_value}
-    - questions_by_ref: dict of {question.ref_id: Question} (optional, for lookups)
-    - visited: set of ref_ids already visited (cycle protection)
+    - answers_by_urn: dict of {question.urn: answer_value}
+    - questions_by_urn: dict of {question.urn: Question} (optional, for lookups)
+    - visited: set of urns already visited (cycle protection)
     """
     depends_on = (
         question.depends_on
@@ -713,23 +713,23 @@ def _is_question_visible(question, answers_by_ref, questions_by_ref=None, visite
     # Cycle protection
     if visited is None:
         visited = set()
-    q_ref = getattr(question, "ref_id", None) or (
-        question.get("ref_id") if isinstance(question, dict) else None
+    q_urn = getattr(question, "urn", None) or (
+        question.get("urn") if isinstance(question, dict) else None
     )
-    if q_ref:
-        if q_ref in visited:
+    if q_urn:
+        if q_urn in visited:
             return True
-        visited = visited | {q_ref}
+        visited = visited | {q_urn}
 
     # Check parent question visibility first (recursive chain)
-    if questions_by_ref:
-        parent_question = questions_by_ref.get(dep_ref)
+    if questions_by_urn:
+        parent_question = questions_by_urn.get(dep_ref)
         if parent_question and not _is_question_visible(
-            parent_question, answers_by_ref, questions_by_ref, visited
+            parent_question, answers_by_urn, questions_by_urn, visited
         ):
             return False
 
-    target_answer = answers_by_ref.get(dep_ref)
+    target_answer = answers_by_urn.get(dep_ref)
     # Use explicit None/empty-list check to avoid hiding on falsy values like 0 or False
     if target_answer is None or (isinstance(target_answer, list) and not target_answer):
         return False
@@ -762,10 +762,10 @@ def build_answers_dict(answers_qs):
     result = {}
     for a in answers_qs:
         if a.question.type == Question.Type.UNIQUE_CHOICE:
-            refs = [c.ref_id for c in a.selected_choices.all()]
+            refs = [c.urn for c in a.selected_choices.all()]
             result[a.question.urn] = refs[0] if refs else None
         elif a.question.type == Question.Type.MULTIPLE_CHOICE:
-            result[a.question.urn] = [c.ref_id for c in a.selected_choices.all()]
+            result[a.question.urn] = [c.urn for c in a.selected_choices.all()]
         else:
             result[a.question.urn] = a.value
     return result
@@ -797,12 +797,12 @@ def update_selected_implementation_groups(compliance_assessment):
             continue
 
         answers_qs = ra.answers.all()
-        answers_by_ref = {}
+        answers_by_urn = {}
         selected_choice_pks_by_qid = {}
         has_answer_by_qid = {}
-        questions_by_ref = {}
+        questions_by_urn = {}
         for q in questions_qs:
-            questions_by_ref[q.ref_id] = q
+            questions_by_urn[q.urn] = q
         for a in answers_qs:
             if a.question.type in (
                 Question.Type.UNIQUE_CHOICE,
@@ -813,12 +813,12 @@ def update_selected_implementation_groups(compliance_assessment):
                 has_answer_by_qid[a.question_id] = len(pks) > 0
             else:
                 has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
-            # For depends_on resolution, pass ref_id strings
-            if a.question.ref_id:
-                answers_by_ref[a.question.ref_id] = a.get_choice_ref_ids() or a.value
+            # For depends_on resolution, pass URN strings
+            if a.question.urn:
+                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
 
         for question in questions_qs:
-            if not _is_question_visible(question, answers_by_ref, questions_by_ref):
+            if not _is_question_visible(question, answers_by_urn, questions_by_urn):
                 continue
 
             if not has_answer_by_qid.get(question.id):
@@ -859,7 +859,7 @@ def build_questions_dict(node):
         choices = []
         for choice in question.choices.all():
             choice_data = {
-                "urn": choice.ref_id,
+                "urn": choice.urn,
                 "value": choice.value or "",
             }
             if choice.add_score is not None:

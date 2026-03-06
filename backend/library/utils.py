@@ -335,7 +335,6 @@ class FrameworkImporter:
             default_locale=library_object.default_locale,
             translations=self.framework_data.get("translations", {}),
             is_published=True,
-            status=Framework.Status.PUBLISHED,
         )
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
