@@ -35,6 +35,7 @@ objects:
         - compliance
         - privacy
         - tprm
+        - follow_up
 
     scaffolded_objects:
       - type: risk_assessment

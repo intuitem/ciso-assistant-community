@@ -35,6 +35,8 @@ objects:
       enable:
         - compliance
         - ebiosrm
+        - follow_up
+        - project_management
 
     scaffolded_objects:
       - type: ebios_rm_study

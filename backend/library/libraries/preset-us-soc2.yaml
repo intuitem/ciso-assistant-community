@@ -36,6 +36,9 @@ objects:
       enable:
         - compliance
         - tprm
+        - organisation_objectives
+        - tasks
+        - follow_up
 
     scaffolded_objects:
       - type: risk_assessment

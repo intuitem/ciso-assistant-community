@@ -34,6 +34,10 @@ objects:
         - compliance
         - metrology
         - tprm
+        - organisation_issues
+        - organisation_objectives
+        - tasks
+        - follow_up
 
     scaffolded_objects:
       # --- Organisation issues (clause 4 - Context of the organisation) ---
