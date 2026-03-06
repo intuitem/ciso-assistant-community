@@ -180,7 +180,9 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts)
+        contracts = Contract.objects.filter(id__in=viewable_contracts).exclude(
+            status=Contract.Status.DRAFT
+        )
 
         # Prepare business functions
         business_functions = Asset.objects.filter(
