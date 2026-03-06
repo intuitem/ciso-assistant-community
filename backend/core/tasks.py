@@ -7,6 +7,9 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     OrganisationIssue,
+    RequirementAssignment,
+    RiskAssessment,
+    RiskScenario,
     TaskNode,
     TaskTemplate,
     ValidationFlow,
@@ -735,6 +738,38 @@ def send_compliance_assessment_assignment_notification(
 
 
 @task()
+def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails):
+    """Send notification when RiskScenario is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        scenario = RiskScenario.objects.get(id=scenario_id)
+    except RiskScenario.DoesNotExist:
+        logger.error(f"RiskScenario with id {scenario_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "scenario_name": scenario.name,
+        "scenario_description": scenario.description or "No description provided",
+        "scenario_ref_id": scenario.ref_id or "N/A",
+        "risk_assessment_name": scenario.risk_assessment.name
+        if scenario.risk_assessment
+        else "N/A",
+        "scenario_treatment": scenario.get_treatment_display(),
+        "folder_name": scenario.folder.name if scenario.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [scenario]):
+            rendered = render_email_template("risk_scenario_assignment", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
 def send_compliance_assessment_due_soon_notification(author_email, assessments, days):
     """Send notification when ComplianceAssessment is due soon"""
     if not check_email_configuration(author_email, assessments):
@@ -980,6 +1015,68 @@ def lock_overdue_compliance_assessments():
         logger.debug("No overdue compliance assessments found to lock")
 
 
+# @db_periodic_task(crontab(minute="*/5"))  # for testing
+@db_periodic_task(crontab(hour="2", minute="45"))
+def auto_sync_assessments():
+    """Automatically sync to actions for assessments with auto_sync enabled, skipping locked ones"""
+    risk_assessments = RiskAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ra_count = 0
+    for assessment in risk_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(
+                reset_residual=False, dry_run=False
+            )
+            if changes:
+                ra_count += 1
+                logger.info(
+                    "Auto-synced risk assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync risk assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ca_count = 0
+    for assessment in compliance_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(dry_run=False)
+            if changes:
+                ca_count += 1
+                logger.info(
+                    "Auto-synced compliance assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync compliance assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    if ra_count > 0 or ca_count > 0:
+        logger.info(
+            f"Auto-sync completed: {ra_count} risk assessments, {ca_count} compliance assessments synced"
+        )
+    else:
+        logger.debug("Auto-sync completed: no assessments needed syncing")
+
+
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="3", minute="0"))
 def deactivate_expired_users():
@@ -1030,3 +1127,107 @@ def mark_expired_evidences():
         logger.info(f"Successfully marked {count} evidences as expired")
     else:
         logger.debug("No expired evidences found to mark")
+
+
+@task()
+def send_assignment_activated_notification(assignment_id):
+    """Send notification when a RequirementAssignment is started (draft -> in_progress)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+            "compliance_assessment__framework",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "framework_name": ca.framework.name if ca.framework else "N/A",
+        "due_date": ca.due_date.strftime("%Y-%m-%d") if ca.due_date else "Not set",
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template("assignment_activated", context)
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"], rendered["body"], email
+                    )
+
+
+@task()
+def send_assignment_submitted_notification(assignment_id):
+    """Send notification when a RequirementAssignment is submitted for review."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    actor_names = ", ".join(str(a) for a in assignment.actor.all())
+    requirement_count = assignment.requirement_assessments.count()
+
+    context = {
+        "assessment_name": ca.name,
+        "actor_names": actor_names,
+        "requirement_count": str(requirement_count),
+    }
+
+    # Notify reviewers, fallback to authors
+    reviewers = ca.reviewers.all()
+    if not reviewers or not reviewers.exists():
+        reviewers = ca.authors.all()
+
+    recipient_emails = set()
+    for reviewer in reviewers:
+        for email in reviewer.get_emails():
+            if email:
+                recipient_emails.add(email)
+
+    for email in recipient_emails:
+        if check_email_configuration(email, [assignment]):
+            rendered = render_email_template("assignment_submitted", context)
+            if rendered:
+                send_notification_email(rendered["subject"], rendered["body"], email)
+
+
+@task()
+def send_assignment_reviewed_notification(
+    assignment_id, decision, reviewer_observation=""
+):
+    """Send notification when a RequirementAssignment is reviewed (closed, reopened, or changes_requested)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "decision": decision.replace("_", " ").title(),
+        "reviewer_observation": reviewer_observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template("assignment_reviewed", context)
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"], rendered["body"], email
+                    )

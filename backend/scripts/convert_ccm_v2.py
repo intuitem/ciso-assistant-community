@@ -238,7 +238,7 @@ def main():
         description="Convert CCM official Excel file to a CISO Assistant v2 Excel file.",
     )
     parser.add_argument("filename", help="Path to the CCM Excel file")
-    parser.add_argument("--packager", help="Name of the packager entity")
+    parser.add_argument("-p", "--packager", help="Name of the packager entity")
     parser.add_argument(
         "-o",
         "--output",
