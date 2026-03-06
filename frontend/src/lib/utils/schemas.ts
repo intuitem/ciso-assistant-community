@@ -563,7 +563,8 @@ export const FeatureFlagsSchema = z.object({
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
-	advanced_analytics: z.boolean().optional()
+	advanced_analytics: z.boolean().optional(),
+	comments: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1314,7 +1315,6 @@ export const OperatingModeSchema = z.object({
 	...NameDescriptionMixin,
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
-	elementary_actions: z.string().uuid().optional().array().optional(),
 	likelihood: z.number().optional().default(-1),
 	folder: z.string()
 });

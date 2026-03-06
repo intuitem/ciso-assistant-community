@@ -1,0 +1,157 @@
+<script lang="ts">
+	import { m } from '$paraglide/messages';
+	import { safeTranslate } from '$lib/utils/i18n';
+
+	interface ElementaryActionItem {
+		id: string;
+		name: string;
+		attack_stage: string | number;
+		icon_fa_class?: string;
+	}
+
+	interface Props {
+		elementaryActions: ElementaryActionItem[];
+		placedNodeIds: Set<string>;
+		onCreateAction?: () => void;
+	}
+
+	let { elementaryActions, placedNodeIds, onCreateAction }: Props = $props();
+
+	let searchQuery = $state('');
+
+	const STAGE_CONFIG = [
+		{ key: 'ebiosReconnaissance', stage: 0, twText: 'text-pink-500', icon: 'fa-magnifying-glass' },
+		{ key: 'ebiosInitialAccess', stage: 1, twText: 'text-violet-500', icon: 'fa-right-to-bracket' },
+		{ key: 'ebiosDiscovery', stage: 2, twText: 'text-orange-500', icon: 'fa-lightbulb' },
+		{ key: 'ebiosExploitation', stage: 3, twText: 'text-red-500', icon: 'fa-bolt' }
+	];
+
+	const STAGE_COLORS: Record<number, string> = {
+		0: 'border-pink-400 bg-pink-50',
+		1: 'border-violet-400 bg-violet-50',
+		2: 'border-orange-400 bg-orange-50',
+		3: 'border-red-400 bg-red-50'
+	};
+
+	function getStageNumber(attackStage: string | number): number {
+		if (typeof attackStage === 'number') return attackStage;
+		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
+		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
+		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
+		if (attackStage.includes('Exploitation') || attackStage === 'ebiosExploitation') return 3;
+		return 0;
+	}
+
+	const groupedActions = $derived(() => {
+		const groups: Record<number, ElementaryActionItem[]> = { 0: [], 1: [], 2: [], 3: [] };
+		for (const ea of elementaryActions) {
+			const stage = getStageNumber(ea.attack_stage);
+			if (!groups[stage]) groups[stage] = [];
+			const matchesSearch =
+				!searchQuery || ea.name.toLowerCase().includes(searchQuery.toLowerCase());
+			if (matchesSearch) {
+				groups[stage].push(ea);
+			}
+		}
+		return groups;
+	});
+
+	let collapsedStages = $state(new Set<number>());
+
+	function toggleStage(stage: number) {
+		const next = new Set(collapsedStages);
+		if (next.has(stage)) {
+			next.delete(stage);
+		} else {
+			next.add(stage);
+		}
+		collapsedStages = next;
+	}
+
+	function handleDragStart(event: DragEvent, action: ElementaryActionItem) {
+		if (!event.dataTransfer) return;
+		event.dataTransfer.setData('application/json', JSON.stringify(action));
+		event.dataTransfer.effectAllowed = 'move';
+	}
+</script>
+
+<div class="w-64 bg-surface-50 border-r border-surface-200 flex flex-col h-full overflow-hidden">
+	<div class="p-3 border-b border-surface-200">
+		<div class="flex items-center justify-between mb-2">
+			<h3 class="text-sm font-semibold text-surface-700">
+				{m.elementaryActions()}
+			</h3>
+			{#if onCreateAction}
+				<button
+					type="button"
+					class="btn-mini-primary w-7 h-7 flex items-center justify-center rounded-base"
+					title={safeTranslate('add-elementary-action')}
+					onclick={onCreateAction}
+				>
+					<i class="fa-solid fa-file-circle-plus text-xs"></i>
+				</button>
+			{/if}
+		</div>
+		<input
+			type="text"
+			placeholder={m.searchPlaceholder()}
+			bind:value={searchQuery}
+			class="input w-full px-2 py-1 text-sm"
+		/>
+	</div>
+
+	<div class="flex-1 overflow-y-auto p-2 space-y-2">
+		{#each STAGE_CONFIG as stageConfig}
+			{@const actions = groupedActions()[stageConfig.stage] ?? []}
+			<div>
+				<button
+					class="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-surface-600 hover:bg-surface-100 rounded-base"
+					onclick={() => toggleStage(stageConfig.stage)}
+				>
+					<span class="flex items-center gap-1.5">
+						<i class="fa-solid {stageConfig.icon} {stageConfig.twText}"></i>
+						{safeTranslate(stageConfig.key)}
+					</span>
+					<span class="flex items-center gap-1">
+						<span class="text-surface-400">{actions.length}</span>
+						<i
+							class="fa-solid fa-chevron-{collapsedStages.has(stageConfig.stage)
+								? 'right'
+								: 'down'} text-[10px] text-surface-400"
+						></i>
+					</span>
+				</button>
+
+				{#if !collapsedStages.has(stageConfig.stage)}
+					<div class="space-y-1 mt-1">
+						{#each actions as action}
+							{@const isPlaced = placedNodeIds.has(action.id)}
+							<div
+								class="flex items-center gap-2 px-2 py-1.5 rounded-base border text-xs
+									{isPlaced
+									? 'border-surface-200 bg-surface-100 text-surface-400 cursor-not-allowed opacity-50'
+									: STAGE_COLORS[stageConfig.stage] + ' cursor-grab hover:shadow-sm'}"
+								draggable={!isPlaced}
+								ondragstart={(e) => {
+									if (!isPlaced) handleDragStart(e, action);
+								}}
+								role={isPlaced ? 'presentation' : 'listitem'}
+							>
+								{#if action.icon_fa_class}
+									<i class="{action.icon_fa_class} text-[10px]"></i>
+								{/if}
+								<span class="text-wrap flex-1">{action.name}</span>
+								{#if isPlaced}
+									<i class="fa-solid fa-check text-[10px] text-success-500"></i>
+								{/if}
+							</div>
+						{/each}
+						{#if actions.length === 0}
+							<p class="text-xs text-surface-400 px-2 italic">{m.noResultFound()}</p>
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{/each}
+	</div>
+</div>

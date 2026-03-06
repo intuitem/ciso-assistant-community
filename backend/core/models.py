@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -4477,6 +4477,113 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
         super().save(*args, **kwargs)
 
 
+class Comment(AbstractBaseModel, FolderMixin):
+    body = models.TextField(verbose_name=_("Body"))
+    is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Active"))
+    is_published = models.BooleanField(default=True)
+
+    author = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    risk_scenario = models.ForeignKey(
+        "RiskScenario",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    applied_control = models.ForeignKey(
+        "AppliedControl",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    finding = models.ForeignKey(
+        "Finding",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        requirement_assessment__isnull=False,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=False,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=False,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=False,
+                    )
+                ),
+                name="comment_exactly_one_parent",
+            )
+        ]
+
+    @property
+    def parent_object(self):
+        return (
+            self.requirement_assessment
+            or self.risk_scenario
+            or self.applied_control
+            or self.finding
+        )
+
+    def save(self, *args, **kwargs):
+        content_object = self.parent_object
+        if content_object is None:
+            raise ValidationError(
+                _("Comment must be attached to exactly one parent object.")
+            )
+
+        if not self._state.adding and self.pk:
+            try:
+                old = Comment.objects.get(pk=self.pk)
+                if old.body != self.body:
+                    self.is_tainted = True
+            except Comment.DoesNotExist:
+                pass
+        self.folder = content_object.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.created_at}"
+
+
 def _get_default_applied_control_cost():
     return {
         "currency": "€",
@@ -6697,20 +6804,25 @@ class ComplianceAssessment(Assessment):
             ),
         }
 
-    def get_requirements_status_count(self):
-        requirements_status_count = []
-        for st in RequirementAssessment.Status:
-            requirements_status_count.append(
-                (
-                    RequirementAssessment.objects.filter(status=st)
-                    .filter(compliance_assessment=self)
-                    .count(),
-                    st,
-                )
-            )
+    def get_requirements_status_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Status]]:
+        queryset = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .values("status")
+            .annotate(count=Count("status"))
+        )
+
+        count_by_status = {row["status"]: row["count"] for row in queryset}
+
+        requirements_status_count = [
+            (count_by_status.get(st, 0), st) for st in RequirementAssessment.Status
+        ]
         return requirements_status_count
 
-    def get_requirements_result_count(self):
+    def get_requirements_result_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Result]]:
         requirements_result_count = []
         selected_implementation_groups_set = (
             set(self.selected_implementation_groups)
@@ -7431,9 +7543,7 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             | Q(applied_controls__requirement_assessments=self)
         ).exists()
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-
+    def trigger_compliance_assessment_update_hooks(self):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
 
@@ -7571,6 +7681,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["result"])
         else:
             self.save(update_fields=["result", "is_scored"])
+
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        self.trigger_compliance_assessment_update_hooks()
 
 
 class RequirementAssignment(AbstractBaseModel, FolderMixin):
@@ -8703,6 +8818,10 @@ auditlog.register(
 )
 auditlog.register(
     TimelineEntry,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    Comment,
     exclude_fields=common_exclude,
 )
 auditlog.register(

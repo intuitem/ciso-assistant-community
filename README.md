@@ -143,7 +143,7 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 3. NIST Cyber Security Framework (CSF) v2.0 🇺🇸
 4. NIS2 🇪🇺
 5. SOC2 🇺🇸
-6. PCI DSS 4.0 💳
+6. PCI DSS 4.0.1 💳
 7. CMMC v2 🇺🇸
 8. PSPF 🇦🇺
 9. General Data Protection Regulation (GDPR): Full text and checklist from GDPR.EU 🇪🇺
@@ -230,6 +230,22 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 90. Microsoft cloud security benchmark v1 - ☁️🌐
 91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
 92. ANSSI : Questionnaire MonAideCyber 🇫🇷
+93. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
+94. CISA Vendor Supply Chain Risk Management (SCRM) Template 🇺🇸
+95. European Sustainability Reporting Standards (ESRS) 🇪🇺
+96. ITIL 4 Management Practices 🌐
+97. NOREA - DORA in Control Framework v3.0 🇪🇺
+98. NIS-1 transposition FR 🇫🇷
+99. PSSI État 🇫🇷
+100. Checklist de dossier d'homologation 🇫🇷
+101. Cahier des charges Label EBIOS RM v3.1 🇫🇷
+102. SecNumCloud v3.2 Annexe 2 : recommandations aux commanditaires ☁️🇫🇷
+103. CCB CyberFundamentals Small - Self assessment 🇧🇪
+104. Mitre ATT&CK v18.1 - Threat catalog 🌐
+105. Mitre D3FEND - Reference controls 🌐
+106. OWASP Top 10 Web - Threat catalog 🐝🌐
+107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
+108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
 
 ### Community contributions
 
@@ -257,6 +273,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
 24. RBI Master Direction 2023 - india 🏦🇮🇳
+25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
+26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
 
 <br/>
 
@@ -347,12 +365,12 @@ For the following executions, use "docker compose up" directly.
 ### Requirements
 
 - Python 3.14+
-- pip 20.3+
+- pip 25.3+
 - poetry 2.0+
 - node 24+
 - npm 10.2+
-- pnpm 10.18+
-- yaml-cpp (brew install yaml-cpp libyaml or apt install libyaml-cpp-dev)
+- pnpm 10.30+
+- yaml-cpp (`brew install yaml-cpp libyaml` or `apt install libyaml-cpp-dev`)
 
 ### Running the backend
 
@@ -401,10 +419,20 @@ export DB_PORT=5432  # optional, default value is 5432
 # You can use a S3 Bucket by declaring these variables
 # The S3 bucket must be created before starting CISO Assistant
 export USE_S3=True
+export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
+export AWS_S3_REGION_NAME=<aws-region>  # optional, e.g., us-east-1
+
+# S3 Authentication Option 1: Access Key (for standalone deployments or S3-compatible services)
 export AWS_ACCESS_KEY_ID=<XXX>
 export AWS_SECRET_ACCESS_KEY=<XXX>
-export AWS_STORAGE_BUCKET_NAME=<your-bucket-name>
-export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>
+export AWS_S3_ENDPOINT_URL=<your-bucket-endpoint>  # required for S3-compatible services (e.g., MinIO)
+
+# S3 Authentication Option 2: IRSA (for Kubernetes/EKS deployments)
+# When running on EKS with IAM Roles for Service Accounts (IRSA) enabled,
+# these environment variables are automatically injected by the pod's service account.
+# No explicit configuration is needed - just ensure USE_S3=True and AWS_STORAGE_BUCKET_NAME are set.
+# export AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
+# export AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
 # Add a second backup mailer (will be deprecated, not recommended anymore)
 export EMAIL_HOST_RESCUE=<XXX>
