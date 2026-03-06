@@ -27,6 +27,7 @@ export const load: PageServerLoad = async ({ fetch }) => {
 		presets,
 		journeys,
 		domains,
-		title: 'presets'
+		title: 'presets',
+		modelDescriptionKey: 'presetsDescription'
 	};
 };

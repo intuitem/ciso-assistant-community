@@ -3591,6 +3591,7 @@
 	"hideProcessed": "Hide processed",
 	"ctrlEnterToPost": "Ctrl+Enter to post",
 	"presets": "Journeys",
+	"presetsDescription": "Follow guided journeys to set up your security program step by step. You can also explore the platform freely and unlock all capabilities from the settings.",
 	"availablePresets": "Available Templates",
 	"activeJourneys": "Active Journeys",
 	"applyPreset": "Start a journey",

@@ -3556,6 +3556,7 @@
 	"hideProcessed": "Masquer les commentaires traités",
 	"ctrlEnterToPost": "Ctrl+Entrée pour publier",
 	"presets": "Parcours",
+	"presetsDescription": "Suivez des parcours guidés pour mettre en place votre programme de sécurité étape par étape. Vous pouvez aussi explorer la plateforme librement et débloquer toutes les fonctionnalités depuis les paramètres.",
 	"availablePresets": "Modèles disponibles",
 	"activeJourneys": "Parcours actifs",
 	"applyPreset": "Démarrer ce parcours",

@@ -90,7 +90,8 @@
 	const displayModelDescription = $derived(
 		(() => {
 			// Only show description on list pages (not on detail pages with object titles)
-			if (hasObjectTitle) return '';
+			// Exception: pages that explicitly provide a modelDescriptionKey
+			if (hasObjectTitle && !$page.data?.modelDescriptionKey) return '';
 			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
 
 			// List pages: get description from i18n
