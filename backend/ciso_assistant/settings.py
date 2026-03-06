@@ -491,6 +491,11 @@ if "POSTGRES_NAME" in os.environ:
             "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
+    # Allow for SSL connections to PostgreSQL databases that require it
+    if "POSTGRES_SSL_MODE" in os.environ:
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = os.environ[
+            "POSTGRES_SSL_MODE"
+        ]
 else:
     DATABASES = {
         "default": {
