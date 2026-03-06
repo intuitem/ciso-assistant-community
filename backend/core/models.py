@@ -837,6 +837,8 @@ class LibraryUpdater:
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
                 framework_dict["urn"] = framework_dict["urn"].lower()
+                if "outcomes_definition" not in framework_dict:
+                    framework_dict["outcomes_definition"] = []
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
@@ -2206,6 +2208,9 @@ class Framework(ReferentialObjectMixin, I18nObjectMixin):
     )
     implementation_groups_definition = models.JSONField(
         blank=True, null=True, verbose_name=_("Implementation groups definition")
+    )
+    outcomes_definition = models.JSONField(
+        default=list, blank=True, verbose_name=_("Outcomes definition")
     )
     library = models.ForeignKey(
         LoadedLibrary,
@@ -6289,6 +6294,8 @@ class ComplianceAssessment(Assessment):
         blank=True, null=True, verbose_name=_("Score definition")
     )
     show_documentation_score = models.BooleanField(default=False)
+
+    computed_outcome = models.JSONField(null=True, blank=True)
 
     assets = models.ManyToManyField(
         Asset,

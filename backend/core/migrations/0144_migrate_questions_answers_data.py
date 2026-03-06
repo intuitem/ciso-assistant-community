@@ -56,10 +56,18 @@ def migrate_forward(apps, schema_editor):
 
     for node in nodes_with_questions.iterator(chunk_size=500):
         if not isinstance(node.questions_json, dict):
+            logger.warning(
+                "RequirementNode %s: questions_json is not a dict, skipping", node.urn
+            )
             continue
 
         for order, (q_urn, q_data) in enumerate(node.questions_json.items()):
             if not isinstance(q_data, dict):
+                logger.warning(
+                    "RequirementNode %s, question %s: data is not a dict, skipping",
+                    node.urn,
+                    q_urn,
+                )
                 continue
 
             q_type = TYPE_MAPPING.get(q_data.get("type", "text"), "text")
@@ -184,6 +192,9 @@ def migrate_forward(apps, schema_editor):
 
     for ra in ras_with_answers.iterator(chunk_size=500):
         if not isinstance(ra.answers_json, dict):
+            logger.warning(
+                "RequirementAssessment %s: answers_json is not a dict, skipping", ra.pk
+            )
             continue
 
         for q_urn, answer_value in ra.answers_json.items():

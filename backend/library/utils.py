@@ -329,6 +329,7 @@ class FrameworkImporter:
             implementation_groups_definition=self.framework_data.get(
                 "implementation_groups_definition"
             ),
+            outcomes_definition=self.framework_data.get("outcomes_definition", []),
             provider=library_object.provider,
             locale=library_object.locale,
             default_locale=library_object.default_locale,

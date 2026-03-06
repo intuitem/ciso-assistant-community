@@ -1,7 +1,8 @@
 """Schema migration: questionnaire models.
 
 - Rename old JSON fields (questions → questions_json, answers → answers_json)
-- Add Framework.status field
+- Add Framework.status and outcomes_definition field
+- Add ComplianceAssessment.computed_outcome field
 - Create Question, QuestionChoice, Answer models
 - Answer includes selected_choices M2M to QuestionChoice
 - QuestionChoice has unique_together on (question, ref_id)
@@ -39,6 +40,18 @@ class Migration(migrations.Migration):
                 default="draft",
                 max_length=20,
                 verbose_name="Status",
+            ),
+        ),
+        migrations.AddField(
+            model_name="complianceassessment",
+            name="computed_outcome",
+            field=models.JSONField(blank=True, null=True),
+        ),
+        migrations.AddField(
+            model_name="framework",
+            name="outcomes_definition",
+            field=models.JSONField(
+                blank=True, default=list, verbose_name="Outcomes definition"
             ),
         ),
         migrations.CreateModel(
