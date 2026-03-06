@@ -1,20 +1,19 @@
-urn: urn:intuitem:risk:preset:micro-business-nist-csf
+urn: urn:intuitem:risk:preset:small-business-cisa-cpg
 locale: en
-ref_id: preset-micro-business-nist-csf
-name: "Micro-Business — NIST CSF 2.0"
-description: "Lightweight cybersecurity baseline for very small organisations (< 50 employees). Uses the NIST Cybersecurity Framework 2.0 as a practical, risk-based starting point — no heavy compliance overhead."
+ref_id: preset-small-business-cisa-cpg
+name: "Small Business — CISA CPG 2.0"
+description: "Lightweight cybersecurity baseline for small organisations. Uses the CISA Cross-Sector Cybersecurity Performance Goals aligned with the NIST CSF — practical, actionable controls with built-in reference controls auto-created for you."
 version: 1
 provider: intuitem
 packager: intuitem
 translations:
   fr:
-    name: "TPE — NIST CSF 2.0"
-    description: "Socle de cybersécurité léger pour les très petites entreprises (< 50 salariés). Utilise le NIST Cybersecurity Framework 2.0 comme point de départ pratique et basé sur les risques — sans surcharge de conformité."
+    name: "Petite entreprise — CISA CPG 2.0"
+    description: "Socle de cybersécurité léger pour les petites entreprises. Utilise les objectifs de performance en cybersécurité (CPG) de la CISA, alignés sur le NIST CSF — des contrôles pratiques et actionnables avec des mesures de référence créées automatiquement."
 
 dependencies:
-  - urn:intuitem:risk:library:nist-csf-2.0
+  - urn:intuitem:risk:library:cisa-cpg-2.0
   - urn:intuitem:risk:library:risk-matrix-3x3-mult
-  - urn:intuitem:risk:library:intuitem-common-catalog
 
 objects:
   preset:
@@ -22,6 +21,7 @@ objects:
       company_size:
         - micro
         - startup
+        - sme
       industry:
         - general
       region:
@@ -41,13 +41,13 @@ objects:
           fr:
             name: "Analyse de risques initiale"
       - type: compliance_assessment
-        name: "NIST CSF 2.0 Assessment"
-        framework: urn:intuitem:risk:library:nist-csf-2.0
+        name: "CISA CPG 2.0 Assessment"
+        framework: urn:intuitem:risk:library:cisa-cpg-2.0
         create_suggested_controls: true
-        ref: csf_audit
+        ref: cpg_audit
         translations:
           fr:
-            name: "Évaluation NIST CSF 2.0"
+            name: "Évaluation CISA CPG 2.0"
 
       # --- Assets ---
       - type: asset
@@ -96,81 +96,81 @@ objects:
             name: "Données clients et métier"
             description: "Fichiers clients, données financières, contrats et autres informations critiques."
 
-      # --- Risk scenarios ---
-      - type: risk_scenario
-        name: "Ransomware on business data"
-        description: "Ransomware encrypts files on computers and shared storage, blocking access to critical business data."
-        risk_assessment_ref: main_ra
-        asset_refs: [asset_endpoints, asset_data]
-        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
-        translations:
-          fr:
-            name: "Rançongiciel sur les données métier"
-            description: "Un rançongiciel chiffre les fichiers sur les ordinateurs et le stockage partagé, bloquant l'accès aux données critiques."
+      # --- Risk scenarios (using CPG threats) ---
       - type: risk_scenario
         name: "Credential theft via phishing"
         description: "An employee falls for a phishing email and discloses credentials, giving attackers access to email and business applications."
         risk_assessment_ref: main_ra
         asset_refs: [asset_email, asset_app]
-        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-002]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-11]
         translations:
           fr:
             name: "Vol d'identifiants par hameçonnage"
             description: "Un employé se fait piéger par un email d'hameçonnage et divulgue ses identifiants, donnant accès à la messagerie et aux applications."
       - type: risk_scenario
-        name: "Data loss from device theft"
-        description: "A laptop or phone is stolen or lost, exposing customer data and business files stored locally."
+        name: "Malware on business data"
+        description: "Malware encrypts or destroys files on computers and shared storage, blocking access to critical business data."
         risk_assessment_ref: main_ra
         asset_refs: [asset_endpoints, asset_data]
-        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-020]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-14]
         translations:
           fr:
-            name: "Perte de données par vol d'appareil"
-            description: "Un ordinateur portable ou un téléphone est volé ou perdu, exposant les données clients et fichiers métier stockés localement."
+            name: "Logiciel malveillant sur les données métier"
+            description: "Un logiciel malveillant chiffre ou détruit les fichiers sur les ordinateurs et le stockage partagé, bloquant l'accès aux données critiques."
       - type: risk_scenario
-        name: "Internet outage or system failure"
-        description: "An internet outage or failure of the main business application disrupts operations."
+        name: "Exploitation of unpatched systems"
+        description: "Attackers exploit known vulnerabilities in unpatched software on computers or the business application to gain unauthorized access."
         risk_assessment_ref: main_ra
-        asset_refs: [asset_network, asset_app]
-        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        asset_refs: [asset_endpoints, asset_app]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-04]
         translations:
           fr:
-            name: "Coupure Internet ou panne système"
-            description: "Une coupure Internet ou une panne de l'application métier principale perturbe l'activité."
+            name: "Exploitation de systèmes non mis à jour"
+            description: "Des attaquants exploitent des vulnérabilités connues dans des logiciels non corrigés sur les ordinateurs ou l'application métier pour obtenir un accès non autorisé."
+      - type: risk_scenario
+        name: "Unauthorized access and lateral movement"
+        description: "An attacker gains access to one system and moves laterally across the network, escalating privileges and compromising sensitive data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:cisa-cpg-2.0:t-10]
+        translations:
+          fr:
+            name: "Accès non autorisé et mouvement latéral"
+            description: "Un attaquant accède à un système et se déplace latéralement sur le réseau, élevant ses privilèges et compromettant les données sensibles."
 
     journey:
       steps:
         - key: assets
           title: "Identify your assets"
-          description: "Review and complete the list of devices, applications, and data that matter most to your business"
+          description: "Review and complete the list of devices, applications, and data that matter most to your business."
           target_model: assets
           translations:
             fr:
               title: "Identifier vos actifs"
-              description: "Examinez et complétez la liste des équipements, applications et données essentiels à votre activité"
-        - key: csf_assessment
+              description: "Examinez et complétez la liste des équipements, applications et données essentiels à votre activité."
+        - key: cpg_assessment
           title: "Assess your cybersecurity posture"
-          description: "Go through the NIST CSF 2.0 functions and assess where you stand today"
+          description: "Go through the CISA CPG goals and assess where you stand today — each goal has concrete, actionable recommendations."
           target_model: compliance-assessments
-          target_ref: csf_audit
+          target_ref: cpg_audit
           translations:
             fr:
               title: "Évaluer votre posture cybersécurité"
-              description: "Parcourez les fonctions du NIST CSF 2.0 et évaluez votre situation actuelle"
+              description: "Parcourez les objectifs CPG de la CISA et évaluez votre situation actuelle — chaque objectif propose des recommandations concrètes et actionnables."
         - key: risk_assessment
           title: "Conduct a risk assessment"
-          description: "Review the pre-created risk scenarios, adjust likelihood and impact, and add any missing risks"
+          description: "Review the pre-created risk scenarios, adjust likelihood and impact, and add any missing risks."
           target_model: risk-assessments
           target_ref: main_ra
           translations:
             fr:
               title: "Mener une analyse de risque"
-              description: "Examinez les scénarios de risque pré-créés, ajustez la vraisemblance et l'impact, et ajoutez les risques manquants"
+              description: "Examinez les scénarios de risque pré-créés, ajustez la vraisemblance et l'impact, et ajoutez les risques manquants."
         - key: controls
           title: "Implement and track security controls"
-          description: "Review the suggested controls, assign owners, and start implementing the most critical ones first"
+          description: "Review the auto-created controls from the CPG reference controls, assign owners, and start implementing the most critical ones first."
           target_model: applied-controls
           translations:
             fr:
               title: "Implémenter et suivre les mesures de sécurité"
-              description: "Examinez les mesures suggérées, assignez des responsables et commencez par les plus critiques"
+              description: "Examinez les contrôles créés automatiquement à partir des mesures de référence CPG, assignez des responsables et commencez par les plus critiques."
