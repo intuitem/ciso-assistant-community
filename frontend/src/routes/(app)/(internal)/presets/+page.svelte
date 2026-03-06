@@ -96,14 +96,6 @@
 		return tags;
 	}
 
-	const REGION_LABELS: Record<string, string> = {
-		fr: 'France',
-		eu: 'Europe',
-		be: 'Belgium',
-		us: 'United States',
-		global: 'Global'
-	};
-
 	const REGION_FLAGS: Record<string, string> = {
 		fr: '\u{1F1EB}\u{1F1F7}',
 		eu: '\u{1F1EA}\u{1F1FA}',
@@ -315,7 +307,7 @@
 							onclick={() => (activeFilter = region)}
 						>
 							{REGION_FLAGS[region] ?? ''}
-							{REGION_LABELS[region] ?? region.toUpperCase()}
+							{region.toUpperCase()}
 						</button>
 					{/each}
 				</div>
