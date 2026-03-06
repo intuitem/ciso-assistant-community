@@ -188,6 +188,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'applied-controls' },
+			{ field: 'folder', urlModel: 'processings' },
 			{
 				field: 'folder',
 				urlModel: 'users',
@@ -215,7 +216,8 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'perimeter', urlModel: 'compliance-assessments' },
 			{ field: 'perimeter', urlModel: 'risk-assessments' },
 			{ field: 'perimeter', urlModel: 'entity-assessments' },
-			{ field: 'perimeters', urlModel: 'campaigns' }
+			{ field: 'perimeters', urlModel: 'campaigns' },
+			{ field: 'perimeters', urlModel: 'processings' }
 		],
 		filters: [{ field: 'lc_status' }, { field: 'folder' }, { field: 'campaigns' }]
 	},
@@ -1692,7 +1694,6 @@ export const URL_MODEL_MAP: ModelMap = {
 		verboseNamePlural: 'Operating modes',
 		foreignKeyFields: [
 			{ field: 'operational_scenario', urlModel: 'operational-scenarios' },
-			{ field: 'elementary_actions', urlModel: 'elementary-actions' },
 			{ field: 'folder', urlModel: 'folders' }
 		],
 		selectFields: [
@@ -1702,26 +1703,6 @@ export const URL_MODEL_MAP: ModelMap = {
 				detail: true,
 				endpointUrl: 'ebios-rm/studies',
 				formNestedField: 'ebios_rm_study'
-			}
-		],
-		reverseForeignKeyFields: [
-			{
-				field: 'operating_modes',
-				urlModel: 'elementary-actions',
-				endpointUrl: 'ebios-rm/elementary-actions',
-				disableDelete: true,
-				addExisting: {
-					parentField: 'elementary_actions',
-					optionsInfoFields: {
-						fields: [{ field: 'attack_stage', translate: true }],
-						classes: 'text-yellow-700'
-					}
-				}
-			},
-			{
-				field: 'operating_mode',
-				urlModel: 'kill-chains',
-				endpointUrl: 'ebios-rm/kill-chains'
 			}
 		],
 		detailViewFields: [

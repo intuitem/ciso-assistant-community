@@ -170,72 +170,37 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
         # Build graph data for each operating mode
         def build_mode_graph(mo):
-            """Build graph data for a single operating mode"""
-            nodes = []
-            links = []
-            groups = {0: "grp00", 1: "grp10", 2: "grp20", 3: "grp30"}
-            panels = {
-                0: "reconnaissance",
-                1: "initialAccess",
-                2: "discovery",
-                3: "exploitation",
-            }
-            panel_nodes = {panel: [] for panel in panels.values()}
+            """Build kill chain steps and elementary actions"""
+            from .serializers import KillChainReadSerializer
 
-            # Collect all elementary actions that are part of kill chain steps
-            kill_chain_ea_ids = set()
-            for step in mo.kill_chain_steps.all():
-                kill_chain_ea_ids.add(step.elementary_action.id)
-                # Also add antecedents
+            steps = mo.kill_chain_steps.all()
+            if not steps.exists():
+                return None
+
+            kill_chain_steps = KillChainReadSerializer(steps, many=True).data
+
+            # Collect all EAs referenced in kill chain steps
+            ea_ids = set()
+            for step in steps:
+                ea_ids.add(step.elementary_action_id)
                 for ant in step.antecedents.all():
-                    kill_chain_ea_ids.add(ant.id)
+                    ea_ids.add(ant.id)
 
-            # Create nodes only for elementary actions in the kill chain
-            kill_chain_eas = mo.elementary_actions.filter(
-                id__in=kill_chain_ea_ids
-            ).order_by("attack_stage")
+            eas = ElementaryAction.objects.filter(id__in=ea_ids)
+            elementary_actions = [
+                {
+                    "id": str(ea.id),
+                    "name": ea.name,
+                    "attack_stage": ea.attack_stage,
+                    "icon_fa_class": ea.icon_fa_class,
+                }
+                for ea in eas
+            ]
 
-            for ea in kill_chain_eas:
-                stage = ea.attack_stage
-                entry = {"id": str(ea.id), "label": ea.name, "group": groups.get(stage)}
-                if ea.icon:
-                    entry["icon"] = ea.icon_fa_hex
-                nodes.append(entry)
-                panel_name = panels.get(stage)
-                if panel_name:
-                    panel_nodes[panel_name].append(str(ea.id))
-
-            # Build links based on kill chain steps
-            for step in mo.kill_chain_steps.all().order_by(
-                "elementary_action__attack_stage"
-            ):
-                ea = step.elementary_action
-                if step.antecedents.exists():
-                    target = str(ea.id)
-                    if step.logic_operator:
-                        # Get the stage from the first antecedent for panel placement
-                        antecedent_stage = step.antecedents.first().attack_stage
-                        nodes.append(
-                            {
-                                "id": str(step.id),
-                                "icon": step.logic_operator,
-                                "shape": "circle",
-                                "size": 45,
-                            }
-                        )
-                        # Add logic operator to the same panel as its antecedents
-                        panel_name = panels.get(antecedent_stage)
-                        if panel_name:
-                            panel_nodes[panel_name].append(str(step.id))
-                        target = str(step.id)
-                        links.append({"source": str(step.id), "target": str(ea.id)})
-                    for ant in step.antecedents.all().order_by("attack_stage"):
-                        links.append({"source": str(ant.id), "target": target})
-
-            # Only return graph data if there are nodes
-            if nodes:
-                return {"nodes": nodes, "links": links, "panelNodes": panel_nodes}
-            return None
+            return {
+                "kill_chain_steps": kill_chain_steps,
+                "elementary_actions": elementary_actions,
+            }
 
         # Get compliance assessments with their result counts
         compliance_assessments_data = []
@@ -613,7 +578,7 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
 
             # 4.0 Elementary Actions sheet
             elementary_actions = ElementaryAction.objects.filter(
-                operating_modes__operational_scenario__ebios_rm_study=study
+                as_kill_chain__operating_mode__operational_scenario__ebios_rm_study=study
             ).distinct()
             ea_data = []
             for ea in elementary_actions:
@@ -671,7 +636,10 @@ class EbiosRMStudyViewSet(BaseModelViewSet):
                         else "",
                         "likelihood": om.get_likelihood_display().get("name", ""),
                         "elementary_actions": "\n".join(
-                            [ea.name for ea in om.elementary_actions.all()]
+                            [
+                                step.elementary_action.name
+                                for step in om.kill_chain_steps.all()
+                            ]
                         ),
                     }
                 )
@@ -1060,13 +1028,11 @@ class ElementaryActionFilter(GenericFilterSet):
     def filter_operating_mode_available_actions(self, queryset, name, value):
         operating_mode = value
         kc_qs = KillChain.objects.filter(operating_mode=operating_mode)
-        # When editing an existing kill chain step, exclude it from the "used"
-        # list so its elementary action remains available in the dropdown.
         exclude_kill_chain = self.data.get("exclude_kill_chain")
         if exclude_kill_chain:
             kc_qs = kc_qs.exclude(id=exclude_kill_chain)
         used_elementary_actions = kc_qs.values_list("elementary_action", flat=True)
-        return value.elementary_actions.all().exclude(id__in=used_elementary_actions)
+        return queryset.exclude(id__in=used_elementary_actions)
 
     def filter_operating_mode_available_antecedents(self, queryset, name, value):
         operating_mode = value
@@ -1083,12 +1049,11 @@ class ElementaryActionFilter(GenericFilterSet):
             )
         else:
             precedent_actions = used_elementary_actions
-        return value.elementary_actions.filter(id__in=precedent_actions)
+        return queryset.filter(id__in=precedent_actions)
 
     class Meta:
         model = ElementaryAction
         fields = [
-            "operating_modes",
             "operating_mode_available_actions",
             "operating_mode_available_antecedents",
         ]
@@ -1159,6 +1124,133 @@ class OperatingModeViewSet(BaseModelViewSet):
                 {"error": "Error in default_ref_id has occurred."}, status=400
             )
 
+    @action(detail=True, methods=["post"], name="Save graph for Operating Mode")
+    def save_graph(self, request, pk):
+        from django.db import transaction
+
+        mo = self.get_object()
+        kill_chain_steps = request.data.get("kill_chain_steps", [])
+        if not isinstance(kill_chain_steps, list):
+            return Response(
+                {"errors": ["kill_chain_steps must be an array."]}, status=400
+            )
+        graph_columns = request.data.get("graph_columns", None)
+
+        # Validate all steps
+        from iam.models import RoleAssignment, Folder
+
+        accessible_ea_ids = set(
+            RoleAssignment.get_accessible_object_ids(
+                Folder.get_root_folder(), request.user, ElementaryAction
+            )[0]
+        )
+        seen_ea_ids = set()
+        errors = []
+
+        for i, step in enumerate(kill_chain_steps):
+            if not isinstance(step, dict):
+                errors.append(f"Step {i}: invalid step payload.")
+                continue
+            ea_id = step.get("elementary_action")
+            antecedent_ids = step.get("antecedents", [])
+            logic_operator = step.get("logic_operator")
+
+            if not ea_id:
+                errors.append(f"Step {i}: missing elementary_action.")
+                continue
+
+            try:
+                ea_id = uuid.UUID(str(ea_id))
+            except (ValueError, AttributeError):
+                errors.append(f"Step {i}: invalid elementary_action UUID.")
+                continue
+
+            if ea_id not in accessible_ea_ids:
+                errors.append(f"Step {i}: elementary action is not accessible.")
+                continue
+
+            if ea_id in seen_ea_ids:
+                errors.append(f"Step {i}: duplicate elementary action in kill chain.")
+                continue
+            seen_ea_ids.add(ea_id)
+
+            try:
+                ea = ElementaryAction.objects.get(pk=ea_id)
+            except ElementaryAction.DoesNotExist:
+                errors.append(f"Step {i}: elementary action not found.")
+                continue
+
+            # Validate antecedents
+            parsed_antecedents = []
+            for ant_id in antecedent_ids:
+                try:
+                    ant_uuid = uuid.UUID(str(ant_id))
+                except (ValueError, AttributeError):
+                    errors.append(f"Step {i}: invalid antecedent UUID.")
+                    continue
+
+                if ant_uuid == ea_id:
+                    errors.append(
+                        f"Step {i}: an elementary action cannot be its own antecedent."
+                    )
+                    continue
+
+                if ant_uuid not in accessible_ea_ids:
+                    errors.append(f"Step {i}: antecedent is not accessible.")
+                    continue
+
+                try:
+                    ant_ea = ElementaryAction.objects.get(pk=ant_uuid)
+                except ElementaryAction.DoesNotExist:
+                    errors.append(f"Step {i}: antecedent not found.")
+                    continue
+
+                if ant_ea.attack_stage > ea.attack_stage:
+                    errors.append(
+                        f"Step {i}: antecedent attack stage must be same or before the action's stage."
+                    )
+                    continue
+
+                parsed_antecedents.append(ant_uuid)
+
+            if logic_operator and logic_operator not in ("AND", "OR"):
+                errors.append(f"Step {i}: logic_operator must be 'AND', 'OR', or null.")
+
+        if errors:
+            return Response({"errors": errors}, status=400)
+
+        # Atomically replace all kill chain steps
+        with transaction.atomic():
+            mo.kill_chain_steps.all().delete()
+            if graph_columns is not None:
+                mo.graph_columns = graph_columns
+                mo.save(update_fields=["graph_columns"])
+
+            for step in kill_chain_steps:
+                ea_id = uuid.UUID(str(step["elementary_action"]))
+                antecedent_ids = [
+                    uuid.UUID(str(a)) for a in step.get("antecedents", [])
+                ]
+                logic_operator = step.get("logic_operator")
+                is_highlighted = step.get("is_highlighted", False)
+                position_x = step.get("position_x", 0)
+                position_y = step.get("position_y", 0)
+
+                kc = KillChain.objects.create(
+                    operating_mode=mo,
+                    elementary_action_id=ea_id,
+                    logic_operator=logic_operator if len(antecedent_ids) > 1 else None,
+                    is_highlighted=is_highlighted,
+                    position_x=position_x,
+                    position_y=position_y,
+                    folder=mo.folder,
+                )
+                if antecedent_ids:
+                    kc.antecedents.set(antecedent_ids)
+
+        # Return updated graph
+        return self.build_graph(request, pk)
+
     @action(detail=True, name="Build graph for Operating Mode")
     def build_graph(self, request, pk):
         mo = self.get_object()
@@ -1182,7 +1274,7 @@ class OperatingModeViewSet(BaseModelViewSet):
                 kill_chain_ea_ids.add(ant.id)
 
         # Create nodes only for elementary actions in the kill chain
-        kill_chain_eas = mo.elementary_actions.filter(
+        kill_chain_eas = ElementaryAction.objects.filter(
             id__in=kill_chain_ea_ids
         ).order_by("attack_stage")
 

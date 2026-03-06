@@ -617,7 +617,7 @@
 </script>
 
 <div class="card table-wrap {classesBase}">
-	<header class="flex justify-between items-center space-x-8 p-2">
+	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
@@ -636,7 +636,7 @@
 					onPointerDownOutside={() => (openState = false)}
 					closeOnInteractOutside={false}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 self-end relative">
+					<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
