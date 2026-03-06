@@ -1936,7 +1936,7 @@
 	"getStarted": "Get Started",
 	"welcomeToCISOAssistant": "Welcome to CISO Assistant",
 	"noDomainsYet": "You haven't created any domain yet. Start with a preset to automatically set up your frameworks, risk assessments, and compliance journeys.",
-	"browsePresets": "Browse presets",
+	"browsePresets": "Browse journeys",
 	"auditName": "Audit Name",
 	"createRiskAssessment": "Initiate a risk assessment as well",
 	"riskAssessmentName": "Risk Assessment Name",
