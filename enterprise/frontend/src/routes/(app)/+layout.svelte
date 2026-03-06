@@ -23,7 +23,7 @@
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
-import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	interface Props {
 		data: LayoutData;
