@@ -9,22 +9,21 @@
 
 	import SideBar from '$lib/components/SideBar/SideBar.svelte';
 	import Breadcrumbs from '$lib/components/Breadcrumbs/Breadcrumbs.svelte';
-	import { pageTitle, modelName, modelDescription, clientSideToast } from '$lib/utils/stores';
+	import {
+		pageTitle,
+		modelName,
+		modelDescription,
+		clientSideToast,
+		getStartedTrigger
+	} from '$lib/utils/stores';
 	import { getCookie, deleteCookie } from '$lib/utils/cookies';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
 
 	import type { PageData, ActionData } from './$types';
-	import QuickStartModal from '$lib/components/SideBar/QuickStart/QuickStartModal.svelte';
-
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
-	import {
-		getModalStore,
-		type ModalComponent,
-		type ModalSettings,
-		type ModalStore
-	} from '$lib/components/Modals/stores';
+	import { getModalStore, type ModalStore } from '$lib/components/Modals/stores';
 
 	import CommandPalette from '$lib/components/CommandPalette/CommandPalette.svelte';
 	import {
@@ -91,7 +90,8 @@
 	const displayModelDescription = $derived(
 		(() => {
 			// Only show description on list pages (not on detail pages with object titles)
-			if (hasObjectTitle) return '';
+			// Exception: pages that explicitly provide a modelDescriptionKey
+			if (hasObjectTitle && !$page.data?.modelDescriptionKey) return '';
 			if (!matchesListUrl && !$page.data?.modelDescriptionKey) return '';
 
 			// List pages: get description from i18n
@@ -126,32 +126,11 @@
 					const data = await res.json();
 					const number = data.count ?? 0;
 					if (number <= 0) return;
-					// clientSideToast.set({
-					// 	message: m.waitingRiskAcceptances({
-					// 		number: number,
-					// 		s: number > 1 ? 's' : '',
-					// 		itPlural: number > 1 ? 'i' : 'e'
-					// 	}),
-					// 	type: 'info'
-					// });
 				});
 			}
 		}
 	});
 
-	function modalQuickStart(): void {
-		let modalComponent: ModalComponent = {
-			ref: QuickStartModal,
-			props: {}
-		};
-		let modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			// Data
-			title: m.quickStart()
-		};
-		modalStore.trigger(modal);
-	}
 	// $inspect(data);
 </script>
 
@@ -188,13 +167,14 @@
 			</div>
 			{#if data?.user?.is_admin}
 				<button
-					onclick={modalQuickStart}
-					class="shrink-0 p-2 rounded-full bg-violet-500 text-white text-xs shadow-lg
+					onclick={() => getStartedTrigger.set(true)}
+					class="shrink-0 px-3 py-1.5 rounded-full bg-violet-500 text-white text-xs font-semibold shadow-lg
 			ring-2 ring-violet-400 ring-offset-2 transition-all duration-300 hover:bg-violet-600
 			hover:ring-violet-300 hover:ring-offset-violet-100 hover:shadow-violet-500/50
-			focus:outline-hidden focus:ring-violet-500"
+			focus:outline-hidden focus:ring-violet-500 cursor-pointer"
 				>
-					{m.quickStart()}
+					<i class="fa-solid fa-rocket mr-1"></i>
+					{m.getStarted()}
 				</button>
 			{/if}
 		</div>
