@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
@@ -388,13 +389,13 @@
 							{#if assessment.eta}
 								<div>
 									<span class="font-semibold text-gray-700">{m.eta()}:</span>
-									<span class="ml-2">{formatDateOrDateTime(assessment.eta)}</span>
+									<span class="ml-2">{formatDateOrDateTime(assessment.eta, getLocale())}</span>
 								</div>
 							{/if}
 							{#if assessment.due_date}
 								<div>
 									<span class="font-semibold text-gray-700">{m.dueDate()}:</span>
-									<span class="ml-2">{formatDateOrDateTime(assessment.due_date)}</span>
+									<span class="ml-2">{formatDateOrDateTime(assessment.due_date, getLocale())}</span>
 								</div>
 							{/if}
 							{#if assessment.status}
@@ -1093,7 +1094,7 @@
 														{/if}
 													</td>
 													<td class="px-3 py-2 text-sm">
-														{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+														{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 													</td>
 												</tr>
 											{/each}
@@ -1176,7 +1177,7 @@
 													{/if}
 												</td>
 												<td class="px-3 py-2 text-sm">
-													{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+													{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 												</td>
 											</tr>
 										{/each}
@@ -1254,7 +1255,7 @@
 											{/if}
 										</td>
 										<td class="px-3 py-2 text-sm">
-											{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+											{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 										</td>
 									</tr>
 								{/each}
