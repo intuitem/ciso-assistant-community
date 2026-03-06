@@ -3539,6 +3539,7 @@
 	"jumpTo": "Jump to",
 	"sortAscending": "Sort A → Z",
 	"sortDescending": "Sort Z → A",
+	"duplicateEbiosRmStudy": "Duplicate Ebios RM study",
 	"assignmentStatusDraft": "Draft",
 	"assignmentStatusInProgress": "In Progress",
 	"assignmentStatusSubmitted": "Submitted",
