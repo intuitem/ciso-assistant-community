@@ -6,7 +6,7 @@ name: CISA Cybersecurity Performance Goals v2.0
 description: CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions
   aligned to the NIST Cybersecurity Framework.
 copyright: This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.
-version: 2
+version: 3
 publication_date: '2025-03-04'
 provider: CISA
 packager: intuitem
@@ -292,6 +292,87 @@ objects:
     description: Execute plans recovering/restoring service to critical assets impacted by incidents. Enable degraded operations
       (paper, radio). Complete post-incident analysis identifying improvement areas. Incorporate lessons learned. Update policies,
       procedures, and training.
+  threats:
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-01
+    ref_id: T.01
+    name: Insufficient Cybersecurity Governance
+    description: Lack of sufficient cybersecurity accountability, investment, or effectiveness due to absent or inadequate
+      policies, roles, and procedures for managing cybersecurity risk.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
+    ref_id: T.02
+    name: Ineffective Incident Response
+    description: Inability to quickly and effectively isolate, contain, eradicate, remediate, and communicate about cybersecurity
+      incidents. Communication failures slow resolution, increase downtime, and amplify damage.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-03
+    ref_id: T.03
+    name: Supply Chain Compromise
+    description: Adversaries exploit vulnerabilities by abusing trusted third-party relationships, manipulating products or
+      delivery mechanisms before they reach final users, or compromising vendor environments.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-04
+    ref_id: T.04
+    name: Exploitation of Known Vulnerabilities
+    description: Adversaries target unpatched and misconfigured systems, particularly those exposed to the internet, leveraging
+      software vulnerabilities, temporary malfunctions, or configuration errors to gain initial access.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-05
+    ref_id: T.05
+    name: Unvalidated Security Controls
+    description: Gaps in cyber defenses or overconfidence in existing protections due to lack of independent validation that
+      implemented controls are properly configured and working as intended.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-06
+    ref_id: T.06
+    name: Insufficient Asset and Network Visibility
+    description: Incomplete or inaccurate understanding of organizational assets, network topology, and security logs inhibits
+      effective detection, incident response, and recovery.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-07
+    ref_id: T.07
+    name: Default Credential Exploitation
+    description: Adversaries acquire and exploit default manufacturer account credentials to gain initial access, maintain
+      persistence, escalate privileges, or evade defenses.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-08
+    ref_id: T.08
+    name: Brute Force and Password Attacks
+    description: Adversaries use brute force techniques to crack passwords, systematically guessing credentials using repetitive
+      or iterative methods against unknown passwords or obtained hashes.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-09
+    ref_id: T.09
+    name: Credential Theft and Misuse
+    description: Adversaries obtain and exploit account credentials through theft, reuse, or abuse of inactive accounts to
+      gain access, maintain persistence, escalate privileges, or bypass network access controls.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
+    ref_id: T.10
+    name: Unauthorized Access and Lateral Movement
+    description: Unauthorized access to network resources enabling adversaries to move across systems undetected, escalate
+      privileges, and compromise sensitive data and critical systems.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-11
+    ref_id: T.11
+    name: Social Engineering and Phishing
+    description: Adversaries use deceptive emails, malicious attachments or links, and social engineering tactics to trick
+      users into revealing sensitive information, executing malicious code, or granting unauthorized access.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-12
+    ref_id: T.12
+    name: Network Interception and Data Manipulation
+    description: Adversaries position themselves between networked devices to enable network sniffing and data manipulation,
+      or steal operational data for personal gain or future operations.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-13
+    ref_id: T.13
+    name: Uncontained Network Compromise
+    description: If a network is compromised by an unauthorized user, lack of segmentation allows malicious activity to spread
+      uncontrolled across networks and critical infrastructure.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-14
+    ref_id: T.14
+    name: Malware and Malicious Code
+    description: Adversaries deploy malware including payloads, droppers, and backdoors to control remote machines, evade
+      defenses, and execute post-compromise actions. Malware can spread via removable media to air-gapped networks.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-15
+    ref_id: T.15
+    name: Unmanaged System Changes
+    description: Delayed, insufficient, or incomplete ability to maintain or restore functionality of critical devices and
+      service operations due to unauthorized or untested changes.
+  - urn: urn:intuitem:risk:threat:cisa-cpg-2.0:t-16
+    ref_id: T.16
+    name: Data Destruction and Service Disruption
+    description: Adversaries disrupt critical systems, delete data, and disable recovery services to prevent system recovery,
+      causing disruption to asset, service, or system availability.
   framework:
     urn: urn:intuitem:risk:framework:cisa-cpg-2.0
     ref_id: CISA-CPG-2.0
@@ -374,6 +455,8 @@ objects:
         - Establish continuous IT/OT team collaboration for security and operational effectiveness
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-01
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-01
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-03
@@ -396,6 +479,8 @@ objects:
         - Develop OT-specific policies acknowledging IT program limitations and critical function priorities
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-01
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-02
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-03
@@ -419,6 +504,8 @@ objects:
         - Account for OT-specific safety and containment considerations
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-04
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:1-d
@@ -439,6 +526,8 @@ objects:
         - Document and track OT asset serial numbers, checksums, digital certificates/signatures to verify authenticity of hardware, software, and firmware
 
         Cost: Moderate | Impact: Moderate | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-03
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-05
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-06
@@ -461,6 +550,8 @@ objects:
         - Ensure contracts detail how and when MSPs notify customers of incidents affecting their environment
 
         Cost: Moderate | Impact: Moderate | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-03
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-07
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-a
@@ -481,6 +572,8 @@ objects:
         - Update critical IT/OT assets more frequently
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-06
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-08
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-b
@@ -504,6 +597,8 @@ objects:
         - For OT assets where patching is infeasible, apply compensating controls (segmentation, monitoring)
 
         Cost: High | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-04
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-09
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-10
@@ -526,6 +621,8 @@ objects:
         - Ensure findings from tests are addressed
 
         Cost: High | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-05
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-11
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-d
@@ -548,6 +645,8 @@ objects:
         - Apply security.txt files conforming to RFC 9116 on all public-facing web domains
 
         Cost: Low | Impact: Low | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-04
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-12
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:2-e
@@ -567,6 +666,8 @@ objects:
         - Perform network reviews and track annually; update when topology changes
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-06
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-13
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-a
@@ -587,6 +688,9 @@ objects:
         - Change default passwords on existing OT systems; establish policy for all new/future devices
 
         Cost: Low | Impact: High | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-07
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-14
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
@@ -609,6 +713,8 @@ objects:
         - Prioritize upgrade/replacement of assets unable to support sufficient strength passwords
 
         Cost: Low | Impact: High | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-08
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-15
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
@@ -633,6 +739,9 @@ objects:
         - Utilize role-based accounts for IT/OT systems when possible
 
         Cost: Low | Impact: High | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-09
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-16
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-d
@@ -652,6 +761,8 @@ objects:
         - Review user access and disable inactive accounts after specified period (e.g., 30 days), ideally via automated process
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-09
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-17
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-e
@@ -672,6 +783,8 @@ objects:
         - Log and store alerts in relevant security or ticketing system for retroactive analysis
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-07
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-18
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-30
@@ -694,6 +807,9 @@ objects:
         - OT: Enable MFA on all remotely accessible accounts/systems; if unavailable, remove remote access, add segmentation
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-08
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-19
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
@@ -717,6 +833,9 @@ objects:
         - Maintain separation of duties distributing responsibilities across multiple individuals/roles
 
         Cost: Low | Impact: High | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-09
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-20
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-h
@@ -737,6 +856,8 @@ objects:
         - Perform quarterly reviews of access permissions and role assignments validating policy compliance
 
         Cost: Low | Impact: High | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-21
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-i
@@ -758,6 +879,9 @@ objects:
         - Physically segment OT enclaves (e.g., data diodes) when applicable
 
         Cost: High | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-13
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-j
@@ -780,6 +904,8 @@ objects:
         - Provide OT personnel security awareness training
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-11
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-23
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-k
@@ -803,6 +929,8 @@ objects:
         - Use encryption for OT external connections where latency permits
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-12
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-24
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-l
@@ -824,6 +952,8 @@ objects:
         - Enable DMARC and set to 'reject'
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-11
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-25
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-m
@@ -844,6 +974,9 @@ objects:
         - Disable Autorun/AutoPlay by default
 
         Cost: Low | Impact: Moderate | Complexity: Simple
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-11
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-14
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-26
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-n
@@ -865,6 +998,8 @@ objects:
         - Implement OT limited functionality permitting only necessary functions, protocols, and services
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-15
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-27
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-o
@@ -890,6 +1025,8 @@ objects:
         - OT: Include device configurations, roles, engineering drawings, and tools
 
         Cost: High | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-16
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-28
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-p
@@ -911,6 +1048,8 @@ objects:
         - Consider OT environment additional requirements for patches/updates ensuring no operational or safety impact
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-03
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-29
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-q
@@ -934,6 +1073,8 @@ objects:
         - For OT assets with non-standard logs, collect network traffic between those assets
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-06
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-30
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-r
@@ -954,6 +1095,8 @@ objects:
         - Establish procedures removing, disabling, or securing physical ports preventing unauthorized device connection
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-14
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-31
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:3-s
@@ -977,6 +1120,9 @@ objects:
         - Logically segment enterprise and production networks per trust boundaries and platform types
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-04
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-32
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-22
@@ -1000,6 +1146,8 @@ objects:
         - Use OT-compatible antivirus with special practices including compatibility checks and performance testing
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-14
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-33
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:4-b
@@ -1021,6 +1169,8 @@ objects:
         - Account for OT-specific events and anomalies
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-10
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-34
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-04
@@ -1045,6 +1195,8 @@ objects:
         - Establish and follow media communications procedures
 
         Cost: Low | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-35
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:5-b
@@ -1065,6 +1217,8 @@ objects:
         - Report known incidents within regulatory timeframes or as soon as safely feasible
 
         Cost: Moderate | Impact: High | Complexity: Moderate
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-36
     - urn: urn:intuitem:risk:req_node:cisa-cpg-2.0:6-a
@@ -1087,6 +1241,9 @@ objects:
         - Update policies, procedures, and training; ensure stakeholder awareness of changes
 
         Cost: Moderate | Impact: High | Complexity: Complex
+      threats:
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-16
+      - urn:intuitem:risk:threat:cisa-cpg-2.0:t-02
       reference_controls:
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-37
       - urn:intuitem:risk:function:cisa-cpg-2.0:rc-02
