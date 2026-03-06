@@ -39,7 +39,7 @@ def scoring_setup(db):
         requirement_node=rn,
         urn="urn:test:extscore:q1",
         ref_id="EQ1",
-        annotation="Question 1",
+        text="Question 1",
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         weight=1,
@@ -49,7 +49,7 @@ def scoring_setup(db):
     q1_good = QuestionChoice.objects.create(
         question=q1,
         ref_id="EC1A",
-        annotation="Good",
+        value="Good",
         add_score=10,
         compute_result="true",
         order=0,
@@ -59,7 +59,7 @@ def scoring_setup(db):
     q1_bad = QuestionChoice.objects.create(
         question=q1,
         ref_id="EC1B",
-        annotation="Bad",
+        value="Bad",
         add_score=0,
         compute_result="false",
         order=1,
@@ -72,7 +72,7 @@ def scoring_setup(db):
         requirement_node=rn,
         urn="urn:test:extscore:q2",
         ref_id="EQ2",
-        annotation="Question 2",
+        text="Question 2",
         type=Question.Type.UNIQUE_CHOICE,
         order=1,
         weight=1,
@@ -82,7 +82,7 @@ def scoring_setup(db):
     q2_good = QuestionChoice.objects.create(
         question=q2,
         ref_id="EC2A",
-        annotation="Good",
+        value="Good",
         add_score=10,
         compute_result="true",
         order=0,
@@ -92,7 +92,7 @@ def scoring_setup(db):
     q2_bad = QuestionChoice.objects.create(
         question=q2,
         ref_id="EC2B",
-        annotation="Bad",
+        value="Bad",
         add_score=0,
         compute_result="false",
         order=1,
@@ -229,7 +229,7 @@ class TestScoringExtended:
         c_high = QuestionChoice.objects.create(
             question=q,
             ref_id="CLC1",
-            annotation="Very high",
+            value="Very high",
             add_score=100,
             compute_result="true",
             order=0,
@@ -239,7 +239,7 @@ class TestScoringExtended:
         QuestionChoice.objects.create(
             question=q,
             ref_id="CLC2",
-            annotation="Placeholder",
+            value="Placeholder",
             order=1,
             folder=folder,
             is_published=True,
@@ -409,7 +409,7 @@ class TestVisibilityEdgeCases:
         c_a = QuestionChoice.objects.create(
             question=q1,
             ref_id="VA",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -419,7 +419,7 @@ class TestVisibilityEdgeCases:
         c_b = QuestionChoice.objects.create(
             question=q1,
             ref_id="VB",
-            annotation="B",
+            value="B",
             add_score=5,
             compute_result="true",
             order=1,
@@ -430,7 +430,7 @@ class TestVisibilityEdgeCases:
         q2_c = QuestionChoice.objects.create(
             question=q2,
             ref_id="VQ2A",
-            annotation="X",
+            value="X",
             add_score=1,
             compute_result="true",
             order=0,
@@ -440,7 +440,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VQ2B",
-            annotation="Y",
+            value="Y",
             add_score=0,
             compute_result="false",
             order=1,
@@ -496,7 +496,7 @@ class TestVisibilityEdgeCases:
         c_a = QuestionChoice.objects.create(
             question=q1,
             ref_id="VA2",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -506,7 +506,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VB2",
-            annotation="B",
+            value="B",
             add_score=5,
             compute_result="true",
             order=1,
@@ -516,7 +516,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VQ2C",
-            annotation="X",
+            value="X",
             order=0,
             folder=folder,
             is_published=True,
@@ -524,7 +524,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VQ2D",
-            annotation="Y",
+            value="Y",
             order=1,
             folder=folder,
             is_published=True,
@@ -571,7 +571,7 @@ class TestVisibilityEdgeCases:
         c_a = QuestionChoice.objects.create(
             question=q1,
             ref_id="VSA",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -581,7 +581,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VSB",
-            annotation="B",
+            value="B",
             add_score=0,
             compute_result="false",
             order=1,
@@ -591,7 +591,7 @@ class TestVisibilityEdgeCases:
         q2_c = QuestionChoice.objects.create(
             question=q2,
             ref_id="VSQ2A",
-            annotation="X",
+            value="X",
             add_score=1,
             compute_result="true",
             order=0,
@@ -601,7 +601,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VSQ2B",
-            annotation="Y",
+            value="Y",
             add_score=0,
             compute_result="false",
             order=1,
@@ -675,7 +675,7 @@ class TestVisibilityEdgeCases:
         q1_c = QuestionChoice.objects.create(
             question=q1,
             ref_id="CHC1A",
-            annotation="Yes",
+            value="Yes",
             add_score=1,
             compute_result="true",
             order=0,
@@ -685,7 +685,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="CHC1B",
-            annotation="No",
+            value="No",
             add_score=0,
             compute_result="false",
             order=1,
@@ -706,7 +706,7 @@ class TestVisibilityEdgeCases:
         q2_c = QuestionChoice.objects.create(
             question=q2,
             ref_id="CHC2A",
-            annotation="Sub-Yes",
+            value="Sub-Yes",
             add_score=1,
             compute_result="true",
             order=0,
@@ -716,7 +716,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="CHC2B",
-            annotation="Sub-No",
+            value="Sub-No",
             add_score=0,
             compute_result="false",
             order=1,
@@ -737,7 +737,7 @@ class TestVisibilityEdgeCases:
         q3_c = QuestionChoice.objects.create(
             question=q3,
             ref_id="CHC3A",
-            annotation="Deep-Yes",
+            value="Deep-Yes",
             add_score=1,
             compute_result="true",
             order=0,
@@ -747,7 +747,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q3,
             ref_id="CHC3B",
-            annotation="Deep-No",
+            value="Deep-No",
             add_score=0,
             compute_result="false",
             order=1,
@@ -808,7 +808,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VUA",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -818,7 +818,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VUB",
-            annotation="B",
+            value="B",
             add_score=0,
             compute_result="false",
             order=1,
@@ -828,7 +828,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VUQ2A",
-            annotation="X",
+            value="X",
             order=0,
             folder=folder,
             is_published=True,
@@ -836,7 +836,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VUQ2B",
-            annotation="Y",
+            value="Y",
             order=1,
             folder=folder,
             is_published=True,
@@ -876,7 +876,7 @@ class TestVisibilityEdgeCases:
         c_a = QuestionChoice.objects.create(
             question=q1,
             ref_id="VEA",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -886,7 +886,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VEB",
-            annotation="B",
+            value="B",
             add_score=0,
             compute_result="false",
             order=1,
@@ -896,7 +896,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VEQ2A",
-            annotation="X",
+            value="X",
             order=0,
             folder=folder,
             is_published=True,
@@ -904,7 +904,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VEQ2B",
-            annotation="Y",
+            value="Y",
             order=1,
             folder=folder,
             is_published=True,
@@ -951,7 +951,7 @@ class TestVisibilityEdgeCases:
         c_a = QuestionChoice.objects.create(
             question=q1,
             ref_id="VFA",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -961,7 +961,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="VFB",
-            annotation="B",
+            value="B",
             add_score=0,
             compute_result="false",
             order=1,
@@ -971,7 +971,7 @@ class TestVisibilityEdgeCases:
         q2_c = QuestionChoice.objects.create(
             question=q2,
             ref_id="VFQ2A",
-            annotation="X",
+            value="X",
             add_score=1,
             compute_result="true",
             order=0,
@@ -981,7 +981,7 @@ class TestVisibilityEdgeCases:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="VFQ2B",
-            annotation="Y",
+            value="Y",
             add_score=0,
             compute_result="false",
             order=1,

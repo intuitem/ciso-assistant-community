@@ -77,7 +77,7 @@ class TestQuestionEndpoints:
             requirement_node=rn,
             urn="urn:test:q1",
             ref_id="Q1",
-            annotation="What is your name?",
+            text="What is your name?",
             type=Question.Type.TEXT,
             folder=folder,
             is_published=True,
@@ -94,7 +94,7 @@ class TestQuestionEndpoints:
             "requirement_node": str(rn.id),
             "urn": "urn:test:new:q1",
             "ref_id": "NQ1",
-            "annotation": "New question?",
+            "text": "New question?",
             "type": "text",
             "order": 0,
             "folder": str(Folder.get_root_folder().id),
@@ -113,7 +113,7 @@ class TestQuestionEndpoints:
             "requirement_node": str(rn.id),
             "urn": "urn:test:pub:q1",
             "ref_id": "PQ1",
-            "annotation": "Should fail?",
+            "text": "Should fail?",
             "type": "text",
             "order": 0,
             "folder": str(Folder.get_root_folder().id),
@@ -132,19 +132,19 @@ class TestQuestionEndpoints:
             requirement_node=rn,
             urn="urn:test:upd:q1",
             ref_id="UQ1",
-            annotation="Original?",
+            text="Original?",
             type=Question.Type.TEXT,
             folder=folder,
             is_published=True,
         )
         response = authenticated_client.patch(
             reverse("questions-detail", args=[q.id]),
-            {"annotation": "Updated?"},
+            {"text": "Updated?"},
             format="json",
         )
         assert response.status_code == status.HTTP_200_OK
         q.refresh_from_db()
-        assert q.annotation == "Updated?"
+        assert q.text == "Updated?"
 
     def test_update_question_on_published_framework_rejected(
         self, authenticated_client, published_framework
@@ -155,14 +155,14 @@ class TestQuestionEndpoints:
             requirement_node=rn,
             urn="urn:test:pubupd:q1",
             ref_id="PUQ1",
-            annotation="Original?",
+            text="Original?",
             type=Question.Type.TEXT,
             folder=folder,
             is_published=True,
         )
         response = authenticated_client.patch(
             reverse("questions-detail", args=[q.id]),
-            {"annotation": "Should fail?"},
+            {"text": "Should fail?"},
             format="json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -176,7 +176,7 @@ class TestQuestionEndpoints:
             requirement_node=rn,
             urn="urn:test:del:q1",
             ref_id="DQ1",
-            annotation="Delete me?",
+            text="Delete me?",
             type=Question.Type.TEXT,
             folder=folder,
             is_published=True,
@@ -282,7 +282,7 @@ class TestQuestionChoiceEndpoints:
         data = {
             "question": str(q.id),
             "ref_id": "C1",
-            "annotation": "Choice A",
+            "value": "Choice A",
             "add_score": 10,
             "order": 0,
             "folder": str(folder.id),
@@ -308,19 +308,19 @@ class TestQuestionChoiceEndpoints:
         c = QuestionChoice.objects.create(
             question=q,
             ref_id="UC1",
-            annotation="Original",
+            value="Original",
             order=0,
             folder=folder,
             is_published=True,
         )
         response = authenticated_client.patch(
             reverse("question-choices-detail", args=[c.id]),
-            {"annotation": "Updated"},
+            {"value": "Updated"},
             format="json",
         )
         assert response.status_code == status.HTTP_200_OK
         c.refresh_from_db()
-        assert c.annotation == "Updated"
+        assert c.value == "Updated"
 
     def test_update_choice_on_published_framework_rejected(
         self, authenticated_client, published_framework
@@ -338,14 +338,14 @@ class TestQuestionChoiceEndpoints:
         c = QuestionChoice.objects.create(
             question=q,
             ref_id="PUC1",
-            annotation="Should not change",
+            value="Should not change",
             order=0,
             folder=folder,
             is_published=True,
         )
         response = authenticated_client.patch(
             reverse("question-choices-detail", args=[c.id]),
-            {"annotation": "Should fail"},
+            {"value": "Should fail"},
             format="json",
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -366,7 +366,7 @@ class TestQuestionChoiceEndpoints:
         data = {
             "question": str(q.id),
             "ref_id": "PC1",
-            "annotation": "Should fail",
+            "value": "Should fail",
             "order": 0,
             "folder": str(folder.id),
         }
@@ -391,7 +391,7 @@ class TestQuestionChoiceEndpoints:
         c = QuestionChoice.objects.create(
             question=q,
             ref_id="DC1",
-            annotation="Delete me",
+            value="Delete me",
             order=0,
             folder=folder,
             is_published=True,

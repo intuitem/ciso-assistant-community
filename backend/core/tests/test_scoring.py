@@ -37,7 +37,7 @@ def scoring_setup(db):
         requirement_node=rn,
         urn="urn:test:score:q1",
         ref_id="SQ1",
-        annotation="Question 1",
+        text="Question 1",
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         weight=1,
@@ -47,7 +47,7 @@ def scoring_setup(db):
     choice_good = QuestionChoice.objects.create(
         question=q1,
         ref_id="SC1A",
-        annotation="Good",
+        value="Good",
         add_score=10,
         compute_result="true",
         order=0,
@@ -57,7 +57,7 @@ def scoring_setup(db):
     choice_bad = QuestionChoice.objects.create(
         question=q1,
         ref_id="SC1B",
-        annotation="Bad",
+        value="Bad",
         add_score=0,
         compute_result="false",
         order=1,
@@ -225,7 +225,7 @@ class TestScoring:
         choice_yes = QuestionChoice.objects.create(
             question=q1,
             ref_id="WC1A",
-            annotation="Yes",
+            value="Yes",
             add_score=10,
             compute_result="true",
             order=0,
@@ -235,7 +235,7 @@ class TestScoring:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="WC1B",
-            annotation="No",
+            value="No",
             add_score=0,
             compute_result="false",
             order=1,
@@ -309,7 +309,7 @@ class TestScoring:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="DC1A",
-            annotation="Yes",
+            value="Yes",
             add_score=10,
             compute_result="true",
             order=0,
@@ -319,7 +319,7 @@ class TestScoring:
         choice_no = QuestionChoice.objects.create(
             question=q1,
             ref_id="DC1B",
-            annotation="No",
+            value="No",
             add_score=0,
             compute_result="true",
             order=1,
@@ -345,7 +345,7 @@ class TestScoring:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="DC2A",
-            annotation="Sub-Yes",
+            value="Sub-Yes",
             add_score=5,
             compute_result="true",
             order=0,
@@ -355,7 +355,7 @@ class TestScoring:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="DC2B",
-            annotation="Sub-No",
+            value="Sub-No",
             add_score=0,
             compute_result="false",
             order=1,
@@ -428,7 +428,7 @@ class TestScoring:
         c1 = QuestionChoice.objects.create(
             question=q,
             ref_id="MC1",
-            annotation="A",
+            value="A",
             add_score=5,
             compute_result="true",
             order=0,
@@ -438,7 +438,7 @@ class TestScoring:
         c2 = QuestionChoice.objects.create(
             question=q,
             ref_id="MC2",
-            annotation="B",
+            value="B",
             add_score=3,
             compute_result="true",
             order=1,

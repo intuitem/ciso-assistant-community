@@ -860,7 +860,7 @@ def build_questions_dict(node):
         for choice in question.choices.all():
             choice_data = {
                 "urn": choice.ref_id,
-                "value": choice.annotation or "",
+                "value": choice.value or "",
             }
             if choice.add_score is not None:
                 choice_data["add_score"] = choice.add_score
@@ -876,12 +876,16 @@ def build_questions_dict(node):
                 choice_data["select_implementation_groups"] = (
                     choice.select_implementation_groups
                 )
+            if choice.annotation:
+                choice_data["annotation"] = choice.annotation
             choices.append(choice_data)
 
         q_data = {
             "type": question.type,
-            "text": question.annotation or "",
+            "text": question.text or "",
         }
+        if question.annotation:
+            q_data["annotation"] = question.annotation
         if choices:
             q_data["choices"] = choices
         if question.depends_on:

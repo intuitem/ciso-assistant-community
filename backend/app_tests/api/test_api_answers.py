@@ -41,7 +41,7 @@ def framework_with_questions(app_config):
         requirement_node=rn,
         urn="urn:test:ans:q1",
         ref_id="AQ1",
-        annotation="Pick one",
+        text="Pick one",
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
@@ -50,7 +50,7 @@ def framework_with_questions(app_config):
     c1 = QuestionChoice.objects.create(
         question=q,
         ref_id="AC1",
-        annotation="Choice A",
+        value="Choice A",
         add_score=10,
         compute_result="true",
         order=0,
@@ -60,7 +60,7 @@ def framework_with_questions(app_config):
     c2 = QuestionChoice.objects.create(
         question=q,
         ref_id="AC2",
-        annotation="Choice B",
+        value="Choice B",
         add_score=0,
         compute_result="false",
         order=1,
@@ -127,7 +127,7 @@ def framework_with_multi_choice(app_config):
     c1 = QuestionChoice.objects.create(
         question=q,
         ref_id="MC1",
-        annotation="A",
+        value="A",
         order=0,
         folder=folder,
         is_published=True,
@@ -135,7 +135,7 @@ def framework_with_multi_choice(app_config):
     c2 = QuestionChoice.objects.create(
         question=q,
         ref_id="MC2",
-        annotation="B",
+        value="B",
         order=1,
         folder=folder,
         is_published=True,
@@ -143,7 +143,7 @@ def framework_with_multi_choice(app_config):
     c3 = QuestionChoice.objects.create(
         question=q,
         ref_id="MC3",
-        annotation="C",
+        value="C",
         order=2,
         folder=folder,
         is_published=True,
@@ -344,7 +344,7 @@ class TestAnswerEndpoints:
         other_choice = QuestionChoice.objects.create(
             question=other_q,
             ref_id="OC1",
-            annotation="Other",
+            value="Other",
             order=0,
             folder=folder,
             is_published=True,

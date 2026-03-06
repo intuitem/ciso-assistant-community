@@ -79,6 +79,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "text",
+                    models.TextField(blank=True, null=True, verbose_name="Text"),
+                ),
+                (
                     "annotation",
                     models.TextField(blank=True, null=True, verbose_name="Annotation"),
                 ),
@@ -171,6 +175,10 @@ class Migration(migrations.Migration):
                         null=True,
                         verbose_name="Reference ID",
                     ),
+                ),
+                (
+                    "value",
+                    models.TextField(blank=True, null=True, verbose_name="Value"),
                 ),
                 (
                     "annotation",

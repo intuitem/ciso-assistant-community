@@ -44,7 +44,7 @@ def dynamic_framework_setup(db):
         requirement_node=rn,
         urn="urn:test:ig:q1",
         ref_id="IGQ1",
-        annotation="Select level",
+        text="Select level",
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         weight=1,
@@ -54,7 +54,7 @@ def dynamic_framework_setup(db):
     c_basic = QuestionChoice.objects.create(
         question=q1,
         ref_id="IGC1A",
-        annotation="Basic",
+        value="Basic",
         add_score=5,
         compute_result="true",
         order=0,
@@ -65,7 +65,7 @@ def dynamic_framework_setup(db):
     c_advanced = QuestionChoice.objects.create(
         question=q1,
         ref_id="IGC1B",
-        annotation="Advanced",
+        value="Advanced",
         add_score=10,
         compute_result="true",
         order=1,
@@ -138,7 +138,7 @@ class TestIsDynamic:
         QuestionChoice.objects.create(
             question=q,
             ref_id="STC1A",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -146,7 +146,7 @@ class TestIsDynamic:
         QuestionChoice.objects.create(
             question=q,
             ref_id="STC1B",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -182,7 +182,7 @@ class TestIsDynamic:
         QuestionChoice.objects.create(
             question=q,
             ref_id="EIGC1",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -191,7 +191,7 @@ class TestIsDynamic:
         QuestionChoice.objects.create(
             question=q,
             ref_id="EIGC2",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -266,7 +266,7 @@ class TestUpdateSelectedImplementationGroups:
         c_no = QuestionChoice.objects.create(
             question=q1,
             ref_id="HIGC1A",
-            annotation="No",
+            value="No",
             add_score=0,
             compute_result="false",
             order=0,
@@ -276,7 +276,7 @@ class TestUpdateSelectedImplementationGroups:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="HIGC1B",
-            annotation="Yes",
+            value="Yes",
             add_score=5,
             compute_result="true",
             order=1,
@@ -296,7 +296,7 @@ class TestUpdateSelectedImplementationGroups:
         c_ig = QuestionChoice.objects.create(
             question=q2,
             ref_id="HIGC2A",
-            annotation="Select",
+            value="Select",
             order=0,
             folder=folder,
             is_published=True,
@@ -305,7 +305,7 @@ class TestUpdateSelectedImplementationGroups:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="HIGC2B",
-            annotation="Skip",
+            value="Skip",
             order=1,
             folder=folder,
             is_published=True,
@@ -391,7 +391,7 @@ class TestUpdateSelectedImplementationGroups:
         c1 = QuestionChoice.objects.create(
             question=q1,
             ref_id="MIGC1A",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -400,7 +400,7 @@ class TestUpdateSelectedImplementationGroups:
         QuestionChoice.objects.create(
             question=q1,
             ref_id="MIGC1B",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -418,7 +418,7 @@ class TestUpdateSelectedImplementationGroups:
         c2 = QuestionChoice.objects.create(
             question=q2,
             ref_id="MIGC2A",
-            annotation="C",
+            value="C",
             order=0,
             folder=folder,
             is_published=True,
@@ -427,7 +427,7 @@ class TestUpdateSelectedImplementationGroups:
         QuestionChoice.objects.create(
             question=q2,
             ref_id="MIGC2B",
-            annotation="D",
+            value="D",
             order=1,
             folder=folder,
             is_published=True,

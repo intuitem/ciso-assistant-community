@@ -35,7 +35,7 @@ def draft_framework_with_valid_questions(app_config):
         requirement_node=rn,
         urn="urn:test:pub:q1",
         ref_id="PQ1",
-        annotation="Pick one",
+        text="Pick one",
         type=Question.Type.UNIQUE_CHOICE,
         order=0,
         folder=folder,
@@ -44,7 +44,7 @@ def draft_framework_with_valid_questions(app_config):
     QuestionChoice.objects.create(
         question=q,
         ref_id="PC1",
-        annotation="Choice A",
+        value="Choice A",
         order=0,
         folder=folder,
         is_published=True,
@@ -52,7 +52,7 @@ def draft_framework_with_valid_questions(app_config):
     QuestionChoice.objects.create(
         question=q,
         ref_id="PC2",
-        annotation="Choice B",
+        value="Choice B",
         order=1,
         folder=folder,
         is_published=True,
@@ -115,7 +115,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="BC1",
-            annotation="Only choice",
+            value="Only choice",
             order=0,
             folder=folder,
             is_published=True,
@@ -190,7 +190,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="MSKC1",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -198,7 +198,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="MSKC2",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -243,7 +243,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="DUPC1",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -251,7 +251,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="DUPC2",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -291,7 +291,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="BAC1",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -299,7 +299,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="BAC2",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,
@@ -346,7 +346,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="VSDC1",
-            annotation="A",
+            value="A",
             order=0,
             folder=folder,
             is_published=True,
@@ -354,7 +354,7 @@ class TestFrameworkPublish:
         QuestionChoice.objects.create(
             question=q,
             ref_id="VSDC2",
-            annotation="B",
+            value="B",
             order=1,
             folder=folder,
             is_published=True,

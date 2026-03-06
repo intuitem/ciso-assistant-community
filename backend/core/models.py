@@ -113,7 +113,8 @@ def _create_questions_from_data(requirement_node, questions_data):
             requirement_node=requirement_node,
             urn=q_urn,
             ref_id=q_ref_id,
-            annotation=q_data.get("text", ""),
+            text=q_data.get("text", ""),
+            annotation=q_data.get("annotation", ""),
             type=q_type,
             config=q_data.get("config"),
             depends_on=q_data.get("depends_on"),
@@ -138,7 +139,8 @@ def _create_questions_from_data(requirement_node, questions_data):
             QuestionChoice.objects.create(
                 question=question,
                 ref_id=c_ref_id,
-                annotation=choice.get("value", ""),
+                value=choice.get("value", ""),
+                annotation=choice.get("annotation", ""),
                 add_score=choice.get("add_score"),
                 compute_result=compute_result,
                 order=c_order,
@@ -2493,7 +2495,7 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             tr = (choice.translations or {}).get(current_lang, {})
             choice_data = {
                 "urn": choice.ref_id,
-                "value": tr.get("value", choice.annotation or ""),
+                "value": tr.get("value", choice.value or ""),
             }
             description = tr.get("description", choice.description)
             if description:
@@ -2510,6 +2512,8 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
                 choice_data["select_implementation_groups"] = (
                     choice.select_implementation_groups
                 )
+            if choice.annotation:
+                choice_data["annotation"] = choice.annotation
             return choice_data
 
         result = {}
@@ -2517,8 +2521,10 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
             q_tr = (question.translations or {}).get(current_lang, {})
             q_data = {
                 "type": question.type,
-                "text": q_tr.get("text", question.annotation or ""),
+                "text": q_tr.get("text", question.text or ""),
             }
+            if question.annotation:
+                q_data["annotation"] = question.annotation
             choices = [_translate_choice(c) for c in question.choices.all()]
             if choices:
                 q_data["choices"] = choices
@@ -2552,6 +2558,7 @@ class Question(AbstractBaseModel, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
+    text = models.TextField(blank=True, null=True, verbose_name=_("Text"))
     annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
     type = models.CharField(
         max_length=20,
@@ -2573,7 +2580,7 @@ class Question(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Questions")
 
     def __str__(self) -> str:
-        return f"{self.ref_id or self.urn}: {self.annotation or ''}"
+        return f"{self.ref_id or self.urn}: {self.text or ''}"
 
 
 class QuestionChoice(AbstractBaseModel, FolderMixin):
@@ -2586,6 +2593,7 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
     ref_id = models.CharField(
         max_length=100, blank=True, null=True, verbose_name=_("Reference ID")
     )
+    value = models.TextField(blank=True, null=True, verbose_name=_("Value"))
     annotation = models.TextField(blank=True, null=True, verbose_name=_("Annotation"))
     add_score = models.IntegerField(blank=True, null=True, verbose_name=_("Add score"))
     compute_result = models.CharField(
@@ -2610,7 +2618,7 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Question choices")
 
     def __str__(self) -> str:
-        return f"{self.ref_id or ''}: {self.annotation or ''}"
+        return f"{self.ref_id or ''}: {self.value or ''}"
 
 
 class RequirementMappingSet(ReferentialObjectMixin):
