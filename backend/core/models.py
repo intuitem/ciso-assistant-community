@@ -2522,7 +2522,7 @@ class QuestionChoice(AbstractBaseModel, FolderMixin):
 
     class Meta:
         ordering = ["order"]
-        unique_together = [("question", "ref_id")]
+        unique_together = [("question", "urn")]
         verbose_name = _("Question choice")
         verbose_name_plural = _("Question choices")
 

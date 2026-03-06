@@ -155,7 +155,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         # PATCH the RA with answers
         patch_data = {
             "answers": {
-                "urn:test:answers:q1": "yes",  # ref_id of the "Yes" choice
+                "urn:test:answers:q1": "urn:test:answers:q1:yes",
             },
             "compliance_assessment": str(
                 compliance_assessment_with_ra["compliance_assessment"].id
@@ -174,8 +174,8 @@ class TestRequirementAssessmentAnswersPatchGet:
         )
         assert response.status_code == 200
         answers = response.data.get("answers", {})
-        assert answers.get("urn:test:answers:q1") == "yes", (
-            f"Expected answer 'yes' for q1, got: {answers}"
+        assert answers.get("urn:test:answers:q1") == "urn:test:answers:q1:yes", (
+            f"Expected answer 'urn:test:answers:q1:yes' for q1, got: {answers}"
         )
 
     def test_patch_text_answer_then_get(
@@ -214,7 +214,7 @@ class TestRequirementAssessmentAnswersPatchGet:
 
         patch_data = {
             "answers": {
-                "urn:test:answers:q1": "no",
+                "urn:test:answers:q1": "urn:test:answers:q1:no",
                 "urn:test:answers:q2": "Not yet implemented.",
             },
             "compliance_assessment": str(
@@ -233,7 +233,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         )
         assert response.status_code == 200
         answers = response.data.get("answers", {})
-        assert answers.get("urn:test:answers:q1") == "no"
+        assert answers.get("urn:test:answers:q1") == "urn:test:answers:q1:no"
         assert answers.get("urn:test:answers:q2") == "Not yet implemented."
 
     def test_patch_overwrites_previous_answer(
@@ -247,7 +247,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         response = authenticated_client.patch(
             f"/api/requirement-assessments/{ra.id}/",
             data={
-                "answers": {"urn:test:answers:q1": "yes"},
+                "answers": {"urn:test:answers:q1": "urn:test:answers:q1:yes"},
                 "compliance_assessment": ca_id,
             },
             format="json",
@@ -258,7 +258,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         response = authenticated_client.patch(
             f"/api/requirement-assessments/{ra.id}/",
             data={
-                "answers": {"urn:test:answers:q1": "no"},
+                "answers": {"urn:test:answers:q1": "urn:test:answers:q1:no"},
                 "compliance_assessment": ca_id,
             },
             format="json",
@@ -271,7 +271,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         )
         assert response.status_code == 200
         answers = response.data.get("answers", {})
-        assert answers.get("urn:test:answers:q1") == "no"
+        assert answers.get("urn:test:answers:q1") == "urn:test:answers:q1:no"
 
     def test_empty_answers_dict_preserves_existing(
         self, authenticated_client, compliance_assessment_with_ra
@@ -284,7 +284,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         response = authenticated_client.patch(
             f"/api/requirement-assessments/{ra.id}/",
             data={
-                "answers": {"urn:test:answers:q1": "yes"},
+                "answers": {"urn:test:answers:q1": "urn:test:answers:q1:yes"},
                 "compliance_assessment": ca_id,
             },
             format="json",
@@ -308,7 +308,7 @@ class TestRequirementAssessmentAnswersPatchGet:
         )
         assert response.status_code == 200
         answers = response.data.get("answers", {})
-        assert answers.get("urn:test:answers:q1") == "yes"
+        assert answers.get("urn:test:answers:q1") == "urn:test:answers:q1:yes"
 
     def test_answers_from_get_match_patch_format(
         self, authenticated_client, compliance_assessment_with_ra
