@@ -428,6 +428,18 @@ DATA_WIZARD_COMMANDS = [
         "requires_framework": False,
         "requires_matrix": True,
     },
+    {
+        "command": "import_bia",
+        "model_type": "BusinessImpactAnalysis",
+        "help": "Import business impact analyses (multi-sheet Excel) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
+        "show_perimeter_option": True,
+        "show_matrix_option": True,
+    },
 ]
 
 
