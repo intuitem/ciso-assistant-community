@@ -2608,7 +2608,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                         if isinstance(answer_value, list) and answer_value:
                             # Try matching by URNs
                             choices = question.choices.filter(urn__in=answer_value)
-                            found_identifiers = set(choices.values_list("urn", flat=True))
+                            found_identifiers = set(
+                                choices.values_list("urn", flat=True)
+                            )
                             missing = set(answer_value) - found_identifiers
 
                             # If some missing, try matching by ref_id
@@ -2619,7 +2621,9 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
                                 if additional_choices.exists():
                                     choices = choices | additional_choices
                                     found_identifiers.update(
-                                        additional_choices.values_list("ref_id", flat=True)
+                                        additional_choices.values_list(
+                                            "ref_id", flat=True
+                                        )
                                     )
                                     missing = set(answer_value) - found_identifiers
 
@@ -2844,7 +2848,9 @@ class AnswerWriteSerializer(BaseModelSerializer):
                                 found_identifiers.update(
                                     additional_choices.values_list("ref_id", flat=True)
                                 )
-                                missing = [v for v in value if v not in found_identifiers]
+                                missing = [
+                                    v for v in value if v not in found_identifiers
+                                ]
 
                         if missing:
                             raise serializers.ValidationError(
