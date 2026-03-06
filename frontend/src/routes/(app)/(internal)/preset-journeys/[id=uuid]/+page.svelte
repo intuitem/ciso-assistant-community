@@ -1,10 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { m } from '$paraglide/messages';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
+	import { goto } from '$lib/utils/breadcrumbs';
 	import { page } from '$app/stores';
 	import { getModalStore } from '$lib/components/Modals/stores';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
+	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -162,7 +164,7 @@
 					method: 'DELETE'
 				});
 				if (response.ok) {
-					goto('/presets');
+					goto('/presets', { label: m.presets(), breadcrumbAction: 'replace' });
 				}
 			}
 		});
@@ -341,15 +343,17 @@
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2">
 										{#if link}
-											<a
+											<Anchor
 												href={link}
+												breadcrumbAction="push"
+												label={step.title}
 												class="font-medium text-gray-800 hover:text-violet-600 transition-colors"
 											>
 												{step.title}
 												<i
 													class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1 opacity-40"
 												></i>
-											</a>
+											</Anchor>
 										{:else}
 											<h4 class="font-medium text-gray-800">{step.title}</h4>
 										{/if}
@@ -393,7 +397,7 @@
 											onclick={async () => {
 												await updateStepStatus(step.id, 'in_progress');
 												const href = getStepLink(step);
-												if (href) goto(href);
+												if (href) goto(href, { label: step.title, breadcrumbAction: 'push' });
 											}}
 										>
 											{m.startStep()}
