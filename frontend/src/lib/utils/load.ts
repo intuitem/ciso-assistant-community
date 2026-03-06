@@ -43,7 +43,6 @@ export function formatSelectFieldData(
 		value: isNumber ? parseInt(key) : key
 	}));
 	if (isNumber) {
-		//TODO: Generalise this pattern throughout the codebase.
 		fieldOptions.sort((a, b) => a.value - b.value);
 	}
 	return fieldOptions;
