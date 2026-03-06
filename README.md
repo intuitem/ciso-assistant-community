@@ -231,6 +231,21 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 91. Baseline informatiebeveiliging Overheid 2 (BIO2) 🇳🇱
 92. ANSSI : Questionnaire MonAideCyber 🇫🇷
 93. ITSP.10.171 - Protecting specified information in non-Government of Canada systems and organizations 🇨🇦
+94. CISA Vendor Supply Chain Risk Management (SCRM) Template 🇺🇸
+95. European Sustainability Reporting Standards (ESRS) 🇪🇺
+96. ITIL 4 Management Practices 🌐
+97. NOREA - DORA in Control Framework v3.0 🇪🇺
+98. NIS-1 transposition FR 🇫🇷
+99. PSSI État 🇫🇷
+100. Checklist de dossier d'homologation 🇫🇷
+101. Cahier des charges Label EBIOS RM v3.1 🇫🇷
+102. SecNumCloud v3.2 Annexe 2 : recommandations aux commanditaires ☁️🇫🇷
+103. CCB CyberFundamentals Small - Self assessment 🇧🇪
+104. Mitre ATT&CK v18.1 - Threat catalog 🌐
+105. Mitre D3FEND - Reference controls 🌐
+106. OWASP Top 10 Web - Threat catalog 🐝🌐
+107. OWASP MAS Threat Modelling Guide - Threat catalog 🐝📱
+108. CISA Cybersecurity Performance Goals (CPG) v2.0 🇺🇸
 
 ### Community contributions
 
@@ -258,6 +273,8 @@ Check out the online documentation on <https://intuitem.gitbook.io/ciso-assistan
 22. OWASP Application Security Verification Standard (ASVS) 5 🐝🖥️
 23. NIST 800-82 (OT) - appendix 🏭🤖
 24. RBI Master Direction 2023 - india 🏦🇮🇳
+25. Loi 05-20 relative à la cybersécurité (Maroc) 🇲🇦
+26. Lithuanian NIS2 Cybersecurity Law (Kibernetinio saugumo įstatymas) 🇱🇹
 
 <br/>
 
