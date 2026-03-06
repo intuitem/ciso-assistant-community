@@ -10,6 +10,7 @@ LIBRARY_URN = "urn:intuitem:risk:library:cisa-cpg-2.0"
 FRAMEWORK_URN = "urn:intuitem:risk:framework:cisa-cpg-2.0"
 REQ_URN_PREFIX = "urn:intuitem:risk:req_node:cisa-cpg-2.0"
 RC_URN_PREFIX = "urn:intuitem:risk:function:cisa-cpg-2.0"
+THREAT_URN_PREFIX = "urn:intuitem:risk:threat:cisa-cpg-2.0"
 
 FUNCTIONS = [
     (
@@ -39,6 +40,242 @@ FUNCTIONS = [
         "Assets and operations affected by a cybersecurity incident are restored.",
     ),
 ]
+
+FUNCTIONS_FR = {
+    "GV": (
+        "GOUVERNER",
+        "La stratégie, les attentes et la politique de gestion des risques de cybersécurité de l'organisation sont établies, communiquées et surveillées.",
+    ),
+    "ID": (
+        "IDENTIFIER",
+        "Les risques de cybersécurité actuels de l'organisation sont compris.",
+    ),
+    "PR": (
+        "PROTÉGER",
+        "Des mesures de protection sont utilisées pour gérer les risques de cybersécurité de l'organisation.",
+    ),
+    "DE": (
+        "DÉTECTER",
+        "Les attaques et compromissions potentielles en matière de cybersécurité sont détectées et analysées.",
+    ),
+    "RS": (
+        "RÉPONDRE",
+        "Des actions sont prises concernant un incident de cybersécurité détecté.",
+    ),
+    "RC": (
+        "RÉTABLIR",
+        "Les actifs et les opérations affectés par un incident de cybersécurité sont restaurés.",
+    ),
+}
+
+SCORES_FR = {
+    1: (
+        "Non mis en œuvre",
+        "L'objectif n'est pas traité. L'organisation n'a pris aucune mesure concernant les pratiques recommandées, ou les actions sont entièrement ponctuelles sans approche documentée.",
+    ),
+    2: (
+        "Partiellement mis en œuvre",
+        "Certaines actions recommandées sont en place mais la mise en œuvre est incomplète ou incohérente. Les pratiques peuvent être ponctuelles ou limitées à des domaines spécifiques de l'organisation.",
+    ),
+    3: (
+        "Largement mis en œuvre",
+        "La plupart des actions recommandées sont systématiquement appliquées dans l'ensemble de l'organisation. Les pratiques sont documentées, reproductibles et couvrent la majorité des actifs et processus concernés.",
+    ),
+    4: (
+        "Entièrement mis en œuvre",
+        "Toutes les actions recommandées sont en place, testées et continuellement améliorées. Les pratiques sont appliquées à l'échelle de l'organisation, régulièrement revues et adaptées en fonction des retours d'expérience et de l'évolution des menaces.",
+    ),
+}
+
+# Threats distilled from TTP/Risk Addressed sections
+# (ref_id, name, description)
+THREATS = [
+    (
+        "T.01",
+        "Insufficient Cybersecurity Governance",
+        "Lack of sufficient cybersecurity accountability, investment, or effectiveness due to absent or inadequate policies, roles, and procedures for managing cybersecurity risk.",
+    ),
+    (
+        "T.02",
+        "Ineffective Incident Response",
+        "Inability to quickly and effectively isolate, contain, eradicate, remediate, and communicate about cybersecurity incidents. Communication failures slow resolution, increase downtime, and amplify damage.",
+    ),
+    (
+        "T.03",
+        "Supply Chain Compromise",
+        "Adversaries exploit vulnerabilities by abusing trusted third-party relationships, manipulating products or delivery mechanisms before they reach final users, or compromising vendor environments.",
+    ),
+    (
+        "T.04",
+        "Exploitation of Known Vulnerabilities",
+        "Adversaries target unpatched and misconfigured systems, particularly those exposed to the internet, leveraging software vulnerabilities, temporary malfunctions, or configuration errors to gain initial access.",
+    ),
+    (
+        "T.05",
+        "Unvalidated Security Controls",
+        "Gaps in cyber defenses or overconfidence in existing protections due to lack of independent validation that implemented controls are properly configured and working as intended.",
+    ),
+    (
+        "T.06",
+        "Insufficient Asset and Network Visibility",
+        "Incomplete or inaccurate understanding of organizational assets, network topology, and security logs inhibits effective detection, incident response, and recovery.",
+    ),
+    (
+        "T.07",
+        "Default Credential Exploitation",
+        "Adversaries acquire and exploit default manufacturer account credentials to gain initial access, maintain persistence, escalate privileges, or evade defenses.",
+    ),
+    (
+        "T.08",
+        "Brute Force and Password Attacks",
+        "Adversaries use brute force techniques to crack passwords, systematically guessing credentials using repetitive or iterative methods against unknown passwords or obtained hashes.",
+    ),
+    (
+        "T.09",
+        "Credential Theft and Misuse",
+        "Adversaries obtain and exploit account credentials through theft, reuse, or abuse of inactive accounts to gain access, maintain persistence, escalate privileges, or bypass network access controls.",
+    ),
+    (
+        "T.10",
+        "Unauthorized Access and Lateral Movement",
+        "Unauthorized access to network resources enabling adversaries to move across systems undetected, escalate privileges, and compromise sensitive data and critical systems.",
+    ),
+    (
+        "T.11",
+        "Social Engineering and Phishing",
+        "Adversaries use deceptive emails, malicious attachments or links, and social engineering tactics to trick users into revealing sensitive information, executing malicious code, or granting unauthorized access.",
+    ),
+    (
+        "T.12",
+        "Network Interception and Data Manipulation",
+        "Adversaries position themselves between networked devices to enable network sniffing and data manipulation, or steal operational data for personal gain or future operations.",
+    ),
+    (
+        "T.13",
+        "Uncontained Network Compromise",
+        "If a network is compromised by an unauthorized user, lack of segmentation allows malicious activity to spread uncontrolled across networks and critical infrastructure.",
+    ),
+    (
+        "T.14",
+        "Malware and Malicious Code",
+        "Adversaries deploy malware including payloads, droppers, and backdoors to control remote machines, evade defenses, and execute post-compromise actions. Malware can spread via removable media to air-gapped networks.",
+    ),
+    (
+        "T.15",
+        "Unmanaged System Changes",
+        "Delayed, insufficient, or incomplete ability to maintain or restore functionality of critical devices and service operations due to unauthorized or untested changes.",
+    ),
+    (
+        "T.16",
+        "Data Destruction and Service Disruption",
+        "Adversaries disrupt critical systems, delete data, and disable recovery services to prevent system recovery, causing disruption to asset, service, or system availability.",
+    ),
+]
+
+# Mapping of goal ref_id -> list of threat ref_ids
+GOAL_THREATS = {
+    "1.A": ["T.01"],
+    "1.B": ["T.01"],
+    "1.C": ["T.02"],
+    "1.D": ["T.03"],
+    "1.E": ["T.03"],
+    "2.A": ["T.06"],
+    "2.B": ["T.04"],
+    "2.C": ["T.05"],
+    "2.D": ["T.04"],
+    "2.E": ["T.06"],
+    "3.A": ["T.07", "T.10"],
+    "3.B": ["T.08"],
+    "3.C": ["T.09", "T.10"],
+    "3.D": ["T.09"],
+    "3.E": ["T.07"],
+    "3.F": ["T.08", "T.10"],
+    "3.G": ["T.09", "T.10"],
+    "3.H": ["T.10"],
+    "3.I": ["T.13", "T.10"],
+    "3.J": ["T.11"],
+    "3.K": ["T.12"],
+    "3.L": ["T.11"],
+    "3.M": ["T.11", "T.14"],
+    "3.N": ["T.15"],
+    "3.O": ["T.16"],
+    "3.P": ["T.03"],
+    "3.Q": ["T.06"],
+    "3.R": ["T.14"],
+    "3.S": ["T.04", "T.10"],
+    "4.A": ["T.14"],
+    "4.B": ["T.10"],
+    "5.A": ["T.02"],
+    "5.B": ["T.02"],
+    "6.A": ["T.16", "T.02"],
+}
+
+THREATS_FR = {
+    "T.01": (
+        "Gouvernance insuffisante de la cybersécurité",
+        "Manque de responsabilité, d'investissement ou d'efficacité en matière de cybersécurité en raison de l'absence ou de l'inadéquation des politiques, des rôles et des procédures de gestion des risques cyber.",
+    ),
+    "T.02": (
+        "Réponse aux incidents inefficace",
+        "Incapacité à isoler, contenir, éradiquer, remédier et communiquer rapidement et efficacement lors d'incidents de cybersécurité. Les défaillances de communication ralentissent la résolution, augmentent les temps d'arrêt et amplifient les dommages.",
+    ),
+    "T.03": (
+        "Compromission de la chaîne d'approvisionnement",
+        "Les adversaires exploitent les vulnérabilités en abusant des relations de confiance avec des tiers, en manipulant les produits ou les mécanismes de livraison avant qu'ils n'atteignent les utilisateurs finaux, ou en compromettant les environnements des fournisseurs.",
+    ),
+    "T.04": (
+        "Exploitation de vulnérabilités connues",
+        "Les adversaires ciblent les systèmes non corrigés et mal configurés, en particulier ceux exposés à Internet, en exploitant les vulnérabilités logicielles, les dysfonctionnements temporaires ou les erreurs de configuration pour obtenir un accès initial.",
+    ),
+    "T.05": (
+        "Contrôles de sécurité non validés",
+        "Lacunes dans les défenses cyber ou excès de confiance dans les protections existantes en raison d'un manque de validation indépendante du bon fonctionnement et de la configuration des contrôles mis en place.",
+    ),
+    "T.06": (
+        "Visibilité insuffisante des actifs et du réseau",
+        "Compréhension incomplète ou inexacte des actifs organisationnels, de la topologie réseau et des journaux de sécurité, entravant la détection efficace, la réponse aux incidents et la reprise d'activité.",
+    ),
+    "T.07": (
+        "Exploitation des identifiants par défaut",
+        "Les adversaires acquièrent et exploitent les identifiants de comptes par défaut du fabricant pour obtenir un accès initial, maintenir la persistance, élever les privilèges ou contourner les défenses.",
+    ),
+    "T.08": (
+        "Attaques par force brute et sur les mots de passe",
+        "Les adversaires utilisent des techniques de force brute pour craquer les mots de passe, en devinant systématiquement les identifiants par des méthodes répétitives ou itératives sur des mots de passe inconnus ou des condensats obtenus.",
+    ),
+    "T.09": (
+        "Vol et utilisation abusive d'identifiants",
+        "Les adversaires obtiennent et exploitent des identifiants de comptes par vol, réutilisation ou abus de comptes inactifs pour obtenir un accès, maintenir la persistance, élever les privilèges ou contourner les contrôles d'accès réseau.",
+    ),
+    "T.10": (
+        "Accès non autorisé et mouvement latéral",
+        "Accès non autorisé aux ressources réseau permettant aux adversaires de se déplacer entre les systèmes sans être détectés, d'élever les privilèges et de compromettre les données sensibles et les systèmes critiques.",
+    ),
+    "T.11": (
+        "Ingénierie sociale et hameçonnage",
+        "Les adversaires utilisent des courriels trompeurs, des pièces jointes ou liens malveillants et des tactiques d'ingénierie sociale pour inciter les utilisateurs à divulguer des informations sensibles, exécuter du code malveillant ou accorder un accès non autorisé.",
+    ),
+    "T.12": (
+        "Interception réseau et manipulation de données",
+        "Les adversaires se positionnent entre les équipements réseau pour permettre l'écoute et la manipulation de données, ou voler des données opérationnelles à des fins personnelles ou pour de futures opérations.",
+    ),
+    "T.13": (
+        "Compromission réseau non contenue",
+        "Si un réseau est compromis par un utilisateur non autorisé, l'absence de segmentation permet à l'activité malveillante de se propager de manière incontrôlée à travers les réseaux et les infrastructures critiques.",
+    ),
+    "T.14": (
+        "Logiciels malveillants et code malveillant",
+        "Les adversaires déploient des logiciels malveillants incluant des charges utiles, des téléchargeurs et des portes dérobées pour contrôler des machines à distance, contourner les défenses et exécuter des actions post-compromission. Les logiciels malveillants peuvent se propager via des supports amovibles vers des réseaux isolés.",
+    ),
+    "T.15": (
+        "Changements système non maîtrisés",
+        "Capacité retardée, insuffisante ou incomplète à maintenir ou restaurer le fonctionnement des dispositifs critiques et des opérations de service en raison de changements non autorisés ou non testés.",
+    ),
+    "T.16": (
+        "Destruction de données et interruption de service",
+        "Les adversaires perturbent les systèmes critiques, suppriment des données et désactivent les services de récupération pour empêcher la restauration des systèmes, causant une interruption de la disponibilité des actifs, services ou systèmes.",
+    ),
+}
 
 # Reference controls distilled from recommended actions
 # (ref_id, name, category, csf_function, description)
@@ -303,6 +540,157 @@ REFERENCE_CONTROLS = [
         "Execute plans recovering/restoring service to critical assets impacted by incidents. Enable degraded operations (paper, radio). Complete post-incident analysis identifying improvement areas. Incorporate lessons learned. Update policies, procedures, and training.",
     ),
 ]
+
+RC_FR = {
+    "RC.01": (
+        "Politique de rôles et responsabilités en cybersécurité",
+        "Documenter tous les rôles, responsabilités et autorités en matière de cybersécurité dans la politique organisationnelle. Répartir les responsabilités au sein de l'organisation, y compris avec les tiers. Assurer la conformité légale et réglementaire.",
+    ),
+    "RC.02": (
+        "Gestion du cycle de vie des politiques de cybersécurité",
+        "Réviser les politiques de cybersécurité annuellement et les mettre à jour en cas de changement des exigences, des risques, des menaces ou des technologies. Communiquer et appliquer les politiques reflétant la stratégie et les priorités organisationnelles.",
+    ),
+    "RC.03": (
+        "Politique de sécurité spécifique aux OT",
+        "Développer des politiques de cybersécurité spécifiques aux technologies opérationnelles (OT), tenant compte des limitations des programmes informatiques et des priorités des fonctions critiques. Établir une gouvernance englobant les obligations réglementaires, juridiques, environnementales et opérationnelles.",
+    ),
+    "RC.04": (
+        "Gestion du plan de réponse aux incidents",
+        "Développer, maintenir, mettre à jour et exercer régulièrement les plans de réponse aux incidents pour des scénarios courants et spécifiques à l'organisation. Garantir des exercices réalistes incluant toutes les parties prenantes. Réviser et tester les plans au minimum annuellement. Prendre en compte les considérations de sûreté et de confinement spécifiques aux OT.",
+    ),
+    "RC.05": (
+        "SLA de notification d'incidents de la chaîne d'approvisionnement",
+        "Exiger des fournisseurs et prestataires de services qu'ils notifient les clients des incidents de sécurité et des vulnérabilités dans des délais adaptés au risque, via des SLA et des contrats.",
+    ),
+    "RC.06": (
+        "Vérification de l'authenticité de la chaîne d'approvisionnement OT",
+        "Documenter et suivre les numéros de série, les sommes de contrôle, les certificats numériques et signatures des actifs OT pour vérifier l'authenticité du matériel, des logiciels et des micrologiciels.",
+    ),
+    "RC.07": (
+        "Gestion des risques liés aux prestataires de services managés",
+        "Développer la compréhension des services et produits de sécurité des MSP. Comprendre les accords contractuels et combler proactivement les lacunes de sécurité. S'assurer que les contrats précisent comment et quand les MSP notifient les clients des incidents.",
+    ),
+    "RC.08": (
+        "Gestion de l'inventaire des actifs",
+        "Maintenir un inventaire régulièrement mis à jour de tous les actifs organisationnels, incluant les données, le matériel, les logiciels, les systèmes, les installations et le personnel. Mettre à jour plus fréquemment les actifs IT/OT critiques.",
+    ),
+    "RC.09": (
+        "Programme de gestion des vulnérabilités",
+        "Mettre en œuvre un programme de gestion des vulnérabilités pour corriger et atténuer les logiciels mal configurés en temps voulu. Suivre l'avancement de la réponse aux risques via les POA&M, les registres de risques et les rapports détaillés. Attribuer les responsabilités pour le traitement des divulgations de menaces, vulnérabilités ou incidents.",
+    ),
+    "RC.10": (
+        "Contrôles compensatoires pour les systèmes existants",
+        "Incorporer des contrôles de sécurité compensatoires pour les systèmes existants lorsque la correction est impossible. Pour les actifs OT, appliquer des contrôles compensatoires tels que la segmentation et la surveillance, rendant les actifs inaccessibles depuis l'internet public.",
+    ),
+    "RC.11": (
+        "Validation indépendante de la sécurité",
+        "Engager régulièrement des experts tiers en cybersécurité pour des tests d'intrusion, des programmes de bug bounty, des simulations d'incidents et des exercices sur table. Évaluer la capacité des adversaires à infiltrer et se déplacer latéralement dans les réseaux. S'assurer que les conclusions sont traitées.",
+    ),
+    "RC.12": (
+        "Programme de divulgation des vulnérabilités",
+        "Maintenir une méthode publique et facilement accessible pour signaler aux équipes de sécurité les actifs vulnérables, mal configurés ou exploitables. Accuser réception des soumissions valides et y répondre dans des délais raisonnables. Protéger les personnes signalant les vulnérabilités de bonne foi. Appliquer les fichiers security.txt conformes à la RFC 9116 sur tous les domaines web publics.",
+    ),
+    "RC.13": (
+        "Documentation de la topologie réseau",
+        "Maintenir une documentation précise décrivant la topologie réseau actuelle pour tous les réseaux IT et OT. Effectuer des revues réseau et les suivre annuellement ; mettre à jour en cas de changement de topologie.",
+    ),
+    "RC.14": (
+        "Élimination des mots de passe par défaut",
+        "Exiger le changement des mots de passe par défaut du fabricant pour tout matériel, logiciel et micrologiciel avant la connexion au réseau. Si impossible (mots de passe codés en dur), documenter et mettre en œuvre des contrôles compensatoires ; surveiller les journaux de trafic réseau et de tentatives de connexion.",
+    ),
+    "RC.15": (
+        "Politique de robustesse des mots de passe",
+        "Appliquer une politique système établissant une robustesse minimale des mots de passe incluant une longueur de 16 caractères ou plus pour tous les actifs IT et OT protégés par mot de passe. Utiliser des phrases de passe et des gestionnaires de mots de passe. Prioriser la mise à niveau ou le remplacement des actifs ne pouvant pas supporter une robustesse suffisante.",
+    ),
+    "RC.16": (
+        "Gestion des identifiants uniques",
+        "Créer des identifiants distincts et séparés pour des services similaires et l'accès aux actifs entre les réseaux IT/OT. Garantir l'absence de réutilisation de mots de passe entre les comptes. Mots de passe uniques pour les comptes d'administration et de machines. Pas de mot de passe universel pour les comptes non personnels. Utiliser des comptes basés sur les rôles.",
+    ),
+    "RC.17": (
+        "Révocation des identifiants et départ du personnel",
+        "Établir un processus administratif défini et appliqué de départ pour le personnel, les prestataires et les fournisseurs, incluant la restitution des jetons physiques et badges, et la révocation de tous les accès aux systèmes et aux locaux. Désactiver les comptes inactifs après une période définie (par ex. 30 jours) via un processus automatisé.",
+    ),
+    "RC.18": (
+        "Surveillance et alerte des tentatives de connexion échouées",
+        "Capturer et journaliser toutes les tentatives de connexion infructueuses conformément à la politique de sécurité. Alerter le personnel de sécurité après des tentatives consécutives infructueuses et des écarts par rapport au comportement normal de l'utilisateur. Stocker les alertes dans un système de sécurité ou de tickets pour analyse rétrospective.",
+    ),
+    "RC.19": (
+        "Déploiement de l'authentification multifacteur",
+        "Exiger l'AMF en utilisant la méthode la plus forte disponible pour les actifs avec accès à distance. Prioriser l'AMF résistante à l'hameçonnage (FIDO/WebAuthn ou basée sur PKI), puis les jetons logiciels d'application mobile, puis SMS/voix en dernier recours. Activer l'AMF sur tous les comptes et systèmes OT accessibles à distance.",
+    ),
+    "RC.20": (
+        "Séparation des comptes à privilèges",
+        "S'assurer que les comptes utilisateurs ne disposent pas de privilèges d'administrateur. Les administrateurs maintiennent des comptes utilisateurs séparés pour les activités non administratives. Réévaluer les privilèges périodiquement. Maintenir la séparation des tâches entre plusieurs individus et rôles.",
+    ),
+    "RC.21": (
+        "Mise en œuvre du moindre privilège",
+        "Tous les comptes utilisateurs, rôles système et processus fonctionnent avec les privilèges minimaux nécessaires à leurs tâches. Effectuer des revues trimestrielles des permissions d'accès et des attributions de rôles pour valider la conformité à la politique.",
+    ),
+    "RC.22": (
+        "Segmentation réseau",
+        "Placer des routeurs entre les réseaux créant des limites, augmentant les domaines de diffusion et filtrant le trafic. Utiliser les limites pour contenir les violations de sécurité en restreignant le trafic à des segments séparés. Segmenter physiquement les enclaves OT (par ex. diodes de données) le cas échéant.",
+    ),
+    "RC.23": (
+        "Programme de sensibilisation et de formation à la cybersécurité",
+        "Fournir une formation initiale à la cybersécurité avant que les nouveaux employés n'accèdent aux systèmes. Fournir au moins une formation annuelle couvrant l'ingénierie sociale, le signalement des attaques, l'utilisation acceptable et l'hygiène cyber de base. Identifier les rôles spécialisés nécessitant une formation complémentaire. Former le personnel OT à la sensibilisation à la sécurité.",
+    ),
+    "RC.24": (
+        "Chiffrement et contrôles cryptographiques",
+        "Utiliser le chiffrement, les signatures numériques et les condensats cryptographiques pour protéger la confidentialité et l'intégrité des communications réseau. Identifier les données critiques à protéger en transit et au repos. Empêcher le stockage en clair des données sensibles et des mots de passe. Utiliser le chiffrement pour les connexions OT externes lorsque la latence le permet.",
+    ),
+    "RC.25": (
+        "Configuration de la sécurité des courriels",
+        "Activer STARTTLS, SPF, DKIM et DMARC (configuré sur « reject ») sur toute l'infrastructure de messagerie d'entreprise pour réduire les risques d'usurpation d'identité, d'hameçonnage et d'interception.",
+    ),
+    "RC.26": (
+        "Restriction des macros et de l'exécution automatique",
+        "Appliquer une politique système désactivant par défaut les macros ou le code embarqué similaire. Établir une politique pour l'activation autorisée des macros sur des actifs spécifiques. Désactiver l'exécution automatique (Autorun/AutoPlay) par défaut pour prévenir l'exécution involontaire de code.",
+    ),
+    "RC.27": (
+        "Processus de gestion sécurisée des changements",
+        "Mettre en œuvre des politiques et processus de gestion sécurisée des changements. Appliquer des restrictions de configuration empêchant les modifications non autorisées. Tester et documenter les changements proposés dans des environnements hors production. Mettre en œuvre une fonctionnalité limitée pour les OT ne permettant que les fonctions, protocoles et services nécessaires.",
+    ),
+    "RC.28": (
+        "Programme de sauvegarde et de récupération",
+        "Développer la liste de toutes les sauvegardes maintenues incluant les supports d'installation, les clés de licence, les informations de configuration et les durées de rétention. Sauvegarder les opérations critiques en quasi-temps réel. Stocker les sauvegardes hors site et hors ligne de manière sécurisée. Tester les sauvegardes et la récupération au minimum annuellement. Valider l'intégrité avant la restauration. Inclure les configurations des équipements OT et les schémas techniques.",
+    ),
+    "RC.29": (
+        "Processus d'approbation du matériel et des logiciels",
+        "Mettre en œuvre une politique administrative exigeant la revue, les tests et l'approbation avant l'installation de tout nouveau matériel, micrologiciel ou logiciel. Maintenir une liste approuvée incluant les versions. Prendre en compte les exigences supplémentaires de l'environnement OT pour les correctifs et mises à jour afin de ne pas impacter les opérations ou la sûreté.",
+    ),
+    "RC.30": (
+        "Collecte et gestion des journaux de sécurité",
+        "Collecter et stocker les journaux d'administration et de sécurité (systèmes d'exploitation, applications, IDS/IPS, pare-feux, DLP, VPN). Stocker les journaux de manière centralisée dans un SIEM ou une base de données avec accès restreint. Conserver les journaux selon des durées adaptées au risque ou aux exigences réglementaires. Pour les actifs OT avec des journaux non standards, collecter le trafic réseau.",
+    ),
+    "RC.31": (
+        "Contrôles des supports amovibles et des dispositifs non autorisés",
+        "Maintenir des politiques garantissant que les supports et matériels non autorisés ne se connectent pas aux actifs IT/OT. Établir des procédures pour retirer, désactiver ou sécuriser les ports physiques afin d'empêcher la connexion de dispositifs non autorisés.",
+    ),
+    "RC.32": (
+        "Durcissement des dispositifs exposés à Internet",
+        "Minimiser les actifs exposés à Internet. Prioriser les correctifs et mises à jour en temps voulu. Désactiver les applications et protocoles réseau inutiles du système d'exploitation. Ne jamais exposer les interfaces de gestion réseau sur l'Internet public. Segmenter logiquement les réseaux selon les périmètres de confiance et les types de plateformes.",
+    ),
+    "RC.33": (
+        "Détection et prévention du code malveillant",
+        "Mettre en œuvre des mécanismes basés sur les signatures et non basés sur les signatures (comportement, heuristique, anomalies) pour détecter et éradiquer le code malveillant sur les terminaux. S'assurer que l'antivirus est à jour, actif et configuré pour l'analyse automatique. Utiliser un antivirus compatible OT avec des pratiques spéciales de gestion des changements.",
+    ),
+    "RC.34": (
+        "Identification et analyse des événements indésirables",
+        "Définir des critères et des processus clairs pour les événements indésirables. Escalader les événements suspects selon le plan de réponse aux incidents. Automatiser l'analyse des informations sur les événements. Former les analystes aux protocoles spécifiques. Prendre en compte les événements et anomalies spécifiques aux OT.",
+    ),
+    "RC.35": (
+        "Procédures de communication en cas d'incident",
+        "Concevoir un plan de communication identifiant les parties prenantes et les mécanismes de coordination lors des incidents. Partager l'information de manière sécurisée selon les plans de réponse. Informer régulièrement la direction. Notifier les RH en cas de menace interne. Établir des procédures de communication médiatique.",
+    ),
+    "RC.36": (
+        "Procédures de signalement des incidents",
+        "Maintenir une politique et des procédures de signalement des incidents confirmés aux entités externes (régulateurs, autorités sectorielles, ISAC, ISAO, CISA). Signaler dans les délais réglementaires ou dès que possible en toute sécurité.",
+    ),
+    "RC.37": (
+        "Récupération après incident et retour d'expérience",
+        "Exécuter les plans de récupération et de restauration des services pour les actifs critiques impactés par les incidents. Permettre les opérations en mode dégradé (papier, radio). Réaliser une analyse post-incident identifiant les axes d'amélioration. Intégrer les retours d'expérience. Mettre à jour les politiques, procédures et formations.",
+    ),
+}
 
 # Goals: (ref_id, name, function_ref, outcome, risk, recommended_actions_text, cost, impact, ease, control_refs)
 GOALS = [
@@ -716,6 +1104,180 @@ GOALS = [
     ),
 ]
 
+# French translations for goals: ref_id -> (name_fr, description_fr, actions_fr)
+GOALS_FR = {
+    "1.A": (
+        "Établir les responsabilités en cybersécurité",
+        "Les rôles, responsabilités et autorités liés au programme de cybersécurité de l'organisation sont établis, communiqués, appliqués et alignés au sein de l'organisation et avec les partenaires externes.",
+        "- Documenter tous les rôles et responsabilités en cybersécurité dans la politique organisationnelle\n- Répartir les responsabilités en cybersécurité au sein de l'organisation ; des tiers peuvent y contribuer\n- Mettre en œuvre les exigences légales et réglementaires en cybersécurité, y compris la protection de la vie privée\n- Établir une collaboration continue entre les équipes IT et OT pour l'efficacité de la sécurité et des opérations",
+    ),
+    "1.B": (
+        "Gérer la gouvernance de la cybersécurité",
+        "La stratégie, les attentes et les politiques de gestion des risques de cybersécurité de l'organisation sont établies.",
+        "- Réviser les politiques de cybersécurité annuellement ; les mettre à jour en cas de changement des exigences, risques, menaces ou technologies\n- Communiquer et appliquer les politiques reflétant la stratégie et les priorités organisationnelles\n- Établir une gouvernance englobant les obligations réglementaires, juridiques, environnementales et opérationnelles\n- Développer des politiques spécifiques aux OT tenant compte des limitations des programmes IT et des priorités des fonctions critiques",
+    ),
+    "1.C": (
+        "Gérer les plans de réponse aux incidents",
+        "Identifier les améliorations en pratiquant les plans de cybersécurité et de réponse aux incidents pour maintenir et mettre à jour le programme de cybersécurité de l'organisation.",
+        "- Développer, maintenir, mettre à jour et exercer régulièrement les plans de RI pour des scénarios courants et spécifiques à l'organisation\n- Garantir des exercices réalistes incluant toutes les parties prenantes\n- Réviser et tester les plans de RI au minimum annuellement\n- Prendre en compte les considérations de sûreté et de confinement spécifiques aux OT",
+    ),
+    "1.D": (
+        "Signalement des incidents et divulgation des vulnérabilités de la chaîne d'approvisionnement",
+        "Les organisations apprennent et répondent plus rapidement aux incidents ou violations connus chez les fournisseurs et prestataires de services.",
+        "- Exiger des fournisseurs et prestataires qu'ils notifient les clients des incidents de sécurité et des vulnérabilités dans des délais adaptés au risque via des SLA et des contrats\n- Documenter et suivre les numéros de série, sommes de contrôle, certificats numériques et signatures des actifs OT pour vérifier l'authenticité du matériel, des logiciels et des micrologiciels",
+    ),
+    "1.E": (
+        "Gérer les risques liés aux prestataires de services managés",
+        "Les risques posés par un prestataire de services managés (MSP) sont identifiés, enregistrés, évalués, priorisés, surveillés et mis à jour tout au long de la relation.",
+        "- Développer la compréhension des services et produits de sécurité du MSP\n- Comprendre les accords contractuels et combler proactivement les lacunes de sécurité hors du périmètre contractuel\n- S'assurer que les contrats précisent comment et quand les MSP notifient les clients des incidents affectant leur environnement",
+    ),
+    "2.A": (
+        "Gérer les actifs organisationnels",
+        "Un inventaire maintenu des actifs pour améliorer la résilience en cybersécurité en réduisant les temps d'arrêt, en facilitant la reprise, en renforçant les défenses et en améliorant la préparation.",
+        "- Maintenir un inventaire régulièrement mis à jour de tous les actifs organisationnels incluant les données, le matériel, les logiciels, les systèmes, les installations et le personnel\n- Mettre à jour plus fréquemment les actifs IT/OT critiques",
+    ),
+    "2.B": (
+        "Atténuer les vulnérabilités connues",
+        "Réduction de la probabilité que des acteurs malveillants exploitent des vulnérabilités connues pour compromettre les réseaux de l'organisation.",
+        "- Mettre en œuvre un programme de gestion des vulnérabilités pour corriger et atténuer les logiciels mal configurés en temps voulu\n- Suivre l'avancement de la réponse aux risques via les POA&M, les registres de risques et les rapports détaillés\n- Documenter les risques potentiels des changements proposés ; fournir des instructions de retour en arrière\n- Attribuer les responsabilités pour le traitement des divulgations de menaces, vulnérabilités ou incidents\n- Incorporer des contrôles de sécurité compensatoires pour les systèmes existants lorsque possible\n- Pour les actifs OT où la correction est impossible, appliquer des contrôles compensatoires (segmentation, surveillance)",
+    ),
+    "2.C": (
+        "Obtenir une validation indépendante des contrôles de cybersécurité",
+        "Valider que les contrôles de sécurité mis en œuvre sont correctement configurés et fonctionnent comme prévu.",
+        "- Engager régulièrement des experts tiers en cybersécurité pour des tests d'intrusion, des bug bounties, des simulations d'incidents et des exercices sur table\n- Évaluer la capacité des adversaires à infiltrer et se déplacer latéralement dans les réseaux ciblant les systèmes critiques\n- S'assurer que les conclusions des tests sont traitées",
+    ),
+    "2.D": (
+        "Maintenir un processus de divulgation et de signalement des vulnérabilités",
+        "Les organisations apprennent plus rapidement les vulnérabilités ou faiblesses.",
+        "- Maintenir une méthode publique et facilement accessible pour signaler aux équipes de sécurité les actifs vulnérables, mal configurés ou exploitables par courriel ou formulaire web\n- Accuser réception des soumissions valides et répondre dans des délais raisonnables\n- Atténuer les faiblesses validées et exploitables proportionnellement à leur sévérité\n- Protéger les personnes identifiant ou signalant les vulnérabilités de bonne foi\n- Appliquer les fichiers security.txt conformes à la RFC 9116 sur tous les domaines web publics",
+    ),
+    "2.E": (
+        "Documenter la topologie réseau",
+        "Répondre plus efficacement aux incidents et maintenir la continuité de service.",
+        "- Maintenir une documentation précise décrivant la topologie réseau actuelle et les informations pertinentes pour tous les réseaux IT et OT\n- Effectuer des revues réseau et les suivre annuellement ; mettre à jour en cas de changement de topologie",
+    ),
+    "3.A": (
+        "Changer les mots de passe par défaut",
+        "Empêcher les acteurs malveillants d'utiliser les mots de passe par défaut pour obtenir un accès initial et se déplacer latéralement dans un réseau.",
+        "- Exiger le changement des mots de passe par défaut du fabricant pour tout matériel, logiciel et micrologiciel avant la connexion au réseau\n- Si impossible (mots de passe codés en dur), documenter et mettre en œuvre des contrôles compensatoires ; surveiller les journaux de trafic réseau et de tentatives de connexion\n- Changer les mots de passe par défaut sur les systèmes OT existants ; établir une politique pour tous les nouveaux dispositifs",
+    ),
+    "3.B": (
+        "Établir une robustesse minimale des mots de passe",
+        "Les mots de passe de l'organisation sont plus difficiles à deviner ou craquer pour les acteurs malveillants.",
+        "- Appliquer une politique système établissant une robustesse minimale des mots de passe incluant une longueur de 16 caractères ou plus pour tous les actifs IT et OT protégés par mot de passe\n- Utiliser des phrases de passe et des gestionnaires de mots de passe\n- Lorsque les longueurs minimales sont impossibles, appliquer des contrôles compensatoires et les enregistrer ; journaliser toutes les tentatives de connexion\n- Prioriser la mise à niveau ou le remplacement des actifs ne supportant pas une robustesse suffisante",
+    ),
+    "3.C": (
+        "Créer des identifiants uniques",
+        "Les adversaires ne peuvent pas réutiliser des identifiants compromis pour se déplacer latéralement dans l'organisation, en particulier entre les réseaux IT et OT.",
+        "- Créer des identifiants distincts et séparés pour des services similaires et l'accès aux actifs entre les réseaux IT/OT\n- Les utilisateurs s'abstiennent de réutiliser les mots de passe entre les comptes, applications et services\n- Les administrateurs système et les comptes de service/machine ont des mots de passe uniques\n- Pas de mot de passe universel pour les comptes non personnels (NPE)\n- Utiliser des comptes basés sur les rôles pour les systèmes IT/OT lorsque possible",
+    ),
+    "3.D": (
+        "Révoquer les identifiants du personnel sortant",
+        "Empêcher l'accès non autorisé aux comptes ou ressources de l'organisation par d'anciens employés.",
+        "- Établir un processus administratif défini et appliqué de départ pour le personnel, les prestataires et les fournisseurs, incluant la restitution des jetons physiques et badges et la révocation de tous les accès\n- Réviser les accès utilisateurs et désactiver les comptes inactifs après une période définie (par ex. 30 jours), idéalement via un processus automatisé",
+    ),
+    "3.E": (
+        "Surveiller les tentatives de connexion infructueuses (automatisées)",
+        "Protéger les organisations contre les attaques automatisées basées sur les identifiants.",
+        "- Capturer et journaliser toutes les tentatives de connexion infructueuses conformément à la politique de sécurité de l'organisation\n- Notifier le personnel de sécurité après des tentatives consécutives infructueuses et des écarts par rapport au comportement normal\n- Journaliser et stocker les alertes dans le système de sécurité ou de tickets pertinent pour analyse rétrospective",
+    ),
+    "3.F": (
+        "Mettre en œuvre l'authentification multifacteur",
+        "Ajouter une couche de sécurité critique et supplémentaire pour protéger les comptes des actifs.",
+        "- Exiger l'AMF en utilisant la méthode la plus forte disponible pour les actifs avec accès à distance\n- Options d'AMF classées par robustesse : (1) AMF résistante à l'hameçonnage (FIDO/WebAuthn ou basée sur PKI), (2) Jetons logiciels d'application mobile, (3) SMS/voix uniquement en l'absence d'autre option\n- Tous les comptes IT utilisent l'AMF ; prioriser les comptes à plus haut risque\n- OT : Activer l'AMF sur tous les comptes et systèmes accessibles à distance ; si indisponible, supprimer l'accès distant, ajouter la segmentation",
+    ),
+    "3.G": (
+        "Les administrateurs maintiennent des comptes utilisateurs et privilégiés séparés",
+        "Rendre plus difficile l'accès des acteurs malveillants aux comptes d'administrateur ou privilégiés, même si les comptes utilisateurs courants sont compromis.",
+        "- Les comptes utilisateurs ne disposent pas de privilèges d'administrateur\n- Les administrateurs maintiennent des comptes utilisateurs séparés pour les activités non administratives\n- Réévaluer les privilèges périodiquement pour valider le besoin continu\n- Maintenir la séparation des tâches en répartissant les responsabilités entre plusieurs individus et rôles",
+    ),
+    "3.H": (
+        "Mettre en œuvre les principes du moindre privilège",
+        "Minimise l'accès non autorisé aux systèmes, données et processus, réduit les erreurs humaines et prévient les actions malveillantes.",
+        "- Tous les comptes utilisateurs, rôles système et processus fonctionnent avec les privilèges minimaux nécessaires\n- Effectuer des revues trimestrielles des permissions d'accès et des attributions de rôles pour valider la conformité à la politique",
+    ),
+    "3.I": (
+        "Mettre en œuvre la segmentation réseau logique et physique",
+        "Limiter l'impact d'une compromission potentielle et empêcher les adversaires d'accéder aux données sensibles, aux espaces et/ou aux infrastructures critiques.",
+        "- Placer des routeurs entre les réseaux créant des limites, augmentant les domaines de diffusion et filtrant le trafic\n- Utiliser les limites pour contenir les violations de sécurité en restreignant le trafic à des segments séparés et en isolant les segments lors d'une intrusion\n- Segmenter physiquement les enclaves OT (par ex. diodes de données) le cas échéant",
+    ),
+    "3.J": (
+        "Mettre en œuvre la formation à la cybersécurité",
+        "Les utilisateurs de l'organisation apprennent et adoptent des comportements plus sûrs.",
+        "- Fournir une formation initiale à la cybersécurité avant que les nouveaux employés n'accèdent aux systèmes informatiques\n- Fournir au moins une formation annuelle couvrant la reconnaissance de l'ingénierie sociale, le signalement des attaques, l'utilisation acceptable et l'hygiène cyber de base\n- Identifier les rôles spécialisés nécessitant une formation complémentaire\n- Fournir une formation basée sur les rôles aux rôles spécialisés incluant les prestataires, partenaires et fournisseurs\n- Fournir au personnel OT une formation de sensibilisation à la sécurité",
+    ),
+    "3.K": (
+        "Utiliser un chiffrement robuste",
+        "Le chiffrement est déployé pour maintenir la confidentialité et l'intégrité des données sensibles sur le réseau de l'organisation.",
+        "- Utiliser le chiffrement, les signatures numériques et les condensats cryptographiques pour protéger la confidentialité et l'intégrité des communications réseau\n- Identifier les données critiques à protéger en transit et au repos (données personnelles, informations propriétaires, programmes PLC, fichiers CAO/FAO)\n- Empêcher le stockage électronique en clair des données sensibles et des mots de passe\n- Stocker les identifiants de manière sécurisée via des gestionnaires de mots de passe\n- Utiliser le chiffrement pour les connexions OT externes lorsque la latence le permet",
+    ),
+    "3.L": (
+        "Activer la sécurité des courriels",
+        "Réduire les risques liés aux menaces courantes par courriel, telles que l'usurpation d'identité, l'hameçonnage et l'interception.",
+        "- Activer STARTTLS sur toute l'infrastructure de messagerie d'entreprise\n- Activer le Sender Policy Framework (SPF)\n- Activer DomainKeys Identified Mail (DKIM)\n- Activer DMARC et le configurer sur « reject »",
+    ),
+    "3.M": (
+        "Désactiver l'exécution automatique et les macros par défaut",
+        "Réduire le risque lié aux macros intégrées et au code exécutable similaire.",
+        "- Appliquer une politique système désactivant par défaut les macros ou le code embarqué similaire\n- Établir une politique pour les utilisateurs autorisés demandant l'activation des macros sur des actifs spécifiques\n- Désactiver l'exécution automatique (Autorun/AutoPlay) par défaut",
+    ),
+    "3.N": (
+        "Établir des processus de gestion des changements",
+        "Des politiques et procédures existent pour gérer les changements et configurations des systèmes.",
+        "- Mettre en œuvre des politiques et processus de gestion sécurisée des changements\n- Appliquer des restrictions de configuration empêchant les modifications non autorisées\n- Tester et documenter les changements proposés dans des environnements hors production ; analyser les impacts sur la sécurité\n- Mettre en œuvre une fonctionnalité OT limitée ne permettant que les fonctions, protocoles et services nécessaires",
+    ),
+    "3.O": (
+        "Maintenir les sauvegardes et la capacité de restauration des systèmes",
+        "Les organisations réduisent les risques de perte de données et d'interruption de service tout en gérant, répondant et se remettant efficacement des incidents.",
+        "- Développer la liste de toutes les sauvegardes maintenues incluant les supports d'installation, les clés de licence, les informations de configuration et les durées de rétention\n- Sauvegarder les systèmes d'opérations critiques en quasi-temps réel ; sauvegarder fréquemment tous les systèmes opérationnels\n- Stocker les sauvegardes hors site et hors ligne de manière sécurisée\n- Tester les sauvegardes et la récupération au minimum annuellement\n- Valider l'intégrité des sauvegardes avant d'initier la restauration\n- Vérifier l'absence d'indicateurs de compromission dans les supports de restauration\n- OT : Inclure les configurations des dispositifs, les rôles, les schémas techniques et les outils",
+    ),
+    "3.P": (
+        "Maintenir un processus d'approbation du matériel et des logiciels",
+        "Augmenter la visibilité sur les actifs technologiques déployés et réduire la probabilité de compromission par l'installation de matériel, micrologiciel ou logiciel non approuvé.",
+        "- Mettre en œuvre une politique administrative exigeant la revue, les tests et l'approbation avant l'installation de tout nouveau matériel, micrologiciel ou logiciel\n- Maintenir une liste approuvée du matériel, des micrologiciels et des logiciels incluant les versions approuvées\n- Prendre en compte les exigences supplémentaires de l'environnement OT pour les correctifs et mises à jour afin de ne pas impacter les opérations ou la sûreté",
+    ),
+    "3.Q": (
+        "Maintenir la collecte et le stockage des journaux",
+        "Améliorer la visibilité pour détecter et répondre aux incidents cyber tout en protégeant les journaux de sécurité contre l'accès non autorisé et la falsification.",
+        "- Collecter et stocker les journaux d'administration et de sécurité (systèmes d'exploitation, applications, IDS/IPS, pare-feux, DLP, VPN)\n- Stocker les journaux de manière centralisée (outil SIEM ou base de données) ; seuls les utilisateurs autorisés et authentifiés y accèdent\n- Conserver les journaux selon des durées adaptées au risque ou aux exigences réglementaires\n- Notifier les équipes de sécurité lorsque des fonctions critiques de journalisation sont désactivées\n- Pour les actifs OT avec des journaux non standards, collecter le trafic réseau entre ces actifs",
+    ),
+    "3.R": (
+        "Interdire la connexion de dispositifs non autorisés",
+        "Empêcher les acteurs malveillants d'obtenir un accès initial ou d'exfiltrer des données via des supports amovibles non autorisés.",
+        "- Maintenir des politiques garantissant que les supports et matériels non autorisés ne se connectent pas aux actifs IT/OT\n- Établir des procédures pour retirer, désactiver ou sécuriser les ports physiques afin d'empêcher la connexion de dispositifs non autorisés",
+    ),
+    "3.S": (
+        "Sécuriser les dispositifs exposés à Internet",
+        "Les utilisateurs non autorisés ne peuvent pas obtenir un point d'ancrage initial dans le système en exploitant des faiblesses connues des actifs exposés à Internet.",
+        "- Minimiser les actifs exposés à Internet autant que possible\n- Prioriser la mise à jour des logiciels via des correctifs en temps voulu\n- Désactiver toutes les applications, logiciels et protocoles réseau inutiles du système d'exploitation sur les actifs exposés à Internet\n- Ne jamais exposer les interfaces de gestion réseau sur l'Internet public\n- Segmenter logiquement les réseaux d'entreprise et de production selon les périmètres de confiance et les types de plateformes",
+    ),
+    "4.A": (
+        "Établir la détection du code malveillant",
+        "Permet l'identification précoce des menaces, renforce l'intégrité des systèmes, fournit des informations pour une remédiation plus rapide et minimise les temps d'arrêt.",
+        "- Mettre en œuvre des mécanismes basés sur les signatures et non basés sur les signatures pour détecter et éradiquer le code malveillant sur les terminaux\n- S'assurer que l'antivirus est à jour, actif et configuré pour l'analyse automatique des courriels et supports amovibles\n- Utiliser un antivirus compatible OT avec des pratiques spéciales incluant les vérifications de compatibilité et les tests de performance",
+    ),
+    "4.B": (
+        "Identifier les événements indésirables",
+        "Les organisations peuvent identifier les événements de sécurité indésirables.",
+        "- Définir des critères et processus clairs pour les événements indésirables ; escalader les événements suspects selon le plan de réponse aux incidents\n- Automatiser l'analyse des informations sur les événements pour accélérer les délais d'investigation\n- Former les analystes aux protocoles appropriés pour les incidents cyber suspectés\n- Prendre en compte les événements et anomalies spécifiques aux OT",
+    ),
+    "5.A": (
+        "Établir des procédures de communication en cas d'incident",
+        "Coordonner les méthodes de communication de crise entre les partenaires internes et externes de l'organisation et les fournisseurs critiques.",
+        "- Concevoir un plan de communication identifiant les parties prenantes et les mécanismes de coordination lors des incidents\n- Collaborer avec les parties prenantes ; partager l'information de manière sécurisée selon les plans de réponse\n- Informer régulièrement la direction des incidents majeurs\n- Notifier les ressources humaines en cas d'activité malveillante interne\n- Établir et suivre les procédures de communication médiatique",
+    ),
+    "5.B": (
+        "Établir des procédures de signalement des incidents",
+        "La CISA et d'autres organisations sont mieux en mesure de fournir une assistance ou de comprendre la portée plus large d'un incident cyber.",
+        "- Maintenir une politique et des procédures de signalement de tous les incidents confirmés aux entités externes (régulateurs, autorités sectorielles, ISAC, ISAO, CISA)\n- Signaler les incidents connus dans les délais réglementaires applicables ou dès que possible en toute sécurité",
+    ),
+    "6.A": (
+        "Planification et préparation à la reprise après incident",
+        "Les organisations sont capables de se remettre de manière sûre et efficace d'un incident de cybersécurité.",
+        "- Exécuter les plans de récupération et de restauration des services pour les actifs critiques impactés par les incidents, incluant la capacité d'exécuter les fonctions essentielles en mode dégradé (opérations papier, communications radio)\n- Réaliser une analyse post-incident identifiant les axes d'amélioration\n- Intégrer les retours d'expérience, améliorer les capacités de détection et de réponse\n- Mettre à jour les politiques, procédures et formations ; s'assurer que les parties prenantes sont informées des changements",
+    ),
+}
+
 
 def build_library():
     lib = {
@@ -726,29 +1288,74 @@ def build_library():
         "name": "CISA Cybersecurity Performance Goals v2.0",
         "description": "CISA Cross-Sector Cybersecurity Performance Goals (CPG) 2.0 - Voluntary practices with high-impact security actions aligned to the NIST Cybersecurity Framework.",
         "copyright": "This document is provided by CISA (Cybersecurity and Infrastructure Security Agency) and is public domain.",
-        "version": 2,
+        "version": 4,
         "publication_date": "2025-03-04",
         "provider": "CISA",
         "packager": "intuitem",
+        "translations": {
+            "fr": {
+                "name": "Objectifs de performance en cybersécurité CISA v2.0",
+                "description": "Objectifs de performance en cybersécurité (CPG) 2.0 de la CISA - Pratiques volontaires avec des actions de sécurité à fort impact alignées sur le cadre de cybersécurité du NIST. Cette traduction française n'est pas une traduction officielle de la CISA.",
+                "copyright": "Ce document est fourni par la CISA (Cybersecurity and Infrastructure Security Agency) et est du domaine public. La traduction française est une traduction non officielle fournie à titre indicatif.",
+            },
+        },
         "objects": {},
     }
 
     # --- Reference Controls ---
     rc_list = []
     for ref_id, name, category, csf_function, description in REFERENCE_CONTROLS:
-        rc_list.append(
-            {
-                "urn": f"{RC_URN_PREFIX}:{ref_id.lower().replace('.', '-')}",
-                "ref_id": ref_id,
-                "name": name,
-                "category": category,
-                "csf_function": csf_function,
-                "description": description,
-            }
-        )
+        rc = {
+            "urn": f"{RC_URN_PREFIX}:{ref_id.lower().replace('.', '-')}",
+            "ref_id": ref_id,
+            "name": name,
+            "category": category,
+            "csf_function": csf_function,
+            "description": description,
+        }
+        if ref_id in RC_FR:
+            name_fr, desc_fr = RC_FR[ref_id]
+            rc["translations"] = {"fr": {"name": name_fr, "description": desc_fr}}
+        rc_list.append(rc)
     lib["objects"]["reference_controls"] = rc_list
 
+    # --- Threats ---
+    threat_list = []
+    for ref_id, name, description in THREATS:
+        threat = {
+            "urn": f"{THREAT_URN_PREFIX}:{ref_id.lower().replace('.', '-')}",
+            "ref_id": ref_id,
+            "name": name,
+            "description": description,
+        }
+        if ref_id in THREATS_FR:
+            name_fr, desc_fr = THREATS_FR[ref_id]
+            threat["translations"] = {"fr": {"name": name_fr, "description": desc_fr}}
+        threat_list.append(threat)
+    lib["objects"]["threats"] = threat_list
+
     # --- Framework ---
+    scores_def = []
+    for score_val in (1, 2, 3, 4):
+        sd = {
+            "score": score_val,
+            "name": {
+                1: "Not Implemented",
+                2: "Partially Implemented",
+                3: "Largely Implemented",
+                4: "Fully Implemented",
+            }[score_val],
+            "description": {
+                1: "The goal is not addressed. The organization has not taken action on the recommended practices, or actions are entirely ad hoc with no documented approach.",
+                2: "Some recommended actions are in place but implementation is incomplete or inconsistent. Practices may be ad hoc or limited to specific areas of the organization.",
+                3: "Most recommended actions are systematically applied across the organization. Practices are documented, repeatable, and cover the majority of relevant assets and processes.",
+                4: "All recommended actions are in place, tested, and continuously improved. Practices are organization-wide, regularly reviewed, and adapted based on lessons learned and evolving threats.",
+            }[score_val],
+        }
+        name_fr, desc_fr = SCORES_FR[score_val]
+        sd["translations"] = {"fr": {"name": name_fr, "description": desc_fr}}
+        scores_def.append(sd)
+
     framework = {
         "urn": FRAMEWORK_URN,
         "ref_id": "CISA-CPG-2.0",
@@ -756,46 +1363,26 @@ def build_library():
         "description": "CISA Cross-Sector Cybersecurity Performance Goals 2.0",
         "min_score": 1,
         "max_score": 4,
-        "scores_definition": [
-            {
-                "score": 1,
-                "name": "Not Implemented",
-                "description": "The goal is not addressed. The organization has not taken action on the recommended practices, or actions are entirely ad hoc with no documented approach.",
-            },
-            {
-                "score": 2,
-                "name": "Partially Implemented",
-                "description": "Some recommended actions are in place but implementation is incomplete or inconsistent. Practices may be ad hoc or limited to specific areas of the organization.",
-            },
-            {
-                "score": 3,
-                "name": "Largely Implemented",
-                "description": "Most recommended actions are systematically applied across the organization. Practices are documented, repeatable, and cover the majority of relevant assets and processes.",
-            },
-            {
-                "score": 4,
-                "name": "Fully Implemented",
-                "description": "All recommended actions are in place, tested, and continuously improved. Practices are organization-wide, regularly reviewed, and adapted based on lessons learned and evolving threats.",
-            },
-        ],
+        "scores_definition": scores_def,
         "requirement_nodes": [],
     }
 
-    func_map = {f[0]: f for f in FUNCTIONS}
     nodes = framework["requirement_nodes"]
 
     # Depth 1: Functions
     for func_ref, func_name, func_desc in FUNCTIONS:
-        nodes.append(
-            {
-                "urn": f"{REQ_URN_PREFIX}:{func_ref.lower()}",
-                "assessable": False,
-                "depth": 1,
-                "ref_id": func_ref,
-                "name": func_name,
-                "description": func_desc,
-            }
-        )
+        node = {
+            "urn": f"{REQ_URN_PREFIX}:{func_ref.lower()}",
+            "assessable": False,
+            "depth": 1,
+            "ref_id": func_ref,
+            "name": func_name,
+            "description": func_desc,
+        }
+        if func_ref in FUNCTIONS_FR:
+            name_fr, desc_fr = FUNCTIONS_FR[func_ref]
+            node["translations"] = {"fr": {"name": name_fr, "description": desc_fr}}
+        nodes.append(node)
 
     # Depth 2: Goals
     func_ref_map = {
@@ -828,20 +1415,55 @@ def build_library():
         rc_urns = [
             f"{RC_URN_PREFIX}:{cr.lower().replace('.', '-')}" for cr in ctrl_refs
         ]
+        threat_urns = [
+            f"{THREAT_URN_PREFIX}:{tr.lower().replace('.', '-')}"
+            for tr in GOAL_THREATS.get(ref_id, [])
+        ]
 
-        nodes.append(
-            {
-                "urn": f"{REQ_URN_PREFIX}:{goal_urn_id}",
-                "assessable": True,
-                "depth": 2,
-                "parent_urn": f"{REQ_URN_PREFIX}:{func_ref_map[func_ref]}",
-                "ref_id": ref_id,
-                "name": name,
-                "description": outcome,
-                "annotation": annotation,
-                "reference_controls": rc_urns,
+        node = {
+            "urn": f"{REQ_URN_PREFIX}:{goal_urn_id}",
+            "assessable": True,
+            "depth": 2,
+            "parent_urn": f"{REQ_URN_PREFIX}:{func_ref_map[func_ref]}",
+            "ref_id": ref_id,
+            "name": name,
+            "description": outcome,
+            "annotation": annotation,
+            "threats": threat_urns,
+            "reference_controls": rc_urns,
+        }
+        if ref_id in GOALS_FR:
+            name_fr, desc_fr, actions_fr = GOALS_FR[ref_id]
+            # Find the French risk text from the mapped threats
+            risk_fr = risk  # fallback to English
+            goal_threat_ids = GOAL_THREATS.get(ref_id, [])
+            if goal_threat_ids and goal_threat_ids[0] in THREATS_FR:
+                _, risk_fr = THREATS_FR[goal_threat_ids[0]]
+            cost_fr = {"Low": "Faible", "Moderate": "Modéré", "High": "Élevé"}.get(
+                cost, cost
+            )
+            impact_fr = {"Low": "Faible", "Moderate": "Modéré", "High": "Élevé"}.get(
+                impact, impact
+            )
+            ease_fr = {
+                "Simple": "Simple",
+                "Moderate": "Modéré",
+                "Complex": "Complexe",
+            }.get(ease, ease)
+            annotation_fr = (
+                f"Résultat attendu : {desc_fr}\n\n"
+                f"TTP/Risque traité : {risk_fr}\n\n"
+                f"Actions recommandées :\n{actions_fr}\n\n"
+                f"Coût : {cost_fr} | Impact : {impact_fr} | Complexité : {ease_fr}"
+            )
+            node["translations"] = {
+                "fr": {
+                    "name": name_fr,
+                    "description": desc_fr,
+                    "annotation": annotation_fr,
+                }
             }
-        )
+        nodes.append(node)
 
     lib["objects"]["framework"] = framework
     return lib
