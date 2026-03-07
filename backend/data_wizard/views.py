@@ -362,6 +362,10 @@ class RecordConsumer[Context](ABC):
                 update_data[key] = value
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            if key == "owner" and any(sk in record for sk in source_keys):
+                update_data[key] = value
+                continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
 
@@ -676,10 +680,11 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        # Resolve owner field (semicolon-separated user emails or team names)
-        owner_value = record.get("owner")
-        if owner_value is not None and str(owner_value).strip():
-            data["owner"] = self._resolve_owners(owner_value)
+        # Resolve owner field (semicolon-separated user emails or team names).
+        # Always set data["owner"] when the column is present, even if blank,
+        # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        if "owner" in record:
+            data["owner"] = self._resolve_owners(record.get("owner"))
 
         return data, None
 
@@ -708,8 +713,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
                 actor_ids.append(actor.id)
             else:
                 logger.warning(
-                    "Could not resolve owner '%s' to a user email or team name — skipping.",
-                    entry,
+                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
                 )
 
         return actor_ids
