@@ -1373,6 +1373,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     evidences = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
     objectives = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
+    owner = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
 
     class Meta:
         model = AppliedControl
@@ -1397,6 +1398,7 @@ class AppliedControlImportExportSerializer(BaseModelSerializer):
             "cost",
             "evidences",
             "objectives",
+            "owner",
         ]
 
 
