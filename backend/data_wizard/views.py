@@ -677,9 +677,9 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
             data["filtering_labels"] = filtering_labels
 
         # Resolve owner field (semicolon-separated user emails or team names)
-        owner_ids = self._resolve_owners(record.get("owner"))
-        if owner_ids:
-            data["owner"] = owner_ids
+        owner_value = record.get("owner")
+        if owner_value is not None and str(owner_value).strip():
+            data["owner"] = self._resolve_owners(owner_value)
 
         return data, None
 
