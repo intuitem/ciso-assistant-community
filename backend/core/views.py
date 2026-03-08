@@ -1672,6 +1672,7 @@ class AssetFilter(GenericFilterSet):
             "dora_licenced_activity",
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
+            "organisation_objectives",
         ]
 
 
@@ -8446,7 +8447,14 @@ class PresetJourneyStepViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "health",
+        "issues",
+        "assigned_to",
+        "is_active",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -8458,6 +8466,56 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
     @action(detail=False, name="Get health choices")
     def health(self, request):
         return Response(dict(OrganisationObjective.Health.choices))
+
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
+
+    @action(
+        detail=True,
+        name="Duplicate organisation objective",
+        methods=["post"],
+        serializer_class=OrganisationObjectiveDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, OrganisationObjective
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"results": "organisation objective not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        new_folder = data["folder"]
+        objective = self.get_object()
+        duplicate_objective = OrganisationObjective.objects.create(
+            name=data["name"],
+            description=data["description"],
+            folder=new_folder,
+            ref_id=objective.ref_id,
+            observation=objective.observation,
+            status=objective.status,
+            health=objective.health,
+            is_active=objective.is_active,
+            start_date=objective.start_date,
+            eta=objective.eta,
+            due_date=objective.due_date,
+            closing_date=objective.closing_date,
+        )
+        duplicate_objective.issues.set(objective.issues.all())
+        duplicate_objective.assets.set(objective.assets.all())
+        duplicate_objective.tasks.set(objective.tasks.all())
+        duplicate_objective.assigned_to.set(objective.assigned_to.all())
+        duplicate_objective.metrics.set(objective.metrics.all())
+
+        return Response(
+            {"results": OrganisationObjectiveReadSerializer(duplicate_objective).data}
+        )
 
 
 class OrganisationIssueViewSet(BaseModelViewSet):
@@ -12798,6 +12856,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "last_occurrence_status",
             "next_occurrence_status",
             "evidences",
+            "objectives",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):

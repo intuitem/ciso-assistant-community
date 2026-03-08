@@ -530,6 +530,11 @@ class AssetWriteSerializer(BaseModelSerializer):
         queryset=Incident.objects.all(),
         required=False,
     )
+    organisation_objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
+        required=False,
+    )
 
     class Meta:
         model = Asset
@@ -2034,6 +2039,12 @@ class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
         return instance
 
 
+class OrganisationObjectiveDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = OrganisationObjective
+        fields = ["name", "description", "folder"]
+
+
 class OrganisationIssueReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)
@@ -3280,6 +3291,11 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
+    )
+    objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
+        required=False,
     )
 
     class Meta:
