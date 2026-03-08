@@ -13163,10 +13163,21 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     end=end_date,
                 )
 
-                # garbage-collect
+                # garbage-collect — only delete untouched nodes
+                TaskNode.objects.filter(
+                    to_delete=True,
+                    task_template=task_template,
+                    status="pending",
+                    observation__in=[None, ""],
+                ).exclude(
+                    evidences__isnull=False,
+                ).exclude(
+                    evidence_revisions__isnull=False,
+                ).delete()
+                # Clear to_delete on surviving nodes
                 TaskNode.objects.filter(
                     to_delete=True, task_template=task_template
-                ).delete()
+                ).update(to_delete=False)
 
     @action(
         detail=False,
