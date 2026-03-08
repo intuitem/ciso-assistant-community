@@ -13066,6 +13066,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_to_process_ids.add((template_id, task_date))
 
         processed_tasks_identifiers = set()
+        materialized_node_ids = set()
 
         for i in range(len(tasks_list)):
             task = tasks_list[i]
@@ -13104,12 +13105,14 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                         task_template=task_template,
                         due_date=task_date,
                     ).first()
-                    if not existing_node:
+                    if not existing_node or existing_node.id in materialized_node_ids:
                         continue
                     existing_node.to_delete = False
                     existing_node.save(update_fields=["to_delete"])
+                    materialized_node_ids.add(existing_node.id)
                     tasks_list[i] = TaskNodeReadSerializer(existing_node).data
                     continue
+                materialized_node_ids.add(task_node.id)
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data

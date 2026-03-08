@@ -1,5 +1,5 @@
 from django.db import migrations, models
-from django.db.models import Count, Min
+from django.db.models import Count
 
 
 STATUS_PRIORITY = {"pending": 0, "in_progress": 1, "completed": 2, "cancelled": 3}
@@ -20,7 +20,7 @@ def merge_duplicate_task_nodes(apps, schema_editor):
         TaskNode.objects.using(db_alias)
         .filter(due_date__isnull=False)
         .values("task_template", "due_date")
-        .annotate(min_id=Min("id"), cnt=Count("id"))
+        .annotate(cnt=Count("id"))
         .filter(cnt__gt=1)
     )
 
