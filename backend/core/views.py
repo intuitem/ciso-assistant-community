@@ -13088,33 +13088,33 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 processed_tasks_identifiers.add(task_identifier)
 
                 task_template = self.get_queryset().get(id=task_template_id)
-                try:
-                    task_node, created = TaskNode.objects.get_or_create(
-                        task_template=task_template,
-                        scheduled_date=task_date,
-                        defaults={
-                            "due_date": task_date,
-                            "status": "pending",
-                            "folder": task_template.folder,
-                        },
-                    )
-                except IntegrityError:
-                    # Another node for this template already has this due_date
-                    # (e.g. a rescheduled occurrence). Resolve to the persisted node.
-                    existing_node = TaskNode.objects.filter(
-                        task_template=task_template,
-                        due_date=task_date,
-                    ).first()
-                    if not existing_node:
-                        continue
-                    if existing_node.id in materialized_node_ids:
+
+                # Check if a node already exists for this recurrence slot
+                rescheduled_node = TaskNode.objects.filter(
+                    task_template=task_template,
+                    scheduled_date=task_date,
+                ).first()
+                if rescheduled_node:
+                    if rescheduled_node.due_date != task_date:
+                        # Node was rescheduled — already in tasks_list
+                        # from existing_nodes, drop the virtual entry.
                         tasks_list[i] = None
                         continue
-                    existing_node.to_delete = False
-                    existing_node.save(update_fields=["to_delete"])
-                    materialized_node_ids.add(existing_node.id)
-                    tasks_list[i] = TaskNodeReadSerializer(existing_node).data
-                    continue
+                    task_node = rescheduled_node
+                else:
+                    try:
+                        task_node, created = TaskNode.objects.get_or_create(
+                            task_template=task_template,
+                            due_date=task_date,
+                            defaults={
+                                "scheduled_date": task_date,
+                                "status": "pending",
+                                "folder": task_template.folder,
+                            },
+                        )
+                    except IntegrityError:
+                        tasks_list[i] = None
+                        continue
                 materialized_node_ids.add(task_node.id)
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
