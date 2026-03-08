@@ -271,6 +271,7 @@
 	"existingControls": "Mesures existantes",
 	"strengthOfKnowledge": "Force des connaissances",
 	"dueDate": "Date d'échéance",
+	"scheduledDate": "Initialement prévue",
 	"attachment": "Pièce jointe",
 	"observation": "Observation",
 	"observationHelpText": "Notes et commentaires supplémentaires au format markdown",

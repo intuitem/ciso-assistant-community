@@ -1984,6 +1984,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
+			{ field: 'scheduled_date' },
 			{ field: 'due_date' },
 			{ field: 'status' },
 			{ field: 'observation' }
