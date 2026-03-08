@@ -8,6 +8,7 @@ from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
 from core.models import (
+    Actor,
     Asset,
     Evidence,
     Folder,
@@ -362,6 +363,10 @@ class RecordConsumer[Context](ABC):
                 update_data[key] = value
                 continue
             source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
+            if key == "owner" and any(sk in record for sk in source_keys):
+                update_data[key] = value
+                continue
             if any(record.get(sk) not in (None, "") for sk in source_keys):
                 update_data[key] = value
 
@@ -562,13 +567,15 @@ class AssetRecordConsumer(RecordConsumer[None]):
 class AppliedControlRecordConsumer(RecordConsumer[None]):
     """
     Consumer for importing AppliedControl records.
-    Supports reference_control linking via ref_id.
+    Supports reference_control linking via ref_id and owner resolution
+    by user email or team name.
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
         "control_impact": ("control_impact", "impact"),
         "reference_control": ("reference_control", "reference_control_ref_id"),
+        "owner": ("owner",),
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -674,7 +681,41 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
+        # Resolve owner field (semicolon-separated user emails or team names).
+        # Always set data["owner"] when the column is present, even if blank,
+        # so that UPDATE mode can clear the M2M instead of silently preserving it.
+        if "owner" in record:
+            data["owner"] = self._resolve_owners(record.get("owner"))
+
         return data, None
+
+    @staticmethod
+    def _resolve_owners(value) -> list:
+        """Resolve semicolon-separated user emails or team names to Actor IDs.
+
+        Each entry is matched first as a user email, then as a team name.
+        Unresolvable entries are silently skipped.
+        """
+        if not value or not isinstance(value, str):
+            return []
+
+        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
+        actor_ids = []
+
+        for entry in entries:
+            # Try matching as user email first
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                # Try matching as team name
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is not None:
+                actor_ids.append(actor.id)
+            else:
+                logger.warning(
+                    "Could not resolve an owner reference to a user email or team name during Applied Control import; skipping."
+                )
+
+        return actor_ids
 
 
 class EvidenceRecordConsumer(RecordConsumer[None]):
