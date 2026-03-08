@@ -83,7 +83,7 @@
 <div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
 	<div
-		class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
+		class="fixed top-36 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
 	>
 		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
 		<div class="flex flex-col gap-2 items-center">
