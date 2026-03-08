@@ -2074,7 +2074,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'objectives',
 				urlModel: 'task-templates',
-				disableCreate: true,
+				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
 					parentField: 'tasks'
@@ -2083,7 +2083,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'organisation_objectives',
 				urlModel: 'assets',
-				disableCreate: true,
+				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
 					parentField: 'assets'
