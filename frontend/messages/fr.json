@@ -2213,6 +2213,7 @@
 	"addOrganisationIssue": "Ajouter un enjeu",
 	"organisationIssue": "Enjeu",
 	"organisationIssues": "Enjeux (ISO)",
+	"issues": "Enjeux (ISO)",
 	"organisationDescription": "C'est ici que vous définissez la hiérarchie et les périmètres de votre organisation.",
 	"origin": "Origine",
 	"health": "Diagnostic",

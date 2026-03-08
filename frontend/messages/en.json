@@ -2304,6 +2304,7 @@
 	"addOrganisationIssue": "Add an issue",
 	"organisationIssue": "Issue",
 	"organisationIssues": "Issues (ISO)",
+	"issues": "Issues (ISO)",
 	"organisationDescription": "It's here where you define the hierarchy and the perimeter of your organization.",
 	"origin": "Origin",
 	"health": "Health check",
