@@ -2047,7 +2047,7 @@
 	"delete": "Delete",
 	"changeStatus": "Change status",
 	"changeHealth": "Change health",
-	"changeIsActive": "Toggle active state",
+	"changeIsActive": "Change active state",
 	"changeImpact": "... impact",
 	"changeEffort": "... effort",
 	"changePriority": "... priority",

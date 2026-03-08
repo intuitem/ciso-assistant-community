@@ -2052,7 +2052,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'status' },
 			{ field: 'health' },
-			{ field: 'is_active', type: 'boolean' },
+			{ field: 'is_active' },
 			{ field: 'start_date', type: 'date' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
@@ -2074,7 +2074,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'objectives',
 				urlModel: 'task-templates',
-				disableCreate: false,
+				disableCreate: true,
 				disableDelete: true,
 				addExisting: {
 					parentField: 'tasks'
@@ -2083,7 +2083,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{
 				field: 'organisation_objectives',
 				urlModel: 'assets',
-				disableCreate: false,
+				disableCreate: true,
 				disableDelete: true,
 				addExisting: {
 					parentField: 'assets'

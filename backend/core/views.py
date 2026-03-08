@@ -8478,6 +8478,10 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
         serializer_class=OrganisationObjectiveDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, OrganisationObjective
         )
@@ -8487,9 +8491,19 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        new_folder = data["folder"]
+        (_, object_ids_add, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, OrganisationObjective
+        )
+        if new_folder.id not in object_ids_add:
+            return Response(
+                {
+                    "error": "You do not have permission to create objects in this folder"
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         objective = self.get_object()
-        data = request.data
-        new_folder = Folder.objects.get(id=data["folder"])
         duplicate_objective = OrganisationObjective.objects.create(
             name=data["name"],
             description=data["description"],

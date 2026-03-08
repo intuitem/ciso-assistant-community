@@ -76,7 +76,8 @@
 			'timestamp',
 			'reported_at',
 			'due_date',
-			'start_date'
+			'start_date',
+			'closing_date'
 		],
 		widgets,
 		actions,
