@@ -54,6 +54,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract frontend metadata
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/frontend
+          tags: |
+            type=raw,value=${{ needs.prepare.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=CISO Assistant Frontend
+            org.opencontainers.image.description=An open-source GRC platform for cybersecurity compliance and risk management
+            org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=AGPL-3.0
+            org.opencontainers.image.url=https://intuitem.com
+            org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
@@ -62,6 +76,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/frontend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+          annotations: ${{ steps.meta-frontend.outputs.annotations }}
 
   build-backend:
     needs: prepare
@@ -97,6 +113,20 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract backend metadata
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/backend
+          tags: |
+            type=raw,value=${{ needs.prepare.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=CISO Assistant Backend
+            org.opencontainers.image.description=An open-source GRC platform for cybersecurity compliance and risk management
+            org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=AGPL-3.0
+            org.opencontainers.image.url=https://intuitem.com
+            org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
@@ -105,6 +135,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/backend:${{ needs.prepare.outputs.version }}-${{ matrix.arch }}
           platforms: linux/${{ matrix.arch }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+          annotations: ${{ steps.meta-backend.outputs.annotations }}
 
   merge-manifests:
     needs: [prepare, build-frontend, build-backend]
