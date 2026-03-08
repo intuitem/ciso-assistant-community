@@ -13019,10 +13019,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
                 if node.scheduled_date not in generated_scheduled_dates:
-                    if (
-                        node.due_date != node.scheduled_date
-                        or node.due_date < today
-                    ):
+                    if node.due_date != node.scheduled_date or node.due_date < today:
                         # Preserve nodes manually rescheduled or in the past
                         node.to_delete = False
                         node.save(update_fields=["to_delete"])
@@ -13122,10 +13119,13 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                             task_template=task_template,
                             due_date=task_date,
                         ).first()
-                        if not existing_node or existing_node.id in materialized_node_ids:
+                        if not existing_node:
                             tasks_list[i] = None
                             continue
                         task_node = existing_node
+                if task_node.id in materialized_node_ids:
+                    tasks_list[i] = None
+                    continue
                 materialized_node_ids.add(task_node.id)
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
