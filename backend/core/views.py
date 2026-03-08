@@ -12973,6 +12973,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
+        today = timezone.localdate()
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
@@ -12981,7 +12982,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
-            start_date_param = start or template.task_date or timezone.localdate()
+            start_date_param = start or template.task_date or today
             end_date_param = end or template.schedule.get("end_date")
 
             if not end_date_param:
@@ -13020,7 +13021,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 if node.scheduled_date not in generated_scheduled_dates:
                     if (
                         node.due_date != node.scheduled_date
-                        or node.due_date < timezone.localdate()
+                        or node.due_date < today
                     ):
                         # Preserve nodes manually rescheduled or in the past
                         node.to_delete = False
@@ -13039,7 +13040,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        current_date = timezone.localdate()
+        current_date = today
 
         # Separate past and future tasks, limit future to next 10
         past_tasks = [
@@ -13066,7 +13067,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_to_process_ids.add((template_id, task_date))
 
         processed_tasks_identifiers = set()
-        materialized_node_ids = set()
+        materialized_node_ids = {
+            task["id"]
+            for task in tasks_list
+            if task and not task.get("virtual") and task.get("id")
+        }
 
         for i in range(len(tasks_list)):
             task = tasks_list[i]
@@ -13113,8 +13118,14 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                             },
                         )
                     except IntegrityError:
-                        tasks_list[i] = None
-                        continue
+                        existing_node = TaskNode.objects.filter(
+                            task_template=task_template,
+                            due_date=task_date,
+                        ).first()
+                        if not existing_node or existing_node.id in materialized_node_ids:
+                            tasks_list[i] = None
+                            continue
+                        task_node = existing_node
                 materialized_node_ids.add(task_node.id)
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
