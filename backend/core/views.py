@@ -13172,7 +13172,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 )
 
                 # garbage-collect
-                TaskNode.objects.filter(to_delete=True).delete()
+                TaskNode.objects.filter(
+                    to_delete=True, task_template=task_template
+                ).delete()
 
     @action(
         detail=False,
