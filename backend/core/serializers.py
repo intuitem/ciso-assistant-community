@@ -2034,6 +2034,12 @@ class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
         return instance
 
 
+class OrganisationObjectiveDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = OrganisationObjective
+        fields = ["name", "description", "folder"]
+
+
 class OrganisationIssueReadSerializer(BaseModelSerializer):
     folder = FieldsRelatedField()
     assets = FieldsRelatedField(many=True)

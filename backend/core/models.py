@@ -4905,8 +4905,13 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    start_date = models.DateField(blank=True, null=True, verbose_name=_("Start date"))
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
-    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    closing_date = models.DateField(
+        blank=True, null=True, verbose_name=_("Closing date")
+    )
     metrics = models.ManyToManyField(
         "metrology.MetricInstance",
         verbose_name="Tracking metrics",

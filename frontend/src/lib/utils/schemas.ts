@@ -924,9 +924,17 @@ export const organisationObjectiveSchema = z.object({
 	metrics: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
+	is_active: z.boolean().optional().default(true),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	closing_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
+
+export const OrganisationObjectiveDuplicateSchema = z.object({
+	...organisationObjectiveSchema.shape
+});
+
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1462,6 +1470,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
+	'organisation-objectives_duplicate': OrganisationObjectiveDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'validation-flows': ValidationFlowSchema,

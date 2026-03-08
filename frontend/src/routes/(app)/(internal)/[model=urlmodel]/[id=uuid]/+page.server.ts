@@ -48,6 +48,21 @@ export const load: PageServerLoad = async (event) => {
 		data.duplicateForm = appliedControlDuplicateForm;
 	}
 
+	if (event.params.model === 'organisation-objectives') {
+		const objectiveSchema = modelSchema(event.params.model);
+		const objective = data.data;
+		const initialDataDuplicate = {
+			name: objective.name,
+			description: objective.description
+		};
+
+		const objectiveDuplicateForm = await superValidate(initialDataDuplicate, zod(objectiveSchema), {
+			errors: false
+		});
+
+		data.duplicateForm = objectiveDuplicateForm;
+	}
+
 	return data;
 };
 
