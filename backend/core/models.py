@@ -8214,7 +8214,9 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
 
     leader = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="led_teams",
         verbose_name="Team Leader",
         help_text="The leader of the team",
@@ -8243,9 +8245,10 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails = []
         if self.team_email:
             emails.append(self.team_email)
-        leader_email = self.leader.email
-        if leader_email:
-            emails.append(leader_email)
+        if self.leader:
+            leader_email = self.leader.email
+            if leader_email:
+                emails.append(leader_email)
         deputy_emails = self.deputies.exclude(email="").values_list("email", flat=True)
         emails.extend(deputy_emails)
         member_emails = self.members.exclude(email="").values_list("email", flat=True)
