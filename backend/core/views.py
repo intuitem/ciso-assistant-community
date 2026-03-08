@@ -13018,9 +13018,15 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
-                if node.scheduled_date not in generated_scheduled_dates:
-                    if node.due_date != node.scheduled_date or node.due_date < today:
-                        # Preserve nodes manually rescheduled or in the past
+                if node.due_date != node.scheduled_date:
+                    # Always preserve user-rescheduled nodes
+                    node.to_delete = False
+                    node.save(update_fields=["to_delete"])
+                    if node.scheduled_date not in generated_scheduled_dates:
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                elif node.scheduled_date not in generated_scheduled_dates:
+                    if node.due_date < today:
+                        # Preserve past nodes whose slot was removed
                         node.to_delete = False
                         node.save(update_fields=["to_delete"])
                         tasks_list.append(TaskNodeReadSerializer(node).data)
@@ -13065,7 +13071,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
 
         processed_tasks_identifiers = set()
         materialized_node_ids = {
-            task["id"]
+            str(task["id"])
             for task in tasks_list
             if task and not task.get("virtual") and task.get("id")
         }
@@ -13098,8 +13104,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 ).first()
                 if rescheduled_node:
                     if rescheduled_node.due_date != task_date:
-                        # Node was rescheduled — already in tasks_list
-                        # from existing_nodes, drop the virtual entry.
+                        # Node was rescheduled — already preserved in
+                        # the existing_nodes loop, drop the virtual entry.
                         tasks_list[i] = None
                         continue
                     task_node = rescheduled_node
@@ -13123,10 +13129,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                             tasks_list[i] = None
                             continue
                         task_node = existing_node
-                if task_node.id in materialized_node_ids:
+                if str(task_node.id) in materialized_node_ids:
                     tasks_list[i] = None
                     continue
-                materialized_node_ids.add(task_node.id)
+                materialized_node_ids.add(str(task_node.id))
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
