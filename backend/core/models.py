@@ -4876,6 +4876,7 @@ class OrganisationObjective(
         Asset,
         blank=True,
         verbose_name="asset",
+        related_name="organisation_objectives",
     )
     tasks = models.ManyToManyField(
         "TaskTemplate",

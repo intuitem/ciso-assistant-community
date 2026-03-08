@@ -1672,6 +1672,7 @@ class AssetFilter(GenericFilterSet):
             "dora_licenced_activity",
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
+            "organisation_objectives",
         ]
 
 
@@ -12848,6 +12849,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "last_occurrence_status",
             "next_occurrence_status",
             "evidences",
+            "objectives",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
