@@ -13022,7 +13022,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     # Always preserve user-rescheduled nodes
                     node.to_delete = False
                     node.save(update_fields=["to_delete"])
-                    if node.scheduled_date not in generated_scheduled_dates:
+                    if node.due_date and start_date <= node.due_date <= end_date:
                         tasks_list.append(TaskNodeReadSerializer(node).data)
                 elif node.scheduled_date not in generated_scheduled_dates:
                     if node.due_date < today:
@@ -13043,25 +13043,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        current_date = today
-
-        # Separate past and future tasks, limit future to next 10
-        past_tasks = [
-            task
-            for task in sorted_tasks
-            if _parse_due_date(task["due_date"]) <= current_date
-        ]
-        next_tasks = [
-            task
-            for task in sorted_tasks
-            if _parse_due_date(task["due_date"]) > current_date
-        ]
-
-        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
-        # Only virtual tasks (from _generate_occurrences) need to be materialized;
-        # existing TaskNodes from the DB are already persisted.
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize.
+        # Every virtual task in the calendar range gets a DB record so it is
+        # clickable/editable in the UI.
         tasks_to_process_ids = set()
-        for task in past_tasks + next_tasks[:10]:
+        for task in sorted_tasks:
             if not task.get("virtual"):
                 continue
             template_id = task.get("task_template")
