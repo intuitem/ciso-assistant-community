@@ -13105,7 +13105,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                         task_template=task_template,
                         due_date=task_date,
                     ).first()
-                    if not existing_node or existing_node.id in materialized_node_ids:
+                    if not existing_node:
+                        continue
+                    if existing_node.id in materialized_node_ids:
+                        tasks_list[i] = None
                         continue
                     existing_node.to_delete = False
                     existing_node.save(update_fields=["to_delete"])
@@ -13117,14 +13120,15 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
-        return tasks_list
+        return [task for task in tasks_list if task is not None]
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
+                today = timezone.localdate()
                 # Soft-delete future TaskNode instances for re-evaluation.
                 TaskNode.objects.filter(
-                    task_template=task_template, scheduled_date__gte=date.today()
+                    task_template=task_template, scheduled_date__gte=today
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
@@ -13142,10 +13146,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if end_date_param:
                         end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                     else:
-                        end_date = timezone.localdate() + delta
+                        end_date = today + delta
                     # Ensure end_date is not before the calculated delta
-                    if end_date < timezone.localdate() + delta:
-                        end_date = timezone.localdate() + delta
+                    min_end_date = today + delta
+                    if end_date < min_end_date:
+                        end_date = min_end_date
                 else:
                     end_date = start_date
                 # Generate the task nodes
