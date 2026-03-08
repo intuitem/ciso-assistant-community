@@ -8,6 +8,7 @@ from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
 from core.models import (
+    Actor,
     Asset,
     Evidence,
     Folder,
@@ -697,8 +698,6 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         """
         if not value or not isinstance(value, str):
             return []
-
-        from core.models import Actor, Team
 
         entries = [entry.strip() for entry in value.split(";") if entry.strip()]
         actor_ids = []
