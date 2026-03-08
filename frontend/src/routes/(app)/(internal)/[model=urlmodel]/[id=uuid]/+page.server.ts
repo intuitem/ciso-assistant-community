@@ -52,13 +52,13 @@ export const load: PageServerLoad = async (event) => {
 		const objectiveSchema = modelSchema(event.params.model);
 		const objectEndpoint = `${BASE_API_URL}/organisation-objectives/${event.params.id}/object/`;
 		const objectRes = await event.fetch(objectEndpoint);
-		const objectData = await objectRes.json();
-
-		const objectiveDuplicateForm = await superValidate(objectData, zod(objectiveSchema), {
-			errors: false
-		});
-
-		data.duplicateForm = objectiveDuplicateForm;
+		if (objectRes.ok) {
+			const objectData = await objectRes.json();
+			const objectiveDuplicateForm = await superValidate(objectData, zod(objectiveSchema), {
+				errors: false
+			});
+			data.duplicateForm = objectiveDuplicateForm;
+		}
 	}
 
 	return data;
