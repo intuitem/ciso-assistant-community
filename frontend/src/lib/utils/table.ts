@@ -2979,6 +2979,20 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			field: 'status',
 			optionsEndpoint: 'organisation-objectives/status'
 		},
+		{
+			type: 'change_field',
+			label: 'changeHealth',
+			icon: 'fa-solid fa-heart-pulse',
+			field: 'health',
+			optionsEndpoint: 'organisation-objectives/health'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'organisation-objectives/is_active'
+		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],
 	'task-templates': [

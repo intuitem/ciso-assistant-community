@@ -1981,6 +1981,8 @@
 	"time": "temps",
 	"delete": "Supprimer",
 	"changeStatus": "Changer le statut",
+	"changeHealth": "Changer le diagnostic",
+	"changeIsActive": "Basculer l'état actif",
 	"changeImpact": "... l'impact",
 	"changeEffort": "... l'effort",
 	"changePriority": "... la priorité",

@@ -8467,6 +8467,10 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
     def health(self, request):
         return Response(dict(OrganisationObjective.Health.choices))
 
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
+
     @action(
         detail=True,
         name="Duplicate organisation objective",

@@ -50,13 +50,11 @@ export const load: PageServerLoad = async (event) => {
 
 	if (event.params.model === 'organisation-objectives') {
 		const objectiveSchema = modelSchema(event.params.model);
-		const objective = data.data;
-		const initialDataDuplicate = {
-			name: objective.name,
-			description: objective.description
-		};
+		const objectEndpoint = `${BASE_API_URL}/organisation-objectives/${event.params.id}/object/`;
+		const objectRes = await event.fetch(objectEndpoint);
+		const objectData = await objectRes.json();
 
-		const objectiveDuplicateForm = await superValidate(initialDataDuplicate, zod(objectiveSchema), {
+		const objectiveDuplicateForm = await superValidate(objectData, zod(objectiveSchema), {
 			errors: false
 		});
 
