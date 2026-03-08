@@ -12981,7 +12981,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
-            start_date_param = start or template.task_date or datetime.now().date()
+            start_date_param = start or template.task_date or timezone.localdate()
             end_date_param = end or template.schedule.get("end_date")
 
             if not end_date_param:
@@ -13020,7 +13020,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 if node.scheduled_date not in generated_scheduled_dates:
                     if (
                         node.due_date != node.scheduled_date
-                        or node.due_date < datetime.now().date()
+                        or node.due_date < timezone.localdate()
                     ):
                         # Preserve nodes manually rescheduled or in the past
                         node.to_delete = False
@@ -13039,7 +13039,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        current_date = datetime.now().date()
+        current_date = timezone.localdate()
 
         # Separate past and future tasks, limit future to next 10
         past_tasks = [
@@ -13099,7 +13099,16 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     )
                 except IntegrityError:
                     # Another node for this template already has this due_date
-                    # (e.g. a rescheduled occurrence). Skip materialization.
+                    # (e.g. a rescheduled occurrence). Resolve to the persisted node.
+                    existing_node = TaskNode.objects.filter(
+                        task_template=task_template,
+                        due_date=task_date,
+                    ).first()
+                    if not existing_node:
+                        continue
+                    existing_node.to_delete = False
+                    existing_node.save(update_fields=["to_delete"])
+                    tasks_list[i] = TaskNodeReadSerializer(existing_node).data
                     continue
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
@@ -13130,10 +13139,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if end_date_param:
                         end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                     else:
-                        end_date = datetime.now().date() + delta
+                        end_date = timezone.localdate() + delta
                     # Ensure end_date is not before the calculated delta
-                    if end_date < datetime.now().date() + delta:
-                        end_date = datetime.now().date() + delta
+                    if end_date < timezone.localdate() + delta:
+                        end_date = timezone.localdate() + delta
                 else:
                     end_date = start_date
                 # Generate the task nodes

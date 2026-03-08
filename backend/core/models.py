@@ -7914,15 +7914,15 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
                 day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
             ]
 
-        # Check if there are any TaskNode instances that are not within the date range
-        if self.pk and self.schedule and self.schedule.get("end_date"):
-            end_date = self.schedule["end_date"]
-            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances whose scheduled date is after the end date
-            TaskNode.objects.filter(
-                task_template=self, scheduled_date__gt=end_date
-            ).delete()
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            # Prune TaskNode instances whose scheduled date is after the end date
+            if self.schedule and self.schedule.get("end_date"):
+                end_date = self.schedule["end_date"]
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+                TaskNode.objects.filter(
+                    task_template=self, scheduled_date__gt=end_date
+                ).delete()
 
 
 class TaskNode(AbstractBaseModel, FolderMixin):
