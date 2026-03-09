@@ -13017,7 +13017,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 )
                 | (
                     Q(due_date__gte=start_date, due_date__lte=end_date)
-                    & ~Q(due_date=F("scheduled_date"))
+                    & (
+                        Q(scheduled_date__isnull=True)
+                        | ~Q(due_date=F("scheduled_date"))
+                    )
                 )
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
