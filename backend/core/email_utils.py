@@ -27,7 +27,7 @@ def get_locale_for_email(email: str) -> str:
         if user:
             return user.get_preferences(save=False).get("lang", "en")
     except Exception as e:
-        logger.warning("Failed to resolve user locale for email %s: %s", email, e)
+        logger.warning("Failed to resolve user locale for email lookup: %s", e)
 
     try:
         general = GlobalSettings.objects.filter(name="general").first()
@@ -54,8 +54,8 @@ def load_email_template(
     """
     if locale is None:
         locale = get_language() or "en"
-        # Extract language code from locale like 'en-us' -> 'en'
-        locale = locale.split("-")[0].lower()
+    # Normalize locale: 'fr-FR' -> 'fr', '' -> 'en'
+    locale = locale.split("-")[0].lower() or "en"
 
     # Construct file path
     template_file = TEMPLATE_BASE_PATH / locale / f"{template_name}.yaml"

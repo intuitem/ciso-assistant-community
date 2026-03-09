@@ -162,6 +162,8 @@
 					label={m.defaultLanguage()}
 					helpText={m.defaultLanguageHelpText()}
 				/>
+				<hr class="my-2" />
+				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
 				<button
 					type="button"
 					class="btn preset-filled-warning-500 text-sm"

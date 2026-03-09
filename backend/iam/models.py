@@ -701,7 +701,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         if not isinstance(prefs, dict):
             prefs = {}
         changed = prefs is not self.preferences
-        if "lang" not in prefs:
+        valid_langs = {code for code, _ in settings.LANGUAGES}
+        if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
             try:
                 from global_settings.models import GlobalSettings
 
