@@ -726,9 +726,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Sending a mail to a user for password resetting or creation
         """
         # Resolve user's preferred language for email rendering
-        user_lang = (
-            self.preferences.get("lang") if isinstance(self.preferences, dict) else None
-        ) or "en"
+        user_lang = self.get_preferences(save=False).get("lang", "en")
 
         header = {
             "email": self.email,
@@ -743,6 +741,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         }
         with translation_override(user_lang):
             email = render_to_string(email_template_name, header)
+            subject = str(subject)
         try:
             send_mail(
                 subject=subject,

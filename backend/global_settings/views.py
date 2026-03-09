@@ -17,6 +17,7 @@ from .serializers import (
     FeatureFlagsSerializer,
 )
 from django.conf import settings
+from django.db import transaction
 from .models import GlobalSettings
 import structlog
 
@@ -183,20 +184,26 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 {"error": "Only administrators can force language for all users."},
                 status=403,
             )
-        lang = request.data.get("language")
+        general = GlobalSettings.objects.filter(name="general").first()
+        lang = (
+            general.value.get("default_language")
+            if general and isinstance(general.value, dict)
+            else None
+        )
         if not lang or lang not in dict(settings.LANGUAGES):
             return Response(
-                {"error": "Invalid language."},
+                {"error": "No valid default language configured in general settings."},
                 status=400,
             )
-        users = User.objects.all()
-        updated = 0
-        for user in users:
-            if not isinstance(user.preferences, dict):
-                user.preferences = {}
-            user.preferences["lang"] = lang
-            user.save(update_fields=["preferences"])
-            updated += 1
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["lang"] = lang
+                user.save(update_fields=["preferences"])
+                updated += 1
         return Response({"updated": updated})
 
     @action(detail=True, name="Get security objective scales")

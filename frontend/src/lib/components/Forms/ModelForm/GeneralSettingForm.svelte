@@ -44,7 +44,6 @@
 	let forceLanguageInProgress = $state(false);
 
 	function handleForceLanguage() {
-		const selectedLang = $formStore.default_language;
 		const firstModal: ModalSettings = {
 			type: 'confirm',
 			title: m.forceLanguageConfirmTitle(),
@@ -61,7 +60,6 @@
 						try {
 							const res = await fetch('/settings/force-language', {
 								method: 'POST',
-								body: JSON.stringify({ language: selectedLang }),
 								headers: { 'Content-Type': 'application/json' }
 							});
 							const data = await res.json();

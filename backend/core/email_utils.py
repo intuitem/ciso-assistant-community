@@ -23,7 +23,7 @@ def get_locale_for_email(email: str) -> str:
     Looks up the user's preferences, falls back to admin default, then 'en'.
     """
     try:
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email__iexact=email).first()
         if user:
             return user.get_preferences(save=False).get("lang", "en")
     except Exception as e:
