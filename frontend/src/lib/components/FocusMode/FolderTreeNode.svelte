@@ -42,6 +42,28 @@
 	const isSelectable = $derived(!!node.uuid);
 	// Whether this node should be shown at all
 	const isVisible = $derived(!node.content_type || contentTypes.includes(node.content_type));
+
+	// Auto-expand if the selected node is somewhere in this subtree
+	const subtreeHasFocus = $derived.by(() => {
+		if (!focusId) return false;
+		function visit(n: TreeNode): boolean {
+			if (n.uuid !== null && focusId === String(n.uuid)) return true;
+			for (const child of n.children ?? []) {
+				if (visit(child)) return true;
+			}
+			return false;
+		}
+		return visit(node);
+	});
+
+	// Track which focusId triggered the last auto-expand to avoid fighting manual collapses
+	let autoExpandedFor = $state<string | null>(null);
+	$effect(() => {
+		if (focusId && focusId !== autoExpandedFor && subtreeHasFocus) {
+			isExpanded = true;
+			autoExpandedFor = focusId;
+		}
+	});
 </script>
 
 <li class="list-none m-0 p-0">
