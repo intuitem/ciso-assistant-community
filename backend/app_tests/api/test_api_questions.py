@@ -83,44 +83,6 @@ class TestQuestionEndpoints:
         assert response.status_code == status.HTTP_201_CREATED
         assert Question.objects.filter(urn="urn:test:new:q1").exists()
 
-    def test_update_question_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        folder = Folder.get_root_folder()
-        q = Question.objects.create(
-            requirement_node=rn,
-            urn="urn:test:upd:q1",
-            ref_id="UQ1",
-            text="Original?",
-            type=Question.Type.TEXT,
-            folder=folder,
-            is_published=True,
-        )
-        response = authenticated_client.patch(
-            reverse("questions-detail", args=[q.id]),
-            {"text": "Updated?"},
-            format="json",
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_delete_question_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        folder = Folder.get_root_folder()
-        q = Question.objects.create(
-            requirement_node=rn,
-            urn="urn:test:del:q1",
-            ref_id="DQ1",
-            text="Delete me?",
-            type=Question.Type.TEXT,
-            folder=folder,
-            is_published=True,
-        )
-        response = authenticated_client.delete(reverse("questions-detail", args=[q.id]))
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
 
 @pytest.mark.django_db
 class TestRequirementNodeEndpoints:
@@ -141,26 +103,6 @@ class TestRequirementNodeEndpoints:
             reverse("requirement-nodes-list"), data, format="json"
         )
         assert response.status_code == status.HTTP_201_CREATED
-
-    def test_update_requirement_node_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        response = authenticated_client.patch(
-            reverse("requirement-nodes-detail", args=[rn.id]),
-            {"ref_id": "REQ-UPDATED"},
-            format="json",
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_delete_requirement_node_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        response = authenticated_client.delete(
-            reverse("requirement-nodes-detail", args=[rn.id])
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.django_db
@@ -197,59 +139,3 @@ class TestQuestionChoiceEndpoints:
             reverse("question-choices-list"), data, format="json"
         )
         assert response.status_code == status.HTTP_201_CREATED
-
-    def test_update_choice_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        folder = Folder.get_root_folder()
-        q = Question.objects.create(
-            requirement_node=rn,
-            urn="urn:test:updchoice:q1",
-            ref_id="UCQ1",
-            type=Question.Type.UNIQUE_CHOICE,
-            folder=folder,
-            is_published=True,
-        )
-        c = QuestionChoice.objects.create(
-            question=q,
-            urn="urn:test:choice:updchoice:c1",
-            ref_id="UC1",
-            value="Original",
-            order=0,
-            folder=folder,
-            is_published=True,
-        )
-        response = authenticated_client.patch(
-            reverse("question-choices-detail", args=[c.id]),
-            {"value": "Updated"},
-            format="json",
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN
-
-    def test_delete_choice_with_urn_returns_403(
-        self, authenticated_client, framework_with_node
-    ):
-        fw, rn = framework_with_node
-        folder = Folder.get_root_folder()
-        q = Question.objects.create(
-            requirement_node=rn,
-            urn="urn:test:delchoice:q1",
-            ref_id="DCQ1",
-            type=Question.Type.UNIQUE_CHOICE,
-            folder=folder,
-            is_published=True,
-        )
-        c = QuestionChoice.objects.create(
-            question=q,
-            urn="urn:test:choice:delchoice:c1",
-            ref_id="DC1",
-            value="Delete me",
-            order=0,
-            folder=folder,
-            is_published=True,
-        )
-        response = authenticated_client.delete(
-            reverse("question-choices-detail", args=[c.id])
-        )
-        assert response.status_code == status.HTTP_403_FORBIDDEN

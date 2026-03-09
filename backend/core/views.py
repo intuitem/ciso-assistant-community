@@ -1580,6 +1580,7 @@ class ThreatViewSet(BaseModelViewSet):
         "library",
         "risk_scenarios",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "provider", "description"]
 
@@ -2317,6 +2318,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "provider",
         "findings",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "description", "provider", "ref_id"]
 
@@ -9288,15 +9290,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if compliance_assessment.id not in viewable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
-            ref_id = request.data.get("ref_id")
+            urn = request.data.get("urn")
             result = request.data.get("result")
             observation = request.data.get("observation")
             score = request.data.get("score")
             status_value = request.data.get("status")
 
-            if not all([ref_id, result]):
+            if not all([urn, result]):
                 return Response(
-                    {"error": "ref_id and result are required fields"},
+                    {"error": "urn and result are required fields"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # validate if result value is valid choice
@@ -9349,12 +9351,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             # Find the requirement assessment to update
             requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
+                compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
 
             if not requirement_assessment:
                 return Response(
-                    {"error": f"Requirement with ref_id {ref_id} not found"},
+                    {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
@@ -9379,7 +9381,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             response_data = {
                 "message": "Requirement updated successfully",
-                "ref_id": ref_id,
+                "urn": urn,
                 "result": result,
             }
 
@@ -9399,7 +9401,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         except RequirementAssessment.DoesNotExist:
             return Response(
-                {"error": f"Requirement with ref_id {ref_id} not found"},
+                {"error": f"Requirement with urn {urn} not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except ValidationError:
@@ -10877,7 +10879,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
-        "requirement__ref_id",
+        "requirement__urn",
         "result",
         "extended_result",
         "compliance_assessment__ref_id",
@@ -10889,7 +10891,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     search_fields = [
         "requirement__name",
         "requirement__description",
-        "requirement__ref_id",
+        "requirement__urn",
     ]
 
     def get_queryset(self):
@@ -12368,6 +12370,7 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "entities",
         "assets",
         "filtering_labels",
+        "urn",
     ]
 
     export_config = {
@@ -14138,6 +14141,7 @@ class QuestionViewSet(BaseModelViewSet):
     filterset_fields = [
         "requirement_node",
         "type",
+        "urn",
     ]
 
     def get_queryset(self):
@@ -14160,6 +14164,7 @@ class QuestionChoiceViewSet(BaseModelViewSet):
     model = QuestionChoice
     filterset_fields = [
         "question",
+        "urn",
     ]
 
     def get_queryset(self):
