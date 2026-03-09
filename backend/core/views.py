@@ -13029,7 +13029,8 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if node.due_date and start_date <= node.due_date <= end_date:
                         tasks_list.append(TaskNodeReadSerializer(node).data)
                 elif node.scheduled_date not in generated_scheduled_dates:
-                    if node.due_date < today:
+                    effective_date = node.due_date or node.scheduled_date
+                    if effective_date and effective_date < today:
                         # Preserve past nodes whose slot was removed
                         node.to_delete = False
                         node.save(update_fields=["to_delete"])
@@ -13173,7 +13174,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     to_delete=True,
                     task_template=task_template,
                     status="pending",
-                    observation__in=[None, ""],
+                    due_date=F("scheduled_date"),
+                ).filter(
+                    Q(observation__isnull=True) | Q(observation=""),
                 ).exclude(
                     evidences__isnull=False,
                 ).exclude(
