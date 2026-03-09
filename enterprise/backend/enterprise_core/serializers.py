@@ -3,10 +3,16 @@ from global_settings.models import GlobalSettings
 from rest_framework import serializers
 from core.serializers import (
     BaseModelSerializer,
+    FolderWriteSerializer as CommunityFolderWriteSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
 from iam.models import Folder, User, Role
+
+from global_settings.models import GlobalSettings
+from global_settings.serializers import (
+    FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
+)
 
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
@@ -18,18 +24,12 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class FolderWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Folder
-        exclude = [
-            "builtin",
-            "content_type",
-        ]
-
+class FolderWriteSerializer(CommunityFolderWriteSerializer):
     def validate_parent_folder(self, parent_folder):
         """
         Check that the folders graph will not contain cycles
         """
+        parent_folder = super().validate_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -183,6 +183,10 @@ class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):
     of a GlobalSettings instance. Each flag is represented as an explicit
     BooleanField, mapping directly to keys within the 'value' dictionary.
     """
+
+    campaigns = serializers.BooleanField(
+        source="value.campaigns", required=False, default=True
+    )
 
     focus_mode = serializers.BooleanField(
         source="value.focus_mode", required=False, default=False

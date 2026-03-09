@@ -80,6 +80,7 @@
 	{form}
 	multiple
 	optionsEndpoint="assets"
+	lazy
 	optionsExtraFields={[['folder', 'str']]}
 	optionsDetailedUrlParameters={[
 		scopeFolder?.id ? ['scope_folder_id', scopeFolder.id] : ['', undefined]

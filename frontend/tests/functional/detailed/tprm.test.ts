@@ -141,6 +141,7 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('check that third parties overview was updated', async () => {
 		await page.goto('/analytics/tprm');
+		await page.locator('body[data-hydrated="true"]').waitFor();
 		await expect(page.locator('#page-title')).toHaveText('Overview');
 		const cards = page.getByTestId('cards-list').locator('div');
 		await expect(page.getByTestId('no-data-available')).not.toBeVisible();
@@ -157,12 +158,15 @@ test('user can create representatives, solutions and entity assessments inside e
 
 	await test.step('check that third parties overview cards can be flipped', async () => {
 		const cards = page.getByTestId('cards-list').locator('div');
-		await cards.first().getByTestId('flip-button-front').click();
-		await expect(cards.first()).toHaveClass(/rotate-x-180/);
+		const firstCard = cards.first();
+		await expect(firstCard).toBeVisible();
+		await expect(firstCard.getByTestId('flip-button-front')).toBeEnabled();
+		await firstCard.getByTestId('flip-button-front').click();
+		await expect(firstCard).toHaveClass(/rotate-x-180/);
 
 		// flip back to front
-		await cards.first().getByTestId('flip-button-back').click();
-		await expect(cards.first()).not.toHaveClass(/rotate-x-180/);
+		await firstCard.getByTestId('flip-button-back').click();
+		await expect(firstCard).not.toHaveClass(/rotate-x-180/);
 	});
 });
 

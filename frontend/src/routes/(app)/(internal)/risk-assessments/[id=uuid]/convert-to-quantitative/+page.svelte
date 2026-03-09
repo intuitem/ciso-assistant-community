@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
-	import { ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Progress } from '@skeletonlabs/skeleton-svelte';
 	import { getToastStore } from '$lib/components/Toast/stores';
 	import { m } from '$paraglide/messages';
 	import type { RiskMatrixJsonDefinition } from '$lib/utils/types';
@@ -177,12 +177,12 @@
 			style="backdrop-filter: blur(4px);"
 		>
 			<div class="card bg-white p-8 shadow-xl max-w-md text-center space-y-4">
-				<ProgressRing
-					strokeWidth="16px"
-					meterStroke="stroke-primary-500"
-					size="size-16"
-					classes="mx-auto"
-				/>
+				<Progress value={null}>
+					<Progress.Circle class="[--size:--spacing(16)] mx-auto">
+						<Progress.CircleTrack />
+						<Progress.CircleRange class="stroke-primary-500" />
+					</Progress.Circle>
+				</Progress>
 				<h3 class="text-xl font-bold">{m.converting()}</h3>
 				<p class="text-gray-600">
 					{m.runningMonteCarloSimulations()}
@@ -378,7 +378,12 @@
 						}}
 					>
 						{#if isSubmitting}
-							<ProgressRing strokeWidth="16px" meterStroke="stroke-white" size="size-6" />
+							<Progress value={null}>
+								<Progress.Circle class="[--size:--spacing(6)]">
+									<Progress.CircleTrack />
+									<Progress.CircleRange class="stroke-white" />
+								</Progress.Circle>
+							</Progress>
 							<span class="ml-2">{m.converting()}</span>
 						{:else}
 							<i class="fa-solid fa-exchange-alt mr-2"></i>

@@ -26,10 +26,12 @@ jobs:
           fetch-depth: 0
       - name: Generate version
         id: version
+        shell: bash
         run: |
+          set -euo pipefail
           CANARY_VERSION="canary-$(date +'%Y%m%d')-$(git rev-parse --short HEAD)"
-          echo "version=${CANARY_VERSION}" >> $GITHUB_OUTPUT
-          echo "build=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "version=${CANARY_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "build=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
   build-frontend:
     needs: prepare
@@ -75,9 +77,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
       - name: Create .meta file
+        shell: bash
+        env:
+          CISO_ASSISTANT_VERSION: ${{ needs.prepare.outputs.version }}
+          CISO_ASSISTANT_BUILD: ${{ needs.prepare.outputs.build }}
         run: |
-          echo "CISO_ASSISTANT_VERSION=${{ needs.prepare.outputs.version }}" > .meta
-          echo "CISO_ASSISTANT_BUILD=${{ needs.prepare.outputs.build }}" >> .meta
+          set -euo pipefail
+          {
+            echo "CISO_ASSISTANT_VERSION=$CISO_ASSISTANT_VERSION"
+            echo "CISO_ASSISTANT_BUILD=$CISO_ASSISTANT_BUILD"
+          } > .meta
           cp .meta ./backend/
           cp .meta ./backend/ciso_assistant/
       - name: Set up Docker Buildx
@@ -108,15 +117,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Create multi-arch manifests
+        shell: bash
+        env:
+          REPO: ${{ github.repository }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
+          set -euo pipefail
+
           # Frontend
-          docker buildx imagetools create -t ghcr.io/${{ github.repository }}/frontend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/${{ github.repository }}/frontend:canary \
-            ghcr.io/${{ github.repository }}/frontend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/${{ github.repository }}/frontend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            -t "ghcr.io/$REPO/frontend:$VERSION" \
+            -t "ghcr.io/$REPO/frontend:canary" \
+            "ghcr.io/$REPO/frontend:$VERSION-amd64" \
+            "ghcr.io/$REPO/frontend:$VERSION-arm64"
 
           # Backend
-          docker buildx imagetools create -t ghcr.io/${{ github.repository }}/backend:${{ needs.prepare.outputs.version }} \
-            -t ghcr.io/${{ github.repository }}/backend:canary \
-            ghcr.io/${{ github.repository }}/backend:${{ needs.prepare.outputs.version }}-amd64 \
-            ghcr.io/${{ github.repository }}/backend:${{ needs.prepare.outputs.version }}-arm64
+          docker buildx imagetools create \
+            -t "ghcr.io/$REPO/backend:$VERSION" \
+            -t "ghcr.io/$REPO/backend:canary" \
+            "ghcr.io/$REPO/backend:$VERSION-amd64" \
+            "ghcr.io/$REPO/backend:$VERSION-arm64"

@@ -8,7 +8,7 @@
 
 	import type { ModalComponent, ModalSettings, TreeViewNode } from '@skeletonlabs/skeleton-svelte';
 
-	import { Switch, ProgressRing, Popover } from '@skeletonlabs/skeleton-svelte';
+	import { Switch, Progress, Popover, Tooltip } from '@skeletonlabs/skeleton-svelte';
 
 	import { goto, invalidateAll } from '$app/navigation';
 
@@ -674,62 +674,64 @@
 						open={exportPopupOpen}
 						onOpenChange={(e) => (exportPopupOpen = e.open)}
 						positioning={{ placement: 'bottom' }}
-						triggerBase="btn preset-filled-primary-500 w-full"
-						contentBase="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
-						zIndex="1000"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger class="btn preset-filled-primary-500 w-full">
 							<span data-testid="export-button">
 								<i class="fa-solid fa-download mr-2"></i>{m.exportButton()}
 							</span>
-						{/snippet}
-						{#snippet content()}
-							<div>
-								<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
-								{#if !page.data.user.is_third_party}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content
+								class="card whitespace-nowrap bg-white py-2 w-fit shadow-lg space-y-1"
+							>
+								<div>
+									<p class="block px-4 py-2 text-sm text-gray-800">{m.complianceAssessment()}</p>
+									{#if !page.data.user.is_third_party}
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asCSV()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asXLSX()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asWord()}</a
+										>
+									{/if}
 									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/csv"
+										href="/compliance-assessments/{data.compliance_assessment.id}/export"
 										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asCSV()}</a
+										>... {m.asZIP()}</a
 									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asXLSX()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment.id}/export/word"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asWord()}</a
-									>
-								{/if}
-								<a
-									href="/compliance-assessments/{data.compliance_assessment.id}/export"
-									class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200">... {m.asZIP()}</a
-								>
-								{#if !page.data.user.is_third_party}
-									<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/csv"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asCSV()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/xlsx"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asXLSX()}</a
-									>
-									<a
-										href="/compliance-assessments/{data.compliance_assessment
-											.id}/action-plan/export/pdf"
-										class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
-										>... {m.asPDF()}</a
-									>
-								{/if}
-							</div>
-						{/snippet}
+									{#if !page.data.user.is_third_party}
+										<p class="block px-4 py-2 text-sm text-gray-800">{m.actionPlan()}</p>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/csv"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asCSV()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/xlsx"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asXLSX()}</a
+										>
+										<a
+											href="/compliance-assessments/{data.compliance_assessment
+												.id}/action-plan/export/pdf"
+											class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-200"
+											>... {m.asPDF()}</a
+										>
+									{/if}
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 					{#if canEditObject}
 						<Anchor
@@ -756,133 +758,203 @@
 						><i class="fa-solid fa-file-lines mr-2"></i>{m.evidences()}</Anchor
 					>
 				{/if}
-				<span class="pt-4 text-sm">{m.powerUps()}</span>
-				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/flash-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-indigo-500 to-violet-500 h-fit"
-						data-testid="flash-mode-button"
-						><i class="fa-solid fa-bolt mr-2"></i> {m.flashMode()}</Anchor
+				<!-- Power-ups Command Palette Grid -->
+				<div class="pt-3 border-t border-gray-200 mt-2 space-y-3">
+					<span class="text-xs font-semibold text-gray-400 uppercase tracking-widest select-none"
+						>{m.powerUps()}</span
 					>
-				{/if}
-				{#if !data.compliance_assessment.is_locked}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/table-mode`}
-						class="btn text-gray-100 bg-linear-to-r from-blue-500 to-sky-500 h-fit"
-						data-testid="table-mode-button"
-						><i class="fa-solid fa-table-list mr-2"></i> {m.tableMode()}</Anchor
-					>
-				{/if}
-				{#if !page.data.user.is_third_party}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-teal-500 to-emerald-500 h-fit"
-						onclick={() => modalCreateForm()}
-						data-testid="apply-mapping-button"
-						><i class="fa-solid fa-diagram-project mr-2"></i> {m.applyMapping()}
-					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-pink-500 h-fit"
-						onclick={() => modalCreateCloneForm()}
-						data-testid="clone-audit-button"
-						><i class="fa-solid fa-copy mr-2"></i> {m.cloneAudit()}
-					</button>
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-rose-500 to-pink-500 h-fit"
-						onclick={() => modalCompareAudit()}
-						data-testid="compare-audit-button"
-						><i class="fa-solid fa-code-compare mr-2"></i>{m.compareToAudit()}
-					</button>
-					{#if page.data?.featureflags?.validation_flows}
-						<button
-							class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
-							onclick={() => modalRequestValidation()}
-							data-testid="request-validation-button"
-						>
-							<i class="fa-solid fa-check-circle mr-2"></i>
-							{m.requestValidation()}
-						</button>
-					{/if}
-				{/if}
 
-				{#if !page.data.user.is_third_party && !data.compliance_assessment.is_locked}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-cyan-500 to-blue-500 h-fit"
-						data-testid="sync-to-actions-button"
-						onclick={async () => {
-							await modalConfirmSyncToActions(
-								data.compliance_assessment.id,
-								data.compliance_assessment.name,
-								'?/syncToActions'
-							);
-						}}
-					>
-						<span class="mr-2">
-							{#if syncingToActionsIsLoading}
-								<ProgressRing
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									size="size-6"
-									classes="-ml-2"
-								/>
-							{:else}
-								<i class="fa-solid fa-arrows-rotate mr-2"></i>
-							{/if}
-						</span>
-						{m.syncToAppliedControls()}
-					</button>
-				{/if}
-
-				{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0 && !data.compliance_assessment.is_locked}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-purple-500 to-fuchsia-500 h-fit"
-						onclick={() => {
-							modalConfirmCreateSuggestedControls(
-								data.compliance_assessment.id,
-								data.compliance_assessment.name,
-								'?/createSuggestedControls'
-							);
-						}}
-					>
-						<span class="mr-2">
-							{#if createAppliedControlsLoading}
-								<ProgressRing
-									strokeWidth="16px"
-									meterStroke="stroke-white"
-									classes="-ml-2"
-									size="size-6"
-								/>
-							{:else}
-								<i class="fa-solid fa-wand-magic-sparkles"></i>
-							{/if}
-						</span>
-						{m.suggestControls()}
-					</button>
-				{/if}
-				{#if has_threats && !page.data.user.is_third_party}
-					<button
-						class="btn text-gray-100 bg-linear-to-r from-yellow-500 to-red-600 h-fit"
-						onclick={openThreatsDialog}
-					>
-						<div class="flex items-center space-x-2">
-							<i class="fa-solid fa-triangle-exclamation text-white"></i>
-							<span class="text-white font-bold">{data.threats.total_unique_threats}</span>
-							<span>{m.potentialThreats()}</span>
+					<!-- Modes -->
+					{#if !data.compliance_assessment.is_locked}
+						<div>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.modes()}</span
+							>
+							<div class="grid grid-cols-2 gap-2">
+								{#if !page.data.user.is_third_party}
+									<Anchor
+										breadcrumbAction="push"
+										href={`${page.url.pathname}/flash-mode`}
+										class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-200 transition-colors cursor-pointer"
+										data-testid="flash-mode-button"
+									>
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500 text-white shrink-0"
+										>
+											<i class="fa-solid fa-bolt text-sm"></i>
+										</div>
+										<span class="text-sm font-semibold">{m.flashMode()}</span>
+									</Anchor>
+								{/if}
+								<Anchor
+									breadcrumbAction="push"
+									href={`${page.url.pathname}/table-mode`}
+									class="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 hover:bg-slate-100 hover:border-slate-200 transition-colors cursor-pointer"
+									data-testid="table-mode-button"
+								>
+									<div
+										class="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-500 text-white shrink-0"
+									>
+										<i class="fa-solid fa-table-list text-sm"></i>
+									</div>
+									<span class="text-sm font-semibold">{m.tableMode()}</span>
+								</Anchor>
+							</div>
 						</div>
-					</button>
-				{/if}
-				{#if !page.data.user.is_third_party && canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
-					<Anchor
-						breadcrumbAction="push"
-						href={`${page.url.pathname}/assignments`}
-						class="btn text-gray-100 bg-linear-to-r from-lime-500 to-green-600 h-fit"
-						data-testid="assignments-button"
-					>
-						<i class="fa-solid fa-user-tag mr-2"></i>
-						{m.assignments?.() ?? 'Assignments'}
-					</Anchor>
-				{/if}
+					{/if}
+
+					<!-- Actions -->
+					{#if !page.data.user.is_third_party}
+						<div>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.actions()}</span
+							>
+							<div class="grid grid-cols-2 gap-2">
+								<button
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									onclick={() => modalCreateForm()}
+									data-testid="apply-mapping-button"
+								>
+									<i class="fa-solid fa-diagram-project text-emerald-500 text-base"></i>
+									<span class="text-sm font-medium">{m.applyMapping()}</span>
+								</button>
+								<button
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									onclick={() => modalCreateCloneForm()}
+									data-testid="clone-audit-button"
+								>
+									<i class="fa-solid fa-copy text-fuchsia-500 text-base"></i>
+									<span class="text-sm font-medium">{m.cloneAudit()}</span>
+								</button>
+								<button
+									class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+									onclick={() => modalCompareAudit()}
+									data-testid="compare-audit-button"
+								>
+									<i class="fa-solid fa-code-compare text-rose-500 text-base"></i>
+									<span class="text-sm font-medium">{m.compareToAudit()}</span>
+								</button>
+								{#if page.data?.featureflags?.validation_flows}
+									<button
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										onclick={() => modalRequestValidation()}
+										data-testid="request-validation-button"
+									>
+										<i class="fa-solid fa-check-circle text-amber-500 text-base"></i>
+										<span class="text-sm font-medium">{m.requestValidation()}</span>
+									</button>
+								{/if}
+								{#if !data.compliance_assessment.is_locked}
+									<button
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										data-testid="sync-to-actions-button"
+										onclick={async () => {
+											await modalConfirmSyncToActions(
+												data.compliance_assessment.id,
+												data.compliance_assessment.name,
+												'?/syncToActions'
+											);
+										}}
+									>
+										{#if syncingToActionsIsLoading}
+											<Progress value={null}>
+												<Progress.Circle class="[--size:--spacing(5)]">
+													<Progress.CircleTrack />
+													<Progress.CircleRange class="stroke-cyan-500" />
+												</Progress.Circle>
+											</Progress>
+										{:else}
+											<i class="fa-solid fa-arrows-rotate text-cyan-500 text-base"></i>
+										{/if}
+										<span class="text-sm font-medium">{m.syncToAppliedControls()}</span>
+									</button>
+									{#if Object.hasOwn(page.data.user.permissions, 'add_appliedcontrol') && data.compliance_assessment.framework.reference_controls.length > 0}
+										<button
+											class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+											onclick={() => {
+												modalConfirmCreateSuggestedControls(
+													data.compliance_assessment.id,
+													data.compliance_assessment.name,
+													'?/createSuggestedControls'
+												);
+											}}
+										>
+											{#if createAppliedControlsLoading}
+												<Progress value={null}>
+													<Progress.Circle class="[--size:--spacing(5)]">
+														<Progress.CircleTrack />
+														<Progress.CircleRange class="stroke-violet-500" />
+													</Progress.Circle>
+												</Progress>
+											{:else}
+												<i class="fa-solid fa-wand-magic-sparkles text-violet-500 text-base"></i>
+											{/if}
+											<span class="text-sm font-medium">{m.suggestControls()}</span>
+										</button>
+									{/if}
+								{/if}
+								{#if canEditObject && page.data?.featureflags?.auditee_mode && !data.compliance_assessment.is_locked && data.compliance_assessment.status !== 'in_review'}
+									<Anchor
+										breadcrumbAction="push"
+										href={`${page.url.pathname}/assignments`}
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-colors shadow-sm cursor-pointer text-left"
+										data-testid="assignments-button"
+									>
+										<i class="fa-solid fa-user-tag text-green-500 text-base"></i>
+										<span class="text-sm font-medium">{m.assignments()}</span>
+									</Anchor>
+								{/if}
+							</div>
+						</div>
+					{/if}
+
+					<!-- Insights -->
+					{#if (has_threats || page.data?.featureflags?.advanced_analytics) && !page.data.user.is_third_party}
+						<div>
+							<span
+								class="text-[11px] font-medium text-gray-400 uppercase tracking-wider mb-1.5 block"
+								>{m.insights()}</span
+							>
+							<div class="grid grid-cols-2 gap-2">
+								{#if has_threats && !page.data.user.is_third_party}
+									<button
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 transition-colors cursor-pointer text-left"
+										onclick={openThreatsDialog}
+									>
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500 text-white shrink-0"
+										>
+											<i class="fa-solid fa-triangle-exclamation text-sm"></i>
+										</div>
+										<div class="flex flex-col">
+											<span class="text-lg font-bold leading-tight"
+												>{data.threats.total_unique_threats}</span
+											>
+											<span class="text-xs text-amber-600">{m.potentialThreats()}</span>
+										</div>
+									</button>
+								{/if}
+								{#if page.data?.featureflags?.advanced_analytics && !page.data.user.is_third_party}
+									<Anchor
+										breadcrumbAction="push"
+										href={`${page.url.pathname}/advanced-analytics`}
+										class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+										data-testid="advanced-analytics-button"
+									>
+										<div
+											class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-500 text-white shrink-0"
+										>
+											<i class="fa-solid fa-chart-line text-sm"></i>
+										</div>
+										<span class="text-sm font-semibold">{m.advancedAnalytics()}</span>
+									</Anchor>
+								{/if}
+							</div>
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</div>
@@ -900,108 +972,112 @@
 				open={filterPopupOpen}
 				onOpenChange={(e) => (filterPopupOpen = e.open)}
 				positioning={{ placement: 'bottom-start' }}
-				triggerBase="btn preset-filled-primary-500 w-fit"
-				contentBase="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
-				zIndex="1000"
 				autoFocus={false}
 				onPointerDownOutside={() => (filterPopupOpen = false)}
 				closeOnInteractOutside={false}
 			>
-				{#snippet trigger()}
+				<Popover.Trigger class="btn preset-filled-primary-500 w-fit">
 					<i class="fa-solid fa-filter mr-2"></i>
 					{m.filters()}
 					{#if filterCount}
 						<span class="text-xs">{filterCount}</span>
 					{/if}
-				{/snippet}
-				{#snippet content()}
-					<div>
-						<span class="text-sm font-bold">{m.result()}</span>
-						<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-							{#each Object.entries(complianceResultColorMap) as [result, color]}
-								<button
-									type="button"
-									onclick={() => toggleResult(result)}
-									class="px-2 py-1 rounded-md font-bold"
-									style="background-color: {selectedResults.includes(result)
-										? color
-										: 'grey'}; color: {selectedResults.includes(result)
-										? result === 'not_applicable'
-											? 'white'
-											: 'black'
-										: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
-								>
-									{safeTranslate(result)}
-								</button>
-							{/each}
-						</div>
-					</div>
-					{#if data.compliance_assessment.progress_status_enabled}
+				</Popover.Trigger>
+				<Popover.Positioner>
+					<Popover.Content
+						class="card p-2 bg-white w-fit shadow-lg space-y-2 border border-surface-200 z-10"
+					>
 						<div>
-							<span class="text-sm font-bold">{m.status()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(complianceStatusColorMap) as [status, color]}
+							<span class="text-sm font-bold">{m.result()}</span>
+							<div class="flex flex-wrap gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+								{#each Object.entries(complianceResultColorMap) as [result, color]}
 									<button
 										type="button"
-										onclick={() => toggleStatus(status)}
+										onclick={() => toggleResult(result)}
 										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedStatus.includes(status)
-											? color + '44'
-											: 'grey'}; color: {selectedStatus.includes(status)
-											? darkenColor(color, 0.3)
-											: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
-									>
-										{safeTranslate(status)}
-									</button>
-								{/each}
-							</div>
-						</div>
-					{/if}
-					{#if data.compliance_assessment.extended_result_enabled}
-						<div>
-							<span class="text-sm font-bold">{m.extendedResult()}</span>
-							<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
-								{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
-									<button
-										type="button"
-										onclick={() => toggleExtendedResult(extendedResult)}
-										class="px-2 py-1 rounded-md font-bold"
-										style="background-color: {selectedExtendedResults.includes(extendedResult)
+										style="background-color: {selectedResults.includes(result)
 											? color
-											: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
-											extendedResult
-										)
-											? 1
-											: 0.3};"
+											: 'grey'}; color: {selectedResults.includes(result)
+											? result === 'not_applicable'
+												? 'white'
+												: 'black'
+											: 'black'}; opacity: {selectedResults.includes(result) ? 1 : 0.3};"
 									>
-										{safeTranslate(extendedResult)}
+										{safeTranslate(result)}
 									</button>
 								{/each}
 							</div>
 						</div>
-					{/if}
-					<div>
-						<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
-						<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
-							<Switch
-								name="questionnaireToggle"
-								class="flex flex-row items-center justify-center"
-								active="bg-primary-500"
-								onCheckedChange={(e) => (displayOnlyAssessableNodes = e.checked)}
-								onclick={() => {
-									displayOnlyAssessableNodes = !displayOnlyAssessableNodes;
-									auditFiltersStore.setDisplayOnlyAssessableNodes(id, displayOnlyAssessableNodes);
-								}}
-							>
-								{#if displayOnlyAssessableNodes}
-									<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
-								{:else}
-									<span class="font-bold text-xs text-gray-500">{m.no()}</span>
-								{/if}
-							</Switch>
+						{#if data.compliance_assessment.progress_status_enabled}
+							<div>
+								<span class="text-sm font-bold">{m.status()}</span>
+								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(complianceStatusColorMap) as [status, color]}
+										<button
+											type="button"
+											onclick={() => toggleStatus(status)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedStatus.includes(status)
+												? color + '44'
+												: 'grey'}; color: {selectedStatus.includes(status)
+												? darkenColor(color, 0.3)
+												: 'black'}; opacity: {selectedStatus.includes(status) ? 1 : 0.3};"
+										>
+											{safeTranslate(status)}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+						{#if data.compliance_assessment.extended_result_enabled}
+							<div>
+								<span class="text-sm font-bold">{m.extendedResult()}</span>
+								<div class="flex flex-wrap w-fit gap-2 text-xs bg-gray-100 border-2 p-1 rounded-md">
+									{#each Object.entries(extendedResultColorMap) as [extendedResult, color]}
+										<button
+											type="button"
+											onclick={() => toggleExtendedResult(extendedResult)}
+											class="px-2 py-1 rounded-md font-bold"
+											style="background-color: {selectedExtendedResults.includes(extendedResult)
+												? color
+												: 'grey'}; color: white; opacity: {selectedExtendedResults.includes(
+												extendedResult
+											)
+												? 1
+												: 0.3};"
+										>
+											{safeTranslate(extendedResult)}
+										</button>
+									{/each}
+								</div>
+							</div>
+						{/if}
+						<div>
+							<span class="text-sm font-bold">{m.ShowOnlyAssessable()}</span>
+							<div id="toggle" class="flex items-center space-x-4 text-xs ml-auto mr-4">
+								<Switch
+									name="questionnaireToggle"
+									class="flex flex-row items-center justify-center"
+									checked={displayOnlyAssessableNodes}
+									onCheckedChange={(e) => {
+										displayOnlyAssessableNodes = e.checked;
+										auditFiltersStore.setDisplayOnlyAssessableNodes(id, e.checked);
+									}}
+								>
+									<Switch.Control>
+										<Switch.Thumb />
+									</Switch.Control>
+									<Switch.HiddenInput />
+									{#if displayOnlyAssessableNodes}
+										<span class="font-bold text-xs text-primary-500">{m.yes()}</span>
+									{:else}
+										<span class="font-bold text-xs text-gray-500">{m.no()}</span>
+									{/if}
+								</Switch>
+							</div>
 						</div>
-					</div>
-				{/snippet}
+					</Popover.Content>
+				</Popover.Positioner>
 			</Popover>
 		</div>
 

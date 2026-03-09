@@ -11,7 +11,20 @@ const loginPageRegex = /^[a-zA-Z0-9]+:\/\/[^\/]+\/login\/?.*$/;
 export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) => {
 	if (!locals.user && !url.pathname.includes('/login')) {
 		redirect(302, `/login?next=${url.pathname}`);
-	} else {
+	}
+
+	if (
+		locals.user &&
+		locals.settings?.enforce_mfa &&
+		!locals.user.has_mfa_enabled &&
+		!locals.user.is_superuser &&
+		locals.user.is_local &&
+		!url.pathname.startsWith('/setup-mfa')
+	) {
+		redirect(302, '/setup-mfa');
+	}
+
+	if (locals.user) {
 		const referer = request.headers.get('referer') ?? '';
 		const fromLogin = loginPageRegex.test(referer);
 		if (fromLogin) {
@@ -24,18 +37,22 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		}
 	}
 
-	// Fetch accessible folders for Focus Mode selector
-	let folders: { id: string; str: string; name: string; content_type: string }[] = [];
+	// Fetch accessible folder tree for Focus Mode selector
+	let orgTree: {
+		name: string;
+		uuid: string | null;
+		viewable?: boolean;
+		children?: unknown[];
+	} | null = null;
 	const focusModeEnabled = locals.featureflags?.focus_mode ?? false;
 	if (locals.user && focusModeEnabled) {
 		try {
-			const foldersRes = await fetch(`${BASE_API_URL}/folders?no_focus=true`);
-			if (foldersRes.ok) {
-				const data = await foldersRes.json();
-				folders = data.results ?? data ?? [];
+			const treeRes = await fetch(`${BASE_API_URL}/folders/org_tree/?include_perimeters=false`);
+			if (treeRes.ok) {
+				orgTree = await treeRes.json();
 			}
 		} catch (e) {
-			console.error('Failed to fetch folders for focus mode:', e);
+			console.error('Failed to fetch folder tree for focus mode:', e);
 		}
 	}
 
@@ -50,6 +67,6 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		featureflags: locals.featureflags,
 		licenseStatus,
 		LICENSE_EXPIRATION_NOTIFY_DAYS,
-		folders
+		orgTree
 	};
 }) satisfies LayoutServerLoad;

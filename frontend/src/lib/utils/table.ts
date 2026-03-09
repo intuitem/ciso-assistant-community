@@ -1236,8 +1236,15 @@ export const VULNERABILITY_SEVERITY_FILTER: ListViewFilterConfig = {
 
 export const listViewFields = {
 	folders: {
-		head: ['name', 'description', 'contentType', 'parentDomain', 'labels'],
-		body: ['name', 'description', 'content_type', 'parent_folder', 'filtering_labels'],
+		head: ['name', 'description', 'contentType', 'parentDomain', 'iamGroups', 'labels'],
+		body: [
+			'name',
+			'description',
+			'content_type',
+			'parent_folder',
+			'create_iam_groups',
+			'filtering_labels'
+		],
 		filters: {
 			content_type: CONTENT_TYPE_FILTER,
 			filtering_labels: LABELS_FILTER
@@ -1363,8 +1370,8 @@ export const listViewFields = {
 			current_level: CURRENT_RISK_LEVEL_FILTER,
 			residual_level: RESIDUAL_RISK_LEVEL_FILTER,
 			within_tolerance: RISK_TOLERANCE_FILTER,
-			control_impact: APPLIED_CONTROL_IMPACT_FILTER,
-			effort: APPLIED_CONTROL_EFFORT_FILTER
+			qualifications: QUALIFICATION_FILTER,
+			filtering_labels: LABELS_FILTER
 		}
 	},
 	'risk-acceptances': {
@@ -1658,8 +1665,16 @@ export const listViewFields = {
 		}
 	},
 	evidences: {
-		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels'],
-		body: ['name', 'folder', 'owner', 'status', 'updated_at', 'filtering_labels'],
+		head: ['name', 'folder', 'owner', 'status', 'updatedAt', 'labels', 'appliedControls'],
+		body: [
+			'name',
+			'folder',
+			'owner',
+			'status',
+			'updated_at',
+			'filtering_labels',
+			'applied_controls'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			filtering_labels: LABELS_FILTER,
@@ -2314,12 +2329,37 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'eta', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'eta', 'due_date', 'assigned_to'],
+		head: [
+			'refId',
+			'name',
+			'domain',
+			'status',
+			'health',
+			'isActive',
+			'startDate',
+			'eta',
+			'dueDate',
+			'closingDate',
+			'assignee'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'folder',
+			'status',
+			'health',
+			'is_active',
+			'start_date',
+			'eta',
+			'due_date',
+			'closing_date',
+			'assigned_to'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
-			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER
 		}
 	},
 	'organisation-issues': {
@@ -2920,14 +2960,7 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'task-nodes/status'
-		},
-		{
-			type: 'change_folder',
-			label: 'changeDomain',
-			icon: 'fa-solid fa-folder',
-			optionsEndpoint: 'folders?content_type=DO&content_type=GL'
-		},
-		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
+		}
 	],
 	'requirement-assessments': [
 		{
@@ -2945,6 +2978,20 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{
+			type: 'change_field',
+			label: 'changeHealth',
+			icon: 'fa-solid fa-heart-pulse',
+			field: 'health',
+			optionsEndpoint: 'organisation-objectives/health'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'organisation-objectives/is_active'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

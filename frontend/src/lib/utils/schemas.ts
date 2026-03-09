@@ -75,6 +75,7 @@ export const FolderSchema = z.object({
 	...NameDescriptionMixin,
 	ref_id: z.string().optional(),
 	parent_folder: z.string(),
+	create_iam_groups: z.boolean().default(false),
 	filtering_labels: z.array(z.string()).optional()
 });
 
@@ -120,7 +121,8 @@ export const RiskAssessmentSchema = z.object({
 	reviewers: z.array(z.string().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	ebios_rm_study: z.string().uuid().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const ThreatSchema = z.object({
@@ -246,7 +248,10 @@ export const ValidationFlowSchema = z.object({
 	findings_assessments: z.array(z.string()).optional(),
 	evidences: z.array(z.string()).optional(),
 	security_exceptions: z.array(z.string()).optional(),
-	policies: z.array(z.string()).optional()
+	policies: z.array(z.string()).optional(),
+	processings: z.array(z.string()).optional(),
+	accreditations: z.array(z.string()).optional(),
+	contracts: z.array(z.string()).optional()
 });
 
 export const ReferenceControlSchema = z.object({
@@ -335,6 +340,7 @@ export const AssetSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -450,7 +456,8 @@ export const ComplianceAssessmentSchema = z.object({
 	ebios_rm_studies: z.string().uuid().optional().array().optional(),
 	assets: z.string().uuid().optional().array().optional(),
 	evidences: z.string().uuid().optional().array().optional(),
-	is_locked: z.boolean().optional().default(false)
+	is_locked: z.boolean().optional().default(false),
+	auto_sync: z.boolean().optional().default(false)
 });
 
 export const CampaignSchema = z.object({
@@ -510,7 +517,7 @@ export const GeneralSettingsSchema = z.object({
 	ebios_radar_green_zone_radius: z.number(),
 	ebios_radar_yellow_zone_radius: z.number(),
 	ebios_radar_red_zone_radius: z.number(),
-	notifications_enable_mailing: z.boolean().optional(),
+	notifications_enable_mailing: z.boolean().default(false),
 	interface_agg_scenario_matrix: z.boolean().optional(),
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
@@ -520,7 +527,8 @@ export const GeneralSettingsSchema = z.object({
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
-	allow_assignments_to_entities: z.boolean().default(false).optional()
+	allow_assignments_to_entities: z.boolean().default(false).optional(),
+	enforce_mfa: z.boolean().default(false).optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -533,6 +541,7 @@ export const FeatureFlagsSchema = z.object({
 	scoring_assistant: z.boolean().optional(),
 	vulnerabilities: z.boolean().optional(),
 	compliance: z.boolean().optional(),
+	campaigns: z.boolean().optional(),
 	tprm: z.boolean().optional(),
 	ebiosrm: z.boolean().optional(),
 	privacy: z.boolean().optional(),
@@ -555,7 +564,9 @@ export const FeatureFlagsSchema = z.object({
 	right_requests: z.boolean().optional(),
 	data_breaches: z.boolean().optional(),
 	chat_mode: z.boolean().optional(),
-	auditee_mode: z.boolean().optional()
+	auditee_mode: z.boolean().optional(),
+	advanced_analytics: z.boolean().optional(),
+	comments: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -915,9 +926,17 @@ export const organisationObjectiveSchema = z.object({
 	metrics: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
+	is_active: z.boolean().optional().default(true),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	closing_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
+
+export const OrganisationObjectiveDuplicateSchema = z.object({
+	...organisationObjectiveSchema.shape
+});
+
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1215,6 +1234,7 @@ export const TaskTemplateSchema = z.object({
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
+	objectives: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
@@ -1306,7 +1326,6 @@ export const OperatingModeSchema = z.object({
 	...NameDescriptionMixin,
 	operational_scenario: z.string().uuid(),
 	ref_id: z.string().optional(),
-	elementary_actions: z.string().uuid().optional().array().optional(),
 	likelihood: z.number().optional().default(-1),
 	folder: z.string()
 });
@@ -1440,7 +1459,7 @@ export const teamSchema = z.object({
 	team_email: z.string().email().optional(),
 	folder: z.string(),
 	members: z.array(z.string().uuid().optional()).optional(),
-	leader: z.string().uuid(),
+	leader: z.string().uuid().optional().nullable(),
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
@@ -1454,6 +1473,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
+	'organisation-objectives_duplicate': OrganisationObjectiveDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'validation-flows': ValidationFlowSchema,

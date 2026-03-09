@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
+from core.serializers import SerializerFactory
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
 from core.serializers import SerializerFactory
@@ -14,7 +15,7 @@ from .serializers import (
     GeneralSettingsSerializer,
     FeatureFlagsSerializer,
 )
-
+from django.conf import settings
 from .models import GlobalSettings
 import structlog
 
@@ -148,6 +149,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "show_warning_external_links": True,
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
+            "enforce_mfa": False,
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
