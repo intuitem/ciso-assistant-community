@@ -16,8 +16,8 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0143_comment"),
-        ("iam", "0019_add_view_globalsettings_in_custom_roles"),
+        ("core", "0146_organisationobjective_closing_date_and_more"),
+        ("iam", "0021_fix_auditee_iam_groups"),
     ]
 
     operations = [

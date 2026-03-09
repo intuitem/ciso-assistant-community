@@ -328,7 +328,7 @@ def migrate_backward(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0144_framework_status_question_questionchoice_answer"),
+        ("core", "0147_framework_status_question_questionchoice_answer"),
     ]
 
     operations = [
