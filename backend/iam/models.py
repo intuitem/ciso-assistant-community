@@ -692,15 +692,16 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_emails(self) -> list[str]:
         return [self.email]
 
-    def get_preferences(self, save=True) -> dict:
+    def get_preferences(self) -> dict:
         """
-        Return normalized user preferences, backfilling defaults if needed.
-        Ensures preferences is always a dict with a 'lang' key.
+        Return normalized user preferences, backfilling defaults in memory.
+        Ensures the returned dict always has a 'lang' key.
+        Does not persist changes — callers that need to save must do so explicitly.
         """
         prefs = self.preferences
         if not isinstance(prefs, dict):
             prefs = {}
-        changed = prefs is not self.preferences
+            self.preferences = prefs
         valid_langs = {code for code, _ in settings.LANGUAGES}
         if not isinstance(prefs.get("lang"), str) or prefs["lang"] not in valid_langs:
             try:
@@ -715,11 +716,6 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             except Exception:
                 default_lang = "en"
             prefs["lang"] = default_lang
-            changed = True
-        if changed:
-            self.preferences = prefs
-            if save and self.pk:
-                self.save(update_fields=["preferences"])
         return prefs
 
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
@@ -727,7 +723,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         Sending a mail to a user for password resetting or creation
         """
         # Resolve user's preferred language for email rendering
-        user_lang = self.get_preferences(save=False).get("lang", "en")
+        user_lang = self.get_preferences().get("lang", "en")
 
         header = {
             "email": self.email,

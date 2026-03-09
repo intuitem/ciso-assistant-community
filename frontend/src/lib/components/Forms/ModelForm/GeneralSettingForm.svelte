@@ -8,6 +8,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
 	import { setLocale } from '$paraglide/runtime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
@@ -158,7 +159,10 @@
 				<Select
 					{form}
 					field="default_language"
-					options={model.selectOptions?.['default_language'] ?? []}
+					options={(model.selectOptions?.['default_language'] ?? []).map((opt: { label: string; value: string }) => ({
+						value: opt.value,
+						label: `${defaultLangLabels[opt.value] ?? opt.value} (${language[LOCALE_MAP[opt.value]?.name] ?? opt.label})`
+					}))}
 					label={m.defaultLanguage()}
 					helpText={m.defaultLanguageHelpText()}
 				/>

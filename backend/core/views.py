@@ -7588,7 +7588,7 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        prefs = request.user.get_preferences(save=False)
+        prefs = request.user.get_preferences()
         prefs["lang"] = new_language
         request.user.preferences = prefs
         request.user.save(update_fields=["preferences"])

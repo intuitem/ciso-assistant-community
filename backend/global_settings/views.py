@@ -6,7 +6,7 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from core.serializers import SerializerFactory
-from iam.models import User
+from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
 from core.serializers import SerializerFactory
@@ -179,9 +179,14 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], name="Force language for all users")
     def force_language(self, request, pk=None):
-        if not request.user.is_superuser:
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
             return Response(
-                {"error": "Only administrators can force language for all users."},
+                {"error": "You do not have permission to change user preferences."},
                 status=403,
             )
         general = GlobalSettings.objects.filter(name="general").first()
