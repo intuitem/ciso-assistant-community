@@ -29,6 +29,7 @@ from core.dora import (
     DORA_SUBSTITUTABILITY_CHOICES,
     DORA_NON_SUBSTITUTABILITY_REASON_CHOICES,
     DORA_BINARY_CHOICES,
+    DORA_YES_NO_ASSESSMENT_CHOICES,
     DORA_REINTEGRATION_POSSIBILITY_CHOICES,
     DORA_DISCONTINUING_IMPACT_CHOICES,
 )
@@ -179,7 +180,9 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts)
+        contracts = Contract.objects.filter(id__in=viewable_contracts).exclude(
+            status=Contract.Status.DRAFT
+        )
 
         # Prepare business functions
         business_functions = Asset.objects.filter(
@@ -879,7 +882,7 @@ class SolutionViewSet(BaseModelViewSet):
 
     @action(detail=False, name="Get alternative providers identified choices")
     def dora_alternative_providers_identified(self, request):
-        return Response(dict(DORA_BINARY_CHOICES))
+        return Response(dict(DORA_YES_NO_ASSESSMENT_CHOICES))
 
     def perform_create(self, serializer):
         serializer.save()

@@ -28,6 +28,7 @@ type SidebarBackendKeys = {
 	right_requests: boolean;
 	data_breaches: boolean;
 	auditee_mode: boolean;
+	advanced_analytics: boolean;
 };
 
 type SidebarFrontendKeys = {

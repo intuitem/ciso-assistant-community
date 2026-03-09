@@ -16,6 +16,7 @@
 	import { Progress, Tabs } from '@skeletonlabs/skeleton-svelte';
 	import type { PageData } from '../[id=uuid]/$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { countMasked } from '$lib/utils/related-visibility';
 
 	interface Props {
@@ -338,6 +339,9 @@
 				<MarkdownRenderer content={data.requirementAssessment.observation} />
 			</div>
 		</div>
+	{/if}
+	{#if page.data?.featureflags?.comments}
+		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
 	{/if}
 	<div class="flex flex-row justify-between space-x-4">
 		<button

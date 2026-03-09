@@ -25,6 +25,7 @@
 		suggestions?: { [key: string]: any };
 		selectOptions?: Record<string, any>;
 		debug?: boolean;
+		customNameDescription?: boolean;
 	}
 
 	let {
@@ -37,7 +38,8 @@
 		object = {},
 		suggestions = {},
 		selectOptions = {},
-		debug = false
+		debug = false,
+		customNameDescription = true
 	}: Props = $props();
 </script>
 
@@ -58,7 +60,7 @@
 			</div>
 		</div>
 		<ModelForm
-			customNameDescription
+			{customNameDescription}
 			{form}
 			{object}
 			{suggestions}

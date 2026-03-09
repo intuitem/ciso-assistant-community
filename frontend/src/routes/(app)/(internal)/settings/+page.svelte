@@ -7,7 +7,9 @@
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
 
-	let group = $state('general');
+	import { goto } from '$app/navigation';
+
+	let group = $state(page.url.searchParams.get('tab') || 'general');
 
 	let { data } = $props();
 </script>

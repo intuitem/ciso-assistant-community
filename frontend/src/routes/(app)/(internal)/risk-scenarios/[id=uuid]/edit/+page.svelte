@@ -199,6 +199,7 @@
 					multiple
 					form={_form}
 					optionsEndpoint="assets"
+					lazy
 					optionsLabelField="auto"
 					optionsExtraFields={[['folder', 'str']]}
 					optionsInfoFields={{

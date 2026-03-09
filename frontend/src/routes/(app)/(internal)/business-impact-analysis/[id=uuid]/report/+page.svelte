@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TimelineTable from '$lib/components/BIA/TimelineTable.svelte';
 	import ActivityTracker from '$lib/components/DataViz/ActivityTracker.svelte';
@@ -399,7 +400,7 @@
 									{control.status ? safeTranslate(control.status) : '--'}
 								</td>
 								<td class="px-4 py-3 text-sm text-surface-700-300">
-									{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+									{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 								</td>
 							</tr>
 						{/each}

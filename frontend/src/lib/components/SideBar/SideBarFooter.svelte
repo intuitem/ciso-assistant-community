@@ -118,20 +118,11 @@
 						<button
 							onclick={() => {
 								openState = false;
-								dispatch('triggerGT');
+								dispatch('getStarted');
 							}}
 							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
-							data-testid="gt-button"
-							><i class="fa-solid fa-wand-magic-sparkles mr-2"></i>{m.guidedTour()}</button
-						>
-						<button
-							onclick={() => {
-								openState = false;
-								dispatch('loadDemoDomain');
-							}}
-							class="cursor-pointer flex items-center gap-2 w-full px-4 py-2.5 text-left text-sm hover:bg-surface-200-800 disabled:text-surface-400-600 text-surface-950-50"
-							data-testid="load-demo-data-button"
-							><i class="fa-solid fa-file-import mr-2"></i>{m.loadDemoData()}</button
+							data-testid="get-started-button"
+							><i class="fa-solid fa-rocket mr-2"></i>{m.getStarted()}</button
 						>
 						<button
 							onclick={() => {

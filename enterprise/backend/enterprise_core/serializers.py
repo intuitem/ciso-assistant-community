@@ -3,6 +3,7 @@ from global_settings.models import GlobalSettings
 from rest_framework import serializers
 from core.serializers import (
     BaseModelSerializer,
+    FolderWriteSerializer as CommunityFolderWriteSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
@@ -23,18 +24,12 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class FolderWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Folder
-        exclude = [
-            "builtin",
-            "content_type",
-        ]
-
+class FolderWriteSerializer(CommunityFolderWriteSerializer):
     def validate_parent_folder(self, parent_folder):
         """
         Check that the folders graph will not contain cycles
         """
+        parent_folder = super().validate_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:

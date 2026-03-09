@@ -100,7 +100,10 @@
 		findings_assessments: m.findingsAssessments(),
 		evidences: m.evidences(),
 		security_exceptions: m.securityExceptions(),
-		policies: m.policies()
+		policies: m.policies(),
+		processings: m.processings(),
+		accreditations: m.accreditations(),
+		contracts: m.contracts()
 	};
 
 	// Get URL model names for links
@@ -114,7 +117,10 @@
 		findings_assessments: 'findings-assessments',
 		evidences: 'evidences',
 		security_exceptions: 'security-exceptions',
-		policies: 'policies'
+		policies: 'policies',
+		processings: 'processings',
+		accreditations: 'accreditations',
+		contracts: 'contracts'
 	};
 
 	// Get status color

@@ -76,7 +76,8 @@
 			'timestamp',
 			'reported_at',
 			'due_date',
-			'start_date'
+			'start_date',
+			'closing_date'
 		],
 		widgets,
 		actions,
@@ -198,7 +199,8 @@
 				field: addExisting.parentField,
 				optionsEndpoint: addExisting.optionsEndpoint ?? field.endpointUrl ?? field.urlModel,
 				label: addExisting.label,
-				optionsInfoFields: addExisting.optionsInfoFields
+				optionsInfoFields: addExisting.optionsInfoFields,
+				lazy: addExisting.lazy
 			}
 		};
 		const modal: ModalSettings = {
@@ -231,7 +233,7 @@
 		modalStore.trigger(modal);
 	}
 
-	function modalAppliedControlDuplicateForm(): void {
+	function modalDuplicateForm(titleKey: () => string): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
 			props: {
@@ -246,7 +248,7 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: m.duplicateAppliedControl()
+			title: titleKey()
 		};
 		modalStore.trigger(modal);
 	}
@@ -773,7 +775,17 @@
 				{#if data.urlModel === 'applied-controls'}
 					<button
 						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
-						onclick={(_) => modalAppliedControlDuplicateForm()}
+						onclick={(_) => modalDuplicateForm(m.duplicateAppliedControl)}
+						data-testid="duplicate-button"
+					>
+						<i class="fa-solid fa-copy mr-2"></i>
+						{m.duplicate()}</button
+					>
+				{/if}
+				{#if data.urlModel === 'organisation-objectives'}
+					<button
+						class="btn text-white bg-linear-to-l from-sky-500 to-green-600"
+						onclick={(_) => modalDuplicateForm(m.duplicateOrganisationObjective)}
 						data-testid="duplicate-button"
 					>
 						<i class="fa-solid fa-copy mr-2"></i>
@@ -787,7 +799,7 @@
 </div>
 
 {#if relatedModels.length > 0 && displayModelTable}
-	<div class="card shadow-lg mt-8 bg-surface-50-950">
+	<div class="card shadow-lg mt-8 bg-surface-50-950 px-2 py-6">
 		<Tabs
 			value={group}
 			onValueChange={(e) => (group = e.value)}
@@ -796,19 +808,28 @@
 		>
 			<Tabs.List class="shrink-0 gap-3">
 				{#each relatedModels as [urlmodel, model]}
-					<Tabs.Trigger value={urlmodel} class="justify-start" data-testid="tabs-control">
+					<Tabs.Trigger
+						value={urlmodel}
+						class="justify-between w-full rounded-md px-3 py-2 transition-colors
+			       aria-[selected=true]:!bg-surface-200-800
+			       "
+						data-testid="tabs-control"
+					>
 						{safeTranslate(model.info.localNamePlural)}
 						{#if model.count !== undefined && model.count > 0}
-							<span class="badge preset-tonal-secondary">{model.count}</span>
+							<span
+								class="ml-2 rounded-full px-2 py-0.5 text-xs
+						   preset-tonal-secondary text-surface-700-300"
+							>
+								{model.count}
+							</span>
 						{/if}
 					</Tabs.Trigger>
 				{/each}
-				<Tabs.Indicator />
 			</Tabs.List>
 			{#each relatedModels as [urlmodel, model]}
 				<Tabs.Content value={urlmodel} class="flex-1 min-w-0">
 					{#key urlmodel}
-						<div class="py-2"></div>
 						{@const field = data.model.reverseForeignKeyFields.find(
 							(item) => item.urlModel === urlmodel
 						)}

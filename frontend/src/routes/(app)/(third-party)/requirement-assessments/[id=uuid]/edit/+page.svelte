@@ -19,6 +19,7 @@
 	import { hideSuggestions } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { countMasked } from '$lib/utils/related-visibility';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
@@ -260,7 +261,6 @@
 				{ taint: false }
 			);
 			form.newControls = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -275,7 +275,6 @@
 				{ taint: false }
 			);
 			form.newEvidence = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -290,7 +289,6 @@
 				{ taint: false }
 			);
 			form.newSecurityException = undefined;
-			console.debug('formStore', $formStore);
 		}
 	});
 
@@ -790,4 +788,7 @@
 			{/snippet}
 		</SuperForm>
 	</div>
+	{#if page.data?.featureflags?.comments}
+		<CommentsPanel parentType="requirement_assessment" parentId={data.requirementAssessment.id} />
+	{/if}
 </div>

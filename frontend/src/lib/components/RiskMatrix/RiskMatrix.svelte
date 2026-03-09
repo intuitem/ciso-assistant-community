@@ -51,9 +51,6 @@
 	let yAxisHeaders: typeof rawYAxisHeaders = $state([]);
 	let xAxisHeaders = $derived(swapAxes ? originalProbabilities : originalImpacts);
 
-	let popupHoverY = $derived(yAxisHeaders.map(() => ({ open: false })));
-	let popupHoverX = $derived(xAxisHeaders.map(() => ({ open: false })));
-
 	let yAxisType = $derived(swapAxes ? 'impact' : 'probability');
 	let xAxisType = $derived(swapAxes ? 'probability' : 'impact');
 
@@ -102,12 +99,7 @@
 			style="background: {xHeader.hexcolor ?? '#FFFFFF'}"
 			data-testid="x-axis-header-{j}"
 		>
-			<Tooltip
-				open={popupHoverX[j].open}
-				onOpenChange={(e) => (popupHoverX[j].open = e.open)}
-				openDelay={0}
-				closeDelay={100}
-			>
+			<Tooltip openDelay={0} closeDelay={100}>
 				<Tooltip.Trigger>
 					<span class="font-semibold p-1 break-all" data-testid="x-header-name">{xHeader.name}</span
 					>
@@ -115,7 +107,7 @@
 						<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 					{/if}
 				</Tooltip.Trigger>
-				<Tooltip.Positioner>
+				<Tooltip.Positioner class="!z-50">
 					<Tooltip.Content>
 						<div
 							class="card bg-black p-4 shadow-lg rounded-sm w-max"
@@ -170,20 +162,14 @@
 					style="background: {yHeader.hexcolor ?? '#FFFFFF'}"
 					data-testid="y-axis-header-{i}"
 				>
-					<Tooltip
-						open={popupHoverY[i].open}
-						onOpenChange={(e) => (popupHoverY[i].open = e.open)}
-						openDelay={0}
-						closeDelay={100}
-						positioning={{ placement: 'bottom-end' }}
-					>
+					<Tooltip openDelay={0} closeDelay={100} positioning={{ placement: 'bottom-end' }}>
 						<Tooltip.Trigger>
 							<span class="font-semibold p-1" data-testid="y-header-name">{yHeader.name}</span>
 							{#if yHeader.description}
 								<i class="fa-solid fa-circle-info cursor-help *:pointer-events-none mt-1"></i>
 							{/if}
 						</Tooltip.Trigger>
-						<Tooltip.Positioner>
+						<Tooltip.Positioner class="!z-50">
 							<Tooltip.Content>
 								<div
 									class="card bg-black p-4 shadow-lg rounded-sm w-max"

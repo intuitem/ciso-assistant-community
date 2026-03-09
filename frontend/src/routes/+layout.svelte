@@ -112,7 +112,7 @@
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
 <Dialog components={modalRegistry} />
-<Toast />
+<Toast zIndex="z-[1000]" />
 {@render children?.()}
 
 {#if $flash}

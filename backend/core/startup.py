@@ -58,6 +58,7 @@ READER_PERMISSIONS_LIST = [
     "view_findingsassessment",
     "view_incident",
     "view_timelineentry",
+    "view_comment",
     "view_tasknode",
     "view_tasktemplate",
     "view_businessimpactanalysis",
@@ -98,6 +99,9 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -176,6 +180,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_accreditation",
     # integrations
     "view_syncmapping",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -211,6 +218,7 @@ ANALYST_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskscenario",
@@ -317,6 +325,11 @@ ANALYST_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks
     "add_tasktemplate",
     "view_tasktemplate",
@@ -443,6 +456,13 @@ ANALYST_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -481,6 +501,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "change_riskacceptance",
     "change_riskassessment",
     "change_riskmatrix",
@@ -598,6 +619,11 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks
     "add_tasktemplate",
     "view_tasktemplate",
@@ -742,6 +768,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -829,6 +862,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "change_requirementassignment",
     "delete_requirementassignment",
     "view_requirementassignment",
+    "transition_requirementassignment",
     # evidence
     "add_evidence",
     "view_evidence",
@@ -985,6 +1019,11 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_timelineentry",
     "change_timelineentry",
     "delete_timelineentry",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
     # tasks,
     "add_tasktemplate",
     "view_tasktemplate",
@@ -1090,6 +1129,13 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1121,11 +1167,17 @@ AUDITEE_PERMISSIONS_LIST = [
     "delete_evidencerevision",
     "view_folder",
     "view_requirementassignment",
+    "transition_requirementassignment",
     "view_appliedcontrol",
     "add_appliedcontrol",
     "change_appliedcontrol",
     "delete_appliedcontrol",
     "view_framework",
+    # comments
+    "add_comment",
+    "view_comment",
+    "change_comment",
+    "delete_comment",
 ]
 
 
@@ -1271,26 +1323,6 @@ def startup(sender: AppConfig, **kwargs):
     )
     auditee.permissions.set(auditee_permissions)
 
-    # Backfill auditee user groups for existing domain folders
-    auditee_role = Role.objects.get(name=RoleCodename.AUDITEE.value)
-    for domain_folder in Folder.objects.filter(content_type=Folder.ContentType.DOMAIN):
-        if not UserGroup.objects.filter(
-            name=str(UserGroupCodename.AUDITEE), folder=domain_folder
-        ).exists():
-            ug = UserGroup.objects.create(
-                name=str(UserGroupCodename.AUDITEE),
-                folder=domain_folder,
-                builtin=True,
-            )
-            ra = RoleAssignment.objects.create(
-                user_group=ug,
-                role=auditee_role,
-                builtin=True,
-                folder=Folder.get_root_folder(),
-                is_recursive=True,
-            )
-            ra.perimeter_folders.add(domain_folder)
-
     # if global auditees user group does not exist, then create it
     if not UserGroup.objects.filter(
         name=UserGroupCodename.GLOBAL_AUDITEE.value, folder=Folder.get_root_folder()
@@ -1302,7 +1334,7 @@ def startup(sender: AppConfig, **kwargs):
         )
         ra = RoleAssignment.objects.create(
             user_group=global_auditees,
-            role=auditee_role,
+            role=auditee,
             is_recursive=True,
             builtin=True,
             folder=Folder.get_root_folder(),
@@ -1425,6 +1457,7 @@ def startup(sender: AppConfig, **kwargs):
         "mapping_max_depth": 3,
         "show_warning_external_links": True,
         "allow_assignments_to_entities": False,
+        "enforce_mfa": False,
     }
     try:
         settings, _ = GlobalSettings.objects.get_or_create(
@@ -1439,7 +1472,10 @@ def startup(sender: AppConfig, **kwargs):
             logger.warning(
                 "ebios radar settings are invalid (None or 0). Reverting to default settings."
             )
-            updated_value = {**current_value, **default_settings}
+            # Merge defaults first, then apply current values to preserve user settings
+            # Finally force-reset the invalid ebios_radar_max to default
+            updated_value = {**default_settings, **current_value}
+            updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
             settings.value = updated_value
             settings.save()
             logger.info(

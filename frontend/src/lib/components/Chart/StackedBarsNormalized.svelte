@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { m } from '$paraglide/messages';
 	interface Props {
+		name?: string;
 		width?: string;
 		height?: string;
 		classesContainer?: string;
@@ -14,6 +15,7 @@
 	}
 
 	let {
+		name = 'stacked',
 		width = 'w-auto',
 		height = 'h-full',
 		classesContainer = '',
@@ -35,7 +37,7 @@
 		return (name) => (name.length > maxLength ? name.substring(0, maxLength) + '...' : name);
 	}
 
-	const chart_id = `stacked_div`;
+	const chart_id = `${name}_stacked_div`;
 
 	onMount(async () => {
 		const echarts = await import('echarts');

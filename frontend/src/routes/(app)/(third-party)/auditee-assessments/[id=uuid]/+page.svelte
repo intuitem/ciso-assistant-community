@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import { page } from '$app/state';
+	import { applyAction, deserialize } from '$app/forms';
+	import { getToastStore } from '$lib/components/Toast/stores';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import Question from '$lib/components/Forms/Question.svelte';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
@@ -43,9 +44,101 @@
 	let requirementAssessments = $derived(data.requirement_assessments);
 	let complianceAssessment = $derived(data.compliance_assessment);
 
+	// Single assignment — the URL param (params.id) IS the assignment ID
+	let assignment = $derived(data.assignment);
+	let assignmentStatus = $derived(assignment?.status ?? null);
+
 	let isReadOnly = $derived(
-		complianceAssessment.is_locked || complianceAssessment.status === 'in_review'
+		complianceAssessment.is_locked ||
+			complianceAssessment.status === 'in_review' ||
+			assignmentStatus === 'draft' ||
+			assignmentStatus === 'submitted' ||
+			assignmentStatus === 'closed'
 	);
+
+	let canSubmit = $derived(
+		assignmentStatus === 'in_progress' || assignmentStatus === 'changes_requested'
+	);
+
+	// Get latest observation from the most recent changes_requested event
+	let reviewerObservation = $derived.by(() => {
+		if (assignmentStatus !== 'changes_requested' || !assignment?.events?.length) return null;
+		const event = assignment.events.find(
+			(e: { event_type: string; event_notes: string | null }) =>
+				e.event_type === 'changes_requested' && e.event_notes
+		);
+		return event?.event_notes ?? null;
+	});
+
+	// History modal state
+	let showHistoryModal = $state(false);
+
+	function openHistoryModal() {
+		showHistoryModal = true;
+	}
+
+	function closeHistoryModal() {
+		showHistoryModal = false;
+	}
+
+	// Format event actor name
+	function formatEventActor(
+		actor: { first_name: string; last_name: string; email: string } | null
+	): string {
+		if (!actor) return '—';
+		const name = [actor.first_name, actor.last_name].filter(Boolean).join(' ');
+		return name || actor.email;
+	}
+
+	const toastStore = getToastStore();
+
+	let isSubmitting = $state(false);
+
+	async function handleSubmitForReview() {
+		if (!assignment || !canSubmit) return;
+
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.submitForReview(),
+			body: m.submitForReviewConfirm(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				isSubmitting = true;
+				try {
+					const response = await fetch(`?/submitAssignment`, {
+						method: 'POST',
+						body: new FormData()
+					});
+					const result = deserialize(await response.text());
+					if (result.type === 'success' && result.data?.submitStatus === 200) {
+						await applyAction(result);
+						await invalidateAll();
+						toastStore.trigger({
+							message: m.statusUpdatedSuccessfully(),
+							background: 'variant-filled-success',
+							timeout: 3000
+						});
+					} else {
+						toastStore.trigger({
+							message: result.data?.submitBody?.error || m.submissionFailed(),
+							background: 'variant-filled-error',
+							timeout: 5000
+						});
+					}
+				} catch (error) {
+					console.error('Error submitting assignment:', error);
+					toastStore.trigger({
+						message: m.anErrorOccurred(),
+						background: 'variant-filled-error',
+						timeout: 3000
+					});
+				} finally {
+					isSubmitting = false;
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
 
 	const requirementHashmap = $derived(
 		Object.fromEntries(
@@ -75,6 +168,7 @@
 	const progressPercent = $derived(
 		totalAssessable > 0 ? Math.round((assessedCount / totalAssessable) * 100) : 0
 	);
+	let submitBlocked = $derived(assessedCount < totalAssessable);
 
 	// --- Update logic (same as table-mode) ---
 	async function updateBulk(
@@ -277,11 +371,26 @@
 		})
 	);
 
-	// ToC visibility
+	// ToC visibility and filtering
 	let tocCollapsed = $state(false);
+	let tocFilterResult = $state<string | null>(null);
+	const resultCounts = $derived(
+		result_options.map((opt) => ({
+			...opt,
+			count: tocSections.filter((s) => s.result === opt.id).length
+		}))
+	);
+	const filteredTocSections = $derived(
+		tocFilterResult ? tocSections.filter((s) => s.result === tocFilterResult) : tocSections
+	);
 
 	// Keyboard navigation
 	function handleKeydown(event: KeyboardEvent) {
+		if (event.key === 'Escape' && showHistoryModal) {
+			event.preventDefault();
+			closeHistoryModal();
+			return;
+		}
 		if (event.metaKey || event.ctrlKey) return;
 		if (document.activeElement?.tagName !== 'BODY') return;
 		if (event.key === 'ArrowRight' || event.key === 'n') {
@@ -294,6 +403,8 @@
 		}
 	}
 
+	import { page } from '$app/state';
+	import CommentsPanel from '$lib/components/CommentsPanel/CommentsPanel.svelte';
 	import { onMount } from 'svelte';
 	onMount(() => {
 		document.addEventListener('keydown', handleKeydown);
@@ -320,8 +431,28 @@
 			</button>
 		</div>
 		{#if !tocCollapsed}
+			<div class="px-2 py-2 flex flex-wrap gap-1 border-b border-gray-200">
+				{#each resultCounts as opt}
+					{#if opt.count > 0}
+						<button
+							class="px-2 py-1 text-[10px] rounded transition-colors flex items-center gap-1.5
+								{tocFilterResult === opt.id
+								? 'bg-gray-700 text-white font-semibold'
+								: 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'}"
+							onclick={() => (tocFilterResult = tocFilterResult === opt.id ? null : opt.id)}
+							title={opt.label}
+						>
+							<span
+								class="inline-block w-1.5 h-1.5 rounded-full"
+								style="background-color: {complianceResultColorMap[opt.id] ?? '#d1d5db'};"
+							></span>
+							{opt.count}
+						</button>
+					{/if}
+				{/each}
+			</div>
 			<nav class="p-2 space-y-0.5">
-				{#each tocSections as section}
+				{#each filteredTocSections as section}
 					<button
 						class="w-full text-left px-2 py-1.5 text-xs rounded-md transition-colors truncate flex items-center gap-1.5
 							{section.index === currentIndex
@@ -344,7 +475,7 @@
 	<!-- Main content -->
 	<div class="flex-1 flex flex-col space-y-4 p-4 min-w-0">
 		<!-- Header: audit name + progress -->
-		<div class="card bg-surface-50-950 shadow-sm px-5 py-3">
+		<div class="card bg-surface-50-950 shadow-sm px-5 py-4 border-t-[3px] border-t-primary-500">
 			<div class="flex items-center justify-between mb-2">
 				<div class="flex items-center space-x-3">
 					<a
@@ -386,8 +517,8 @@
 			<div class="flex items-center space-x-3">
 				<div class="flex-1 bg-surface-200-800 rounded-full h-2">
 					<div
-						class="bg-indigo-500 h-2 rounded-full transition-all duration-300"
-						style="width: {progressPercent}%"
+						class="h-2 rounded-full transition-all duration-500 ease-out"
+						style="width: {progressPercent}%; background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-400));"
 					></div>
 				</div>
 				<span class="text-sm font-medium text-surface-600-400 whitespace-nowrap"
@@ -396,11 +527,111 @@
 			</div>
 		</div>
 
-		<!-- Read-only banner -->
-		{#if isReadOnly}
-			<div class="card bg-yellow-50 border border-yellow-300 px-5 py-3 flex items-center space-x-3">
-				<i class="fa-solid fa-lock text-yellow-600 text-lg"></i>
-				<p class="text-yellow-800 font-medium">
+		<!-- Assignment status banners -->
+		{#if assignmentStatus === 'submitted'}
+			<div
+				class="bg-white border border-blue-200 border-l-[3px] border-l-blue-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
+					<i class="fa-solid fa-clock text-blue-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-blue-800 font-medium">{m.assignmentSubmittedBanner()}</p>
+			</div>
+		{:else if assignmentStatus === 'closed'}
+			<div
+				class="bg-white border border-green-200 border-l-[3px] border-l-emerald-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-check-circle text-emerald-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-green-800 font-medium">{m.assignmentClosedBanner()}</p>
+			</div>
+		{:else if assignmentStatus === 'changes_requested'}
+			<div
+				class="bg-white border border-red-200 border-l-[3px] border-l-red-500 rounded-lg px-5 py-3 flex flex-col gap-2 shadow-sm"
+			>
+				<div class="flex items-center gap-3">
+					<div
+						class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0"
+					>
+						<i class="fa-solid fa-rotate-left text-red-500 text-sm"></i>
+					</div>
+					<p class="text-sm text-red-800 font-medium">{m.assignmentChangesRequestedBanner()}</p>
+				</div>
+				{#if reviewerObservation}
+					<div class="bg-red-50 rounded-md p-3 ml-11 text-sm text-red-700 whitespace-pre-line">
+						<i class="fa-solid fa-comment-dots mr-1"></i>
+						{reviewerObservation}
+					</div>
+				{/if}
+				{#if assignment?.events?.length > 0}
+					<button
+						class="ml-11 badge bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 cursor-pointer transition-colors"
+						onclick={openHistoryModal}
+						title={m.viewHistory()}
+					>
+						<i class="fa-solid fa-clock-rotate-left mr-1"></i>
+						{m.eventsHistory()}
+						<span class="badge bg-gray-100 text-gray-500 text-[10px] ml-1"
+							>{assignment.events.length}</span
+						>
+					</button>
+				{/if}
+			</div>
+		{:else if assignmentStatus === 'draft'}
+			<div
+				class="bg-white border border-gray-200 border-l-[3px] border-l-gray-400 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-hourglass text-gray-400 text-sm"></i>
+				</div>
+				<p class="text-sm text-gray-600 font-medium">{m.assignmentAwaitingStart()}</p>
+			</div>
+		{/if}
+
+		<!-- Submit for Review button -->
+		{#if canSubmit}
+			<div class="flex flex-col items-end gap-2">
+				{#if submitBlocked}
+					<p class="text-xs text-amber-600 flex items-center gap-1.5">
+						<i class="fa-solid fa-circle-exclamation"></i>
+						{m.incompleteAssessmentWarning({
+							remaining: totalAssessable - assessedCount,
+							total: totalAssessable
+						})}
+					</p>
+				{/if}
+				<button
+					class="btn preset-filled-primary-500"
+					onclick={handleSubmitForReview}
+					disabled={isSubmitting || submitBlocked}
+					title={submitBlocked ? m.incompleteAssessmentError() : ''}
+				>
+					{#if isSubmitting}
+						<i class="fa-solid fa-spinner fa-spin mr-2"></i>
+					{:else}
+						<i class="fa-solid fa-paper-plane mr-2"></i>
+					{/if}
+					{m.submitForReview()}
+				</button>
+			</div>
+		{/if}
+
+		<!-- Read-only banner (only for CA-level locks, not assignment-level) -->
+		{#if complianceAssessment.is_locked || complianceAssessment.status === 'in_review'}
+			<div
+				class="bg-white border border-yellow-200 border-l-[3px] border-l-yellow-500 rounded-lg px-5 py-3 flex items-center gap-3 shadow-sm"
+			>
+				<div
+					class="w-8 h-8 rounded-full bg-yellow-50 flex items-center justify-center flex-shrink-0"
+				>
+					<i class="fa-solid fa-lock text-yellow-500 text-sm"></i>
+				</div>
+				<p class="text-sm text-yellow-800 font-medium">
 					{complianceAssessment.is_locked
 						? m.lockedAssessmentMessage()
 						: m.assessmentInReviewMessage()}
@@ -417,7 +648,7 @@
 				] ?? requirementAssessment}
 			<div
 				id="current-requirement"
-				class="card bg-surface-50-950 shadow-lg px-6 py-4 flex flex-col space-y-4"
+				class="card bg-surface-50-950 shadow-md border-t-[3px] border-t-orange-400 px-6 py-5 flex flex-col space-y-4"
 			>
 				<!-- Requirement title -->
 				<div class="flex items-start justify-between">
@@ -560,7 +791,7 @@
 										form={scoreForms[requirementAssessment.id]}
 										min_score={complianceAssessment.min_score}
 										max_score={complianceAssessment.max_score}
-										scores_definition={data.scores.scores_definition}
+										scores_definition={complianceAssessment.scores_definition}
 										field="score"
 										label={complianceAssessment.show_documentation_score
 											? m.implementationScore()
@@ -596,7 +827,7 @@
 											form={docScoreForms[requirementAssessment.id]}
 											min_score={complianceAssessment.min_score}
 											max_score={complianceAssessment.max_score}
-											scores_definition={data.scores.scores_definition}
+											scores_definition={complianceAssessment.scores_definition}
 											field="documentation_score"
 											label={m.documentationScore()}
 											isDoc={true}
@@ -770,6 +1001,9 @@
 						</form>
 					{/key}
 				{/if}
+				{#if page.data?.featureflags?.comments}
+					<CommentsPanel parentType="requirement_assessment" parentId={requirementAssessment.id} />
+				{/if}
 			</div>
 
 			<!-- Previous / Next navigation -->
@@ -795,10 +1029,110 @@
 				</button>
 			</div>
 		{:else}
-			<div class="card bg-surface-50-950 shadow-lg p-8 text-center">
-				<i class="fa-solid fa-clipboard-check text-4xl text-surface-300-700 mb-4"></i>
-				<p class="text-surface-600-400 text-lg">{m.noAuditAssignments()}</p>
+			<div class="flex flex-col items-center justify-center py-20">
+				<div class="w-16 h-16 rounded-2xl bg-surface-100-900 flex items-center justify-center mb-5">
+					<i class="fa-solid fa-clipboard-check text-2xl text-surface-300-700"></i>
+				</div>
+				<p class="text-surface-400-600">{m.noAuditAssignments()}</p>
 			</div>
 		{/if}
 	</div>
 </div>
+
+<!-- History Modal -->
+{#if showHistoryModal && assignment?.events?.length > 0}
+	<div class="fixed inset-0 bg-black/50 z-40" onclick={closeHistoryModal} role="presentation"></div>
+	<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+		<div
+			class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="history-modal-title"
+		>
+			<!-- Header -->
+			<div class="flex items-center justify-between p-4 border-b">
+				<h2 id="history-modal-title" class="h4 font-semibold">
+					<i class="fa-solid fa-clock-rotate-left text-primary-500 mr-2"></i>
+					{m.eventsHistory()}
+				</h2>
+				<button
+					class="btn btn-sm preset-ghost-surface"
+					onclick={closeHistoryModal}
+					aria-label={m.close()}
+				>
+					<i class="fa-solid fa-times"></i>
+				</button>
+			</div>
+
+			<!-- Content -->
+			<div class="p-4 overflow-y-auto flex-1">
+				<div class="mb-3">
+					<span class="text-sm text-gray-600">
+						{complianceAssessment.name}
+					</span>
+				</div>
+
+				<div class="space-y-3">
+					{#each assignment.events as event}
+						<div class="flex gap-3">
+							<div class="flex flex-col items-center">
+								<div
+									class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0 {event.event_type ===
+									'changes_requested'
+										? 'bg-red-400'
+										: event.event_type === 'closed'
+											? 'bg-emerald-500'
+											: event.event_type === 'submitted'
+												? 'bg-blue-400'
+												: event.event_type === 'in_progress'
+													? 'bg-amber-400'
+													: 'bg-gray-300'}"
+								></div>
+								<div class="w-px flex-1 bg-gray-200 mt-1"></div>
+							</div>
+							<div class="pb-3 flex-1">
+								<div class="flex items-center gap-2 text-sm">
+									<span
+										class="font-medium px-1.5 py-0.5 rounded text-xs {event.event_type ===
+										'changes_requested'
+											? 'bg-red-100 text-red-700'
+											: event.event_type === 'closed'
+												? 'bg-green-100 text-green-700'
+												: event.event_type === 'submitted'
+													? 'bg-blue-100 text-blue-700'
+													: event.event_type === 'in_progress'
+														? 'bg-orange-100 text-orange-700'
+														: 'bg-gray-100 text-gray-700'}"
+									>
+										{safeTranslate(event.event_type)}
+									</span>
+									<span class="text-gray-500 text-xs">
+										{formatEventActor(event.event_actor)}
+									</span>
+								</div>
+								<span class="text-gray-400 text-xs">
+									{new Date(event.created_at).toLocaleString()}
+								</span>
+								{#if event.event_notes}
+									<div
+										class="mt-1.5 text-sm text-gray-700 whitespace-pre-line bg-gray-50 border border-gray-100 rounded-md px-3 py-2"
+									>
+										{event.event_notes}
+									</div>
+								{/if}
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Footer -->
+			<div class="p-4 border-t bg-gray-50 rounded-b-lg">
+				<button class="btn preset-filled-surface-500 w-full" onclick={closeHistoryModal}>
+					{m.close()}
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}

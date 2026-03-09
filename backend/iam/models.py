@@ -263,6 +263,7 @@ class Folder(NameDescriptionMixin):
             ["provider_entity", "folder"],
             ["solution", "provider_entity", "folder"],
             ["processing", "folder"],
+            ["journey", "folder"],
         ]
 
         # Attempt to traverse each path until a valid folder is found or all paths are exhausted.
@@ -333,6 +334,7 @@ class Folder(NameDescriptionMixin):
             (UserGroupCodename.APPROVER, RoleCodename.APPROVER),
             (UserGroupCodename.ANALYST, RoleCodename.ANALYST),
             (UserGroupCodename.DOMAIN_MANAGER, RoleCodename.DOMAIN_MANAGER),
+            (UserGroupCodename.AUDITEE, RoleCodename.AUDITEE),
         ]
 
         for ug_codename, role_codename in builtin_pairs:
@@ -1196,6 +1198,10 @@ class RoleAssignment(NameDescriptionMixin, FolderMixin):
                 objects_iter = object_type.objects.filter(
                     provider_entity__folder_id__in=folder_ids
                 ).values_list("id", "provider_entity__folder_id")
+            elif hasattr(object_type, "journey"):
+                objects_iter = object_type.objects.filter(
+                    journey__folder_id__in=folder_ids
+                ).values_list("id", "journey__folder_id")
             else:
                 raise NotImplementedError("type not supported")
 

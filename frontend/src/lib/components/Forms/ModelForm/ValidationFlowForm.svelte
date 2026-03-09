@@ -194,5 +194,45 @@
 			multiple
 			disabled={initialData.findings_assessments}
 		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="security-exceptions"
+			field="security_exceptions"
+			cacheLock={cacheLocks['security_exceptions']}
+			bind:cachedValue={formDataCache['security_exceptions']}
+			label={m.securityExceptions()}
+			multiple
+			disabled={initialData.security_exceptions}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="processings"
+			field="processings"
+			cacheLock={cacheLocks['processings']}
+			bind:cachedValue={formDataCache['processings']}
+			label={m.processings()}
+			multiple
+			disabled={initialData.processings}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="accreditations"
+			field="accreditations"
+			cacheLock={cacheLocks['accreditations']}
+			bind:cachedValue={formDataCache['accreditations']}
+			label={m.accreditations()}
+			multiple
+			disabled={initialData.accreditations}
+		/>
+		<AutocompleteSelect
+			{form}
+			optionsEndpoint="contracts"
+			field="contracts"
+			cacheLock={cacheLocks['contracts']}
+			bind:cachedValue={formDataCache['contracts']}
+			label={m.contracts()}
+			multiple
+			disabled={initialData.contracts}
+		/>
 	</Dropdown>
 {/if}

@@ -1,0 +1,14 @@
+subject: "CISO Assistant : Votre affectation sur '${assessment_name}' a démarré"
+body: |
+  Bonjour,
+
+  Votre affectation sur l'audit suivant a démarré et est prête pour votre contribution :
+
+  - Audit : ${assessment_name}
+  - Référentiel : ${framework_name}
+  - Date d'échéance : ${due_date}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour commencer votre évaluation :
+  ${ciso_assistant_url}
+
+  Merci.
