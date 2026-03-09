@@ -929,7 +929,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }]
+		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
 	},
 	'feature-flags': {
 		name: 'featureFlags',

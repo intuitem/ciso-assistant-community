@@ -6,6 +6,7 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from core.serializers import SerializerFactory
+from iam.models import User
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
 from core.serializers import SerializerFactory
@@ -150,6 +151,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
+            "default_language": "en",
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -168,6 +170,34 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         settings.value["enabled_integrations"] = list(enabled_integrations)
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
+
+    @action(detail=True, name="Get available languages")
+    def default_language(self, request):
+        choices = {code: name for code, name in settings.LANGUAGES}
+        return Response(choices)
+
+    @action(detail=True, methods=["post"], name="Force language for all users")
+    def force_language(self, request):
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "Only administrators can force language for all users."},
+                status=403,
+            )
+        lang = request.data.get("language")
+        if not lang or lang not in dict(settings.LANGUAGES):
+            return Response(
+                {"error": "Invalid language."},
+                status=400,
+            )
+        users = User.objects.all()
+        updated = 0
+        for user in users:
+            if not isinstance(user.preferences, dict):
+                user.preferences = {}
+            user.preferences["lang"] = lang
+            user.save(update_fields=["preferences"])
+            updated += 1
+        return Response({"updated": updated})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):

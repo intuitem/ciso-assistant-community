@@ -15,6 +15,31 @@ logger = structlog.getLogger(__name__)
 TEMPLATE_BASE_PATH = Path(__file__).parent / "templates" / "emails"
 
 
+def get_locale_for_email(email: str) -> str:
+    """
+    Resolve the preferred locale for a given email address.
+    Looks up the user's preferences, falls back to admin default, then 'en'.
+    """
+    from iam.models import User
+    from global_settings.models import GlobalSettings
+
+    try:
+        user = User.objects.filter(email=email).first()
+        if user and isinstance(user.preferences, dict) and user.preferences.get("lang"):
+            return user.preferences["lang"]
+    except Exception:
+        pass
+
+    try:
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            return general.value.get("default_language", "en")
+    except Exception:
+        pass
+
+    return "en"
+
+
 def load_email_template(
     template_name: str, locale: Optional[str] = None
 ) -> Optional[Dict[str, str]]:
@@ -68,7 +93,10 @@ def load_email_template(
 
 
 def render_email_template(
-    template_name: str, context: Dict, locale: Optional[str] = None
+    template_name: str,
+    context: Dict,
+    locale: Optional[str] = None,
+    recipient_email: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Render email template with context variables
@@ -76,11 +104,14 @@ def render_email_template(
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
         context: Dictionary of variables to substitute in template
-        locale: Language code. If None, uses current Django language
+        locale: Language code. If None, resolves from recipient_email or uses current Django language
+        recipient_email: Email address of recipient, used to resolve locale from user preferences
 
     Returns:
         Dictionary with 'subject' and 'body' keys, or empty dict if template not found
     """
+    if locale is None and recipient_email:
+        locale = get_locale_for_email(recipient_email)
     template_data = load_email_template(template_name, locale)
     if not template_data:
         logger.error(f"Failed to load template {template_name}")
@@ -265,7 +296,9 @@ def send_templated_notification(
     if not check_email_configuration(recipient_email, []):
         return False
 
-    rendered = render_email_template(template_name, context, locale)
+    rendered = render_email_template(
+        template_name, context, locale=locale, recipient_email=recipient_email
+    )
     if not rendered:
         return False
 

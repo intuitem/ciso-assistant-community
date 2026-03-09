@@ -7573,7 +7573,23 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        return Response(request.user.preferences, status=status.HTTP_200_OK)
+        prefs = request.user.preferences
+        if not isinstance(prefs, dict):
+            prefs = {}
+        if "lang" not in prefs:
+            try:
+                general = GlobalSettings.objects.filter(name="general").first()
+                default_lang = (
+                    general.value.get("default_language", "en")
+                    if general and isinstance(general.value, dict)
+                    else "en"
+                )
+            except Exception:
+                default_lang = "en"
+            prefs["lang"] = default_lang
+            request.user.preferences = prefs
+            request.user.save(update_fields=["preferences"])
+        return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")

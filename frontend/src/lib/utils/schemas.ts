@@ -528,7 +528,8 @@ export const GeneralSettingsSchema = z.object({
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
-	enforce_mfa: z.boolean().default(false).optional()
+	enforce_mfa: z.boolean().default(false).optional(),
+	default_language: z.string().default('en').optional()
 });
 
 export const FeatureFlagsSchema = z.object({

@@ -14,7 +14,7 @@ from django.db.utils import OperationalError, ProgrammingError
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import AnonymousUser, Permission
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, override as translation_override
 from django.urls.base import reverse_lazy
 from django.db.models import Q, F, Prefetch, QuerySet
 from knox.models import AuthToken
@@ -508,6 +508,21 @@ class UserManager(BaseUserManager):
             user.password = make_password(password)
         else:
             user.set_unusable_password()
+        # Set default language from general settings
+        try:
+            from global_settings.models import GlobalSettings
+
+            general = GlobalSettings.objects.filter(name="general").first()
+            if general and isinstance(general.value, dict):
+                default_lang = general.value.get("default_language", "en")
+            else:
+                default_lang = "en"
+        except Exception:
+            default_lang = "en"
+        if not isinstance(user.preferences, dict):
+            user.preferences = {}
+        user.preferences["lang"] = default_lang
+
         user.save(using=self._db)
         user.user_groups.set(extra_fields.get("user_groups", []))
         if initial_group:
@@ -681,6 +696,11 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         """
         Sending a mail to a user for password resetting or creation
         """
+        # Resolve user's preferred language for email rendering
+        user_lang = (
+            self.preferences.get("lang") if isinstance(self.preferences, dict) else None
+        ) or "en"
+
         header = {
             "email": self.email,
             "root_url": CISO_ASSISTANT_URL,
@@ -692,7 +712,8 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             "object": object,
             "object_id": object_id,
         }
-        email = render_to_string(email_template_name, header)
+        with translation_override(user_lang):
+            email = render_to_string(email_template_name, header)
         try:
             send_mail(
                 subject=subject,
