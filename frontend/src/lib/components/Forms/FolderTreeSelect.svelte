@@ -60,6 +60,7 @@
 	let searchInputEl = $state<HTMLInputElement | null>(null);
 	let sortAsc = $state(true);
 	let selectedName = $state('');
+	let selectedPath = $state<string[]>([]);
 	let isLoading = $state(false);
 
 	let debouncedQuery = $state('');
@@ -127,18 +128,24 @@
 	$effect(() => {
 		const v = $value;
 		if (v && orgTree) {
-			function findName(n: TreeNode): string | null {
-				if (n.uuid === String(v)) return n.name;
+			// Only traverse when the name isn't already known (edit mode / cache restore)
+			if (selectedName) return;
+			function findNode(n: TreeNode, anc: string[]): { name: string; path: string[] } | null {
+				if (n.uuid === String(v)) return { name: n.name, path: anc };
 				for (const c of n.children ?? []) {
-					const found = findName(c);
+					const found = findNode(c, [...anc, n.name]);
 					if (found) return found;
 				}
 				return null;
 			}
-			const found = findName(orgTree);
-			if (found) selectedName = found;
+			const result = findNode(orgTree, []);
+			if (result) {
+				selectedName = result.name;
+				selectedPath = result.path;
+			}
 		} else if (!v) {
 			selectedName = '';
+			selectedPath = [];
 		}
 	});
 
@@ -149,9 +156,10 @@
 	//  Unique CSS class for click-outside detection
 	const selectorClass = `folder-tree-select-${field.replace(/_/g, '-')}`;
 
-	function handleSelect(id: string, name: string) {
+	function handleSelect(id: string, name: string, path: string[] = []) {
 		$value = id;
 		selectedName = name;
+		selectedPath = path;
 		isOpen = false;
 		searchQuery = '';
 		onChange($value);
@@ -161,6 +169,7 @@
 		e.stopPropagation();
 		$value = null;
 		selectedName = '';
+		selectedPath = [];
 		isOpen = false;
 		onChange(null);
 	}
@@ -256,8 +265,15 @@
 					{$errors && $errors.length > 0 ? 'border-red-400' : ''}"
 			>
 				<i class="fa-solid fa-folder text-slate-400 flex-shrink-0 text-xs"></i>
-				<span class="flex-1 truncate {selectedName ? 'text-surface-900' : 'text-surface-500'}">
-					{selectedName || m.selectDomain()}
+				<span class="flex-1 min-w-0 truncate">
+					{#if selectedName}
+						{#if selectedPath.length > 0}
+							<span class="text-surface-400 text-xs">{selectedPath.join(' / ')} / </span>
+						{/if}
+						<span class="text-surface-900">{selectedName}</span>
+					{:else}
+						<span class="text-surface-500">{m.selectDomain()}</span>
+					{/if}
 				</span>
 				{#if isLoading}
 					<i class="fa-solid fa-spinner animate-spin text-slate-400 text-xs flex-shrink-0"></i>
@@ -347,7 +363,7 @@
 										{$value === String(result.node.uuid) ? 'bg-indigo-100' : ''}"
 									onclick={(e) => {
 										e.stopPropagation();
-										handleSelect(String(result.node.uuid), result.node.name);
+										handleSelect(String(result.node.uuid), result.node.name, result.path);
 									}}
 									title={[...result.path, result.node.name].join(' / ')}
 								>

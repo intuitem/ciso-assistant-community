@@ -12,9 +12,10 @@
 		node: TreeNode;
 		sortAsc: boolean;
 		focusId: string | null;
-		onSelect: (id: string, name: string) => void;
+		onSelect: (id: string, name: string, path: string[]) => void;
 		depth?: number;
 		contentTypes?: string[];
+		ancestors?: string[];
 	}
 
 	let {
@@ -23,7 +24,8 @@
 		focusId,
 		onSelect,
 		depth = 0,
-		contentTypes = ['DO', 'GL']
+		contentTypes = ['DO', 'GL'],
+		ancestors = []
 	}: Props = $props();
 
 	const sortedChildren = $derived.by(() => {
@@ -71,7 +73,7 @@
 				title={node.name}
 				onclick={(e) => {
 					e.stopPropagation();
-					if (isSelectable) onSelect(String(node.uuid), node.name);
+					if (isSelectable) onSelect(String(node.uuid), node.name, ancestors);
 				}}
 				disabled={!isSelectable}
 			>
@@ -97,6 +99,7 @@
 						{onSelect}
 						{contentTypes}
 						depth={depth + 1}
+						ancestors={[...ancestors, node.name]}
 					/>
 				{/each}
 			</ul>
