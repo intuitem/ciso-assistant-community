@@ -1156,6 +1156,7 @@ class LibraryUpdater:
                             requirement_node=requirement_node_object
                         ).prefetch_related("choices")
 
+                        ra_changed = False
                         for q in new_questions:
                             if q.urn not in existing_answers:
                                 # New question: create empty answer
@@ -1165,6 +1166,7 @@ class LibraryUpdater:
                                     folder=ra.folder,
                                 )
                                 answers_changed_ca_ids.add(ra.compliance_assessment_id)
+                                ra_changed = True
                             else:
                                 # Existing question: validate answer against new choices
                                 answer = existing_answers[q.urn]
@@ -1191,6 +1193,7 @@ class LibraryUpdater:
                                     answers_changed_ca_ids.add(
                                         ra.compliance_assessment_id
                                     )
+                                    ra_changed = True
 
                         # Remove answers for questions that no longer exist
                         new_question_urns = {q.urn for q in new_questions}
@@ -1198,6 +1201,12 @@ class LibraryUpdater:
                             if urn not in new_question_urns:
                                 answer.delete()
                                 answers_changed_ca_ids.add(ra.compliance_assessment_id)
+                                ra_changed = True
+
+                        if ra_changed:
+                            ra.recompute_assessment()
+                            if ra not in requirement_assessment_objects_to_update:
+                                requirement_assessment_objects_to_update.append(ra)
 
                     # update threats linked to the requirement_node
                     for threat_urn in requirement_node.get("threats", []):
@@ -1243,7 +1252,7 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["score", "is_scored", "documentation_score"],
+                        ["score", "is_scored", "documentation_score", "result"],
                         batch_size=100,
                     )
 
@@ -6433,8 +6442,9 @@ class ComplianceAssessment(Assessment):
             framework=self.framework
         ).select_related()
 
-        # If there's a baseline, prefetch all related baseline assessments in one query
+        # If there's a baseline, prefetch all related baseline assessments and answers in one query
         baseline_assessments = {}
+        baseline_answers = {}
         if baseline and baseline.framework == self.framework:
             baseline_assessments = {
                 ra.requirement_id: ra
@@ -6442,6 +6452,15 @@ class ComplianceAssessment(Assessment):
                     compliance_assessment=baseline, requirement__in=requirements
                 ).prefetch_related("evidences", "applied_controls")
             }
+
+            if baseline_assessments:
+                answers_qs = Answer.objects.filter(
+                    requirement_assessment__in=baseline_assessments.values()
+                ).prefetch_related("selected_choices")
+                for ans in answers_qs:
+                    baseline_answers[
+                        (ans.requirement_assessment.requirement_id, ans.question_id)
+                    ] = ans
 
         # Create all RequirementAssessment objects in bulk
         requirement_assessments = [
@@ -6469,15 +6488,38 @@ class ComplianceAssessment(Assessment):
         for question in questions:
             ra = ra_by_req.get(question.requirement_node_id)
             if ra:
+                baseline_ans = baseline_answers.get((ra.requirement_id, question.id))
                 answers_to_create.append(
                     Answer(
                         requirement_assessment=ra,
                         question=question,
                         folder_id=self.folder.id,
+                        value=baseline_ans.value if baseline_ans else None,
                     )
                 )
         if answers_to_create:
-            Answer.objects.bulk_create(answers_to_create, batch_size=1000)
+            created_answers = Answer.objects.bulk_create(
+                answers_to_create, batch_size=1000
+            )
+
+            # Replicate selected_choices M2M from baseline
+            if baseline_answers:
+                through_objects = []
+                for ans in created_answers:
+                    baseline_ans = baseline_answers.get(
+                        (ans.requirement_assessment.requirement_id, ans.question_id)
+                    )
+                    if baseline_ans:
+                        for choice in baseline_ans.selected_choices.all():
+                            through_objects.append(
+                                Answer.selected_choices.through(
+                                    answer_id=ans.id, questionchoice_id=choice.id
+                                )
+                            )
+                if through_objects:
+                    Answer.selected_choices.through.objects.bulk_create(
+                        through_objects, batch_size=1000
+                    )
 
         # If there's a baseline, update the created assessments with baseline data
         if baseline_assessments:
@@ -7636,7 +7678,11 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
 
         return visible_questions, answered_visible_questions
 
-    def compute_score_and_result(self):
+    def recompute_assessment(self):
+        """
+        Recalculates score, result and is_scored from current Answer objects.
+        Does NOT save the model.
+        """
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
         answers_qs = (
             self.answers.select_related("question")
@@ -7737,10 +7783,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         else:
             new_result = self.Result.NON_COMPLIANT
 
-        # Atomic update and save
+        # Update attributes
         self.score = new_score
         self.result = new_result
         self.is_scored = new_is_scored
+
+    def compute_score_and_result(self):
+        self.recompute_assessment()
+        # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
     def save(self, *args, **kwargs) -> None:
