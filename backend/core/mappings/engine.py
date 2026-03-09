@@ -576,5 +576,4 @@ class MappingEngine:
         return dict(res)
 
 
-
 engine = MappingEngine()
