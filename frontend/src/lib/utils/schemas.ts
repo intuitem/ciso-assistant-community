@@ -340,6 +340,7 @@ export const AssetSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -924,9 +925,17 @@ export const organisationObjectiveSchema = z.object({
 	metrics: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
+	is_active: z.boolean().optional().default(true),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	closing_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
+
+export const OrganisationObjectiveDuplicateSchema = z.object({
+	...organisationObjectiveSchema.shape
+});
+
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1224,6 +1233,7 @@ export const TaskTemplateSchema = z.object({
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
+	objectives: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
@@ -1448,7 +1458,7 @@ export const teamSchema = z.object({
 	team_email: z.string().email().optional(),
 	folder: z.string(),
 	members: z.array(z.string().uuid().optional()).optional(),
-	leader: z.string().uuid(),
+	leader: z.string().uuid().optional().nullable(),
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
@@ -1462,6 +1472,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
+	'organisation-objectives_duplicate': OrganisationObjectiveDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'validation-flows': ValidationFlowSchema,

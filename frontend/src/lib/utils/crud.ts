@@ -2052,13 +2052,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'status' },
 			{ field: 'health' },
+			{ field: 'is_active' },
+			{ field: 'start_date', type: 'date' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
+			{ field: 'closing_date', type: 'date' },
 			{ field: 'observation' },
 			{ field: 'assigned_to' },
-			{ field: 'issues' },
-			{ field: 'assets' },
-			{ field: 'tasks' }
+			{ field: 'issues' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2068,6 +2069,24 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableDelete: true,
 				addExisting: {
 					parentField: 'applied_controls'
+				}
+			},
+			{
+				field: 'objectives',
+				urlModel: 'task-templates',
+				disableCreate: false,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'tasks'
+				}
+			},
+			{
+				field: 'organisation_objectives',
+				urlModel: 'assets',
+				disableCreate: false,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'assets'
 				}
 			},
 			{
