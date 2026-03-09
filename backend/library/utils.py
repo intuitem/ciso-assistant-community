@@ -334,7 +334,7 @@ class FrameworkImporter:
 
         for requirement_importer in self._requirement_nodes:
             requirement_node_data = requirement_importer.requirement_data
-            questions = requirement_node_data.get("questions", {})
+            questions = requirement_node_data.get("questions") or {}
 
             for question_urn in questions.keys():
                 if question_urn in question_urns:

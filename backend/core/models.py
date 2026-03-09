@@ -645,7 +645,7 @@ class LibraryUpdater:
         duplicated_question_urns = set()
 
         for requirement_node in requirement_nodes:
-            questions = requirement_node.get("questions", {})
+            questions = requirement_node.get("questions") or {}
 
             for question_urn in questions.keys():
                 if question_urn in question_urns:
