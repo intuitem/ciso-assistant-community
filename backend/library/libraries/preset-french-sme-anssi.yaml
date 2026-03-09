@@ -1,0 +1,343 @@
+urn: urn:intuitem:risk:preset:french-sme-anssi
+locale: fr
+ref_id: preset-french-sme-anssi
+name: "PME française - Hygiène ANSSI"
+description: "Guide d'hygiène cybersécurité ANSSI + parcours RGPD pour les petites et moyennes entreprises françaises. Active les modules vie privée et gestion des fournisseurs. Point de départ idéal pour les organisations débutant leur mise en conformité sécurité et vie privée."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  en:
+    name: French SME - ANSSI Hygiene
+    description: ANSSI Cybersecurity Hygiene guide + GDPR journey for French small and medium enterprises. Enables privacy and vendor management modules. Ideal starting point for organizations beginning their security and privacy compliance.
+
+dependencies:
+  - urn:intuitem:risk:library:anssi-guide-hygiene
+  - urn:intuitem:risk:library:gdpr
+  - urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+  - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+      industry:
+        - general
+      region:
+        - fr
+        - eu
+      goal: security-baseline
+
+    feature_flags:
+      enable:
+        - compliance
+        - privacy
+        - tprm
+        - follow_up
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "Analyse de risques initiale"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-4x4-ebios-rm
+        ref: main_ra
+        translations:
+          en:
+            name: "Initial Risk Assessment"
+      - type: compliance_assessment
+        name: "ANSSI Hygiene Assessment"
+        framework: urn:intuitem:risk:library:anssi-guide-hygiene
+        create_suggested_controls: true
+        ref: anssi_audit
+        translations:
+          fr:
+            name: "Évaluation ANSSI Hygiène"
+      - type: compliance_assessment
+        name: "GDPR Compliance"
+        framework: urn:intuitem:risk:library:gdpr
+        ref: gdpr_audit
+        translations:
+          fr:
+            name: "Conformité RGPD"
+
+      # --- Processings (GDPR Article 30) ---
+      - type: processing
+        name: "Gestion des comptes clients"
+        description: "Collecte et traitement des données d'identité, de contact et de facturation des clients pour la création de compte, l'authentification et la gestion des abonnements."
+        translations:
+          en:
+            name: "Customer account management"
+            description: "Collection and processing of customer identity, contact, and billing data for account creation, authentication, and subscription management."
+      - type: processing
+        name: "Gestion des ressources humaines"
+        description: "Traitement des données personnelles des employés pour la paie, les contrats, la gestion des performances et les obligations légales."
+        translations:
+          en:
+            name: "Human resources management"
+            description: "Processing of employee personal data for payroll, contracts, performance management, and legal obligations."
+      - type: processing
+        name: "Prospection commerciale"
+        description: "Traitement des données de contact pour l'envoi de communications marketing, de mises à jour produit et de newsletters aux clients et prospects."
+        translations:
+          en:
+            name: "Marketing outreach"
+            description: "Processing of contact data for sending marketing communications, product updates, and newsletters to customers and prospects."
+      - type: processing
+        name: "Support client"
+        description: "Traitement des données personnelles soumises via les canaux de support (email, téléphone, tickets) pour résoudre les demandes et fournir une assistance."
+        translations:
+          en:
+            name: "Customer support"
+            description: "Processing of personal data submitted through support channels (email, phone, tickets) to resolve issues and provide assistance."
+      - type: processing
+        name: "Vidéosurveillance des locaux"
+        description: "Captation et stockage d'images vidéo dans les locaux de l'entreprise pour assurer la sécurité des biens et des personnes."
+        translations:
+          en:
+            name: "Premises video surveillance"
+            description: "Capture and storage of video footage on company premises to ensure the security of property and people."
+      - type: processing
+        name: "Cookies et traceurs du site web"
+        description: "Utilisation de cookies, pixels de suivi et technologies similaires sur les sites web de l'entreprise à des fins d'analyse et de personnalisation."
+        translations:
+          en:
+            name: "Website cookies and trackers"
+            description: "Use of cookies, tracking pixels, and similar technologies on company websites for analytics and personalisation."
+
+      # --- Typical SME vendor entities ---
+      - type: entity
+        name: "Hébergeur / infogérant"
+        description: "Prestataire d'hébergement ou d'infogérance gérant l'infrastructure informatique, les serveurs et les sauvegardes de l'entreprise."
+        translations:
+          en:
+            name: "Hosting / managed services provider"
+            description: "Hosting or managed services provider managing the company's IT infrastructure, servers, and backups."
+      - type: entity
+        name: "Éditeur de logiciels métier"
+        description: "Fournisseur de l'application métier principale (ERP, CRM, comptabilité) traitant des données clients et internes."
+        translations:
+          en:
+            name: "Business software vendor"
+            description: "Vendor of the primary business application (ERP, CRM, accounting) processing customer and internal data."
+      - type: entity
+        name: "Prestataire de messagerie"
+        description: "Fournisseur de la solution de messagerie électronique et de collaboration (ex. Microsoft 365, Google Workspace)."
+        translations:
+          en:
+            name: "Email service provider"
+            description: "Provider of the email and collaboration solution (e.g. Microsoft 365, Google Workspace)."
+      - type: entity
+        name: "Cabinet comptable"
+        description: "Expert-comptable ou cabinet traitant les données financières, de paie et fiscales de l'entreprise."
+        translations:
+          en:
+            name: "Accounting firm"
+            description: "Accountant or firm processing the company's financial, payroll, and tax data."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Penetration Test Findings"
+        category: pentest
+        ref: pentest_findings
+        translations:
+          fr:
+            name: "Résultats des tests d'intrusion"
+
+      # --- Assets ---
+      - type: asset
+        name: "Réseau d'entreprise"
+        description: "Infrastructure réseau interne incluant commutateurs, routeurs, pare-feu et points d'accès Wi-Fi."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          en:
+            name: "Corporate network"
+            description: "Internal network infrastructure including switches, routers, firewalls, and Wi-Fi access points."
+      - type: asset
+        name: "Postes de travail"
+        description: "Ordinateurs portables et fixes utilisés par les employés pour les activités quotidiennes."
+        asset_type: SP
+        ref: asset_workstations
+        translations:
+          en:
+            name: "Workstations"
+            description: "Laptops and desktops used by employees for daily activities."
+      - type: asset
+        name: "Messagerie électronique"
+        description: "Service de messagerie et de collaboration (ex. Microsoft 365, Google Workspace)."
+        asset_type: SP
+        ref: asset_email
+        translations:
+          en:
+            name: "Email system"
+            description: "Email and collaboration service (e.g. Microsoft 365, Google Workspace)."
+      - type: asset
+        name: "Application métier (ERP/CRM)"
+        description: "Application métier principale gérant les données clients, la facturation et les processus internes."
+        asset_type: SP
+        ref: asset_erp
+        translations:
+          en:
+            name: "Business application (ERP/CRM)"
+            description: "Primary business application managing customer data, billing, and internal processes."
+      - type: asset
+        name: "Serveur de fichiers"
+        description: "Stockage centralisé des documents et fichiers partagés de l'entreprise."
+        asset_type: SP
+        ref: asset_fileserver
+        translations:
+          en:
+            name: "File server"
+            description: "Centralised storage for company documents and shared files."
+      - type: asset
+        name: "Données clients"
+        description: "Données personnelles et commerciales des clients : identité, coordonnées, historique des commandes et facturation."
+        asset_type: PR
+        ref: asset_customer_data
+        translations:
+          en:
+            name: "Customer data"
+            description: "Customer personal and business data: identity, contact details, order history, and billing."
+      - type: asset
+        name: "Données employés"
+        description: "Données personnelles des employés : identité, contrats, paie, évaluations et documents administratifs."
+        asset_type: PR
+        ref: asset_employee_data
+        translations:
+          en:
+            name: "Employee data"
+            description: "Employee personal data: identity, contracts, payroll, evaluations, and administrative documents."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "Chiffrement des données par rançongiciel"
+        description: "Un rançongiciel chiffre les fichiers sur le serveur de fichiers et les postes de travail, rendant les données inaccessibles et perturbant l'activité."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_fileserver, asset_workstations]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
+        translations:
+          en:
+            name: "Data encryption by ransomware"
+            description: "Ransomware encrypts files on the file server and workstations, making data inaccessible and disrupting business operations."
+      - type: risk_scenario
+        name: "Vol d'identifiants par hameçonnage"
+        description: "Un employé est victime d'un email d'hameçonnage et divulgue ses identifiants, permettant un accès non autorisé à la messagerie et aux applications métier."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_email, asset_erp]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-002]
+        translations:
+          en:
+            name: "Credential theft via phishing"
+            description: "An employee falls victim to a phishing email and discloses credentials, enabling unauthorised access to email and business applications."
+      - type: risk_scenario
+        name: "Fuite de données clients"
+        description: "Les données clients sont exfiltrées suite à une compromission de l'application métier ou du serveur de fichiers, entraînant une violation RGPD."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_customer_data, asset_erp]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-019]
+        translations:
+          en:
+            name: "Customer data breach"
+            description: "Customer data is exfiltrated following a compromise of the business application or file server, resulting in a GDPR breach."
+      - type: risk_scenario
+        name: "Compromission par un prestataire"
+        description: "Un fournisseur tiers (hébergeur, éditeur logiciel) est compromis, donnant aux attaquants un accès indirect au réseau et aux données de l'entreprise."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_erp]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-003]
+        translations:
+          en:
+            name: "Compromise via third-party vendor"
+            description: "A third-party vendor (hosting provider, software vendor) is compromised, giving attackers indirect access to the company's network and data."
+      - type: risk_scenario
+        name: "Indisponibilité du réseau par attaque DDoS"
+        description: "Une attaque par déni de service rend le réseau d'entreprise et les services en ligne indisponibles, paralysant l'activité."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-007]
+        translations:
+          en:
+            name: "Network unavailability due to DDoS attack"
+            description: "A denial-of-service attack makes the corporate network and online services unavailable, paralysing business operations."
+      - type: risk_scenario
+        name: "Fuite de données par un employé"
+        description: "Un employé malveillant ou négligent copie ou transmet des données sensibles (clients, RH) en dehors de l'entreprise."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_customer_data, asset_employee_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-005]
+        translations:
+          en:
+            name: "Data leak by an employee"
+            description: "A malicious or negligent employee copies or transmits sensitive data (customer, HR) outside the company."
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identifier vos actifs"
+          description: "Listez les actifs primaires et supports de votre système d'information"
+          target_model: assets
+          translations:
+            en:
+              title: "Identify your assets"
+              description: "List primary and supporting assets in your information system"
+        - key: anssi_hygiene
+          title: "Évaluer la conformité ANSSI Hygiène"
+          description: "Parcourez les 42 mesures d'hygiène ANSSI et évaluez votre état actuel"
+          target_model: compliance-assessments
+          target_ref: anssi_audit
+          translations:
+            en:
+              title: "Assess ANSSI Hygiene compliance"
+              description: "Go through the 42 ANSSI hygiene measures and assess your current status"
+        - key: risk_scenarios
+          title: "Mener une analyse de risque"
+          description: "Identifiez les risques en combinant les menaces avec vos actifs, évaluez la vraisemblance et l'impact"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            en:
+              title: "Conduct a risk assessment"
+              description: "Identify risks by combining threats with your assets, assess likelihood and impact"
+        - key: controls
+          title: "Implémenter et suivre les mesures de sécurité"
+          description: "Créez des mesures appliquées pour traiter les risques identifiés et les écarts de conformité, et suivez leur avancement"
+          target_model: applied-controls
+          translations:
+            en:
+              title: "Implement and track security controls"
+              description: "Create applied controls to address identified risks and compliance gaps, and track their progress"
+        - key: processings
+          title: "Cartographier vos traitements de données"
+          description: "Examinez et complétez le registre des activités de traitement exigé par l'article 30 du RGPD — documentez quelles données personnelles vous traitez, pourquoi et comment."
+          target_model: processings
+          translations:
+            en:
+              title: "Map your data processings"
+              description: "Review and complete the record of processing activities required by GDPR Article 30 — document what personal data you process, why, and how."
+        - key: vendors
+          title: "Gérer vos fournisseurs"
+          description: "Examinez les entités fournisseurs pré-créées, ajoutez celles manquantes et créez des évaluations en utilisant le cadre de due diligence pour évaluer la posture sécurité de chaque fournisseur."
+          target_model: entities
+          translations:
+            en:
+              title: "Manage your vendors"
+              description: "Review the pre-created vendor entities, add any missing ones, and create entity assessments using the due diligence framework to evaluate each vendor's security posture."
+        - key: gdpr_compliance
+          title: "Évaluer la conformité RGPD"
+          description: "Passez en revue les exigences du RGPD par rapport à vos pratiques"
+          target_model: compliance-assessments
+          target_ref: gdpr_audit
+          translations:
+            en:
+              title: "Assess GDPR compliance"
+              description: "Review GDPR requirements against your practices"
+        - key: findings
+          title: "Suivre les résultats de tests et d'audits"
+          description: "Importez ou créez des résultats de tests d'intrusion, de scans de vulnérabilités et d'audits. Attribuez des responsables, définissez des priorités et suivez la remédiation."
+          target_model: findings-assessments
+          target_ref: pentest_findings
+          translations:
+            en:
+              title: "Track pentest and audit findings"
+              description: "Import or create findings from penetration tests, vulnerability scans, and audits. Assign owners, set priorities, and track remediation progress."

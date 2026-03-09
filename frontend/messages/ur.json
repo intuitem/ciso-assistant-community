@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "نیا آڈٹ",
 	"addEvidence": "ثبوت شامل کریں",
 	"addDomain": "ڈومین شامل کریں",
+	"createIamGroups": "IAM گروپس بنائیں",
+	"iamGroups": "IAM گروپس",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM گروپس صارفین کو کردار تفویض کرنے کیلئے استعمال ہوتے ہیں",
+	"globalFolderMustKeepIamGroupsEnabled": "گلوبل فولڈر کو IAM گروپس کو فعال رکھنا ہوگا۔",
+	"cannotDisableIamGroupsAssignedUsers": "IAM گروپس کو اس وقت تک غیر فعال نہیں کیا جا سکتا جب تک وہ صارفین کو تفویض ہوں۔",
 	"addPerimeter": "پیریمیٹر شامل کریں",
 	"addUser": "صارف شامل کریں",
 	"addPolicy": "پالیسی شامل کریں",
@@ -150,6 +155,10 @@
 	"selectDomain": "ڈومین منتخب کریں",
 	"focusMode": "فوکس موڈ",
 	"focusModeTooltip": "کسی مخصوص ڈومین پر توجہ مرکوز کریں",
+	"objectNotReachableFromCurrentFocus": "یہ آبجیکٹ موجودہ فوکس سے قابل رسائی نہیں ہے۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
+	"objectNotFound": "آبجیکٹ نہیں ملا۔ فہرست کے منظر کی طرف ری ڈائریکٹ کر رہے ہیں۔",
+	"autoSync": "اقدامات کے ساتھ خودکار روزانہ ہم آہنگی",
+	"autoSyncHelpText": "جب فعال ہو تو، ٹاسک خودکار طور پر روزانہ اقدامات کے ساتھ ہم آہنگ ہو جائے گا۔ مقفل تشخیصات کو چھوڑ دیا جائے گا۔",
 	"clearFocus": "فوکس صاف کریں",
 	"noDomainsAvailable": "کوئی ڈومین دستیاب نہیں",
 	"urn": "URN",
@@ -171,6 +180,7 @@
 	"next": "اگلا",
 	"previous": "پچھلا",
 	"show": "دکھائیں",
+	"showStakeholdersName": "اسٹیک ہولڈرز کا نام دکھائیں",
 	"entries": "اندراجات",
 	"searchPlaceholder": "تلاش کریں...",
 	"noEntriesFound": "کوئی اندراجات نہیں ملے",
@@ -1078,6 +1088,7 @@
 		}
 	],
 	"cascadeAffectedHint": "نیچے دیے گئے اشیاء نظام میں باقی ہیں لیکن ان کی اس اشیاء سے لنکس ہٹا دیے جائیں گے۔",
+	"campaignsDescription": "آڈٹ مہمات کا انتظام",
 	"libraryFilteringLabels": "لیبریری لیبلز",
 	"appliedControlsPlaceholder": "لگائے گئے کنٹرولز منتخب کریں...",
 	"assignmentSettings": "اسائنمنٹ سیٹنگز",
@@ -1090,5 +1101,7 @@
 	"processingTimeout": "Processing timeout",
 	"maliciousFileDetected": "Malicious file detected",
 	"serverConfigurationError": "Server configuration error",
-	"libraryLoadFailed": "Library load failed"
+	"libraryLoadFailed": "Library load failed",
+	"sortAscending": "ترتیب الف ← ی",
+	"sortDescending": "ترتیب ی ← الف"
 }

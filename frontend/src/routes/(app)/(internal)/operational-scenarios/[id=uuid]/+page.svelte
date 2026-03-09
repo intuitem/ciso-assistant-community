@@ -183,7 +183,7 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.riskOrigin()}</h4>
 						<i class="fa-solid fa-skull-crossbones text-3xl"></i>
-						<p class="badge text-white bg-red-500 capitalize">
+						<p class="badge whitespace-normal text-white bg-red-500 capitalize">
 							{safeTranslate(operationalScenario.ro_to.risk_origin.str)}
 						</p>
 					</div>
@@ -193,7 +193,7 @@
 						<h4 class="font-semibold text-gray-600">{m.stakeholders()}</h4>
 						<i class="fa-solid fa-globe text-3xl"></i>
 						{#each operationalScenario.stakeholders as stakeholder}
-							<p class="badge text-white bg-violet-500">
+							<p class="badge whitespace-normal text-white bg-violet-500">
 								<a class="anchor text-white" href="/stakeholders/{stakeholder.id}"
 									>{stakeholder.str}</a
 								>
@@ -207,7 +207,9 @@
 					>
 						<h4 class="font-semibold text-gray-600">{m.targetObjective()}</h4>
 						<i class="fa-solid fa-bullseye text-3xl"></i>
-						<p class="badge text-white bg-blue-500">{operationalScenario.ro_to.target_objective}</p>
+						<p class="badge whitespace-normal text-white bg-blue-500 break-all">
+							{operationalScenario.ro_to.target_objective}
+						</p>
 					</div>
 				</div>
 			</div>
@@ -241,53 +243,47 @@
 						onValueChange={(e) => {
 							group = e.value;
 						}}
-						listJustify="justify-center"
 					>
-						{#snippet list()}
+						<Tabs.List>
 							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Control value={urlmodel}>
+								<Tabs.Trigger value={urlmodel} data-testid="tabs-control">
 									{safeTranslate(model.info.localNamePlural)}
 									{#if model.table.body.length > 0}
 										<span class="badge preset-tonal-secondary">{model.table.body.length}</span>
 									{/if}
-								</Tabs.Control>
+								</Tabs.Trigger>
 							{/each}
-						{/snippet}
-						{#snippet content()}
-							{#each Object.entries(data.relatedModels) as [urlmodel, model]}
-								<Tabs.Panel value={urlmodel}>
-									<div class="flex flex-row justify-between px-4 py-2">
-										<h4 class="font-semibold lowercase capitalize-first my-auto">
-											{safeTranslate('associated-' + model.info.localNamePlural)}
-										</h4>
-									</div>
-									{#if model.table}
-										<ModelTable
-											source={model.table}
-											deleteForm={model.deleteForm}
-											URLModel={urlmodel}
-											baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
-										>
-											{#snippet addButton()}
-												<div>
-													<span
-														class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
-													>
-														<button
-															class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
-															data-testid="add-button"
-															title={safeTranslate('add-' + model.info.localName)}
-															onclick={(_) => modalCreateForm(model)}
-															><i class="fa-solid fa-file-circle-plus"></i>
-														</button>
-													</span>
-												</div>
-											{/snippet}
-										</ModelTable>
-									{/if}
-								</Tabs.Panel>
-							{/each}
-						{/snippet}
+							<Tabs.Indicator />
+						</Tabs.List>
+						{#each Object.entries(data.relatedModels) as [urlmodel, model]}
+							<Tabs.Content value={urlmodel}>
+								<div class="py-2"></div>
+								{#if model.table}
+									<ModelTable
+										source={model.table}
+										deleteForm={model.deleteForm}
+										URLModel={urlmodel}
+										baseEndpoint="/operating-modes?operational_scenario={page.params.id}"
+									>
+										{#snippet addButton()}
+											<div>
+												<span
+													class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs"
+												>
+													<button
+														class="inline-block border-e p-3 btn-mini-primary w-12 focus:relative"
+														data-testid="add-button"
+														title={safeTranslate('add-' + model.info.localName)}
+														onclick={(_) => modalCreateForm(model)}
+														><i class="fa-solid fa-file-circle-plus"></i>
+													</button>
+												</span>
+											</div>
+										{/snippet}
+									</ModelTable>
+								{/if}
+							</Tabs.Content>
+						{/each}
 					</Tabs>
 				</div>
 			{/if}
@@ -321,10 +317,8 @@
 						onOpenChange={(e) =>
 							(likelihoodPopupOpen = operationalScenario.likelihood.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.likelihood.description}
 									<i class="fa-solid fa-dice text-black opacity-75"></i>
@@ -333,18 +327,19 @@
 							</h3>
 							<span>{operationalScenario.likelihood.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.likelihood.hexcolor}"
-							>
-								<p data-testid="likelihood-description" class="font-semibold">
-									{operationalScenario.likelihood.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.likelihood.hexcolor}"
+								>
+									<p data-testid="likelihood-description" class="font-semibold">
+										{operationalScenario.likelihood.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-xmark"></i>
@@ -357,10 +352,8 @@
 						onOpenChange={(e) =>
 							(gravityPopupOpen = operationalScenario.gravity.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.gravity.description}
 									<i class="fa-solid fa-bomb text-black opacity-75"></i>
@@ -369,18 +362,19 @@
 							</h3>
 							<span>{operationalScenario.gravity.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.gravity.hexcolor}"
-							>
-								<p data-testid="gravity-description" class="font-semibold">
-									{operationalScenario.gravity.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.gravity.hexcolor}"
+								>
+									<p data-testid="gravity-description" class="font-semibold">
+										{operationalScenario.gravity.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 				<i class="fa-solid fa-equals"></i>
@@ -393,10 +387,8 @@
 						onOpenChange={(e) =>
 							(riskLevelPopupOpen = operationalScenario.risk_level.description ? e.open : false)}
 						positioning={{ placement: 'bottom' }}
-						zIndex="100"
-						contentBase="max-w-sm"
 					>
-						{#snippet trigger()}
+						<Popover.Trigger>
 							<h3 class="font-semibold text-lg text-gray-700 flex items-center space-x-2">
 								{#if operationalScenario.risk_level.description}
 									<i class="fa-solid fa-circle-radiation text-black opacity-75"></i>
@@ -405,18 +397,19 @@
 							</h3>
 							<span>{operationalScenario.risk_level.name}</span>
 							<i class="fa-solid fa-circle-info cursor-pointer hover:opacity-70"></i>
-						{/snippet}
-						{#snippet content()}
-							<div
-								class="card bg-black text-gray-200 p-4 z-20"
-								style="color: {operationalScenario.risk_level.hexcolor}"
-							>
-								<p data-testid="riskLevel-description" class="font-semibold">
-									{operationalScenario.risk_level.description}
-								</p>
-								<div class="arrow bg-black"></div>
-							</div>
-						{/snippet}
+						</Popover.Trigger>
+						<Popover.Positioner>
+							<Popover.Content class="max-w-sm">
+								<div
+									class="card bg-black text-gray-200 p-4 z-20"
+									style="color: {operationalScenario.risk_level.hexcolor}"
+								>
+									<p data-testid="riskLevel-description" class="font-semibold">
+										{operationalScenario.risk_level.description}
+									</p>
+								</div>
+							</Popover.Content>
+						</Popover.Positioner>
 					</Popover>
 				</div>
 			</div>

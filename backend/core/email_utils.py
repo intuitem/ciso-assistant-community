@@ -209,6 +209,25 @@ def format_validation_list(validations) -> str:
     return "\n".join(validation_lines)
 
 
+def format_task_node_list(task_nodes) -> str:
+    """
+    Format a list of task nodes for email templates
+
+    Args:
+        task_nodes: List of TaskNode objects
+
+    Returns:
+        Formatted string with task node information
+    """
+    task_lines = []
+    for node in task_nodes:
+        name = node.task_template.name if node.task_template else "Unknown"
+        due_date = node.due_date.strftime("%Y-%m-%d") if node.due_date else "Not set"
+        task_lines.append(f"- {name} (Due: {due_date}, Status: {node.status})")
+
+    return "\n".join(task_lines)
+
+
 def get_default_context() -> Dict[str, str]:
     """
     Get default context variables for email templates
@@ -241,7 +260,10 @@ def send_templated_notification(
     Returns:
         True if email was queued successfully, False otherwise
     """
-    from .tasks import send_notification_email
+    from .tasks import check_email_configuration, send_notification_email
+
+    if not check_email_configuration(recipient_email, []):
+        return False
 
     rendered = render_email_template(template_name, context, locale)
     if not rendered:

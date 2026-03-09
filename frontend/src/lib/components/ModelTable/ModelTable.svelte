@@ -18,11 +18,12 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import type { TableSource } from '$lib/components/ModelTable/types';
-	import type { ListViewFilterConfig } from '$lib/utils/table';
+	import type { ListViewFilterConfig, BatchActionConfig } from '$lib/utils/table';
 	import { goto, breadcrumbs } from '$lib/utils/breadcrumbs';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
-	import { contextMenuActions, listViewFields } from '$lib/utils/table';
+	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
+	import BatchActionBar from './BatchActionBar.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
 	import { m } from '$paraglide/messages';
@@ -249,7 +250,6 @@
 		}
 	);
 	const rows = handler.getRows();
-	let invalidateTable = $state(false);
 
 	const relatedFieldNames = $derived(
 		new Set(model?.foreignKeyFields?.map((field) => field.field) ?? [])
@@ -342,6 +342,7 @@
 				breadcrumbs.updateCrumb(hrefPattern, { href: fullPath });
 			}
 		}
+		history.replaceState(history.state, '', page.url.pathname + page.url.search);
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
@@ -378,15 +379,6 @@
 		if (page.form?.form?.posted && page.form?.form?.valid) {
 			console.debug('Form posted, invalidating table');
 			handler.invalidate();
-		}
-	});
-
-	$effect(() => {
-		if (invalidateTable) {
-			console.debug('Invalidating table due to filter change');
-			handler.invalidate();
-			_goto(page.url);
-			invalidateTable = false;
 		}
 	});
 
@@ -567,77 +559,140 @@
 	};
 
 	let openState = $state(false);
+
+	// Search state lifted here so it survives BatchActionBar show/hide cycles
+	let searchValue = $state('');
+
+	// Batch selection state
+	let selectedIds: Set<string> = $state(new Set());
+
+	const currentBatchActions: BatchActionConfig[] = $derived(
+		URLModel && model
+			? getBatchActions(URLModel).filter((a) =>
+					a.type === 'delete'
+						? Object.hasOwn(user.permissions, `delete_${model.name}`)
+						: Object.hasOwn(user.permissions, `change_${model.name}`)
+				)
+			: []
+	);
+	const hasBatchActions = $derived(currentBatchActions.length > 0 && deleteForm !== undefined);
+
+	let selectAllChecked = $derived.by(() => {
+		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
+		return pageIds.length > 0 && pageIds.every((id: string) => selectedIds.has(id));
+	});
+
+	function toggleRowSelection(id: string) {
+		const next = new Set(selectedIds);
+		if (next.has(id)) {
+			next.delete(id);
+		} else {
+			next.add(id);
+		}
+		selectedIds = next;
+	}
+
+	function toggleSelectAll() {
+		const pageIds = $rows.filter((r: any) => r.meta?.id).map((r: any) => r.meta.id);
+		if (selectAllChecked) {
+			selectedIds = new Set();
+		} else {
+			selectedIds = new Set(pageIds);
+		}
+	}
+
+	function clearSelection() {
+		selectedIds = new Set();
+	}
+
+	// Clear selection when rows change (page/filter change)
+	let previousRowSignature = '';
+	$effect(() => {
+		const sig = $rows.map((r: any) => r.meta?.id).join(',');
+		if (previousRowSignature && sig !== previousRowSignature) {
+			selectedIds = new Set();
+		}
+		previousRowSignature = sig;
+	});
 </script>
 
 <div class="card table-wrap {classesBase}">
-	<header class="flex justify-between items-center space-x-8 p-2">
-		{#if !hideFilters}
-			<Popover
-				open={openState}
-				onOpenChange={(e) => (openState = e.open)}
-				positioning={{ placement: 'bottom-start' }}
-				triggerBase="btn preset-filled-primary-500 self-end relative"
-				contentBase="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
-				zIndex="1000"
-				autoFocus={false}
-				onPointerDownOutside={() => (openState = false)}
-				closeOnInteractOutside={false}
-			>
-				{#snippet trigger()}
-					<i class="fa-solid fa-filter mr-2"></i>
-					{m.filters()}
-					{#if filterCount}
-						<span class="text-sm">{filterCount}</span>
-					{/if}
-				{/snippet}
-				{#snippet content()}
-					<SuperForm {_form} validators={zod(z.object({}))}>
-						{#snippet children({ form })}
-							{#each filteredFields as field}
-								{#if filters[field]?.component}
-									{@const FilterComponent = filters[field].component}
-									<FilterComponent
-										{form}
-										{field}
-										{...filters[field].props}
-										fieldContext="filter"
-										label={safeTranslate(filters[field].props?.label)}
-										onChange={(value) => {
-											const arrayValue = Array.isArray(value) ? value : [value];
-											const sanitizedArrayValue = arrayValue.filter(
-												(v) => v !== null && v !== undefined
-											);
+	<header class="flex items-center justify-between gap-2 px-2 h-16">
+		{#if hasBatchActions && selectedIds.size > 0}
+			<BatchActionBar
+				{selectedIds}
+				actions={currentBatchActions}
+				{URLModel}
+				{handler}
+				onClearSelection={clearSelection}
+			/>
+		{:else}
+			{#if !hideFilters}
+				<Popover
+					open={openState}
+					onOpenChange={(e) => (openState = e.open)}
+					positioning={{ placement: 'bottom-start' }}
+					autoFocus={false}
+					onPointerDownOutside={() => (openState = false)}
+					closeOnInteractOutside={false}
+				>
+					<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
+						<i class="fa-solid fa-filter mr-2"></i>
+						{m.filters()}
+						{#if filterCount}
+							<span class="text-sm">{filterCount}</span>
+						{/if}
+					</Popover.Trigger>
+					<Popover.Positioner class="z-50!">
+						<Popover.Content
+							class="card p-2 bg-white max-w-lg shadow-lg space-y-2 border border-surface-200"
+						>
+							<SuperForm {_form} validators={zod(z.object({}))}>
+								{#snippet children({ form })}
+									{#each filteredFields as field}
+										{#if filters[field]?.component}
+											{@const FilterComponent = filters[field].component}
+											<FilterComponent
+												{form}
+												{field}
+												{...filters[field].props}
+												fieldContext="filter"
+												label={safeTranslate(filters[field].props?.label)}
+												onChange={(value) => {
+													const arrayValue = Array.isArray(value) ? value : [value];
+													const sanitizedArrayValue = arrayValue.filter(
+														(v) => v !== null && v !== undefined
+													);
 
-											filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
-											invalidateTable = true;
-										}}
-									/>
-								{/if}
-							{/each}
-						{/snippet}
-					</SuperForm>
-				{/snippet}
-			</Popover>
-		{/if}
-		{#if search}
-			<Search {handler} />
-		{/if}
-		{#if pagination && rowsPerPage}
-			<RowsPerPage {handler} />
-		{/if}
-		<div class="flex space-x-2 items-center">
-			{@render optButton?.()}
-			{#if canSelectObject}
-				{@render selectButton?.()}
+													filterValues[field] = sanitizedArrayValue.map((v) => ({ value: v }));
+												}}
+											/>
+										{/if}
+									{/each}
+								{/snippet}
+							</SuperForm>
+						</Popover.Content>
+					</Popover.Positioner>
+				</Popover>
 			{/if}
-			{#if canCreateObject && !disableCreate}
-				{@render addButton?.()}
+			{#if search}
+				<Search {handler} bind:value={searchValue} />
 			{/if}
-		</div>
+			{#if pagination && rowsPerPage}
+				<RowsPerPage {handler} />
+			{/if}
+			<div class="flex space-x-2 items-center">
+				{@render optButton?.()}
+				{#if canSelectObject}
+					{@render selectButton?.()}
+				{/if}
+				{#if canCreateObject && !disableCreate}
+					{@render addButton?.()}
+				{/if}
+			</div>
+		{/if}
 	</header>
-	{@render quickFilters?.(filterValues, _form, () => {
-		invalidateTable = true;
-	})}
+	{@render quickFilters?.(filterValues, _form, () => {})}
 	{#if hiddenRowCount > 0}
 		<div
 			class="mx-2 mb-2 rounded border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800"
@@ -654,6 +709,27 @@
 	>
 		<thead class="table-head {regionHead}">
 			<tr>
+				{#if hasBatchActions}
+					<th
+						class="{regionHeadCell} group/check w-10 text-center cursor-pointer"
+						title={m.selectAll()}
+						onclick={(e) => {
+							e.stopPropagation();
+							toggleSelectAll();
+						}}
+					>
+						<span
+							class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+						>
+							<input
+								type="checkbox"
+								class="checkbox pointer-events-none"
+								checked={selectAllChecked}
+								tabindex={-1}
+							/>
+						</span>
+					</th>
+				{/if}
 				{#each Object.entries(tableSource.head) as [key, heading]}
 					{#if fields.length === 0 || fields.includes(key)}
 						<Th {handler} orderBy={isMultiValueColumn(key) ? undefined : key} class={regionHeadCell}
@@ -667,6 +743,9 @@
 			</tr>
 			{#if thFilter}
 				<tr>
+					{#if hasBatchActions}
+						<th></th>
+					{/if}
 					{#each Object.entries(tableSource.head) as [key, _]}
 						{#if thFilterFields.includes(key)}
 							<ThFilter {handler} filterBy={key} />
@@ -690,6 +769,27 @@
 								aria-rowindex={rowIndex + 1}
 								class="hover:preset-tonal-primary even:bg-surface-50 cursor-pointer"
 							>
+								{#if hasBatchActions}
+									<td
+										class="group/check w-10 text-center cursor-pointer"
+										role="gridcell"
+										onclick={(e) => {
+											e.stopPropagation();
+											if (meta?.id) toggleRowSelection(meta.id);
+										}}
+									>
+										<span
+											class="inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover/check:bg-black/10 dark:group-hover/check:bg-white/10"
+										>
+											<input
+												type="checkbox"
+												class="checkbox pointer-events-none"
+												checked={selectedIds.has(meta?.id)}
+												tabindex={-1}
+											/>
+										</span>
+									</td>
+								{/if}
 								{#each Object.entries(row) as [key, value]}
 									{#if key !== 'meta'}
 										{@const component = fieldComponentMap[key]}
@@ -769,14 +869,21 @@
 															{#if value.id}
 																{@const itemHref = `/${model?.foreignKeyFields?.find((item) => item.field === key)?.urlModel}/${value.id}`}
 																{#if key === 'ro_to_couple'}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
+																	<Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation
 																		>{safeTranslate(toCamelCase(value.str.split(' - ')[0]))} - {value.str.split(
 																			'-'
 																		)[1]}</Anchor
 																	>
 																{:else}
-																	<Anchor breadcrumbAction="push" href={itemHref} class="anchor"
-																		>{safeTranslate(value.str)}</Anchor
+																	<Anchor
+																		breadcrumbAction="push"
+																		href={itemHref}
+																		class="anchor"
+																		stopPropagation>{safeTranslate(value.str)}</Anchor
 																	>
 																{/if}
 															{:else}
@@ -795,7 +902,7 @@
 															{formatDateOrDateTime(value, getLocale())}
 														{:else if [true, false].includes(value)}
 															<span class="ml-4">{safeTranslate(value ?? '-')}</span>
-														{:else if key === 'progress'}
+														{:else if key === 'progress' || key === 'treatment_progress'}
 															<span class="ml-9"
 																>{safeTranslate('percentageDisplay', { number: value })}</span
 															>
@@ -833,10 +940,13 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{#if value?.length > 300}
-																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
+															{#if displayValue?.length > 300}
+																{displayValue.slice(0, 300)}...
 															{:else}
-																{safeTranslate(value ?? '-')}
+																{displayValue}
 															{/if}
 														{/if}
 														{@render badge?.(key, row)}

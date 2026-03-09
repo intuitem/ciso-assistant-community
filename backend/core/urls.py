@@ -86,6 +86,11 @@ router.register(
     RequirementAssessmentViewSet,
     basename="requirement-assessments",
 )
+router.register(
+    r"requirement-assignments",
+    RequirementAssignmentViewSet,
+    basename="requirement-assignments",
+)
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
 router.register(
@@ -114,9 +119,16 @@ router.register(
 router.register(r"findings", FindingViewSet, basename="findings")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
+router.register(
+    r"preset-journey-steps",
+    PresetJourneyStepViewSet,
+    basename="preset-journey-steps",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()

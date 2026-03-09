@@ -228,7 +228,7 @@
 			if (form.message?.redirect) {
 				goto(getSecureRedirect(form.message.redirect));
 			}
-			if (form.valid) {
+			if (form.valid && !form.message?.error) {
 				if (parent && typeof parent.onConfirm === 'function') {
 					parent.onConfirm();
 				}
@@ -722,6 +722,7 @@
 				{cacheLocks}
 				{formDataCache}
 				initialData={model.initialData}
+				{object}
 				{context}
 				{...rest}
 			/>

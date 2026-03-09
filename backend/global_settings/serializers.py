@@ -20,6 +20,7 @@ GENERAL_SETTINGS_KEYS = [
     "show_warning_external_links",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
+    "enforce_mfa",
 ]
 
 
@@ -231,39 +232,26 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
     )
+    auditee_mode = serializers.BooleanField(
+        source="value.auditee_mode", required=False, default=False
+    )
+    advanced_analytics = serializers.BooleanField(
+        source="value.advanced_analytics", required=False, default=False
+    )
+    comments = serializers.BooleanField(
+        source="value.comments", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
-        fields = [
-            "xrays",
-            "incidents",
-            "tasks",
-            "risk_acceptances",
-            "exceptions",
-            "follow_up",
-            "ebiosrm",
-            "scoring_assistant",
-            "vulnerabilities",
-            "compliance",
-            "tprm",
-            "privacy",
-            "experimental",
-            "inherent_risk",
-            "organisation_objectives",
-            "organisation_issues",
-            "quantitative_risk_studies",
-            "terminologies",
-            "bia",
-            "project_management",
-            "contracts",
-            "reports",
-            "validation_flows",
-            "outgoing_webhooks",
-            "metrology",
-            "personal_data",
-            "purposes",
-            "right_requests",
-            "data_breaches",
+        exclude = [
+            "id",
+            "created_at",
+            "updated_at",
+            "name",
+            "value",
+            "folder",
+            "is_published",
         ]
         read_only_fields = ["name"]
 

@@ -10,6 +10,7 @@ import { setFlash } from 'sveltekit-flash-message/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import {
+	defaultWriteFormAction,
 	nestedDeleteFormAction,
 	nestedWriteFormAction,
 	handleErrorResponse
@@ -47,6 +48,19 @@ export const load: PageServerLoad = async (event) => {
 		data.duplicateForm = appliedControlDuplicateForm;
 	}
 
+	if (event.params.model === 'organisation-objectives') {
+		const objectiveSchema = modelSchema(event.params.model);
+		const objectEndpoint = `${BASE_API_URL}/organisation-objectives/${event.params.id}/object/`;
+		const objectRes = await event.fetch(objectEndpoint);
+		if (objectRes.ok) {
+			const objectData = await objectRes.json();
+			const objectiveDuplicateForm = await superValidate(objectData, zod(objectiveSchema), {
+				errors: false
+			});
+			data.duplicateForm = objectiveDuplicateForm;
+		}
+	}
+
 	return data;
 };
 
@@ -57,6 +71,13 @@ export const actions: Actions = {
 	},
 	delete: async (event) => {
 		return nestedDeleteFormAction({ event });
+	},
+	update: async (event) => {
+		return defaultWriteFormAction({
+			event,
+			urlModel: event.params.model,
+			action: 'edit'
+		});
 	},
 	duplicate: async (event) => {
 		const formData = await event.request.formData();

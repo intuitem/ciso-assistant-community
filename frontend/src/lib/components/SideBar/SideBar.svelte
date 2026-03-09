@@ -7,7 +7,7 @@
 	import { writable } from 'svelte/store';
 
 	import { getCookie, setCookie } from '$lib/utils/cookies';
-	import { driverInstance, tableHandlers } from '$lib/utils/stores';
+	import { driverInstance, tableHandlers, getStartedTrigger } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 
 	import { invalidateAll } from '$app/navigation';
@@ -205,17 +205,35 @@
 			props: {
 				actions: [
 					{
+						label: m.browsePresets(),
+						description: m.browsePresetsDescription(),
+						action: () => {
+							window.location.href = '/presets';
+							return true;
+						},
+						btnIcon: 'fa-rocket'
+					},
+					{
 						label: m.showGuidedTour(),
+						description: m.showGuidedTourDescription(),
 						action: triggerVisit,
-						classes: 'preset-filled-surface-500',
 						btnIcon: 'fa-wand-magic-sparkles'
 					},
 					{
 						label: m.loadDemoData(),
+						description: m.loadDemoDataDescription(),
 						action: loadDemoDomain,
-						classes: 'preset-filled-secondary-500',
 						btnIcon: 'fa-file-import',
 						async: true
+					},
+					{
+						label: m.customizeFeatureFlags(),
+						description: m.customizeFeatureFlagsDescription(),
+						action: () => {
+							window.location.href = '/settings?tab=featureFlags';
+							return true;
+						},
+						btnIcon: 'fa-sliders'
 					}
 				]
 			}
@@ -223,7 +241,6 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: m.firstTimeLoginModalTitle(),
 			body: m.firstTimeLoginModalDescription()
 		};
@@ -284,6 +301,14 @@
 		setCookie('show_first_login_modal', 'false');
 	});
 
+	// Watch for trigger from the top bar "Get Started" button
+	$effect(() => {
+		if ($getStartedTrigger) {
+			getStartedTrigger.set(false);
+			modalFirstLogin();
+		}
+	});
+
 	let classesSidebarOpen = $derived((open: boolean) => (open ? '' : '-ml-56 pointer-events-none'));
 </script>
 
@@ -296,7 +321,7 @@
 		<nav class="flex-1 flex flex-col overflow-y-auto overflow-x-hidden bg-gray-50 py-4 px-3">
 			<SideBarHeader />
 			<SideBarNavigation {sideBarVisibleItems} />
-			<SideBarFooter on:triggerGT={triggerVisit} on:loadDemoDomain={loadDemoDomain} />
+			<SideBarFooter on:getStarted={modalFirstLogin} />
 		</nav>
 	</aside>
 	{#if $loading}

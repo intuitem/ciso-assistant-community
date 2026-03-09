@@ -8,7 +8,7 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.14"
-django = "^6.0.2"
+django = "^6.0.3"
 weasyprint = "^68.0"
 psycopg2-binary = "^2.9.11"
 gunicorn = "^23.0.0"
@@ -23,7 +23,7 @@ structlog = "^24.4.0"
 python-dotenv = "^1.2.1"
 drf-spectacular = "^0.29.0"
 django-rest-knox = "^5.0.2"
-django-allauth = { version = "^65.13.1", extras = [
+django-allauth = { version = "^65.14.1", extras = [
   "socialaccount",
   "saml",
   "mfa",
@@ -35,7 +35,7 @@ fido2 = "^2.1.1"
 humanize = "^4.15.0"
 huey = "^2.5.5"
 python-docx = "^1.2.0"
-docxtpl = "^0.19.1"
+docxtpl = "^0.20.2"
 numpy = "^2.4.1"
 scipy = "^1.16.3"
 matplotlib = "^3.10.8"
