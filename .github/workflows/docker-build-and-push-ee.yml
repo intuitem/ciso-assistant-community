@@ -68,6 +68,7 @@ jobs:
             org.opencontainers.image.title=CISO Assistant Enterprise Frontend
             org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management
             org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial
             org.opencontainers.image.url=https://intuitem.com
             org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
@@ -126,6 +127,7 @@ jobs:
             org.opencontainers.image.title=CISO Assistant Enterprise Backend
             org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management
             org.opencontainers.image.vendor=intuitem
+            org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial
             org.opencontainers.image.url=https://intuitem.com
             org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant
       - name: Build and Push
@@ -153,11 +155,23 @@ jobs:
         shell: bash
         env:
           VERSION: ${{ needs.prepare.outputs.version }}
+          GIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          CREATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           # Frontend
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Enterprise Frontend" \
+            --annotation "index:org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:latest" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-frontend:$VERSION-amd64" \
@@ -165,6 +179,16 @@ jobs:
 
           # Backend
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Enterprise Backend" \
+            --annotation "index:org.opencontainers.image.description=Enterprise GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=LicenseRef-intuitem-Commercial" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/${{ github.repository }}" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION" \
             -t "ghcr.io/intuitem/ciso-assistant-enterprise-backend:latest" \
             "ghcr.io/intuitem/ciso-assistant-enterprise-backend:$VERSION-amd64" \

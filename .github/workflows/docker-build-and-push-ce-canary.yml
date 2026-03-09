@@ -153,11 +153,23 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           VERSION: ${{ needs.prepare.outputs.version }}
+          GIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          CREATED="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 
           # Frontend
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Frontend" \
+            --annotation "index:org.opencontainers.image.description=An open-source GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=AGPL-3.0" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/$REPO" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/$REPO/frontend:$VERSION" \
             -t "ghcr.io/$REPO/frontend:canary" \
             "ghcr.io/$REPO/frontend:$VERSION-amd64" \
@@ -165,6 +177,16 @@ jobs:
 
           # Backend
           docker buildx imagetools create \
+            --annotation "index:org.opencontainers.image.title=CISO Assistant Backend" \
+            --annotation "index:org.opencontainers.image.description=An open-source GRC platform for cybersecurity compliance and risk management" \
+            --annotation "index:org.opencontainers.image.vendor=intuitem" \
+            --annotation "index:org.opencontainers.image.licenses=AGPL-3.0" \
+            --annotation "index:org.opencontainers.image.url=https://intuitem.com" \
+            --annotation "index:org.opencontainers.image.documentation=https://intuitem.gitbook.io/ciso-assistant" \
+            --annotation "index:org.opencontainers.image.source=https://github.com/$REPO" \
+            --annotation "index:org.opencontainers.image.version=$VERSION" \
+            --annotation "index:org.opencontainers.image.revision=$GIT_SHA" \
+            --annotation "index:org.opencontainers.image.created=$CREATED" \
             -t "ghcr.io/$REPO/backend:$VERSION" \
             -t "ghcr.io/$REPO/backend:canary" \
             "ghcr.io/$REPO/backend:$VERSION-amd64" \
