@@ -27,15 +27,15 @@ def get_locale_for_email(email: str) -> str:
         user = User.objects.filter(email=email).first()
         if user and isinstance(user.preferences, dict) and user.preferences.get("lang"):
             return user.preferences["lang"]
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Failed to resolve user locale for email %s: %s", email, e)
 
     try:
         general = GlobalSettings.objects.filter(name="general").first()
         if general and isinstance(general.value, dict):
             return general.value.get("default_language", "en")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning("Failed to resolve default language from global settings: %s", e)
 
     return "en"
 
