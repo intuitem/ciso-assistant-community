@@ -7328,22 +7328,14 @@ class ComplianceAssessment(Assessment):
         requirement_assessments = self.get_requirement_assessments(
             include_non_assessable=False
         )
-        ra_ids = [ra.id for ra in requirement_assessments]
 
-        total_questions_count = Answer.objects.filter(
-            requirement_assessment_id__in=ra_ids,
-        ).count()
-        answered_questions_count = (
-            Answer.objects.filter(
-                requirement_assessment_id__in=ra_ids,
-            )
-            .filter(
-                Q(value__isnull=False) & ~Q(value__in=[None, [], ""])
-                | Q(selected_choices__isnull=False)
-            )
-            .distinct()
-            .count()
-        )
+        total_questions_count = 0
+        answered_questions_count = 0
+
+        for ra in requirement_assessments:
+            total, answered = ra.get_visible_questions_counts()
+            total_questions_count += total
+            answered_questions_count += answered
 
         if total_questions_count > 0:
             return int((answered_questions_count / total_questions_count) * 100)
@@ -7599,6 +7591,50 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 ca_ref.upsert_daily_metrics()
 
             transaction.on_commit(_do_metrics_update)
+
+    def get_visible_questions_counts(self) -> tuple[int, int]:
+        """Return (visible_questions_count, answered_visible_questions_count) for this assessment."""
+        # Use prefetched objects if available
+        questions_qs = self.requirement.questions.all()
+        answers_qs = self.answers.all()
+
+        # Build lookup for answered questions and their values
+        selected_choice_pks_by_qid = {}
+        answers_by_urn = {}
+        questions_by_urn = {}
+        has_answer_by_qid = {}
+
+        for a in answers_qs:
+            q_type = a.question.type
+            if q_type in (
+                Question.Type.UNIQUE_CHOICE,
+                Question.Type.MULTIPLE_CHOICE,
+            ):
+                pks = {c.id for c in a.selected_choices.all()}
+                selected_choice_pks_by_qid[a.question_id] = pks
+                has_answer_by_qid[a.question_id] = len(pks) > 0
+            else:
+                has_answer_by_qid[a.question_id] = a.value is not None and a.value != ""
+
+            # For depends_on resolution, pass URN strings
+            if a.question.urn:
+                answers_by_urn[a.question.urn] = a.get_choice_urns() or a.value
+
+        for q in questions_qs:
+            questions_by_urn[q.urn] = q
+
+        visible_questions = 0
+        answered_visible_questions = 0
+
+        for question in questions_qs:
+            if not _is_question_visible(question, answers_by_urn, questions_by_urn):
+                continue
+
+            visible_questions += 1
+            if has_answer_by_qid.get(question.id):
+                answered_visible_questions += 1
+
+        return visible_questions, answered_visible_questions
 
     def compute_score_and_result(self):
         questions_qs = self.requirement.questions.prefetch_related("choices").all()
