@@ -1057,7 +1057,7 @@ class LibraryUpdater:
                             )
 
                     # Sync questions for both new and existing nodes
-                    if questions:
+                    if questions is not None:
                         _sync_questions_from_data(requirement_node_object, questions)
 
                     # update answers or score for each ra for the current requirement_node, when relevant
@@ -1139,7 +1139,7 @@ class LibraryUpdater:
                                     ra.documentation_score = new_doc_score
                                     requirement_assessment_objects_to_update.append(ra)
 
-                        if not questions:
+                        if questions is None:
                             if ra not in requirement_assessment_objects_to_update:
                                 requirement_assessment_objects_to_update.append(ra)
                             continue
