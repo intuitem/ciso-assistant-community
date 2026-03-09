@@ -7247,10 +7247,10 @@ class FolderViewSet(BaseModelViewSet):
                     )
                 _fields["question"] = question
 
-                # Store M2M ref_ids for post-create
-                choice_ref_ids = _fields.pop("selected_choices_ref_ids", None)
-                if choice_ref_ids:
-                    many_to_many_map_ids["selected_choices_ref_ids"] = choice_ref_ids
+                # Store M2M urns for post-create
+                choice_urns = _fields.pop("selected_choices_urns", None)
+                if choice_urns:
+                    many_to_many_map_ids["selected_choices_urns"] = choice_urns
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -7528,17 +7528,17 @@ class FolderViewSet(BaseModelViewSet):
                     )
 
             case "answer":
-                if ref_ids := many_to_many_map_ids.get("selected_choices_ref_ids"):
+                if urns := many_to_many_map_ids.get("selected_choices_urns"):
                     choices = list(
                         QuestionChoice.objects.filter(
-                            question=obj.question, ref_id__in=ref_ids
+                            question=obj.question, urn__in=urns
                         )
                     )
-                    found_refs = {c.ref_id for c in choices}
-                    missing = set(ref_ids) - found_refs
+                    found_urns = {c.urn for c in choices}
+                    missing = set(urns) - found_urns
                     if missing:
                         logger.warning(
-                            "Answer import: could not resolve choice ref_ids %s "
+                            "Answer import: could not resolve choice urns %s "
                             "for question %s",
                             missing,
                             obj.question.urn,
