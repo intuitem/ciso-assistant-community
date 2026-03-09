@@ -173,6 +173,7 @@ def generate_excel_file() -> None:
         questionnaire_path=QUESTIONS_OUT,
         mesures_path=MESURES_OUT,
         output_path=EXCEL_OUT,
+        include_dev_info=True,
     )
     print("✅ [OK] Excel build completed")
 

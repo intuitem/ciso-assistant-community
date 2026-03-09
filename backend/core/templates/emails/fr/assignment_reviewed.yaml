@@ -1,0 +1,14 @@
+subject: "CISO Assistant : Votre affectation sur '${assessment_name}' a été ${decision}"
+body: |
+  Bonjour,
+
+  Votre affectation sur l'audit suivant a été examinée :
+
+  - Audit : ${assessment_name}
+  - Décision : ${decision}
+  ${reviewer_observation}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour plus de détails :
+  ${ciso_assistant_url}
+
+  Merci.

@@ -38,15 +38,26 @@ def get_entity_identifier(
     if not entity or not entity.legal_identifiers:
         return "", ""
 
+    def map_identifier_type(key: str) -> str:
+        key_upper = key.upper()
+        if key_upper == "LEI":
+            return "eba_qCO:qx2000"
+        elif key_upper == "EUID":
+            return "eba_qCO:qx2002"
+        elif key_upper == "VAT":
+            return "eba_qCO:qx2004"
+        else:
+            return "eba_qCO:qx2003"
+
     # Try priority identifiers first
     for id_type in priority:
         if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
-            return entity.legal_identifiers[id_type], id_type
+            return entity.legal_identifiers[id_type], map_identifier_type(id_type)
 
     # Use first available identifier
     for key, value in entity.legal_identifiers.items():
         if value:
-            return value, key
+            return value, map_identifier_type(key)
 
     return "", ""
 
@@ -173,6 +184,10 @@ def generate_b_01_02_entities(
         parent_entity_lei = ""
         if entity.parent_entity and entity.parent_entity.legal_identifiers:
             parent_entity_lei = entity.parent_entity.legal_identifiers.get("LEI", "")
+
+        if not parent_entity_lei:
+            # If no parent or parent has no LEI, use entity's own LEI for c0060 as per EBA rules
+            parent_entity_lei = lei
 
         csv_writer.writerow(
             [

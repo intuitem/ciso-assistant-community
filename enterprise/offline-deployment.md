@@ -140,10 +140,18 @@ LICENSE_EXPIRATION=2025-12-31
 
 # S3 Storage (optional)
 # USE_S3=True
+# AWS_STORAGE_BUCKET_NAME=ciso-assistant-bucket
+# AWS_S3_REGION_NAME=us-east-1
+#
+# Authentication Option 1: Access Key (for standalone deployments)
 # AWS_ACCESS_KEY_ID=your-access-key
 # AWS_SECRET_ACCESS_KEY=your-secret-key
-# AWS_STORAGE_BUCKET_NAME=ciso-assistant-bucket
-# AWS_S3_ENDPOINT_URL=https://s3.your-domain.com
+# AWS_S3_ENDPOINT_URL=https://s3.your-domain.com  # Required for S3-compatible services (e.g., MinIO)
+#
+# Authentication Option 2: IRSA (for Kubernetes/EKS deployments)
+# When running on EKS with IRSA enabled, these are automatically set by the pod's service account:
+# AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
+# AWS_ROLE_ARN=arn:aws:iam::123456789012:role/ciso-assistant-s3-role
 
 # Email rescue (backup email server)
 # EMAIL_HOST_RESCUE=your-backup-smtp-host

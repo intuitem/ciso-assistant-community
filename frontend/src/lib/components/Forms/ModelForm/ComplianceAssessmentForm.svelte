@@ -371,5 +371,13 @@
 			cacheLock={cacheLocks['is_locked']}
 			bind:cachedValue={formDataCache['is_locked']}
 		/>
+		<Checkbox
+			{form}
+			field="auto_sync"
+			label={m.autoSync()}
+			helpText={m.autoSyncHelpText()}
+			cacheLock={cacheLocks['auto_sync']}
+			bind:cachedValue={formDataCache['auto_sync']}
+		/>
 	{/if}
 </Dropdown>
