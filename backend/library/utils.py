@@ -73,6 +73,7 @@ class RequirementNodeImporter:
         parent_urn = self.requirement_data.get("parent_urn")
         if parent_urn:
             parent_urn = parent_urn.lower()
+
         requirement_node = RequirementNode.objects.create(
             # Should i just inherit the folder from Framework or this is useless ?
             folder=Folder.get_root_folder(),
@@ -327,6 +328,25 @@ class FrameworkImporter:
             translations=self.framework_data.get("translations", {}),
             is_published=True,
         )
+
+        question_urns = set()
+        duplicated_question_urns = set()
+
+        for requirement_importer in self._requirement_nodes:
+            requirement_node_data = requirement_importer.requirement_data
+            questions = requirement_node_data.get("questions", {})
+
+            for question_urn in questions.keys():
+                if question_urn in question_urns:
+                    duplicated_question_urns.add(question_urn)
+                else:
+                    question_urns.add(question_urn)
+
+        if len(duplicated_question_urns) > 0:
+            raise ValueError(
+                f"The following questions URNs are duplicated: {duplicated_question_urns!r}"
+            )
+
         for requirement_node in self._requirement_nodes:
             requirement_node.import_requirement_node(framework_object)
 

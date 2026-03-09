@@ -879,7 +879,7 @@ class LoadedLibraryViewSet(BaseModelViewSet):
         except Exception as e:
             logger.error("Failed to update library", error=e)
             return Response(
-                {"error": "libraryUpdateFailed"},
+                {"error": f"Library update failed: {e}"},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is None:

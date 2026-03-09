@@ -637,6 +637,24 @@ class LibraryUpdater:
                 },
             )
 
+    @staticmethod
+    def _get_duplicated_question_urns(requirement_nodes: list[dict]) -> set[str]:
+        """Return the set of duplicated question URNs from a list of requirement nodes."""
+
+        question_urns = set()
+        duplicated_question_urns = set()
+
+        for requirement_node in requirement_nodes:
+            questions = requirement_node.get("questions", {})
+
+            for question_urn in questions.keys():
+                if question_urn in question_urns:
+                    duplicated_question_urns.add(question_urn)
+                else:
+                    question_urns.add(question_urn)
+
+        return duplicated_question_urns
+
     def update_frameworks(self):
         """
         Update frameworks with score change handling.
@@ -651,6 +669,15 @@ class LibraryUpdater:
         for new_framework in self.new_frameworks:
             with transaction.atomic():
                 requirement_nodes = new_framework["requirement_nodes"]
+
+                duplicated_question_urns = self._get_duplicated_question_urns(
+                    requirement_nodes
+                )
+                if len(duplicated_question_urns) > 0:
+                    raise ValueError(
+                        f"The following questions URNs are duplicated: {duplicated_question_urns!r}"
+                    )
+
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
                 framework_dict["urn"] = framework_dict["urn"].lower()
