@@ -78,7 +78,12 @@ export const handle: Handle = async ({ event, resolve }) =>
 			redirect(302, '/login');
 		}
 
-		const user = await validateUserSession(event);
+		// Skip session validation for SSO authenticate route — the token cookie
+		// has just been set by the backend but the allauth session token hasn't
+		// been fetched yet; that happens in the page's load function.
+		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
+
+		const user = isSSOAuthenticate ? null : await validateUserSession(event);
 		if (user) {
 			event.locals.user = user;
 			const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {

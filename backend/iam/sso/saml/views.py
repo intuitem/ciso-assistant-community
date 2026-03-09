@@ -71,6 +71,7 @@ class ACSView(SAMLViewMixin, View):
 class FinishACSView(SAMLViewMixin, View):
     def dispatch(self, request, organization_slug):
         error = None
+        token = None
         next_url = "/"
         if len(SSOSettings.objects.all()) == 0:
             raise Http404()
@@ -179,7 +180,7 @@ class FinishACSView(SAMLViewMixin, View):
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
             token = generate_token(user)
-            login.state["next"] += f"sso/authenticate/{token}"
+            login.state["next"] += "sso/authenticate"
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
@@ -216,7 +217,17 @@ class FinishACSView(SAMLViewMixin, View):
                 email_object.verified = True
                 email_object.save()
                 logger.info("Email verified", user=user)
-        return HttpResponseRedirect(next_url)
+        response = HttpResponseRedirect(next_url)
+        if not error and token:
+            response.set_cookie(
+                "token",
+                token,
+                httponly=True,
+                secure=True,
+                samesite="Lax",
+                path="/",
+            )
+        return response
 
 
 class GenerateSAMLKeyView(SAMLViewMixin, APIView):

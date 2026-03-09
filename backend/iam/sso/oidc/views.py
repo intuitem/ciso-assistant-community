@@ -83,14 +83,23 @@ def callback(request, provider_id):
             )
 
         token = generate_token(request.user)
-        next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate/{token}"
+        next = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
 
         logger.info(
             "SSO authentication successful",
             provider=provider_id,
         )
 
-        return HttpResponseRedirect(next)
+        response = HttpResponseRedirect(next)
+        response.set_cookie(
+            "token",
+            token,
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+            path="/",
+        )
+        return response
     except SocialApp.DoesNotExist as e:
         logger.error(
             "OIDC provider configuration not found",
