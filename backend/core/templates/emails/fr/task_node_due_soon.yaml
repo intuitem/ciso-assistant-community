@@ -1,0 +1,12 @@
+subject: "CISO Assistant: Tâche à échéance dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Vous avez ${task_count} tâche(s) à échéance dans ${days_remaining} jour(s) :
+
+  ${task_list}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces tâches :
+  ${ciso_assistant_url}
+
+  Merci.

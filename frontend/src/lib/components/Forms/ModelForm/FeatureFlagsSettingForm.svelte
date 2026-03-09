@@ -147,6 +147,11 @@
 					field: 'auditee_mode',
 					label: m.auditeeMode(),
 					description: m.auditeeModeDescription()
+				},
+				{
+					field: 'advanced_analytics',
+					label: m.advancedAnalytics(),
+					description: m.advancedAnalyticsDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -199,6 +204,11 @@
 					field: 'outgoing_webhooks',
 					label: m.webhooks(),
 					description: m.webhooksDescription()
+				},
+				{
+					field: 'comments',
+					label: m.comments(),
+					description: m.commentsDescription()
 				},
 				{
 					field: 'experimental',

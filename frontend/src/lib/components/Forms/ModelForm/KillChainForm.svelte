@@ -11,6 +11,7 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
+		object?: Record<string, any>;
 	}
 
 	let {
@@ -18,7 +19,8 @@
 		model,
 		cacheLocks = {},
 		formDataCache = $bindable({}),
-		initialData = {}
+		initialData = {},
+		object = {}
 	}: Props = $props();
 
 	const formStore = form.form;
@@ -47,7 +49,10 @@
 	{form}
 	optionsEndpoint="elementary-actions"
 	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_mode_available_actions', $formStore.operating_mode]]
+		? [
+				['operating_mode_available_actions', $formStore.operating_mode],
+				...(object?.id ? [['exclude_kill_chain', object.id]] : [])
+			]
 		: undefined}
 	optionsInfoFields={{
 		fields: [
@@ -71,28 +76,35 @@
 <!-- 	cacheLock={cacheLocks['is_highlighted']} -->
 <!-- 	bind:cachedValue={formDataCache['is_highlighted']} -->
 <!-- /> -->
-<AutocompleteSelect
-	{form}
-	optionsEndpoint="elementary-actions"
-	optionsDetailedUrlParameters={$formStore.operating_mode
-		? [['operating_modes', $formStore.operating_mode]]
-		: undefined}
-	optionsInfoFields={{
-		fields: [
-			{
-				field: 'attack_stage',
-				translate: true
-			}
-		],
-		classes: 'text-yellow-700'
-	}}
-	multiple
-	field="antecedents"
-	cacheLock={cacheLocks['antecedents']}
-	helpText={m.antecedentsHelpText()}
-	bind:cachedValue={formDataCache['antecedents']}
-	label={m.antecedents()}
-/>
+{#key $formStore.elementary_action}
+	<AutocompleteSelect
+		{form}
+		optionsEndpoint="elementary-actions"
+		optionsDetailedUrlParameters={$formStore.operating_mode
+			? [
+					['operating_mode_available_antecedents', $formStore.operating_mode],
+					...($formStore?.elementary_action
+						? [['actual_action', $formStore.elementary_action]]
+						: [])
+				]
+			: undefined}
+		optionsInfoFields={{
+			fields: [
+				{
+					field: 'attack_stage',
+					translate: true
+				}
+			],
+			classes: 'text-yellow-700'
+		}}
+		multiple
+		field="antecedents"
+		cacheLock={cacheLocks['antecedents']}
+		helpText={m.antecedentsHelpText()}
+		bind:cachedValue={formDataCache['antecedents']}
+		label={m.antecedents()}
+	/>
+{/key}
 <Select
 	{form}
 	options={model.selectOptions['logic_operator']}

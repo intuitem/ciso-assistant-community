@@ -13,7 +13,7 @@
 	});
 
 	import Toast from '$lib/components/Toast/Toast.svelte';
-	import Modal from '$lib/components/Modals/Modal.svelte';
+	import Dialog from '$lib/components/Modals/Modal.svelte';
 	import DisplayJSONModal from '$lib/components/Modals/DisplayJSONModal.svelte';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
@@ -111,8 +111,8 @@
 </script>
 
 <svelte:head><link rel="icon" href="/favicon.ico" /></svelte:head>
-<Modal components={modalRegistry} />
-<Toast />
+<Dialog components={modalRegistry} />
+<Toast zIndex="z-[1000]" />
 {@render children?.()}
 
 {#if $flash}

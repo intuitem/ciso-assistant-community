@@ -28,6 +28,11 @@
 	"addComplianceAssessment": "नया ऑडिट",
 	"addEvidence": "साक्ष्य जोड़ें",
 	"addDomain": "डोमेन जोड़ें",
+	"createIamGroups": "IAM समूह बनाएं",
+	"iamGroups": "IAM समूह",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "IAM समूहों का उपयोग उपयोगकर्ताओं को भूमिकाएँ सौंपने के लिए किया जाता है",
+	"globalFolderMustKeepIamGroupsEnabled": "ग्लोबल फ़ोल्डर को IAM समूह सक्षम रखने चाहिए।",
+	"cannotDisableIamGroupsAssignedUsers": "IAM समूहों को तब तक निष्क्रिय नहीं किया जा सकता जब तक वे उपयोगकर्ताओं को सौंपे गए हों।",
 	"addPerimeter": "परिधि जोड़ें",
 	"addUser": "उपयोगकर्ता जोड़ें",
 	"addPolicy": "नीति जोड़ें",
@@ -152,6 +157,8 @@
 	"focusModeTooltip": "किसी विशिष्ट डोमेन पर ध्यान केंद्रित करें",
 	"objectNotReachableFromCurrentFocus": "यह ऑब्जेक्ट वर्तमान फ़ोकस से पहुंच योग्य नहीं है। सूची दृश्य पर पुनर्निर्देशित कर रहे हैं।",
 	"objectNotFound": "ऑब्जेक्ट नहीं मिला। सूची दृश्य पर पुनर्निर्देशित कर रहे हैं।",
+	"autoSync": "क्रिया के लिए स्वचालित दैनिक सिंक",
+	"autoSyncHelpText": "जब सक्षम किया जाता है, एक कार्य स्वचालित रूप से प्रतिदिन कार्यों को सिंक करेगा। लॉक किए गए मूल्यांकन छोड़ दिए जाते हैं।",
 	"clearFocus": "फोकस साफ़ करें",
 	"noDomainsAvailable": "कोई डोमेन उपलब्ध नहीं",
 	"urn": "URN",
@@ -173,6 +180,7 @@
 	"next": "अगला",
 	"previous": "पिछला",
 	"show": "दिखाएँ",
+	"showStakeholdersName": "स्टेकहोल्डर्स का नाम दिखाएँ",
 	"entries": "प्रविष्टियाँ",
 	"searchPlaceholder": "खोजें...",
 	"noEntriesFound": "कोई प्रविष्टियाँ नहीं मिलीं",
@@ -1094,5 +1102,7 @@
 	"processingTimeout": "Processing timeout",
 	"maliciousFileDetected": "Malicious file detected",
 	"serverConfigurationError": "Server configuration error",
-	"libraryLoadFailed": "Library load failed"
+	"libraryLoadFailed": "Library load failed",
+	"sortAscending": "क्रम A → Z",
+	"sortDescending": "क्रम Z → A"
 }

@@ -79,11 +79,18 @@ export async function handleErrorResponse({
 		return message(form, { warning: res.warning });
 	}
 	if (res.error || res.detail) {
-		setFlash({ type: 'error', message: safeTranslate(res.error || res.detail) }, event);
+		setFlash(
+			{ type: 'error', message: safeTranslate(res.error || res.detail), timeout: 10000 },
+			event
+		);
 		return message(form, { error: res.error || res.detail });
 	}
 	Object.entries(res).forEach(([key, value]) => {
-		setError(form, key, safeTranslate(value));
+		if (Array.isArray(value)) {
+			value.forEach((item: string) => setError(form, key, safeTranslate(item)));
+		} else {
+			setError(form, key, safeTranslate(value));
+		}
 	});
 	return message(form, { status: response.status });
 }
@@ -149,8 +156,14 @@ export async function defaultWriteFormAction({
 				body: file
 			};
 			const fileUploadRes = await event.fetch(fileUploadEndpoint, fileUploadRequestInitOptions);
-			if (!fileUploadRes.ok)
+			if (!fileUploadRes.ok) {
+				// Clean up the created object if file upload fails during creation
+				if (action === 'create') {
+					const deleteEndpoint = `${BASE_API_URL}/${urlModel}/${writtenObject.id}/`;
+					await event.fetch(deleteEndpoint, { method: 'DELETE' });
+				}
 				return await handleErrorResponse({ event, response: fileUploadRes, form });
+			}
 		}
 	}
 
@@ -179,7 +192,6 @@ export async function nestedWriteFormAction({
 	redirectToWrittenObject = false
 }: {
 	event: RequestEvent;
-
 	action: FormAction;
 	redirectToWrittenObject: boolean;
 }) {
