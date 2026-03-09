@@ -272,8 +272,7 @@ class TestBackupRestoreAnswers:
         resp = send_domain_import(authenticated_client, zip_buf)
 
         assert resp.status_code == status.HTTP_200_OK
-        answer = Answer.objects.filter(question=fwq["q_sc"]).first()
-        assert answer is not None
+        answer = Answer.objects.get(question=fwq["q_sc"])
         choice_refs = list(answer.selected_choices.values_list("urn", flat=True))
         assert choice_refs == ["urn:test:choice:bqsc:ac1"]
 
@@ -295,8 +294,7 @@ class TestBackupRestoreAnswers:
         resp = send_domain_import(authenticated_client, zip_buf)
 
         assert resp.status_code == status.HTTP_200_OK
-        answer = Answer.objects.filter(question=fwq["q_mc"]).first()
-        assert answer is not None
+        answer = Answer.objects.get(question=fwq["q_mc"])
         choice_refs = set(answer.selected_choices.values_list("urn", flat=True))
         assert choice_refs == {"urn:test:choice:bqmc:mc1", "urn:test:choice:bqmc:mc3"}
 
@@ -315,8 +313,7 @@ class TestBackupRestoreAnswers:
         resp = send_domain_import(authenticated_client, zip_buf)
 
         assert resp.status_code == status.HTTP_200_OK
-        answer = Answer.objects.filter(question=fwq["q_sc"]).first()
-        assert answer is not None
+        answer = Answer.objects.get(question=fwq["q_sc"])
         assert answer.selected_choices.count() == 0
 
     def test_backup_restore_answer_no_choices_field(
@@ -334,8 +331,7 @@ class TestBackupRestoreAnswers:
         resp = send_domain_import(authenticated_client, zip_buf)
 
         assert resp.status_code == status.HTTP_200_OK
-        answer = Answer.objects.filter(question=fwq["q_sc"]).first()
-        assert answer is not None
+        answer = Answer.objects.get(question=fwq["q_sc"])
         assert answer.selected_choices.count() == 0
 
     def test_backup_restore_preserves_value_field(
@@ -353,6 +349,5 @@ class TestBackupRestoreAnswers:
         resp = send_domain_import(authenticated_client, zip_buf)
 
         assert resp.status_code == status.HTTP_200_OK
-        answer = Answer.objects.filter(question=fwq["q_text"]).first()
-        assert answer is not None
+        answer = Answer.objects.get(question=fwq["q_text"])
         assert answer.value == "some text"
