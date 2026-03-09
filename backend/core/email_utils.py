@@ -8,6 +8,8 @@ from string import Template
 from typing import Dict, Optional
 from django.conf import settings
 from django.utils.translation import get_language
+from global_settings.models import GlobalSettings
+from iam.models import User
 import structlog
 
 logger = structlog.getLogger(__name__)
@@ -20,9 +22,6 @@ def get_locale_for_email(email: str) -> str:
     Resolve the preferred locale for a given email address.
     Looks up the user's preferences, falls back to admin default, then 'en'.
     """
-    from iam.models import User
-    from global_settings.models import GlobalSettings
-
     try:
         user = User.objects.filter(email=email).first()
         if user:
