@@ -35,7 +35,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		.catch(() => ({}));
 
 	const metricsPromise = fetch(`${BASE_API_URL}/get_metrics/`)
-		.then((res) => res.json())
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('Failed to fetch or parse metrics:', error);
@@ -43,7 +46,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const auditsMetricsPromise = fetch(`${BASE_API_URL}/get_audits_metrics/`)
-		.then((res) => res.json())
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('Failed to fetch or parse audits metrics:', error);
@@ -51,7 +57,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const countersPromise = fetch(`${BASE_API_URL}/get_counters/`)
-		.then((res) => res.json())
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('failed to fetch or parse counters:', error);
@@ -59,7 +68,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const combinedAssessmentsStatusPromise = fetch(`${BASE_API_URL}/get_combined_assessments_status/`)
-		.then((res) => res.json())
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('failed to fetch or parse combined assessments status:', error);
@@ -69,7 +81,10 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const governanceCalendarDataPromise = fetch(
 		`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
 	)
-		.then((res) => res.json())
+		.then((res) => {
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			return res.json();
+		})
 		.then((data) => data.results)
 		.catch((error) => {
 			console.error('Failed to fetch governance calendar data:', error);

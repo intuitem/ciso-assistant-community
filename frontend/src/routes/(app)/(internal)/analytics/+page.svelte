@@ -234,7 +234,7 @@
 									</div>
 								{:then auditsMetrics}
 									<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-										{#if auditsMetrics?.audits_stats}
+										{#if auditsMetrics?.audits_stats?.data}
 											<StackedBarsNormalized
 												names={auditsMetrics.audits_stats.names}
 												data={auditsMetrics.audits_stats.data}
