@@ -268,3 +268,20 @@ def get_sso_info(request):
             "callback_url": callback_url,
         }
     )
+
+
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def get_default_language(request):
+    """
+    Returns the configured default language. Falls back to English if unset or invalid.
+    """
+    general = GlobalSettings.objects.filter(name="general").first()
+    default_language = "en"
+    if general and isinstance(general.value, dict):
+        default_language = general.value.get("default_language", default_language)
+
+    if default_language not in dict(settings.LANGUAGES):
+        default_language = "en"
+
+    return Response({"default_language": default_language})
