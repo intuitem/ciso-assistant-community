@@ -21,11 +21,7 @@ class MappingEngine:
         self.frameworks: dict[str, dict[str, int]] = defaultdict(dict)
         self.direct_mappings: set[tuple[str, str]] = set()
 
-        if not self.frameworks:
-            self.load_frameworks()
-
-        if not self.direct_mappings:
-            self.load_rms_data()
+        self.reload_cache()
 
         self.fields_to_map: list[str] = [
             "result",
@@ -55,6 +51,11 @@ class MappingEngine:
         if data is None:
             return None
         return self._decompress_rms(data)
+
+    def reload_cache(self) -> None:
+        """Reloads all engine cache data: frameworks and RMS data."""
+        self.load_frameworks()
+        self.load_rms_data()
 
     def load_rms_data(self) -> None:
         """
