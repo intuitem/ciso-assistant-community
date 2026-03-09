@@ -1200,6 +1200,134 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
+class VulnerabilityRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Vulnerability records.
+    """
+
+    SERIALIZER_CLASS = VulnerabilityWriteSerializer
+    SEVERITY_MAP: Final[dict[str, int]] = {
+        "undefined": -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "undefined": "--",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+
+        raw_severity = record.get("severity")
+        if isinstance(raw_severity, str):
+            severity = self.SEVERITY_MAP.get(raw_severity.lower().strip(), -1)
+        elif isinstance(raw_severity, int) and -1 <= raw_severity <= 4:
+            severity = raw_severity
+        else:
+            severity = -1
+
+        raw_status = record.get("status")
+        if isinstance(raw_status, str):
+            status = self.STATUS_MAP.get(raw_status.lower().strip(), "--")
+        else:
+            status = "--"
+
+        applied_controls = []
+        for ap_name in (record.get("applied_controls") or "").splitlines():
+            ap_name = ap_name.strip()
+            if not ap_name:
+                continue
+            obj = AppliedControl.objects.filter(
+                name=ap_name, folder_id=folder_id
+            ).first()
+            if obj:
+                applied_controls.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No applied control named '{ap_name}' found in folder",
+                )
+
+        assets = []
+        for asset_name in (record.get("assets") or "").splitlines():
+            asset_name = asset_name.strip()
+            if not asset_name:
+                continue
+            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            if obj:
+                assets.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No asset named '{asset_name}' found in folder",
+                )
+
+        security_exceptions = []
+        for se_name in (record.get("security_exceptions") or "").splitlines():
+            se_name = se_name.strip()
+            if not se_name:
+                continue
+            obj = SecurityException.objects.filter(
+                name=se_name, folder_id=folder_id
+            ).first()
+            if obj:
+                security_exceptions.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No security exception named '{se_name}' found in folder",
+                )
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "status": status,
+            "severity": severity,
+            "folder": folder_id,
+            "applied_controls": applied_controls,
+            "assets": assets,
+            "security_exceptions": security_exceptions,
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = Vulnerability.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return Vulnerability.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
+
+
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
@@ -1741,27 +1869,6 @@ class LoadFileView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = LoadFileSerializer
 
-    VULNERABILITY_SEVERITY_MAP = {
-        None: -1,
-        "undefined": -1,
-        "info": 0,
-        "low": 1,
-        "medium": 2,
-        "high": 3,
-        "critical": 4,
-    }
-
-    VULNERABILITY_STATUS_MAP = {
-        None: "--",
-        "undefined": "--",
-        "potential": "potential",
-        "exploitable": "exploitable",
-        "mitigated": "mitigated",
-        "fixed": "fixed",
-        "not exploitable": "not_exploitable",
-        "unaffected": "unaffected",
-    }
-
     def process_excel_file(self, request, record_file: io.BytesIO) -> Response:
         # Parse Excel data
         # Note: I can still pick the request.user for extra checks on the legit access for write operations
@@ -1911,8 +2018,10 @@ class LoadFileView(APIView):
                                 .to_dict()
                             )
                         case ModelType.VULNERABILITY:
-                            res = self._process_vulnerability_record(
-                                records, folder_id, request, on_conflict
+                            res = (
+                                VulnerabilityRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
                             )
                         case ModelType.BUSINESS_IMPACT_ANALYSIS:
                             res = (
@@ -3573,202 +3682,6 @@ class LoadFileView(APIView):
                     logger.warning(f"Error creating control {control_name}: {str(e)}")
 
         return control_mapping
-
-    def _add_missing_reference_for_vulnerability(
-        self, results, record, object_name, name, folder_id
-    ):
-        results["failed"] += 1
-        results["errors"].append(
-            {
-                "record": record,
-                "error": f"No object '{object_name}' named '{name}' exists in folder {folder_id}.",
-            }
-        )
-
-    def _process_vulnerability_record(
-        self, records, folder_id, request, on_conflict=ConflictMode.STOP
-    ):
-        def safe_lowercase(s):
-            if s is None or type(s) is not str:
-                return s
-            else:
-                return s.lower().strip()
-
-        results = {"successful": 0, "failed": 0, "errors": []}
-        try:
-            for record in records:
-                ref_id = record.get("ref_id", "")
-                name = record.get("name", "")
-                if not name:
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {"record": record, "error": "Name field is mandatory"}
-                    )
-                    continue
-                description = record.get("description", "")
-
-                status_value = self.VULNERABILITY_STATUS_MAP.get(
-                    safe_lowercase(record.get("status", "")), "--"
-                )
-                severity = self.VULNERABILITY_SEVERITY_MAP.get(
-                    safe_lowercase(record.get("severity", "")), -1
-                )
-
-                failed_record_reference = False
-
-                applied_controls = []
-                if record.get("applied_controls"):
-                    for ap_name in record.get("applied_controls", "").split("\n"):
-                        ap_name = ap_name.strip()
-                        if not ap_name:
-                            continue
-                        obj = AppliedControl.objects.filter(
-                            name=ap_name, folder_id=folder_id
-                        ).first()
-                        if obj:
-                            applied_controls.append(obj.id)
-                        else:
-                            failed_record_reference = True
-                            self._add_missing_reference_for_vulnerability(
-                                results, record, "applied_controls", ap_name, folder_id
-                            )
-                            break
-                else:
-                    applied_controls = []
-
-                assets = []
-                if record.get("assets"):
-                    for asset_name in record.get("assets", "").split("\n"):
-                        asset_name = asset_name.strip()
-                        if not asset_name:
-                            continue
-                        obj = Asset.objects.filter(
-                            name=asset_name, folder_id=folder_id
-                        ).first()
-                        if obj:
-                            assets.append(obj.id)
-                        else:
-                            failed_record_reference = True
-                            self._add_missing_reference_for_vulnerability(
-                                results, record, "assets", asset_name, folder_id
-                            )
-                            break
-
-                if failed_record_reference:
-                    continue
-
-                filtering_labels = []
-                if record.get("filtering_labels"):
-                    for filter_name in record.get("filtering_labels", "").split("\n"):
-                        filter_name = filter_name.strip()
-                        if not filter_name:
-                            continue
-                        filtering_label, _ = FilteringLabel.objects.get_or_create(
-                            label=filter_name, folder_id=folder_id
-                        )
-                        filtering_labels.append(filtering_label.id)
-
-                security_exceptions = []
-                if record.get("security_exceptions"):
-                    for se_name in record.get("security_exceptions", "").split("\n"):
-                        se_name = se_name.strip()
-                        if not se_name:
-                            continue
-                        obj = SecurityException.objects.filter(
-                            name=se_name, folder_id=folder_id
-                        ).first()
-                        if obj:
-                            security_exceptions.append(obj.id)
-                        else:
-                            failed_record_reference = True
-                            self._add_missing_reference_for_vulnerability(
-                                results,
-                                record,
-                                "security_exceptions",
-                                se_name,
-                                folder_id,
-                            )
-                            break
-
-                vuln_data = {
-                    "ref_id": ref_id,
-                    "name": name,
-                    "description": description,
-                    "status": status_value,
-                    "severity": severity,
-                    "applied_controls": applied_controls,
-                    "assets": assets,
-                    "folder": folder_id,
-                    "security_exceptions": security_exceptions,
-                    "filtering_labels": filtering_labels,
-                }
-                if failed_record_reference:
-                    continue
-
-                existing = None
-                if ref_id:
-                    existing = Vulnerability.objects.filter(
-                        ref_id=ref_id, folder_id=folder_id
-                    ).first()
-                if existing is None:
-                    existing = Vulnerability.objects.filter(
-                        name=name, folder_id=folder_id
-                    ).first()
-
-                if existing is not None:
-                    match on_conflict:
-                        case ConflictMode.STOP:
-                            results["failed"] += 1
-                            results["errors"].append(
-                                {
-                                    "record": record,
-                                    "error": f"Vulnerability '{name}' already exists",
-                                }
-                            )
-                            return results
-                        case ConflictMode.SKIP:
-                            continue
-                        case ConflictMode.UPDATE:
-                            vuln_serializer = VulnerabilityWriteSerializer(
-                                existing, data=vuln_data, context={"request": request}
-                            )
-                else:
-                    vuln_serializer = VulnerabilityWriteSerializer(
-                        data=vuln_data, context={"request": request}
-                    )
-
-                if vuln_serializer.is_valid():
-                    try:
-                        vuln_serializer.save()
-                        results["successful"] += 1
-                    except Exception as e:
-                        results["failed"] += 1
-                        results["errors"].append(
-                            {
-                                "record": record,
-                                "error": f"Failed to save vulnerability record {str(e)}",
-                            }
-                        )
-                else:
-                    logger.warning(
-                        f"Vulnerability validation failed: {vuln_serializer.errors}"
-                    )
-                    results["failed"] += 1
-                    results["errors"].append(
-                        {
-                            "record": record,
-                            "error": f"Failed to save vulnerability record: {vuln_serializer.errors}",
-                        }
-                    )
-
-        except Exception as e:
-            logger.warning("Failed to save vulnerability records")
-            results["errors"].append(
-                {"error": f"Failed to parse the vulnerability records: {str(e)}"}
-            )
-            results["failed"] = len(records)
-            results["successful"] = 0
-        return results
 
     def _process_risk_scenario_record(
         self, record, risk_assessment, matrix_mappings, control_mapping, request
