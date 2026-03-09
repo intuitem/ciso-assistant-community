@@ -12370,7 +12370,6 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
         "entities",
         "assets",
         "filtering_labels",
-        "urn",
     ]
 
     export_config = {
