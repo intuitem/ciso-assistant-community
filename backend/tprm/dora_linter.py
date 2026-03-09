@@ -708,7 +708,9 @@ def lint_contracts() -> List[Dict[str, Any]]:
     results = []
 
     # Get all contracts
-    contracts = Contract.objects.all().select_related("beneficiary_entity")
+    contracts = Contract.objects.exclude(status=Contract.Status.DRAFT).select_related(
+        "beneficiary_entity"
+    )
 
     if not contracts.exists():
         # No contracts found - this could be OK, but let's inform the user
@@ -914,6 +916,7 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
             solutions__isnull=False,
             solutions__assets__id__in=business_function_asset_ids,
         )
+        .exclude(status=Contract.Status.DRAFT)
         .distinct()
         .select_related("provider_entity", "beneficiary_entity")
         .prefetch_related("solutions")
