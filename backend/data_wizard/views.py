@@ -193,7 +193,7 @@ def _parse_recovery_objectives(raw: str) -> dict:
         key, _, val = part.partition(":")
         key = key.strip()
         secs = _parse_time_to_seconds(val.strip())
-        if secs is not None and secs > 0:
+        if secs is not None and secs >= 0:
             result[key] = {"value": secs}
     return result
 
@@ -560,22 +560,25 @@ class AssetRecordConsumer(RecordConsumer[None]):
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
-        raw_sec = record.get("security_objectives", "")
-        sec_objectives = _parse_security_objectives(raw_sec)
-        if raw_sec and not sec_objectives:
-            return data, Error(
-                record=record,
-                error=f"Could not parse security_objectives: '{raw_sec}'",
-                is_warning=True,
-            )
+        # Accept both export column names and native field names for support assets
+        raw_sec = record.get("security_objectives") or record.get(
+            "security_capabilities", ""
+        )
+        raw_rec = record.get("disaster_recovery_objectives") or record.get(
+            "recovery_capabilities", ""
+        )
 
-        raw_rec = record.get("disaster_recovery_objectives", "")
+        sec_objectives = _parse_security_objectives(raw_sec)
         rec_objectives = _parse_recovery_objectives(raw_rec)
+
+        parse_warning_msgs = []
+        if raw_sec and not sec_objectives:
+            parse_warning_msgs.append(
+                f"Could not parse security_objectives: '{raw_sec}'"
+            )
         if raw_rec and not rec_objectives:
-            return data, Error(
-                record=record,
-                error=f"Could not parse disaster_recovery_objectives: '{raw_rec}'",
-                is_warning=True,
+            parse_warning_msgs.append(
+                f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
             )
 
         if asset_type == "PR":
@@ -589,6 +592,12 @@ class AssetRecordConsumer(RecordConsumer[None]):
             if rec_objectives:
                 data["recovery_capabilities"] = {"objectives": rec_objectives}
 
+        if parse_warning_msgs:
+            return data, Error(
+                record=record,
+                error="; ".join(parse_warning_msgs),
+                is_warning=True,
+            )
         return data, None
 
     def process_records(self, records: list[dict]) -> Result:
