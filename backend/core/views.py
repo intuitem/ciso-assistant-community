@@ -616,7 +616,7 @@ class CustomOrderingFilter(filters.OrderingFilter):
         ordering_mapping = { "name": "owner__name" }
     """
 
-    ordering_mapping: dict[str, str]
+    ordering_mapping: dict[str, str] = {}
 
     def get_ordering(self, request, queryset, view) -> Optional[list[str]]:
         """Map ordering terms based on `ordering_mapping` when provided on the subclass."""
@@ -624,11 +624,14 @@ class CustomOrderingFilter(filters.OrderingFilter):
         if ordering_list is None:
             return None
 
-        mapping = getattr(view, "ordering_mapping", None) or getattr(
-            self, "ordering_mapping", None
+        view_mapping = getattr(view, "ordering_mapping", None)
+        mapping = (
+            view_mapping
+            if view_mapping is not None
+            else getattr(self, "ordering_mapping", None)
         )
 
-        if mapping is None:
+        if not mapping:
             return ordering_list
 
         new_ordering_list = []
