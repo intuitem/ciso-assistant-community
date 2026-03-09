@@ -246,6 +246,102 @@ Controls are created on picked based on the perimeter's domain. Line breaks are 
 
 (1): the string of characters must represent a value present in the chosen risk matrix
 
+
+
+## 🏢 Business Impact Analysis
+
+The BIA export/import uses a **multi-sheet Excel file**:
+
+* **Summary** sheet - one row per BIA
+* **\<BIA name>** sheet - one row per asset assessment for that BIA
+* **\<BIA name> - thresholds** sheet - one row per escalation threshold for that BIA
+
+### Template
+
+{% file src="../.gitbook/assets/sample_business_impact_analysis (1).xlsx" %}
+
+***
+
+### Summary sheet
+
+#### Supported fields
+
+* `name`\*
+* `description`
+* `perimeter` - name of the perimeter
+* `perimeter_ref_id` - ref\_id of the perimeter
+* `risk_matrix` - name of the risk matrix
+* `risk_matrix_ref_id` - ref\_id of the risk matrix&#x20;
+* `folder` - domain/folder name
+* `version`
+* `status`
+  * `planned`
+  * `in_progress`
+  * `in_review`
+  * `done`
+  * `deprecated`
+* `eta` - estimated completion date
+* `due_date`
+* `observation`
+* `authors` - comma-separated list of user emails
+* `reviewers` - comma-separated list of user emails
+
+Special considerations
+
+* `status` defaults to `planned` if not provided
+* `perimeter` and `risk_matrix` are resolved by UUID, ref\_id, or name (in that order)
+* `authors` and `reviewers` are matched by email address
+
+***
+
+### Asset assessment sheets (\<BIA name>)
+
+One sheet per BIA, named after the BIA. Each row is an asset assessment.
+
+Supported fields
+
+* `bia_name`\* - name of the parent BIA (injected automatically on re-import)
+* `asset`\* - name of the asset
+* `asset_ref_id` - ref\_id of the asset (alternative lookup)
+* `recovery_documented` - `true` / `false`
+* `recovery_tested` - `true` / `false`
+* `recovery_targets_met` - `true` / `false`
+* `dependencies` - comma-separated list of asset names or ref\_ids
+* `associated_controls` - comma-separated list of applied control names or ref\_ids
+* `evidences` - comma-separated list of evidence names
+* `observation`
+
+Special considerations
+
+* `asset` is resolved by UUID, ref\_id, or name (in that order)
+* Boolean fields accept `true/false`, `yes/no`, `1/0`
+* Multiple values (dependencies, controls, evidences) use comma separation
+
+***
+
+### Threshold sheets (\<BIA name> - thresholds)
+
+One sheet per BIA, named `<BIA name> - thresholds`. Each row is an escalation threshold.
+
+#### Supported fields
+
+* `bia_name`\* - name of the parent BIA
+* `asset`\* - name of the asset (used to resolve the asset assessment)
+* `asset_ref_id` - ref\_id of the asset (alternative lookup)
+* `point_in_time`\* - integer (time horizon in hours/days depending on your matrix)
+* `quali_impact` - integer qualitative impact level (-1 = not set)
+* `quanti_impact` - decimal quantitative impact value
+* `quanti_impact_unit` - unit for quantitative impact (e.g. `currency`)
+* `qualifications` - comma-separated list of qualification names
+* `justification`
+
+Special considerations
+
+* The asset assessment is resolved by matching `(bia_name, asset)` — both must already exist before thresholds are imported
+* `point_in_time` combined with the asset assessment forms the unique key for update/deduplication
+* `quali_impact` defaults to `-1` (not set) if blank
+* `quanti_impact` defaults to `0` if blank
+
 ## ⚙️  Elementary actions
 
 Elementary actions are useful to model a killchain during the 4th workshop of an EBIOS RM study.&#x20;
@@ -381,11 +477,10 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 
 ### Template
 
-{% file src="../.gitbook/assets/sample-processings.xlsx" %}
+{% file src="../.gitbook/assets/sample-processings (1).xlsx" %}
 
 ### Supported fields
 
-* internal\_id
 * ref\_id
 * name\*
 * description
