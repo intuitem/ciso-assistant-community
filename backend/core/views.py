@@ -7529,31 +7529,41 @@ class FolderViewSet(BaseModelViewSet):
 
             case "answer":
                 if urns := many_to_many_map_ids.get("selected_choices_urns"):
-                    choices = list(
-                        QuestionChoice.objects.filter(
-                            question=obj.question, urn__in=urns
-                        )
-                    )
-                    found_urns = {c.urn for c in choices}
-                    missing = set(urns) - found_urns
-                    if missing:
-                        logger.warning(
-                            "Answer import: could not resolve choice urns %s "
-                            "for question %s",
-                            missing,
-                            obj.question.urn,
-                        )
-                    if (
-                        obj.question.type == Question.Type.UNIQUE_CHOICE
-                        and len(choices) > 1
+                    if obj.question.type not in (
+                        Question.Type.UNIQUE_CHOICE,
+                        Question.Type.MULTIPLE_CHOICE,
                     ):
                         logger.warning(
-                            "Answer import: multiple choices provided for "
-                            "unique_choice question %s, keeping only first",
+                            "Answer import: choice identifiers (selected_choices_ref_ids/selected_choices_urns) "
+                            "provided for non-choice question %s",
                             obj.question.urn,
                         )
-                        choices = choices[:1]
-                    obj.selected_choices.set(choices)
+                    else:
+                        choices = list(
+                            QuestionChoice.objects.filter(
+                                question=obj.question, urn__in=urns
+                            )
+                        )
+                        found_urns = {c.urn for c in choices}
+                        missing = set(urns) - found_urns
+                        if missing:
+                            logger.warning(
+                                "Answer import: could not resolve choice urns %s "
+                                "for question %s",
+                                missing,
+                                obj.question.urn,
+                            )
+                        if (
+                            obj.question.type == Question.Type.UNIQUE_CHOICE
+                            and len(choices) > 1
+                        ):
+                            logger.warning(
+                                "Answer import: multiple choices provided for "
+                                "unique_choice question %s, keeping only first",
+                                obj.question.urn,
+                            )
+                            choices = choices[:1]
+                        obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
