@@ -1243,7 +1243,7 @@ class LibraryUpdater:
                 if requirement_assessment_objects_to_update:
                     RequirementAssessment.objects.bulk_update(
                         requirement_assessment_objects_to_update,
-                        ["answers", "score", "is_scored", "documentation_score"],
+                        ["score", "is_scored", "documentation_score"],
                         batch_size=100,
                     )
 
@@ -1257,9 +1257,36 @@ class LibraryUpdater:
                         update_selected_implementation_groups(ca)
 
                 if requirement_assessment_objects_to_create:
-                    RequirementAssessment.objects.bulk_create(
+                    created_ras = RequirementAssessment.objects.bulk_create(
                         requirement_assessment_objects_to_create, batch_size=100
                     )
+
+                    # Seed answers for newly created assessments
+                    answers_to_create = []
+                    # Mapping to find assessments by requirement_id
+                    ra_by_req = defaultdict(list)
+                    for ra in created_ras:
+                        ra_by_req[ra.requirement_id].append(ra)
+
+                    new_req_ids = list(ra_by_req.keys())
+                    if new_req_ids:
+                        # Prefetch all questions for these new requirements
+                        questions = Question.objects.filter(
+                            requirement_node_id__in=new_req_ids
+                        )
+                        for question in questions:
+                            ras = ra_by_req.get(question.requirement_node_id, [])
+                            for ra in ras:
+                                answers_to_create.append(
+                                    Answer(
+                                        requirement_assessment=ra,
+                                        question=question,
+                                        folder=ra.folder,
+                                    )
+                                )
+
+                    if answers_to_create:
+                        Answer.objects.bulk_create(answers_to_create, batch_size=500)
 
     def update_risk_matrices(self):
         for matrix in self.new_matrices:
@@ -7615,7 +7642,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         answered_visible_questions = 0
         is_score_computed = False
         is_result_computed = False
-        self.is_scored = False
 
         # Determine aggregation method
         scores_def = self.compliance_assessment.scores_definition
@@ -7646,7 +7672,6 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
                 if choice.id in selected_pks:
                     if choice.add_score is not None:
                         is_score_computed = True
-                        self.is_scored = True
                         total_score += choice.add_score * question.weight
                         total_weight += question.weight
 
@@ -7659,38 +7684,28 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         else:
             computed_score = total_score
 
-        self.score = max(min(int(computed_score), max_score), min_score)
+        new_score = max(min(int(computed_score), max_score), min_score)
+        new_is_scored = is_score_computed
 
-        # No visible questions → not applicable
+        # Determine overall result
         if visible_questions == 0:
-            self.result = self.Result.NOT_APPLICABLE
-            self.save(update_fields=["score", "result", "is_scored"])
-            return
-
-        # Not all visible questions are answered → not assessed
-        if answered_visible_questions < visible_questions:
-            self.result = self.Result.NOT_ASSESSED
-            self.save(update_fields=["score", "result", "is_scored"])
-            return
-
-        # Compute overall result
-        if not results:
-            self.result = self.Result.NOT_ASSESSED
+            new_result = self.Result.NOT_APPLICABLE
+        elif answered_visible_questions < visible_questions:
+            new_result = self.Result.NOT_ASSESSED
+        elif not results:
+            new_result = self.Result.NOT_ASSESSED
         elif all(results):
-            self.result = self.Result.COMPLIANT
+            new_result = self.Result.COMPLIANT
         elif any(results):
-            self.result = self.Result.PARTIALLY_COMPLIANT
+            new_result = self.Result.PARTIALLY_COMPLIANT
         else:
-            self.result = self.Result.NON_COMPLIANT
+            new_result = self.Result.NON_COMPLIANT
 
-        if is_score_computed and is_result_computed:
-            self.save(update_fields=["score", "result", "is_scored"])
-        elif is_score_computed:
-            self.save(update_fields=["score", "is_scored"])
-        elif is_result_computed:
-            self.save(update_fields=["result"])
-        else:
-            self.save(update_fields=["result", "is_scored"])
+        # Atomic update and save
+        self.score = new_score
+        self.result = new_result
+        self.is_scored = new_is_scored
+        self.save(update_fields=["score", "result", "is_scored"])
 
     def save(self, *args, **kwargs) -> None:
         super().save(*args, **kwargs)

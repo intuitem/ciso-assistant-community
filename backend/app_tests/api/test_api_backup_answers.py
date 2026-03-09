@@ -190,7 +190,7 @@ def make_objects_for_answer(
     question_urn,
     *,
     answer_value=None,
-    selected_choices_ref_ids=None,
+    selected_choices_urns=None,
     include_choices_field=True,
 ):
     """Build minimal backup objects: perimeter, CA, RA, answer."""
@@ -241,8 +241,8 @@ def make_objects_for_answer(
         "created_at": "2026-01-01T00:00:00Z",
         "updated_at": "2026-01-01T00:00:00Z",
     }
-    if include_choices_field and selected_choices_ref_ids is not None:
-        answer_fields["selected_choices_ref_ids"] = selected_choices_ref_ids
+    if include_choices_field and selected_choices_urns is not None:
+        answer_fields["selected_choices_urns"] = selected_choices_urns
 
     objects.append(
         {
@@ -260,13 +260,13 @@ class TestBackupRestoreAnswers:
     def test_backup_restore_single_choice_answer(
         self, authenticated_client, framework_with_questions
     ):
-        """selected_choices_ref_ids: ['AC1'] -> Answer with 1 selected choice."""
+        """selected_choices_urns: ['AC1'] -> Answer with 1 selected choice."""
         fwq = framework_with_questions
         objects = make_objects_for_answer(
             fwq["framework"].urn,
             fwq["requirement_node"].urn,
             fwq["q_sc"].urn,
-            selected_choices_ref_ids=["AC1"],
+            selected_choices_urns=["urn:test:choice:bqsc:ac1"],
         )
         zip_buf = create_domain_import_zip(objects)
         resp = send_domain_import(authenticated_client, zip_buf)
@@ -274,19 +274,22 @@ class TestBackupRestoreAnswers:
         assert resp.status_code == status.HTTP_200_OK
         answer = Answer.objects.filter(question=fwq["q_sc"]).first()
         assert answer is not None
-        choice_refs = list(answer.selected_choices.values_list("ref_id", flat=True))
-        assert choice_refs == ["AC1"]
+        choice_refs = list(answer.selected_choices.values_list("urn", flat=True))
+        assert choice_refs == ["urn:test:choice:bqsc:ac1"]
 
     def test_backup_restore_multiple_choice_answer(
         self, authenticated_client, framework_with_questions
     ):
-        """selected_choices_ref_ids: ['MC1','MC3'] -> Answer with 2 selected choices."""
+        """selected_choices_urns: ['MC1','MC3'] -> Answer with 2 selected choices."""
         fwq = framework_with_questions
         objects = make_objects_for_answer(
             fwq["framework"].urn,
             fwq["requirement_node"].urn,
             fwq["q_mc"].urn,
-            selected_choices_ref_ids=["MC1", "MC3"],
+            selected_choices_urns=[
+                "urn:test:choice:bqmc:mc1",
+                "urn:test:choice:bqmc:mc3",
+            ],
         )
         zip_buf = create_domain_import_zip(objects)
         resp = send_domain_import(authenticated_client, zip_buf)
@@ -294,19 +297,19 @@ class TestBackupRestoreAnswers:
         assert resp.status_code == status.HTTP_200_OK
         answer = Answer.objects.filter(question=fwq["q_mc"]).first()
         assert answer is not None
-        choice_refs = set(answer.selected_choices.values_list("ref_id", flat=True))
-        assert choice_refs == {"MC1", "MC3"}
+        choice_refs = set(answer.selected_choices.values_list("urn", flat=True))
+        assert choice_refs == {"urn:test:choice:bqmc:mc1", "urn:test:choice:bqmc:mc3"}
 
     def test_backup_restore_answer_with_empty_choices(
         self, authenticated_client, framework_with_questions
     ):
-        """selected_choices_ref_ids: [] -> Answer with no choices."""
+        """selected_choices_urns: [] -> Answer with no choices."""
         fwq = framework_with_questions
         objects = make_objects_for_answer(
             fwq["framework"].urn,
             fwq["requirement_node"].urn,
             fwq["q_sc"].urn,
-            selected_choices_ref_ids=[],
+            selected_choices_urns=[],
         )
         zip_buf = create_domain_import_zip(objects)
         resp = send_domain_import(authenticated_client, zip_buf)
@@ -319,7 +322,7 @@ class TestBackupRestoreAnswers:
     def test_backup_restore_answer_no_choices_field(
         self, authenticated_client, framework_with_questions
     ):
-        """No selected_choices_ref_ids key -> Answer created, empty M2M."""
+        """No selected_choices_urns key -> Answer created, empty M2M."""
         fwq = framework_with_questions
         objects = make_objects_for_answer(
             fwq["framework"].urn,
