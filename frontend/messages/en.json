@@ -248,7 +248,7 @@
 	"forceLanguageConfirmBody": "Are you sure you want to override the language preference for ALL users? This will change the language for every user in the system.",
 	"forceLanguageFinalConfirmTitle": "Final confirmation",
 	"forceLanguageFinalConfirmBody": "This will override the language preference of all users. This action cannot be undone. Proceed?",
-	"forceLanguageSuccess": "Language forced successfully for {count} users",
+	"forceLanguageSuccess": "Language forced successfully for all users",
 	"forceLanguageFailed": "Failed to force language for all users",
 	"annotation": "Annotation",
 	"library": "Library",

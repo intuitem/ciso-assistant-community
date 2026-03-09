@@ -8,6 +8,7 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { setLocale } from '$paraglide/runtime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
 	import { getToastStore } from '$lib/components/Toast/stores';
 
@@ -65,10 +66,12 @@
 							const data = await res.json();
 							if (res.ok) {
 								toastStore.trigger({
-									message: m.forceLanguageSuccess({ count: data.updated }),
+									message: m.forceLanguageSuccess(),
 									preset: 'success'
 								});
-								window.location.reload();
+								if (data.language) {
+									setLocale(data.language);
+								}
 							} else {
 								toastStore.trigger({
 									message: data.error || m.forceLanguageFailed(),

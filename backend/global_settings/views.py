@@ -204,7 +204,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
                 user.preferences["lang"] = lang
                 user.save(update_fields=["preferences"])
                 updated += 1
-        return Response({"updated": updated})
+        return Response({"updated": updated, "language": lang})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
