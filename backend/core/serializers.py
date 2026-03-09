@@ -1822,20 +1822,6 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
 
 
 class RequirementNodeWriteSerializer(BaseModelSerializer):
-    def update(self, instance, validated_data):
-        # Skip the URN-based "imported objects" guard from BaseModelSerializer
-        # because requirement nodes on draft frameworks should be editable.
-        self._check_object_perm(instance, "change")
-        try:
-            return super(BaseModelSerializer, self).update(instance, validated_data)
-        except Exception as e:
-            logger.error(
-                "Failed to update RequirementNode", error=str(e), exc_info=True
-            )
-            raise serializers.ValidationError(
-                "Failed to update requirement node. Please check the input data."
-            )
-
     class Meta:
         model = RequirementNode
         exclude = ["created_at", "updated_at"]
@@ -2727,11 +2713,59 @@ class AnswerWriteSerializer(BaseModelSerializer):
     )
 
     def validate(self, attrs):
+        requirement_assessment = attrs.get("requirement_assessment") or (
+            self.instance.requirement_assessment if self.instance else None
+        )
         question = attrs.get("question") or (
             self.instance.question if self.instance else None
         )
         value = attrs.get("value")
         selected_choices_list = attrs.get("selected_choices")
+
+        if not requirement_assessment:
+            raise serializers.ValidationError(
+                {"requirement_assessment": "This field is required."}
+            )
+
+        # 1. Parent/child consistency check
+        if (
+            question
+            and question.requirement_node_id != requirement_assessment.requirement_id
+        ):
+            raise serializers.ValidationError(
+                {
+                    "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                }
+            )
+
+        # 2. Assessment state/locked checks
+        compliance_assessment = requirement_assessment.compliance_assessment
+        if compliance_assessment.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the answer when the audit is locked."
+            )
+
+        from core.models import ComplianceAssessment
+
+        if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the answer when the audit is in review."
+            )
+
+        # 3. Assignment-level locking for auditee users
+        request = self.context.get("request")
+        if request and requirement_assessment:
+            from core.utils import get_auditee_filtered_folder_ids
+
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders and requirement_assessment.folder_id in auditee_folders:
+                locked_assignment = requirement_assessment.assignments.filter(
+                    status__in=["submitted", "closed"]
+                ).first()
+                if locked_assignment:
+                    raise serializers.ValidationError(
+                        "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
 
         if question:
             q_type = question.type
