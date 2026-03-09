@@ -2133,7 +2133,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+        "prefetch_related": [
+            "owner",
+            "parent_assets",
+            "overridden_children_capabilities",
+            "filtering_labels",
+        ],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
