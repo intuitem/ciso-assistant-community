@@ -54,8 +54,14 @@ class MappingEngine:
 
     def reload_cache(self) -> None:
         """Reloads all engine cache data: frameworks and RMS data."""
-        self.load_frameworks()
-        self.load_rms_data()
+        from django.db.utils import ProgrammingError, OperationalError
+
+        try:
+            self.load_frameworks()
+            self.load_rms_data()
+        except (ProgrammingError, OperationalError):
+            # Tables might not exist during migrations.
+            pass
 
     def load_rms_data(self) -> None:
         """
