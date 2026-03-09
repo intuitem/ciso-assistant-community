@@ -13134,8 +13134,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             with transaction.atomic():
                 today = timezone.localdate()
                 # Soft-delete future TaskNode instances for re-evaluation.
-                TaskNode.objects.filter(
-                    task_template=task_template, scheduled_date__gte=today
+                TaskNode.objects.filter(task_template=task_template).filter(
+                    Q(scheduled_date__gte=today)
+                    | Q(scheduled_date__isnull=True, due_date__gte=today)
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
