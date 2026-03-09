@@ -99,17 +99,6 @@
 			<header class={cHeader} data-testid="modal-title">
 				{$modalStore[0].title ?? '(title missing)'}
 			</header>
-
-			<div
-				role="button"
-				tabindex="0"
-				class="flex items-center hover:text-primary-500 cursor-pointer"
-				aria-label="Close"
-				onclick={parent.onClose}
-				onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && parent.onClose()}
-			>
-				<i class="fa-solid fa-xmark"></i>
-			</div>
 		</div>
 
 		<article class="text-sm text-gray-700 whitespace-pre-line">
