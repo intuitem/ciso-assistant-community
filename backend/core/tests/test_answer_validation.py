@@ -12,6 +12,7 @@ from core.models import (
 from core.serializers import AnswerWriteSerializer
 from iam.models import Folder
 
+
 @pytest.fixture
 def validation_setup(db):
     folder = Folder.get_root_folder()
@@ -71,21 +72,26 @@ def validation_setup(db):
         "folder": folder,
     }
 
+
 @pytest.mark.django_db
 class TestAnswerValidation:
     def test_validate_parent_child_consistency(self, validation_setup):
         """Verify that a question must belong to the requirement assessment's node."""
         data = validation_setup
-        serializer = AnswerWriteSerializer(data={
-            "requirement_assessment": data["ra1"].id,
-            "question": data["q2"].id,  # q2 belongs to rn2, ra1 belongs to rn1
-            "value": "some text",
-            "folder": data["folder"].id,
-        })
+        serializer = AnswerWriteSerializer(
+            data={
+                "requirement_assessment": data["ra1"].id,
+                "question": data["q2"].id,  # q2 belongs to rn2, ra1 belongs to rn1
+                "value": "some text",
+                "folder": data["folder"].id,
+            }
+        )
         with pytest.raises(ValidationError) as excinfo:
             serializer.is_valid(raise_exception=True)
         assert "question" in excinfo.value.detail
-        assert "does not belong to requirement assessment" in str(excinfo.value.detail["question"][0])
+        assert "does not belong to requirement assessment" in str(
+            excinfo.value.detail["question"][0]
+        )
 
     def test_validate_locked_ca(self, validation_setup):
         """Verify that answers cannot be modified if the compliance assessment is locked."""
@@ -93,12 +99,14 @@ class TestAnswerValidation:
         data["ca"].is_locked = True
         data["ca"].save()
 
-        serializer = AnswerWriteSerializer(data={
-            "requirement_assessment": data["ra1"].id,
-            "question": data["q1"].id,
-            "value": "some text",
-            "folder": data["folder"].id,
-        })
+        serializer = AnswerWriteSerializer(
+            data={
+                "requirement_assessment": data["ra1"].id,
+                "question": data["q1"].id,
+                "value": "some text",
+                "folder": data["folder"].id,
+            }
+        )
         with pytest.raises(ValidationError) as excinfo:
             serializer.is_valid(raise_exception=True)
         assert "audit is locked" in str(excinfo.value.detail["non_field_errors"][0])
@@ -109,12 +117,14 @@ class TestAnswerValidation:
         data["ca"].status = Assessment.Status.IN_REVIEW
         data["ca"].save()
 
-        serializer = AnswerWriteSerializer(data={
-            "requirement_assessment": data["ra1"].id,
-            "question": data["q1"].id,
-            "value": "some text",
-            "folder": data["folder"].id,
-        })
+        serializer = AnswerWriteSerializer(
+            data={
+                "requirement_assessment": data["ra1"].id,
+                "question": data["q1"].id,
+                "value": "some text",
+                "folder": data["folder"].id,
+            }
+        )
         with pytest.raises(ValidationError) as excinfo:
             serializer.is_valid(raise_exception=True)
         assert "audit is in review" in str(excinfo.value.detail["non_field_errors"][0])
