@@ -12974,6 +12974,10 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
         today = timezone.localdate()
+        task_templates = list(task_templates)
+        task_templates_by_id = {
+            str(template.id): template for template in task_templates
+        }
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
@@ -13081,7 +13085,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                task_template = self.get_queryset().get(id=task_template_id)
+                task_template = task_templates_by_id[str(task_template_id)]
 
                 # Check if a node already exists for this recurrence slot
                 rescheduled_node = TaskNode.objects.filter(

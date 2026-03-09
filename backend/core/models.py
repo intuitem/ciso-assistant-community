@@ -7927,6 +7927,7 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
                     task_template=self,
                     scheduled_date__gt=end_date,
                     status="pending",
+                    due_date=F("scheduled_date"),
                     observation__in=[None, ""],
                 ).exclude(
                     evidences__isnull=False,
