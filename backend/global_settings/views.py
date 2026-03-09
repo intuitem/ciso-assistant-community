@@ -172,12 +172,12 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
 
     @action(detail=True, name="Get available languages")
-    def default_language(self, request):
+    def default_language(self, request, pk=None):
         choices = {code: name for code, name in settings.LANGUAGES}
         return Response(choices)
 
     @action(detail=True, methods=["post"], name="Force language for all users")
-    def force_language(self, request):
+    def force_language(self, request, pk=None):
         if not request.user.is_superuser:
             return Response(
                 {"error": "Only administrators can force language for all users."},

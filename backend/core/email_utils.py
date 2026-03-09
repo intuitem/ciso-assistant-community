@@ -25,8 +25,8 @@ def get_locale_for_email(email: str) -> str:
 
     try:
         user = User.objects.filter(email=email).first()
-        if user and isinstance(user.preferences, dict) and user.preferences.get("lang"):
-            return user.preferences["lang"]
+        if user:
+            return user.get_preferences(save=False).get("lang", "en")
     except Exception as e:
         logger.warning("Failed to resolve user locale for email %s: %s", email, e)
 

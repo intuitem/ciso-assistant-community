@@ -9,6 +9,7 @@
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -22,6 +23,7 @@
 
 	const formStore = form.form;
 	const modalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -62,9 +64,18 @@
 								body: JSON.stringify({ language: selectedLang }),
 								headers: { 'Content-Type': 'application/json' }
 							});
-							await res.json();
+							const data = await res.json();
 							if (res.ok) {
+								toastStore.trigger({
+									message: m.forceLanguageSuccess({ count: data.updated }),
+									preset: 'success'
+								});
 								window.location.reload();
+							} else {
+								toastStore.trigger({
+									message: data.error || m.forceLanguageFailed(),
+									preset: 'error'
+								});
 							}
 						} finally {
 							forceLanguageInProgress = false;

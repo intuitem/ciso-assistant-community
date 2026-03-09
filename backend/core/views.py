@@ -7573,22 +7573,7 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        prefs = request.user.preferences
-        if not isinstance(prefs, dict):
-            prefs = {}
-        if "lang" not in prefs:
-            try:
-                general = GlobalSettings.objects.filter(name="general").first()
-                default_lang = (
-                    general.value.get("default_language", "en")
-                    if general and isinstance(general.value, dict)
-                    else "en"
-                )
-            except Exception:
-                default_lang = "en"
-            prefs["lang"] = default_lang
-            request.user.preferences = prefs
-            request.user.save(update_fields=["preferences"])
+        prefs = request.user.get_preferences()
         return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
@@ -7603,8 +7588,10 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        request.user.preferences["lang"] = new_language
-        request.user.save()
+        prefs = request.user.get_preferences(save=False)
+        prefs["lang"] = new_language
+        request.user.preferences = prefs
+        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 

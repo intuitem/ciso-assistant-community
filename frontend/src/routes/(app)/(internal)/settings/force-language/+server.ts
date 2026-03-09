@@ -1,9 +1,14 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error, json } from '@sveltejs/kit';
+import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ fetch, request }) => {
-	const body = await request.json();
+	let body;
+	try {
+		body = await request.json();
+	} catch {
+		return json({ error: 'Invalid request body' }, { status: 400 });
+	}
 
 	const response = await fetch(`${BASE_API_URL}/settings/general/force_language/`, {
 		method: 'POST',
@@ -11,11 +16,12 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 		body: JSON.stringify(body)
 	});
 
-	if (!response.ok) {
-		const data = await response.json();
-		return json(data, { status: response.status });
+	let data;
+	try {
+		data = await response.json();
+	} catch {
+		return json({ error: 'Unexpected response from server' }, { status: response.status || 500 });
 	}
 
-	const data = await response.json();
-	return json(data);
+	return json(data, { status: response.status });
 };

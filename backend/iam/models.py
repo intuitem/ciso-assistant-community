@@ -692,6 +692,35 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def get_emails(self) -> list[str]:
         return [self.email]
 
+    def get_preferences(self, save=True) -> dict:
+        """
+        Return normalized user preferences, backfilling defaults if needed.
+        Ensures preferences is always a dict with a 'lang' key.
+        """
+        prefs = self.preferences
+        if not isinstance(prefs, dict):
+            prefs = {}
+        changed = prefs is not self.preferences
+        if "lang" not in prefs:
+            try:
+                from global_settings.models import GlobalSettings
+
+                general = GlobalSettings.objects.filter(name="general").first()
+                default_lang = (
+                    general.value.get("default_language", "en")
+                    if general and isinstance(general.value, dict)
+                    else "en"
+                )
+            except Exception:
+                default_lang = "en"
+            prefs["lang"] = default_lang
+            changed = True
+        if changed:
+            self.preferences = prefs
+            if save and self.pk:
+                self.save(update_fields=["preferences"])
+        return prefs
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
         Sending a mail to a user for password resetting or creation
