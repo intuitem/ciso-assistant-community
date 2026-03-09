@@ -86,8 +86,6 @@ class TestQuestionEndpoints:
 
 @pytest.mark.django_db
 class TestRequirementNodeEndpoints:
-    """Test RequirementNode API endpoints for published-framework guards."""
-
     def test_create_requirement_node_on_framework_with_node(
         self, authenticated_client, framework_with_node
     ):
