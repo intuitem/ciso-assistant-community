@@ -15,7 +15,7 @@ from iam.models import Folder
 
 
 @pytest.fixture
-def draft_framework(app_config):
+def framework_with_node(app_config):
     """Create a draft framework with a requirement node."""
     folder = Folder.get_root_folder()
     fw = Framework.objects.create(
@@ -48,8 +48,8 @@ class TestQuestionEndpoints:
         response = client.post(reverse("questions-list"), {}, format="json")
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_list_questions(self, authenticated_client, draft_framework):
-        fw, rn = draft_framework
+    def test_list_questions(self, authenticated_client, framework_with_node):
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         Question.objects.create(
             requirement_node=rn,
@@ -64,10 +64,10 @@ class TestQuestionEndpoints:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["count"] >= 1
 
-    def test_create_question_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_create_question_on_framework_with_node(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         data = {
             "requirement_node": str(rn.id),
             "urn": "urn:test:new:q1",
@@ -83,10 +83,10 @@ class TestQuestionEndpoints:
         assert response.status_code == status.HTTP_201_CREATED
         assert Question.objects.filter(urn="urn:test:new:q1").exists()
 
-    def test_update_question_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_update_question_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         q = Question.objects.create(
             requirement_node=rn,
@@ -102,14 +102,12 @@ class TestQuestionEndpoints:
             {"text": "Updated?"},
             format="json",
         )
-        assert response.status_code == status.HTTP_200_OK
-        q.refresh_from_db()
-        assert q.text == "Updated?"
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_delete_question_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_delete_question_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         q = Question.objects.create(
             requirement_node=rn,
@@ -121,18 +119,17 @@ class TestQuestionEndpoints:
             is_published=True,
         )
         response = authenticated_client.delete(reverse("questions-detail", args=[q.id]))
-        assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not Question.objects.filter(id=q.id).exists()
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.django_db
 class TestRequirementNodeEndpoints:
     """Test RequirementNode API endpoints for published-framework guards."""
 
-    def test_create_requirement_node_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_create_requirement_node_on_framework_with_node(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         data = {
             "framework": str(fw.id),
@@ -145,28 +142,25 @@ class TestRequirementNodeEndpoints:
         )
         assert response.status_code == status.HTTP_201_CREATED
 
-    def test_update_requirement_node_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_update_requirement_node_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         response = authenticated_client.patch(
             reverse("requirement-nodes-detail", args=[rn.id]),
             {"ref_id": "REQ-UPDATED"},
             format="json",
         )
-        assert response.status_code == status.HTTP_200_OK
-        rn.refresh_from_db()
-        assert rn.ref_id == "REQ-UPDATED"
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_delete_requirement_node_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_delete_requirement_node_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         response = authenticated_client.delete(
             reverse("requirement-nodes-detail", args=[rn.id])
         )
-        assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not RequirementNode.objects.filter(id=rn.id).exists()
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.django_db
@@ -178,10 +172,10 @@ class TestQuestionChoiceEndpoints:
         response = client.get(reverse("question-choices-list"))
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_create_choice_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_create_choice_on_framework_with_node(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         q = Question.objects.create(
             requirement_node=rn,
@@ -204,10 +198,10 @@ class TestQuestionChoiceEndpoints:
         )
         assert response.status_code == status.HTTP_201_CREATED
 
-    def test_update_choice_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_update_choice_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         q = Question.objects.create(
             requirement_node=rn,
@@ -231,14 +225,12 @@ class TestQuestionChoiceEndpoints:
             {"value": "Updated"},
             format="json",
         )
-        assert response.status_code == status.HTTP_200_OK
-        c.refresh_from_db()
-        assert c.value == "Updated"
+        assert response.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_delete_choice_on_draft_framework(
-        self, authenticated_client, draft_framework
+    def test_delete_choice_with_urn_returns_403(
+        self, authenticated_client, framework_with_node
     ):
-        fw, rn = draft_framework
+        fw, rn = framework_with_node
         folder = Folder.get_root_folder()
         q = Question.objects.create(
             requirement_node=rn,
@@ -260,5 +252,4 @@ class TestQuestionChoiceEndpoints:
         response = authenticated_client.delete(
             reverse("question-choices-detail", args=[c.id])
         )
-        assert response.status_code == status.HTTP_204_NO_CONTENT
-        assert not QuestionChoice.objects.filter(id=c.id).exists()
+        assert response.status_code == status.HTTP_403_FORBIDDEN

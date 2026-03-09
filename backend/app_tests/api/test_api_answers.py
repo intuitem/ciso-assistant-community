@@ -197,7 +197,7 @@ class TestAnswerEndpoints:
             {
                 "requirement_assessment": str(ra.id),
                 "question": str(q.id),
-                "value": "AC1",
+                "value": data["choice_a"].urn,
                 "folder": str(folder.id),
             },
             format="json",
@@ -275,7 +275,7 @@ class TestAnswerEndpoints:
 
         response = authenticated_client.patch(
             reverse("answers-detail", args=[answer.id]),
-            {"value": "AC2"},
+            {"value": data["choice_b"].urn},
             format="json",
         )
         assert response.status_code == status.HTTP_200_OK
@@ -380,7 +380,7 @@ class TestAnswerEndpoints:
             {
                 "requirement_assessment": str(ra.id),
                 "question": str(q.id),
-                "value": ["MC1", "MC3"],
+                "value": [data["choice_a"].urn, data["choice_c"].urn],
                 "folder": str(folder.id),
             },
             format="json",
