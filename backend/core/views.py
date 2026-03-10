@@ -637,12 +637,12 @@ class CustomOrderingFilter(filters.OrderingFilter):
         if ordering_list is None:
             return None
 
-        view_mapping = getattr(view, "ordering_mapping", None)
-        mapping = (
-            view_mapping
-            if view_mapping is not None
-            else getattr(self, "ordering_mapping", None)
-        )
+        # Merge ordering_mapping from all classes in the view MRO that define it
+        # directly, going base→derived so subclass entries take precedence.
+        mapping: dict[str, str] = {}
+        for cls in reversed(type(view).__mro__):
+            if "ordering_mapping" in cls.__dict__:
+                mapping.update(cls.__dict__["ordering_mapping"])
 
         if not mapping:
             return ordering_list
