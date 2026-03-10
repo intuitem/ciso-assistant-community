@@ -1,4 +1,5 @@
 import hashlib
+from decimal import Decimal
 from enum import Enum
 
 import json
@@ -69,7 +70,7 @@ def format_currency(value, currency: str) -> str:
     if not currency:
         return f"{value} *"
 
-    if isinstance(value, (int, float)):
+    if isinstance(value, (int, float, Decimal)):
         if value >= 1_000_000_000:
             formatted = f"{value / 1_000_000_000:.1f}B"
         elif value >= 1_000_000:
