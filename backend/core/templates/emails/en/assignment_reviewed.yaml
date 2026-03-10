@@ -9,6 +9,6 @@ body: |
   ${reviewer_observation}
 
   Please log in to your CISO Assistant portal for more details:
-  ${ciso_assistant_url}
+  ${ciso_assistant_url}/auditee-dashboard
 
   Thank you.
