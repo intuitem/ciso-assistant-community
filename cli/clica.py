@@ -327,13 +327,12 @@ DATA_WIZARD_COMMANDS = [
             "Import folders (domains) from CSV/Excel.\n"
             "\nRequired columns: name\n"
             "Optional columns: description, domain (parent folder name)\n"
-            "\nNote: conflict management is not supported for folder imports."
+            "\nConflict detection: by name + parent folder"
         ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": False,
-        "supports_conflict": False,
     },
     {
         "command": "import_perimeters",
@@ -391,8 +390,9 @@ DATA_WIZARD_COMMANDS = [
             "Optional columns: ref_id, description, threat, "
             "existing_applied_controls (newline-separated names), "
             "additional_controls (newline-separated names), "
-            "inherent_probability, inherent_impact, "
-            "residual_probability, residual_impact, treatment\n"
+            "inherent_proba, inherent_impact, "
+            "current_proba, current_impact, "
+            "residual_proba, residual_impact, treatment\n"
             "\nNote: always creates a new risk assessment; conflict management is not applicable."
         ),
         "requires_folder": False,
@@ -409,13 +409,12 @@ DATA_WIZARD_COMMANDS = [
             "\nRequired columns: name\n"
             "Optional columns: ref_id, description, "
             "attack_stage (know/enter/discover/exploit), icon, domain\n"
-            "\nNote: conflict management is not supported for elementary action imports."
+            "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": False,
-        "supports_conflict": False,
     },
     {
         "command": "import_reference_controls",
@@ -456,15 +455,14 @@ DATA_WIZARD_COMMANDS = [
             "Optional columns: ref_id, description, status, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
-            "assigned_to (comma-separated emails), "
+            "assigned_to (comma-separated user emails), "
             "labels (comma-separated), domain\n"
-            "\nNote: conflict management is not supported for processing imports."
+            "\nConflict detection: by name + folder"
         ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
         "requires_matrix": False,
-        "supports_conflict": False,
     },
     {
         "command": "import_policies",
@@ -525,8 +523,8 @@ DATA_WIZARD_COMMANDS = [
             "Import TPRM records from a multi-sheet Excel file.\n"
             "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
             "\nEntities columns: name*, ref_id, description, domain\n"
-            "Solutions columns: name*, ref_id, description, provider (entity ref_id or name)\n"
-            "Contracts columns: name*, ref_id, description, solution (ref_id or name)\n"
+            "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
+            "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
             "\nConflict detection: by name + folder (entities/solutions/contracts)"
         ),
         "requires_folder": True,

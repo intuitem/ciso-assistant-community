@@ -1230,13 +1230,19 @@ class FolderRecordConsumer(RecordConsumer[None]):
 
         domain_name = str(record.get("domain", "")).strip()
         if domain_name:
-            parent_folder = Folder.objects.filter(name__iexact=domain_name).first()
-            if not parent_folder:
+            matching_folders = Folder.objects.filter(name__iexact=domain_name)
+            count = matching_folders.count()
+            if count == 0:
                 return {}, Error(
                     record=record,
                     error=f"Parent folder '{domain_name}' not found",
                 )
-            parent_folder_id = parent_folder.id
+            if count > 1:
+                return {}, Error(
+                    record=record,
+                    error=f"Multiple folders named '{domain_name}' found; please use a unique name",
+                )
+            parent_folder_id = matching_folders.first().id
         else:
             parent_folder_id = Folder.get_root_folder().id
 
@@ -1349,6 +1355,16 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = ProcessingWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "nature": ("processing_nature",),
+        "filtering_labels": ("labels",),
+    }
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        update_data = super()._build_update_data(record, record_data)
+        if "assigned_to" not in update_data and "assigned_to" in record:
+            update_data["assigned_to"] = record_data.get("assigned_to", [])
+        return update_data
 
     def create_context(self):
         return None, None
@@ -1394,13 +1410,15 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
                 )
             )
 
-        # Resolve M2M: assigned_to (by email)
+        # Resolve M2M: assigned_to (by user email → Actor)
         if record.get("assigned_to"):
             emails = [
                 e.strip() for e in str(record["assigned_to"]).split(",") if e.strip()
             ]
             data["assigned_to"] = list(
-                User.objects.filter(email__in=emails).values_list("id", flat=True)
+                Actor.objects.filter(user__email__in=emails).values_list(
+                    "id", flat=True
+                )
             )
 
         # Resolve M2M: filtering_labels (by label name, create if missing)
