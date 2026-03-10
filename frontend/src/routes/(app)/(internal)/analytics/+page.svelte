@@ -196,11 +196,19 @@
 												href="/compliance-assessments/"
 											/>
 										{:then auditsMetrics}
-											<SimpleCard
-												count="{auditsMetrics?.progress_avg ?? 0}%"
-												label={m.sumpageAvgProgress()}
-												href="/compliance-assessments/"
-											/>
+											{#if auditsMetrics}
+												<SimpleCard
+													count="{auditsMetrics.progress_avg}%"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{:else}
+												<SimpleCard
+													count="-"
+													label={m.sumpageAvgProgress()}
+													href="/compliance-assessments/"
+												/>
+											{/if}
 										{:catch}
 											<SimpleCard
 												count="-"
@@ -237,13 +245,17 @@
 										</div>
 									{:then auditsMetrics}
 										<div class="bg-white rounded-lg p-4 h-96 border border-gray-200">
-											{#if auditsMetrics?.audits_stats?.data}
+											{#if auditsMetrics?.audits_stats?.data?.length > 0}
 												<StackedBarsNormalized
 													names={auditsMetrics.audits_stats.names}
 													data={auditsMetrics.audits_stats.data}
 													uuids={auditsMetrics.audits_stats.uuids}
 													title={m.recentlyUpdatedAudits()}
 												/>
+											{:else}
+												<div class="flex items-center justify-center h-full text-gray-500">
+													<p>{m.nothingToShowYet()}</p>
+												</div>
 											{/if}
 										</div>
 									{:catch}
@@ -317,6 +329,10 @@
 								</div>
 							</div>
 						</section>
+					{:else}
+						<div class="col-span-3 lg:col-span-1">
+							<p class="text-red-500">Error loading metrics</p>
+						</div>
 					{/if}
 				{:catch error}
 					<div class="col-span-3 lg:col-span-1">
@@ -375,6 +391,10 @@
 								/>
 							</div>
 						</section>
+					{:else}
+						<div class="col-span-3 lg:col-span-1">
+							<p class="text-red-500">Error loading counters</p>
+						</div>
 					{/if}
 				{:catch}
 					<div>Data load error</div>
