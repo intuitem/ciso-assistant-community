@@ -78,9 +78,11 @@ class PresetExecutor:
         folder_name: str | None = None,
         folder_id: str | None = None,
         create_objects: bool = True,
+        apply_feature_flags: bool = True,
     ) -> PresetJourney:
         self._load_dependencies()
-        self._apply_feature_flags()
+        if apply_feature_flags:
+            self._apply_feature_flags()
         if folder_id:
             folder = Folder.objects.get(id=folder_id)
             # Check for existing journey with the same preset in this folder
