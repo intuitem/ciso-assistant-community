@@ -874,6 +874,7 @@
 	"templateReset": "Modèle réinitialisé par défaut",
 	"confirmResetTemplate": "Êtes-vous sûr de vouloir réinitialiser ce modèle par défaut ? Votre personnalisation sera perdue.",
 	"templatePreview": "Aperçu",
+	"markdownSupported": "Le formatage Markdown est supporté (liens, gras, listes, etc.)",
 	"wordTemplates": "Modèles de rapports Word",
 	"wordTemplatesDescription": "Personnalisez les modèles de rapports Word (.docx) utilisés pour la génération de rapports. Téléversez vos propres modèles pour remplacer ceux par défaut.",
 	"uploadTemplate": "Téléverser un modèle",

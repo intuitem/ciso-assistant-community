@@ -478,7 +478,12 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
         "task_node_due_soon", context, recipient_email=actor_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], actor_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            actor_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render task_node_due_soon email template for {actor_email}"
@@ -502,7 +507,12 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
         "task_node_overdue", context, recipient_email=actor_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], actor_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            actor_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render task_node_overdue email template for {actor_email}"
@@ -542,7 +552,12 @@ def send_notification_email_expired_eta(owner_email, controls):
         "expired_controls", context, recipient_email=owner_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render expired_controls email template for {owner_email}"
@@ -550,13 +565,13 @@ def send_notification_email_expired_eta(owner_email, controls):
 
 
 @task()
-def send_notification_email(subject, message, owner_email):
+def send_notification_email(subject, message, owner_email, html_message=None):
     try:
-        logger.debug(
+        logger.info(
             "Sending notification email",
             subject=subject,
-            message=message,
             recipient=owner_email,
+            has_html=html_message is not None,
         )
         send_mail(
             subject=subject,
@@ -564,6 +579,7 @@ def send_notification_email(subject, message, owner_email):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[owner_email],
             fail_silently=False,
+            html_message=html_message,
         )
         logger.info(
             "Notification email sent successfully",
@@ -584,7 +600,7 @@ def check_email_configuration(owner_email, controls):
         "notifications_enable_mailing", False
     )
     if not notifications_enable_mailing:
-        logger.warning(
+        logger.info(
             "Email notification is disabled. You can enable it under Extra/Settings. Skipping for now."
         )
         return False
@@ -665,7 +681,12 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
                 "applied_control_assignment", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -702,7 +723,12 @@ def send_task_template_assignment_notification(task_template_id, emails):
                 "task_template_assignment", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -744,7 +770,12 @@ def send_compliance_assessment_assignment_notification(
                 "compliance_assessment_assignment", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -778,7 +809,12 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
                 "risk_scenario_assignment", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -800,7 +836,12 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
         template_name, context, recipient_email=author_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], author_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            author_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {author_email}"
@@ -826,7 +867,12 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         template_name, context, recipient_email=owner_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
@@ -850,7 +896,12 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
         "expired_evidences", context, recipient_email=owner_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render expired_evidences email template for {owner_email}"
@@ -876,7 +927,12 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         template_name, context, recipient_email=owner_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
@@ -927,7 +983,12 @@ def send_validation_flow_created_notification(validation_flow):
         "validation_flow_created", context, recipient_email=approver_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            approver_email,
+            rendered.get("html_body"),
+        )
         logger.info(
             f"Sent validation flow creation notification to {approver_email} for {validation_flow.ref_id}"
         )
@@ -968,7 +1029,12 @@ def send_validation_flow_updated_notification(
         "validation_flow_updated", context, recipient_email=recipient_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], recipient_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            recipient_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render validation_flow_updated email template for {recipient_email}"
@@ -1000,7 +1066,12 @@ def send_validation_deadline_notification(approver_email, validations, days):
         "validation_deadline", context, recipient_email=approver_email
     )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            approver_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render validation_deadline email template for {approver_email}"
@@ -1184,7 +1255,10 @@ def send_assignment_activated_notification(assignment_id):
                 )
                 if rendered:
                     send_notification_email(
-                        rendered["subject"], rendered["body"], email
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
                     )
 
 
@@ -1228,7 +1302,12 @@ def send_assignment_submitted_notification(assignment_id):
                 "assignment_submitted", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -1261,5 +1340,8 @@ def send_assignment_reviewed_notification(
                 )
                 if rendered:
                     send_notification_email(
-                        rendered["subject"], rendered["body"], email
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
                     )

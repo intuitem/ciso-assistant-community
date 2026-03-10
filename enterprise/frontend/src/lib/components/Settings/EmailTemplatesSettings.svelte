@@ -6,6 +6,7 @@
 		type ModalStore,
 		type ModalSettings
 	} from '$lib/components/Modals/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -40,6 +41,7 @@
 	let editVariables: string[] = $state([]);
 	let saving = $state(false);
 	let successMessage = $state('');
+	let showPreview = $state(false);
 
 	async function fetchData() {
 		loading = true;
@@ -273,13 +275,30 @@
 			</div>
 
 			<div>
-				<label class="label font-medium" for="template-body">{m.templateBody()}</label>
-				<textarea
-					id="template-body"
-					class="textarea mt-1 font-mono text-sm"
-					rows="12"
-					bind:value={editBody}
-				></textarea>
+				<div class="flex items-center justify-between">
+					<label class="label font-medium" for="template-body">{m.templateBody()}</label>
+					<button
+						class="btn btn-sm preset-outlined-surface-500"
+						type="button"
+						onclick={() => (showPreview = !showPreview)}
+					>
+						<i class="fa-solid {showPreview ? 'fa-pen' : 'fa-eye'} text-xs"></i>
+						{showPreview ? m.editTemplate() : m.templatePreview()}
+					</button>
+				</div>
+				{#if showPreview}
+					<div class="card p-4 mt-1">
+						<MarkdownRenderer content={editBody} />
+					</div>
+				{:else}
+					<textarea
+						id="template-body"
+						class="textarea mt-1 font-mono text-sm"
+						rows="12"
+						bind:value={editBody}
+					></textarea>
+					<p class="text-xs text-gray-500 mt-1">{m.markdownSupported()}</p>
+				{/if}
 			</div>
 
 			<div class="flex gap-2">
