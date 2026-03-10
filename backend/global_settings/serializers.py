@@ -251,6 +251,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     comments = serializers.BooleanField(
         source="value.comments", required=False, default=True
     )
+    journeys = serializers.BooleanField(
+        source="value.journeys", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
