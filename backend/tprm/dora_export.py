@@ -16,7 +16,60 @@ from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
 
+# Export Styles
+EXPORT_STYLE_STANDARD = "eba"
+EXPORT_STYLE_ONEGATE = "onegate"
+
+
 # Helper Functions
+
+
+def get_dora_export_metadata(
+    main_entity: Entity, style: str = EXPORT_STYLE_STANDARD
+) -> dict:
+    """
+    Compute metadata for DORA RoI export based on the selected style.
+
+    Args:
+        main_entity: The main financial entity
+        style: The export style (eba or onegate)
+
+    Returns:
+        Dictionary with:
+        - folder_prefix: The prefix for files inside the ZIP
+        - filename: The name of the ZIP file
+        - entity_id: The identifier for parameters.csv
+        - competent_authority: The authority name used in naming
+    """
+    lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+    if not lei:
+        raise ValueError(
+            "Cannot generate DORA RoI export: main entity has no LEI. "
+            "Please set a LEI in the main entity's legal identifiers before exporting."
+        )
+
+    # Determine consolidation level (defaulting to CON as per current logic)
+    # TODO: Add Entity.dora_consolidation_level if individual reporting is needed
+    level = "CON"
+
+    if style == EXPORT_STYLE_ONEGATE:
+        authority = main_entity.dora_competent_authority or "NBB"
+        # OneGate naming convention: DeclarerType_DeclarerID.RecipientInstitution_OneGateDomain_OneGateReport
+        # Example: LEI_549300CGF6CED54T4Y96.NBB_DOR_DORA_ROI
+        folder_prefix = f"LEI_{lei}.{authority}_DOR_DORA_ROI"
+        entity_id = f"rs:{lei}.{level}"
+    else:
+        # Standard EBA convention (current logic)
+        authority = main_entity.dora_competent_authority or "UNKNOWN"
+        folder_prefix = f"LEI_{lei}.{level}_{authority}_DOR_DORA_ROI"
+        entity_id = f"rs:{lei}.{level}"
+
+    return {
+        "folder_prefix": folder_prefix,
+        "filename": f"{folder_prefix}.zip",
+        "entity_id": entity_id,
+        "competent_authority": authority,
+    }
 
 
 def get_entity_identifier(
@@ -1327,7 +1380,9 @@ def _compute_ref_period() -> str:
     return f"{current_year - 1}-12-31"
 
 
-def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") -> None:
+def generate_parameters(
+    zip_file, main_entity: Entity, folder_prefix: str = "", entity_id: str = ""
+) -> None:
     """
     Generate parameters.csv - Report metadata and configuration parameters.
 
@@ -1337,6 +1392,8 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
     Args:
         zip_file: ZIP file object to write to
         main_entity: The main builtin entity
+        folder_prefix: Optional folder prefix to prepend to file path
+        entity_id: The identifier for the report (optional, will be computed if not provided)
     """
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
@@ -1344,15 +1401,16 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
     # Write CSV headers
     csv_writer.writerow(["name", "value"])
 
-    # Get LEI for entityID
-    lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-    if not lei:
-        raise ValueError(
-            "Cannot generate DORA RoI export: main entity has no LEI. "
-            "The entityID parameter requires a valid LEI (EBA Filing Rules v5.5). "
-            "Please set a LEI in the main entity's legal identifiers before exporting."
-        )
-    entity_id = f"rs:{lei}.CON"
+    # If entityID not provided, compute it (default to LEI.CON)
+    if not entity_id:
+        lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+        if not lei:
+            raise ValueError(
+                "Cannot generate DORA RoI export: main entity has no LEI. "
+                "The entityID parameter requires a valid LEI (EBA Filing Rules v5.5). "
+                "Please set a LEI in the main entity's legal identifiers before exporting."
+            )
+        entity_id = f"rs:{lei}.CON"
 
     # Get currency for baseCurrency
     base_currency = (

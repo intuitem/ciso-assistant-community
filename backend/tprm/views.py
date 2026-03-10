@@ -214,15 +214,27 @@ class EntityViewSet(BaseModelViewSet):
             solutions__id__in=related_solution_ids
         )
 
-        # Calculate folder name for the ZIP structure (without .zip extension)
-        lei, _ = dora_export.get_entity_identifier(main_entity, priority=["LEI"])
-        competent_authority = main_entity.dora_competent_authority or "UNKNOWN"
+        # Get export style from query parameters
+        export_style = request.query_params.get(
+            "format", dora_export.EXPORT_STYLE_STANDARD
+        )
+        if export_style not in [
+            dora_export.EXPORT_STYLE_STANDARD,
+            dora_export.EXPORT_STYLE_ONEGATE,
+        ]:
+            export_style = dora_export.EXPORT_STYLE_STANDARD
 
-        if lei:
-            base_folder_name = f"LEI_{lei}.CON_{competent_authority}_DOR_DORA_ROI"
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            base_folder_name = f"DORA_ROI_{timestamp}"
+        # Get export metadata (naming, identifiers)
+        try:
+            export_meta = dora_export.get_dora_export_metadata(
+                main_entity, export_style
+            )
+        except ValueError as e:
+            return Response({"error": str(e)}, status=400)
+
+        base_folder_name = export_meta["folder_prefix"]
+        entity_id = export_meta["entity_id"]
+        filename = export_meta["filename"]
 
         # Create zip file in memory
         zip_buffer = io.BytesIO()
@@ -286,7 +298,9 @@ class EntityViewSet(BaseModelViewSet):
             dora_export.generate_filing_indicators(zip_file, base_folder_name)
 
             # Generate parameters.csv
-            dora_export.generate_parameters(zip_file, main_entity, base_folder_name)
+            dora_export.generate_parameters(
+                zip_file, main_entity, base_folder_name, entity_id=entity_id
+            )
 
             # Generate JSON metadata files
             dora_export.generate_report_package_json(zip_file, base_folder_name)
@@ -294,9 +308,6 @@ class EntityViewSet(BaseModelViewSet):
 
         # Prepare response
         zip_buffer.seek(0)
-
-        # Use the same base folder name for the ZIP filename
-        filename = f"{base_folder_name}.zip"
 
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
