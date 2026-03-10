@@ -4666,26 +4666,17 @@ class AppliedControl(
 
         return annual_cost
 
+    # Currencies where the symbol goes after the amount
+    _SUFFIX_CURRENCIES = {"€", "PLN"}
+
     @staticmethod
     def _stringify_cost(cost: float, currency: str) -> str:
-        match currency:
-            case "$":
-                return f"${cost}"
-            case "€":
-                return f"{cost}€"
-            case "£":
-                return f"£{cost}"
-            case "A$":
-                return f"A${cost}"
-            case "NZ$":
-                return f"NZ${cost}"
-            case "C$":
-                return f"C${cost}"
-            case "¥":
-                return f"¥{cost}"
-
-        logger.error("Unknown currency detected", currency=currency)
-        return f"{cost} *"
+        if not currency:
+            logger.error("Unknown currency detected", currency=currency)
+            return f"{cost} *"
+        if currency in AppliedControl._SUFFIX_CURRENCIES:
+            return f"{cost}{currency}"
+        return f"{currency}{cost}"
 
     @property
     def display_cost(self) -> str:
