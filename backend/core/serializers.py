@@ -3,6 +3,8 @@ from typing import Any
 
 import structlog
 from django.db import models, transaction
+from datetime import datetime
+
 from django.db.models import F
 from django.utils import timezone
 
@@ -1786,6 +1788,7 @@ class FrameworkImportExportSerializer(BaseModelSerializer):
             "min_score",
             "max_score",
             "implementation_groups_definition",
+            "outcomes_definition",
             "provider",
             "annotation",
             "translations",
@@ -1801,18 +1804,41 @@ class RequirementNodeReadSerializer(ReferentialSerializer):
     threats = FieldsRelatedField(many=True)
     display_short = serializers.CharField()
     display_long = serializers.CharField()
-    questions = serializers.JSONField(source="get_questions_translated")
+    questions = serializers.SerializerMethodField()
     typical_evidence = serializers.CharField(
         source="get_typical_evidence_translated", allow_blank=True, allow_null=True
     )
+
+    def get_questions(self, obj):
+        """Reconstruct the old JSON format from Question/QuestionChoice models
+        for backward compatibility with the frontend."""
+        from core.utils import build_questions_dict
+
+        return build_questions_dict(obj)
 
     class Meta:
         model = RequirementNode
         exclude = ["translations"]
 
 
-class RequirementNodeWriteSerializer(RequirementNodeReadSerializer):
-    pass
+class RequirementNodeWriteSerializer(BaseModelSerializer):
+    def update(self, instance, validated_data):
+        # Skip the URN-based "imported objects" guard from BaseModelSerializer
+        # because requirement nodes on draft frameworks should be editable.
+        self._check_object_perm(instance, "change")
+        try:
+            return super(BaseModelSerializer, self).update(instance, validated_data)
+        except Exception as e:
+            logger.error(
+                "Failed to update RequirementNode", error=str(e), exc_info=True
+            )
+            raise serializers.ValidationError(
+                "Failed to update requirement node. Please check the input data."
+            )
+
+    class Meta:
+        model = RequirementNode
+        exclude = ["created_at", "updated_at"]
 
 
 class EvidenceReadSerializer(BaseModelSerializer):
@@ -2208,6 +2234,7 @@ class ComplianceAssessmentListSerializer(BaseModelSerializer):
             "description",
             "version",
             "framework",
+            "computed_outcome",
             "folder",
             "perimeter",
             "progress",
@@ -2366,6 +2393,7 @@ class ComplianceAssessmentImportExportSerializer(BaseModelSerializer):
             "observation",
             "framework",
             "selected_implementation_groups",
+            "computed_outcome",
             "min_score",
             "max_score",
             "scores_definition",
@@ -2415,6 +2443,13 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
     security_exceptions = FieldsRelatedField(many=True)
     is_locked = serializers.BooleanField()
     applied_controls = FieldsRelatedField(many=True)
+    answers = serializers.SerializerMethodField()
+
+    def get_answers(self, obj):
+        """Reconstruct old JSON format {question_urn: answer_value} from Answer model."""
+        from core.utils import build_answers_dict
+
+        return build_answers_dict(obj.answers.all())
 
     class Meta:
         model = RequirementAssessment
@@ -2423,6 +2458,14 @@ class RequirementAssessmentReadSerializer(BaseModelSerializer):
 
 class RequirementAssessmentWriteSerializer(BaseModelSerializer):
     requirement = serializers.PrimaryKeyRelatedField(read_only=True)
+    answers = serializers.JSONField(required=False, write_only=True)
+
+    def validate_answers(self, value):
+        if value is not None and not isinstance(value, dict):
+            raise serializers.ValidationError(
+                "Answers must be a JSON object mapping question URNs to values."
+            )
+        return value
 
     def validate(self, attrs):
         compliance_assessment = self.get_compliance_assessment()
@@ -2521,32 +2564,383 @@ class RequirementAssessmentWriteSerializer(BaseModelSerializer):
             )
 
     def update(self, instance, validated_data):
-        instance = super().update(instance, validated_data)
+        with transaction.atomic():
+            # Handle answers if provided in old JSON format
+            answers_data = validated_data.pop("answers", None)
 
-        requirement = instance.requirement
+            instance = super().update(instance, validated_data)
 
-        # Safely get all choices across all questions
-        choices = []
-        for _, question in (
-            requirement.questions.items() if requirement.questions else []
-        ):
-            for choice in question.get("choices", []):
-                choices.append(choice)
+            if answers_data and isinstance(answers_data, dict):
+                # Convert incoming answers dict to Answer model updates
+                from core.models import Answer, Question
 
-        # Check if any choice has scoring or result logic
-        has_score_or_result = any(
-            choice.get("add_score") is not None
-            or choice.get("compute_result") is not None
-            for choice in choices
-        )
+                questions_by_urn = {
+                    q.urn: q
+                    for q in Question.objects.filter(
+                        requirement_node=instance.requirement
+                    ).prefetch_related("choices")
+                }
+                for q_urn, answer_value in answers_data.items():
+                    question = questions_by_urn.get(q_urn)
+                    if not question:
+                        logger.warning(
+                            "Question URN not found, skipping answer",
+                            q_urn=q_urn,
+                            available_urns=list(questions_by_urn.keys()),
+                        )
+                        continue
 
-        if has_score_or_result:
-            instance.compute_score_and_result()
+                    answer, _created = Answer.objects.update_or_create(
+                        requirement_assessment=instance,
+                        question=question,
+                        defaults={"folder": instance.folder},
+                    )
 
-        return instance
+                    if question.type == Question.Type.UNIQUE_CHOICE:
+                        if answer_value:
+                            choice = question.choices.filter(urn=answer_value).first()
+
+                            answer.selected_choices.set([choice] if choice else [])
+                            if not choice:
+                                logger.warning(
+                                    "Choice not found for answer",
+                                    q_urn=q_urn,
+                                    value=answer_value,
+                                )
+                        else:
+                            answer.selected_choices.clear()
+                        answer.value = None
+                        answer.save(update_fields=["value"])
+                    elif question.type == Question.Type.MULTIPLE_CHOICE:
+                        if isinstance(answer_value, list) and answer_value:
+                            choices = question.choices.filter(urn__in=answer_value)
+                            found_identifiers = set(
+                                choices.values_list("urn", flat=True)
+                            )
+                            missing = set(answer_value) - found_identifiers
+
+                            answer.selected_choices.set(choices)
+                            if missing:
+                                logger.warning(
+                                    "Some choices not found for answer",
+                                    q_urn=q_urn,
+                                    missing_values=list(missing),
+                                )
+                        else:
+                            answer.selected_choices.clear()
+                        answer.value = None
+                        answer.save(update_fields=["value"])
+                    else:
+                        answer.value = answer_value
+                        answer.save(update_fields=["value"])
+
+                # Check if any choice has scoring or result logic
+                from core.models import QuestionChoice
+
+                has_score_or_result = (
+                    QuestionChoice.objects.filter(
+                        question__requirement_node=instance.requirement,
+                    )
+                    .filter(
+                        models.Q(add_score__isnull=False)
+                        | models.Q(compute_result__isnull=False)
+                    )
+                    .exists()
+                )
+
+                if has_score_or_result:
+                    instance.compute_score_and_result()
+
+            return instance
 
     class Meta:
         model = RequirementAssessment
+        exclude = ["created_at", "updated_at"]
+
+
+class QuestionChoiceReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = QuestionChoice
+        fields = "__all__"
+
+
+class QuestionChoiceWriteSerializer(BaseModelSerializer):
+    def update(self, instance, validated_data):
+        # Skip the URN-based "imported objects" guard from BaseModelSerializer
+        # because choices on draft frameworks should be editable.
+        self._check_object_perm(instance, "change")
+        try:
+            return super(BaseModelSerializer, self).update(instance, validated_data)
+        except Exception as e:
+            logger.error("Failed to update QuestionChoice", error=str(e), exc_info=True)
+            raise serializers.ValidationError(
+                "Failed to update choice. Please check the input data."
+            )
+
+    class Meta:
+        model = QuestionChoice
+        exclude = ["created_at", "updated_at"]
+
+
+class QuestionReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    choices = QuestionChoiceReadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Question
+        fields = "__all__"
+
+
+class QuestionWriteSerializer(BaseModelSerializer):
+    def update(self, instance, validated_data):
+        # Skip the URN-based "imported objects" guard from BaseModelSerializer
+        # because questions on draft frameworks should be editable.
+        self._check_object_perm(instance, "change")
+        try:
+            return super(BaseModelSerializer, self).update(instance, validated_data)
+        except Exception as e:
+            logger.error("Failed to update Question", error=str(e), exc_info=True)
+            raise serializers.ValidationError(
+                "Failed to update question. Please check the input data."
+            )
+
+    class Meta:
+        model = Question
+        exclude = ["created_at", "updated_at"]
+
+
+class AnswerReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    selected_choices = FieldsRelatedField(many=True)
+
+    class Meta:
+        model = Answer
+        fields = "__all__"
+
+
+class AnswerWriteSerializer(BaseModelSerializer):
+    # Accept selected_choices as list of PKs for M2M
+    selected_choices = serializers.PrimaryKeyRelatedField(
+        queryset=QuestionChoice.objects.all(), many=True, required=False
+    )
+
+    def validate(self, attrs):
+        requirement_assessment = attrs.get("requirement_assessment") or (
+            self.instance.requirement_assessment if self.instance else None
+        )
+        question = attrs.get("question") or (
+            self.instance.question if self.instance else None
+        )
+        value = attrs.get("value")
+        selected_choices_list = attrs.get("selected_choices")
+
+        if not requirement_assessment:
+            raise serializers.ValidationError(
+                {"requirement_assessment": "This field is required."}
+            )
+
+        # 1. Parent/child consistency check
+        if (
+            question
+            and question.requirement_node_id != requirement_assessment.requirement_id
+        ):
+            raise serializers.ValidationError(
+                {
+                    "question": f"Question '{question}' does not belong to requirement assessment '{requirement_assessment}'."
+                }
+            )
+
+        # 2. Assessment state/locked checks
+        compliance_assessment = requirement_assessment.compliance_assessment
+        if compliance_assessment.is_locked:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the answer when the audit is locked."
+            )
+
+        from core.models import ComplianceAssessment
+
+        if compliance_assessment.status == ComplianceAssessment.Status.IN_REVIEW:
+            raise serializers.ValidationError(
+                "⚠️ Cannot modify the answer when the audit is in review."
+            )
+
+        # 3. Assignment-level locking for auditee users
+        request = self.context.get("request")
+        if request and requirement_assessment:
+            from core.utils import get_auditee_filtered_folder_ids
+
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders and requirement_assessment.folder_id in auditee_folders:
+                locked_assignment = requirement_assessment.assignments.filter(
+                    status__in=["submitted", "closed"]
+                ).first()
+                if locked_assignment:
+                    raise serializers.ValidationError(
+                        "Cannot modify: this requirement's assignment has been submitted or closed."
+                    )
+
+        if question:
+            q_type = question.type
+
+            # Reject sending both value and selected_choices for choice questions
+            if (
+                q_type in (Question.Type.UNIQUE_CHOICE, Question.Type.MULTIPLE_CHOICE)
+                and value is not None
+                and selected_choices_list is not None
+            ):
+                raise serializers.ValidationError(
+                    "Cannot send both 'value' and 'selected_choices' for choice questions. "
+                    "Use 'selected_choices' (PKs) or 'value' (ref_ids), not both."
+                )
+
+            # Reject selected_choices for non-choice question types
+            if (
+                q_type
+                not in (
+                    Question.Type.UNIQUE_CHOICE,
+                    Question.Type.MULTIPLE_CHOICE,
+                )
+                and selected_choices_list is not None
+            ):
+                raise serializers.ValidationError(
+                    {
+                        "selected_choices": "selected_choices is only valid for choice questions."
+                    }
+                )
+
+            if q_type == Question.Type.TEXT:
+                if value is not None and not isinstance(value, str):
+                    raise serializers.ValidationError(
+                        {"value": "Text answers must be a string."}
+                    )
+
+            elif q_type == Question.Type.NUMBER:
+                if value is not None and not isinstance(value, (int, float)):
+                    raise serializers.ValidationError(
+                        {"value": "Number answers must be numeric."}
+                    )
+
+            elif q_type == Question.Type.UNIQUE_CHOICE:
+                # Legacy: value is a URN string → resolve to M2M
+                if value is not None:
+                    if isinstance(value, list):
+                        raise serializers.ValidationError(
+                            {
+                                "value": "Single choice answers must be a string, not a list."
+                            }
+                        )
+                    if value:
+                        choice = question.choices.filter(urn=value).first()
+
+                        if not choice:
+                            raise serializers.ValidationError(
+                                {"value": f"Invalid choice '{value}'."}
+                            )
+                        attrs["_m2m_choices"] = [choice]
+                    else:
+                        attrs["_m2m_choices"] = []
+                    attrs["value"] = None
+
+                # Direct M2M PKs: validate all belong to question and at most 1
+                if selected_choices_list is not None:
+                    if len(selected_choices_list) > 1:
+                        raise serializers.ValidationError(
+                            {
+                                "selected_choices": "Single choice questions accept at most one selection."
+                            }
+                        )
+                    valid_pks = set(question.choices.values_list("id", flat=True))
+                    for c in selected_choices_list:
+                        if c.id not in valid_pks:
+                            raise serializers.ValidationError(
+                                {
+                                    "selected_choices": f"Choice {c.id} does not belong to this question."
+                                }
+                            )
+                    attrs["_m2m_choices"] = selected_choices_list
+                    attrs["value"] = None
+
+            elif q_type == Question.Type.MULTIPLE_CHOICE:
+                # Legacy: value is a list of URN strings → resolve to M2M
+                if value is not None:
+                    if not isinstance(value, list):
+                        raise serializers.ValidationError(
+                            {"value": "Multiple choice answers must be a list."}
+                        )
+                    if value:
+                        choices = question.choices.filter(urn__in=value)
+                        found_identifiers = set(choices.values_list("urn", flat=True))
+                        missing = [v for v in value if v not in found_identifiers]
+
+                        if missing:
+                            raise serializers.ValidationError(
+                                {"value": f"Invalid choices: {missing}"}
+                            )
+                        attrs["_m2m_choices"] = list(choices)
+                    else:
+                        attrs["_m2m_choices"] = []
+                    attrs["value"] = None
+
+                # Direct M2M PKs: validate all belong to question
+                if selected_choices_list is not None:
+                    valid_pks = set(question.choices.values_list("id", flat=True))
+                    for c in selected_choices_list:
+                        if c.id not in valid_pks:
+                            raise serializers.ValidationError(
+                                {
+                                    "selected_choices": f"Choice {c.id} does not belong to this question."
+                                }
+                            )
+                    attrs["_m2m_choices"] = selected_choices_list
+                    attrs["value"] = None
+
+            elif q_type == Question.Type.BOOLEAN:
+                if value is not None and not isinstance(value, bool):
+                    raise serializers.ValidationError(
+                        {"value": "Boolean answers must be true or false."}
+                    )
+            elif q_type == Question.Type.DATE:
+                if value is not None:
+                    if not isinstance(value, str):
+                        raise serializers.ValidationError(
+                            {
+                                "value": "Date answers must be a string in YYYY-MM-DD format."
+                            }
+                        )
+                    try:
+                        datetime.strptime(value, "%Y-%m-%d")
+                    except ValueError:
+                        raise serializers.ValidationError(
+                            {"value": "Date answers must be in YYYY-MM-DD format."}
+                        )
+
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        m2m_choices = validated_data.pop("_m2m_choices", None)
+        # Remove selected_choices from validated_data since M2M can't be set on create
+        validated_data.pop("selected_choices", None)
+        instance = super().create(validated_data)
+        if m2m_choices is not None:
+            instance.selected_choices.set(m2m_choices)
+            # Re-save to trigger IG update for dynamic frameworks
+            instance.save()
+        return instance
+
+    def update(self, instance, validated_data):
+        m2m_choices = validated_data.pop("_m2m_choices", None)
+        validated_data.pop("selected_choices", None)
+        instance = super().update(instance, validated_data)
+        if m2m_choices is not None:
+            instance.selected_choices.set(m2m_choices)
+            # Re-save to trigger IG update for dynamic frameworks
+            instance.save()
+        return instance
+
+    class Meta:
+        model = Answer
         exclude = ["created_at", "updated_at"]
 
 
@@ -2660,7 +3054,6 @@ class RequirementAssessmentImportExportSerializer(BaseModelSerializer):
             "requirement",
             "selected",
             "mapping_inference",
-            "answers",
             "evidences",
             "applied_controls",
         ]
@@ -2672,6 +3065,28 @@ class RequirementAssignmentEventSerializer(BaseModelSerializer):
     class Meta:
         model = RequirementAssignmentEvent
         fields = ["id", "event_type", "event_actor", "event_notes", "created_at"]
+
+
+class AnswerImportExportSerializer(BaseModelSerializer):
+    folder = HashSlugRelatedField(slug_field="pk", read_only=True)
+    requirement_assessment = HashSlugRelatedField(slug_field="pk", read_only=True)
+    question = serializers.SlugRelatedField(slug_field="urn", read_only=True)
+    selected_choices_urns = serializers.SerializerMethodField()
+
+    def get_selected_choices_urns(self, obj):
+        return list(obj.selected_choices.values_list("urn", flat=True))
+
+    class Meta:
+        model = Answer
+        fields = [
+            "created_at",
+            "updated_at",
+            "folder",
+            "requirement_assessment",
+            "question",
+            "value",
+            "selected_choices_urns",
+        ]
 
 
 class RequirementAssignmentReadSerializer(BaseModelSerializer):

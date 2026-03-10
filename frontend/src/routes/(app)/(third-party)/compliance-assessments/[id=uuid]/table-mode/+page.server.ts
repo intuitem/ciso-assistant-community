@@ -20,9 +20,12 @@ export const load = (async ({ fetch, params }) => {
 		)
 	);
 
-	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
-	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
-	compliance_assessment.framework = framework;
+	const frameworkId = compliance_assessment.framework?.id;
+	if (frameworkId) {
+		const frameworkEndpoint = `${BASE_API_URL}/frameworks/${frameworkId}/`;
+		const framework = await fetch(frameworkEndpoint).then((res) => res.json());
+		compliance_assessment.framework = framework;
+	}
 
 	const measureModel = getModelInfo('applied-controls');
 	const measureCreateSchema = modelSchema('applied-controls');
@@ -128,7 +131,8 @@ export const actions: Actions = {
 		};
 
 		const res = await event.fetch(endpoint, requestInitOptions);
-		return { status: res.status, body: await res.json() };
+		const body = await res.json();
+		return { status: res.status, body };
 	},
 	createEvidence: async (event) => {
 		const result = await nestedWriteFormAction({ event, action: 'create' });

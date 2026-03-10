@@ -125,6 +125,8 @@ from core.models import (
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
+    build_answers_dict,
+    build_questions_dict,
     compare_schema_versions,
     get_auditee_filtered_folder_ids,
     _generate_occurrences,
@@ -1578,6 +1580,7 @@ class ThreatViewSet(BaseModelViewSet):
         "library",
         "risk_scenarios",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "provider", "description"]
 
@@ -2315,6 +2318,7 @@ class ReferenceControlViewSet(BaseModelViewSet):
         "provider",
         "findings",
         "filtering_labels",
+        "urn",
     ]
     search_fields = ["name", "description", "provider", "ref_id"]
 
@@ -7220,6 +7224,7 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["compliance_assessment"] = ComplianceAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["compliance_assessment"])
                 )
+                _fields.pop("answers", None)
                 many_to_many_map_ids.update(
                     {
                         "applied_controls": get_mapped_ids(
@@ -7230,6 +7235,24 @@ class FolderViewSet(BaseModelViewSet):
                         ),
                     }
                 )
+
+            case "answer":
+                _fields["requirement_assessment"] = RequirementAssessment.objects.get(
+                    id=link_dump_database_ids.get(_fields["requirement_assessment"])
+                )
+                question = Question.objects.get(urn=_fields.get("question"))
+                # Validate question belongs to the requirement
+                ra = _fields["requirement_assessment"]
+                if question.requirement_node_id != ra.requirement_id:
+                    raise ValidationError(
+                        f"Question {question.urn} does not belong to requirement {ra.requirement_id}"
+                    )
+                _fields["question"] = question
+
+                # Store M2M urns for post-create
+                choice_urns = _fields.pop("selected_choices_urns", None)
+                if choice_urns:
+                    many_to_many_map_ids["selected_choices_urns"] = choice_urns
 
             case "vulnerability":
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
@@ -7506,6 +7529,43 @@ class FolderViewSet(BaseModelViewSet):
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
 
+            case "answer":
+                if urns := many_to_many_map_ids.get("selected_choices_urns"):
+                    if obj.question.type not in (
+                        Question.Type.UNIQUE_CHOICE,
+                        Question.Type.MULTIPLE_CHOICE,
+                    ):
+                        logger.warning(
+                            "Answer import: choice identifiers (selected_choices_ref_ids/selected_choices_urns) "
+                            "provided for non-choice question %s",
+                            obj.question.urn,
+                        )
+                    else:
+                        choices = list(
+                            QuestionChoice.objects.filter(
+                                question=obj.question, urn__in=urns
+                            )
+                        )
+                        found_urns = {c.urn for c in choices}
+                        missing = set(urns) - found_urns
+                        if missing:
+                            logger.warning(
+                                "Answer import: could not resolve choice urns %s "
+                                "for question %s",
+                                missing,
+                                obj.question.urn,
+                            )
+                        if (
+                            obj.question.type == Question.Type.UNIQUE_CHOICE
+                            and len(choices) > 1
+                        ):
+                            logger.warning(
+                                "Answer import: multiple choices provided for "
+                                "unique_choice question %s, keeping only first",
+                                obj.question.urn,
+                            )
+                            choices = choices[:1]
+                        obj.selected_choices.set(choices)
             case "entity":
                 if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
                     obj.relationship.set(relationship_ids)
@@ -7764,13 +7824,13 @@ class FrameworkViewSet(BaseModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset().prefetch_related("requirement_nodes")
 
-        # Annotate if the framework is dynamic (any question uses implementation groups)
+        # Annotate if the framework is dynamic (any question choice uses implementation groups)
         qs = qs.annotate(
             is_dynamic=Exists(
-                RequirementNode.objects.filter(
-                    framework=OuterRef("pk"),
-                    questions__icontains="select_implementation_groups",
-                )
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=OuterRef("pk"),
+                    select_implementation_groups__isnull=False,
+                ).exclude(select_implementation_groups=[])
             )
         )
 
@@ -7795,7 +7855,9 @@ class FrameworkViewSet(BaseModelViewSet):
         _framework = Framework.objects.get(id=pk)
         return Response(
             get_sorted_requirement_nodes(
-                RequirementNode.objects.filter(framework=_framework).all(),
+                RequirementNode.objects.filter(framework=_framework)
+                .prefetch_related("questions", "questions__choices")
+                .all(),
                 None,
                 _framework.max_score,
             )
@@ -9228,15 +9290,15 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         if compliance_assessment.id not in viewable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
-            ref_id = request.data.get("ref_id")
+            urn = request.data.get("urn")
             result = request.data.get("result")
             observation = request.data.get("observation")
             score = request.data.get("score")
             status_value = request.data.get("status")
 
-            if not all([ref_id, result]):
+            if not all([urn, result]):
                 return Response(
-                    {"error": "ref_id and result are required fields"},
+                    {"error": "urn and result are required fields"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             # validate if result value is valid choice
@@ -9289,12 +9351,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             # Find the requirement assessment to update
             requirement_assessment = RequirementAssessment.objects.filter(
-                compliance_assessment=compliance_assessment, requirement__ref_id=ref_id
+                compliance_assessment=compliance_assessment, requirement__urn=urn
             ).first()
 
             if not requirement_assessment:
                 return Response(
-                    {"error": f"Requirement with ref_id {ref_id} not found"},
+                    {"error": f"Requirement with urn {urn} not found"},
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
@@ -9319,7 +9381,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
             response_data = {
                 "message": "Requirement updated successfully",
-                "ref_id": ref_id,
+                "urn": urn,
                 "result": result,
             }
 
@@ -9339,7 +9401,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         except RequirementAssessment.DoesNotExist:
             return Response(
-                {"error": f"Requirement with ref_id {ref_id} not found"},
+                {"error": f"Requirement with urn {urn} not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except ValidationError:
@@ -9554,7 +9616,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
             .all(),
         )
         nodes_by_urn = {node.urn: node for node in requirement_nodes}
@@ -9607,7 +9671,9 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
-            .prefetch_related("reference_controls", "threats")
+            .prefetch_related(
+                "reference_controls", "threats", "questions", "questions__choices"
+            )
         )
         nodes_by_urn = {node.urn: node for node in requirements_objects}
         for node in requirements_objects:
@@ -10813,7 +10879,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
         "compliance_assessment",
         "applied_controls",
         "security_exceptions",
-        "requirement__ref_id",
+        "requirement__urn",
         "result",
         "extended_result",
         "compliance_assessment__ref_id",
@@ -10825,7 +10891,7 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
     search_fields = [
         "requirement__name",
         "requirement__description",
-        "requirement__ref_id",
+        "requirement__urn",
     ]
 
     def get_queryset(self):
@@ -10845,6 +10911,9 @@ class RequirementAssessmentViewSet(BaseModelViewSet):
                 "evidences",  # ManyToManyField serialized as FieldsRelatedField
                 "applied_controls",  # ManyToManyField to AppliedControl
                 "security_exceptions",  # ManyToManyField serialized as FieldsRelatedField
+                "answers",  # Reverse FK from Answer, used by get_answers() in read serializer
+                "answers__question",  # Needed by build_answers_dict() to get question.urn and question.type
+                "answers__selected_choices",  # Needed by build_answers_dict() to get choice ref_ids
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -11376,6 +11445,27 @@ def generate_html(
             p = req.parent_urn
             req = None if not (p) else node_per_urn[p]
 
+    # Pre-fetch all assessments, answers, and questions to avoid N+1 queries
+    # in the recursive traversal.
+    assessments_prefetched = assessments.select_related("requirement").prefetch_related(
+        "answers__question",
+        "answers__selected_choices",
+        "evidences",
+        "applied_controls__evidences",
+    )
+    assessment_by_urn = {a.requirement.urn: a for a in assessments_prefetched}
+
+    # Pre-build answers and questions dicts keyed by requirement URN
+    answers_dict_by_urn = {}
+    for a in assessments_prefetched:
+        answers_dict_by_urn[a.requirement.urn] = build_answers_dict(a.answers.all())
+
+    questions_dict_by_urn = {}
+    for node in requirement_nodes.prefetch_related("questions__choices"):
+        qd = build_questions_dict(node)
+        if qd:
+            questions_dict_by_urn[node.urn] = qd
+
     def generate_data_rec(requirement_node: RequirementNode):
         selected_evidences = []
         children_nodes = [
@@ -11397,13 +11487,16 @@ def generate_html(
         node_data["bar_graph"] = True if children_nodes else False
 
         if requirement_node.assessable:
-            assessment = RequirementAssessment.objects.filter(
-                requirement__urn=requirement_node.urn,
-                compliance_assessment=compliance_assessment,
-            ).first()
+            assessment = assessment_by_urn.get(requirement_node.urn)
 
             if assessment:
                 node_data["assessments"] = assessment
+                node_data["answers_dict"] = answers_dict_by_urn.get(
+                    requirement_node.urn, {}
+                )
+                node_data["questions_dict"] = questions_dict_by_urn.get(
+                    requirement_node.urn, {}
+                )
                 node_data["result"] = assessment.get_result_display()
                 node_data["status"] = assessment.get_status_display()
                 node_data["result_color_class"] = color_css_class(assessment.result)
@@ -14038,3 +14131,68 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+
+
+class QuestionViewSet(BaseModelViewSet):
+    """API endpoint for Question CRUD."""
+
+    model = Question
+    filterset_fields = [
+        "requirement_node",
+        "type",
+        "urn",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related("requirement_node", "requirement_node__framework", "folder")
+            .prefetch_related("choices")
+        )
+        # Allow filtering by framework
+        framework_id = self.request.query_params.get("framework")
+        if framework_id:
+            qs = qs.filter(requirement_node__framework_id=framework_id)
+        return qs
+
+
+class QuestionChoiceViewSet(BaseModelViewSet):
+    """API endpoint for QuestionChoice CRUD."""
+
+    model = QuestionChoice
+    filterset_fields = [
+        "question",
+        "urn",
+    ]
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("question", "folder")
+
+
+class AnswerViewSet(BaseModelViewSet):
+    """API endpoint for Answer CRUD."""
+
+    model = Answer
+    filterset_fields = [
+        "requirement_assessment",
+        "question",
+    ]
+
+    def get_queryset(self):
+        qs = (
+            super()
+            .get_queryset()
+            .select_related(
+                "requirement_assessment",
+                "requirement_assessment__compliance_assessment",
+                "question",
+                "folder",
+            )
+            .prefetch_related("selected_choices")
+        )
+        # Allow filtering by compliance assessment
+        ca_id = self.request.query_params.get("compliance_assessment")
+        if ca_id:
+            qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
+        return qs
