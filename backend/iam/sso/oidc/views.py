@@ -95,7 +95,7 @@ def callback(request, provider_id):
             "token",
             token,
             httponly=True,
-            secure=True,
+            secure=settings.CISO_ASSISTANT_URL.startswith("https"),
             samesite="Lax",
             path="/",
         )
