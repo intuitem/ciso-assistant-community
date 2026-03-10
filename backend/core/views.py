@@ -6143,6 +6143,7 @@ class FolderFilter(GenericFilterSet):
     parent_folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
     owned = df.BooleanFilter(method="get_owned_folders", label="owned")
+    writable = df.CharFilter(method="get_writable_folders", label="writable")
     content_type = df.MultipleChoiceFilter(
         choices=Folder.ContentType, lookup_expr="icontains"
     )
@@ -6156,6 +6157,23 @@ class FolderFilter(GenericFilterSet):
             return queryset.filter(id__in=owned_folders_id)
         return queryset.exclude(id__in=owned_folders_id)
 
+    def get_writable_folders(self, queryset, name, value):
+        if not value:
+            return queryset
+        try:
+            perm = Permission.objects.get(codename=value)
+        except Permission.DoesNotExist:
+            return queryset.none()
+        return queryset.filter(
+            id__in=[
+                folder.id
+                for folder in queryset
+                if RoleAssignment.is_access_allowed(
+                    user=self.request.user, perm=perm, folder=folder
+                )
+            ]
+        )
+
     class Meta:
         model = Folder
         fields = [
@@ -6163,6 +6181,7 @@ class FolderFilter(GenericFilterSet):
             "content_type",
             "owner",
             "owned",
+            "writable",
             "filtering_labels",
         ]
 

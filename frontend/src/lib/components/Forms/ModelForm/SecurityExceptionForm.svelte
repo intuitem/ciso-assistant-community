@@ -84,7 +84,7 @@
 <HiddenInput {form} field="requirement_assessments" />
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_securityexception"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}

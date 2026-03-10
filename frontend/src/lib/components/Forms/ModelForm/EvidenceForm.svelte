@@ -73,7 +73,7 @@
 {/if}
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN&writable=add_evidence"
 	field="folder"
 	pathField="path"
 	cacheLock={cacheLocks['folder']}

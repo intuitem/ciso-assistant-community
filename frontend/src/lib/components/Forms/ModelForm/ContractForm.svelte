@@ -30,7 +30,7 @@
 <AutocompleteSelect
 	{form}
 	field="folder"
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
+	optionsEndpoint="folders?content_type=DO&content_type=GL&writable=add_contract"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
