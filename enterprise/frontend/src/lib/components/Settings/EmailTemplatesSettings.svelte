@@ -13,8 +13,16 @@
 	interface TemplateInfo {
 		template_key: string;
 		description: string;
+		category: string;
 		variables: string[];
 		overrides: string[];
+	}
+
+	interface TemplateCategory {
+		key: string;
+		label: () => string;
+		description: () => string;
+		templates: TemplateInfo[];
 	}
 
 	interface TemplateOverride {
@@ -32,6 +40,30 @@
 	let overrides: TemplateOverride[] = $state([]);
 	let loading = $state(true);
 	let error = $state('');
+
+	const CATEGORY_META: Record<string, { label: () => string; description: () => string }> = {
+		core: { label: () => m.coreEmails(), description: () => m.coreEmailsDescription() },
+		notification: {
+			label: () => m.notificationEmails(),
+			description: () => m.notificationEmailsDescription()
+		}
+	};
+
+	let groupedTemplates: TemplateCategory[] = $derived.by(() => {
+		const groups: Record<string, TemplateInfo[]> = {};
+		for (const t of availableTemplates) {
+			const cat = t.category || 'notification';
+			(groups[cat] ??= []).push(t);
+		}
+		return ['core', 'notification']
+			.filter((key) => groups[key]?.length)
+			.map((key) => ({
+				key,
+				label: CATEGORY_META[key]?.label ?? (() => key),
+				description: CATEGORY_META[key]?.description ?? (() => ''),
+				templates: groups[key]
+			}));
+	});
 
 	// Edit state
 	let editingKey = $state('');
@@ -322,53 +354,61 @@
 			</div>
 		</div>
 	{:else}
-		<!-- Templates list -->
-		<div class="table-container">
-			<table class="table">
-				<thead>
-					<tr>
-						<th>{m.templateKey()}</th>
-						<th>{m.description()}</th>
-						<th>{m.status()}</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each availableTemplates as template}
-						{@const customLangs = getCustomizedLanguages(template.template_key)}
-						<tr>
-							<td class="font-medium">{formatKey(template.template_key)}</td>
-							<td class="text-gray-600 text-sm">{template.description}</td>
-							<td>
-								{#if customLangs.length > 0}
-									<div class="flex flex-wrap gap-1">
-										{#each customLangs as lang}
-											<span class="badge preset-filled-warning-500 text-xs">
-												{lang.toUpperCase()}
-											</span>
-										{/each}
-									</div>
-								{:else}
-									<span class="badge preset-outlined-surface-500 text-xs"
-										>{m.defaultTemplate()}</span
-									>
-								{/if}
-							</td>
-							<td>
-								<button
-									class="btn btn-sm preset-outlined-primary-500"
-									type="button"
-									onclick={() => startEdit(template.template_key)}
-									title={m.editTemplate()}
-								>
-									<i class="fa-solid fa-pen text-xs"></i>
-									{m.editTemplate()}
-								</button>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		</div>
+		<!-- Templates list grouped by category -->
+		{#each groupedTemplates as category}
+			<div class="space-y-2">
+				<div>
+					<h3 class="h4 font-semibold">{category.label()}</h3>
+					<p class="text-sm text-gray-500">{category.description()}</p>
+				</div>
+				<div class="table-container">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>{m.templateKey()}</th>
+								<th>{m.description()}</th>
+								<th>{m.status()}</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each category.templates as template}
+								{@const customLangs = getCustomizedLanguages(template.template_key)}
+								<tr>
+									<td class="font-medium">{formatKey(template.template_key)}</td>
+									<td class="text-gray-600 text-sm">{template.description}</td>
+									<td>
+										{#if customLangs.length > 0}
+											<div class="flex flex-wrap gap-1">
+												{#each customLangs as lang}
+													<span class="badge preset-filled-warning-500 text-xs">
+														{lang.toUpperCase()}
+													</span>
+												{/each}
+											</div>
+										{:else}
+											<span class="badge preset-outlined-surface-500 text-xs"
+												>{m.defaultTemplate()}</span
+											>
+										{/if}
+									</td>
+									<td>
+										<button
+											class="btn btn-sm preset-outlined-primary-500"
+											type="button"
+											onclick={() => startEdit(template.template_key)}
+											title={m.editTemplate()}
+										>
+											<i class="fa-solid fa-pen text-xs"></i>
+											{m.editTemplate()}
+										</button>
+									</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		{/each}
 	{/if}
 </div>

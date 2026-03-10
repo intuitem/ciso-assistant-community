@@ -12,8 +12,40 @@ WORD_TEMPLATE_REGISTRY = {
 
 
 EMAIL_TEMPLATE_REGISTRY = {
+    "welcome": {
+        "description": "Welcome email sent to new internal users",
+        "category": "core",
+        "variables": [
+            "set_password_url",
+            "ciso_assistant_url",
+        ],
+    },
+    "welcome_sso": {
+        "description": "Welcome email sent to new SSO users",
+        "category": "core",
+        "variables": [
+            "ciso_assistant_url",
+        ],
+    },
+    "password_reset": {
+        "description": "Password reset email",
+        "category": "core",
+        "variables": [
+            "reset_password_url",
+            "ciso_assistant_url",
+        ],
+    },
+    "questionnaire_assignment": {
+        "description": "Sent when a third-party questionnaire is assigned",
+        "category": "core",
+        "variables": [
+            "questionnaire_url",
+            "ciso_assistant_url",
+        ],
+    },
     "applied_control_assignment": {
         "description": "Sent when a control is assigned to a user",
+        "category": "notification",
         "variables": [
             "control_name",
             "control_description",
@@ -27,6 +59,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "applied_control_expiring_soon": {
         "description": "Sent when controls are about to expire",
+        "category": "notification",
         "variables": [
             "control_count",
             "control_list",
@@ -36,6 +69,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "assignment_activated": {
         "description": "Sent when an audit assignment starts",
+        "category": "notification",
         "variables": [
             "assessment_name",
             "framework_name",
@@ -45,6 +79,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "assignment_reviewed": {
         "description": "Sent when an assignment is reviewed",
+        "category": "notification",
         "variables": [
             "assessment_name",
             "decision",
@@ -54,6 +89,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "assignment_submitted": {
         "description": "Sent when an assignment is submitted",
+        "category": "notification",
         "variables": [
             "assessment_name",
             "actor_names",
@@ -63,6 +99,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "compliance_assessment_assignment": {
         "description": "Sent when a compliance assessment is assigned",
+        "category": "notification",
         "variables": [
             "assessment_name",
             "assessment_description",
@@ -75,6 +112,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "compliance_assessment_due_soon": {
         "description": "Sent when compliance assessments are due soon",
+        "category": "notification",
         "variables": [
             "assessment_count",
             "assessment_list",
@@ -84,6 +122,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "evidence_expiring_soon": {
         "description": "Sent when evidences are about to expire",
+        "category": "notification",
         "variables": [
             "evidence_count",
             "evidence_list",
@@ -93,6 +132,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "expired_controls": {
         "description": "Sent when controls have expired",
+        "category": "notification",
         "variables": [
             "control_count",
             "control_list",
@@ -101,6 +141,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "expired_evidences": {
         "description": "Sent when evidences have expired",
+        "category": "notification",
         "variables": [
             "evidence_count",
             "evidence_list",
@@ -110,6 +151,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "risk_scenario_assignment": {
         "description": "Sent when a risk scenario is assigned",
+        "category": "notification",
         "variables": [
             "scenario_name",
             "scenario_description",
@@ -122,6 +164,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "task_node_due_soon": {
         "description": "Sent when tasks are due soon",
+        "category": "notification",
         "variables": [
             "task_count",
             "task_list",
@@ -131,6 +174,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "task_node_overdue": {
         "description": "Sent when tasks are overdue",
+        "category": "notification",
         "variables": [
             "task_count",
             "task_list",
@@ -139,6 +183,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "task_template_assignment": {
         "description": "Sent when a task is assigned",
+        "category": "notification",
         "variables": [
             "task_id",
             "task_name",
@@ -152,6 +197,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "validation_deadline": {
         "description": "Sent when validation deadlines are approaching",
+        "category": "notification",
         "variables": [
             "days",
             "validation_list",
@@ -164,6 +210,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "validation_flow_created": {
         "description": "Sent when a validation flow is created",
+        "category": "notification",
         "variables": [
             "validation_ref_id",
             "requester_name",
@@ -175,6 +222,7 @@ EMAIL_TEMPLATE_REGISTRY = {
     },
     "validation_flow_updated": {
         "description": "Sent when a validation flow status changes",
+        "category": "notification",
         "variables": [
             "validation_ref_id",
             "new_status",

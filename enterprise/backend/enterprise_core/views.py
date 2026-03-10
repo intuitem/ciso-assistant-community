@@ -566,6 +566,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
                 {
                     "template_key": key,
                     "description": meta["description"],
+                    "category": meta.get("category", "notification"),
                     "variables": meta["variables"],
                     "overrides": [
                         lang for lang in ["en", "fr"] if (key, lang) in override_set
