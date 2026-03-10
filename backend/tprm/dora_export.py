@@ -846,18 +846,21 @@ def generate_b_05_01_provider_details(
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
-    # Write CSV headers
+    # Write CSV headers (DORA 4.0 Layout)
     csv_writer.writerow(
         [
             "c0010",  # Identification code of ICT third-party service provider
-            "c0020",  # Type of code
-            "c0030",  # Name of the ICT third-party service provider
-            "c0040",  # Type of person
-            "c0050",  # Country
-            "c0060",  # Currency
-            "c0070",  # Total annual expense
-            "c0080",  # Identification code of parent undertaking
-            "c0090",  # Type of code for parent undertaking
+            "c0020",  # Type of code to identify the ICT third-party service provider
+            "c0030",  # Additional identification code of ICT third-party service provider
+            "c0040",  # Type of additional identification code of the ICT third-party service provider
+            "c0050",  # Legal name of the ICT third-party service provider
+            "c0060",  # Name of the ICT third-party service provider in Latin alphabet
+            "c0070",  # Type of person of the ICT third-party service provider
+            "c0080",  # Country of the ICT third-party service provider’s headquarters
+            "c0090",  # Currency of the amount reported in RT.05.01.0070
+            "c0100",  # Total annual expense or estimated cost of the ICT third-party service provider
+            "c0110",  # Identification code of the ICT third-party service provider’s ultimate parent undertaking
+            "c0120",  # Type of code to identify the ICT third-party service provider’s ultimate parent undertaking
         ]
     )
 
@@ -891,43 +894,47 @@ def generate_b_05_01_provider_details(
             provider, priority=["LEI", "EUID", "VAT", "DUNS"]
         )
 
-        # c0030: Provider name
+        # c0050: Provider legal name
         provider_name = provider.name
 
-        # c0040: Type of person
+        # c0070: Type of person
         person_type = provider.dora_provider_person_type or ""
 
-        # c0050: Country with eba_GA prefix
+        # c0080: Country with eba_GA prefix
         country = ""
         if provider.country:
             country = f"eba_GA:{provider.country}"
 
-        # c0060: Currency with eba_CU prefix
+        # c0090: Currency with eba_CU prefix
         currency = ""
         if data["currency"]:
             currency = f"eba_CU:{data['currency']}"
 
-        # c0070: Total annual expense
+        # c0100: Total annual expense
         total_expense = data["total_expense"]
 
-        # c0080, c0090: Parent entity identifier (prioritize LEI)
+        # c0110, c0120: Parent entity identifier (prioritize LEI)
         parent_code, parent_code_type = "", ""
         if provider.parent_entity:
             parent_code, parent_code_type = get_entity_identifier(
                 provider.parent_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
             )
 
+        # Write provider detail row (12 columns for DORA 4.0)
         csv_writer.writerow(
             [
-                provider_code,
-                code_type,
-                provider_name,
-                person_type,
-                country,
-                currency,
-                total_expense,
-                parent_code,
-                parent_code_type,
+                provider_code,  # c0010
+                code_type,  # c0020
+                "",  # c0030: Additional identification code
+                "",  # c0040: Type of additional identification code
+                provider_name,  # c0050
+                provider_name,  # c0060: Name in Latin alphabet TODO: add Entity.latin_name DB column, equals Entity.name by default, to be displayed in EntityForm if name contains non-Latin characters
+                person_type,  # c0070
+                country,  # c0080
+                currency,  # c0090
+                total_expense,  # c0100
+                parent_code,  # c0110
+                parent_code_type,  # c0120
             ]
         )
 
@@ -1349,7 +1356,7 @@ def generate_parameters(zip_file, main_entity: Entity, folder_prefix: str = "") 
 
     # Get currency for baseCurrency
     base_currency = (
-        f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
+        f"eba_CU:{main_entity.currency}" if main_entity.currency else "eba_CU:EUR"
     )
 
     # Write parameters
