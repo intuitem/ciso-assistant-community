@@ -39,11 +39,40 @@ def get_locale_for_email(email: str) -> str:
     return "en"
 
 
+def _load_custom_email_template(
+    template_name: str, locale: str
+) -> Optional[Dict[str, str]]:
+    """
+    Try to load a custom email template override from the database.
+    Returns None if no active override exists.
+    """
+    try:
+        from core.models import CustomEmailTemplate
+
+        override = CustomEmailTemplate.objects.filter(
+            template_key=template_name,
+            language=locale,
+            is_active=True,
+        ).first()
+        if not override and locale != "en":
+            override = CustomEmailTemplate.objects.filter(
+                template_key=template_name,
+                language="en",
+                is_active=True,
+            ).first()
+        if override:
+            return {"subject": override.subject, "body": override.body}
+    except Exception:
+        pass
+    return None
+
+
 def load_email_template(
     template_name: str, locale: Optional[str] = None
 ) -> Optional[Dict[str, str]]:
     """
-    Load email template from YAML file
+    Load email template, checking for custom overrides first, then falling
+    back to the built-in YAML file.
 
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
@@ -56,6 +85,11 @@ def load_email_template(
         locale = get_language() or "en"
     # Normalize locale: 'fr-FR' -> 'fr', '' -> 'en'
     locale = locale.split("-")[0].lower() or "en"
+
+    # Check for custom override first
+    custom = _load_custom_email_template(template_name, locale)
+    if custom:
+        return custom
 
     # Construct file path
     template_file = TEMPLATE_BASE_PATH / locale / f"{template_name}.yaml"

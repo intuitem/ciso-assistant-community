@@ -37,8 +37,17 @@ import shutil
 from pathlib import Path
 import humanize
 
+from core.models import CustomEmailTemplate, CustomWordTemplate
 from .models import ClientSettings
-from .serializers import ClientSettingsReadSerializer, LogEntrySerializer
+from .serializers import (
+    ClientSettingsReadSerializer,
+    CustomEmailTemplateReadSerializer,
+    CustomEmailTemplateWriteSerializer,
+    CustomWordTemplateReadSerializer,
+    CustomWordTemplateWriteSerializer,
+    LogEntrySerializer,
+)
+from .template_registry import EMAIL_TEMPLATE_REGISTRY, WORD_TEMPLATE_REGISTRY
 
 from auditlog.models import LogEntry
 
@@ -510,4 +519,271 @@ class LogEntryViewSet(
                     output_field=CharField(),
                 )
             ),
+        )
+
+
+class CustomEmailTemplateViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing custom email template overrides.
+    Only accessible to users with change_globalsettings permission.
+    """
+
+    model = CustomEmailTemplate
+    filterset_fields = ["template_key", "language", "is_active"]
+    search_fields = ["template_key", "language", "subject"]
+
+    def _has_permission(self, request):
+        return RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def get_queryset(self):
+        if not self._has_permission(self.request):
+            return CustomEmailTemplate.objects.none()
+        return CustomEmailTemplate.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method in ("POST", "PUT", "PATCH"):
+            return CustomEmailTemplateWriteSerializer
+        return CustomEmailTemplateReadSerializer
+
+    @action(methods=["get"], detail=False, url_path="available")
+    def available(self, request):
+        """Return the registry of all overridable templates with their metadata."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        overrides = CustomEmailTemplate.objects.filter(is_active=True).values_list(
+            "template_key", "language"
+        )
+        override_set = {(k, l) for k, l in overrides}
+
+        result = []
+        for key, meta in EMAIL_TEMPLATE_REGISTRY.items():
+            result.append(
+                {
+                    "template_key": key,
+                    "description": meta["description"],
+                    "variables": meta["variables"],
+                    "overrides": [
+                        lang for lang in ["en", "fr"] if (key, lang) in override_set
+                    ],
+                }
+            )
+        return Response(result)
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="default/(?P<template_key>[^/]+)/(?P<language>[^/]+)",
+    )
+    def default_template(self, request, template_key=None, language=None):
+        """Return the built-in default template content for a given key and language."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if template_key not in EMAIL_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from core.email_utils import load_email_template
+
+        template_data = load_email_template(template_key, locale=language)
+        if not template_data:
+            return Response(
+                {"error": "Default template not found for this language"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return Response(
+            {
+                "template_key": template_key,
+                "language": language,
+                "subject": template_data["subject"],
+                "body": template_data["body"],
+                "variables": EMAIL_TEMPLATE_REGISTRY[template_key]["variables"],
+            }
+        )
+
+
+class CustomWordTemplateViewSet(BaseModelViewSet):
+    """
+    API endpoint for managing custom Word template overrides.
+    Only accessible to users with change_globalsettings permission.
+    """
+
+    model = CustomWordTemplate
+    filterset_fields = ["template_key", "language", "is_active"]
+    search_fields = ["template_key", "language"]
+
+    def _has_permission(self, request):
+        return RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
+    def get_queryset(self):
+        if not self._has_permission(self.request):
+            return CustomWordTemplate.objects.none()
+        return CustomWordTemplate.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method in ("POST", "PUT", "PATCH"):
+            return CustomWordTemplateWriteSerializer
+        return CustomWordTemplateReadSerializer
+
+    @action(methods=["get"], detail=False, url_path="available")
+    def available(self, request):
+        """Return the registry of all overridable Word templates."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        overrides = CustomWordTemplate.objects.filter(is_active=True).values_list(
+            "template_key", "language"
+        )
+        override_set = {(k, l) for k, l in overrides}
+
+        result = []
+        for key, meta in WORD_TEMPLATE_REGISTRY.items():
+            result.append(
+                {
+                    "template_key": key,
+                    "description": meta["description"],
+                    "default_languages": meta["default_languages"],
+                    "overrides": [
+                        lang
+                        for lang in meta["default_languages"]
+                        if (key, lang) in override_set
+                    ],
+                }
+            )
+        return Response(result)
+
+    @action(
+        methods=["post"],
+        detail=True,
+        url_path="upload",
+        parser_classes=(FileUploadParser,),
+    )
+    def upload_file(self, request, pk):
+        """Upload a .docx file for an existing override record."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if "file" not in request.FILES:
+            return Response(
+                {"error": "No file provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            template = CustomWordTemplate.objects.get(id=pk)
+            uploaded = request.FILES["file"]
+
+            if not uploaded.name.endswith(".docx"):
+                return Response(
+                    {"file": "invalidFileType"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Validate the docx can be parsed by docxtpl
+            try:
+                from docxtpl import DocxTemplate
+                import io
+
+                uploaded.seek(0)
+                DocxTemplate(io.BytesIO(uploaded.read()))
+                uploaded.seek(0)
+            except Exception:
+                return Response(
+                    {"file": "invalidDocxTemplate"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            template.file = uploaded
+            template.save()
+            return Response(status=status.HTTP_200_OK)
+        except CustomWordTemplate.DoesNotExist:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(methods=["get"], detail=True, url_path="download")
+    def download_file(self, request, pk):
+        """Download the current custom template file."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            template = CustomWordTemplate.objects.get(id=pk)
+            if not template.file:
+                return Response(
+                    {"error": "No file uploaded"}, status=status.HTTP_404_NOT_FOUND
+                )
+
+            from django.http import FileResponse
+
+            template.file.open("rb")
+            return FileResponse(
+                template.file,
+                content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                as_attachment=True,
+                filename=f"{template.template_key}_{template.language}.docx",
+            )
+        except CustomWordTemplate.DoesNotExist:
+            return Response(
+                {"error": "Template not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+    @action(
+        methods=["get"],
+        detail=False,
+        url_path="download-default/(?P<template_key>[^/]+)/(?P<language>[^/]+)",
+    )
+    def download_default(self, request, template_key=None, language=None):
+        """Download the built-in default Word template."""
+        if not self._has_permission(request):
+            return Response(status=status.HTTP_403_FORBIDDEN)
+
+        if template_key not in WORD_TEMPLATE_REGISTRY:
+            return Response(
+                {"error": "Unknown template key"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        from django.conf import settings as django_settings
+        from django.http import FileResponse
+
+        template_path = (
+            Path(django_settings.BASE_DIR)
+            / "core"
+            / "templates"
+            / "core"
+            / f"{template_key}_template_{language}.docx"
+        )
+
+        if not template_path.exists() and language != "en":
+            template_path = (
+                Path(django_settings.BASE_DIR)
+                / "core"
+                / "templates"
+                / "core"
+                / f"{template_key}_template_en.docx"
+            )
+
+        if not template_path.exists():
+            return Response(
+                {"error": "Default template not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        return FileResponse(
+            open(template_path, "rb"),
+            content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            as_attachment=True,
+            filename=f"{template_key}_template_{language}.docx",
         )
