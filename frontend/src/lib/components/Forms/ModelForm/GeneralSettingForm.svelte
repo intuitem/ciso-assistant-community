@@ -379,10 +379,26 @@
 						{ label: 'US Dollar ($)', value: '$' },
 						{ label: 'British Pound (£)', value: '£' },
 						{ label: 'Japanese Yen (¥)', value: '¥' },
+						{ label: 'Chinese Yuan (CN¥)', value: 'CN¥' },
+						{ label: 'Indian Rupee (₹)', value: '₹' },
+						{ label: 'South Korean Won (₩)', value: '₩' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' },
 						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
-						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' },
+						{ label: 'Singapore Dollar (S$)', value: 'S$' },
+						{ label: 'Hong Kong Dollar (HK$)', value: 'HK$' },
+						{ label: 'Swedish Krona (SEK)', value: 'SEK' },
+						{ label: 'Norwegian Krone (NOK)', value: 'NOK' },
+						{ label: 'Danish Krone (DKK)', value: 'DKK' },
+						{ label: 'Brazilian Real (R$)', value: 'R$' },
+						{ label: 'Mexican Peso (MX$)', value: 'MX$' },
+						{ label: 'South African Rand (ZAR)', value: 'ZAR' },
+						{ label: 'Turkish Lira (₺)', value: '₺' },
+						{ label: 'Polish Złoty (PLN)', value: 'PLN' },
+						{ label: 'Taiwan Dollar (NT$)', value: 'NT$' },
+						{ label: 'Thai Baht (฿)', value: '฿' },
+						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
