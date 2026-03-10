@@ -159,10 +159,12 @@
 				<Select
 					{form}
 					field="default_language"
-					options={(model.selectOptions?.['default_language'] ?? []).map((opt: { label: string; value: string }) => ({
-						value: opt.value,
-						label: `${defaultLangLabels[opt.value] ?? opt.value} (${language[LOCALE_MAP[opt.value]?.name] ?? opt.label})`
-					}))}
+					options={(model.selectOptions?.['default_language'] ?? []).map(
+						(opt: { label: string; value: string }) => ({
+							value: opt.value,
+							label: `${defaultLangLabels[opt.value] ?? opt.value} (${language[LOCALE_MAP[opt.value]?.name] ?? opt.label})`
+						})
+					)}
 					label={m.defaultLanguage()}
 					helpText={m.defaultLanguageHelpText()}
 				/>
