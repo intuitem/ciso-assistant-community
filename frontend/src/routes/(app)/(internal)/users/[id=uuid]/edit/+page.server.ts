@@ -32,7 +32,26 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 };
 
 export const actions: Actions = {
-	default: async (event) => {
+	resetMFA: async (event) => {
+		const endpoint = `${BASE_API_URL}/iam/reset-mfa/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			body: JSON.stringify({ user: event.params.id })
+		});
+
+		if (!res.ok) {
+			const response = await res.json();
+			setFlash(
+				{ type: 'error', message: safeTranslate(response.error ?? 'mfaResetFailed') },
+				event
+			);
+			return fail(res.status);
+		}
+
+		setFlash({ type: 'success', message: m.mfaSuccessfullyReset() }, event);
+		return {};
+	},
+	updateUser: async (event) => {
 		const schema = UserEditSchema;
 		const endpoint = `${BASE_API_URL}/users/${event.params.id}/`;
 		const form = await superValidate(event.request, zod(schema));
