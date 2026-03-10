@@ -469,7 +469,8 @@
 
 	run(() => {
 		_disabled =
-			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
+			disabled ||
+			(Boolean(selected.length && options.length === 1 && $constraints?.required) && !lazy);
 	});
 
 	$effect(() => {
