@@ -9,6 +9,7 @@ from django.db import transaction
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet, ActionPlanList
 from core.models import AppliedControl
+from core.utils import format_currency as _fmt_currency, get_global_currency
 from global_settings.models import GlobalSettings
 
 from .models import (
@@ -58,11 +59,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()  # type: ignore[unreachable]
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Initialize totals
         current_ale_combined = 0
@@ -102,16 +99,8 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
             scenarios_data.append(scenario_data)
 
-        # Format currency helper function
         def format_currency(value):
-            if value >= 1000000000:
-                return f"{currency}{value / 1000000000:.1f}B"
-            elif value >= 1000000:
-                return f"{currency}{value / 1000000:.1f}M"
-            elif value >= 1000:
-                return f"{currency}{value / 1000:.0f}K"
-            else:
-                return f"{currency}{value:,.0f}"
+            return _fmt_currency(value, currency)
 
         return Response(
             {
@@ -162,11 +151,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         curves = []
 
@@ -373,11 +358,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Get all selected scenarios regardless of status, ordered by priority then ref_id
         selected_scenarios = study.risk_scenarios.filter(is_selected=True).order_by(
@@ -454,14 +435,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
                 # Format risk reduction display
                 def format_currency(value):
-                    if value >= 1000000000:
-                        return f"{value / 1000000000:.1f}B {currency}"
-                    elif value >= 1000000:
-                        return f"{value / 1000000:.1f}M {currency}"
-                    elif value >= 1000:
-                        return f"{value / 1000:.0f}K {currency}"
-                    else:
-                        return f"{value:,.0f} {currency}"
+                    return _fmt_currency(value, currency)
 
                 scenario_info["risk_reduction_display"] = (
                     format_currency(risk_reduction)
@@ -663,14 +637,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
 
         # Format study total treatment cost
         def format_currency(value):
-            if value >= 1000000000:
-                return f"{value / 1000000000:.1f}B {currency}"
-            elif value >= 1000000:
-                return f"{value / 1000000:.1f}M {currency}"
-            elif value >= 1000:
-                return f"{value / 1000:.0f}K {currency}"
-            else:
-                return f"{value:,.0f} {currency}"
+            return _fmt_currency(value, currency)
 
         study_total_treatment_cost_display = (
             format_currency(study_total_treatment_cost)
@@ -742,11 +709,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         scenarios_data = []
 
@@ -849,11 +812,7 @@ class QuantitativeRiskStudyViewSet(BaseModelViewSet):
         """
         study: QuantitativeRiskStudy = self.get_object()
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         scenarios_data = []
 
@@ -1275,11 +1234,7 @@ class QuantitativeRiskScenarioViewSet(BaseModelViewSet):
                         }
                     )
 
-        # Get currency from global settings
-        general_settings = GlobalSettings.objects.filter(name="general").first()
-        currency = (
-            general_settings.value.get("currency", "€") if general_settings else "€"
-        )
+        currency = get_global_currency()
 
         # Return the combined curves data
         return Response(
