@@ -648,7 +648,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `ref_id` | No | Reference ID — used as primary lookup key when present |
 | `name` | **Yes** | Task template name |
 | `description` | No | |
-| `domain` | No | Folder name lookup (falls back to form-selected folder) |
+| `folder` | No | Folder name lookup (falls back to form-selected folder) |
 | `is_recurrent` | No | Boolean (`true`/`false`, `1`/`0`, `yes`/`no`) — defaults to `false` |
 | `enabled` | No | Boolean — defaults to `true` |
 | `link` | No | URL |
@@ -661,10 +661,12 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `findings_assessment` | No | Comma-separated findings assessment names |
 | `schedule_frequency` | No | `DAILY`, `WEEKLY`, `MONTHLY`, or `YEARLY` (recurrent only) |
 | `schedule_interval` | No | Integer — repeat every N periods (recurrent only) |
-| `schedule_days_of_week` | No | Comma-separated day numbers 0–6, Mon=0 (WEEKLY only) |
-| `schedule_months_of_year` | No | Comma-separated month numbers 1–12 (YEARLY only) |
-| `schedule_start_date` | No | Date (YYYY-MM-DD) — schedule start |
+| `schedule_days_of_week` | No | Comma-separated integers 1–7, Mon=1, Sun=7 (WEEKLY) |
+| `schedule_weeks_of_month` | No | Comma-separated integers -1–4 (1=first, -1=last) |
+| `schedule_months_of_year` | No | Comma-separated month numbers 1–12 (YEARLY) |
 | `schedule_end_date` | No | Date (YYYY-MM-DD) — schedule end |
+| `schedule_occurrences` | No | Integer — stop after N occurrences |
+| `schedule_overdue_behavior` | No | `DELAY_NEXT` or `NO_IMPACT` |
 | `task_date` | No | Due date for non-recurrent tasks (YYYY-MM-DD) |
 | `status` | No | `pending`, `in_progress`, `completed`, `cancelled` (non-recurrent only — sets the single node) |
 | `observation` | No | Free text (non-recurrent only — sets the single node) |
@@ -685,7 +687,7 @@ Each sheet imports past occurrences for one template. The sheet name is `"{count
 - **M2M resolution for versioned models:** `risk_assessments` and `compliance_assessments` export as `"name - version"`. The importer strips the version suffix and matches by name, then verifies `str(candidate) == entry` to handle duplicates.
 - **PII protection:** Actor lookup warnings mask email addresses beyond the first 4 characters in server logs.
 - **on_conflict applies to nodes:** SKIP/STOP/UPDATE conflict mode applies to both templates and their task nodes.
-- **Multi-folder imports:** Each summary row's `domain` column is used to resolve its folder independently — the form-selected folder is only the fallback.
+- **Multi-folder imports:** Each summary row's `folder` column is used to resolve its folder independently — the form-selected folder is only the fallback.
 - **CSV mode:** When a CSV is uploaded instead of Excel, only `TaskTemplate` objects are created (no node sheets). All summary fields are supported.
 
 ---

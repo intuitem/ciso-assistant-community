@@ -1217,6 +1217,25 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         "cancelled": "cancelled",
     }
 
+    _M2M_CLEARABLE: ClassVar[frozenset[str]] = frozenset(
+        {
+            "assigned_to",
+            "assets",
+            "applied_controls",
+            "evidences",
+            "compliance_assessments",
+            "risk_assessments",
+            "findings_assessment",
+        }
+    )
+
+    def _build_update_data(self, record: dict, record_data: dict) -> dict:
+        update_data = super()._build_update_data(record, record_data)
+        for key in self._M2M_CLEARABLE:
+            if key in record_data and key in record:
+                update_data[key] = record_data[key]
+        return update_data
+
     def create_context(self):
         return None, None
 
@@ -1318,9 +1337,33 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             try:
                 interval = int(float(str(interval_raw)))
                 schedule = {"frequency": freq, "interval": interval}
-                end_date = str(record.get("schedule_end_date") or "").strip()
-                if end_date:
-                    schedule["end_date"] = end_date
+                for opt_key, col in [
+                    ("end_date", "schedule_end_date"),
+                    ("overdue_behavior", "schedule_overdue_behavior"),
+                    ("occurrences", "schedule_occurrences"),
+                ]:
+                    raw_val = str(record.get(col) or "").strip()
+                    if raw_val:
+                        if opt_key == "occurrences":
+                            try:
+                                schedule[opt_key] = int(raw_val)
+                            except (ValueError, TypeError):
+                                pass
+                        else:
+                            schedule[opt_key] = raw_val
+                for opt_key, col in [
+                    ("days_of_week", "schedule_days_of_week"),
+                    ("weeks_of_month", "schedule_weeks_of_month"),
+                    ("months_of_year", "schedule_months_of_year"),
+                ]:
+                    raw_val = str(record.get(col) or "").strip()
+                    if raw_val:
+                        try:
+                            schedule[opt_key] = [
+                                int(v.strip()) for v in raw_val.split(",") if v.strip()
+                            ]
+                        except (ValueError, TypeError):
+                            pass
             except (ValueError, TypeError):
                 pass
 
@@ -1346,10 +1389,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             data["observation"] = str(observation)
 
         assigned_raw = record.get("assigned_to") or ""
-        if assigned_raw:
-            actor_ids = self._resolve_actors(assigned_raw)
-            if actor_ids:
-                data["assigned_to"] = actor_ids
+        data["assigned_to"] = self._resolve_actors(assigned_raw) if assigned_raw else []
 
         for col, model, field_label in [
             ("assets", Asset, "asset"),
@@ -1360,10 +1400,9 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             ("findings_assessment", FindingsAssessment, "findings_assessment"),
         ]:
             raw = record.get(col) or ""
-            if raw:
-                ids = self._resolve_m2m_by_name(model, raw, field_label)
-                if ids:
-                    data[col] = ids
+            data[col] = (
+                self._resolve_m2m_by_name(model, raw, field_label) if raw else []
+            )
 
         return data, None
 
@@ -2833,6 +2872,7 @@ class LoadFileView(APIView):
                     raw_status, "pending"
                 )
                 observation = str(row.get("observation") or "")
+                scheduled_date = _parse_date(row.get("scheduled_date")) or due_date
 
                 try:
                     existing_node = TaskNode.objects.filter(
@@ -2859,6 +2899,7 @@ class LoadFileView(APIView):
                             case ConflictMode.UPDATE:
                                 existing_node.status = status_val
                                 existing_node.observation = observation
+                                existing_node.scheduled_date = scheduled_date
                                 existing_node.to_delete = False
                                 existing_node.save()
                                 overall_results["task_nodes"]["updated"] += 1
@@ -2869,7 +2910,7 @@ class LoadFileView(APIView):
                             status=status_val,
                             observation=observation,
                             folder=template.folder,
-                            scheduled_date=due_date,
+                            scheduled_date=scheduled_date,
                             to_delete=False,
                         )
                         overall_results["task_nodes"]["created"] += 1
