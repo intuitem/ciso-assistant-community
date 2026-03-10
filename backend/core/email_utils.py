@@ -62,8 +62,13 @@ def _load_custom_email_template(
             ).first()
         if override:
             return {"subject": override.subject, "body": override.body}
-    except Exception:
-        pass
+    except Exception as e:
+        logger.warning(
+            "Failed to load custom email template override",
+            template=template_name,
+            locale=locale,
+            exc_info=e,
+        )
     return None
 
 

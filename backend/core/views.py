@@ -8982,8 +8982,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             if custom and custom.file:
                 custom.file.open("rb")
                 doc = DocxTemplate(io.BytesIO(custom.file.read()))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                "Failed to load custom Word template, falling back to default",
+                exc_info=e,
+            )
 
         if doc is None:
             template_path = (
