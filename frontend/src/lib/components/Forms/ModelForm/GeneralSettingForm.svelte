@@ -8,7 +8,10 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { setLocale } from '$paraglide/runtime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -22,6 +25,7 @@
 
 	const formStore = form.form;
 	const modalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -33,11 +37,58 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'financial']);
+	let openAccordionItems = $state([]);
 
 	// Track original currency for change detection
 	let originalCurrency = $state($formStore.currency);
 	let conversionRateValue = $state('1.0');
+
+	let forceLanguageInProgress = $state(false);
+
+	function handleForceLanguage() {
+		const firstModal: ModalSettings = {
+			type: 'confirm',
+			title: m.forceLanguageConfirmTitle(),
+			body: m.forceLanguageConfirmBody(),
+			response: (confirmed: boolean) => {
+				if (!confirmed) return;
+				const secondModal: ModalSettings = {
+					type: 'confirm',
+					title: m.forceLanguageFinalConfirmTitle(),
+					body: m.forceLanguageFinalConfirmBody(),
+					response: async (confirmed2: boolean) => {
+						if (!confirmed2) return;
+						forceLanguageInProgress = true;
+						try {
+							const res = await fetch('/settings/force-language', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' }
+							});
+							const data = await res.json();
+							if (res.ok) {
+								toastStore.trigger({
+									message: m.forceLanguageSuccess(),
+									preset: 'success'
+								});
+								if (data.language) {
+									setLocale(data.language);
+								}
+							} else {
+								toastStore.trigger({
+									message: data.error || m.forceLanguageFailed(),
+									preset: 'error'
+								});
+							}
+						} finally {
+							forceLanguageInProgress = false;
+						}
+					}
+				};
+				modalStore.trigger(secondModal);
+			}
+		};
+		modalStore.trigger(firstModal);
+	}
 
 	function handleCurrencyChange(newCurrency: string) {
 		if (originalCurrency && originalCurrency !== newCurrency) {
@@ -89,6 +140,48 @@
 	onValueChange={(e) => (openAccordionItems = e.value)}
 	multiple
 >
+	<Accordion.Item value="language">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-language mr-2"></i><span class="flex-1 text-left"
+				>{m.languageSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="default_language"
+					options={(model.selectOptions?.['default_language'] ?? []).map(
+						(opt: { label: string; value: string }) => ({
+							value: opt.value,
+							label: `${defaultLangLabels[opt.value] ?? opt.value} (${language[LOCALE_MAP[opt.value]?.name] ?? opt.label})`
+						})
+					)}
+					label={m.defaultLanguage()}
+					helpText={m.defaultLanguageHelpText()}
+				/>
+				<hr class="my-2" />
+				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
+				<button
+					type="button"
+					class="btn preset-filled-warning-500 text-sm"
+					onclick={handleForceLanguage}
+					disabled={forceLanguageInProgress}
+				>
+					<i class="fa-solid fa-users mr-2"></i>
+					{m.forceLanguageForAllUsers()}
+				</button>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
 	<Accordion.Item value="notifications">
 		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
 			<i class="fa-solid fa-bell mr-2"></i><span class="flex-1 text-left"
