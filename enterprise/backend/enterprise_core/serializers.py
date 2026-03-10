@@ -183,6 +183,7 @@ class CustomEmailTemplateReadSerializer(BaseModelSerializer):
         model = CustomEmailTemplate
         fields = [
             "id",
+            "folder",
             "template_key",
             "language",
             "subject",
@@ -196,7 +197,16 @@ class CustomEmailTemplateReadSerializer(BaseModelSerializer):
 class CustomEmailTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomEmailTemplate
-        fields = ["template_key", "language", "subject", "body", "is_active"]
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "subject",
+            "body",
+            "is_active",
+        ]
+        read_only_fields = ["id"]
 
 
 class CustomWordTemplateReadSerializer(BaseModelSerializer):
@@ -211,6 +221,7 @@ class CustomWordTemplateReadSerializer(BaseModelSerializer):
         model = CustomWordTemplate
         fields = [
             "id",
+            "folder",
             "template_key",
             "language",
             "file",
@@ -223,7 +234,8 @@ class CustomWordTemplateReadSerializer(BaseModelSerializer):
 class CustomWordTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomWordTemplate
-        fields = ["template_key", "language", "is_active"]
+        fields = ["id", "folder", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
 
 
 class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):

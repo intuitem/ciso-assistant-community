@@ -8551,7 +8551,7 @@ auditlog.register(
 )
 
 
-class CustomEmailTemplate(AbstractBaseModel):
+class CustomEmailTemplate(AbstractBaseModel, FolderMixin):
     """
     Allows admins to override built-in email notification templates.
     Each record overrides one template for one language.
@@ -8583,7 +8583,7 @@ class CustomEmailTemplate(AbstractBaseModel):
         return f"{self.template_key} ({self.language})"
 
 
-class CustomWordTemplate(AbstractBaseModel):
+class CustomWordTemplate(AbstractBaseModel, FolderMixin):
     """
     Allows admins to override built-in Word report templates (.docx).
     Each record overrides one template for one language.

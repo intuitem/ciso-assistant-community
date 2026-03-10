@@ -8990,8 +8990,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
         if doc is None:
             template_path = (
-                Path(settings.BASE_DIR)
-                / "core"
+                Path(__file__).resolve().parent
                 / "templates"
                 / "core"
                 / f"audit_report_template_{lang}.docx"

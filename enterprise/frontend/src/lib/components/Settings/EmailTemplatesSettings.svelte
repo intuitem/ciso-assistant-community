@@ -1,6 +1,13 @@
 <script lang="ts">
 	import * as m from '$paraglide/messages';
 	import { LOCALE_DISPLAY_MAP } from '$lib/utils/constants';
+	import {
+		getModalStore,
+		type ModalStore,
+		type ModalSettings
+	} from '$lib/components/Modals/stores';
+
+	const modalStore: ModalStore = getModalStore();
 
 	interface TemplateInfo {
 		template_key: string;
@@ -152,21 +159,31 @@
 		saving = false;
 	}
 
-	async function resetTemplate(key: string, lang: string) {
+	function resetTemplate(key: string, lang: string) {
 		const existing = getOverride(key, lang);
 		if (!existing) return;
 
-		try {
-			const res = await fetch(`/fe-api/custom-email-templates/${existing.id}`, {
-				method: 'DELETE'
-			});
-			if (res.ok || res.status === 204) {
-				successMessage = m.templateReset();
-				await fetchData();
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: m.resetToDefault(),
+			body: m.confirmResetTemplate(),
+			response: async (confirmed: boolean) => {
+				if (!confirmed) return;
+				try {
+					const res = await fetch(`/fe-api/custom-email-templates/${existing.id}`, {
+						method: 'DELETE'
+					});
+					if (res.ok || res.status === 204) {
+						successMessage = m.templateReset();
+						await fetchData();
+						cancelEdit();
+					}
+				} catch {
+					error = 'Failed to reset template';
+				}
 			}
-		} catch {
-			error = 'Failed to reset template';
-		}
+		};
+		modalStore.trigger(modal);
 	}
 
 	function formatKey(key: string): string {

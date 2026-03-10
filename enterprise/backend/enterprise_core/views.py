@@ -529,7 +529,7 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
     """
 
     model = CustomEmailTemplate
-    filterset_fields = ["template_key", "language", "is_active"]
+    filterset_fields = ["template_key", "language", "is_active", "folder"]
     search_fields = ["template_key", "language", "subject"]
 
     def _has_permission(self, request):
@@ -617,7 +617,7 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
     """
 
     model = CustomWordTemplate
-    filterset_fields = ["template_key", "language", "is_active"]
+    filterset_fields = ["template_key", "language", "is_active", "folder"]
     search_fields = ["template_key", "language"]
 
     def _has_permission(self, request):
@@ -755,24 +755,18 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        from django.conf import settings as django_settings
         from django.http import FileResponse
+        import core as core_module
+
+        core_dir = Path(core_module.__file__).resolve().parent
 
         template_path = (
-            Path(django_settings.BASE_DIR)
-            / "core"
-            / "templates"
-            / "core"
-            / f"{template_key}_template_{language}.docx"
+            core_dir / "templates" / "core" / f"{template_key}_template_{language}.docx"
         )
 
         if not template_path.exists() and language != "en":
             template_path = (
-                Path(django_settings.BASE_DIR)
-                / "core"
-                / "templates"
-                / "core"
-                / f"{template_key}_template_en.docx"
+                core_dir / "templates" / "core" / f"{template_key}_template_en.docx"
             )
 
         if not template_path.exists():
