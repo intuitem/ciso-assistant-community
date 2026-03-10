@@ -5,6 +5,7 @@ from iam.sso.views import SSOSettingsViewSet
 
 from .views import (
     GlobalSettingsViewSet,
+    get_default_language,
     get_sso_info,
     GeneralSettingsViewSet,
     FeatureFlagsViewSet,
@@ -38,4 +39,9 @@ urlpatterns = [
     path(r"", include(router.urls)),
     path(r"", include(settings_router.urls)),
     path(r"sso/info/", get_sso_info, name="get_sso_info"),
+    path(
+        r"general/default-language/",
+        get_default_language,
+        name="get_default_language",
+    ),
 ]
