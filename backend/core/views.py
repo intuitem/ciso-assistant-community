@@ -8389,8 +8389,14 @@ class PresetJourneyViewSet(BaseModelViewSet):
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
+        apply_feature_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
         executor = PresetExecutor(stored_lib, request.user, request)
-        executor.upgrade_journey(journey)
+        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
         return Response(PresetJourneyReadSerializer(journey).data)

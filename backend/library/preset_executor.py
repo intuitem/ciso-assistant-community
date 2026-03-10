@@ -130,7 +130,9 @@ class PresetExecutor:
         return journey
 
     @transaction.atomic
-    def upgrade_journey(self, journey: PresetJourney) -> PresetJourney:
+    def upgrade_journey(
+        self, journey: PresetJourney, apply_feature_flags: bool = True
+    ) -> PresetJourney:
         """Non-destructive upgrade of an existing journey to the current preset version.
 
         - Re-runs dependency loading and feature flags
@@ -138,7 +140,8 @@ class PresetExecutor:
         - Syncs steps: adds new, removes orphaned, updates metadata, preserves user state
         """
         self._load_dependencies()
-        self._apply_feature_flags()
+        if apply_feature_flags:
+            self._apply_feature_flags()
 
         folder = journey.folder
         perimeter = self._create_default_perimeter(folder)
