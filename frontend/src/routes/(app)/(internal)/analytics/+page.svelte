@@ -377,7 +377,7 @@
 						</section>
 					{/if}
 				{:catch}
-					<div>Data load eror</div>
+					<div>Data load error</div>
 				{/await}
 				{#await data.stream.combinedAssessmentsStatus}
 					<div class="col-span-3 lg:col-span-1">
@@ -390,13 +390,13 @@
 							<GroupedBarChart
 								name="combined_assessments_status"
 								title={m.assessmentsPerStatus()}
-								categories={combinedAssessmentsStatus?.status_labels.map((label) =>
+								categories={combinedAssessmentsStatus?.status_labels?.map((label) =>
 									safeTranslate(label)
-								)}
-								series={combinedAssessmentsStatus?.series.map((s) => ({
+								) ?? []}
+								series={combinedAssessmentsStatus?.series?.map((s) => ({
 									name: safeTranslate(s.name),
 									data: s.data
-								}))}
+								})) ?? []}
 								height="h-80"
 							/>
 						</section>
