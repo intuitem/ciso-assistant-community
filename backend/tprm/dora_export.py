@@ -41,8 +41,8 @@ def get_dora_export_metadata(
         - entity_id: The identifier for parameters.csv
         - competent_authority: The authority name used in naming
     """
-    lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-    if not lei:
+    lei, lei_type = get_entity_identifier(main_entity, priority=["LEI"])
+    if not lei or lei_type != "eba_qCO:qx2000":
         raise ValueError(
             "Cannot generate DORA RoI export: main entity has no LEI. "
             "Please set a LEI in the main entity's legal identifiers before exporting."
@@ -107,7 +107,7 @@ def get_entity_identifier(
         if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
             return entity.legal_identifiers[id_type], map_identifier_type(id_type)
 
-    # Use first available identifier
+    # Use first available identifier if we couldn't find any of the priority ones
     for key, value in entity.legal_identifiers.items():
         if value:
             return value, map_identifier_type(key)
