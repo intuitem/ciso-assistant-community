@@ -7,34 +7,46 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	// All data is streamed — nothing blocks the initial page render.
 
+	function assertOk(res: Response) {
+		if (!res.ok) throw new Error(`HTTP ${res.status}`);
+		return res;
+	}
+
 	const appliedControlStatusPromise = fetch(`${BASE_API_URL}/applied-controls/per_status/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((res) => res.results)
 		.catch(() => null);
 
 	const taskTemplateStatusPromise = fetch(`${BASE_API_URL}/task-templates/per_status/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((res) => res.results)
 		.catch(() => null);
 
 	const risksCountPerLevelPromise = fetch(`${BASE_API_URL}/risk-scenarios/count_per_level/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((res) => res.results)
 		.catch(() => ({ current: [], residual: [] }));
 
 	const threatsCountPromise = fetch(`${BASE_API_URL}/threats/threats_count/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch(() => ({ results: { labels: [], values: [] } }));
 
 	const qualificationsCountPromise = fetch(`${BASE_API_URL}/risk-scenarios/qualifications_count/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch(() => ({ results: { labels: [], values: [] } }));
 
 	const complianceAnalyticsPromise = fetch(`${BASE_API_URL}/compliance-assessments/analytics/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch(() => ({}));
 
 	const metricsPromise = fetch(`${BASE_API_URL}/get_metrics/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
@@ -43,6 +55,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const auditsMetricsPromise = fetch(`${BASE_API_URL}/get_audits_metrics/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
@@ -51,6 +64,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const countersPromise = fetch(`${BASE_API_URL}/get_counters/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
@@ -59,6 +73,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const combinedAssessmentsStatusPromise = fetch(`${BASE_API_URL}/get_combined_assessments_status/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
@@ -69,6 +84,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const governanceCalendarDataPromise = fetch(
 		`${BASE_API_URL}/get_governance_calendar_data/?year=${currentYear}`
 	)
+		.then(assertOk)
 		.then((res) => res.json())
 		.then((data) => data.results)
 		.catch((error) => {
@@ -77,6 +93,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const vulnerabilitySankeyDataPromise = fetch(`${BASE_API_URL}/vulnerabilities/sankey_data/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch vulnerability sankey data:', error);
@@ -86,6 +103,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 	const findingsAssessmentSunburstDataPromise = fetch(
 		`${BASE_API_URL}/findings-assessments/sunburst_data/`
 	)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch findings assessment sunburst data:', error);
@@ -94,6 +112,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 
 	// Start all operations analytics fetches in parallel
 	const detectionPromise = fetch(`${BASE_API_URL}/incidents/detection_breakdown/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch incident detection breakdown:', error);
@@ -101,6 +120,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const monthlyPromise = fetch(`${BASE_API_URL}/incidents/monthly_metrics/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch monthly incident metrics:', error);
@@ -108,6 +128,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const summaryPromise = fetch(`${BASE_API_URL}/incidents/summary_stats/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch incident summary stats:', error);
@@ -115,6 +136,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const severityPromise = fetch(`${BASE_API_URL}/incidents/severity_breakdown/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch incident severity breakdown:', error);
@@ -122,6 +144,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const qualificationsPromise = fetch(`${BASE_API_URL}/incidents/qualifications_breakdown/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch incident qualifications breakdown:', error);
@@ -129,6 +152,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const exceptionSankeyPromise = fetch(`${BASE_API_URL}/security-exceptions/sankey_data/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch security exception Sankey data:', error);
@@ -136,6 +160,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const sunburstPromise = fetch(`${BASE_API_URL}/applied-controls/sunburst_data/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch applied controls sunburst data:', error);
@@ -143,6 +168,7 @@ export const load: PageServerLoad = async ({ locals, fetch }) => {
 		});
 
 	const findingsSankeyPromise = fetch(`${BASE_API_URL}/findings/sankey_data/`)
+		.then(assertOk)
 		.then((res) => res.json())
 		.catch((error) => {
 			console.error('Failed to fetch findings Sankey data:', error);
