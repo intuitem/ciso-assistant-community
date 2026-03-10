@@ -14,12 +14,21 @@ export const load: PageServerLoad = async ({ params, fetch }) => {
 	const URLModel = 'users';
 	const model = getModelInfo(URLModel);
 	const objectEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/object/`;
+	const readEndpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
 
-	const object = await fetch(objectEndpoint).then((res) => res.json());
+	const [object, readObject] = await Promise.all([
+		fetch(objectEndpoint).then((res) => res.json()),
+		fetch(readEndpoint).then((res) => res.json())
+	]);
 	const schema = UserEditSchema;
 	const form = await superValidate(object, zod(schema));
 
-	return { form, model, object, title: m.edit() };
+	return {
+		form,
+		model,
+		object: { ...object, has_mfa_enabled: readObject.has_mfa_enabled },
+		title: m.edit()
+	};
 };
 
 export const actions: Actions = {

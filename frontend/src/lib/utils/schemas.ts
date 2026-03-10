@@ -433,6 +433,10 @@ export const SetPasswordSchema = z.object({
 	confirm_new_password: z.string()
 });
 
+export const ResetMFASchema = z.object({
+	user: z.string()
+});
+
 export const ComplianceAssessmentSchema = z.object({
 	...NameDescriptionMixin,
 	version: z.string().optional().default('1.0'),

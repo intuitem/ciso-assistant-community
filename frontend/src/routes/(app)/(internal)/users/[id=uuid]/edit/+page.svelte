@@ -29,3 +29,16 @@
 		</p>
 	</div>
 {/if}
+
+{#if data.object.has_mfa_enabled}
+	<div class="card bg-white shadow-sm p-4 mt-2">
+		<p class="text-gray-500 text-sm">
+			{m.resetMFADescription()}
+			<a
+				href="{page.url.pathname}/reset-mfa"
+				class="text-warning-700 hover:text-warning-500"
+				data-testid="reset-mfa-btn">{m.resetMFA()}</a
+			>.
+		</p>
+	</div>
+{/if}
