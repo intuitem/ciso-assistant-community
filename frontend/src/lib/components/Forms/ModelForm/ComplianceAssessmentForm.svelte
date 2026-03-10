@@ -137,7 +137,7 @@
 {#key folderKey}
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL&content_type=EN"
+		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
