@@ -38,6 +38,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
 
 from .base_models import (
@@ -4666,17 +4667,9 @@ class AppliedControl(
 
         return annual_cost
 
-    # Currencies where the symbol goes after the amount
-    _SUFFIX_CURRENCIES = {"€", "PLN"}
-
     @staticmethod
-    def _stringify_cost(cost: float, currency: str) -> str:
-        if not currency:
-            logger.error("Unknown currency detected", currency=currency)
-            return f"{cost} *"
-        if currency in AppliedControl._SUFFIX_CURRENCIES:
-            return f"{cost}{currency}"
-        return f"{currency}{cost}"
+    def _stringify_cost(cost, currency: str) -> str:
+        return _fmt_currency(cost, currency)
 
     @property
     def display_cost(self) -> str:
