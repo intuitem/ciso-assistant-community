@@ -54,9 +54,9 @@ def get_dora_export_metadata(
 
     if style == EXPORT_STYLE_ONEGATE:
         authority = main_entity.dora_competent_authority or "NBB"
-        # OneGate naming convention: DeclarerType_DeclarerID.RecipientInstitution_OneGateDomain_OneGateReport
-        # Example: LEI_549300CGF6CED54T4Y96.NBB_DOR_DORA_ROI
-        folder_prefix = f"LEI_{lei}.{authority}_DOR_DORA_ROI"
+        # OneGate naming convention: DeclarerType_DeclarerID.ConsolidationLevel_RecipientInstitution_OneGateDomain_OneGateReport
+        # Example: LEI_549300CGF6CED54T4Y96.CON_NBB_DOR_DORA_ROI
+        folder_prefix = f"LEI_{lei}.{level}_{authority}_DOR_DORA_ROI"
         entity_id = f"rs:{lei}.{level}"
     else:
         # Standard EBA convention (current logic)
@@ -1414,7 +1414,7 @@ def generate_parameters(
 
     # Get currency for baseCurrency
     base_currency = (
-        f"eba_CU:{main_entity.currency}" if main_entity.currency else "eba_CU:EUR"
+        f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
     )
 
     # Write parameters
