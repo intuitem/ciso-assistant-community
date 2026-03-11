@@ -1,5 +1,6 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from iam.models import Folder, RoleAssignment, UserGroup
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from core.models import Asset
@@ -217,8 +218,14 @@ class EntityViewSet(BaseModelViewSet):
         # Get export metadata (naming, identifiers)
         try:
             export_meta = dora_export.get_dora_export_metadata(main_entity)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=400)
+        except ValueError:
+            logger.exception("Error generating DORA export metadata")
+            return Response(
+                {
+                    "error": "Error generating DORA export metadata. Please ensure the main entity has the required DORA metadata fields (folder_prefix, entity_id, filename)."
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
 
         base_folder_name = export_meta["folder_prefix"]
         entity_id = export_meta["entity_id"]
