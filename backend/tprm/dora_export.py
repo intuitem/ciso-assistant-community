@@ -56,6 +56,20 @@ def get_dora_export_metadata(main_entity: Entity) -> dict:
     }
 
 
+def get_ultimate_parent(entity):
+    """Walk parent_entity chain to the root. Returns None if no parent."""
+    current = entity.parent_entity
+    seen = {entity.pk}
+    while current is not None:
+        if current.pk in seen:
+            break  # cycle guard
+        seen.add(current.pk)
+        if current.parent_entity is None:
+            return current
+        current = current.parent_entity
+    return current
+
+
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
 ) -> tuple[str, str]:
@@ -950,11 +964,12 @@ def generate_b_05_01_provider_details(
         # c0100: Total annual expense
         total_expense = data["total_expense"]
 
-        # c0110, c0120: Parent entity identifier (prioritize LEI)
+        # c0110, c0120: Ultimate parent undertaking identifier (prioritize LEI)
         parent_code, parent_code_type = "", ""
-        if provider.parent_entity:
+        ultimate_parent = get_ultimate_parent(provider)
+        if ultimate_parent:
             parent_code, parent_code_type = get_entity_identifier(
-                provider.parent_entity, priority=["LEI", "EUID", "VAT", "DUNS"]
+                ultimate_parent, priority=["LEI", "EUID", "VAT", "DUNS"]
             )
 
         # Write provider detail row (12 columns for DORA 4.0)

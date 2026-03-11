@@ -1515,6 +1515,49 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
         self.assertEqual(prov_row[10], "")
         self.assertEqual(prov_row[11], "")
 
+    def test_ultimate_parent_multi_level_hierarchy(self):
+        """c0110/c0120 should resolve to the ultimate parent, not the immediate parent."""
+        grandparent = Entity.objects.create(
+            name="Grand Parent Corp",
+            legal_identifiers={"LEI": "GRAND123456789012345"},
+            country="US",
+        )
+        intermediate = Entity.objects.create(
+            name="Intermediate Holdings",
+            legal_identifiers={"LEI": "INTER123456789012345"},
+            country="GB",
+            parent_entity=grandparent,
+        )
+        subsidiary = Entity.objects.create(
+            name="Subsidiary Provider",
+            legal_identifiers={"LEI": "SUBSI123456789012345"},
+            country="DE",
+            parent_entity=intermediate,
+            dora_provider_person_type="eba_CT:x212",
+        )
+        contract = Contract.objects.create(
+            name="Subsidiary Contract",
+            provider_entity=subsidiary,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        sub_row = next(r for r in rows[1:] if r[0] == "SUBSI123456789012345")
+        # c0110 should be the grandparent's LEI, not intermediate's
+        self.assertEqual(sub_row[10], "GRAND123456789012345")
+        self.assertEqual(sub_row[11], "eba_qCO:qx2000")
+        # Cleanup
+        contract.delete()
+        subsidiary.delete()
+        intermediate.delete()
+        grandparent.delete()
+
     def test_empty_queryset(self):
         buf = self._generate(
             dora_export.generate_b_05_01_provider_details,
