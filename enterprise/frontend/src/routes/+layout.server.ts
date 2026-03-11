@@ -6,7 +6,17 @@ import { env } from '$env/dynamic/public';
 export const load: LayoutServerLoad = async ({ fetch, locals }) => {
 	let clientSettings: GlobalSettings;
 	if (!locals.globalSettings) {
-		const _settings = await fetch('/settings/client-settings').then((res) => res.json());
+		let _settings = {};
+		try {
+			const res = await fetch('/settings/client-settings');
+			if (res.ok) {
+				_settings = await res.json();
+			} else {
+				console.error('Failed to fetch client settings:', res.status, res.statusText);
+			}
+		} catch (e) {
+			console.error('Error fetching client settings:', e);
+		}
 		clientSettings = { name: 'clientSettings', settings: _settings };
 	} else clientSettings = locals.globalSettings;
 

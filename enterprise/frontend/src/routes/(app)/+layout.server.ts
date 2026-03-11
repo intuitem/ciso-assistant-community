@@ -56,7 +56,17 @@ export const load = loadFlash(async ({ fetch, locals, url, cookies, request }) =
 		}
 	}
 
-	const licenseStatus = await fetch(`${BASE_API_URL}/license-status/`).then((res) => res.json());
+	let licenseStatus = {};
+	try {
+		const licenseRes = await fetch(`${BASE_API_URL}/license-status/`);
+		if (licenseRes.ok) {
+			licenseStatus = await licenseRes.json();
+		} else {
+			console.error('Failed to fetch license status:', licenseRes.status, licenseRes.statusText);
+		}
+	} catch (e) {
+		console.error('Error fetching license status:', e);
+	}
 	const LICENSE_EXPIRATION_NOTIFY_DAYS = Object.hasOwn(env, 'PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS')
 		? env.PUBLIC_LICENSE_EXPIRATION_NOTIFY_DAYS
 		: 7;
