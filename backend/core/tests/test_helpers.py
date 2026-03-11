@@ -333,3 +333,130 @@ def test_invalid_semver_format():
     version_b = "1.2.3"
     with pytest.raises(VersionFormatError):
         compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b=1)
+
+
+# --- Additional tests for core.utils functions ---
+
+
+def test_sizeof_json_dict():
+    """Test sizeof_json with a dictionary"""
+    from core.utils import sizeof_json
+
+    obj = {"key": "value", "number": 42}
+    result = sizeof_json(obj)
+    assert result > 0
+    assert isinstance(result, int)
+
+
+def test_sizeof_json_bytes():
+    """Test sizeof_json with bytes input"""
+    from core.utils import sizeof_json
+
+    obj = b"test bytes"
+    result = sizeof_json(obj)
+    assert result == len(obj)
+
+
+def test_sizeof_json_bytearray():
+    """Test sizeof_json with bytearray input"""
+    from core.utils import sizeof_json
+
+    obj = bytearray(b"test bytearray")
+    result = sizeof_json(obj)
+    assert result == len(obj)
+
+
+def test_sizeof_json_memoryview():
+    """Test sizeof_json with memoryview input"""
+    from core.utils import sizeof_json
+
+    obj = memoryview(b"test memoryview")
+    result = sizeof_json(obj)
+    assert result == len(obj)
+
+
+def test_camel_case_standard():
+    """Test camel_case with standard inputs"""
+    from core.utils import camel_case
+
+    assert camel_case("hello_world") == "helloWorld"
+    assert camel_case("test-case") == "testCase"
+    assert camel_case("multiple_word_test") == "multipleWordTest"
+
+
+def test_camel_case_empty():
+    """Test camel_case with empty string"""
+    from core.utils import camel_case
+
+    assert camel_case("") == ""
+    assert camel_case(None) == ""
+
+
+def test_camel_case_single_word():
+    """Test camel_case with single word"""
+    from core.utils import camel_case
+
+    assert camel_case("hello") == "hello"
+
+
+def test_camel_case_mixed_separators():
+    """Test camel_case with mixed separators"""
+    from core.utils import camel_case
+
+    assert camel_case("hello_world-test") == "helloWorldTest"
+
+
+def test_sha256_hash():
+    """Test sha256 hash function"""
+    from core.utils import sha256
+
+    result = sha256(b"test string")
+    assert len(result) == 64  # SHA256 produces 64 hex characters
+    assert isinstance(result, str)
+    # Test consistency
+    assert sha256(b"test string") == sha256(b"test string")
+    # Test different inputs produce different hashes
+    assert sha256(b"test1") != sha256(b"test2")
+
+
+def test_time_state_future():
+    """Test time_state with future date"""
+    from core.utils import time_state
+    from datetime import datetime, timedelta
+
+    future_date = (datetime.now() + timedelta(days=10)).isoformat()
+    result = time_state(future_date)
+    assert result["name"] == "incoming"
+    assert result["hexcolor"] == "#93c5fd"
+
+
+def test_time_state_past():
+    """Test time_state with past date"""
+    from core.utils import time_state
+    from datetime import datetime, timedelta
+
+    past_date = (datetime.now() - timedelta(days=10)).isoformat()
+    result = time_state(past_date)
+    assert result["name"] == "outdated"
+    assert result["hexcolor"] == "#f87171"
+
+
+def test_get_auditee_filtered_folder_ids_no_assignments():
+    """Test get_auditee_filtered_folder_ids with no assignments"""
+    from core.utils import get_auditee_filtered_folder_ids
+    from iam.models import User
+
+    user = User.objects.create(email="test@example.com")
+    result = get_auditee_filtered_folder_ids(user)
+    assert isinstance(result, set)
+
+
+def test_schema_version_lower():
+    """Test compare_schema_versions when backup schema is lower"""
+    schema_ver_a = 1
+    schema_ver_b = 2
+    version_a = "v1.2.3"
+    version_b = "v1.2.3"
+    with pytest.raises(ValidationError) as excinfo:
+        compare_schema_versions(schema_ver_a, version_a, version_b, schema_ver_b)
+    assert excinfo.value.args[0]["error"] == "backupLowerVersionError"
