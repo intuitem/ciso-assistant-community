@@ -317,15 +317,17 @@ def generate_b_01_03_branches(
 
     # Write branch data (one row per branch)
     for branch in branches:
-        # c0010: Identification code of the branch
+        # c0010: Identification code of the branch (typed dimension eba_typ:IS — use "0" if empty)
         branch_code, _ = get_entity_identifier(branch)
+        branch_code = branch_code or "0"
 
-        # c0020: LEI of the financial entity head office (parent entity)
+        # c0020: LEI of the financial entity head office (typed dimension eba_typ:LE — use "0" if empty)
         head_office_lei = ""
         if branch.parent_entity:
             head_office_lei, _ = get_entity_identifier(
                 branch.parent_entity, priority=["LEI"]
             )
+        head_office_lei = head_office_lei or "0"
 
         # c0030: Name of the branch
         branch_name = branch.name
@@ -509,20 +511,24 @@ def generate_b_02_02_ict_services(
                 # c0010: Contract reference
                 contract_ref = contract.ref_id or str(contract.id)
 
-                # c0020: LEI of entity using the service (beneficiary entity)
+                # c0020: LEI of entity using the service (typed dimension eba_typ:LE — use "0" if empty)
                 entity_lei = ""
                 if contract.beneficiary_entity:
                     entity_lei, _ = get_entity_identifier(
                         contract.beneficiary_entity, priority=["LEI"]
                     )
+                entity_lei = entity_lei or "0"
 
                 # c0030, c0040: Provider identification
+                # c0030 is typed dimension eba_typ:IS — use "0" if empty
+                # c0040 is enumeration metric — keep empty when c0030 has no real value
                 provider_code, provider_code_type = "", ""
                 if contract.provider_entity:
                     provider_code, provider_code_type = get_entity_identifier(
                         contract.provider_entity,
                         priority=["LEI", "EUID", "VAT", "DUNS"],
                     )
+                provider_code = provider_code or "0"
 
                 # c0050: Function identifier
                 function_id = function.ref_id or str(function.id)
@@ -758,9 +764,12 @@ def generate_b_03_02_ict_providers(
         provider = contract.provider_entity
 
         # Get provider identifier (prioritize LEI)
+        # c0020 is typed dimension eba_typ:IS — use "0" if empty
+        # c0030 is enumeration metric — keep empty when c0020 has no real value
         provider_code, code_type = get_entity_identifier(
             provider, priority=["LEI", "EUID", "VAT", "DUNS"]
         )
+        provider_code = provider_code or "0"
 
         csv_writer.writerow([contract_ref, provider_code, code_type])
 
@@ -803,9 +812,11 @@ def generate_b_03_03_intragroup_providers(
     # Write provider data for each intra-group contract
     for contract in intragroup_contracts:
         contract_ref = contract.ref_id or str(contract.id)
+        # c0020 is typed dimension eba_typ:LE — use "0" if empty
         provider_lei, _ = get_entity_identifier(
             contract.provider_entity, priority=["LEI"]
         )
+        provider_lei = provider_lei or "0"
         csv_writer.writerow([contract_ref, provider_lei, "true"])
 
     path = (
@@ -858,20 +869,21 @@ def generate_b_04_01_service_users(
         # c0010: Contract reference
         contract_ref = contract.ref_id or str(contract.id)
 
-        # c0020: LEI of beneficiary entity
+        # c0020: LEI of beneficiary entity (typed dimension eba_typ:LE — use "0" if empty)
         beneficiary_lei = ""
         if contract.beneficiary_entity:
             beneficiary_lei, _ = get_entity_identifier(
                 contract.beneficiary_entity, priority=["LEI"]
             )
+        beneficiary_lei = beneficiary_lei or "0"
 
         # Write row for beneficiary entity (not a branch)
-        combination = (contract_ref, beneficiary_lei, "")
+        combination = (contract_ref, beneficiary_lei, "0")
         if combination not in written_combinations:
             # c0030: Nature of entity (not a branch)
             entity_nature = "eba_ZZ:x839"  # not a branch
-            # c0040: Branch code (empty for non-branch)
-            branch_code = ""
+            # c0040: Branch code (typed dimension eba_typ:IS — use "0" for non-branch)
+            branch_code = "0"
 
             csv_writer.writerow(
                 [contract_ref, beneficiary_lei, entity_nature, branch_code]
@@ -884,7 +896,9 @@ def generate_b_04_01_service_users(
                 contract.beneficiary_entity, "id", None
             ):
                 continue
+            # c0040: Branch code (typed dimension eba_typ:IS — use "0" if empty)
             branch_code, _ = get_entity_identifier(branch)
+            branch_code = branch_code or "0"
             combination = (contract_ref, beneficiary_lei, branch_code)
             if combination not in written_combinations:
                 # c0030: Nature of entity (branch of a financial entity)
@@ -961,9 +975,12 @@ def generate_b_05_01_provider_details(
         provider = data["provider"]
 
         # c0010, c0020: Provider identifier (prioritize LEI)
+        # c0010 is typed dimension eba_typ:IS — use "0" if empty
+        # c0020 is enumeration metric — keep empty when c0010 has no real value
         provider_code, code_type = get_entity_identifier(
             provider, priority=["LEI", "EUID", "VAT", "DUNS"]
         )
+        provider_code = provider_code or "0"
 
         # c0050: Provider legal name
         provider_name = provider.name
@@ -985,20 +1002,23 @@ def generate_b_05_01_provider_details(
         total_expense = data["total_expense"]
 
         # c0110, c0120: Ultimate parent undertaking identifier (prioritize LEI)
+        # c0110 is typed dimension eba_typ:IS — use "0" if empty
+        # c0120 is enumeration metric — keep empty when c0110 has no real value
         parent_code, parent_code_type = "", ""
         ultimate_parent = get_ultimate_parent(provider)
         if ultimate_parent:
             parent_code, parent_code_type = get_entity_identifier(
                 ultimate_parent, priority=["LEI", "EUID", "VAT", "DUNS"]
             )
+        parent_code = parent_code or "0"
 
         # Write provider detail row (12 columns for DORA 4.0)
         csv_writer.writerow(
             [
                 provider_code,  # c0010
                 code_type,  # c0020
-                "",  # c0030: Additional identification code
-                "",  # c0040: Type of additional identification code
+                "0",  # c0030: Additional identification code (typed dimension eba_typ:IS — "0" = not applicable)
+                "",  # c0040: Type of additional identification code (enumeration metric — empty)
                 provider_name,  # c0050
                 provider_name,  # c0060: Name in Latin alphabet TODO: add Entity.latin_name DB column, equals Entity.name by default, to be displayed in EntityForm if name contains non-Latin characters
                 person_type,  # c0070
@@ -1075,15 +1095,21 @@ def generate_b_05_02_supply_chains(
             chain = get_provider_chain(solution.provider_entity)
 
             for rank, provider in enumerate(chain, start=1):
+                # c0030 is typed dimension eba_typ:IS — use "0" if empty
+                # c0040 is enumeration metric — keep empty when c0030 has no real value
                 provider_code, provider_code_type = get_entity_identifier(provider)
+                provider_code = provider_code or "0"
 
                 # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
+                # c0060 is typed dimension eba_typ:IS — use "0" if empty
+                # c0070 is enumeration metric — keep empty when c0060 has no real value
                 recipient_code, recipient_code_type = "", ""
                 if rank > 1:
                     recipient = chain[rank - 2]
                     recipient_code, recipient_code_type = get_entity_identifier(
                         recipient
                     )
+                recipient_code = recipient_code or "0"
 
                 csv_writer.writerow(
                     [
@@ -1239,9 +1265,12 @@ def generate_b_07_01_assessment(
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
 
+            # c0020 is typed dimension eba_typ:IS — use "0" if empty
+            # c0030 is enumeration metric — keep empty when c0020 has no real value
             provider_code, provider_code_type = get_entity_identifier(
                 contract.provider_entity
             )
+            provider_code = provider_code or "0"
 
             ict_service_type = solution.dora_ict_service_type or ""
             substitutability = solution.dora_substitutability or ""
@@ -1488,13 +1517,15 @@ def generate_parameters(
         f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
     )
 
-    # Write parameters
+    # Write parameters (7 parameters per OneGate XBRL Protocol v1.2, section 3.2)
     parameters = [
         ("entityID", entity_id),
         ("refPeriod", _compute_ref_period()),
         ("baseCurrency", base_currency),
         ("decimalsInteger", "0"),
         ("decimalsMonetary", "-3"),
+        ("decimalsPercentage", "4"),
+        ("decimalsDecimal", "2"),
     ]
 
     for name, value in parameters:

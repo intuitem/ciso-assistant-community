@@ -641,14 +641,15 @@ class TestGenerateB0103(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         self.assertEqual(rows[1][1], "MAIN1234567890123456")
 
-    def test_missing_parent_returns_empty(self):
+    def test_missing_parent_returns_zero_sentinel(self):
+        """c0020 is typed dimension eba_typ:LE — "0" when no parent."""
         orphan_branch = Entity.objects.create(
             name="Orphan Branch",
             legal_identifiers={"VAT": "XX111111111"},
         )
         buf = self._generate(dora_export.generate_b_01_03_branches, [orphan_branch])
         rows = self._read_csv(buf, self.CSV)
-        self.assertEqual(rows[1][1], "")
+        self.assertEqual(rows[1][1], "0")
 
     def test_country_prefix(self):
         buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
@@ -1314,7 +1315,7 @@ class TestGenerateB0401(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         main_rows = [r for r in rows[1:] if r[0] == "CA-001" and r[2] == "eba_ZZ:x839"]
         self.assertEqual(len(main_rows), 1)
-        self.assertEqual(main_rows[0][3], "")  # branch_code empty
+        self.assertEqual(main_rows[0][3], "0")  # branch_code "0" for non-branch (typed dimension)
 
     def test_branch_row_nature(self):
         buf = self._generate(
@@ -1504,7 +1505,8 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
             self.assertEqual(uk_row[11], "eba_qCO:qx2000")
         c.delete()
 
-    def test_parent_entity_empty_when_no_parent(self):
+    def test_parent_entity_zero_when_no_parent(self):
+        """c0110 is typed dimension — use "0" when provider has no parent."""
         buf = self._generate(
             dora_export.generate_b_05_01_provider_details,
             self.main_entity,
@@ -1512,8 +1514,8 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, self.CSV)
         prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
-        self.assertEqual(prov_row[10], "")
-        self.assertEqual(prov_row[11], "")
+        self.assertEqual(prov_row[10], "0")  # c0110: typed dimension, "0" = not applicable
+        self.assertEqual(prov_row[11], "")  # c0120: enumeration metric, stays empty
 
     def test_ultimate_parent_multi_level_hierarchy(self):
         """c0110/c0120 should resolve to the ultimate parent, not the immediate parent."""
@@ -1603,14 +1605,15 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         for row in self._data_rows(rows):
             self.assertEqual(row[4], "1")
 
-    def test_recipient_empty_for_rank_1(self):
+    def test_recipient_zero_sentinel_for_rank_1(self):
+        """c0060 is typed dimension eba_typ:IS — "0" for rank 1 (no recipient)."""
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
         )
         rows = self._read_csv(buf, self.CSV)
         for row in self._data_rows(rows):
-            self.assertEqual(row[5], "")
-            self.assertEqual(row[6], "")
+            self.assertEqual(row[5], "0")  # c0060: typed dimension, "0" = not applicable
+            self.assertEqual(row[6], "")  # c0070: enumeration metric, stays empty
 
     def test_multiple_solutions_multiple_rows(self):
         # contract_main has 1 solution, contract_second has 1 → at least 2 rows
@@ -1668,10 +1671,10 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         # 3 ranks
         self.assertEqual(len(chain_rows), 3)
 
-        # Rank 1: root provider, no recipient
+        # Rank 1: root provider, no recipient (typed dimension "0")
         self.assertEqual(chain_rows[0][2], "ROOT1234567890123456")  # c0030
         self.assertEqual(chain_rows[0][4], "1")  # c0050
-        self.assertEqual(chain_rows[0][5], "")  # c0060
+        self.assertEqual(chain_rows[0][5], "0")  # c0060: typed dimension, "0" = not applicable
 
         # Rank 2: intermediate, recipient = root
         self.assertEqual(chain_rows[1][2], "INTM1234567890123456")
@@ -1721,8 +1724,8 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
 
         self.assertEqual(len(solo_rows), 1)
         self.assertEqual(solo_rows[0][4], "1")
-        self.assertEqual(solo_rows[0][5], "")
-        self.assertEqual(solo_rows[0][6], "")
+        self.assertEqual(solo_rows[0][5], "0")  # c0060: typed dimension, "0" = not applicable
+        self.assertEqual(solo_rows[0][6], "")  # c0070: enumeration metric, stays empty
 
         # Cleanup
         contract.solutions.clear()
@@ -2174,11 +2177,13 @@ class TestParameters(DoraExportTestMixin, TestCase):
         params = self._params_dict(buf)
         self.assertEqual(params["decimalsInteger"], "0")
         self.assertEqual(params["decimalsMonetary"], "-3")
+        self.assertEqual(params["decimalsPercentage"], "4")
+        self.assertEqual(params["decimalsDecimal"], "2")
 
-    def test_five_parameter_rows(self):
+    def test_seven_parameter_rows(self):
         buf = self._generate(dora_export.generate_parameters, self.entity)
         rows = self._read_csv(buf, "reports/parameters.csv")
-        self.assertEqual(len(self._data_rows(rows)), 5)
+        self.assertEqual(len(self._data_rows(rows)), 7)
 
 
 class TestReportPackageJson(DoraExportTestMixin, TestCase):
@@ -2402,7 +2407,7 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
         """v8892_m: B_01.03 c0020 head office LEI must match ^[A-Z0-9]{18}[0-9]{2}$."""
         for row in self.b0103:
             lei = row[1]  # c0020
-            if lei:
+            if lei and lei != "0":  # "0" is typed dimension sentinel for not applicable
                 self.assertRegex(lei, LEI_REGEX)
 
     # --- Category 2: Non-negative constraints (2 tests) ---
@@ -2459,9 +2464,9 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
                 self.assertTrue(row[5], f"c0060 (reason) empty when c0050={row[4]}")
 
     def test_v8856_b0103_lei_implies_country(self):
-        """v8856_m: If B_01.03 c0020 populated, c0040 must be populated."""
+        """v8856_m: If B_01.03 c0020 populated (real LEI, not "0"), c0040 must be populated."""
         for row in self.b0103:
-            if row[1]:  # c0020 (head office LEI)
+            if row[1] and row[1] != "0":  # c0020 (head office LEI), skip "0" sentinel
                 self.assertTrue(row[3], f"c0040 (country) empty when c0020={row[1]}")
 
     def test_v8857_b0103_country_implies_lei(self):
@@ -2514,9 +2519,9 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
             for col_idx, col_name in mandatory.items():
                 self.assertTrue(row[col_idx], f"Row {i}: {col_name} is empty")
 
-    @unittest.skip("EBA rule not enforced: providers missing parent undertaking code")
     def test_completeness_b0501(self):
-        """v8850-v8855: B_05.01 c0020, c0050, c0060, c0070, c0080, c0110 must be non-empty."""
+        """v8850-v8855: B_05.01 c0020, c0050, c0060, c0070, c0080, c0110 must be non-empty.
+        c0110 now always has "0" sentinel when no parent (typed dimension fix)."""
         mandatory = {
             1: "c0020",
             4: "c0050",
