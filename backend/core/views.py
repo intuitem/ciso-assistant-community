@@ -6255,7 +6255,15 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        return Response({"name": "Global", "children": folders_list})
+        root_folder = Folder.get_root_folder()
+        return Response(
+            {
+                "name": root_folder.name,
+                "uuid": str(root_folder.id),
+                "content_type": root_folder.content_type,
+                "children": folders_list,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -7573,7 +7581,8 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        return Response(request.user.preferences, status=status.HTTP_200_OK)
+        prefs = request.user.get_preferences()
+        return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
@@ -7587,8 +7596,10 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        request.user.preferences["lang"] = new_language
-        request.user.save()
+        prefs = request.user.get_preferences()
+        prefs["lang"] = new_language
+        request.user.preferences = prefs
+        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -8389,8 +8400,14 @@ class PresetJourneyViewSet(BaseModelViewSet):
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
+        apply_feature_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
         executor = PresetExecutor(stored_lib, request.user, request)
-        executor.upgrade_journey(journey)
+        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
         return Response(PresetJourneyReadSerializer(journey).data)

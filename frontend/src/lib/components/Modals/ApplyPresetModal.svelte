@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getModalStore } from './stores';
 	import { m } from '$paraglide/messages';
+	import { page } from '$app/stores';
 
 	interface Props {
 		parent: any;
@@ -10,6 +11,7 @@
 			folder_name?: string;
 			folder_id?: string;
 			create_objects?: boolean;
+			apply_feature_flags?: boolean;
 		}) => Promise<{ ok: boolean; error?: string }>;
 	}
 
@@ -17,10 +19,15 @@
 
 	const modalStore = getModalStore();
 
+	const canChangeSettings = $derived(
+		Object.hasOwn($page.data.user?.permissions ?? {}, 'change_globalsettings')
+	);
+
 	let mode: 'new' | 'existing' = $state('new');
 	let folderName: string = $state(presetName);
 	let selectedFolderId: string = $state('');
 	let createObjects: boolean = $state(true);
+	let applyFeatureFlags: boolean = $state(true);
 	let errorMessage: string = $state('');
 	let submitting: boolean = $state(false);
 
@@ -30,13 +37,26 @@
 		submitting = true;
 
 		try {
-			let payload: { folder_name?: string; folder_id?: string; create_objects?: boolean };
+			let payload: {
+				folder_name?: string;
+				folder_id?: string;
+				create_objects?: boolean;
+				apply_feature_flags?: boolean;
+			};
 			if (mode === 'new') {
 				if (!folderName.trim()) return;
-				payload = { folder_name: folderName.trim(), create_objects: createObjects };
+				payload = {
+					folder_name: folderName.trim(),
+					create_objects: createObjects,
+					apply_feature_flags: canChangeSettings && applyFeatureFlags
+				};
 			} else {
 				if (!selectedFolderId) return;
-				payload = { folder_id: selectedFolderId, create_objects: createObjects };
+				payload = {
+					folder_id: selectedFolderId,
+					create_objects: createObjects,
+					apply_feature_flags: canChangeSettings && applyFeatureFlags
+				};
 			}
 
 			const result = await onApply(payload);
@@ -110,22 +130,44 @@
 				</label>
 			{/if}
 
-			<!-- Feature flags warning -->
-			<div
-				class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800 flex items-start gap-2"
-			>
-				<i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
-				<p>{m.presetFeatureFlagsWarning()}</p>
-			</div>
-
 			<!-- Create objects toggle -->
 			<label
-				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 border border-gray-200"
+				class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-indigo-50 border border-indigo-200"
 			>
 				<input type="checkbox" class="checkbox mt-0.5" bind:checked={createObjects} />
 				<div>
-					<span class="text-sm font-medium">{m.createUnderlyingObjects()}</span>
+					<span class="text-sm font-medium flex items-center gap-1.5">
+						<i class="fa-solid fa-cubes text-indigo-600 text-xs"></i>
+						{m.createUnderlyingObjects()}
+					</span>
 					<p class="text-xs text-gray-500 mt-0.5">{m.createUnderlyingObjectsHelp()}</p>
+				</div>
+			</label>
+
+			<!-- Apply feature flags toggle -->
+			<label
+				class="flex items-start gap-3 p-3 rounded-lg border {canChangeSettings
+					? 'cursor-pointer bg-amber-50 border-amber-200'
+					: 'bg-gray-100 border-gray-200 opacity-60'}"
+			>
+				<input
+					type="checkbox"
+					class="checkbox mt-0.5"
+					bind:checked={applyFeatureFlags}
+					disabled={!canChangeSettings}
+				/>
+				<div>
+					<span class="text-sm font-medium flex items-center gap-1.5">
+						<i class="fa-solid fa-sliders text-amber-600 text-xs"></i>
+						{m.applyFeatureFlags()}
+					</span>
+					<p class="text-xs text-gray-500 mt-0.5">{m.applyFeatureFlagsHelp()}</p>
+					{#if !canChangeSettings}
+						<p class="text-xs text-amber-600 mt-1">
+							<i class="fa-solid fa-lock text-[10px] mr-1"></i>
+							{m.applyFeatureFlagsNoPermission()}
+						</p>
+					{/if}
 				</div>
 			</label>
 
