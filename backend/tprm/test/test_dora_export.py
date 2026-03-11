@@ -1595,7 +1595,7 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         self.assertNotIn("CA-OVR", refs)
         self.assertNotIn("CA-SUB", refs)
 
-    def test_rank_always_1(self):
+    def test_rank_1_for_direct_providers(self):
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
         )
@@ -1603,7 +1603,7 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         for row in self._data_rows(rows):
             self.assertEqual(row[4], "1")
 
-    def test_recipient_fields_empty(self):
+    def test_recipient_empty_for_rank_1(self):
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
         )
@@ -1626,6 +1626,109 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, self.CSV)
         self.assertEqual(len(rows), 1)
+
+    def test_rank_from_provider_chain(self):
+        """Provider with parent chain produces multiple rows with increasing rank."""
+        grandparent = Entity.objects.create(
+            name="Root Provider",
+            legal_identifiers={"LEI": "ROOT1234567890123456"},
+        )
+        intermediate = Entity.objects.create(
+            name="Intermediate Sub",
+            legal_identifiers={"LEI": "INTM1234567890123456"},
+            parent_entity=grandparent,
+        )
+        leaf = Entity.objects.create(
+            name="Leaf Sub-sub",
+            legal_identifiers={"LEI": "LEAF1234567890123456"},
+            parent_entity=intermediate,
+        )
+        solution = Solution.objects.create(
+            name="Subcontracted Service",
+            provider_entity=leaf,
+            dora_ict_service_type="eba_ZZ:x755",
+        )
+        contract = Contract.objects.create(
+            name="Chain Contract",
+            ref_id="CA-CHAIN",
+            provider_entity=grandparent,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        chain_rows = [r for r in self._data_rows(rows) if r[0] == "CA-CHAIN"]
+
+        # 3 ranks
+        self.assertEqual(len(chain_rows), 3)
+
+        # Rank 1: root provider, no recipient
+        self.assertEqual(chain_rows[0][2], "ROOT1234567890123456")  # c0030
+        self.assertEqual(chain_rows[0][4], "1")  # c0050
+        self.assertEqual(chain_rows[0][5], "")  # c0060
+
+        # Rank 2: intermediate, recipient = root
+        self.assertEqual(chain_rows[1][2], "INTM1234567890123456")
+        self.assertEqual(chain_rows[1][4], "2")
+        self.assertEqual(chain_rows[1][5], "ROOT1234567890123456")
+
+        # Rank 3: leaf, recipient = intermediate
+        self.assertEqual(chain_rows[2][2], "LEAF1234567890123456")
+        self.assertEqual(chain_rows[2][4], "3")
+        self.assertEqual(chain_rows[2][5], "INTM1234567890123456")
+
+        # Cleanup
+        contract.solutions.clear()
+        contract.delete()
+        solution.delete()
+        leaf.delete()
+        intermediate.delete()
+        grandparent.delete()
+
+    def test_rank_1_no_parent(self):
+        """Provider with no parent produces a single rank-1 row (regression guard)."""
+        standalone = Entity.objects.create(
+            name="Standalone Provider",
+            legal_identifiers={"LEI": "SOLO1234567890123456"},
+        )
+        solution = Solution.objects.create(
+            name="Solo Service",
+            provider_entity=standalone,
+            dora_ict_service_type="eba_ZZ:x755",
+        )
+        contract = Contract.objects.create(
+            name="Solo Contract",
+            ref_id="CA-SOLO",
+            provider_entity=standalone,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        solo_rows = [r for r in self._data_rows(rows) if r[0] == "CA-SOLO"]
+
+        self.assertEqual(len(solo_rows), 1)
+        self.assertEqual(solo_rows[0][4], "1")
+        self.assertEqual(solo_rows[0][5], "")
+        self.assertEqual(solo_rows[0][6], "")
+
+        # Cleanup
+        contract.solutions.clear()
+        contract.delete()
+        solution.delete()
+        standalone.delete()
 
 
 class TestGenerateB0601(DoraExportTestMixin, DoraDataFactory, TestCase):
@@ -2376,15 +2479,89 @@ class TestEBAValidationRules(DoraExportTestMixin, DoraDataFactory, TestCase):
 
 
 class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
-    @unittest.skip("TDD: not yet implemented")
     def test_b0502_rank_greater_than_1(self):
         """Sub-contracting chains should produce rank > 1."""
-        pass
+        parent = Entity.objects.create(
+            name="TDD Parent",
+            legal_identifiers={"LEI": "TDDP1234567890123456"},
+        )
+        child = Entity.objects.create(
+            name="TDD Child",
+            legal_identifiers={"LEI": "TDDC1234567890123456"},
+            parent_entity=parent,
+        )
+        solution = Solution.objects.create(
+            name="TDD Service",
+            provider_entity=child,
+            dora_ict_service_type="eba_ZZ:x755",
+        )
+        contract = Contract.objects.create(
+            name="TDD Contract",
+            ref_id="CA-TDD-RANK",
+            provider_entity=parent,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
 
-    @unittest.skip("TDD: not yet implemented")
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, "reports/b_05.02.csv")
+        data = [r for r in self._data_rows(rows) if r[0] == "CA-TDD-RANK"]
+        ranks = [r[4] for r in data]
+        self.assertIn("2", ranks)
+
+        contract.solutions.clear()
+        contract.delete()
+        solution.delete()
+        child.delete()
+        parent.delete()
+
     def test_b0502_recipient_code_populated(self):
         """Rank > 1 rows should have recipient entity code+type."""
-        pass
+        parent = Entity.objects.create(
+            name="TDD Rcpt Parent",
+            legal_identifiers={"LEI": "RCPP1234567890123456"},
+        )
+        child = Entity.objects.create(
+            name="TDD Rcpt Child",
+            legal_identifiers={"LEI": "RCPC1234567890123456"},
+            parent_entity=parent,
+        )
+        solution = Solution.objects.create(
+            name="TDD Rcpt Service",
+            provider_entity=child,
+            dora_ict_service_type="eba_ZZ:x755",
+        )
+        contract = Contract.objects.create(
+            name="TDD Rcpt Contract",
+            ref_id="CA-TDD-RCPT",
+            provider_entity=parent,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(solution)
+
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, "reports/b_05.02.csv")
+        data = [r for r in self._data_rows(rows) if r[0] == "CA-TDD-RCPT"]
+        rank2_rows = [r for r in data if r[4] == "2"]
+        self.assertTrue(len(rank2_rows) > 0)
+        self.assertEqual(rank2_rows[0][5], "RCPP1234567890123456")
+        self.assertEqual(rank2_rows[0][6], "eba_qCO:qx2000")  # LEI type code
+
+        contract.solutions.clear()
+        contract.delete()
+        solution.delete()
+        child.delete()
+        parent.delete()
 
     @unittest.skip("TDD: not yet implemented")
     def test_b9901_aggregation_data_rows(self):

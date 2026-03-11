@@ -70,6 +70,26 @@ def get_ultimate_parent(entity):
     return current
 
 
+def get_provider_chain(entity):
+    """
+    Walk parent_entity from entity to root.
+    Returns list from root to leaf, e.g. [A, B, C] where A is root.
+    If entity has no parent, returns [entity].
+    """
+    chain = [entity]
+    seen = {entity.pk}
+    current = entity
+    while current.parent_entity is not None:
+        parent = current.parent_entity
+        if parent.pk in seen:
+            break  # cycle guard
+        seen.add(parent.pk)
+        chain.append(parent)
+        current = parent
+    chain.reverse()  # root first
+    return chain
+
+
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
 ) -> tuple[str, str]:
@@ -1042,43 +1062,40 @@ def generate_b_05_02_supply_chains(
             solutions__isnull=False,
         )
         .select_related("provider_entity", "beneficiary_entity")
-        .prefetch_related("solutions")
+        .prefetch_related("solutions__provider_entity")
     )
 
     # Write supply chain data
     for contract in supply_chain_contracts:
-        # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
-            # c0010: Contract reference
             contract_ref = contract.ref_id or str(contract.id)
-
-            # c0020: ICT service type
             ict_service_type = solution.dora_ict_service_type or ""
 
-            # c0030, c0040: Provider identification
-            provider_code, provider_code_type = get_entity_identifier(
-                contract.provider_entity
-            )
+            # Build supply chain from solution's provider
+            chain = get_provider_chain(solution.provider_entity)
 
-            # c0050: Rank in supply chain (1 = direct provider)
-            # Sub-contracting chains are not modeled, so rank is always 1
-            rank = 1
+            for rank, provider in enumerate(chain, start=1):
+                provider_code, provider_code_type = get_entity_identifier(provider)
 
-            # c0060, c0070: Recipient of sub-contracted ICT services
-            # For rank 1 (direct providers), these fields should be empty
-            recipient_code, recipient_code_type = "", ""
+                # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
+                recipient_code, recipient_code_type = "", ""
+                if rank > 1:
+                    recipient = chain[rank - 2]
+                    recipient_code, recipient_code_type = get_entity_identifier(
+                        recipient
+                    )
 
-            csv_writer.writerow(
-                [
-                    contract_ref,
-                    ict_service_type,
-                    provider_code,
-                    provider_code_type,
-                    rank,
-                    recipient_code,
-                    recipient_code_type,
-                ]
-            )
+                csv_writer.writerow(
+                    [
+                        contract_ref,
+                        ict_service_type,
+                        provider_code,
+                        provider_code_type,
+                        rank,
+                        recipient_code,
+                        recipient_code_type,
+                    ]
+                )
 
     path = (
         f"{folder_prefix}/reports/b_05.02.csv"
