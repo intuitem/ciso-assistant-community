@@ -162,8 +162,27 @@
 		modalStore.trigger(modal);
 	}
 
-	function formatKey(key: string): string {
-		return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+	function snakeToCamel(key: string): string {
+		const parts = key.split('_');
+		return (
+			parts[0] +
+			parts
+				.slice(1)
+				.map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+				.join('')
+		);
+	}
+
+	function templateName(key: string): string {
+		const msgKey = `template${snakeToCamel(key).charAt(0).toUpperCase() + snakeToCamel(key).slice(1)}Name`;
+		const fn = (m as Record<string, (() => string) | undefined>)[msgKey];
+		return fn ? fn() : key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+	}
+
+	function templateDescription(key: string): string {
+		const msgKey = `template${snakeToCamel(key).charAt(0).toUpperCase() + snakeToCamel(key).slice(1)}Description`;
+		const fn = (m as Record<string, (() => string) | undefined>)[msgKey];
+		return fn ? fn() : '';
 	}
 
 	function langLabel(code: string): string {
@@ -199,7 +218,7 @@
 		<div class="card p-6 space-y-4">
 			<div class="flex items-center justify-between">
 				<h3 class="h4 font-semibold">
-					{m.editTemplate()}: {formatKey(editingKey)}
+					{m.editTemplate()}: {templateName(editingKey)}
 				</h3>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
 					<i class="fa-solid fa-xmark"></i>
@@ -287,8 +306,8 @@
 					{#each availableTemplates as template}
 						{@const customLangs = getCustomizedLanguages(template.template_key)}
 						<tr>
-							<td class="font-medium">{formatKey(template.template_key)}</td>
-							<td class="text-gray-600 text-sm">{template.description}</td>
+							<td class="font-medium">{templateName(template.template_key)}</td>
+							<td class="text-gray-600 text-sm">{templateDescription(template.template_key)}</td>
 							<td>
 								{#if customLangs.length > 0}
 									<div class="flex flex-wrap gap-1">
