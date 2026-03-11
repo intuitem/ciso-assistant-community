@@ -1216,7 +1216,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if annual_cost == 0:
             return ""
         currency = self.get_currency(obj)
-        return f"{annual_cost:,.2f} {currency}"
+        return AppliedControl._stringify_cost(f"{annual_cost:,.2f}", currency)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
