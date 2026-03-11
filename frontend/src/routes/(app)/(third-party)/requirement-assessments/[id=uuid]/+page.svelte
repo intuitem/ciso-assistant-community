@@ -99,7 +99,7 @@
 			<div class="ml-3">
 				<b class="mr-2">Implemetation Groups :</b>
 				{#each data.requirement.implementation_groups as ig}
-					<span class="badge bg-blue-100">
+					<span class="badge bg-blue-100 mr-2">
 						{ig}
 					</span>
 				{/each}
