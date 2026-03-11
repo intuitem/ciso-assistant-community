@@ -16,23 +16,15 @@ from tprm.models import Entity, Contract, Solution
 from core.models import Asset
 
 
-# Export Styles
-EXPORT_STYLE_STANDARD = "eba"
-EXPORT_STYLE_ONEGATE = "onegate"
-
-
 # Helper Functions
 
 
-def get_dora_export_metadata(
-    main_entity: Entity, style: str = EXPORT_STYLE_STANDARD
-) -> dict:
+def get_dora_export_metadata(main_entity: Entity) -> dict:
     """
-    Compute metadata for DORA RoI export based on the selected style.
+    Compute metadata for DORA RoI export.
 
     Args:
         main_entity: The main financial entity
-        style: The export style (eba or onegate)
 
     Returns:
         Dictionary with:
@@ -52,17 +44,9 @@ def get_dora_export_metadata(
     # TODO: Add Entity.dora_consolidation_level if individual reporting is needed
     level = "CON"
 
-    if style == EXPORT_STYLE_ONEGATE:
-        authority = main_entity.dora_competent_authority or "NBB"
-        # OneGate naming convention: DeclarerType_DeclarerID.RecipientInstitution_OneGateDomain_OneGateReport
-        # Example: LEI_549300CGF6CED54T4Y96.NBB_DOR_DORA_ROI
-        folder_prefix = f"LEI_{lei}.{authority}_DOR_DORA_ROI"
-        entity_id = f"rs:{lei}.{level}"
-    else:
-        # Standard EBA convention (current logic)
-        authority = main_entity.dora_competent_authority or "UNKNOWN"
-        folder_prefix = f"LEI_{lei}.{level}_{authority}_DOR_DORA_ROI"
-        entity_id = f"rs:{lei}.{level}"
+    authority = main_entity.dora_competent_authority or "UNKNOWN"
+    folder_prefix = f"LEI_{lei}.{level}_{authority}_DOR_DORA_ROI"
+    entity_id = f"rs:{lei}.{level}"
 
     return {
         "folder_prefix": folder_prefix,
@@ -1414,7 +1398,7 @@ def generate_parameters(
 
     # Get currency for baseCurrency
     base_currency = (
-        f"eba_CU:{main_entity.currency}" if main_entity.currency else "eba_CU:EUR"
+        f"iso4217:{main_entity.currency}" if main_entity.currency else "iso4217:EUR"
     )
 
     # Write parameters

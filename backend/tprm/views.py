@@ -214,21 +214,9 @@ class EntityViewSet(BaseModelViewSet):
             solutions__id__in=related_solution_ids
         )
 
-        # Get export style from query parameters
-        export_style = request.query_params.get(
-            "format", dora_export.EXPORT_STYLE_STANDARD
-        )
-        if export_style not in [
-            dora_export.EXPORT_STYLE_STANDARD,
-            dora_export.EXPORT_STYLE_ONEGATE,
-        ]:
-            export_style = dora_export.EXPORT_STYLE_STANDARD
-
         # Get export metadata (naming, identifiers)
         try:
-            export_meta = dora_export.get_dora_export_metadata(
-                main_entity, export_style
-            )
+            export_meta = dora_export.get_dora_export_metadata(main_entity)
         except ValueError as e:
             return Response({"error": str(e)}, status=400)
 
