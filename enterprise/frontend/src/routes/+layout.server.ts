@@ -47,7 +47,9 @@ function sanitizeClientSettings(
 			...clientSettings.settings,
 			name: '',
 			logo: '',
-			favicon: ''
+			favicon: '',
+			logo_hash: '',
+			favicon_hash: ''
 		}
 	};
 }

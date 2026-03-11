@@ -1,5 +1,5 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ fetch, locals, cookies }) => {
@@ -7,22 +7,25 @@ export const load: PageServerLoad = async ({ fetch, locals, cookies }) => {
 		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
-	console.error('coucou1');
 	const token = cookies.get('token');
 	if (!token) {
 		redirect(302, '/login');
 	}
-	console.error('coucou2');
 
 	const allauthSessionEndpoint = `${BASE_API_URL}/iam/session-token/`;
 	const allauthSessionResponse = await fetch(allauthSessionEndpoint, { method: 'POST' });
 
 	if (!allauthSessionResponse.ok) {
-		console.error('Failed to fetch allauth session token');
-		return fail(allauthSessionResponse.status);
+		console.error('Failed to fetch allauth session token:', allauthSessionResponse.status);
+		redirect(302, '/login');
 	}
 
 	const allauthSessionToken = await allauthSessionResponse.json().then((res) => res.token);
+
+	if (!allauthSessionToken || typeof allauthSessionToken !== 'string') {
+		console.error('Session token response missing or invalid token field');
+		redirect(302, '/login');
+	}
 
 	cookies.set('allauth_session_token', allauthSessionToken, {
 		httpOnly: true,
