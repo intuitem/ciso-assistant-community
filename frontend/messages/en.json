@@ -1825,7 +1825,6 @@
 	"firstTimeLoginModalTitle": "Welcome to CISO Assistant!",
 	"firstTimeLoginModalDescription": "Choose how you'd like to get started. You can always change things later.",
 	"browsePresetsDescription": "Set up frameworks, risk assessments, and compliance journeys automatically",
-	"recommended": "Recommended",
 	"customizeFeatureFlags": "Customize my experience",
 	"customizeFeatureFlagsDescription": "Enable or disable modules to tailor the platform to your needs",
 	"skipForNow": "Skip for now",
@@ -3642,5 +3641,7 @@
 	"doneEditing": "Done editing",
 	"noLinkedObject": "— No linked object —",
 	"showDescriptions": "Show descriptions",
-	"hideDescriptions": "Hide descriptions"
+	"hideDescriptions": "Hide descriptions",
+	"syncToAppliedControl": "Sync to applied control",
+	"syncToReferenceControl": "Sync to reference control"
 }

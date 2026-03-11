@@ -3607,5 +3607,7 @@
 	"doneEditing": "Terminé",
 	"noLinkedObject": "— Aucun objet lié —",
 	"showDescriptions": "Afficher les descriptions",
-	"hideDescriptions": "Masquer les descriptions"
+	"hideDescriptions": "Masquer les descriptions",
+	"syncToAppliedControl": "Synchroniser avec la mesure appliquée",
+	"syncToReferenceControl": "Synchroniser avec la mesure de référence"
 }

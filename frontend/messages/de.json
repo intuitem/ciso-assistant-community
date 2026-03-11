@@ -3011,5 +3011,7 @@
 	"sortAscending": "Sortieren A → Z",
 	"sortDescending": "Sortieren Z → A",
 	"confirmModalMessagePlural": "Sind Sie sicher? Diese Aktion wirkt sich dauerhaft auf folgende Objekte aus",
-	"syncAppliedControlsMessage": "Die angewendeten Kontrollen, die diese Referenzkontrolle verwenden, werden mit ihr synchronisiert. Bitte beachten Sie, dass dies nicht rückgängig gemacht werden kann."
+	"syncAppliedControlsMessage": "Die angewendeten Kontrollen, die diese Referenzkontrolle verwenden, werden mit ihr synchronisiert. Bitte beachten Sie, dass dies nicht rückgängig gemacht werden kann.",
+	"syncToAppliedControl": "Mit angewendeter Maßnahme synchronisieren",
+	"syncToReferenceControl": "Mit Referenzkontrolle synchronisieren"
 }

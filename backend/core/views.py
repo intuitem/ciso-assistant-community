@@ -4999,6 +4999,29 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         return Response({"results": sunburst_data})
 
+    @action(detail=True, methods=["post"], url_path="sync-to-reference-control")
+    def sync_applied_controls(self, request, pk):
+        applied_control = self.get_object()
+        reference_control = applied_control.reference_control
+
+        FIELDS_TO_SYNC: Final[list[str]] = [
+            "category",
+            "csf_function",
+        ]
+
+        for field_to_sync in FIELDS_TO_SYNC:
+            reference_control_value = getattr(reference_control, field_to_sync)
+
+            setattr(applied_control, field_to_sync, reference_control_value)
+
+        skip_sync = all(
+            field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
+            for field_to_sync in FIELDS_TO_SYNC
+        )
+        applied_control.save(update_fields=FIELDS_TO_SYNC, skip_sync=skip_sync)
+
+        return Response({"id": applied_control.id, "name": applied_control.name})
+
 
 class ActionPlanList(generics.ListAPIView):
     filterset_fields = {
