@@ -1137,6 +1137,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    "view_webhookeventtype",
     # presets
     "view_presetjourney",
     "add_presetjourney",
