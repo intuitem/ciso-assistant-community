@@ -97,10 +97,10 @@ class DoraExportMetadataTestCase(TestCase):
         )
 
         self.assertEqual(
-            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI"
+            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.FSMA_DOR_DORA_ROI"
         )
         self.assertEqual(
-            meta["filename"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI.zip"
+            meta["filename"], "LEI_123456789ABCDEFGHI00.FSMA_DOR_DORA_ROI.zip"
         )
         self.assertEqual(meta["entity_id"], "rs:123456789ABCDEFGHI00.CON")
         self.assertEqual(meta["competent_authority"], "FSMA")
@@ -112,10 +112,10 @@ class DoraExportMetadataTestCase(TestCase):
         )
 
         self.assertEqual(
-            meta["folder_prefix"], "LEI_00IHGFEDCBA987654321.CON_NBB_DOR_DORA_ROI"
+            meta["folder_prefix"], "LEI_00IHGFEDCBA987654321.NBB_DOR_DORA_ROI"
         )
         self.assertEqual(
-            meta["filename"], "LEI_00IHGFEDCBA987654321.CON_NBB_DOR_DORA_ROI.zip"
+            meta["filename"], "LEI_00IHGFEDCBA987654321.NBB_DOR_DORA_ROI.zip"
         )
         self.assertEqual(meta["entity_id"], "rs:00IHGFEDCBA987654321.CON")
         self.assertEqual(meta["competent_authority"], "NBB")
@@ -445,7 +445,7 @@ class DoraExportReportsTestCase(TestCase):
         rows = self._read_csv_from_zip(buf, "reports/parameters.csv")
         params = dict(rows[1:])
         self.assertEqual(params["entityID"], "rs:MAIN1234567890123456.CON")
-        self.assertEqual(params["baseCurrency"], "iso4217:EUR")
+        self.assertEqual(params["baseCurrency"], "eba_CU:EUR")
 
     def test_generate_report_package_json(self):
         buf = io.BytesIO()
