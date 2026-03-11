@@ -1288,10 +1288,10 @@ def generate_b_99_01_aggregation(
     zip_file, contracts: QuerySet, business_functions: QuerySet, folder_prefix: str = ""
 ) -> None:
     """
-    Generate b_99.01.csv - Aggregation report placeholder (standard not yet finalized).
+    Generate b_99.01.csv - Definitions from Entities making use of ICT Services.
 
-    This currently only generates headers as the DORA standard for this report
-    is not yet properly defined.
+    Single-row aggregation table with counts of contracts, solutions and business
+    functions grouped by their DORA classification attributes.
 
     Args:
         zip_file: ZIP file object to write to
@@ -1301,32 +1301,87 @@ def generate_b_99_01_aggregation(
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
-    # Write CSV headers
     csv_writer.writerow(
         [
-            "c0010",  # Standalone arrangement
-            "c0020",  # Overarching arrangement
-            "c0030",  # Subsequent or associated arrangement
-            "c0040",  # Data sensitiveness: Low
-            "c0050",  # Data sensitiveness: Medium
-            "c0060",  # Data sensitiveness: High
-            "c0070",  # Impact discontinuing function: Low
-            "c0080",  # Impact discontinuing function: Medium
-            "c0090",  # Impact discontinuing function: High
-            "c0100",  # Substitutability: Not substitutable
-            "c0110",  # Substitutability: Highly complex
-            "c0120",  # Substitutability: Medium complexity
-            "c0130",  # Substitutability: Easily substitutable
-            "c0140",  # Reintegration: Easy
-            "c0150",  # Reintegration: Difficult
-            "c0160",  # Reintegration: Highly complex
-            "c0170",  # Impact discontinuing ICT: Low
-            "c0180",  # Impact discontinuing ICT: Medium
-            "c0190",  # Impact discontinuing ICT: High
+            "c0010",
+            "c0020",
+            "c0030",
+            "c0040",
+            "c0050",
+            "c0060",
+            "c0070",
+            "c0080",
+            "c0090",
+            "c0100",
+            "c0110",
+            "c0120",
+            "c0130",
+            "c0140",
+            "c0150",
+            "c0160",
+            "c0170",
+            "c0180",
+            "c0190",
         ]
     )
 
-    # TODO: Add data rows once DORA standard is properly defined
+    # c0010-c0030: Count contracts by type
+    c0010 = contracts.filter(dora_contractual_arrangement="eba_CO:x1").count()
+    c0020 = contracts.filter(dora_contractual_arrangement="eba_CO:x2").count()
+    c0030 = contracts.filter(dora_contractual_arrangement="eba_CO:x3").count()
+
+    # Get distinct solutions linked to these contracts
+    solutions = Solution.objects.filter(contracts__in=contracts).distinct()
+
+    # c0040-c0060: Data sensitiveness (solutions)
+    c0040 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x791").count()
+    c0050 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x792").count()
+    c0060 = solutions.filter(dora_data_sensitiveness="eba_ZZ:x793").count()
+
+    # c0070-c0090: Impact of discontinuing function (business functions)
+    c0070 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x791").count()
+    c0080 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x792").count()
+    c0090 = business_functions.filter(dora_discontinuing_impact="eba_ZZ:x793").count()
+
+    # c0100-c0130: Substitutability (solutions)
+    c0100 = solutions.filter(dora_substitutability="eba_ZZ:x959").count()
+    c0110 = solutions.filter(dora_substitutability="eba_ZZ:x960").count()
+    c0120 = solutions.filter(dora_substitutability="eba_ZZ:x961").count()
+    c0130 = solutions.filter(dora_substitutability="eba_ZZ:x962").count()
+
+    # c0140-c0160: Reintegration possibility (solutions)
+    c0140 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x798").count()
+    c0150 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x966").count()
+    c0160 = solutions.filter(dora_reintegration_possibility="eba_ZZ:x967").count()
+
+    # c0170-c0190: Impact of discontinuing ICT services (solutions)
+    c0170 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x791").count()
+    c0180 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x792").count()
+    c0190 = solutions.filter(dora_discontinuing_impact="eba_ZZ:x793").count()
+
+    csv_writer.writerow(
+        [
+            c0010,
+            c0020,
+            c0030,
+            c0040,
+            c0050,
+            c0060,
+            c0070,
+            c0080,
+            c0090,
+            c0100,
+            c0110,
+            c0120,
+            c0130,
+            c0140,
+            c0150,
+            c0160,
+            c0170,
+            c0180,
+            c0190,
+        ]
+    )
 
     path = (
         f"{folder_prefix}/reports/b_99.01.csv"

@@ -1989,14 +1989,97 @@ class TestGenerateB9901(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         self._assert_col_count(rows, 19)
 
-    def test_header_only_no_data_rows(self):
+    def test_data_row_present(self):
         buf = self._generate(
             dora_export.generate_b_99_01_aggregation,
             Contract.objects.all(),
             Asset.objects.all(),
         )
         rows = self._read_csv(buf, self.CSV)
-        self.assertEqual(len(rows), 1)
+        self.assertEqual(len(rows), 2)
+
+    def test_aggregation_counts(self):
+        """B_99.01 should produce correct aggregate counts."""
+        provider = Entity.objects.create(
+            name="Agg Provider",
+            legal_identifiers={"LEI": "AGGP1234567890123456"},
+        )
+        sol_low = Solution.objects.create(
+            name="Low Sens Service",
+            provider_entity=provider,
+            dora_data_sensitiveness="eba_ZZ:x791",
+            dora_substitutability="eba_ZZ:x959",
+            dora_reintegration_possibility="eba_ZZ:x798",
+            dora_discontinuing_impact="eba_ZZ:x791",
+        )
+        sol_high = Solution.objects.create(
+            name="High Sens Service",
+            provider_entity=provider,
+            dora_data_sensitiveness="eba_ZZ:x793",
+            dora_substitutability="eba_ZZ:x962",
+            dora_reintegration_possibility="eba_ZZ:x967",
+            dora_discontinuing_impact="eba_ZZ:x793",
+        )
+        contract = Contract.objects.create(
+            name="Agg Contract",
+            ref_id="CA-AGG",
+            provider_entity=provider,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+            dora_contractual_arrangement="eba_CO:x1",
+        )
+        contract.solutions.add(sol_low, sol_high)
+
+        biz_fn = Asset.objects.create(
+            name="Agg Function",
+            is_business_function=True,
+            dora_discontinuing_impact="eba_ZZ:x792",
+        )
+
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.filter(pk=contract.pk),
+            Asset.objects.filter(pk=biz_fn.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+        self.assertEqual(len(data), 1)
+        row = data[0]
+
+        # c0010 = 1 standalone contract
+        self.assertEqual(row[0], "1")
+        # c0020 = 0 overarching
+        self.assertEqual(row[1], "0")
+        # c0040 = 1 low sensitiveness
+        self.assertEqual(row[3], "1")
+        # c0060 = 1 high sensitiveness
+        self.assertEqual(row[5], "1")
+        # c0080 = 1 medium function impact
+        self.assertEqual(row[7], "1")
+        # c0100 = 1 not substitutable
+        self.assertEqual(row[9], "1")
+        # c0130 = 1 easily substitutable
+        self.assertEqual(row[12], "1")
+
+        contract.solutions.clear()
+        contract.delete()
+        sol_low.delete()
+        sol_high.delete()
+        biz_fn.delete()
+        provider.delete()
+
+    def test_empty_queryset_produces_zero_row(self):
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.none(),
+            Asset.objects.none(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+        self.assertEqual(len(data), 1)
+        for val in data[0]:
+            self.assertEqual(val, "0")
 
 
 class TestFilingIndicators(DoraExportTestMixin, TestCase):
@@ -2563,10 +2646,49 @@ class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
         child.delete()
         parent.delete()
 
-    @unittest.skip("TDD: not yet implemented")
     def test_b9901_aggregation_data_rows(self):
         """B.99.01 should produce actual aggregate counts."""
-        pass
+        provider = Entity.objects.create(
+            name="TDD Agg Provider",
+            legal_identifiers={"LEI": "TDDP1234567890123456"},
+        )
+        sol = Solution.objects.create(
+            name="TDD Agg Service",
+            provider_entity=provider,
+            dora_data_sensitiveness="eba_ZZ:x792",
+            dora_substitutability="eba_ZZ:x961",
+            dora_reintegration_possibility="eba_ZZ:x966",
+            dora_discontinuing_impact="eba_ZZ:x792",
+        )
+        contract = Contract.objects.create(
+            name="TDD Agg Contract",
+            ref_id="CA-TDD-AGG",
+            provider_entity=provider,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+            dora_contractual_arrangement="eba_CO:x2",
+        )
+        contract.solutions.add(sol)
+
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.filter(pk=contract.pk),
+            Asset.objects.none(),
+        )
+        rows = self._read_csv(buf, "reports/b_99.01.csv")
+        data = self._data_rows(rows)
+        self.assertEqual(len(data), 1)
+        row = data[0]
+        # c0020 = 1 overarching contract
+        self.assertEqual(row[1], "1")
+        # c0050 = 1 medium sensitiveness
+        self.assertEqual(row[4], "1")
+
+        contract.solutions.clear()
+        contract.delete()
+        sol.delete()
+        provider.delete()
 
     @unittest.skip("TDD: not yet implemented")
     def test_b0501_latin_name_distinct(self):
