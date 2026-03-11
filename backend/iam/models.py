@@ -935,6 +935,15 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             if user.is_editor and not user.is_third_party
         ]
 
+    @property
+    def is_sso(self) -> bool:
+        """
+        Indicates whether the user has a linked SSO (social) account.
+        """
+        from allauth.socialaccount.models import SocialAccount
+
+        return SocialAccount.objects.filter(user=self).exists()
+
     def has_mfa_enabled(self) -> bool:
         """
         Check if the user has Multi-Factor Authentication (MFA) enabled.

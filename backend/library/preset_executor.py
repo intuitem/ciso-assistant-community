@@ -264,10 +264,14 @@ class PresetExecutor:
             if hasattr(field, "source") and field.source.startswith("value.")
         }
 
+        # Flags that must never be disabled by a preset
+        PROTECTED_FLAGS = {"journeys"}
+
         # Start from current value, then set all known flags to False
         value = dict(settings_obj.value or {})
         for flag in all_flags:
-            value[flag] = False
+            if flag not in PROTECTED_FLAGS:
+                value[flag] = False
 
         # Enable only the flags the preset requests
         for flag in flags_config.get("enable", []):
@@ -327,12 +331,76 @@ class PresetExecutor:
         "risk_scenario": RiskScenario,
     }
 
-    def _find_existing(self, folder: Folder, obj_type: str, name: str):
-        """Return an existing object if one with the same name already exists in the folder."""
+    def _find_existing(self, folder: Folder, obj_type: str, item: dict, name: str):
+        """Return a compatible existing object for this preset item, if any.
+
+        Uses type-specific filters beyond just name to avoid false matches
+        (e.g. two compliance assessments with the same name but different frameworks).
+        """
         model_class = self._TYPE_MODEL_MAP.get(obj_type)
         if not model_class:
             return None
-        return model_class.objects.filter(folder=folder, name=name).first()
+        queryset = model_class.objects.filter(folder=folder, name=name)
+
+        if obj_type == "risk_assessment":
+            matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+            queryset = queryset.filter(risk_matrix=matrix)
+        elif obj_type == "compliance_assessment":
+            framework = self._resolve_library_object(item["framework"], Framework)
+            queryset = queryset.filter(framework=framework)
+        elif obj_type == "ebios_rm_study":
+            matrix = self._resolve_library_object(item["risk_matrix"], RiskMatrix)
+            queryset = queryset.filter(risk_matrix=matrix)
+        elif obj_type == "findings_assessment":
+            queryset = queryset.filter(category=item.get("category", "pentest"))
+        elif obj_type == "metric_instance":
+            metric_def_urn = item.get("metric_definition")
+            metric_def = (
+                MetricDefinition.objects.filter(urn=metric_def_urn).first()
+                if metric_def_urn
+                else None
+            )
+            if not metric_def:
+                return None
+            queryset = queryset.filter(metric_definition=metric_def)
+        elif obj_type == "asset":
+            queryset = queryset.filter(type=item.get("asset_type", "SP"))
+
+        return queryset.first()
+
+    def _find_existing_risk_scenario(self, name: str, risk_assessment_id: str):
+        """Find an existing risk scenario by name within a specific risk assessment."""
+        return RiskScenario.objects.filter(
+            risk_assessment_id=risk_assessment_id, name=name
+        ).first()
+
+    def _backfill_side_effects(
+        self, obj_type: str, obj, item: dict, object_refs: dict
+    ) -> None:
+        """Run idempotent side effects for reused objects.
+
+        When an existing object is reused instead of created, we still need
+        to ensure that dependent objects (requirement assessments, asset links,
+        threat links, etc.) are properly set up.
+        """
+        if obj_type == "compliance_assessment":
+            if not obj.requirement_assessments.exists():
+                obj.create_requirement_assessments()
+            if item.get("create_suggested_controls"):
+                assessments = obj.requirement_assessments.all().prefetch_related(
+                    "requirement__reference_controls"
+                )
+                for ra in assessments:
+                    ra.create_applied_controls_from_suggestions()
+
+        elif obj_type == "risk_scenario":
+            asset_refs = item.get("asset_refs", [])
+            asset_ids = [object_refs[r] for r in asset_refs if r in object_refs]
+            if asset_ids:
+                obj.assets.add(*Asset.objects.filter(id__in=asset_ids))
+            threat_urns = item.get("threat_urns", [])
+            if threat_urns:
+                obj.threats.add(*Threat.objects.filter(urn__in=threat_urns))
 
     def _create_objects(self, folder: Folder, default_perimeter: Perimeter) -> dict:
         scaffolded = self._preset_content.get("scaffolded_objects", [])
@@ -346,8 +414,8 @@ class PresetExecutor:
             name = self._tr(item, "name")
             description = self._tr(item, "description")
 
-            # Reuse existing object if one with the same name exists in this folder
-            existing = self._find_existing(folder, obj_type, name)
+            # Reuse existing compatible object if found in this folder
+            existing = self._find_existing(folder, obj_type, item, name)
             if existing:
                 logger.info(
                     "Reusing existing object",
@@ -357,6 +425,7 @@ class PresetExecutor:
                 )
                 if ref:
                     object_refs[ref] = str(existing.id)
+                self._backfill_side_effects(obj_type, existing, item, object_refs)
                 continue
 
             if obj_type == "perimeter":
@@ -556,18 +625,6 @@ class PresetExecutor:
             name = self._tr(item, "name")
             description = self._tr(item, "description")
 
-            existing = self._find_existing(folder, "risk_scenario", name)
-            if existing:
-                logger.info(
-                    "Reusing existing object",
-                    type="risk_scenario",
-                    name=name,
-                    id=str(existing.id),
-                )
-                if ref:
-                    object_refs[ref] = str(existing.id)
-                continue
-
             ra_ref = item.get("risk_assessment_ref")
             ra_id = object_refs.get(ra_ref) if ra_ref else None
             if not ra_id:
@@ -575,6 +632,21 @@ class PresetExecutor:
                     "Risk scenario skipped: risk_assessment_ref not resolved",
                     name=name,
                     ref=ra_ref,
+                )
+                continue
+
+            # Reuse by matching name + risk_assessment (not just folder + name)
+            existing = self._find_existing_risk_scenario(name, ra_id)
+            if existing:
+                logger.info(
+                    "Reusing existing risk scenario",
+                    name=name,
+                    id=str(existing.id),
+                )
+                if ref:
+                    object_refs[ref] = str(existing.id)
+                self._backfill_side_effects(
+                    "risk_scenario", existing, item, object_refs
                 )
                 continue
 
