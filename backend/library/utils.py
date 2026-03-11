@@ -344,7 +344,7 @@ class FrameworkImporter:
 
         if len(duplicated_question_urns) > 0:
             raise ValueError(
-                f"The following questions URNs are duplicated: {duplicated_question_urns!r}"
+                f"The following question URNs are duplicated: {duplicated_question_urns!r}"
             )
 
         for requirement_node in self._requirement_nodes:

@@ -675,7 +675,7 @@ class LibraryUpdater:
                 )
                 if len(duplicated_question_urns) > 0:
                     raise ValueError(
-                        f"The following questions URNs are duplicated: {duplicated_question_urns!r}"
+                        f"The following question URNs are duplicated: {duplicated_question_urns!r}"
                     )
 
                 framework_dict = {**new_framework}
