@@ -7,10 +7,12 @@ export const load: PageServerLoad = async ({ fetch, locals, cookies }) => {
 		redirect(302, locals.user.is_auditee ? '/auditee-dashboard' : '/analytics');
 	}
 
+	console.error("coucou1")
 	const token = cookies.get('token');
 	if (!token) {
 		redirect(302, '/login');
 	}
+	console.error("coucou2")
 
 	const allauthSessionEndpoint = `${BASE_API_URL}/iam/session-token/`;
 	const allauthSessionResponse = await fetch(allauthSessionEndpoint, { method: 'POST' });
