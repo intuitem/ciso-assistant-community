@@ -13262,6 +13262,9 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
         # Build a set of (template_id, date) identifiers for virtual tasks to materialize.
         # Every virtual task in the calendar range gets a DB record so it is
         # clickable/editable in the UI.
+        # NOTE: All virtual tasks in the range are materialized. Currently the
+        # calendar UI fetches one month at a time; if that changes, consider
+        # adding an upper bound here.
         tasks_to_process_ids = set()
         for task in sorted_tasks:
             if not task.get("virtual"):
