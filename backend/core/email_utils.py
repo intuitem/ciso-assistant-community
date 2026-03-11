@@ -2,6 +2,7 @@
 Email template utilities for CISO Assistant
 """
 
+import re
 import yaml
 import markdown
 from pathlib import Path
@@ -140,11 +141,23 @@ def markdown_to_html(text: str) -> str:
     into the template. The template body itself is authored by admins
     (who have change_globalsettings permission), so raw HTML in the
     template is an accepted trust boundary.
+
+    All <a> links get target="_blank" so they open in a new tab
+    (important for webmail clients, email previews, and embedded iframes).
     """
-    return markdown.markdown(
+    html = markdown.markdown(
         text,
         extensions=["nl2br", "sane_lists"],
     )
+    # Add target="_blank" with rel="noopener noreferrer" to all <a> tags
+    # - noopener: prevents the opened page from accessing window.opener
+    # - noreferrer: prevents sending the Referer header to the linked page
+    html = re.sub(
+        r"<a(?![^>]*\btarget=)",
+        '<a target="_blank" rel="noopener noreferrer"',
+        html,
+    )
+    return html
 
 
 def render_email_template(
