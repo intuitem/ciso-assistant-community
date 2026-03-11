@@ -255,16 +255,16 @@
 
 		chart.setOption(option);
 
-		// Handle resize
-		const resizeHandler = function () {
-			chart.resize();
-		};
+		// Use ResizeObserver to handle container size changes (including initial flex layout)
+		const container = document.getElementById(chart_id);
+		const resizeObserver = new ResizeObserver(() => {
+			chart?.resize();
+		});
+		if (container) resizeObserver.observe(container);
 
-		window.addEventListener('resize', resizeHandler);
-
-		// Clean up event listener on component unmount
+		// Clean up on component unmount
 		return () => {
-			window.removeEventListener('resize', resizeHandler);
+			resizeObserver.disconnect();
 			chart?.dispose();
 		};
 	});
