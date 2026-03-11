@@ -1,3 +1,4 @@
+import json
 import time
 
 from .helpers import get_referential_translation
@@ -701,6 +702,16 @@ class LibraryImporter:
 
         library_objects = self._library.content
 
+        # Guard against double-serialised content (old databases may store JSON as a string)
+        if isinstance(library_objects, str):
+            library_objects = json.loads(library_objects)
+
+        # Preset-only libraries don't need regular object imports
+        if "preset" in library_objects and not any(
+            object_field in library_objects for object_field in self.OBJECT_FIELDS
+        ):
+            return None
+
         if not any(
             object_field in library_objects for object_field in self.OBJECT_FIELDS
         ):
@@ -717,6 +728,8 @@ class LibraryImporter:
             key for key in ["framework", "frameworks"] if key in library_objects
         ]:
             framework_data = library_objects[keys_found[0]]
+            if isinstance(framework_data, str):
+                return f"[FRAMEWORK_ERROR] The '{keys_found[0]}' field must be a dict or list, not a string. The stored library data may be corrupted."
             if isinstance(framework_data, dict):
                 framework_data = [framework_data]
             if (
@@ -763,6 +776,8 @@ class LibraryImporter:
             key for key in ["risk_matrix", "risk_matrices"] if key in library_objects
         ]:
             risk_matrix_data = library_objects[keys_found[0]]
+            if isinstance(risk_matrix_data, str):
+                return f"[RISK_MATRIX_ERROR] The '{keys_found[0]}' field must be a dict or list, not a string. The stored library data may be corrupted."
             if isinstance(risk_matrix_data, dict):
                 # Handle risk matrix as dict for consistency (it would be bad for "risk_matrix" to not accept a dict but allowing it for "framework" and "requiremnt_mapping_set")
                 risk_matrix_data = [risk_matrix_data]
@@ -791,11 +806,14 @@ class LibraryImporter:
 
     def check_and_import_dependencies(self) -> Union[str, None]:
         """Check and import library dependencies."""
+        content = self._library.content
+        if isinstance(content, str):
+            content = json.loads(content)
         if (
             not self._library.dependencies
-            or self._library.content.get(
+            or content.get(
                 "requirement_mapping_set",
-                self._library.content.get("requirement_mapping_sets"),
+                content.get("requirement_mapping_sets"),
             )
             is not None
         ):

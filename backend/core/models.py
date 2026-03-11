@@ -38,6 +38,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
 
 from .base_models import (
@@ -341,7 +342,7 @@ class StoredLibrary(LibraryMixin):
 
         if dry_run:
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
             return (
@@ -387,7 +388,7 @@ class StoredLibrary(LibraryMixin):
                 outdated_library.delete()
 
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
 
@@ -469,6 +470,10 @@ class StoredLibrary(LibraryMixin):
             self.is_loaded = True
             self.save()
         return error_msg
+
+    @property
+    def is_preset(self) -> bool:
+        return bool(self.content and "preset" in self.content)
 
     def delete(self, *args, **kwargs):
         library_filtering_labels = list(self.filtering_labels.all())
@@ -4663,25 +4668,8 @@ class AppliedControl(
         return annual_cost
 
     @staticmethod
-    def _stringify_cost(cost: float, currency: str) -> str:
-        match currency:
-            case "$":
-                return f"${cost}"
-            case "€":
-                return f"{cost}€"
-            case "£":
-                return f"£{cost}"
-            case "A$":
-                return f"A${cost}"
-            case "NZ$":
-                return f"NZ${cost}"
-            case "C$":
-                return f"C${cost}"
-            case "¥":
-                return f"¥{cost}"
-
-        logger.error("Unknown currency detected", currency=currency)
-        return f"{cost} *"
+    def _stringify_cost(cost, currency: str) -> str:
+        return _fmt_currency(cost, currency)
 
     @property
     def display_cost(self) -> str:
@@ -4872,6 +4860,7 @@ class OrganisationObjective(
         Asset,
         blank=True,
         verbose_name="asset",
+        related_name="organisation_objectives",
     )
     tasks = models.ManyToManyField(
         "TaskTemplate",
@@ -4901,8 +4890,13 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    start_date = models.DateField(blank=True, null=True, verbose_name=_("Start date"))
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
-    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    closing_date = models.DateField(
+        blank=True, null=True, verbose_name=_("Closing date")
+    )
     metrics = models.ManyToManyField(
         "metrology.MetricInstance",
         verbose_name="Tracking metrics",
@@ -8222,7 +8216,9 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
 
     leader = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="led_teams",
         verbose_name="Team Leader",
         help_text="The leader of the team",
@@ -8251,9 +8247,10 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails = []
         if self.team_email:
             emails.append(self.team_email)
-        leader_email = self.leader.email
-        if leader_email:
-            emails.append(leader_email)
+        if self.leader:
+            leader_email = self.leader.email
+            if leader_email:
+                emails.append(leader_email)
         deputy_emails = self.deputies.exclude(email="").values_list("email", flat=True)
         emails.extend(deputy_emails)
         member_emails = self.members.exclude(email="").values_list("email", flat=True)
@@ -8343,6 +8340,76 @@ class Actor(AbstractBaseModel):
 
     def __str__(self):
         return str(self.specific)
+
+
+class PresetJourney(NameDescriptionMixin, FolderMixin):
+    """Instance created when a user applies a preset definition."""
+
+    urn = models.CharField(max_length=255)
+    version = models.IntegerField(default=1)
+    object_refs = models.JSONField(default=dict)
+    applied_at = models.DateTimeField(auto_now_add=True)
+    applied_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name="preset_journeys"
+    )
+
+    class Meta:
+        ordering = ["-applied_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class PresetJourneyStep(AbstractBaseModel):
+    """A step in a preset journey with explicit completion tracking."""
+
+    class Status(models.TextChoices):
+        NOT_STARTED = "not_started", _("Not Started")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        DONE = "done", _("Done")
+        SKIPPED = "skipped", _("Skipped")
+
+    journey = models.ForeignKey(
+        PresetJourney, related_name="steps", on_delete=models.CASCADE
+    )
+    key = models.CharField(max_length=100)
+    order = models.IntegerField()
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    translations = models.JSONField(null=True, blank=True)
+    target_model = models.CharField(max_length=100, blank=True, null=True)
+    target_ref = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.NOT_STARTED
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = [["journey", "key"]]
+
+    @property
+    def get_title_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("title", self.title)
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("description", self.description)
+
+    def __str__(self):
+        return f"{self.journey.name} - {self.title}"
 
 
 common_exclude = ["created_at", "updated_at"]
@@ -8464,5 +8531,13 @@ auditlog.register(
     RequirementAssignment,
     exclude_fields=common_exclude,
     m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    PresetJourney,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    PresetJourneyStep,
+    exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

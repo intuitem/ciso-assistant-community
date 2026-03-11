@@ -39,6 +39,11 @@
 		{ id: 'Perimeter', label: m.perimeters(), description: '' },
 		{ id: 'ComplianceAssessment', label: m.complianceAssessment(), description: '' },
 		{
+			id: 'BusinessImpactAnalysis',
+			label: m.businessImpactAnalysis(),
+			description: m.businessImpactAnalysisDescription()
+		},
+		{
 			id: 'FindingsAssessment',
 			label: m.findingsAssessment(),
 			description: m.dataWizardFindingsAssessmentDescription()
@@ -99,6 +104,7 @@
 	// Determine if domain selection should be disabled
 	let isDomainDisabled = $derived(
 		selectedModel === 'ComplianceAssessment' ||
+			selectedModel === 'BusinessImpactAnalysis' ||
 			selectedModel === 'FindingsAssessment' ||
 			selectedModel === 'RiskAssessment' ||
 			selectedModel === 'User' ||
@@ -109,6 +115,7 @@
 
 	let isMatrixDisabled = $derived(
 		selectedModel !== 'RiskAssessment' &&
+			selectedModel !== 'BusinessImpactAnalysis' &&
 			selectedModel !== 'EbiosRMStudyARM' &&
 			selectedModel !== 'EbiosRMStudyExcel'
 	);

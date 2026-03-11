@@ -9,6 +9,6 @@ body: |
   - Due Date: ${due_date}
 
   Please log in to your CISO Assistant portal to begin your assessment:
-  ${ciso_assistant_url}
+  ${ciso_assistant_url}/auditee-dashboard
 
   Thank you.
