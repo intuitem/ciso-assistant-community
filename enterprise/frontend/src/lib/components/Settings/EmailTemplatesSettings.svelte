@@ -252,8 +252,8 @@
 	});
 </script>
 
-<div class="space-y-4">
-	<p class="text-gray-500">{m.emailTemplatesDescription()}</p>
+<div class="flex flex-col gap-6">
+	<span class="text-gray-500">{m.emailTemplatesDescription()}</span>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -273,86 +273,114 @@
 		</div>
 	{:else if editingKey}
 		<!-- Edit panel -->
-		<div class="card p-6 space-y-4">
-			<div class="flex items-center justify-between">
-				<h3 class="h4 font-semibold">
-					{m.editTemplate()}: {templateName(editingKey)}
-				</h3>
-				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
-			</div>
-
-			<!-- Language selector -->
-			<div class="flex items-center gap-3">
-				<label class="label font-medium" for="template-lang">{m.language()}</label>
-				<select
-					id="template-lang"
-					class="select w-48"
-					bind:value={editingLang}
-					onchange={switchLanguage}
-				>
-					{#each supportedLanguages as lang}
-						<option value={lang}>{langLabel(lang)}</option>
-					{/each}
-				</select>
-				{#if getOverride(editingKey, editingLang)}
-					<span class="badge preset-filled-warning-500 text-xs">{m.customized()}</span>
-					<button
-						class="btn btn-sm preset-outlined-error-500"
-						type="button"
-						onclick={() => resetTemplate(editingKey, editingLang)}
-						title={m.resetToDefault()}
-					>
-						<i class="fa-solid fa-rotate-left text-xs"></i>
-						{m.resetToDefault()}
-					</button>
-				{/if}
-			</div>
-
-			<!-- Variables reference -->
-			<details class="card p-3 bg-surface-100">
-				<summary class="cursor-pointer font-medium">{m.templateVariables()}</summary>
-				<div class="mt-2 flex flex-wrap gap-2">
-					{#each editVariables as variable}
-						<code class="bg-surface-200 px-2 py-1 rounded text-sm">${'{' + variable + '}'}</code>
-					{/each}
-				</div>
-			</details>
-
-			<div>
-				<label class="label font-medium" for="template-subject">{m.templateSubject()}</label>
-				<input id="template-subject" type="text" class="input mt-1" bind:value={editSubject} />
-			</div>
-
-			<div>
-				<div class="flex items-center justify-between">
-					<label class="label font-medium" for="template-body">{m.templateBody()}</label>
+		<div class="card bg-white shadow-lg">
+			<header class="flex items-center justify-between p-4 border-b border-surface-200">
+				<div class="flex items-center gap-3">
 					<button
 						class="btn btn-sm preset-outlined-surface-500"
 						type="button"
-						onclick={() => (showPreview = !showPreview)}
+						onclick={cancelEdit}
+						title={m.cancel()}
 					>
-						<i class="fa-solid {showPreview ? 'fa-pen' : 'fa-eye'} text-xs"></i>
-						{showPreview ? m.editTemplate() : m.templatePreview()}
+						<i class="fa-solid fa-arrow-left text-xs"></i>
 					</button>
-				</div>
-				{#if showPreview}
-					<div class="card p-4 mt-1">
-						<MarkdownRenderer content={editBody} />
+					<div>
+						<h3 class="h4 font-semibold">{templateName(editingKey)}</h3>
+						<p class="text-sm text-gray-500">{templateDescription(editingKey)}</p>
 					</div>
-				{:else}
-					<textarea
-						id="template-body"
-						class="textarea mt-1 font-mono text-sm"
-						rows="12"
-						bind:value={editBody}
-					></textarea>
-					<p class="text-xs text-gray-500 mt-1">{m.markdownSupported()}</p>
-				{/if}
+				</div>
+				<div class="flex items-center gap-2">
+					{#if getOverride(editingKey, editingLang)}
+						<span class="badge preset-filled-warning-500 text-xs">{m.customized()}</span>
+					{/if}
+				</div>
+			</header>
+
+			<div class="p-4 space-y-4">
+				<!-- Language selector row -->
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-3">
+						<label class="label font-medium" for="template-lang">{m.language()}</label>
+						<select
+							id="template-lang"
+							class="select w-48"
+							bind:value={editingLang}
+							onchange={switchLanguage}
+						>
+							{#each supportedLanguages as lang}
+								<option value={lang}>{langLabel(lang)}</option>
+							{/each}
+						</select>
+					</div>
+					{#if getOverride(editingKey, editingLang)}
+						<button
+							class="btn btn-sm preset-outlined-error-500"
+							type="button"
+							onclick={() => resetTemplate(editingKey, editingLang)}
+							title={m.resetToDefault()}
+						>
+							<i class="fa-solid fa-rotate-left text-xs"></i>
+							{m.resetToDefault()}
+						</button>
+					{/if}
+				</div>
+
+				<hr />
+
+				<!-- Subject -->
+				<div>
+					<label class="label font-medium" for="template-subject">{m.templateSubject()}</label>
+					<input id="template-subject" type="text" class="input mt-1" bind:value={editSubject} />
+				</div>
+
+				<!-- Body with preview toggle -->
+				<div>
+					<div class="flex items-center justify-between">
+						<label class="label font-medium" for="template-body">{m.templateBody()}</label>
+						<button
+							class="btn btn-sm preset-outlined-surface-500"
+							type="button"
+							onclick={() => (showPreview = !showPreview)}
+						>
+							<i class="fa-solid {showPreview ? 'fa-pen' : 'fa-eye'} text-xs"></i>
+							{showPreview ? m.editTemplate() : m.templatePreview()}
+						</button>
+					</div>
+					{#if showPreview}
+						<div class="card p-4 mt-1 bg-surface-50-950">
+							<MarkdownRenderer content={editBody} />
+						</div>
+					{:else}
+						<textarea
+							id="template-body"
+							class="textarea mt-1 font-mono text-sm"
+							rows="14"
+							bind:value={editBody}
+						></textarea>
+						<p class="text-xs text-gray-500 mt-1">
+							<i class="fa-brands fa-markdown"></i>
+							{m.markdownSupported()}
+						</p>
+					{/if}
+				</div>
+
+				<!-- Variables reference -->
+				<details class="p-3 rounded-lg bg-surface-50-950">
+					<summary class="cursor-pointer font-medium text-sm">
+						<i class="fa-solid fa-code text-xs mr-1"></i>
+						{m.templateVariables()}
+					</summary>
+					<div class="mt-2 flex flex-wrap gap-2">
+						{#each editVariables as variable}
+							<code class="bg-surface-200 px-2 py-1 rounded text-xs font-mono"
+								>${'{' + variable + '}'}</code
+							>
+						{/each}
+					</div>
+				</details>
 			</div>
 
-			<div class="flex gap-2">
+			<footer class="flex items-center gap-2 p-4 border-t border-surface-200">
 				<button
 					class="btn preset-filled-primary-500 font-semibold"
 					type="button"
@@ -362,71 +390,67 @@
 					{#if saving}
 						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
 					{/if}
+					<i class="fa-solid fa-check mr-1"></i>
 					{m.save()}
 				</button>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={loadDefault}>
+					<i class="fa-solid fa-file-lines mr-1 text-xs"></i>
 					{m.loadDefault()}
 				</button>
+				<div class="flex-1"></div>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
 					{m.cancel()}
 				</button>
-			</div>
+			</footer>
 		</div>
 	{:else}
 		<!-- Templates list grouped by category -->
 		{#each groupedTemplates as category}
-			<div class="space-y-2">
+			<div class="flex flex-col gap-3">
 				<div>
-					<h3 class="h4 font-semibold">{category.label()}</h3>
+					<h3 class="text-base font-semibold flex items-center gap-2">
+						<i
+							class="fa-solid {category.key === 'core'
+								? 'fa-shield-halved'
+								: 'fa-bell'} text-sm text-primary-500"
+						></i>
+						{category.label()}
+					</h3>
 					<p class="text-sm text-gray-500">{category.description()}</p>
 				</div>
-				<div class="table-container">
-					<table class="table">
-						<thead>
-							<tr>
-								<th>{m.templateKey()}</th>
-								<th>{m.description()}</th>
-								<th>{m.status()}</th>
-								<th></th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each category.templates as template}
-								{@const customLangs = getCustomizedLanguages(template.template_key)}
-								<tr>
-									<td class="font-medium">{templateName(template.template_key)}</td>
-									<td class="text-gray-600 text-sm">{templateDescription(template.template_key)}</td
-									>
-									<td>
-										{#if customLangs.length > 0}
-											<div class="flex flex-wrap gap-1">
-												{#each customLangs as lang}
-													<span class="badge preset-filled-warning-500 text-xs">
-														{lang.toUpperCase()}
-													</span>
-												{/each}
-											</div>
-										{:else}
-											<span class="badge preset-outlined-surface-500 text-xs"
-												>{m.defaultTemplate()}</span
-											>
-										{/if}
-									</td>
-									<td>
-										<button
-											class="btn btn-sm preset-outlined-primary-500"
-											type="button"
-											onclick={() => startEdit(template.template_key)}
-											title={m.editTemplate()}
-										>
-											<i class="fa-solid fa-pen text-xs"></i>
-											{m.editTemplate()}
-										</button>
-									</td>
-								</tr>
-							{/each}
-						</tbody>
-					</table>
+				<div class="card bg-white shadow-lg overflow-hidden">
+					{#each category.templates as template, i}
+						{@const customLangs = getCustomizedLanguages(template.template_key)}
+						{#if i > 0}
+							<hr class="border-surface-200" />
+						{/if}
+						<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-50 transition-colors">
+							<div class="flex-1 min-w-0">
+								<div class="flex items-center gap-2">
+									<span class="font-medium">{templateName(template.template_key)}</span>
+									{#if customLangs.length > 0}
+										{#each customLangs as lang}
+											<span class="badge preset-filled-warning-500 text-xs">
+												{lang.toUpperCase()}
+											</span>
+										{/each}
+									{/if}
+								</div>
+								<p class="text-sm text-gray-500 truncate">
+									{templateDescription(template.template_key)}
+								</p>
+							</div>
+							<button
+								class="btn btn-sm preset-outlined-primary-500 shrink-0"
+								type="button"
+								onclick={() => startEdit(template.template_key)}
+								title={m.editTemplate()}
+							>
+								<i class="fa-solid fa-pen text-xs"></i>
+								{m.editTemplate()}
+							</button>
+						</div>
+					{/each}
 				</div>
 			</div>
 		{/each}

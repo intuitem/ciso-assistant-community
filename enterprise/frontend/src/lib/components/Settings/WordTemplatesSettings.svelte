@@ -194,8 +194,8 @@
 	});
 </script>
 
-<div class="space-y-4">
-	<p class="text-gray-500">{m.wordTemplatesDescription()}</p>
+<div class="flex flex-col gap-6">
+	<span class="text-gray-500">{m.wordTemplatesDescription()}</span>
 
 	{#if successMessage}
 		<div class="alert preset-filled-success-500 p-3">
@@ -215,128 +215,135 @@
 		</div>
 	{:else if editingKey}
 		<!-- Upload panel -->
-		<div class="card p-6 space-y-4">
-			<div class="flex items-center justify-between">
-				<h3 class="h4 font-semibold">
-					{m.editTemplate()}: {templateName(editingKey)}
-				</h3>
-				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
-					<i class="fa-solid fa-xmark"></i>
-				</button>
-			</div>
-
-			<!-- Language selector -->
-			<div class="flex items-center gap-3">
-				<label class="label font-medium" for="word-template-lang">{m.language()}</label>
-				<select id="word-template-lang" class="select w-48" bind:value={editingLang}>
-					{#each supportedLanguages as lang}
-						<option value={lang}>{langLabel(lang)}</option>
-					{/each}
-				</select>
-				{#if getOverride(editingKey, editingLang)?.file}
-					<span class="badge preset-filled-warning-500 text-xs">{m.customized()}</span>
+		<div class="card bg-white shadow-lg">
+			<header class="flex items-center justify-between p-4 border-b border-surface-200">
+				<div class="flex items-center gap-3">
 					<button
-						class="btn btn-sm preset-outlined-error-500"
+						class="btn btn-sm preset-outlined-surface-500"
 						type="button"
-						onclick={() => resetTemplate(editingKey, editingLang)}
+						onclick={cancelEdit}
+						title={m.cancel()}
 					>
-						<i class="fa-solid fa-rotate-left text-xs"></i>
-						{m.resetToDefault()}
+						<i class="fa-solid fa-arrow-left text-xs"></i>
 					</button>
+					<div>
+						<h3 class="h4 font-semibold">{templateName(editingKey)}</h3>
+						<p class="text-sm text-gray-500">{templateDescription(editingKey)}</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					{#if getOverride(editingKey, editingLang)?.file}
+						<span class="badge preset-filled-warning-500 text-xs">{m.customized()}</span>
+					{/if}
+				</div>
+			</header>
+
+			<div class="p-4 space-y-4">
+				<!-- Language selector row -->
+				<div class="flex items-center justify-between">
+					<div class="flex items-center gap-3">
+						<label class="label font-medium" for="word-template-lang">{m.language()}</label>
+						<select id="word-template-lang" class="select w-48" bind:value={editingLang}>
+							{#each supportedLanguages as lang}
+								<option value={lang}>{langLabel(lang)}</option>
+							{/each}
+						</select>
+					</div>
+					{#if getOverride(editingKey, editingLang)?.file}
+						<button
+							class="btn btn-sm preset-outlined-error-500"
+							type="button"
+							onclick={() => resetTemplate(editingKey, editingLang)}
+						>
+							<i class="fa-solid fa-rotate-left text-xs"></i>
+							{m.resetToDefault()}
+						</button>
+					{/if}
+				</div>
+
+				<hr />
+
+				<!-- Current file info -->
+				{#if getOverride(editingKey, editingLang)?.file}
+					<div class="flex items-center gap-2 text-sm text-gray-600">
+						<i class="fa-solid fa-file-word text-primary-500"></i>
+						<span>{getOverride(editingKey, editingLang)?.file}</span>
+					</div>
+				{/if}
+
+				<!-- Upload -->
+				<div>
+					<label class="label font-medium" for="word-file-upload">{m.uploadTemplate()}</label>
+					<input
+						id="word-file-upload"
+						type="file"
+						accept=".docx"
+						class="input mt-1"
+						onchange={handleFileInput}
+						disabled={uploading}
+					/>
+					<p class="text-xs text-gray-500 mt-1">{m.wordTemplateUploadHelp()}</p>
+				</div>
+
+				{#if uploading}
+					<div class="flex items-center gap-2 text-sm">
+						<i class="fa-solid fa-spinner fa-spin"></i>
+						<span>{m.uploading()}</span>
+					</div>
 				{/if}
 			</div>
 
-			<!-- Current file info -->
-			{#if getOverride(editingKey, editingLang)?.file}
-				<div class="flex items-center gap-2 text-sm text-gray-600">
-					<i class="fa-solid fa-file-word"></i>
-					<span>{getOverride(editingKey, editingLang)?.file}</span>
-				</div>
-			{/if}
-
-			<!-- Upload -->
-			<div>
-				<label class="label font-medium" for="word-file-upload">{m.uploadTemplate()}</label>
-				<input
-					id="word-file-upload"
-					type="file"
-					accept=".docx"
-					class="input mt-1"
-					onchange={handleFileInput}
-					disabled={uploading}
-				/>
-				<p class="text-xs text-gray-500 mt-1">{m.wordTemplateUploadHelp()}</p>
-			</div>
-
-			{#if uploading}
-				<div class="flex items-center gap-2">
-					<i class="fa-solid fa-spinner fa-spin"></i>
-					<span>{m.uploading()}</span>
-				</div>
-			{/if}
-
-			<!-- Download default -->
-			<div class="flex gap-2">
+			<footer class="flex items-center gap-2 p-4 border-t border-surface-200">
 				<a
 					href="/fe-api/custom-word-templates/download-default/{editingKey}/{editingLang}"
 					class="btn preset-outlined-surface-500"
 					download
 				>
-					<i class="fa-solid fa-download text-xs"></i>
+					<i class="fa-solid fa-download text-xs mr-1"></i>
 					{m.downloadDefaultTemplate()}
 				</a>
+				<div class="flex-1"></div>
 				<button class="btn preset-outlined-surface-500" type="button" onclick={cancelEdit}>
 					{m.cancel()}
 				</button>
-			</div>
+			</footer>
 		</div>
 	{:else}
 		<!-- Templates list -->
-		<div class="table-container">
-			<table class="table">
-				<thead>
-					<tr>
-						<th>{m.templateKey()}</th>
-						<th>{m.description()}</th>
-						<th>{m.status()}</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each availableTemplates as template}
-						{@const customLangs = getCustomizedLanguages(template.template_key)}
-						<tr>
-							<td class="font-medium">{templateName(template.template_key)}</td>
-							<td class="text-gray-600 text-sm">{templateDescription(template.template_key)}</td>
-							<td>
-								{#if customLangs.length > 0}
-									<div class="flex flex-wrap gap-1">
-										{#each customLangs as lang}
-											<span class="badge preset-filled-warning-500 text-xs">
-												{lang.toUpperCase()}
-											</span>
-										{/each}
-									</div>
-								{:else}
-									<span class="badge preset-outlined-surface-500 text-xs"
-										>{m.defaultTemplate()}</span
-									>
-								{/if}
-							</td>
-							<td>
-								<button
-									class="btn btn-sm preset-outlined-primary-500"
-									type="button"
-									onclick={() => startEdit(template.template_key)}
-								>
-									<i class="fa-solid fa-pen text-xs"></i>
-									{m.editTemplate()}
-								</button>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
+		<div class="card bg-white shadow-lg overflow-hidden">
+			{#each availableTemplates as template, i}
+				{@const customLangs = getCustomizedLanguages(template.template_key)}
+				{#if i > 0}
+					<hr class="border-surface-200" />
+				{/if}
+				<div class="flex items-center gap-4 px-4 py-3 hover:bg-surface-50 transition-colors">
+					<i class="fa-solid fa-file-word text-primary-500"></i>
+					<div class="flex-1 min-w-0">
+						<div class="flex items-center gap-2">
+							<span class="font-medium">{templateName(template.template_key)}</span>
+							{#if customLangs.length > 0}
+								{#each customLangs as lang}
+									<span class="badge preset-filled-warning-500 text-xs">
+										{lang.toUpperCase()}
+									</span>
+								{/each}
+							{/if}
+						</div>
+						<p class="text-sm text-gray-500 truncate">
+							{templateDescription(template.template_key)}
+						</p>
+					</div>
+					<button
+						class="btn btn-sm preset-outlined-primary-500 shrink-0"
+						type="button"
+						onclick={() => startEdit(template.template_key)}
+						title={m.editTemplate()}
+					>
+						<i class="fa-solid fa-pen text-xs"></i>
+						{m.editTemplate()}
+					</button>
+				</div>
+			{/each}
 		</div>
 	{/if}
 </div>
