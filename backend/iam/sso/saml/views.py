@@ -181,7 +181,9 @@ class FinishACSView(SAMLViewMixin, View):
             user.last_name = idp_last_names[0] if idp_last_names else user.last_name
             user.save()
             token = generate_token(user)
-            login.state["next"] = f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
+            login.state["next"] = (
+                f"{settings.CISO_ASSISTANT_URL.rstrip('/')}/sso/authenticate"
+            )
             pre_social_login(request, login)
             if request.user.is_authenticated:
                 get_account_adapter(request).logout(request)
