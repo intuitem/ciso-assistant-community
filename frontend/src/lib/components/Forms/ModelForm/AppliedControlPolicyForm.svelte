@@ -446,9 +446,6 @@
 
 <FolderTreeSelect
 	{form}
-	optionsDetailedUrlParameters={origin === 'requirement-assessments'
-		? [['scope_folder_id', initialData.folder]]
-		: []}
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
