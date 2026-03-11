@@ -97,7 +97,7 @@
 		</span>
 		{#if data.requirement.implementation_groups?.length > 0}
 			<div class="ml-3">
-				<b class="mr-2">Implemetation Groups :</b>
+				<b class="mr-2">{m.implementationGroups()} :</b>
 				{#each data.requirement.implementation_groups as ig}
 					<span class="badge bg-blue-100 mr-2">
 						{ig}
