@@ -7,6 +7,7 @@
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 
 	interface Props {
 		form: SuperValidated<any>;
@@ -81,11 +82,9 @@
 		cacheLock={cacheLocks['observation']}
 		bind:cachedValue={formDataCache['observation']}
 	/>
-	<AutocompleteSelect
+	<FolderTreeSelect
 		{form}
-		optionsEndpoint="folders?content_type=DO&content_type=GL"
 		field="folder"
-		pathField="path"
 		cacheLock={cacheLocks['folder']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.domain()}
