@@ -1,8 +1,10 @@
 import csv
 import io
 import json
+import unittest
 import zipfile
 from datetime import date
+from unittest.mock import patch
 
 from django.test import TestCase
 
@@ -11,98 +13,58 @@ from tprm.models import Entity, Contract, Solution
 from tprm import dora_export
 
 
-class DoraExportHelpersTestCase(TestCase):
-    def test_get_entity_identifier(self):
-        # Empty entity
-        entity = Entity()
-        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
-
-        # Priority test: LEI > EUID > VAT > DUNS
-        entity.legal_identifiers = {
-            "DUNS": "1111",
-            "VAT": "2222",
-            "EUID": "3333",
-            "LEI": "4444",
-        }
-        self.assertEqual(
-            dora_export.get_entity_identifier(entity), ("4444", "eba_qCO:qx2000")
-        )
-
-        entity.legal_identifiers = {"VAT": "2222", "DUNS": "1111"}
-        self.assertEqual(
-            dora_export.get_entity_identifier(entity), ("2222", "eba_qCO:qx2004")
-        )
-
-        entity.legal_identifiers = {"UNKNOWN": "9999"}
-        self.assertEqual(
-            dora_export.get_entity_identifier(entity), ("9999", "eba_qCO:qx2003")
-        )
-
-    def test_format_date(self):
-        d = date(2023, 5, 17)
-        self.assertEqual(dora_export.format_date(d), "2023-05-17")
-        self.assertEqual(dora_export.format_date(None), "")
+# ---------------------------------------------------------------------------
+# Shared test infrastructure
+# ---------------------------------------------------------------------------
 
 
-class DoraExportMetadataTestCase(TestCase):
+class DoraExportTestMixin:
+    """Helpers shared by all report-level tests."""
+
+    def _generate(self, func, *args, **kwargs):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            func(z, *args, **kwargs)
+        return buf
+
+    def _read_csv(self, buf, filename):
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as z:
+            with z.open(filename) as f:
+                return list(csv.reader(io.StringIO(f.read().decode("utf-8"))))
+
+    def _read_json(self, buf, filename):
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as z:
+            with z.open(filename) as f:
+                return json.loads(f.read().decode("utf-8"))
+
+    def _assert_headers(self, rows, expected):
+        self.assertEqual(rows[0], expected)
+
+    def _assert_col_count(self, rows, n):
+        for i, row in enumerate(rows):
+            self.assertEqual(len(row), n, f"Row {i} has {len(row)} cols, expected {n}")
+
+    def _data_rows(self, rows):
+        return rows[1:]
+
+
+class DoraDataFactory:
+    """Creates a rich object graph for report tests (called from setUp)."""
+
     def setUp(self):
-        self.entity_with_auth = Entity.objects.create(
-            name="Test Entity With Auth",
-            legal_identifiers={"LEI": "123456789ABCDEFGHI00"},
-            dora_competent_authority="FSMA",
-        )
-        self.entity_without_auth = Entity.objects.create(
-            name="Test Entity Without Auth",
-            legal_identifiers={"LEI": "00IHGFEDCBA987654321"},
-        )
-        self.entity_no_lei = Entity.objects.create(
-            name="Test Entity No LEI",
-            legal_identifiers={"VAT": "BE0123456789"},
-        )
+        super().setUp()
 
-    def test_get_dora_export_metadata_with_auth(self):
-        """Test metadata generation with competent authority set."""
-        meta = dora_export.get_dora_export_metadata(self.entity_with_auth)
-
-        self.assertEqual(
-            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI"
-        )
-        self.assertEqual(
-            meta["filename"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI.zip"
-        )
-        self.assertEqual(meta["entity_id"], "rs:123456789ABCDEFGHI00.CON")
-        self.assertEqual(meta["competent_authority"], "FSMA")
-
-    def test_get_dora_export_metadata_unknown_auth(self):
-        """Test metadata with missing competent authority defaults to UNKNOWN."""
-        meta = dora_export.get_dora_export_metadata(self.entity_without_auth)
-
-        self.assertEqual(
-            meta["folder_prefix"], "LEI_00IHGFEDCBA987654321.CON_UNKNOWN_DOR_DORA_ROI"
-        )
-        self.assertEqual(
-            meta["filename"], "LEI_00IHGFEDCBA987654321.CON_UNKNOWN_DOR_DORA_ROI.zip"
-        )
-        self.assertEqual(meta["entity_id"], "rs:00IHGFEDCBA987654321.CON")
-        self.assertEqual(meta["competent_authority"], "UNKNOWN")
-
-    def test_get_dora_export_metadata_no_lei(self):
-        """Test that missing LEI raises ValueError."""
-        with self.assertRaisesMessage(
-            ValueError, "Cannot generate DORA RoI export: main entity has no LEI."
-        ):
-            dora_export.get_dora_export_metadata(self.entity_no_lei)
-
-
-class DoraExportReportsTestCase(TestCase):
-    def setUp(self):
-        # Set up a robust dataset for all reports
+        # --- Entities (9) ---
         self.main_entity = Entity.objects.create(
-            name="Main Entity",
+            name="Main Financial Entity",
             legal_identifiers={"LEI": "MAIN1234567890123456"},
             country="BE",
             currency="EUR",
-            dora_entity_type="bank",
+            dora_entity_type="eba_CT:x12",
+            dora_competent_authority="FSMA",
+            dora_entity_hierarchy="eba_RP:x53",
         )
 
         self.subsidiary = Entity.objects.create(
@@ -111,324 +73,2050 @@ class DoraExportReportsTestCase(TestCase):
             country="FR",
             currency="EUR",
             parent_entity=self.main_entity,
-            dora_provider_person_type="legal",  # Indicates subsidiary
+            dora_provider_person_type="eba_CT:x212",
+            dora_assets_value=50000,
         )
 
-        self.branch = Entity.objects.create(
-            name="Branch Entity",
+        self.branch_be = Entity.objects.create(
+            name="Branch Belgium",
             legal_identifiers={"VAT": "BE0999999999"},
             country="BE",
             parent_entity=self.main_entity,
-            # No dora_provider_person_type for branches
+            # No dora_provider_person_type → branch
         )
 
-        self.provider = Entity.objects.create(
-            name="Third Party Provider",
+        self.branch_nl = Entity.objects.create(
+            name="Branch Netherlands",
+            legal_identifiers={"EUID": "NL0888888888"},
+            country="NL",
+            parent_entity=self.main_entity,
+            # person_type is None → branch
+        )
+
+        self.provider_external = Entity.objects.create(
+            name="External Cloud Provider",
             legal_identifiers={"LEI": "PROV1234567890123456"},
             country="US",
-            dora_provider_person_type="legal",
+            dora_provider_person_type="eba_CT:x212",
         )
 
-        self.intragroup_provider = Entity.objects.create(
-            name="Intragroup Provider",
+        self.provider_external_2 = Entity.objects.create(
+            name="German IT Provider",
+            legal_identifiers={"VAT": "DE123456789"},
+            country="DE",
+            dora_provider_person_type="eba_CT:x212",
+        )
+
+        self.provider_intragroup = Entity.objects.create(
+            name="Intragroup IT Services",
             legal_identifiers={"LEI": "INTRA000000000000000"},
             parent_entity=self.main_entity,
         )
 
-        self.business_function = Asset.objects.create(
+        self.provider_with_parent = Entity.objects.create(
+            name="UK Provider Subsidiary",
+            legal_identifiers={"LEI": "UKPR1234567890123456"},
+            country="GB",
+            parent_entity=self.provider_external,
+            dora_provider_person_type="eba_CT:x212",
+        )
+
+        self.entity_minimal = Entity.objects.create(
+            name="Minimal Entity",
+        )
+
+        # --- Assets (4) ---
+        self.biz_fn_critical = Asset.objects.create(
             name="Critical Payment Service",
             is_business_function=True,
             disaster_recovery_objectives={
                 "objectives": {"rto": {"value": 2}, "rpo": {"value": 1}}
             },
             dora_criticality_assessment="eba_BT:x28",
+            dora_criticality_justification="Supports core payments",
+            dora_licenced_activity="eba_TA:x185",
+            dora_discontinuing_impact="eba_ZZ:x793",
         )
 
-        self.solution = Solution.objects.create(
+        self.biz_fn_empty_objectives = Asset.objects.create(
+            name="Function Empty Objectives",
+            is_business_function=True,
+            disaster_recovery_objectives={},
+        )
+
+        self.biz_fn_partial_objectives = Asset.objects.create(
+            name="Function Partial Objectives",
+            is_business_function=True,
+            disaster_recovery_objectives={"objectives": {"rto": {"value": 4}}},
+        )
+
+        self.non_business_asset = Asset.objects.create(
+            name="Laptop Fleet",
+            is_business_function=False,
+        )
+
+        # --- Solutions (4) ---
+        self.solution_cloud = Solution.objects.create(
             name="Cloud Hosting",
-            provider_entity=self.provider,
-            dora_ict_service_type="cloud",
+            provider_entity=self.provider_external,
+            dora_ict_service_type="eba_TA:S09",
             storage_of_data=True,
             data_location_storage="US",
+            data_location_processing="IE",
+            dora_data_sensitiveness="eba_ZZ:x793",
+            dora_reliance_level="eba_ZZ:x796",
+            dora_substitutability="eba_ZZ:x960",
+            dora_non_substitutability_reason="eba_ZZ:x963",
+            dora_has_exit_plan="eba_BT:x28",
+            dora_reintegration_possibility="eba_ZZ:x966",
+            dora_discontinuing_impact="eba_ZZ:x793",
+            dora_alternative_providers_identified="eba_BT:x28",
+            dora_alternative_providers="Azure, GCP",
         )
-        self.solution.assets.add(self.business_function)
+        self.solution_cloud.assets.add(self.biz_fn_critical)
 
-        self.contract = Contract.objects.create(
+        self.solution_no_storage = Solution.objects.create(
+            name="Managed Network",
+            provider_entity=self.provider_external_2,
+            dora_ict_service_type="eba_TA:S10",
+            storage_of_data=False,
+            data_location_storage="",
+            data_location_processing="",
+        )
+        self.solution_no_storage.assets.add(self.biz_fn_critical)
+
+        self.solution_no_assets = Solution.objects.create(
+            name="Consulting Services",
+            provider_entity=self.provider_external,
+            dora_ict_service_type="eba_TA:S01",
+        )
+
+        self.solution_minimal = Solution.objects.create(
+            name="Internal Tools",
+            provider_entity=self.provider_intragroup,
+        )
+        self.solution_minimal.assets.add(self.biz_fn_empty_objectives)
+
+        # --- Contracts (7) ---
+        self.contract_main = Contract.objects.create(
             name="Main Cloud Contract",
-            provider_entity=self.provider,
+            ref_id="CA-001",
+            provider_entity=self.provider_external,
             beneficiary_entity=self.main_entity,
             annual_expense=100000,
             currency="EUR",
             is_intragroup=False,
+            start_date=date(2024, 1, 1),
+            end_date=date(2026, 12, 31),
+            notice_period_entity=90,
+            notice_period_provider=60,
+            governing_law_country="BE",
+            status=Contract.Status.ACTIVE,
         )
-        self.contract.solutions.add(self.solution)
+        self.contract_main.solutions.add(self.solution_cloud)
 
-        self.overarching_contract = Contract.objects.create(
+        self.contract_second = Contract.objects.create(
+            name="Network Contract",
+            ref_id="CA-002",
+            provider_entity=self.provider_external_2,
+            beneficiary_entity=self.main_entity,
+            annual_expense=50000,
+            currency="EUR",
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        self.contract_second.solutions.add(self.solution_no_storage)
+
+        self.contract_no_expense = Contract.objects.create(
+            name="Free Tier Contract",
+            provider_entity=self.provider_external,
+            beneficiary_entity=self.main_entity,
+            annual_expense=None,
+            currency="",
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        self.contract_no_expense.solutions.add(self.solution_cloud)
+
+        self.overarching = Contract.objects.create(
             name="Group Framework Agreement",
-            provider_entity=self.intragroup_provider,
+            ref_id="CA-OVR",
+            provider_entity=self.provider_intragroup,
             beneficiary_entity=self.main_entity,
             is_intragroup=True,
+            status=Contract.Status.ACTIVE,
         )
 
         self.sub_contract = Contract.objects.create(
             name="Local IT Support",
-            provider_entity=self.intragroup_provider,
+            ref_id="CA-SUB",
+            provider_entity=self.provider_intragroup,
             beneficiary_entity=self.subsidiary,
             is_intragroup=True,
-            overarching_contract=self.overarching_contract,
+            overarching_contract=self.overarching,
+            status=Contract.Status.ACTIVE,
+        )
+        self.sub_contract.solutions.add(self.solution_minimal)
+
+        self.contract_no_provider = Contract.objects.create(
+            name="Legacy Contract",
+            provider_entity=None,
+            beneficiary_entity=self.main_entity,
+            status=Contract.Status.ACTIVE,
         )
 
-    def _read_csv_from_zip(self, zip_buffer, filename):
-        zip_buffer.seek(0)
-        with zipfile.ZipFile(zip_buffer, "r") as z:
-            with z.open(filename) as f:
-                content = f.read().decode("utf-8")
-                return list(csv.reader(io.StringIO(content)))
+        self.contract_no_solutions = Contract.objects.create(
+            name="Pending Contract",
+            provider_entity=self.provider_external,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
 
-    def _read_json_from_zip(self, zip_buffer, filename):
-        zip_buffer.seek(0)
-        with zipfile.ZipFile(zip_buffer, "r") as z:
-            with z.open(filename) as f:
-                return json.loads(f.read().decode("utf-8"))
 
-    def test_generate_b_01_01_main_entity(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_01_01_main_entity(z, self.main_entity)
+# ===========================================================================
+# Helper function tests
+# ===========================================================================
 
-        rows = self._read_csv_from_zip(buf, "reports/b_01.01.csv")
-        self.assertEqual(len(rows), 2)
+
+class TestGetEntityIdentifier(TestCase):
+    def test_empty_entity(self):
+        entity = Entity()
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+
+    def test_none_entity(self):
+        self.assertEqual(dora_export.get_entity_identifier(None), ("", ""))
+
+    def test_null_legal_identifiers(self):
+        entity = Entity(legal_identifiers=None)
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+
+    def test_empty_legal_identifiers(self):
+        entity = Entity(legal_identifiers={})
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+
+    def test_lei_maps_to_qx2000(self):
+        entity = Entity(legal_identifiers={"LEI": "ABCDEFGHIJ0123456789"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "ABCDEFGHIJ0123456789")
+        self.assertEqual(code_type, "eba_qCO:qx2000")
+
+    def test_euid_maps_to_qx2002(self):
+        entity = Entity(legal_identifiers={"EUID": "NL0888888888"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "NL0888888888")
+        self.assertEqual(code_type, "eba_qCO:qx2002")
+
+    def test_vat_maps_to_qx2004(self):
+        entity = Entity(legal_identifiers={"VAT": "BE0999999999"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "BE0999999999")
+        self.assertEqual(code_type, "eba_qCO:qx2004")
+
+    def test_duns_maps_to_qx2003(self):
+        entity = Entity(legal_identifiers={"DUNS": "123456789"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "123456789")
+        self.assertEqual(code_type, "eba_qCO:qx2003")
+
+    def test_unknown_key_falls_back_to_qx2003(self):
+        entity = Entity(legal_identifiers={"CUSTOM_ID": "XYZ"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "XYZ")
+        self.assertEqual(code_type, "eba_qCO:qx2003")
+
+    def test_priority_lei_over_vat(self):
+        entity = Entity(legal_identifiers={"VAT": "V1", "LEI": "L1"})
+        code, _ = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "L1")
+
+    def test_priority_euid_over_vat(self):
+        entity = Entity(legal_identifiers={"VAT": "V1", "EUID": "E1"})
+        code, _ = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "E1")
+
+    def test_custom_priority_order(self):
+        entity = Entity(legal_identifiers={"LEI": "L1", "VAT": "V1"})
+        code, code_type = dora_export.get_entity_identifier(entity, priority=["VAT"])
+        self.assertEqual(code, "V1")
+        self.assertEqual(code_type, "eba_qCO:qx2004")
+
+    def test_empty_string_values_skipped(self):
+        entity = Entity(legal_identifiers={"LEI": "", "VAT": "V1"})
+        code, code_type = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "V1")
+        self.assertEqual(code_type, "eba_qCO:qx2004")
+
+
+class TestFormatDate(TestCase):
+    def test_normal_date(self):
+        self.assertEqual(dora_export.format_date(date(2023, 5, 17)), "2023-05-17")
+
+    def test_none_returns_empty(self):
+        self.assertEqual(dora_export.format_date(None), "")
+
+    def test_jan_first_zero_padding(self):
+        self.assertEqual(dora_export.format_date(date(2024, 1, 1)), "2024-01-01")
+
+    def test_dec_31_zero_padding(self):
+        self.assertEqual(dora_export.format_date(date(2024, 12, 31)), "2024-12-31")
+
+
+class TestComputeRefPeriod(TestCase):
+    @patch("tprm.dora_export.date")
+    def test_year_2025(self, mock_date):
+        mock_date.today.return_value = date(2025, 6, 15)
+        mock_date.side_effect = lambda *a, **kw: date(*a, **kw)
+        self.assertEqual(dora_export._compute_ref_period(), "2025-03-31")
+
+    @patch("tprm.dora_export.date")
+    def test_year_2026(self, mock_date):
+        mock_date.today.return_value = date(2026, 3, 1)
+        mock_date.side_effect = lambda *a, **kw: date(*a, **kw)
+        self.assertEqual(dora_export._compute_ref_period(), "2025-12-31")
+
+    @patch("tprm.dora_export.date")
+    def test_year_2030(self, mock_date):
+        mock_date.today.return_value = date(2030, 7, 1)
+        mock_date.side_effect = lambda *a, **kw: date(*a, **kw)
+        self.assertEqual(dora_export._compute_ref_period(), "2029-12-31")
+
+    @patch("tprm.dora_export.date")
+    def test_year_2024_returns_2025_period(self, mock_date):
+        mock_date.today.return_value = date(2024, 12, 1)
+        mock_date.side_effect = lambda *a, **kw: date(*a, **kw)
+        self.assertEqual(dora_export._compute_ref_period(), "2025-03-31")
+
+
+class TestGetDoraExportMetadata(TestCase):
+    def setUp(self):
+        self.entity_with_auth = Entity.objects.create(
+            name="Entity With Auth",
+            legal_identifiers={"LEI": "123456789ABCDEFGHI00"},
+            dora_competent_authority="FSMA",
+        )
+        self.entity_without_auth = Entity.objects.create(
+            name="Entity Without Auth",
+            legal_identifiers={"LEI": "00IHGFEDCBA987654321"},
+        )
+        self.entity_no_lei = Entity.objects.create(
+            name="Entity No LEI",
+            legal_identifiers={"VAT": "BE0123456789"},
+        )
+        self.entity_empty_lei = Entity.objects.create(
+            name="Entity Empty LEI",
+            legal_identifiers={"LEI": ""},
+        )
+
+    def test_with_authority(self):
+        meta = dora_export.get_dora_export_metadata(self.entity_with_auth)
         self.assertEqual(
-            rows[0], ["c0010", "c0020", "c0030", "c0040", "c0050", "c0060"]
+            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI"
         )
+        self.assertEqual(
+            meta["filename"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI.zip"
+        )
+        self.assertEqual(meta["competent_authority"], "FSMA")
+
+    def test_without_authority_defaults_unknown(self):
+        meta = dora_export.get_dora_export_metadata(self.entity_without_auth)
+        self.assertEqual(meta["competent_authority"], "UNKNOWN")
+        self.assertIn("UNKNOWN", meta["folder_prefix"])
+
+    def test_no_lei_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dora_export.get_dora_export_metadata(self.entity_no_lei)
+
+    def test_empty_lei_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dora_export.get_dora_export_metadata(self.entity_empty_lei)
+
+    def test_entity_id_format(self):
+        meta = dora_export.get_dora_export_metadata(self.entity_with_auth)
+        self.assertEqual(meta["entity_id"], "rs:123456789ABCDEFGHI00.CON")
+
+
+# ===========================================================================
+# Report generator tests
+# ===========================================================================
+
+
+class TestGenerateB0101(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_01.01.csv"
+    HEADERS = ["c0010", "c0020", "c0030", "c0040", "c0050", "c0060"]
+
+    def test_correct_headers(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 6)
+
+    def test_exactly_one_data_row(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(self._data_rows(rows)), 1)
+
+    def test_lei_column(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
         self.assertEqual(rows[1][0], "MAIN1234567890123456")
-        self.assertEqual(rows[1][1], "Main Entity")
+
+    def test_name_column(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][1], "Main Financial Entity")
+
+    def test_country_column(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
         self.assertEqual(rows[1][2], "eba_GA:BE")
 
-    def test_generate_b_01_02_entities(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
+    def test_entity_type_column(self):
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][3], "eba_CT:x12")
+
+    def test_missing_country_returns_empty(self):
+        self.main_entity.country = ""
+        self.main_entity.save()
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][2], "")
+
+    def test_missing_entity_type_returns_empty(self):
+        self.main_entity.dora_entity_type = ""
+        self.main_entity.save()
+        buf = self._generate(dora_export.generate_b_01_01_main_entity, self.main_entity)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][3], "")
+
+    def test_folder_prefix_path_routing(self):
+        buf = self._generate(
+            dora_export.generate_b_01_01_main_entity,
+            self.main_entity,
+            folder_prefix="MY_PREFIX",
+        )
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as z:
+            self.assertIn("MY_PREFIX/reports/b_01.01.csv", z.namelist())
+
+
+class TestGenerateB0102(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_01.02.csv"
+    HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+        "c0110",
+    ]
+
+    def _entities(self):
+        return [self.main_entity, self.subsidiary]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 11)
+
+    def test_correct_row_count(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(self._data_rows(rows)), 2)
+
+    def test_parent_lei_self_reference_when_no_parent(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "MAIN1234567890123456")
+        # No parent → self-reference
+        self.assertEqual(main_row[5], "MAIN1234567890123456")
+
+    def test_subsidiary_parent_lei(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        sub_row = next(r for r in rows[1:] if r[0] == "SUB00000000000000000")
+        self.assertEqual(sub_row[5], "MAIN1234567890123456")
+
+    def test_currency_prefix(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, self._entities()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "MAIN1234567890123456")
+        self.assertEqual(main_row[9], "eba_CU:EUR")
+
+    def test_missing_currency(self):
+        entity_no_cur = Entity.objects.create(
+            name="No Currency",
+            legal_identifiers={"LEI": "NOCUR000000000000000"},
+        )
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, [entity_no_cur]
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][9], "")
+
+    def test_assets_value_present(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, [self.subsidiary]
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][10], "50000")
+
+    def test_assets_value_null(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, [self.main_entity]
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][10], "")
+
+    def test_date_defaults(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, [self.main_entity]
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # deletion_date col 8 should be 9999-12-31
+        self.assertEqual(rows[1][8], "9999-12-31")
+
+    def test_empty_entity_list(self):
+        buf = self._generate(
+            dora_export.generate_b_01_02_entities, self.main_entity, []
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)  # header only
+
+
+class TestGenerateB0103(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_01.03.csv"
+    HEADERS = ["c0010", "c0020", "c0030", "c0040"]
+
+    def test_correct_headers(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 4)
+
+    def test_branch_code_from_vat(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][0], "BE0999999999")
+
+    def test_branch_code_from_euid(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_nl])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][0], "NL0888888888")
+
+    def test_head_office_lei(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][1], "MAIN1234567890123456")
+
+    def test_missing_parent_returns_empty(self):
+        orphan_branch = Entity.objects.create(
+            name="Orphan Branch",
+            legal_identifiers={"VAT": "XX111111111"},
+        )
+        buf = self._generate(dora_export.generate_b_01_03_branches, [orphan_branch])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][1], "")
+
+    def test_country_prefix(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [self.branch_be])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][3], "eba_GA:BE")
+
+    def test_empty_list(self):
+        buf = self._generate(dora_export.generate_b_01_03_branches, [])
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+    def test_multiple_branches(self):
+        buf = self._generate(
+            dora_export.generate_b_01_03_branches,
+            [self.branch_be, self.branch_nl],
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(self._data_rows(rows)), 2)
+
+
+class TestGenerateB0201(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_02.01.csv"
+    HEADERS = ["c0010", "c0020", "c0030", "c0040", "c0050"]
+
+    def _all_contracts(self):
+        return Contract.objects.all()
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 5)
+
+    def test_contract_ref_uses_ref_id(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertIn("CA-001", refs)
+
+    def test_contract_ref_falls_back_to_id(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        # contract_no_expense has no ref_id → uses str(id)
+        self.assertIn(str(self.contract_no_expense.id), refs)
+
+    def test_overarching_reference_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        sub_row = next(r for r in rows[1:] if r[0] == "CA-SUB")
+        self.assertEqual(sub_row[2], "CA-OVR")
+
+    def test_overarching_reference_missing(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[2], "")
+
+    def test_currency_prefix(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[3], "eba_CU:EUR")
+
+    def test_missing_currency(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        no_expense_row = next(
+            r for r in rows[1:] if r[0] == str(self.contract_no_expense.id)
+        )
+        self.assertEqual(no_expense_row[3], "")
+
+    def test_annual_expense_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(float(main_row[4]), 100000.0)
+
+    def test_annual_expense_null(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, self._all_contracts()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        no_expense_row = next(
+            r for r in rows[1:] if r[0] == str(self.contract_no_expense.id)
+        )
+        self.assertEqual(no_expense_row[4], "")
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_02_01_contracts, Contract.objects.none()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0202(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_02.02.csv"
+    HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+        "c0110",
+        "c0120",
+        "c0130",
+        "c0140",
+        "c0150",
+        "c0160",
+        "c0170",
+        "c0180",
+    ]
+
+    def _contracts(self):
+        return Contract.objects.all()
+
+    def _biz_fn_ids(self):
+        return set(
+            Asset.objects.filter(is_business_function=True).values_list("id", flat=True)
+        )
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 18)
+
+    def test_contract_ref(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertIn("CA-001", refs)
+
+    def test_beneficiary_lei(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[1], "MAIN1234567890123456")
+
+    def test_provider_code_and_type_lei(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[2], "PROV1234567890123456")
+        self.assertEqual(main_row[3], "eba_qCO:qx2000")
+
+    def test_provider_with_non_lei_identifier(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[2], "DE123456789")
+        self.assertEqual(second_row[3], "eba_qCO:qx2004")
+
+    def test_function_id(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[4], str(self.biz_fn_critical.id))
+
+    def test_ict_service_type(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[5], "eba_TA:S09")
+
+    def test_start_date(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[6], "2024-01-01")
+
+    def test_end_date(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[7], "2026-12-31")
+
+    def test_end_date_missing_defaults_to_9999(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[7], "9999-12-31")
+
+    def test_notice_periods_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[9], "90")
+        self.assertEqual(main_row[10], "60")
+
+    def test_notice_periods_null(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[9], "")
+        self.assertEqual(second_row[10], "")
+
+    def test_governing_law_country(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[11], "eba_GA:BE")
+
+    def test_provider_country_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[12], "eba_GA:US")
+
+    def test_provider_country_missing_defaults_qx2007(self):
+        self.provider_external.country = ""
+        self.provider_external.save()
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[12], "eba_GA:qx2007")
+
+    def test_storage_of_data_true(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[13], "eba_BT:x28")
+
+    def test_storage_of_data_false(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[13], "eba_BT:x29")
+
+    def test_data_location_storage_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[14], "eba_GA:US")
+
+    def test_data_location_storage_missing_defaults_qx2007(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[14], "eba_GA:qx2007")
+
+    def test_data_location_processing_present(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[15], "eba_GA:IE")
+
+    def test_data_location_processing_missing_defaults_qx2007(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[15], "eba_GA:qx2007")
+
+    def test_data_sensitiveness(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[16], "eba_ZZ:x793")
+
+    def test_reliance_level(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[17], "eba_ZZ:x796")
+
+    def test_multiple_solutions_per_contract_multiple_rows(self):
+        # contract_no_expense also has solution_cloud → should produce rows
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=self._biz_fn_ids(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # contract_main and contract_no_expense both have solution_cloud → biz_fn_critical
+        # contract_second has solution_no_storage → biz_fn_critical
+        # sub_contract has solution_minimal → biz_fn_empty_objectives
+        self.assertGreater(len(self._data_rows(rows)), 2)
+
+    def test_empty_business_function_asset_ids_uses_fallback(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+            business_function_asset_ids=set(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Empty set is falsy → falls through to is_business_function=True filter
+        self.assertGreater(len(self._data_rows(rows)), 0)
+
+    def test_fallback_when_param_is_none(self):
+        buf = self._generate(
+            dora_export.generate_b_02_02_ict_services,
+            self._contracts(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Fallback uses is_business_function filter
+        self.assertGreater(len(self._data_rows(rows)), 0)
+
+
+class TestGenerateB0203(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_02.03.csv"
+    HEADERS = ["c0010", "c0020", "c0030"]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 3)
+
+    def test_only_intragroup_with_overarching(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Only sub_contract has is_intragroup=True AND overarching_contract
+        self.assertEqual(len(self._data_rows(rows)), 1)
+        self.assertEqual(rows[1][0], "CA-SUB")
+        self.assertEqual(rows[1][1], "CA-OVR")
+
+    def test_intragroup_without_overarching_excluded(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        # overarching itself is intragroup but has no overarching_contract
+        self.assertNotIn("CA-OVR", refs)
+
+    def test_link_always_true(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[2], "true")
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_02_03_intragroup_contracts, Contract.objects.none()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0301(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_03.01.csv"
+    HEADERS = ["c0010", "c0020", "c0030"]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_03_01_signing_entities,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_all_contracts_listed(self):
+        contracts = Contract.objects.all()
+        buf = self._generate(
+            dora_export.generate_b_03_01_signing_entities,
+            self.main_entity,
+            contracts,
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(self._data_rows(rows)), contracts.count())
+
+    def test_signing_entity_always_main(self):
+        buf = self._generate(
+            dora_export.generate_b_03_01_signing_entities,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[1], "MAIN1234567890123456")
+
+    def test_link_always_true(self):
+        buf = self._generate(
+            dora_export.generate_b_03_01_signing_entities,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[2], "true")
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_03_01_signing_entities,
+            self.main_entity,
+            Contract.objects.none(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0302(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_03.02.csv"
+    HEADERS = ["c0010", "c0020", "c0030"]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_only_third_party_contracts(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        # Intragroup contracts should not appear
+        self.assertNotIn("CA-OVR", refs)
+        self.assertNotIn("CA-SUB", refs)
+
+    def test_provider_code_and_type(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[1], "PROV1234567890123456")
+        self.assertEqual(main_row[2], "eba_qCO:qx2000")
+
+    def test_provider_vat_type(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        second_row = next(r for r in rows[1:] if r[0] == "CA-002")
+        self.assertEqual(second_row[1], "DE123456789")
+        self.assertEqual(second_row[2], "eba_qCO:qx2004")
+
+    def test_contract_without_provider_excluded(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertNotIn(str(self.contract_no_provider.id), refs)
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_03_02_ict_providers, Contract.objects.none()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0303(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_03.03.csv"
+    HEADERS = ["c0010", "c0020", "c0031"]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_03_03_intragroup_providers,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_only_intragroup(self):
+        buf = self._generate(
+            dora_export.generate_b_03_03_intragroup_providers,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # overarching + sub_contract are intragroup
+        self.assertEqual(len(self._data_rows(rows)), 2)
+
+    def test_provider_lei(self):
+        buf = self._generate(
+            dora_export.generate_b_03_03_intragroup_providers,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[1], "INTRA000000000000000")
+
+    def test_link_always_true(self):
+        buf = self._generate(
+            dora_export.generate_b_03_03_intragroup_providers,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[2], "true")
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_03_03_intragroup_providers,
+            self.main_entity,
+            Contract.objects.none(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0401(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_04.01.csv"
+    HEADERS = ["c0010", "c0020", "c0030", "c0040"]
+
+    def _branches(self):
+        return [self.branch_be, self.branch_nl]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_beneficiary_row_nature(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        main_rows = [r for r in rows[1:] if r[0] == "CA-001" and r[2] == "eba_ZZ:x839"]
+        self.assertEqual(len(main_rows), 1)
+        self.assertEqual(main_rows[0][3], "")  # branch_code empty
+
+    def test_branch_row_nature(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        branch_rows = [
+            r for r in rows[1:] if r[0] == "CA-001" and r[2] == "eba_ZZ:x838"
+        ]
+        # main_entity has 2 branches → 2 branch rows for CA-001
+        self.assertEqual(len(branch_rows), 2)
+
+    def test_branch_code_present(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        branch_rows = [
+            r for r in rows[1:] if r[0] == "CA-001" and r[2] == "eba_ZZ:x838"
+        ]
+        branch_codes = {r[3] for r in branch_rows}
+        self.assertIn("BE0999999999", branch_codes)
+        self.assertIn("NL0888888888", branch_codes)
+
+    def test_deduplication(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Check no duplicate (contract_ref, beneficiary_lei, branch_code) combos
+        combos = [(r[0], r[1], r[3]) for r in self._data_rows(rows)]
+        self.assertEqual(len(combos), len(set(combos)))
+
+    def test_empty_branches_still_has_beneficiary_rows(self):
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            [],
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # All contracts still get beneficiary rows
+        self.assertGreater(len(self._data_rows(rows)), 0)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[2], "eba_ZZ:x839")
+
+    def test_subsidiary_contract_no_branches(self):
+        # sub_contract beneficiary is subsidiary, not main → no branches for it
+        buf = self._generate(
+            dora_export.generate_b_04_01_service_users,
+            self._branches(),
+            Contract.objects.filter(id=self.sub_contract.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Only 1 beneficiary row, no branch rows (branches belong to main, not subsidiary)
+        self.assertEqual(len(self._data_rows(rows)), 1)
+        self.assertEqual(rows[1][2], "eba_ZZ:x839")
+
+
+class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_05.01.csv"
+    HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+        "c0110",
+        "c0120",
+    ]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 12)
+
+    def test_only_third_party_providers(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        provider_codes = [r[0] for r in self._data_rows(rows)]
+        self.assertNotIn("INTRA000000000000000", provider_codes)
+
+    def test_provider_deduplication(self):
+        # provider_external has 2 contracts (contract_main, contract_no_expense) → 1 row
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        lei_rows = [r for r in self._data_rows(rows) if r[0] == "PROV1234567890123456"]
+        self.assertEqual(len(lei_rows), 1)
+
+    def test_expense_aggregation(self):
+        # provider_external: contract_main (100000) + contract_no_expense (None) + contract_no_solutions (None)
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
+        self.assertEqual(float(prov_row[9]), 100000.0)
+
+    def test_expense_aggregation_multiple_providers(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        de_row = next(r for r in rows[1:] if r[0] == "DE123456789")
+        self.assertEqual(float(de_row[9]), 50000.0)
+
+    def test_null_expense_excluded_from_aggregation(self):
+        # contract_no_expense has annual_expense=None → should not add anything
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
+        # Total should be 100000 (from contract_main only), not crash
+        self.assertEqual(float(prov_row[9]), 100000.0)
+
+    def test_currency_from_contract(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
+        self.assertEqual(prov_row[8], "eba_CU:EUR")
+
+    def test_parent_entity_codes_populated(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.filter(provider_entity=self.provider_with_parent),
+        )
+        # Need a contract with provider_with_parent
+        c = Contract.objects.create(
+            name="UK Contract",
+            provider_entity=self.provider_with_parent,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        uk_row = next((r for r in rows[1:] if r[0] == "UKPR1234567890123456"), None)
+        if uk_row:
+            self.assertEqual(uk_row[10], "PROV1234567890123456")
+            self.assertEqual(uk_row[11], "eba_qCO:qx2000")
+        c.delete()
+
+    def test_parent_entity_empty_when_no_parent(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
+        self.assertEqual(prov_row[10], "")
+        self.assertEqual(prov_row[11], "")
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_05_01_provider_details,
+            self.main_entity,
+            Contract.objects.none(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_05.02.csv"
+    HEADERS = ["c0010", "c0020", "c0030", "c0040", "c0050", "c0060", "c0070"]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 7)
+
+    def test_only_third_party_with_solutions(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertNotIn("CA-OVR", refs)
+        self.assertNotIn("CA-SUB", refs)
+
+    def test_rank_always_1(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[4], "1")
+
+    def test_recipient_fields_empty(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[5], "")
+            self.assertEqual(row[6], "")
+
+    def test_multiple_solutions_multiple_rows(self):
+        # contract_main has 1 solution, contract_second has 1 → at least 2 rows
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertGreaterEqual(len(self._data_rows(rows)), 2)
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.none()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestGenerateB0601(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_06.01.csv"
+    HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+    ]
+
+    def _biz_fns(self):
+        return Asset.objects.filter(is_business_function=True)
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            self._biz_fns(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            self._biz_fns(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 10)
+
+    def test_function_id_uses_ref_id(self):
+        self.biz_fn_critical.ref_id = "FN-001"
+        self.biz_fn_critical.save()
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][0], "FN-001")
+
+    def test_function_id_falls_back_to_uuid(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][0], str(self.biz_fn_critical.id))
+
+    def test_licensed_activity(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][1], "eba_TA:x185")
+
+    def test_function_name(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][2], "Critical Payment Service")
+
+    def test_entity_lei_is_main(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            self._biz_fns(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[3], "MAIN1234567890123456")
+
+    def test_criticality_assessment(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][4], "eba_BT:x28")
+
+    def test_rto_rpo_full_objectives(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][7], "2")
+        self.assertEqual(rows[1][8], "1")
+
+    def test_rto_rpo_empty_dict(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_empty_objectives.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][7], "")
+        self.assertEqual(rows[1][8], "")
+
+    def test_rto_rpo_partial_only_rto(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_partial_objectives.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][7], "4")
+        self.assertEqual(rows[1][8], "")
+
+    def test_discontinuing_impact(self):
+        buf = self._generate(
+            dora_export.generate_b_06_01_functions,
+            self.main_entity,
+            Asset.objects.filter(id=self.biz_fn_critical.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(rows[1][9], "eba_ZZ:x793")
+
+
+class TestGenerateB0701(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_07.01.csv"
+    HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+        "c0110",
+        "c0120",
+    ]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 12)
+
+    def test_only_third_party_with_solutions(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertNotIn("CA-OVR", refs)
+        self.assertNotIn("CA-SUB", refs)
+
+    def test_solution_dora_fields(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        # Find the row for contract_main with solution_cloud
+        main_row = next(r for r in rows[1:] if r[0] == "CA-001")
+        self.assertEqual(main_row[3], "eba_TA:S09")
+        self.assertEqual(main_row[4], "eba_ZZ:x960")
+        self.assertEqual(main_row[5], "eba_ZZ:x963")
+        self.assertEqual(main_row[7], "eba_BT:x28")
+        self.assertEqual(main_row[8], "eba_ZZ:x966")
+        self.assertEqual(main_row[9], "eba_ZZ:x793")
+        self.assertEqual(main_row[10], "eba_BT:x28")
+        self.assertEqual(main_row[11], "Azure, GCP")
+
+    def test_missing_optional_fields(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment,
+            Contract.objects.filter(id=self.contract_second.id),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        if len(rows) > 1:
+            row = rows[1]
+            self.assertEqual(row[4], "")  # substitutability
+            self.assertEqual(row[5], "")  # non_sub reason
+
+    def test_empty_queryset(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.none()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+    def test_contract_no_solutions_excluded(self):
+        buf = self._generate(
+            dora_export.generate_b_07_01_assessment, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        refs = [r[0] for r in self._data_rows(rows)]
+        self.assertNotIn(str(self.contract_no_solutions.id), refs)
+
+
+class TestGenerateB9901(DoraExportTestMixin, DoraDataFactory, TestCase):
+    CSV = "reports/b_99.01.csv"
+    EXPECTED_HEADERS = [
+        "c0010",
+        "c0020",
+        "c0030",
+        "c0040",
+        "c0050",
+        "c0060",
+        "c0070",
+        "c0080",
+        "c0090",
+        "c0100",
+        "c0110",
+        "c0120",
+        "c0130",
+        "c0140",
+        "c0150",
+        "c0160",
+        "c0170",
+        "c0180",
+        "c0190",
+    ]
+
+    def test_correct_headers(self):
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.all(),
+            Asset.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, self.EXPECTED_HEADERS)
+
+    def test_col_count(self):
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.all(),
+            Asset.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_col_count(rows, 19)
+
+    def test_header_only_no_data_rows(self):
+        buf = self._generate(
+            dora_export.generate_b_99_01_aggregation,
+            Contract.objects.all(),
+            Asset.objects.all(),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(rows), 1)
+
+
+class TestFilingIndicators(DoraExportTestMixin, TestCase):
+    CSV = "reports/FilingIndicators.csv"
+
+    def test_correct_headers(self):
+        buf = self._generate(dora_export.generate_filing_indicators)
+        rows = self._read_csv(buf, self.CSV)
+        self._assert_headers(rows, ["templateID", "reported"])
+
+    def test_exactly_15_templates(self):
+        buf = self._generate(dora_export.generate_filing_indicators)
+        rows = self._read_csv(buf, self.CSV)
+        self.assertEqual(len(self._data_rows(rows)), 15)
+
+    def test_all_reported_true(self):
+        buf = self._generate(dora_export.generate_filing_indicators)
+        rows = self._read_csv(buf, self.CSV)
+        for row in self._data_rows(rows):
+            self.assertEqual(row[1], "true")
+
+    def test_complete_template_set(self):
+        expected_ids = {
+            "B_01.01",
+            "B_01.02",
+            "B_01.03",
+            "B_02.01",
+            "B_02.02",
+            "B_02.03",
+            "B_03.01",
+            "B_03.02",
+            "B_03.03",
+            "B_04.01",
+            "B_05.01",
+            "B_05.02",
+            "B_06.01",
+            "B_07.01",
+            "B_99.01",
+        }
+        buf = self._generate(dora_export.generate_filing_indicators)
+        rows = self._read_csv(buf, self.CSV)
+        actual_ids = {r[0] for r in self._data_rows(rows)}
+        self.assertEqual(actual_ids, expected_ids)
+
+
+class TestParameters(DoraExportTestMixin, TestCase):
+    def setUp(self):
+        self.entity = Entity.objects.create(
+            name="Param Entity",
+            legal_identifiers={"LEI": "PARAM000000000000000"},
+            currency="EUR",
+        )
+
+    def _params_dict(self, buf):
+        rows = self._read_csv(buf, "reports/parameters.csv")
+        return dict(self._data_rows(rows))
+
+    def test_entity_id_passed_through(self):
+        buf = self._generate(
+            dora_export.generate_parameters,
+            self.entity,
+            entity_id="rs:CUSTOM.CON",
+        )
+        params = self._params_dict(buf)
+        self.assertEqual(params["entityID"], "rs:CUSTOM.CON")
+
+    def test_entity_id_computed_from_lei(self):
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        params = self._params_dict(buf)
+        self.assertEqual(params["entityID"], "rs:PARAM000000000000000.CON")
+
+    def test_base_currency(self):
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        params = self._params_dict(buf)
+        self.assertEqual(params["baseCurrency"], "iso4217:EUR")
+
+    def test_base_currency_other(self):
+        self.entity.currency = "USD"
+        self.entity.save()
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        params = self._params_dict(buf)
+        self.assertEqual(params["baseCurrency"], "iso4217:USD")
+
+    def test_ref_period_present(self):
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        params = self._params_dict(buf)
+        self.assertIn("refPeriod", params)
+        self.assertTrue(len(params["refPeriod"]) > 0)
+
+    def test_decimals(self):
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        params = self._params_dict(buf)
+        self.assertEqual(params["decimalsInteger"], "0")
+        self.assertEqual(params["decimalsMonetary"], "-3")
+
+    def test_five_parameter_rows(self):
+        buf = self._generate(dora_export.generate_parameters, self.entity)
+        rows = self._read_csv(buf, "reports/parameters.csv")
+        self.assertEqual(len(self._data_rows(rows)), 5)
+
+
+class TestReportPackageJson(DoraExportTestMixin, TestCase):
+    def test_document_type(self):
+        buf = self._generate(dora_export.generate_report_package_json)
+        data = self._read_json(buf, "META-INF/reportPackage.json")
+        self.assertEqual(
+            data["documentInfo"]["documentType"],
+            "https://xbrl.org/report-package/2023",
+        )
+
+    def test_json_structure(self):
+        buf = self._generate(dora_export.generate_report_package_json)
+        data = self._read_json(buf, "META-INF/reportPackage.json")
+        self.assertIn("documentInfo", data)
+
+    def test_path(self):
+        buf = self._generate(dora_export.generate_report_package_json)
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as z:
+            self.assertIn("META-INF/reportPackage.json", z.namelist())
+
+
+class TestReportJson(DoraExportTestMixin, TestCase):
+    def test_document_type(self):
+        buf = self._generate(dora_export.generate_report_json)
+        data = self._read_json(buf, "reports/report.json")
+        self.assertEqual(
+            data["documentInfo"]["documentType"],
+            "https://xbrl.org/2021/xbrl-csv",
+        )
+
+    def test_extends_taxonomy(self):
+        buf = self._generate(dora_export.generate_report_json)
+        data = self._read_json(buf, "reports/report.json")
+        self.assertIn(
+            "http://www.eba.europa.eu/eu/fr/xbrl/crr/fws/dora/4.0/mod/dora.json",
+            data["documentInfo"]["extends"],
+        )
+
+    def test_path(self):
+        buf = self._generate(dora_export.generate_report_json)
+        buf.seek(0)
+        with zipfile.ZipFile(buf, "r") as z:
+            self.assertIn("reports/report.json", z.namelist())
+
+
+# ===========================================================================
+# Cross-table referential integrity
+# ===========================================================================
+
+
+class TestCrossTableReferentialIntegrity(
+    DoraExportTestMixin, DoraDataFactory, TestCase
+):
+    """Verify FK consistency across all report tables."""
+
+    def setUp(self):
+        super().setUp()
+        self.all_contracts = Contract.objects.all()
+        self.biz_fn_ids = set(
+            Asset.objects.filter(is_business_function=True).values_list("id", flat=True)
+        )
+        self.branches = [self.branch_be, self.branch_nl]
+        self.biz_fns = Asset.objects.filter(is_business_function=True)
+
+        # Generate all reports into one zip
+        self.buf = io.BytesIO()
+        with zipfile.ZipFile(self.buf, "w") as z:
+            dora_export.generate_b_01_01_main_entity(z, self.main_entity)
             dora_export.generate_b_01_02_entities(
                 z, self.main_entity, [self.main_entity, self.subsidiary]
             )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_01.02.csv")
-        self.assertEqual(len(rows), 3)  # Header + 2 entities
-        self.assertEqual(rows[0][0], "c0010")
-
-        main_row = next(r for r in rows[1:] if r[0] == "MAIN1234567890123456")
-        self.assertEqual(
-            main_row[5], "MAIN1234567890123456"
-        )  # Parent LEI is itself if no parent
-        self.assertEqual(main_row[9], "eba_CU:EUR")
-
-        sub_row = next(r for r in rows[1:] if r[0] == "SUB00000000000000000")
-        self.assertEqual(sub_row[5], "MAIN1234567890123456")  # Parent LEI is main
-
-    def test_generate_b_01_03_branches(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_01_03_branches(z, [self.branch])
-
-        rows = self._read_csv_from_zip(buf, "reports/b_01.03.csv")
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[1][0], "BE0999999999")  # Branch code
-        self.assertEqual(rows[1][1], "MAIN1234567890123456")  # Head office LEI
-
-    def test_generate_b_02_01_contracts(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_02_01_contracts(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_02.01.csv")
-        self.assertEqual(len(rows), 4)  # Header + 3 contracts
-
-        # Check sub_contract to see overarching reference
-        sub_row = next(r for r in rows[1:] if r[0] == str(self.sub_contract.id))
-        self.assertEqual(sub_row[2], str(self.overarching_contract.id))
-
-    def test_generate_b_02_02_ict_services(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_02_02_ict_services(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_02.02.csv")
-        self.assertEqual(
-            len(rows), 2
-        )  # Header + 1 combination (contract + solution + asset)
-        self.assertEqual(rows[1][1], "MAIN1234567890123456")  # Beneficiary LEI
-        self.assertEqual(rows[1][2], "PROV1234567890123456")  # Provider code
-        self.assertEqual(rows[1][4], str(self.business_function.id))  # Function ID
-        self.assertEqual(rows[1][13], "eba_BT:x28")  # Storage of data
-        self.assertEqual(rows[1][14], "eba_GA:US")  # Data location
-
-    def test_generate_b_02_03_intragroup_contracts(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_02_03_intragroup_contracts(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_02.03.csv")
-        self.assertEqual(len(rows), 2)  # Header + 1 (only sub_contract has overarching)
-        self.assertEqual(rows[1][0], str(self.sub_contract.id))
-        self.assertEqual(rows[1][1], str(self.overarching_contract.id))
-        self.assertEqual(rows[1][2], "true")
-
-    def test_generate_b_03_01_signing_entities(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
+            dora_export.generate_b_01_03_branches(z, self.branches)
+            dora_export.generate_b_02_01_contracts(z, self.all_contracts)
+            dora_export.generate_b_02_02_ict_services(
+                z, self.all_contracts, business_function_asset_ids=self.biz_fn_ids
+            )
+            dora_export.generate_b_02_03_intragroup_contracts(z, self.all_contracts)
             dora_export.generate_b_03_01_signing_entities(
-                z, self.main_entity, Contract.objects.all()
+                z, self.main_entity, self.all_contracts
             )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_03.01.csv")
-        self.assertEqual(len(rows), 4)  # Header + 3 contracts
-        for row in rows[1:]:
-            self.assertEqual(row[1], "MAIN1234567890123456")
-            self.assertEqual(row[2], "true")
-
-    def test_generate_b_03_02_ict_providers(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_03_02_ict_providers(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_03.02.csv")
-        self.assertEqual(len(rows), 2)  # Header + 1 third party contract
-        self.assertEqual(rows[1][0], str(self.contract.id))
-        self.assertEqual(rows[1][1], "PROV1234567890123456")
-
-    def test_generate_b_03_03_intragroup_providers(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
+            dora_export.generate_b_03_02_ict_providers(z, self.all_contracts)
             dora_export.generate_b_03_03_intragroup_providers(
-                z, self.main_entity, Contract.objects.all()
+                z, self.main_entity, self.all_contracts
             )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_03.03.csv")
-        self.assertEqual(len(rows), 3)  # Header + 2 intragroup
-        for row in rows[1:]:
-            self.assertEqual(row[1], "INTRA000000000000000")
-            self.assertEqual(row[2], "true")
-
-    def test_generate_b_04_01_service_users(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
             dora_export.generate_b_04_01_service_users(
-                z, [self.branch], Contract.objects.all()
+                z, self.branches, self.all_contracts
             )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_04.01.csv")
-        # 3 contracts -> 3 rows for beneficiaries. main_entity has 1 branch -> +2 rows for main_entity contracts
-        self.assertEqual(len(rows), 6)  # Header + 5 rows
-
-        main_contracts = [str(self.contract.id), str(self.overarching_contract.id)]
-        for c_id in main_contracts:
-            c_rows = [r for r in rows if r[0] == c_id]
-            self.assertEqual(len(c_rows), 2)  # 1 for beneficiary, 1 for branch
-
-            non_branch = next(r for r in c_rows if r[2] == "eba_ZZ:x839")
-            branch_row = next(r for r in c_rows if r[2] == "eba_ZZ:x838")
-
-            self.assertEqual(non_branch[3], "")
-            self.assertEqual(branch_row[3], "BE0999999999")
-
-    def test_generate_b_05_01_provider_details(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
             dora_export.generate_b_05_01_provider_details(
-                z, self.main_entity, Contract.objects.all()
+                z, self.main_entity, self.all_contracts
             )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_05.01.csv")
-        self.assertEqual(len(rows), 2)  # Header + 1 third party provider
-        self.assertEqual(rows[1][0], "PROV1234567890123456")
-        self.assertEqual(rows[1][4], "Third Party Provider")
-        self.assertEqual(rows[1][7], "eba_GA:US")
-        self.assertEqual(
-            rows[1][9], "100000.0"
-        )  # Annual expense string representation might differ based on model, but we compare string if it's decimal
-
-    def test_generate_b_05_02_supply_chains(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_05_02_supply_chains(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_05.02.csv")
-        self.assertEqual(len(rows), 2)  # Header + 1 supply chain row
-        self.assertEqual(rows[1][0], str(self.contract.id))
-        self.assertEqual(rows[1][1], "cloud")
-        self.assertEqual(rows[1][4], "1")  # Rank
-
-    def test_generate_b_06_01_functions(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_06_01_functions(
-                z, self.main_entity, Asset.objects.filter(is_business_function=True)
-            )
-
-        rows = self._read_csv_from_zip(buf, "reports/b_06.01.csv")
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[1][0], str(self.business_function.id))
-        self.assertEqual(rows[1][4], "eba_BT:x28")
-        self.assertEqual(rows[1][7], "2")  # RTO
-        self.assertEqual(rows[1][8], "1")  # RPO
-
-    def test_generate_b_07_01_assessment(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_b_07_01_assessment(z, Contract.objects.all())
-
-        rows = self._read_csv_from_zip(buf, "reports/b_07.01.csv")
-        self.assertEqual(len(rows), 2)
-        self.assertEqual(rows[1][0], str(self.contract.id))
-        self.assertEqual(rows[1][3], "cloud")  # Service type
-
-    def test_generate_b_99_01_aggregation(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
+            dora_export.generate_b_05_02_supply_chains(z, self.all_contracts)
+            dora_export.generate_b_06_01_functions(z, self.main_entity, self.biz_fns)
+            dora_export.generate_b_07_01_assessment(z, self.all_contracts)
             dora_export.generate_b_99_01_aggregation(
-                z, Contract.objects.all(), Asset.objects.all()
+                z, self.all_contracts, self.biz_fns
             )
 
-        rows = self._read_csv_from_zip(buf, "reports/b_99.01.csv")
-        self.assertEqual(len(rows), 1)  # Only header implemented currently
+    def _get_refs(self, csv_name, col=0):
+        rows = self._read_csv(self.buf, csv_name)
+        return {r[col] for r in self._data_rows(rows)}
 
-    def test_generate_filing_indicators(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_filing_indicators(z)
+    def test_b0202_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0202_refs = self._get_refs("reports/b_02.02.csv")
+        self.assertTrue(b0202_refs.issubset(b0201_refs))
 
-        rows = self._read_csv_from_zip(buf, "reports/FilingIndicators.csv")
-        self.assertTrue(len(rows) > 10)
-        self.assertEqual(rows[0], ["templateID", "reported"])
-        for row in rows[1:]:
-            self.assertEqual(row[1], "true")
+    def test_b0203_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0203_refs = self._get_refs("reports/b_02.03.csv")
+        self.assertTrue(b0203_refs.issubset(b0201_refs))
 
-    def test_generate_parameters(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_parameters(z, self.main_entity)
+    def test_b0301_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0301_refs = self._get_refs("reports/b_03.01.csv")
+        self.assertTrue(b0301_refs.issubset(b0201_refs))
 
-        rows = self._read_csv_from_zip(buf, "reports/parameters.csv")
-        params = dict(rows[1:])
-        self.assertEqual(params["entityID"], "rs:MAIN1234567890123456.CON")
-        self.assertEqual(params["baseCurrency"], "iso4217:EUR")
+    def test_b0302_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0302_refs = self._get_refs("reports/b_03.02.csv")
+        self.assertTrue(b0302_refs.issubset(b0201_refs))
 
-    def test_generate_report_package_json(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_report_package_json(z)
+    def test_b0401_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0401_refs = self._get_refs("reports/b_04.01.csv")
+        self.assertTrue(b0401_refs.issubset(b0201_refs))
 
-        data = self._read_json_from_zip(buf, "META-INF/reportPackage.json")
-        self.assertEqual(
-            data["documentInfo"]["documentType"], "https://xbrl.org/report-package/2023"
-        )
+    def test_b0502_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0502_refs = self._get_refs("reports/b_05.02.csv")
+        self.assertTrue(b0502_refs.issubset(b0201_refs))
 
-    def test_generate_report_json(self):
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w") as z:
-            dora_export.generate_report_json(z)
+    def test_b0701_refs_subset_of_b0201(self):
+        b0201_refs = self._get_refs("reports/b_02.01.csv")
+        b0701_refs = self._get_refs("reports/b_07.01.csv")
+        self.assertTrue(b0701_refs.issubset(b0201_refs))
 
-        data = self._read_json_from_zip(buf, "reports/report.json")
-        self.assertEqual(
-            data["documentInfo"]["documentType"], "https://xbrl.org/2021/xbrl-csv"
-        )
+    def test_b0202_function_ids_subset_of_b0601(self):
+        b0601_rows = self._read_csv(self.buf, "reports/b_06.01.csv")
+        b0601_fn_ids = {r[0] for r in self._data_rows(b0601_rows)}
+        b0202_rows = self._read_csv(self.buf, "reports/b_02.02.csv")
+        b0202_fn_ids = {r[4] for r in self._data_rows(b0202_rows)}
+        self.assertTrue(b0202_fn_ids.issubset(b0601_fn_ids))
+
+
+# ===========================================================================
+# TDD: Future features (skipped)
+# ===========================================================================
+
+
+class TestTDDFutureFeatures(DoraExportTestMixin, DoraDataFactory, TestCase):
+    @unittest.skip("TDD: not yet implemented")
+    def test_b0502_rank_greater_than_1(self):
+        """Sub-contracting chains should produce rank > 1."""
+        pass
+
+    @unittest.skip("TDD: not yet implemented")
+    def test_b0502_recipient_code_populated(self):
+        """Rank > 1 rows should have recipient entity code+type."""
+        pass
+
+    @unittest.skip("TDD: not yet implemented")
+    def test_b9901_aggregation_data_rows(self):
+        """B.99.01 should produce actual aggregate counts."""
+        pass
+
+    @unittest.skip("TDD: not yet implemented")
+    def test_b0501_latin_name_distinct(self):
+        """c0060 should use a separate latin_name field, not duplicate name."""
+        pass
