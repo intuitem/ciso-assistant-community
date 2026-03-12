@@ -579,14 +579,14 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "reference_control": ["reference_control", "reference_control_ref_id"],
         "owner": ["owner"],
     })
-    IMPACT_MAP: Final[dict[str, int]] = {
+    IMPACT_MAP: ClassVar[Mapping[str, int]] = MappingProxyType({
         "very low": 1,
         "low": 2,
         "medium": 3,
         "high": 4,
         "very high": 5,
-    }
-    EFFORT_MAP: Final[dict[str, str]] = {
+    })
+    EFFORT_MAP: ClassVar[Mapping[str, str]] = MappingProxyType({
         "extra small": "XS",
         "extrasmall": "XS",
         "xs": "XS",
@@ -599,7 +599,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         "extra large": "XL",
         "extralarge": "XL",
         "xl": "XL",
-    }
+    })
 
     def create_context(self):
         return None, None
@@ -2201,7 +2201,7 @@ class LoadFileView(APIView):
         results = {"successful": 0, "failed": 0, "errors": []}
 
         # Define attack stage mapping (supports English and French)
-        ATTACK_STAGE_MAP = {
+        ATTACK_STAGE_MAP: dict[str, int] = {
             # English
             "know": 0,
             "reconnaissance": 0,
@@ -2228,7 +2228,7 @@ class LoadFileView(APIView):
         }
 
         # Define icon mapping
-        ICON_MAP = {
+        ICON_MAP: dict[str, str] = {
             icon.lower(): icon
             for icon in [
                 "server",
