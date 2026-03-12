@@ -167,7 +167,7 @@ def _resolve_filtering_labels(value: Any) -> list[UUID]:
         return []
 
     separator = "|" if "|" in value else ","
-    label_names = [name.strip() for name in value.split(separator)]
+    label_names = set(name.strip() for name in value.split(separator))
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -693,16 +693,16 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         return data, None
 
     @staticmethod
-    def _resolve_owners(value) -> list:
+    def _resolve_owners(value: Any) -> list[UUID]:
         """Resolve semicolon-separated user emails or team names to Actor IDs.
 
         Each entry is matched first as a user email, then as a team name.
         Unresolvable entries are silently skipped.
         """
-        if not value or not isinstance(value, str):
+        if not isinstance(value, str):
             return []
 
-        entries = [entry.strip() for entry in value.split(";") if entry.strip()]
+        entries = set(entry.strip() for entry in value.split(";"))
         actor_ids = []
 
         for entry in entries:
