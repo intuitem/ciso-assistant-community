@@ -1262,7 +1262,7 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = ElementaryActionWriteSerializer
-    ATTACK_STAGE_MAP: Final[dict[str, int]] = {
+    ATTACK_STAGE_MAP: ClassVar[Mapping[str, int]] = MappingProxyType({
         # English
         "know": 0,
         "reconnaissance": 0,
@@ -1286,8 +1286,8 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
         "découvrir": 2,
         "decouvrir": 2,
         "exploiter": 3,
-    }
-    ICON_MAP: Final[dict[str, str]] = {
+    })
+    ICON_MAP: ClassVar[Mapping[str, str]] = MappingProxyType({
         icon.lower(): icon
         for icon in [
             "server",
@@ -1309,7 +1309,7 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
             "globe",
             "usb",
         ]
-    }
+    })
 
     def create_context(self):
         return None, None
