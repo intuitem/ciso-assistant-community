@@ -1319,17 +1319,19 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if domain_name not in (None, ""):
+        if not domain_name:
             domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
         if not name:
             return {}, Error(record=record, error="Name field is mandatory")
 
+        record_attack_stage = record.get("attack_stage")
         attack_stage = 0
-        if record.get("attack_stage", ""):
+
+        if record_attack_stage:
             attack_stage = self.ATTACK_STAGE_MAP.get(
-                str(record.get("attack_stage")).strip().lower(), 0
+                str(record_attack_stage).strip().lower(), 0
             )
 
         data: dict = {
@@ -1340,9 +1342,10 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
             "attack_stage": attack_stage,
         }
 
-        if record.get("icon", ""):
-            icon = self.ICON_MAP.get(str(record.get("icon")).strip().lower())
-            if icon:
+        record_icon = record.get("icon")
+        if record_icon:
+            icon = self.ICON_MAP.get(str(record_icon).strip().lower())
+            if icon is not None:
                 data["icon"] = icon
 
         return data, None
