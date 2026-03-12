@@ -1015,9 +1015,7 @@ def generate_b_05_01_provider_details(
         parent_code, parent_code_type = "", ""
         ultimate_parent = get_ultimate_parent(provider)
         if ultimate_parent:
-            parent_code, parent_code_type, _ = get_entity_identifier(
-                ultimate_parent
-            )
+            parent_code, parent_code_type, _ = get_entity_identifier(ultimate_parent)
         if not parent_code:
             parent_code = provider_code
             parent_code_type = code_type
