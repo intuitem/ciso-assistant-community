@@ -18,9 +18,21 @@
 	// Determine if we can generate the report (no errors)
 	const canGenerate = errors.length === 0;
 
+	// Available identifiers from the linter response
+	const availableIdentifiers: Array<{ type: string; value: string }> =
+		lintResults.available_identifiers || [];
+
+	// Export options state
+	let selectedIdentifierType = $state(
+		availableIdentifiers.length > 0 ? availableIdentifiers[0].type : ''
+	);
+	let selectedLevel = $state('IND');
+
 	function handleGenerateReport() {
-		// Navigate to the download endpoint
-		window.location.href = '/reports/dora-roi/download';
+		const params = new URLSearchParams();
+		if (selectedIdentifierType) params.set('identifier_type', selectedIdentifierType);
+		params.set('level', selectedLevel);
+		window.location.href = `/reports/dora-roi/download?${params.toString()}`;
 	}
 
 	function getSeverityColor(severity: string): string {
@@ -193,6 +205,63 @@
 			{/if}
 		</div>
 	</div>
+
+	<!-- Export Options -->
+	{#if availableIdentifiers.length > 0}
+		<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+			<h2 class="text-xl font-semibold text-gray-900 mb-4">Export Options</h2>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<!-- Identifier selector -->
+				<div>
+					<label for="identifier-type" class="block text-sm font-medium text-gray-700 mb-2">
+						Entity Identifier
+					</label>
+					<select
+						id="identifier-type"
+						bind:value={selectedIdentifierType}
+						class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+					>
+						{#each availableIdentifiers as identifier}
+							<option value={identifier.type}>
+								{identifier.type} — {identifier.value}
+							</option>
+						{/each}
+					</select>
+					<p class="mt-1 text-xs text-gray-500">
+						Used for ZIP file naming and entity identification in the report.
+					</p>
+				</div>
+
+				<!-- Level selector -->
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-2"> Reporting Level </label>
+					<div class="flex gap-4">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="level"
+								value="IND"
+								bind:group={selectedLevel}
+								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+							/>
+							<span class="text-sm text-gray-700">Individual (IND)</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="level"
+								value="CON"
+								bind:group={selectedLevel}
+								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+							/>
+							<span class="text-sm text-gray-700">Consolidated (CON)</span>
+						</label>
+					</div>
+					<p class="mt-1 text-xs text-gray-500">Individual or consolidated reporting scope.</p>
+				</div>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Action Buttons -->
 	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

@@ -2,8 +2,13 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async ({ fetch }) => {
-	const endpoint = `${BASE_API_URL}/entities/generate_dora_roi/`;
+export const GET: RequestHandler = async ({ fetch, url }) => {
+	const identifierType = url.searchParams.get('identifier_type') || '';
+	const level = url.searchParams.get('level') || 'IND';
+	const params = new URLSearchParams();
+	if (identifierType) params.set('identifier_type', identifierType);
+	params.set('level', level);
+	const endpoint = `${BASE_API_URL}/entities/generate_dora_roi/?${params.toString()}`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {

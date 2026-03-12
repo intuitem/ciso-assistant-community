@@ -35,6 +35,7 @@
 		{ value: 'LEI', label: 'LEI (Legal Entity Identifier)' },
 		{ value: 'EUID', label: 'EUID (European Unique Identifier)' },
 		{ value: 'DUNS', label: 'DUNS Number' },
+		{ value: 'KBO', label: 'KBO (Kruispuntbank van Ondernemingen — Belgium)' },
 		{ value: 'VAT', label: 'VAT Number' },
 		{ value: 'OTHER', label: 'Other' }
 	];

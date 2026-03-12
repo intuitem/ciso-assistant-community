@@ -19,12 +19,16 @@ from core.models import Asset
 # Helper Functions
 
 
-def get_dora_export_metadata(main_entity: Entity) -> dict:
+def get_dora_export_metadata(
+    main_entity: Entity, identifier_type: str = None, level: str = "IND"
+) -> dict:
     """
     Compute metadata for DORA RoI export.
 
     Args:
         main_entity: The main financial entity
+        identifier_type: Explicit identifier key to use (e.g. "LEI", "KBO"). If None, uses priority list.
+        level: Consolidation level — "IND" (individual) or "CON" (consolidated). Defaults to "IND".
 
     Returns:
         Dictionary with:
@@ -33,20 +37,30 @@ def get_dora_export_metadata(main_entity: Entity) -> dict:
         - entity_id: The identifier for parameters.csv
         - competent_authority: The authority name used in naming
     """
-    lei, lei_type = get_entity_identifier(main_entity, priority=["LEI"])
-    if not lei or lei_type != "eba_qCO:qx2000":
-        raise ValueError(
-            "Cannot generate DORA RoI export: main entity has no LEI. "
-            "Please set a LEI in the main entity's legal identifiers before exporting."
+    if identifier_type:
+        # Use the explicitly requested identifier
+        if not main_entity.legal_identifiers or not main_entity.legal_identifiers.get(
+            identifier_type
+        ):
+            raise ValueError(
+                f"Cannot generate DORA RoI export: main entity has no {identifier_type}. "
+                f"Please set a {identifier_type} in the main entity's legal identifiers before exporting."
+            )
+        code, xbrl_type, key_name = get_entity_identifier(
+            main_entity, priority=[identifier_type]
         )
-
-    # Determine consolidation level (defaulting to CON as per current logic)
-    # TODO: Add Entity.dora_consolidation_level if individual reporting is needed
-    level = "CON"
+    else:
+        # Use default priority
+        code, xbrl_type, key_name = get_entity_identifier(main_entity)
+        if not code:
+            raise ValueError(
+                "Cannot generate DORA RoI export: main entity has no legal identifier. "
+                "Please set a legal identifier (LEI, EUID, KBO, VAT, DUNS) in the main entity before exporting."
+            )
 
     authority = main_entity.dora_competent_authority or "UNKNOWN"
-    folder_prefix = f"LEI_{lei}.{level}_{authority}_DOR_DORA_ROI"
-    entity_id = f"rs:{lei}.{level}"
+    folder_prefix = f"{key_name}_{code}.{level}_{authority}_DOR_DORA_ROI"
+    entity_id = f"rs:{code}.{level}"
 
     return {
         "folder_prefix": folder_prefix,
@@ -92,22 +106,22 @@ def get_provider_chain(entity):
 
 def get_entity_identifier(
     entity: Entity, priority: List[str] = None
-) -> tuple[str, str]:
+) -> tuple[str, str, str]:
     """
-    Extract identification code and type from entity's legal_identifiers.
+    Extract identification code, type, and key name from entity's legal_identifiers.
 
     Args:
         entity: Entity object with legal_identifiers
-        priority: List of identifier types in priority order (default: LEI, EUID, VAT, DUNS)
+        priority: List of identifier types in priority order (default: LEI, EUID, KBO, VAT, DUNS)
 
     Returns:
-        Tuple of (identifier_code, identifier_type)
+        Tuple of (identifier_code, identifier_type, key_name)
     """
     if priority is None:
-        priority = ["LEI", "EUID", "VAT", "DUNS"]
+        priority = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
 
     if not entity or not entity.legal_identifiers:
-        return "", ""
+        return "", "", ""
 
     def map_identifier_type(key: str) -> str:
         key_upper = key.upper()
@@ -115,6 +129,8 @@ def get_entity_identifier(
             return "eba_qCO:qx2000"
         elif key_upper == "EUID":
             return "eba_qCO:qx2002"
+        elif key_upper == "KBO":
+            return "eba_qCO:qx2003"
         elif key_upper == "VAT":
             return "eba_qCO:qx2004"
         else:
@@ -123,14 +139,18 @@ def get_entity_identifier(
     # Try priority identifiers first
     for id_type in priority:
         if id_type in entity.legal_identifiers and entity.legal_identifiers[id_type]:
-            return entity.legal_identifiers[id_type], map_identifier_type(id_type)
+            return (
+                entity.legal_identifiers[id_type],
+                map_identifier_type(id_type),
+                id_type,
+            )
 
     # Use first available identifier if we couldn't find any of the priority ones
     for key, value in entity.legal_identifiers.items():
         if value:
-            return value, map_identifier_type(key)
+            return value, map_identifier_type(key), key
 
-    return "", ""
+    return "", "", ""
 
 
 def format_date(date_obj) -> str:
@@ -318,13 +338,13 @@ def generate_b_01_03_branches(
     # Write branch data (one row per branch)
     for branch in branches:
         # c0010: Identification code of the branch (typed dimension eba_typ:IS — use "0" if empty)
-        branch_code, _ = get_entity_identifier(branch)
+        branch_code, _, _ = get_entity_identifier(branch)
         branch_code = branch_code or "0"
 
         # c0020: LEI of the financial entity head office (typed dimension eba_typ:LE — use "0" if empty)
         head_office_lei = ""
         if branch.parent_entity:
-            head_office_lei, _ = get_entity_identifier(
+            head_office_lei, _, _ = get_entity_identifier(
                 branch.parent_entity, priority=["LEI"]
             )
         head_office_lei = head_office_lei or "0"
@@ -514,7 +534,7 @@ def generate_b_02_02_ict_services(
                 # c0020: LEI of entity using the service (typed dimension eba_typ:LE — use "0" if empty)
                 entity_lei = ""
                 if contract.beneficiary_entity:
-                    entity_lei, _ = get_entity_identifier(
+                    entity_lei, _, _ = get_entity_identifier(
                         contract.beneficiary_entity, priority=["LEI"]
                     )
                 entity_lei = entity_lei or "0"
@@ -524,9 +544,9 @@ def generate_b_02_02_ict_services(
                 # c0040 is enumeration metric — keep empty when c0030 has no real value
                 provider_code, provider_code_type = "", ""
                 if contract.provider_entity:
-                    provider_code, provider_code_type = get_entity_identifier(
+                    provider_code, provider_code_type, _ = get_entity_identifier(
                         contract.provider_entity,
-                        priority=["LEI", "EUID", "VAT", "DUNS"],
+                        priority=["LEI", "EUID", "KBO", "VAT", "DUNS"],
                     )
                 provider_code = provider_code or "0"
 
@@ -709,7 +729,7 @@ def generate_b_03_01_signing_entities(
     csv_writer.writerow(["c0010", "c0020", "c0030"])
 
     # Get main entity identifier
-    main_code, _ = get_entity_identifier(main_entity)
+    main_code, _, _ = get_entity_identifier(main_entity)
 
     # Write contract-entity data (main entity signs all contracts)
     for contract in contracts:
@@ -766,8 +786,8 @@ def generate_b_03_02_ict_providers(
         # Get provider identifier (prioritize LEI)
         # c0020 is typed dimension eba_typ:IS — use "0" if empty
         # c0030 is enumeration metric — keep empty when c0020 has no real value
-        provider_code, code_type = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
+        provider_code, code_type, _ = get_entity_identifier(
+            provider, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
         )
         provider_code = provider_code or "0"
 
@@ -813,7 +833,7 @@ def generate_b_03_03_intragroup_providers(
     for contract in intragroup_contracts:
         contract_ref = contract.ref_id or str(contract.id)
         # c0020 is typed dimension eba_typ:LE — use "0" if empty
-        provider_lei, _ = get_entity_identifier(
+        provider_lei, _, _ = get_entity_identifier(
             contract.provider_entity, priority=["LEI"]
         )
         provider_lei = provider_lei or "0"
@@ -872,7 +892,7 @@ def generate_b_04_01_service_users(
         # c0020: LEI of beneficiary entity (typed dimension eba_typ:LE — use "0" if empty)
         beneficiary_lei = ""
         if contract.beneficiary_entity:
-            beneficiary_lei, _ = get_entity_identifier(
+            beneficiary_lei, _, _ = get_entity_identifier(
                 contract.beneficiary_entity, priority=["LEI"]
             )
         beneficiary_lei = beneficiary_lei or "0"
@@ -897,7 +917,7 @@ def generate_b_04_01_service_users(
             ):
                 continue
             # c0040: Branch code (typed dimension eba_typ:IS — use "0" if empty)
-            branch_code, _ = get_entity_identifier(branch)
+            branch_code, _, _ = get_entity_identifier(branch)
             branch_code = branch_code or "0"
             combination = (contract_ref, beneficiary_lei, branch_code)
             if combination not in written_combinations:
@@ -977,8 +997,8 @@ def generate_b_05_01_provider_details(
         # c0010, c0020: Provider identifier (prioritize LEI)
         # c0010 is typed dimension eba_typ:IS — use "0" if empty
         # c0020 is enumeration metric — keep empty when c0010 has no real value
-        provider_code, code_type = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "VAT", "DUNS"]
+        provider_code, code_type, _ = get_entity_identifier(
+            provider, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
         )
         provider_code = provider_code or "0"
 
@@ -1007,8 +1027,8 @@ def generate_b_05_01_provider_details(
         parent_code, parent_code_type = "", ""
         ultimate_parent = get_ultimate_parent(provider)
         if ultimate_parent:
-            parent_code, parent_code_type = get_entity_identifier(
-                ultimate_parent, priority=["LEI", "EUID", "VAT", "DUNS"]
+            parent_code, parent_code_type, _ = get_entity_identifier(
+                ultimate_parent, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
             )
         if not parent_code:
             parent_code = provider_code
@@ -1105,7 +1125,7 @@ def generate_b_05_02_supply_chains(
             for rank, provider in enumerate(chain, start=1):
                 # c0030 is typed dimension eba_typ:IS — use "0" if empty
                 # c0040 is enumeration metric — keep empty when c0030 has no real value
-                provider_code, provider_code_type = get_entity_identifier(provider)
+                provider_code, provider_code_type, _ = get_entity_identifier(provider)
                 provider_code = provider_code or "0"
 
                 # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
@@ -1118,7 +1138,7 @@ def generate_b_05_02_supply_chains(
                     )
                 else:
                     recipient = chain[rank - 2]
-                    recipient_code, recipient_code_type = get_entity_identifier(
+                    recipient_code, recipient_code_type, _ = get_entity_identifier(
                         recipient
                     )
                     recipient_code = recipient_code or "0"
@@ -1185,7 +1205,7 @@ def generate_b_06_01_functions(
     )
 
     # Get main entity LEI
-    main_lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
+    main_lei, _, _ = get_entity_identifier(main_entity, priority=["LEI"])
 
     # Write function data
     for function in business_functions:
@@ -1290,7 +1310,7 @@ def generate_b_07_01_assessment(
 
             # c0020 is typed dimension eba_typ:IS — use "0" if empty
             # c0030 is enumeration metric — keep empty when c0020 has no real value
-            provider_code, provider_code_type = get_entity_identifier(
+            provider_code, provider_code_type, _ = get_entity_identifier(
                 contract.provider_entity
             )
             provider_code = provider_code or "0"
@@ -1524,16 +1544,16 @@ def generate_parameters(
     # Write CSV headers
     csv_writer.writerow(["name", "value"])
 
-    # If entityID not provided, compute it (default to LEI.CON)
+    # If entityID not provided, compute it (default to IND)
     if not entity_id:
-        lei, _ = get_entity_identifier(main_entity, priority=["LEI"])
-        if not lei:
+        code, _, key_name = get_entity_identifier(main_entity)
+        if not code:
             raise ValueError(
-                "Cannot generate DORA RoI export: main entity has no LEI. "
-                "The entityID parameter requires a valid LEI (EBA Filing Rules v5.5). "
-                "Please set a LEI in the main entity's legal identifiers before exporting."
+                "Cannot generate DORA RoI export: main entity has no legal identifier. "
+                "The entityID parameter requires a valid identifier (EBA Filing Rules v5.5). "
+                "Please set a legal identifier in the main entity before exporting."
             )
-        entity_id = f"rs:{lei}.CON"
+        entity_id = f"rs:{code}.IND"
 
     # Get currency for baseCurrency
     base_currency = (

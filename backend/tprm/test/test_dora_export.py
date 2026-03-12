@@ -283,70 +283,94 @@ class DoraDataFactory:
 class TestGetEntityIdentifier(TestCase):
     def test_empty_entity(self):
         entity = Entity()
-        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
 
     def test_none_entity(self):
-        self.assertEqual(dora_export.get_entity_identifier(None), ("", ""))
+        self.assertEqual(dora_export.get_entity_identifier(None), ("", "", ""))
 
     def test_null_legal_identifiers(self):
         entity = Entity(legal_identifiers=None)
-        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
 
     def test_empty_legal_identifiers(self):
         entity = Entity(legal_identifiers={})
-        self.assertEqual(dora_export.get_entity_identifier(entity), ("", ""))
+        self.assertEqual(dora_export.get_entity_identifier(entity), ("", "", ""))
 
     def test_lei_maps_to_qx2000(self):
         entity = Entity(legal_identifiers={"LEI": "ABCDEFGHIJ0123456789"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "ABCDEFGHIJ0123456789")
         self.assertEqual(code_type, "eba_qCO:qx2000")
+        self.assertEqual(key_name, "LEI")
 
     def test_euid_maps_to_qx2002(self):
         entity = Entity(legal_identifiers={"EUID": "NL0888888888"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "NL0888888888")
         self.assertEqual(code_type, "eba_qCO:qx2002")
+        self.assertEqual(key_name, "EUID")
+
+    def test_kbo_maps_to_qx2003(self):
+        entity = Entity(legal_identifiers={"KBO": "0123456789"})
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "0123456789")
+        self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(key_name, "KBO")
 
     def test_vat_maps_to_qx2004(self):
         entity = Entity(legal_identifiers={"VAT": "BE0999999999"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "BE0999999999")
         self.assertEqual(code_type, "eba_qCO:qx2004")
+        self.assertEqual(key_name, "VAT")
 
     def test_duns_maps_to_qx2003(self):
         entity = Entity(legal_identifiers={"DUNS": "123456789"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "123456789")
         self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(key_name, "DUNS")
 
     def test_unknown_key_falls_back_to_qx2003(self):
         entity = Entity(legal_identifiers={"CUSTOM_ID": "XYZ"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "XYZ")
         self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(key_name, "CUSTOM_ID")
 
     def test_priority_lei_over_vat(self):
         entity = Entity(legal_identifiers={"VAT": "V1", "LEI": "L1"})
-        code, _ = dora_export.get_entity_identifier(entity)
+        code, _, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "L1")
+        self.assertEqual(key_name, "LEI")
 
     def test_priority_euid_over_vat(self):
         entity = Entity(legal_identifiers={"VAT": "V1", "EUID": "E1"})
-        code, _ = dora_export.get_entity_identifier(entity)
+        code, _, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "E1")
+        self.assertEqual(key_name, "EUID")
+
+    def test_priority_kbo_over_vat(self):
+        entity = Entity(legal_identifiers={"VAT": "V1", "KBO": "K1"})
+        code, _, key_name = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "K1")
+        self.assertEqual(key_name, "KBO")
 
     def test_custom_priority_order(self):
         entity = Entity(legal_identifiers={"LEI": "L1", "VAT": "V1"})
-        code, code_type = dora_export.get_entity_identifier(entity, priority=["VAT"])
+        code, code_type, key_name = dora_export.get_entity_identifier(
+            entity, priority=["VAT"]
+        )
         self.assertEqual(code, "V1")
         self.assertEqual(code_type, "eba_qCO:qx2004")
+        self.assertEqual(key_name, "VAT")
 
     def test_empty_string_values_skipped(self):
         entity = Entity(legal_identifiers={"LEI": "", "VAT": "V1"})
-        code, code_type = dora_export.get_entity_identifier(entity)
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "V1")
         self.assertEqual(code_type, "eba_qCO:qx2004")
+        self.assertEqual(key_name, "VAT")
 
 
 class TestFormatDate(TestCase):
@@ -408,14 +432,23 @@ class TestGetDoraExportMetadata(TestCase):
             name="Entity Empty LEI",
             legal_identifiers={"LEI": ""},
         )
+        self.entity_kbo = Entity.objects.create(
+            name="Entity KBO",
+            legal_identifiers={"KBO": "0123456789"},
+            dora_competent_authority="NBB",
+        )
+        self.entity_no_identifiers = Entity.objects.create(
+            name="Entity No Identifiers",
+            legal_identifiers={},
+        )
 
-    def test_with_authority(self):
+    def test_with_authority_default_ind(self):
         meta = dora_export.get_dora_export_metadata(self.entity_with_auth)
         self.assertEqual(
-            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI"
+            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.IND_FSMA_DOR_DORA_ROI"
         )
         self.assertEqual(
-            meta["filename"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI.zip"
+            meta["filename"], "LEI_123456789ABCDEFGHI00.IND_FSMA_DOR_DORA_ROI.zip"
         )
         self.assertEqual(meta["competent_authority"], "FSMA")
 
@@ -424,17 +457,51 @@ class TestGetDoraExportMetadata(TestCase):
         self.assertEqual(meta["competent_authority"], "UNKNOWN")
         self.assertIn("UNKNOWN", meta["folder_prefix"])
 
-    def test_no_lei_raises_value_error(self):
-        with self.assertRaises(ValueError):
-            dora_export.get_dora_export_metadata(self.entity_no_lei)
+    def test_no_lei_uses_vat_by_default(self):
+        meta = dora_export.get_dora_export_metadata(self.entity_no_lei)
+        self.assertEqual(
+            meta["folder_prefix"], "VAT_BE0123456789.IND_UNKNOWN_DOR_DORA_ROI"
+        )
 
-    def test_empty_lei_raises_value_error(self):
+    def test_empty_identifiers_raises_value_error(self):
+        with self.assertRaises(ValueError):
+            dora_export.get_dora_export_metadata(self.entity_no_identifiers)
+
+    def test_empty_lei_uses_fallback(self):
+        # Entity with empty LEI but no other identifiers raises
         with self.assertRaises(ValueError):
             dora_export.get_dora_export_metadata(self.entity_empty_lei)
 
-    def test_entity_id_format(self):
+    def test_entity_id_format_default_ind(self):
         meta = dora_export.get_dora_export_metadata(self.entity_with_auth)
+        self.assertEqual(meta["entity_id"], "rs:123456789ABCDEFGHI00.IND")
+
+    def test_level_con(self):
+        meta = dora_export.get_dora_export_metadata(self.entity_with_auth, level="CON")
+        self.assertEqual(
+            meta["folder_prefix"], "LEI_123456789ABCDEFGHI00.CON_FSMA_DOR_DORA_ROI"
+        )
         self.assertEqual(meta["entity_id"], "rs:123456789ABCDEFGHI00.CON")
+
+    def test_explicit_identifier_type_kbo(self):
+        meta = dora_export.get_dora_export_metadata(
+            self.entity_kbo, identifier_type="KBO"
+        )
+        self.assertEqual(meta["folder_prefix"], "KBO_0123456789.IND_NBB_DOR_DORA_ROI")
+        self.assertEqual(meta["entity_id"], "rs:0123456789.IND")
+
+    def test_explicit_identifier_type_missing_raises(self):
+        with self.assertRaises(ValueError):
+            dora_export.get_dora_export_metadata(
+                self.entity_with_auth, identifier_type="KBO"
+            )
+
+    def test_kbo_with_con_level(self):
+        meta = dora_export.get_dora_export_metadata(
+            self.entity_kbo, identifier_type="KBO", level="CON"
+        )
+        self.assertEqual(meta["folder_prefix"], "KBO_0123456789.CON_NBB_DOR_DORA_ROI")
+        self.assertEqual(meta["entity_id"], "rs:0123456789.CON")
 
 
 # ===========================================================================
@@ -2271,7 +2338,7 @@ class TestParameters(DoraExportTestMixin, TestCase):
     def test_entity_id_computed_from_lei(self):
         buf = self._generate(dora_export.generate_parameters, self.entity)
         params = self._params_dict(buf)
-        self.assertEqual(params["entityID"], "rs:PARAM000000000000000.CON")
+        self.assertEqual(params["entityID"], "rs:PARAM000000000000000.IND")
 
     def test_base_currency(self):
         buf = self._generate(dora_export.generate_parameters, self.entity)
