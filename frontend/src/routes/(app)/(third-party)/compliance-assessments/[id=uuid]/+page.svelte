@@ -366,7 +366,10 @@
 				bodyComponent: List,
 				bodyProps: {
 					items: Object.values(requirementAssessmentsSync.changes).map(
-						(req) => `${req.str}, ${safeTranslate(req.current)} -> ${safeTranslate(req.new)}`
+						({ str, changes }) =>
+							`${str}, ${changes
+								.map((change) => `${safeTranslate(change.current)} -> ${safeTranslate(change.new)}`)
+								.join(', ')}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
