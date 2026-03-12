@@ -583,15 +583,18 @@ DATA_WIZARD_COMMANDS = [
 
 
 def register_data_wizard_command(config: Dict[str, object]) -> None:
-    command_name = str(config["command"])
+    command_name = config["command"]
     cli_name = command_name.replace("_", "-")
-    model_type = str(config["model_type"])
-    help_text = str(config["help"])
-    requires_folder = bool(config.get("requires_folder", False))
-    requires_perimeter = bool(config.get("requires_perimeter", False))
-    requires_framework = bool(config.get("requires_framework", False))
-    requires_matrix = bool(config.get("requires_matrix", False))
-    supports_conflict = bool(config.get("supports_conflict", True))
+
+    model_type = config["model_type"]
+    help_text = config["help"]
+
+    requires_folder = config.get("requires_folder", False)
+    requires_perimeter = config.get("requires_perimeter", False)
+    requires_framework = config.get("requires_framework", False)
+    requires_matrix = config.get("requires_matrix", False)
+    supports_conflict = config.get("supports_conflict", True)
+
     show_folder_option = config.get(
         "show_folder_option",
         model_type
