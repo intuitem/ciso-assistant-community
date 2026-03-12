@@ -89,7 +89,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar, Mapping
+from typing import Optional, Final, ClassVar, Mapping, Any
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -158,15 +158,16 @@ def _parse_datetime(value) -> Optional[str]:
     return value
 
 
-def _resolve_filtering_labels(value) -> list[UUID]:
+def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
     Labels that do not yet exist are created on the fly.
     """
-    if not value or not isinstance(value, str):
+    if not isinstance(value, str):
         return []
+
     separator = "|" if "|" in value else ","
-    label_names = [name.strip() for name in value.split(separator) if name.strip()]
+    label_names = [name.strip() for name in value.split(separator)]
     label_ids: list[UUID] = []
     for label_name in label_names:
         label = FilteringLabel.objects.filter(label=label_name).first()
@@ -1379,7 +1380,7 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
-        if domain_name not in (None, ""):
+        if not domain_name:
             domain = self.folders_map.get(str(domain_name).lower(), self.folder_id)
 
         name = record.get("name")
@@ -1388,11 +1389,13 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
 
         # Accept display value or raw key for status
         status_mapping = {v: k for k, v in Processing.STATUS_CHOICES}
-        status_value = record.get("status", "privacy_draft")
-        if isinstance(status_value, str) and status_value in status_mapping:
-            status_value = status_mapping[status_value]
+        record_status_value = record.get("status", "privacy_draft")
+        status_value = None
 
-        data: dict = {
+        if record_status_value in status_mapping:
+            status_value = status_mapping[record_status_value]
+
+        data = {
             "name": name,
             "description": record.get("description", ""),
             "ref_id": record.get("ref_id", ""),
@@ -1403,11 +1406,11 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
         }
 
         # Resolve M2M: nature (by name)
-        if record.get("processing_nature"):
+        record_processing_nature = record.get("processing_nature")
+        if record_processing_nature:
             nature_names = [
-                n.strip()
-                for n in str(record["processing_nature"]).split(",")
-                if n.strip()
+                nature_name.strip()
+                for nature_name in str(record_processing_nature).split(",")
             ]
             data["nature"] = list(
                 ProcessingNature.objects.filter(name__in=nature_names).values_list(
@@ -1416,9 +1419,10 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
             )
 
         # Resolve M2M: assigned_to (by user email → Actor)
-        if record.get("assigned_to"):
+        record_assigned_to = record.get("assigned_to")
+        if record_assigned_to:
             emails = [
-                e.strip() for e in str(record["assigned_to"]).split(",") if e.strip()
+                email.strip() for email in str(record_assigned_to).split(",")
             ]
             data["assigned_to"] = list(
                 Actor.objects.filter(user__email__in=emails).values_list(
