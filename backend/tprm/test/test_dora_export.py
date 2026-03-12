@@ -1315,7 +1315,9 @@ class TestGenerateB0401(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         main_rows = [r for r in rows[1:] if r[0] == "CA-001" and r[2] == "eba_ZZ:x839"]
         self.assertEqual(len(main_rows), 1)
-        self.assertEqual(main_rows[0][3], "0")  # branch_code "0" for non-branch (typed dimension)
+        self.assertEqual(
+            main_rows[0][3], "0"
+        )  # branch_code "0" for non-branch (typed dimension)
 
     def test_branch_row_nature(self):
         buf = self._generate(
@@ -1514,7 +1516,9 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, self.CSV)
         prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
-        self.assertEqual(prov_row[10], "0")  # c0110: typed dimension, "0" = not applicable
+        self.assertEqual(
+            prov_row[10], "0"
+        )  # c0110: typed dimension, "0" = not applicable
         self.assertEqual(prov_row[11], "")  # c0120: enumeration metric, stays empty
 
     def test_ultimate_parent_multi_level_hierarchy(self):
@@ -1612,7 +1616,9 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, self.CSV)
         for row in self._data_rows(rows):
-            self.assertEqual(row[5], "0")  # c0060: typed dimension, "0" = not applicable
+            self.assertEqual(
+                row[5], "0"
+            )  # c0060: typed dimension, "0" = not applicable
             self.assertEqual(row[6], "")  # c0070: enumeration metric, stays empty
 
     def test_multiple_solutions_multiple_rows(self):
@@ -1674,7 +1680,9 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         # Rank 1: root provider, no recipient (typed dimension "0")
         self.assertEqual(chain_rows[0][2], "ROOT1234567890123456")  # c0030
         self.assertEqual(chain_rows[0][4], "1")  # c0050
-        self.assertEqual(chain_rows[0][5], "0")  # c0060: typed dimension, "0" = not applicable
+        self.assertEqual(
+            chain_rows[0][5], "0"
+        )  # c0060: typed dimension, "0" = not applicable
 
         # Rank 2: intermediate, recipient = root
         self.assertEqual(chain_rows[1][2], "INTM1234567890123456")
@@ -1724,7 +1732,9 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
 
         self.assertEqual(len(solo_rows), 1)
         self.assertEqual(solo_rows[0][4], "1")
-        self.assertEqual(solo_rows[0][5], "0")  # c0060: typed dimension, "0" = not applicable
+        self.assertEqual(
+            solo_rows[0][5], "0"
+        )  # c0060: typed dimension, "0" = not applicable
         self.assertEqual(solo_rows[0][6], "")  # c0070: enumeration metric, stays empty
 
         # Cleanup
@@ -1732,6 +1742,117 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         contract.delete()
         solution.delete()
         standalone.delete()
+
+    def test_no_duplicate_rows(self):
+        """Multiple solutions with same ICT type + same provider must not produce duplicates."""
+        provider = Entity.objects.create(
+            name="Dup Provider",
+            legal_identifiers={"LEI": "DUPP1234567890123456"},
+        )
+        sol_a = Solution.objects.create(
+            name="Service A",
+            provider_entity=provider,
+            dora_ict_service_type="eba_TA:S19",
+        )
+        sol_b = Solution.objects.create(
+            name="Service B",
+            provider_entity=provider,
+            dora_ict_service_type="eba_TA:S19",
+        )
+        contract = Contract.objects.create(
+            name="Dup Contract",
+            ref_id="CA-DUP",
+            provider_entity=provider,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(sol_a, sol_b)
+
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+
+        # Two solutions share the same XBRL dimension key — only one row expected
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0][0], "CA-DUP")
+        self.assertEqual(data[0][1], "eba_TA:S19")
+
+        # Cleanup
+        contract.solutions.clear()
+        contract.delete()
+        sol_a.delete()
+        sol_b.delete()
+        provider.delete()
+
+    def test_no_duplicate_rows_full_dataset(self):
+        """Every row in the output must have a unique XBRL dimension key."""
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+        # Key = (c0010, c0020, c0030, c0050, c0060)
+        keys = [(r[0], r[1], r[2], r[4], r[5]) for r in data]
+        self.assertEqual(
+            len(keys), len(set(keys)), "Duplicate XBRL dimension keys found"
+        )
+
+    def test_solutions_without_ict_service_type_excluded(self):
+        """Solutions with empty dora_ict_service_type must not appear in b_05.02."""
+        provider = Entity.objects.create(
+            name="NoType Provider",
+            legal_identifiers={"LEI": "NTYP1234567890123456"},
+        )
+        sol_with = Solution.objects.create(
+            name="Has Type",
+            provider_entity=provider,
+            dora_ict_service_type="eba_TA:S05",
+        )
+        sol_without = Solution.objects.create(
+            name="No Type",
+            provider_entity=provider,
+            dora_ict_service_type="",
+        )
+        contract = Contract.objects.create(
+            name="Mixed Contract",
+            ref_id="CA-MIX",
+            provider_entity=provider,
+            beneficiary_entity=self.main_entity,
+            is_intragroup=False,
+            status=Contract.Status.ACTIVE,
+        )
+        contract.solutions.add(sol_with, sol_without)
+
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains,
+            Contract.objects.filter(pk=contract.pk),
+        )
+        rows = self._read_csv(buf, self.CSV)
+        data = self._data_rows(rows)
+
+        # Only the solution with ICT service type should appear
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0][1], "eba_TA:S05")
+
+        # Cleanup
+        contract.solutions.clear()
+        contract.delete()
+        sol_with.delete()
+        sol_without.delete()
+        provider.delete()
+
+    def test_c0020_never_empty(self):
+        """No row in b_05.02 may have an empty c0020 (explicit XBRL dimension TIC:TA)."""
+        buf = self._generate(
+            dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
+        )
+        rows = self._read_csv(buf, self.CSV)
+        for i, row in enumerate(self._data_rows(rows), start=2):
+            self.assertTrue(row[1], f"Row {i} has empty c0020 (ICT service type)")
 
 
 class TestGenerateB0601(DoraExportTestMixin, DoraDataFactory, TestCase):
