@@ -199,7 +199,6 @@ class CustomEmailTemplateWriteSerializer(BaseModelSerializer):
         model = CustomEmailTemplate
         fields = [
             "id",
-            "folder",
             "template_key",
             "language",
             "subject",
@@ -234,7 +233,7 @@ class CustomWordTemplateReadSerializer(BaseModelSerializer):
 class CustomWordTemplateWriteSerializer(BaseModelSerializer):
     class Meta:
         model = CustomWordTemplate
-        fields = ["id", "folder", "template_key", "language", "is_active"]
+        fields = ["id", "template_key", "language", "is_active"]
         read_only_fields = ["id"]
 
 

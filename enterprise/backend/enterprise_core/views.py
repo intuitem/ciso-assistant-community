@@ -593,7 +593,9 @@ class CustomEmailTemplateViewSet(BaseModelViewSet):
 
         from core.email_utils import load_email_template
 
-        template_data = load_email_template(template_key, locale=language)
+        template_data = load_email_template(
+            template_key, locale=language, builtin_only=True
+        )
         if not template_data:
             return Response(
                 {"error": "Default template not found for this language"},

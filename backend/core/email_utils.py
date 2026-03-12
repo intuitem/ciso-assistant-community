@@ -76,7 +76,9 @@ def _load_custom_email_template(
 
 
 def load_email_template(
-    template_name: str, locale: Optional[str] = None
+    template_name: str,
+    locale: Optional[str] = None,
+    builtin_only: bool = False,
 ) -> Optional[Dict[str, str]]:
     """
     Load email template, checking for custom overrides first, then falling
@@ -85,6 +87,7 @@ def load_email_template(
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
         locale: Language code (e.g., 'en', 'fr'). If None, uses current Django language
+        builtin_only: If True, skip custom overrides and load only the built-in YAML file
 
     Returns:
         Dictionary with 'subject' and 'body' keys, or None if not found
@@ -95,9 +98,10 @@ def load_email_template(
     locale = locale.split("-")[0].lower() or "en"
 
     # Check for custom override first
-    custom = _load_custom_email_template(template_name, locale)
-    if custom:
-        return custom
+    if not builtin_only:
+        custom = _load_custom_email_template(template_name, locale)
+        if custom:
+            return custom
 
     # Construct file path
     template_file = TEMPLATE_BASE_PATH / locale / f"{template_name}.yaml"

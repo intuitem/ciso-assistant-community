@@ -375,7 +375,7 @@
 					<div class="mt-2 flex flex-wrap gap-2">
 						{#each editVariables as variable}
 							<code class="bg-surface-200 px-2 py-1 rounded text-xs font-mono"
-								>${'{' + variable + '}'}</code
+								>{'${' + variable + '}'}</code
 							>
 						{/each}
 					</div>
