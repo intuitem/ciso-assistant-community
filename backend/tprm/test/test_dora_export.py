@@ -1507,8 +1507,8 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
             self.assertEqual(uk_row[11], "eba_qCO:qx2000")
         c.delete()
 
-    def test_parent_entity_zero_when_no_parent(self):
-        """c0110 is typed dimension — use "0" when provider has no parent."""
+    def test_parent_entity_self_ref_when_no_parent(self):
+        """c0110 must reference valid c0010 in b_05.01 (FK 807) — self-reference when no parent."""
         buf = self._generate(
             dora_export.generate_b_05_01_provider_details,
             self.main_entity,
@@ -1517,9 +1517,9 @@ class TestGenerateB0501(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         prov_row = next(r for r in rows[1:] if r[0] == "PROV1234567890123456")
         self.assertEqual(
-            prov_row[10], "0"
-        )  # c0110: typed dimension, "0" = not applicable
-        self.assertEqual(prov_row[11], "")  # c0120: enumeration metric, stays empty
+            prov_row[10], "PROV1234567890123456"
+        )  # c0110: self-reference (provider IS its own ultimate parent)
+        self.assertEqual(prov_row[11], "eba_qCO:qx2000")  # c0120: LEI code type
 
     def test_ultimate_parent_multi_level_hierarchy(self):
         """c0110/c0120 should resolve to the ultimate parent, not the immediate parent."""
@@ -1609,17 +1609,15 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         for row in self._data_rows(rows):
             self.assertEqual(row[4], "1")
 
-    def test_recipient_zero_sentinel_for_rank_1(self):
-        """c0060 is typed dimension eba_typ:IS — "0" for rank 1 (no recipient)."""
+    def test_recipient_equals_provider_for_rank_1(self):
+        """CHECK_C0050: when rank=1, c0060 (recipient) must equal c0030 (provider)."""
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
         )
         rows = self._read_csv(buf, self.CSV)
         for row in self._data_rows(rows):
-            self.assertEqual(
-                row[5], "0"
-            )  # c0060: typed dimension, "0" = not applicable
-            self.assertEqual(row[6], "")  # c0070: enumeration metric, stays empty
+            self.assertEqual(row[5], row[2])  # c0060 = c0030 (provider code)
+            self.assertEqual(row[6], row[3])  # c0070 = c0040 (provider code type)
 
     def test_multiple_solutions_multiple_rows(self):
         # contract_main has 1 solution, contract_second has 1 → at least 2 rows
@@ -1677,12 +1675,12 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         # 3 ranks
         self.assertEqual(len(chain_rows), 3)
 
-        # Rank 1: root provider, no recipient (typed dimension "0")
+        # Rank 1: root provider, recipient = provider (CHECK_C0050)
         self.assertEqual(chain_rows[0][2], "ROOT1234567890123456")  # c0030
         self.assertEqual(chain_rows[0][4], "1")  # c0050
         self.assertEqual(
-            chain_rows[0][5], "0"
-        )  # c0060: typed dimension, "0" = not applicable
+            chain_rows[0][5], "ROOT1234567890123456"
+        )  # c0060: recipient = provider when rank=1
 
         # Rank 2: intermediate, recipient = root
         self.assertEqual(chain_rows[1][2], "INTM1234567890123456")
@@ -1733,9 +1731,9 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         self.assertEqual(len(solo_rows), 1)
         self.assertEqual(solo_rows[0][4], "1")
         self.assertEqual(
-            solo_rows[0][5], "0"
-        )  # c0060: typed dimension, "0" = not applicable
-        self.assertEqual(solo_rows[0][6], "")  # c0070: enumeration metric, stays empty
+            solo_rows[0][5], "SOLO1234567890123456"
+        )  # c0060: recipient = provider when rank=1 (CHECK_C0050)
+        self.assertEqual(solo_rows[0][6], "eba_qCO:qx2000")  # c0070: LEI code type
 
         # Cleanup
         contract.solutions.clear()

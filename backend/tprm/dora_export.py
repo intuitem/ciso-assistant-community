@@ -1002,15 +1002,17 @@ def generate_b_05_01_provider_details(
         total_expense = data["total_expense"]
 
         # c0110, c0120: Ultimate parent undertaking identifier (prioritize LEI)
-        # c0110 is typed dimension eba_typ:IS — use "0" if empty
-        # c0120 is enumeration metric — keep empty when c0110 has no real value
+        # FK constraint: c0110 must reference a valid c0010 in B_05.01
+        # If no parent, self-reference the provider (it IS its own ultimate parent)
         parent_code, parent_code_type = "", ""
         ultimate_parent = get_ultimate_parent(provider)
         if ultimate_parent:
             parent_code, parent_code_type = get_entity_identifier(
                 ultimate_parent, priority=["LEI", "EUID", "VAT", "DUNS"]
             )
-        parent_code = parent_code or "0"
+        if not parent_code:
+            parent_code = provider_code
+            parent_code_type = code_type
 
         # Write provider detail row (12 columns for DORA 4.0)
         csv_writer.writerow(
@@ -1107,15 +1109,19 @@ def generate_b_05_02_supply_chains(
                 provider_code = provider_code or "0"
 
                 # c0060/c0070: recipient = previous entity in chain (the one that sub-contracted)
-                # c0060 is typed dimension eba_typ:IS — use "0" if empty
-                # c0070 is enumeration metric — keep empty when c0060 has no real value
-                recipient_code, recipient_code_type = "", ""
-                if rank > 1:
+                # CHECK_C0050: when rank=1, recipient must equal provider (direct service relationship)
+                # When rank>1, recipient is the previous entity in the chain
+                if rank == 1:
+                    recipient_code, recipient_code_type = (
+                        provider_code,
+                        provider_code_type,
+                    )
+                else:
                     recipient = chain[rank - 2]
                     recipient_code, recipient_code_type = get_entity_identifier(
                         recipient
                     )
-                recipient_code = recipient_code or "0"
+                    recipient_code = recipient_code or "0"
 
                 key = (
                     contract_ref,
