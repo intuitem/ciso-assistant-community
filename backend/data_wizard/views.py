@@ -296,7 +296,7 @@ class RecordConsumer[Context](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {}
+    SOURCE_KEY_MAP: ClassVar[dict[str, list[str]]] = {}
 
     def __init__(self, base_context: BaseContext):
         self.request = base_context.request
@@ -362,7 +362,7 @@ class RecordConsumer[Context](ABC):
             if key in identity_fields:
                 update_data[key] = value
                 continue
-            source_keys = self.SOURCE_KEY_MAP.get(key, (key,))
+            source_keys = self.SOURCE_KEY_MAP.get(key, [key])
             # For M2M owner, propagate even when blank so UPDATE mode clears stale owners.
             if key == "owner" and any(sk in record for sk in source_keys):
                 update_data[key] = value
@@ -471,8 +471,8 @@ class AssetRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AssetWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "reference_link": ("reference_link", "link"),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "reference_link": ["reference_link", "link"],
     }
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
@@ -572,10 +572,10 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "control_impact": ("control_impact", "impact"),
-        "reference_control": ("reference_control", "reference_control_ref_id"),
-        "owner": ("owner",),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "control_impact": ["control_impact", "impact"],
+        "reference_control": ["reference_control", "reference_control_ref_id"],
+        "owner": ["owner"],
     }
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
@@ -831,8 +831,8 @@ class ThreatRecordConsumer(RecordConsumer[None]):
 
 class ReferenceControlRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "csf_function": ("function",),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "csf_function": ["function"],
     }
     CATEGORY_MAP: Final[dict[str, str]] = {
         "policy": "policy",
@@ -1204,8 +1204,8 @@ class FolderRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = FolderWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "parent_folder": ("domain",),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "parent_folder": ["domain"],
     }
 
     def create_context(self):
@@ -1355,9 +1355,9 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = ProcessingWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "nature": ("processing_nature",),
-        "filtering_labels": ("labels",),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "nature": ["processing_nature"],
+        "filtering_labels": ["labels"],
     }
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
@@ -1431,15 +1431,15 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "perimeter": ("perimeter", "perimeter_ref_id", "perimeter_name"),
-        "risk_matrix": (
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "perimeter": ["perimeter", "perimeter_ref_id", "perimeter_name"],
+        "risk_matrix": [
             "risk_matrix",
             "risk_matrix_ref_id",
             "risk_matrix_name",
             "matrix",
-        ),
-        "bia": ("bia", "bia_name"),
+        ],
+        "bia": ["bia", "bia_name"],
     }
 
     def create_context(self):
@@ -1575,9 +1575,9 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
 
 class AssetAssessmentRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = AssetAssessmentWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "bia": ("bia", "bia_name"),
-        "asset": ("asset", "asset_ref_id", "asset_name"),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "bia": ["bia", "bia_name"],
+        "asset": ["asset", "asset_ref_id", "asset_name"],
     }
 
     def create_context(self):
@@ -1769,10 +1769,10 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
 
 class EscalationThresholdRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = EscalationThresholdWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
-        "bia": ("bia", "bia_name"),
-        "asset": ("asset", "asset_ref_id", "asset_name"),
-        "asset_assessment": ("asset_assessment",),
+    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+        "bia": ["bia", "bia_name"],
+        "asset": ["asset", "asset_ref_id", "asset_name"],
+        "asset_assessment": ["asset_assessment"],
     }
 
     def create_context(self):
