@@ -7,6 +7,7 @@ It checks for mandatory and recommended fields before generating the actual repo
 
 from typing import List, Dict, Any
 from tprm.models import Entity, Contract, Solution
+from tprm.dora_export import IDENTIFIER_PRIORITY
 from core.models import Asset
 from django.db.models import Q
 import re
@@ -43,7 +44,7 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
         # Check legal identifiers (mandatory)
         has_legal_identifier = False
         if provider.legal_identifiers:
-            identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+            identifier_types = IDENTIFIER_PRIORITY
             for id_type in identifier_types:
                 if provider.legal_identifiers.get(id_type):
                     has_legal_identifier = True
@@ -97,7 +98,7 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
         if provider.parent_entity:
             parent_has_identifier = False
             if provider.parent_entity.legal_identifiers:
-                identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+                identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
                     if provider.parent_entity.legal_identifiers.get(id_type):
                         parent_has_identifier = True
@@ -166,7 +167,7 @@ def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
     has_legal_identifier = False
     if entity.legal_identifiers:
         # Check for any of the accepted identifiers: LEI, EUID, VAT, DUNS
-        identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+        identifier_types = IDENTIFIER_PRIORITY
         for id_type in identifier_types:
             if entity.legal_identifiers.get(id_type):
                 has_legal_identifier = True
@@ -360,7 +361,7 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
         # Check legal identifiers (mandatory)
         has_legal_identifier = False
         if subsidiary.legal_identifiers:
-            identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+            identifier_types = IDENTIFIER_PRIORITY
             for id_type in identifier_types:
                 if subsidiary.legal_identifiers.get(id_type):
                     has_legal_identifier = True
@@ -497,7 +498,7 @@ def lint_branches(main_entity: Entity) -> List[Dict[str, Any]]:
     # Check that main entity (parent of all branches) has a legal identifier
     main_has_identifier = False
     if main_entity.legal_identifiers:
-        identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+        identifier_types = IDENTIFIER_PRIORITY
         for id_type in identifier_types:
             if main_entity.legal_identifiers.get(id_type):
                 main_has_identifier = True
@@ -834,7 +835,7 @@ def lint_contracts() -> List[Dict[str, Any]]:
             # Check that beneficiary entity has a legal identifier
             beneficiary_has_identifier = False
             if contract.beneficiary_entity.legal_identifiers:
-                identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+                identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
                     if contract.beneficiary_entity.legal_identifiers.get(id_type):
                         beneficiary_has_identifier = True
@@ -1008,7 +1009,7 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
             # Check that provider entity has a legal identifier
             provider_has_identifier = False
             if contract.provider_entity.legal_identifiers:
-                identifier_types = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+                identifier_types = IDENTIFIER_PRIORITY
                 for id_type in identifier_types:
                     if contract.provider_entity.legal_identifiers.get(id_type):
                         provider_has_identifier = True
@@ -1437,7 +1438,7 @@ def lint_dora_roi() -> Dict[str, Any]:
     # Build available identifiers for the frontend selector
     available_identifiers = []
     if main_entity and main_entity.legal_identifiers:
-        priority = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+        priority = IDENTIFIER_PRIORITY
         for id_type in priority:
             value = main_entity.legal_identifiers.get(id_type)
             if value:

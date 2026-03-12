@@ -18,6 +18,8 @@ from core.models import Asset
 
 # Helper Functions
 
+IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+
 
 def get_dora_export_metadata(
     main_entity: Entity, identifier_type: str = None, level: str = "IND"
@@ -37,26 +39,17 @@ def get_dora_export_metadata(
         - entity_id: The identifier for parameters.csv
         - competent_authority: The authority name used in naming
     """
-    if identifier_type:
-        # Use the explicitly requested identifier
-        if not main_entity.legal_identifiers or not main_entity.legal_identifiers.get(
-            identifier_type
-        ):
-            raise ValueError(
-                f"Cannot generate DORA RoI export: main entity has no {identifier_type}. "
-                f"Please set a {identifier_type} in the main entity's legal identifiers before exporting."
-            )
-        code, xbrl_type, key_name = get_entity_identifier(
-            main_entity, priority=[identifier_type]
+    if level not in ("IND", "CON"):
+        raise ValueError(f"Invalid level '{level}'. Must be 'IND' or 'CON'.")
+
+    priority = [identifier_type] if identifier_type else None
+    code, xbrl_type, key_name = get_entity_identifier(main_entity, priority=priority)
+    if not code or (identifier_type and key_name != identifier_type):
+        missing = identifier_type or "legal identifier"
+        raise ValueError(
+            f"Cannot generate DORA RoI export: main entity has no {missing}. "
+            f"Please set a {missing} in the main entity's legal identifiers before exporting."
         )
-    else:
-        # Use default priority
-        code, xbrl_type, key_name = get_entity_identifier(main_entity)
-        if not code:
-            raise ValueError(
-                "Cannot generate DORA RoI export: main entity has no legal identifier. "
-                "Please set a legal identifier (LEI, EUID, KBO, VAT, DUNS) in the main entity before exporting."
-            )
 
     authority = main_entity.dora_competent_authority or "UNKNOWN"
     folder_prefix = f"{key_name}_{code}.{level}_{authority}_DOR_DORA_ROI"
@@ -118,7 +111,7 @@ def get_entity_identifier(
         Tuple of (identifier_code, identifier_type, key_name)
     """
     if priority is None:
-        priority = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+        priority = IDENTIFIER_PRIORITY
 
     if not entity or not entity.legal_identifiers:
         return "", "", ""
@@ -545,8 +538,7 @@ def generate_b_02_02_ict_services(
                 provider_code, provider_code_type = "", ""
                 if contract.provider_entity:
                     provider_code, provider_code_type, _ = get_entity_identifier(
-                        contract.provider_entity,
-                        priority=["LEI", "EUID", "KBO", "VAT", "DUNS"],
+                        contract.provider_entity
                     )
                 provider_code = provider_code or "0"
 
@@ -786,9 +778,7 @@ def generate_b_03_02_ict_providers(
         # Get provider identifier (prioritize LEI)
         # c0020 is typed dimension eba_typ:IS — use "0" if empty
         # c0030 is enumeration metric — keep empty when c0020 has no real value
-        provider_code, code_type, _ = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
-        )
+        provider_code, code_type, _ = get_entity_identifier(provider)
         provider_code = provider_code or "0"
 
         csv_writer.writerow([contract_ref, provider_code, code_type])
@@ -997,9 +987,7 @@ def generate_b_05_01_provider_details(
         # c0010, c0020: Provider identifier (prioritize LEI)
         # c0010 is typed dimension eba_typ:IS — use "0" if empty
         # c0020 is enumeration metric — keep empty when c0010 has no real value
-        provider_code, code_type, _ = get_entity_identifier(
-            provider, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
-        )
+        provider_code, code_type, _ = get_entity_identifier(provider)
         provider_code = provider_code or "0"
 
         # c0050: Provider legal name
@@ -1028,7 +1016,7 @@ def generate_b_05_01_provider_details(
         ultimate_parent = get_ultimate_parent(provider)
         if ultimate_parent:
             parent_code, parent_code_type, _ = get_entity_identifier(
-                ultimate_parent, priority=["LEI", "EUID", "KBO", "VAT", "DUNS"]
+                ultimate_parent
             )
         if not parent_code:
             parent_code = provider_code
