@@ -150,12 +150,12 @@ class TestDoraExportNoData:
         response = authenticated_client.get(DORA_EXPORT_URL)
         assert response.status_code == 400
 
-    def test_main_entity_without_lei_returns_400(
+    def test_main_entity_without_any_identifier_returns_400(
         self, authenticated_client, app_config
     ):
-        # startup() creates a builtin Main entity — update it to have VAT only
+        # startup() creates a builtin Main entity — update it to have no identifiers
         main_entity = Entity.get_main_entity()
-        main_entity.legal_identifiers = {"VAT": "BE0123456789"}
+        main_entity.legal_identifiers = {}
         main_entity.save()
         response = authenticated_client.get(DORA_EXPORT_URL)
         assert response.status_code == 400
@@ -184,7 +184,7 @@ class TestDoraExportEndpoint:
         response = authenticated_client.get(DORA_EXPORT_URL)
         disposition = response["Content-Disposition"]
         assert "LEI_APITESTLEI00000000000" in disposition
-        assert "CON_FSMA" in disposition
+        assert "IND_FSMA" in disposition
         assert disposition.endswith('.zip"')
 
     def test_zip_is_valid(self, authenticated_client, dora_data):
@@ -252,7 +252,7 @@ class TestDoraExportEndpoint:
         response = authenticated_client.get(DORA_EXPORT_URL)
         rows = _read_csv_from_zip(response.content, "parameters.csv")
         params = dict(rows[1:])
-        assert "rs:APITESTLEI00000000000.CON" == params["entityID"]
+        assert "rs:APITESTLEI00000000000.IND" == params["entityID"]
         assert params["baseCurrency"] == "iso4217:EUR"
 
     def test_filing_indicators_all_true(self, authenticated_client, dora_data):
