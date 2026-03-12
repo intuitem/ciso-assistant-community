@@ -504,6 +504,9 @@ class LibraryUpdater:
             ]
             super().__init__("Score boundaries changed, user decision required")
 
+    class DuplicatedQuestionURNs(Exception):
+        pass
+
     def __init__(
         self,
         old_library: "LoadedLibrary",
@@ -674,7 +677,7 @@ class LibraryUpdater:
                     requirement_nodes
                 )
                 if len(duplicated_question_urns) > 0:
-                    raise ValueError(
+                    raise LibraryUpdater.DuplicatedQuestionURNs(
                         f"The following question URNs are duplicated: {duplicated_question_urns!r}"
                     )
 

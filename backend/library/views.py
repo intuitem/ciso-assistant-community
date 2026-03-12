@@ -876,10 +876,17 @@ class LoadedLibraryViewSet(BaseModelViewSet):
                 },
                 status=HTTP_409_CONFLICT,
             )
+        except LibraryUpdater.DuplicatedQuestionURNs as e:
+            return Response(
+                {
+                    "error": str(e),
+                },
+                status=HTTP_400_BAD_REQUEST,
+            )
         except Exception as e:
             logger.error("Failed to update library", error=e)
             return Response(
-                {"error": f"Library update failed: {e}"},
+                {"error": f"Library update failed."},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
         if error_msg is None:
