@@ -1533,10 +1533,13 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
             ).exists():
                 reasons.append("all its solutions are missing ICT service type")
             reason = "; ".join(reasons) if reasons else "unknown reason"
+            # Contracts excluded from B_05.02 scope by design (intragroup,
+            # missing provider, etc.) are informational, not errors.
+            severity = "info" if reasons else "error"
             contract_ref = contract.ref_id or contract.name
             results.append(
                 {
-                    "severity": "error",
+                    "severity": severity,
                     "category": "Cross-table (B_02.01 \u2194 B_05.02)",
                     "message": (
                         f"Contract '{contract_ref}' is in B_02.01 but missing from B_05.02: "
