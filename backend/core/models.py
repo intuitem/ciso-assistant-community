@@ -8560,8 +8560,7 @@ class CustomEmailTemplate(AbstractBaseModel, FolderMixin):
     )
     is_active = models.BooleanField(default=True)
 
-    class Meta:
-        unique_together = ("template_key", "language")
+    fields_to_check = ["template_key", "language"]
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"
@@ -8589,8 +8588,7 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
     )
     is_active = models.BooleanField(default=True)
 
-    class Meta:
-        unique_together = ("template_key", "language")
+    fields_to_check = ["template_key", "language"]
 
     def __str__(self):
         return f"{self.template_key} ({self.language})"

@@ -75,9 +75,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "unique_together": {("template_key", "language")},
-            },
+            options={},
         ),
         migrations.CreateModel(
             name="CustomWordTemplate",
@@ -137,8 +135,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={
-                "unique_together": {("template_key", "language")},
-            },
+            options={},
         ),
     ]
