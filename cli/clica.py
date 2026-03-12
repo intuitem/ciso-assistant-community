@@ -262,7 +262,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Asset",
         "help": (
             "Import assets from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, type (PR=primary/SP=support), description, "
             "business_value, reference_link, observation, filtering_labels, "
             "parent_assets, domain (folder name)\n"
@@ -278,7 +278,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "AppliedControl",
         "help": (
             "Import applied controls from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, category, "
             "status (to_do/in_progress/on_hold/active/deprecated), csf_function, "
             "priority, effort (XS/S/M/L/XL), control_impact (1-5), "
@@ -297,7 +297,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Evidence",
         "help": (
             "Import evidences from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, filtering_labels, domain\n"
             "\nConflict detection: by name + folder"
         ),
@@ -311,7 +311,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "User",
         "help": (
             "Import users from CSV/Excel.\n"
-            "\nRequired columns: email\n"
+            "\nRequired columns: email\n\n"
             "Optional columns: first_name, last_name\n"
             "\nConflict detection: by email"
         ),
@@ -325,7 +325,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Folder",
         "help": (
             "Import folders (domains) from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: description, domain (parent folder name)\n"
             "\nConflict detection: by name + parent folder"
         ),
@@ -339,7 +339,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Perimeter",
         "help": (
             "Import perimeters from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, domain\n"
             "\nConflict detection: by name + folder"
         ),
@@ -354,7 +354,7 @@ DATA_WIZARD_COMMANDS = [
         "help": (
             "Import compliance assessment results from CSV/Excel.\n"
             "Creates a new assessment and updates matching requirement results.\n"
-            "\nRequired columns: ref_id or urn, assessable (must be truthy)\n"
+            "\nRequired columns: ref_id or urn, assessable (must be truthy)\n\n"
             "Optional columns: compliance_result, requirement_progress, observations, "
             "score, implementation_score, documentation_score, answers\n"
             "\nNote: always creates a new assessment; conflict management is not applicable."
@@ -370,7 +370,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "FindingsAssessment",
         "help": (
             "Import findings into a new findings assessment from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
             "severity (info/low/medium/high/critical), priority (1-4), "
             "eta, due_date, observation, filtering_labels\n"
@@ -386,7 +386,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "RiskAssessment",
         "help": (
             "Import risk scenarios into a new risk assessment from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, threat, "
             "existing_applied_controls (newline-separated names), "
             "additional_controls (newline-separated names), "
@@ -406,7 +406,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "ElementaryAction",
         "help": (
             "Import elementary actions from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, "
             "attack_stage (know/enter/discover/exploit), icon, domain\n"
             "\nConflict detection: by name + folder"
@@ -421,7 +421,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "ReferenceControl",
         "help": (
             "Import reference controls from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, "
             "category (policy/process/technical/physical/procedure), "
             "function (govern/identify/protect/detect/respond/recover), domain\n"
@@ -437,7 +437,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Threat",
         "help": (
             "Import threats from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, domain\n"
             "\nConflict detection: by name + folder"
         ),
@@ -451,7 +451,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Processing",
         "help": (
             "Import privacy processings from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, status, "
             "dpia_required (true/false), dpia_reference, "
             "processing_nature (comma-separated), "
@@ -469,7 +469,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Policy",
         "help": (
             "Import policies from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, "
             "status (to_do/in_progress/on_hold/active/deprecated), "
             "csf_function, priority, effort (XS/S/M/L/XL), "
@@ -486,7 +486,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "SecurityException",
         "help": (
             "Import security exceptions from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, "
             "severity (info/low/medium/high/critical), "
             "status (draft/in_review/approved/resolved/expired/deprecated), "
@@ -503,7 +503,7 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Incident",
         "help": (
             "Import incidents from CSV/Excel.\n"
-            "\nRequired columns: name\n"
+            "\nRequired columns: name\n\n"
             "Optional columns: ref_id, description, "
             "severity (critical/major/moderate/minor/low/unknown), "
             "status (new/ongoing/resolved/closed/dismissed), "
