@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import FileUploadParser
 
 from .serializers import LoadFileSerializer
+from core.base_models import AbstractBaseModel
 from core.models import (
     Actor,
     Asset,
@@ -324,7 +325,7 @@ class RecordConsumer[Context](ABC):
     ) -> tuple[dict, Optional[Error]]:
         pass
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[type[AbstractBaseModel]]:
         """Find an existing record matching this data based on the model's fields_to_check."""
         model_class = self.SERIALIZER_CLASS.Meta.model
         fields_to_check = getattr(model_class, "fields_to_check", [])
@@ -753,7 +754,7 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
 class UserRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = UserWriteSerializer
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[User]:
         email = record_data.get("email")
         if not email:
             return None
@@ -1211,7 +1212,7 @@ class FolderRecordConsumer(RecordConsumer[None]):
     def create_context(self):
         return None, None
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[Folder]:
         name = record_data.get("name")
         if not name:
             return None
@@ -1717,7 +1718,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
             resolved.append(evidence.id)
         return resolved, None
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[AssetAssessment]:
         bia_id = record_data.get("bia")
         asset_id = record_data.get("asset")
         if not bia_id or not asset_id:
@@ -1884,7 +1885,7 @@ class EscalationThresholdRecordConsumer(RecordConsumer[None]):
             resolved.append(qualification.id)
         return resolved, None
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[EscalationThreshold]:
         asset_assessment_id = record_data.get("asset_assessment")
         point_in_time = record_data.get("point_in_time")
         if not asset_assessment_id or point_in_time is None:
