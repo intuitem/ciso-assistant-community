@@ -1,5 +1,6 @@
 import io
 import logging
+from types import MappingProxyType
 import pandas as pd
 from rest_framework import status
 from rest_framework.views import APIView
@@ -88,7 +89,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from datetime import datetime
-from typing import Optional, Final, ClassVar
+from typing import Optional, Final, ClassVar, Mapping
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -297,7 +298,7 @@ class RecordConsumer[Context](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
-    SOURCE_KEY_MAP: ClassVar[dict[str, list[str]]] = {}
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({})
 
     def __init__(self, base_context: BaseContext):
         self.request = base_context.request
@@ -472,9 +473,9 @@ class AssetRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AssetWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "reference_link": ["reference_link", "link"],
-    }
+    })
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
         "pr": "PR",
@@ -573,11 +574,11 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "control_impact": ["control_impact", "impact"],
         "reference_control": ["reference_control", "reference_control_ref_id"],
         "owner": ["owner"],
-    }
+    })
     IMPACT_MAP: Final[dict[str, int]] = {
         "very low": 1,
         "low": 2,
@@ -832,9 +833,9 @@ class ThreatRecordConsumer(RecordConsumer[None]):
 
 class ReferenceControlRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "csf_function": ["function"],
-    }
+    })
     CATEGORY_MAP: Final[dict[str, str]] = {
         "policy": "policy",
         "process": "process",
@@ -1205,9 +1206,9 @@ class FolderRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = FolderWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "parent_folder": ["domain"],
-    }
+    })
 
     def create_context(self):
         return None, None
@@ -1356,10 +1357,10 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
     """
 
     SERIALIZER_CLASS = ProcessingWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "nature": ["processing_nature"],
         "filtering_labels": ["labels"],
-    }
+    })
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
@@ -1432,7 +1433,7 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "perimeter": ["perimeter", "perimeter_ref_id", "perimeter_name"],
         "risk_matrix": [
             "risk_matrix",
@@ -1441,7 +1442,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
             "matrix",
         ],
         "bia": ["bia", "bia_name"],
-    }
+    })
 
     def create_context(self):
         return None, None
@@ -1576,10 +1577,10 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
 
 class AssetAssessmentRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = AssetAssessmentWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "bia": ["bia", "bia_name"],
         "asset": ["asset", "asset_ref_id", "asset_name"],
-    }
+    })
 
     def create_context(self):
         return None, None
@@ -1770,11 +1771,11 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
 
 class EscalationThresholdRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = EscalationThresholdWriteSerializer
-    SOURCE_KEY_MAP: Final[dict[str, list[str]]] = {
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "bia": ["bia", "bia_name"],
         "asset": ["asset", "asset_ref_id", "asset_name"],
         "asset_assessment": ["asset_assessment"],
-    }
+    })
 
     def create_context(self):
         return None, None
