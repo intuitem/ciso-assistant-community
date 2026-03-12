@@ -567,9 +567,8 @@ def send_notification_email_expired_eta(owner_email, controls):
 @task()
 def send_notification_email(subject, message, owner_email, html_message=None):
     try:
-        logger.info(
+        logger.debug(
             "Sending notification email",
-            subject=subject,
             recipient=owner_email,
             has_html=html_message is not None,
         )

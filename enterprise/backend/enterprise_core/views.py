@@ -644,8 +644,10 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
         if not self._has_permission(request):
             return Response(status=status.HTTP_403_FORBIDDEN)
 
-        overrides = CustomWordTemplate.objects.filter(is_active=True).values_list(
-            "template_key", "language"
+        overrides = (
+            CustomWordTemplate.objects.filter(is_active=True)
+            .exclude(file="")
+            .values_list("template_key", "language")
         )
         override_set = {(k, l) for k, l in overrides}
 
@@ -765,7 +767,9 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             core_dir / "templates" / "core" / f"{template_key}_template_{language}.docx"
         )
 
+        resolved_language = language
         if not template_path.exists() and language != "en":
+            resolved_language = "en"
             template_path = (
                 core_dir / "templates" / "core" / f"{template_key}_template_en.docx"
             )
@@ -780,5 +784,5 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             open(template_path, "rb"),
             content_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
             as_attachment=True,
-            filename=f"{template_key}_template_{language}.docx",
+            filename=f"{template_key}_template_{resolved_language}.docx",
         )

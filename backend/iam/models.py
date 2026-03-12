@@ -818,13 +818,17 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         password=EMAIL_HOST_PASSWORD_RESCUE,
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
                     ) as new_connection:
-                        EmailMessage(
+                        msg = EmailMessage(
                             subject=subject,
                             body=body,
                             from_email=None,
                             to=[self.email],
                             connection=new_connection,
-                        ).send()
+                        )
+                        if html_body:
+                            msg.content_subtype = "html"
+                            msg.body = html_body
+                        msg.send()
                     logger.info(
                         "Email sent via rescue server",
                         recipient=self.email,

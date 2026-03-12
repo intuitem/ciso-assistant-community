@@ -84,13 +84,12 @@
 				fetch('/fe-api/custom-email-templates')
 			]);
 
-			if (availableRes.ok) {
-				availableTemplates = await availableRes.json();
+			if (!availableRes.ok || !overridesRes.ok) {
+				throw new Error('Failed to load templates');
 			}
-			if (overridesRes.ok) {
-				const data = await overridesRes.json();
-				overrides = data.results || data;
-			}
+			availableTemplates = await availableRes.json();
+			const data = await overridesRes.json();
+			overrides = data.results || data;
 		} catch {
 			error = 'Failed to load templates';
 		}
@@ -130,17 +129,20 @@
 	}
 
 	async function loadDefault() {
+		editSubject = '';
+		editBody = '';
 		try {
 			const res = await fetch(
 				`/fe-api/custom-email-templates/default/${editingKey}/${editingLang}`
 			);
-			if (res.ok) {
-				const data = await res.json();
-				editSubject = data.subject;
-				editBody = data.body;
+			if (!res.ok) {
+				throw new Error('Failed to load default template');
 			}
+			const data = await res.json();
+			editSubject = data.subject;
+			editBody = data.body;
 		} catch {
-			// keep current values
+			error = 'Failed to load default template';
 		}
 	}
 

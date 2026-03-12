@@ -941,7 +941,7 @@
 	"customized": "Customized",
 	"defaultTemplate": "Default",
 	"loadDefault": "Load default",
-	"templateSaved": "Email template saved successfully",
+	"templateSaved": "Template saved successfully",
 	"templateReset": "Template reset to default",
 	"confirmResetTemplate": "Are you sure you want to reset this template to default? Your customization will be lost.",
 	"templatePreview": "Preview",

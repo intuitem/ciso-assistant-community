@@ -46,13 +46,12 @@
 				fetch('/fe-api/custom-word-templates')
 			]);
 
-			if (availableRes.ok) {
-				availableTemplates = await availableRes.json();
+			if (!availableRes.ok || !overridesRes.ok) {
+				throw new Error('Failed to load templates');
 			}
-			if (overridesRes.ok) {
-				const data = await overridesRes.json();
-				overrides = data.results || data;
-			}
+			availableTemplates = await availableRes.json();
+			const data = await overridesRes.json();
+			overrides = data.results || data;
 		} catch {
 			error = 'Failed to load templates';
 		}

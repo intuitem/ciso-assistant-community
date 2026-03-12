@@ -8583,7 +8583,11 @@ class CustomWordTemplate(AbstractBaseModel, FolderMixin):
     )
     file = models.FileField(
         upload_to="custom_word_templates/",
-        validators=[FileExtensionValidator(["docx"])],
+        validators=[
+            FileExtensionValidator(["docx"]),
+            validate_file_size,
+            validate_file_name,
+        ],
         help_text=_("Custom .docx template file"),
     )
     is_active = models.BooleanField(default=True)
