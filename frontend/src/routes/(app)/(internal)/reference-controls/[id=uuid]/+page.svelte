@@ -64,7 +64,7 @@
 			<span class="mr-2">
 				<i class="fa-solid fa-arrows-rotate mr-2"></i>
 			</span>
-			{m.syncToAppliedControls()}
+			{m.syncToAppliedControl()}
 		</button>
 	{/snippet}
 </DetailView>

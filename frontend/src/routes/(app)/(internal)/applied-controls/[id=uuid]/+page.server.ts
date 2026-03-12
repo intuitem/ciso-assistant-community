@@ -18,7 +18,7 @@ export const actions: Actions = {
 		const form = await superValidate(formData, zod(schema));
 
 		const response = await event.fetch(
-			`${BASE_API_URL}/applied-controls/${event.params.id}/sync-to-reference-control/`,
+			`${BASE_API_URL}/applied-controls/${event.params.id}/sync-to-reference-control/?dry_run=false`,
 			{
 				method: 'POST',
 				headers: {

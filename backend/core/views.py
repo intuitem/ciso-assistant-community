@@ -5001,8 +5001,13 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="sync-to-reference-control")
     def sync_applied_controls(self, request, pk):
+        dry_run = request.query_params.get("dry_run", True)
+        if dry_run == "false":
+            dry_run = False
+
         applied_control = self.get_object()
         reference_control = applied_control.reference_control
+        changes: list[tuple[str, str]] = [] # List of (old_value, new_value) tuples.
 
         FIELDS_TO_SYNC: Final[list[str]] = [
             "category",
@@ -5012,7 +5017,14 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         for field_to_sync in FIELDS_TO_SYNC:
             reference_control_value = getattr(reference_control, field_to_sync)
 
+            applied_control_value = getattr(applied_control, field_to_sync)
+            if reference_control_value != applied_control_value:
+                changes.append((reference_control_value, applied_control_value))
+
             setattr(applied_control, field_to_sync, reference_control_value)
+
+        if dry_run:
+            return Response(changes)
 
         skip_sync = all(
             field_to_sync not in AppliedControl.INTEGRATION_SYNCABLE_FIELDS
@@ -5020,7 +5032,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         )
         applied_control.save(update_fields=FIELDS_TO_SYNC, skip_sync=skip_sync)
 
-        return Response({"id": applied_control.id, "name": applied_control.name})
+        return Response(changes)
 
 
 class ActionPlanList(generics.ListAPIView):

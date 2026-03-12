@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { safeTranslate } from '$lib/utils/i18n';
 	import DetailView from '$lib/components/DetailView/DetailView.svelte';
 	import { m } from '$paraglide/messages';
 	import { page } from '$app/state';
@@ -8,8 +9,12 @@
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
 	import List from '$lib/components/List/List.svelte';
 
+	interface LocalPageData extends PageData {
+		dryRunData: [string, string][];
+	}
+
 	interface Props {
-		data: PageData;
+		data: LocalPageData;
 	}
 
 	let { data }: Props = $props();
@@ -19,15 +24,6 @@
 	async function modalConfirmSyncAppliedControls() {
 		const appliedControlId = page.params.id;
 
-		/* const endpoint = `/applied-controls/${appliedControlId}/sync-to-reference-control`;
-		const syncableAppliedControls = await fetch(endpoint).then((response) => {
-			if (response.ok) {
-				return response.json();
-			} else {
-				throw new Error('Failed to sync applied control.');
-			}
-		}); */
-
 		const modalComponent: ModalComponent = {
 			ref: ConfirmModal,
 			props: {
@@ -35,26 +31,28 @@
 				id: appliedControlId,
 				URLModel: 'reference-controls',
 				formAction: '?/syncAppliedControls',
-				bodyComponent: List
-				/* bodyProps: {
-					items: syncableAppliedControls.map((appliedControl) => appliedControl.name),
-					message: m.confirmModalMessagePlural()
-				} */
+				bodyComponent: List,
+				bodyProps: {
+					items: dryRunData.map(
+						([oldValue, newValue]) => `${safeTranslate(oldValue)} -> ${safeTranslate(newValue)}`
+					),
+					message: m.theFollowingChangesWillBeApplied()
+				}
 			}
 		};
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: m.syncToReferenceControl()
+			title: m.syncToReferenceControl(),
+			body: ''
 		};
 		modalStore.trigger(modal);
 	}
 
-	let appliedControl = $derived(data.data);
-	let hasReferenceControl = $derived(appliedControl['reference_control'] !== null);
+	let dryRunData: [string, string][] = $derived(data.dryRunData);
 </script>
 
-{#if hasReferenceControl}
+{#if dryRunData.length > 0}
 	<DetailView {data}>
 		{#snippet widgets()}
 			<button
