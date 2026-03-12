@@ -260,7 +260,14 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_assets",
         "model_type": "Asset",
-        "help": "Import assets using the Data Wizard backend.",
+        "help": (
+            "Import assets from CSV/Excel.\n"
+            "\nRequired columns: name\n"
+            "Optional columns: ref_id, description, type (primary/support), "
+            "domain, business_value, observation, reference_link (or link), "
+            "security_objectives, disaster_recovery_objectives, parent_assets, "
+            "labels (or filtering_labels / étiquette / label)\n"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,

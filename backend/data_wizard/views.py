@@ -537,6 +537,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = AssetWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
         "reference_link": ("reference_link", "link"),
+        "filtering_labels": ("filtering_labels", "labels", "étiquette", "label"),
     }
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
@@ -579,7 +580,13 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "observation": record.get("observation", ""),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        filtering_labels = _resolve_filtering_labels(raw_labels)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
