@@ -295,7 +295,7 @@ class BaseContext:
     on_conflict: ConflictMode = ConflictMode.STOP
 
 
-class RecordConsumer[Context](ABC):
+class RecordConsumer[Context=None](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
@@ -467,7 +467,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -567,7 +567,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+class AppliedControlRecordConsumer(RecordConsumer):
     """
     Consumer for importing AppliedControl records.
     Supports reference_control linking via ref_id and owner resolution
@@ -721,7 +721,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         return actor_ids
 
 
-class EvidenceRecordConsumer(RecordConsumer[None]):
+class EvidenceRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = EvidenceWriteSerializer
 
     def create_context(self):
@@ -753,7 +753,7 @@ class EvidenceRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
-class UserRecordConsumer(RecordConsumer[None]):
+class UserRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = UserWriteSerializer
 
     def find_existing(self, record_data: dict) -> Optional[User]:
@@ -779,7 +779,7 @@ class UserRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class PerimeterRecordConsumer(RecordConsumer[None]):
+class PerimeterRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = PerimeterWriteSerializer
 
     def create_context(self):
@@ -806,7 +806,7 @@ class PerimeterRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class ThreatRecordConsumer(RecordConsumer[None]):
+class ThreatRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = ThreatWriteSerializer
 
     def create_context(self):
@@ -832,7 +832,7 @@ class ThreatRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class ReferenceControlRecordConsumer(RecordConsumer[None]):
+class ReferenceControlRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "csf_function": ["function"],
@@ -985,7 +985,7 @@ class FindingsAssessmentRecordConsumer(RecordConsumer[FindingsAssessmentContext]
         return finding_data, None
 
 
-class PolicyRecordConsumer(RecordConsumer[None]):
+class PolicyRecordConsumer(RecordConsumer):
     """
     Consumer for importing Policy records.
     Policy is a proxy model of AppliedControl with category='policy'.
@@ -1037,7 +1037,7 @@ class PolicyRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
-class SecurityExceptionRecordConsumer(RecordConsumer[None]):
+class SecurityExceptionRecordConsumer(RecordConsumer):
     """
     Consumer for importing SecurityException records.
     """
@@ -1104,7 +1104,7 @@ class SecurityExceptionRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class IncidentRecordConsumer(RecordConsumer[None]):
+class IncidentRecordConsumer(RecordConsumer):
     """
     Consumer for importing Incident records.
     """
@@ -1200,7 +1200,7 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
-class FolderRecordConsumer(RecordConsumer[None]):
+class FolderRecordConsumer(RecordConsumer):
     """
     Consumer for importing Folder (domain) records.
     Supports stop/skip/update conflict management by name + parent_folder.
@@ -1256,7 +1256,7 @@ class FolderRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class ElementaryActionRecordConsumer(RecordConsumer[None]):
+class ElementaryActionRecordConsumer(RecordConsumer):
     """
     Consumer for importing ElementaryAction records.
     Supports stop/skip/update conflict management by name + folder.
@@ -1352,7 +1352,7 @@ class ElementaryActionRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
-class ProcessingRecordConsumer(RecordConsumer[None]):
+class ProcessingRecordConsumer(RecordConsumer):
     """
     Consumer for importing Processing (privacy) records.
     Supports stop/skip/update conflict management by name + folder.
@@ -1438,7 +1438,7 @@ class ProcessingRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
-class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
+class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "perimeter": ["perimeter", "perimeter_ref_id", "perimeter_name"],
@@ -1582,7 +1582,7 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class AssetAssessmentRecordConsumer(RecordConsumer[None]):
+class AssetAssessmentRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = AssetAssessmentWriteSerializer
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "bia": ["bia", "bia_name"],
@@ -1776,7 +1776,7 @@ class AssetAssessmentRecordConsumer(RecordConsumer[None]):
         }, None
 
 
-class EscalationThresholdRecordConsumer(RecordConsumer[None]):
+class EscalationThresholdRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = EscalationThresholdWriteSerializer
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
         "bia": ["bia", "bia_name"],
