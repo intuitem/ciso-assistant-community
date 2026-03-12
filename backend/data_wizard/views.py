@@ -2177,8 +2177,6 @@ class LoadFileView(APIView):
         framework_id,
         matrix_id=None,
     ):
-        folders_map = get_accessible_folders_map(request.user)
-
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
