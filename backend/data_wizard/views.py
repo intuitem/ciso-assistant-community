@@ -295,7 +295,7 @@ class BaseContext:
     on_conflict: ConflictMode = ConflictMode.STOP
 
 
-class RecordConsumer[Context=None](ABC):
+class RecordConsumer[Context = None](ABC):
     SERIALIZER_CLASS: ClassVar[type[BaseModelSerializer]]
     # Maps record_data keys to possible source record keys when they differ.
     # Override in subclasses that use alternative/aliased column names.
@@ -474,9 +474,11 @@ class AssetRecordConsumer(RecordConsumer):
     """
 
     SERIALIZER_CLASS = AssetWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "reference_link": ["reference_link", "link"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "reference_link": ["reference_link", "link"],
+        }
+    )
     TYPE_MAP: Final[dict[str, str]] = {
         "primary": "PR",
         "pr": "PR",
@@ -575,32 +577,38 @@ class AppliedControlRecordConsumer(RecordConsumer):
     """
 
     SERIALIZER_CLASS = AppliedControlWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "control_impact": ["control_impact", "impact"],
-        "reference_control": ["reference_control", "reference_control_ref_id"],
-        "owner": ["owner"],
-    })
-    IMPACT_MAP: ClassVar[Mapping[str, int]] = MappingProxyType({
-        "very low": 1,
-        "low": 2,
-        "medium": 3,
-        "high": 4,
-        "very high": 5,
-    })
-    EFFORT_MAP: ClassVar[Mapping[str, str]] = MappingProxyType({
-        "extra small": "XS",
-        "extrasmall": "XS",
-        "xs": "XS",
-        "small": "S",
-        "s": "S",
-        "medium": "M",
-        "m": "M",
-        "large": "L",
-        "l": "L",
-        "extra large": "XL",
-        "extralarge": "XL",
-        "xl": "XL",
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "control_impact": ["control_impact", "impact"],
+            "reference_control": ["reference_control", "reference_control_ref_id"],
+            "owner": ["owner"],
+        }
+    )
+    IMPACT_MAP: ClassVar[Mapping[str, int]] = MappingProxyType(
+        {
+            "very low": 1,
+            "low": 2,
+            "medium": 3,
+            "high": 4,
+            "very high": 5,
+        }
+    )
+    EFFORT_MAP: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            "extra small": "XS",
+            "extrasmall": "XS",
+            "xs": "XS",
+            "small": "S",
+            "s": "S",
+            "medium": "M",
+            "m": "M",
+            "large": "L",
+            "l": "L",
+            "extra large": "XL",
+            "extralarge": "XL",
+            "xl": "XL",
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -834,9 +842,11 @@ class ThreatRecordConsumer(RecordConsumer):
 
 class ReferenceControlRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = ReferenceControlWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "csf_function": ["function"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "csf_function": ["function"],
+        }
+    )
     CATEGORY_MAP: Final[dict[str, str]] = {
         "policy": "policy",
         "process": "process",
@@ -1207,9 +1217,11 @@ class FolderRecordConsumer(RecordConsumer):
     """
 
     SERIALIZER_CLASS = FolderWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "parent_folder": ["domain"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "parent_folder": ["domain"],
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -1263,54 +1275,58 @@ class ElementaryActionRecordConsumer(RecordConsumer):
     """
 
     SERIALIZER_CLASS = ElementaryActionWriteSerializer
-    ATTACK_STAGE_MAP: ClassVar[Mapping[str, int]] = MappingProxyType({
-        # English
-        "know": 0,
-        "reconnaissance": 0,
-        "ebiosreconnaissance": 0,
-        "enter": 1,
-        "initial access": 1,
-        "ebiosinitialaccess": 1,
-        "discover": 2,
-        "discovery": 2,
-        "ebiosdiscovery": 2,
-        "exploit": 3,
-        "exploitation": 3,
-        "ebiosexploitation": 3,
-        # French
-        "connaitre": 0,
-        "connaître": 0,
-        "pénétrer": 1,
-        "penetrer": 1,
-        "entrer": 1,
-        "trouver": 2,
-        "découvrir": 2,
-        "decouvrir": 2,
-        "exploiter": 3,
-    })
-    ICON_MAP: ClassVar[Mapping[str, str]] = MappingProxyType({
-        icon.lower(): icon
-        for icon in [
-            "server",
-            "computer",
-            "cloud",
-            "file",
-            "diamond",
-            "phone",
-            "cube",
-            "blocks",
-            "shapes",
-            "network",
-            "database",
-            "key",
-            "search",
-            "carrot",
-            "money",
-            "skull",
-            "globe",
-            "usb",
-        ]
-    })
+    ATTACK_STAGE_MAP: ClassVar[Mapping[str, int]] = MappingProxyType(
+        {
+            # English
+            "know": 0,
+            "reconnaissance": 0,
+            "ebiosreconnaissance": 0,
+            "enter": 1,
+            "initial access": 1,
+            "ebiosinitialaccess": 1,
+            "discover": 2,
+            "discovery": 2,
+            "ebiosdiscovery": 2,
+            "exploit": 3,
+            "exploitation": 3,
+            "ebiosexploitation": 3,
+            # French
+            "connaitre": 0,
+            "connaître": 0,
+            "pénétrer": 1,
+            "penetrer": 1,
+            "entrer": 1,
+            "trouver": 2,
+            "découvrir": 2,
+            "decouvrir": 2,
+            "exploiter": 3,
+        }
+    )
+    ICON_MAP: ClassVar[Mapping[str, str]] = MappingProxyType(
+        {
+            icon.lower(): icon
+            for icon in [
+                "server",
+                "computer",
+                "cloud",
+                "file",
+                "diamond",
+                "phone",
+                "cube",
+                "blocks",
+                "shapes",
+                "network",
+                "database",
+                "key",
+                "search",
+                "carrot",
+                "money",
+                "skull",
+                "globe",
+                "usb",
+            ]
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -1361,10 +1377,12 @@ class ProcessingRecordConsumer(RecordConsumer):
     """
 
     SERIALIZER_CLASS = ProcessingWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "nature": ["processing_nature"],
-        "filtering_labels": ["labels"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "nature": ["processing_nature"],
+            "filtering_labels": ["labels"],
+        }
+    )
 
     def _build_update_data(self, record: dict, record_data: dict) -> dict:
         update_data = super()._build_update_data(record, record_data)
@@ -1421,9 +1439,7 @@ class ProcessingRecordConsumer(RecordConsumer):
         # Resolve M2M: assigned_to (by user email → Actor)
         record_assigned_to = record.get("assigned_to")
         if record_assigned_to:
-            emails = [
-                email.strip() for email in str(record_assigned_to).split(",")
-            ]
+            emails = [email.strip() for email in str(record_assigned_to).split(",")]
             data["assigned_to"] = list(
                 Actor.objects.filter(user__email__in=emails).values_list(
                     "id", flat=True
@@ -1440,16 +1456,18 @@ class ProcessingRecordConsumer(RecordConsumer):
 
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "perimeter": ["perimeter", "perimeter_ref_id", "perimeter_name"],
-        "risk_matrix": [
-            "risk_matrix",
-            "risk_matrix_ref_id",
-            "risk_matrix_name",
-            "matrix",
-        ],
-        "bia": ["bia", "bia_name"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "perimeter": ["perimeter", "perimeter_ref_id", "perimeter_name"],
+            "risk_matrix": [
+                "risk_matrix",
+                "risk_matrix_ref_id",
+                "risk_matrix_name",
+                "matrix",
+            ],
+            "bia": ["bia", "bia_name"],
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -1584,10 +1602,12 @@ class BusinessImpactAnalysisRecordConsumer(RecordConsumer):
 
 class AssetAssessmentRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = AssetAssessmentWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "bia": ["bia", "bia_name"],
-        "asset": ["asset", "asset_ref_id", "asset_name"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "bia": ["bia", "bia_name"],
+            "asset": ["asset", "asset_ref_id", "asset_name"],
+        }
+    )
 
     def create_context(self):
         return None, None
@@ -1778,11 +1798,13 @@ class AssetAssessmentRecordConsumer(RecordConsumer):
 
 class EscalationThresholdRecordConsumer(RecordConsumer):
     SERIALIZER_CLASS = EscalationThresholdWriteSerializer
-    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType({
-        "bia": ["bia", "bia_name"],
-        "asset": ["asset", "asset_ref_id", "asset_name"],
-        "asset_assessment": ["asset_assessment"],
-    })
+    SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
+        {
+            "bia": ["bia", "bia_name"],
+            "asset": ["asset", "asset_ref_id", "asset_name"],
+            "asset_assessment": ["asset_assessment"],
+        }
+    )
 
     def create_context(self):
         return None, None
