@@ -181,8 +181,10 @@ class EntityViewSet(BaseModelViewSet):
         entities_for_b_01_02 = [main_entity] + subsidiaries
 
         # Prepare contract QuerySets
-        contracts = Contract.objects.filter(id__in=viewable_contracts).exclude(
-            status=Contract.Status.DRAFT
+        contracts = (
+            Contract.objects.filter(id__in=viewable_contracts)
+            .exclude(status=Contract.Status.DRAFT)
+            .exclude(dora_exclude=True)
         )
 
         # Prepare business functions

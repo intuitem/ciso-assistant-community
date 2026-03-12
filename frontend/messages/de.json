@@ -1962,6 +1962,7 @@
 	"isEnabled": "Aktiviert",
 	"isHighlighted": "Ist hervorgehoben",
 	"isIntragroup": "Ist konzernintern",
+	"doraExclude": "Exclude from DORA RoI",
 	"isLocked": "Gesperrt",
 	"isLockedHelpText": "Sperren Sie diese Bewertung, um Änderungen daran oder an den zugehörigen Elementen zu verhindern.",
 	"isRecurrent": "Wiederkehrend",

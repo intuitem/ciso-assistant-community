@@ -3134,6 +3134,7 @@
 	"terminationReason": "Termination Reason",
 	"governingLawCountry": "Governing Law Country",
 	"isIntragroup": "Is Intra-group",
+	"doraExclude": "Exclude from DORA RoI",
 	"noticePeriodEntity": "Notice Period for Entity (days)",
 	"noticePeriodProvider": "Notice Period for Provider (days)",
 	"storageOfData": "Is storing data",

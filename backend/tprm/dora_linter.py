@@ -30,7 +30,11 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
 
     # Get all provider entities from non-draft third-party contracts
     provider_entities = (
-        Entity.objects.filter(contracts__is_intragroup=False, contracts__isnull=False)
+        Entity.objects.filter(
+            contracts__is_intragroup=False,
+            contracts__isnull=False,
+            contracts__dora_exclude=False,
+        )
         .exclude(contracts__status=Contract.Status.DRAFT)
         .distinct()
     )
@@ -732,8 +736,10 @@ def lint_contracts() -> List[Dict[str, Any]]:
     results = []
 
     # Get all contracts
-    contracts = Contract.objects.exclude(status=Contract.Status.DRAFT).select_related(
-        "beneficiary_entity"
+    contracts = (
+        Contract.objects.exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
+        .select_related("beneficiary_entity")
     )
 
     if not contracts.exists():
@@ -941,6 +947,7 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
             solutions__assets__id__in=business_function_asset_ids,
         )
         .exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
         .distinct()
         .select_related("provider_entity", "beneficiary_entity")
         .prefetch_related("solutions")
@@ -1410,6 +1417,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
     # Get all non-draft contracts (same scope as B_02.01)
     all_contracts = (
         Contract.objects.exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
         .select_related("provider_entity")
         .prefetch_related("solutions")
     )
@@ -1431,6 +1439,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
                 solutions__assets__id__in=business_function_asset_ids,
             )
             .exclude(status=Contract.Status.DRAFT)
+            .exclude(dora_exclude=True)
             .distinct()
             .values_list("id", flat=True)
         )
@@ -1448,6 +1457,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
             solutions__isnull=False,
         )
         .exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
         .distinct()
     )
     # Further filter: at least one solution must have dora_ict_service_type
@@ -1569,10 +1579,14 @@ def lint_conditional_fields() -> List[Dict[str, Any]]:
     results = []
 
     # --- v8805: sub-contracting contracts must have overarching contract ---
-    subcontracting_contracts = Contract.objects.filter(
-        dora_contractual_arrangement="eba_CO:x3",
-        overarching_contract__isnull=True,
-    ).exclude(status=Contract.Status.DRAFT)
+    subcontracting_contracts = (
+        Contract.objects.filter(
+            dora_contractual_arrangement="eba_CO:x3",
+            overarching_contract__isnull=True,
+        )
+        .exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
+    )
 
     for contract in subcontracting_contracts:
         contract_ref = contract.ref_id or contract.name

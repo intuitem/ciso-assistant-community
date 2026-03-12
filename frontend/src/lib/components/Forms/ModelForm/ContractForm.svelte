@@ -203,4 +203,11 @@
 		cacheLock={cacheLocks['is_intragroup']}
 		bind:cachedValue={formDataCache['is_intragroup']}
 	/>
+	<Checkbox
+		{form}
+		field="dora_exclude"
+		label={m.doraExclude()}
+		cacheLock={cacheLocks['dora_exclude']}
+		bind:cachedValue={formDataCache['dora_exclude']}
+	/>
 </Dropdown>

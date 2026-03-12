@@ -2593,6 +2593,7 @@
 	"terminationReason": "终止原因",
 	"governingLawCountry": "适用法律国家",
 	"isIntragroup": "集团内部",
+	"doraExclude": "Exclude from DORA RoI",
 	"noticePeriodEntity": "实体通知期（天）",
 	"noticePeriodProvider": "提供商通知期（天）",
 	"storageOfData": "正在存储数据",
