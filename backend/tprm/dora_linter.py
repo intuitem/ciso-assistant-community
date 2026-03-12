@@ -603,6 +603,7 @@ def lint_business_functions() -> List[Dict[str, Any]]:
     # Check each business function's ref_id and licensed activity
     invalid_ref_ids = []
     missing_licensed_activity = []
+    duplicate_ref_ids = {}  # ref_id -> list of Assets
     valid_count = 0
 
     for bf in business_functions:
@@ -611,6 +612,10 @@ def lint_business_functions() -> List[Dict[str, Any]]:
             invalid_ref_ids.append(bf)
         else:
             valid_count += 1
+
+        # Track ref_ids to detect duplicates (causes XBRL duplicate fact errors in b_06.01)
+        effective_ref_id = bf.ref_id or str(bf.id)
+        duplicate_ref_ids.setdefault(effective_ref_id, []).append(bf)
 
         # Check licensed activity (mandatory for DORA reporting)
         if not bf.dora_licenced_activity:
@@ -629,6 +634,22 @@ def lint_business_functions() -> List[Dict[str, Any]]:
                     "object_type": "assets",
                     "object_id": str(bf.id),
                     "object_name": bf.name,
+                }
+            )
+
+    # Report duplicate ref_ids
+    for ref_id, assets in duplicate_ref_ids.items():
+        if len(assets) > 1:
+            names = ", ".join(f"'{a.name}'" for a in assets)
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Business Functions",
+                    "message": f"Duplicate function identifier '{ref_id}' shared by {len(assets)} business functions: {names}. This will cause XBRL duplicate fact errors in b_06.01.",
+                    "field": "ref_id",
+                    "object_type": "assets",
+                    "object_id": str(assets[0].id),
+                    "object_name": assets[0].name,
                 }
             )
 
@@ -1238,6 +1259,70 @@ def lint_solutions() -> List[Dict[str, Any]]:
     return results
 
 
+def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
+    """
+    Validate solutions that appear in b_05.02 (ICT service supply chains).
+
+    b_05.02 includes all solutions on non-intragroup contracts with providers.
+    Column c0020 (Type of ICT services) is an explicit XBRL dimension and must
+    not be empty — solutions without dora_ict_service_type are silently excluded
+    from the export. This rule warns about such solutions so users can fix them.
+
+    Returns:
+        List of validation results with severity levels (warning, ok)
+    """
+    results = []
+
+    # Solutions on third-party contracts (same scope as generate_b_05_02)
+    solutions = (
+        Solution.objects.filter(
+            contracts__is_intragroup=False,
+            contracts__provider_entity__isnull=False,
+        )
+        .distinct()
+        .select_related("provider_entity")
+    )
+
+    if not solutions.exists():
+        return results
+
+    missing = solutions.filter(
+        Q(dora_ict_service_type__isnull=True) | Q(dora_ict_service_type="")
+    )
+
+    for solution in missing:
+        results.append(
+            {
+                "severity": "warning",
+                "category": "Supply Chain (B_05.02)",
+                "message": (
+                    f"Solution '{solution.name}' on a third-party contract has no "
+                    f"ICT service type — it will be excluded from the B_05.02 "
+                    f"supply chain export"
+                ),
+                "field": "dora_ict_service_type",
+                "object_type": "solutions",
+                "object_id": str(solution.id),
+                "object_name": solution.name,
+            }
+        )
+
+    if not missing.exists():
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Supply Chain (B_05.02)",
+                "message": f"All {solutions.count()} supply-chain solutions have ICT service type set",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_unique_leis(main_entity: Entity) -> List[Dict[str, Any]]:
     """
     Validate that LEIs are unique across entities included in DORA ROI report.
@@ -1339,6 +1424,7 @@ def lint_dora_roi() -> Dict[str, Any]:
     results.extend(lint_contracts())
     results.extend(lint_b_02_02_contracts())
     results.extend(lint_solutions())
+    results.extend(lint_supply_chain_solutions())
     results.extend(lint_provider_entities())
 
     # Calculate summary
