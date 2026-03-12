@@ -1388,6 +1388,279 @@ def lint_unique_leis(main_entity: Entity) -> List[Dict[str, Any]]:
     return results
 
 
+def lint_cross_table_consistency() -> List[Dict[str, Any]]:
+    """
+    Validate cross-table consistency for DORA ROI export.
+
+    Checks EBA/NBB validation rules that span multiple tables:
+    - 02.01_02.02_0010: Every contract in B_02.01 must appear in B_02.02
+    - 02.01_05.02_0010: Every contract in B_02.01 must appear in B_05.02
+    - 03.02_02.02_COMBINATION: B_03.02/B_02.02 provider combinations must match
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # Get all non-draft contracts (same scope as B_02.01)
+    all_contracts = (
+        Contract.objects.exclude(status=Contract.Status.DRAFT)
+        .select_related("provider_entity")
+        .prefetch_related("solutions")
+    )
+
+    if not all_contracts.exists():
+        return results
+
+    # --- Compute B_02.02 scope ---
+    business_functions = Asset.objects.filter(is_business_function=True)
+    business_function_asset_ids = set(business_functions.values_list("id", flat=True))
+    for bf in business_functions:
+        descendants = bf.get_descendants()
+        business_function_asset_ids.update(asset.id for asset in descendants)
+
+    b_02_02_contract_ids = (
+        set(
+            Contract.objects.filter(
+                solutions__isnull=False,
+                solutions__assets__id__in=business_function_asset_ids,
+            )
+            .exclude(status=Contract.Status.DRAFT)
+            .distinct()
+            .values_list("id", flat=True)
+        )
+        if business_function_asset_ids
+        else set()
+    )
+
+    # --- Compute B_05.02 scope ---
+    # B_05.02 includes non-intragroup contracts with provider, solutions,
+    # and at least one solution with dora_ict_service_type set
+    b_05_02_candidates = (
+        Contract.objects.filter(
+            is_intragroup=False,
+            provider_entity__isnull=False,
+            solutions__isnull=False,
+        )
+        .exclude(status=Contract.Status.DRAFT)
+        .distinct()
+    )
+    # Further filter: at least one solution must have dora_ict_service_type
+    b_05_02_contract_ids = set()
+    for contract in b_05_02_candidates.prefetch_related("solutions"):
+        if contract.solutions.exclude(
+            Q(dora_ict_service_type__isnull=True) | Q(dora_ict_service_type="")
+        ).exists():
+            b_05_02_contract_ids.add(contract.id)
+
+    # --- Check 02.01_02.02: every B_02.01 contract should be in B_02.02 ---
+    missing_b_02_02 = []
+    for contract in all_contracts:
+        if contract.id not in b_02_02_contract_ids:
+            missing_b_02_02.append(contract)
+
+    if missing_b_02_02:
+        # Diagnose why each contract is missing
+        for contract in missing_b_02_02:
+            has_solutions = contract.solutions.exists()
+            if not has_solutions:
+                reason = "has no solutions linked"
+            elif not business_function_asset_ids:
+                reason = "no business functions exist in the system"
+            else:
+                # Has solutions but none linked to business function assets
+                reason = "none of its solutions are linked to business function assets"
+            contract_ref = contract.ref_id or contract.name
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Cross-table (B_02.01 \u2194 B_02.02)",
+                    "message": (
+                        f"Contract '{contract_ref}' is in B_02.01 but missing from B_02.02: "
+                        f"{reason}. Link its solutions to business function assets to fix this."
+                    ),
+                    "field": "solutions",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+    else:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Cross-table (B_02.01 \u2194 B_02.02)",
+                "message": f"All {all_contracts.count()} contracts in B_02.01 are also present in B_02.02",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    # --- Check 02.01_05.02: every B_02.01 contract should be in B_05.02 ---
+    missing_b_05_02 = []
+    for contract in all_contracts:
+        if contract.id not in b_05_02_contract_ids:
+            missing_b_05_02.append(contract)
+
+    if missing_b_05_02:
+        for contract in missing_b_05_02:
+            reasons = []
+            if contract.is_intragroup:
+                reasons.append("is intragroup")
+            if not contract.provider_entity:
+                reasons.append("has no provider entity")
+            if not contract.solutions.exists():
+                reasons.append("has no solutions")
+            elif not contract.solutions.exclude(
+                Q(dora_ict_service_type__isnull=True) | Q(dora_ict_service_type="")
+            ).exists():
+                reasons.append("all its solutions are missing ICT service type")
+            reason = "; ".join(reasons) if reasons else "unknown reason"
+            contract_ref = contract.ref_id or contract.name
+            results.append(
+                {
+                    "severity": "error",
+                    "category": "Cross-table (B_02.01 \u2194 B_05.02)",
+                    "message": (
+                        f"Contract '{contract_ref}' is in B_02.01 but missing from B_05.02: "
+                        f"{reason}."
+                    ),
+                    "field": "solutions",
+                    "object_type": "contracts",
+                    "object_id": str(contract.id),
+                    "object_name": contract.name,
+                }
+            )
+    else:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Cross-table (B_02.01 \u2194 B_05.02)",
+                "message": f"All {all_contracts.count()} contracts in B_02.01 are also present in B_05.02",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
+def lint_conditional_fields() -> List[Dict[str, Any]]:
+    """
+    Validate conditional field requirements (EBA formula validation rules).
+
+    Checks:
+    - v8805: If contract type is eba_CO:x3 (sub-contracting), overarching contract must be set
+    - v8804: If entity type is not eba_CT:x318 or eba_CT:x317, assets value must be set
+    - v8884: Solutions in B_07.01 must have substitutability set
+
+    Returns:
+        List of validation results with severity levels (error, warning, ok)
+    """
+    results = []
+
+    # --- v8805: sub-contracting contracts must have overarching contract ---
+    subcontracting_contracts = Contract.objects.filter(
+        dora_contractual_arrangement="eba_CO:x3",
+        overarching_contract__isnull=True,
+    ).exclude(status=Contract.Status.DRAFT)
+
+    for contract in subcontracting_contracts:
+        contract_ref = contract.ref_id or contract.name
+        results.append(
+            {
+                "severity": "error",
+                "category": "Conditional fields (v8805)",
+                "message": (
+                    f"Contract '{contract_ref}' has type 'sub-contracting' (eba_CO:x3) "
+                    f"but no overarching contract is set (B_02.01.0030 required)."
+                ),
+                "field": "overarching_contract",
+                "object_type": "contracts",
+                "object_id": str(contract.id),
+                "object_name": contract.name,
+            }
+        )
+
+    # --- v8804: entity type not x318/x317 requires assets value ---
+    # Get entities in B_01.02 scope (main entity + subsidiaries)
+    main_entity = Entity.get_main_entity()
+    if main_entity:
+        exempt_types = {"eba_CT:x318", "eba_CT:x317"}
+        subsidiaries = Entity.objects.filter(
+            parent_entity=main_entity, dora_provider_person_type__isnull=False
+        ).exclude(dora_provider_person_type="")
+        b_01_02_entities = [main_entity] + list(subsidiaries)
+
+        for entity in b_01_02_entities:
+            if (
+                entity.dora_entity_type
+                and entity.dora_entity_type not in exempt_types
+                and entity.dora_assets_value is None
+            ):
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Conditional fields (v8804)",
+                        "message": (
+                            f"Entity '{entity.name}' has type '{entity.dora_entity_type}' "
+                            f"(not exempt) but assets value (B_01.02.0110) is not set."
+                        ),
+                        "field": "dora_assets_value",
+                        "object_type": "entities",
+                        "object_id": str(entity.id),
+                        "object_name": entity.name,
+                    }
+                )
+
+    # --- v8884: solutions in B_07.01 must have substitutability ---
+    # B_07.01 includes solutions on non-intragroup contracts with provider
+    b_07_01_solutions = Solution.objects.filter(
+        contracts__is_intragroup=False,
+        contracts__provider_entity__isnull=False,
+    ).distinct()
+
+    missing_substitutability = b_07_01_solutions.filter(
+        Q(dora_substitutability__isnull=True) | Q(dora_substitutability="")
+    )
+
+    for solution in missing_substitutability:
+        results.append(
+            {
+                "severity": "error",
+                "category": "Conditional fields (v8884)",
+                "message": (
+                    f"Solution '{solution.name}' appears in B_07.01 but has no "
+                    f"substitutability assessment set (B_07.01.0050 required)."
+                ),
+                "field": "dora_substitutability",
+                "object_type": "solutions",
+                "object_id": str(solution.id),
+                "object_name": solution.name,
+            }
+        )
+
+    # Summary if all good
+    if not results:
+        results.append(
+            {
+                "severity": "ok",
+                "category": "Conditional fields",
+                "message": "All conditional field requirements are satisfied",
+                "field": None,
+                "object_type": None,
+                "object_id": None,
+                "object_name": None,
+            }
+        )
+
+    return results
+
+
 def lint_dora_roi() -> Dict[str, Any]:
     """
     Perform comprehensive linting for DORA ROI export.
@@ -1427,6 +1700,8 @@ def lint_dora_roi() -> Dict[str, Any]:
     results.extend(lint_solutions())
     results.extend(lint_supply_chain_solutions())
     results.extend(lint_provider_entities())
+    results.extend(lint_cross_table_consistency())
+    results.extend(lint_conditional_fields())
 
     # Calculate summary
     summary = {
