@@ -5007,7 +5007,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
         applied_control = self.get_object()
         reference_control = applied_control.reference_control
-        changes: list[tuple[str, str]] = [] # List of (old_value, new_value) tuples.
+        changes: list[tuple[str, str]] = []  # List of (old_value, new_value) tuples.
 
         FIELDS_TO_SYNC: Final[list[str]] = [
             "category",
