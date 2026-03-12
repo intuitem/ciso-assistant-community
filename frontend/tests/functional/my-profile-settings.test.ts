@@ -15,7 +15,7 @@ test('my profile settings page loads correctly', async ({ logedPage, page }) => 
 			page.locator('dt').filter({ hasText: 'Multi-factor authentication' })
 		).toBeVisible();
 		await expect(page.locator('h6').filter({ hasText: 'Authenticator app' })).toBeVisible();
-		await expect(page.getByRole('button', { name: 'Enable 2FA' })).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Enable MFA' })).toBeVisible();
 	});
 
 	await test.step('personal access tokens section is visible', async () => {

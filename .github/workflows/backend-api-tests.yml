@@ -62,7 +62,6 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ env.BACKEND_DIR }}
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: poetry install
 
       - name: Run migrations
@@ -130,7 +129,10 @@ jobs:
         with:
           path: ${{ env.BACKEND_DIR }}/.venv
           key: venv-${{ runner.os }}-${{ hashFiles('backend/poetry.lock') }}
-          fail-on-cache-miss: true
+
+      - name: Install dependencies
+        working-directory: ${{ env.BACKEND_DIR }}
+        run: poetry install
 
       - name: Download Database
         uses: actions/download-artifact@v4
@@ -146,16 +148,22 @@ jobs:
 
       - name: Run Test File
         working-directory: ${{ env.BACKEND_DIR }}
+        env:
+          TEST_FILE: ${{ matrix.test-file }}
+          JOB_INDEX: ${{ strategy.job-index }}
         run: |
           # Use --reuse-db to prevent pytest from destroying/recreating the DB
-          poetry run pytest ${{ matrix.test-file }} --reuse-db --html=pytest-report-${{ strategy.job-index }}.html --self-contained-html
+          poetry run pytest "$TEST_FILE" --reuse-db --html="pytest-report-${JOB_INDEX}.html" --self-contained-html
 
       - name: Prepare Artifact Name
         if: ${{ !cancelled() }}
+        env:
+          RAW_BRANCH: ${{ env.BRANCH_NAME }}
         run: |
-          SAFE_BRANCH=$(echo "${{ env.BRANCH_NAME }}" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
-          echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> $GITHUB_ENV
-          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> $GITHUB_ENV
+          set -euo pipefail
+          SAFE_BRANCH=$(echo "$RAW_BRANCH" | sed -E 's/[^a-zA-Z0-9_-]/_/g')
+          echo "BRANCH_SANITIZED=$SAFE_BRANCH" >> "$GITHUB_ENV"
+          echo "NOW=$(date +'%Y-%m-%dT%H-%M-%S')" >> "$GITHUB_ENV"
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

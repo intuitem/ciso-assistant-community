@@ -70,6 +70,7 @@
 
 <AutocompleteSelect
 	{form}
+	lazy
 	field="assets"
 	optionsEndpoint="assets"
 	optionsLabelField="auto"

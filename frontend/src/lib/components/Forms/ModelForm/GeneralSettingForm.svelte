@@ -8,7 +8,10 @@
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import RadioGroup from '../RadioGroup.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
+	import { LOCALE_MAP, language, defaultLangLabels } from '$lib/utils/locales';
+	import { setLocale } from '$paraglide/runtime';
 	import { getModalStore, type ModalSettings } from '$lib/components/Modals/stores';
+	import { getToastStore } from '$lib/components/Toast/stores';
 
 	interface Props {
 		form: SuperForm<any>;
@@ -22,6 +25,7 @@
 
 	const formStore = form.form;
 	const modalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
@@ -33,11 +37,58 @@
 	let horizontalAxisPos = $derived(flipVertically ? 'top-8' : 'bottom-8');
 	let horizontalLabelPos = $derived(flipVertically ? 'top-2' : 'bottom-2');
 
-	let openAccordionItems = $state(['notifications', 'financial']);
+	let openAccordionItems = $state([]);
 
 	// Track original currency for change detection
 	let originalCurrency = $state($formStore.currency);
 	let conversionRateValue = $state('1.0');
+
+	let forceLanguageInProgress = $state(false);
+
+	function handleForceLanguage() {
+		const firstModal: ModalSettings = {
+			type: 'confirm',
+			title: m.forceLanguageConfirmTitle(),
+			body: m.forceLanguageConfirmBody(),
+			response: (confirmed: boolean) => {
+				if (!confirmed) return;
+				const secondModal: ModalSettings = {
+					type: 'confirm',
+					title: m.forceLanguageFinalConfirmTitle(),
+					body: m.forceLanguageFinalConfirmBody(),
+					response: async (confirmed2: boolean) => {
+						if (!confirmed2) return;
+						forceLanguageInProgress = true;
+						try {
+							const res = await fetch('/settings/force-language', {
+								method: 'POST',
+								headers: { 'Content-Type': 'application/json' }
+							});
+							const data = await res.json();
+							if (res.ok) {
+								toastStore.trigger({
+									message: m.forceLanguageSuccess(),
+									preset: 'success'
+								});
+								if (data.language) {
+									setLocale(data.language);
+								}
+							} else {
+								toastStore.trigger({
+									message: data.error || m.forceLanguageFailed(),
+									preset: 'error'
+								});
+							}
+						} finally {
+							forceLanguageInProgress = false;
+						}
+					}
+				};
+				modalStore.trigger(secondModal);
+			}
+		};
+		modalStore.trigger(firstModal);
+	}
 
 	function handleCurrencyChange(newCurrency: string) {
 		if (originalCurrency && originalCurrency !== newCurrency) {
@@ -89,11 +140,63 @@
 	onValueChange={(e) => (openAccordionItems = e.value)}
 	multiple
 >
+	<Accordion.Item value="language">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-language mr-2"></i><span class="flex-1 text-left"
+				>{m.languageSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<Select
+					{form}
+					field="default_language"
+					options={(model.selectOptions?.['default_language'] ?? []).map(
+						(opt: { label: string; value: string }) => ({
+							value: opt.value,
+							label: `${defaultLangLabels[opt.value] ?? opt.value} (${language[LOCALE_MAP[opt.value]?.name] ?? opt.label})`
+						})
+					)}
+					label={m.defaultLanguage()}
+					helpText={m.defaultLanguageHelpText()}
+				/>
+				<hr class="my-2" />
+				<p class="text-sm text-gray-500">{m.forceLanguageHelpText()}</p>
+				<button
+					type="button"
+					class="btn preset-filled-warning-500 text-sm"
+					onclick={handleForceLanguage}
+					disabled={forceLanguageInProgress}
+				>
+					<i class="fa-solid fa-users mr-2"></i>
+					{m.forceLanguageForAllUsers()}
+				</button>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
 	<Accordion.Item value="notifications">
-		{#snippet control()}
-			<i class="fa-solid fa-bell mr-2"></i>{m.settingsNotifications()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-bell mr-2"></i><span class="flex-1 text-left"
+				>{m.settingsNotifications()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -101,13 +204,21 @@
 					label={m.settingsNotificationsMail()}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="assets">
-		{#snippet control()}
-			<i class="fa-solid fa-gem mr-2"></i>{m.assets()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-gem mr-2"></i><span class="flex-1 text-left">{m.assets()}</span>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<Select
 					{form}
@@ -119,13 +230,23 @@
 					label={m.securityObjectiveScale()}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="riskMatrix">
-		{#snippet control()}
-			<i class="fa-solid fa-table-cells-large mr-2"></i>{m.settingsRiskMatrix()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-table-cells-large mr-2"></i><span class="flex-1 text-left"
+				>{m.settingsRiskMatrix()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4 flex flex-row gap-4">
 				<div class="flex flex-col flex-1 space-y-4">
 					<Checkbox
@@ -160,7 +281,7 @@
 				</div>
 				<div class="flex-1">
 					<div class="relative w-full h-64 max-w-md bg-white rounded-lg shadow-md p-4">
-						<!-- Point d’origine -->
+						<!-- Point d'origine -->
 						<div class={`absolute ${horizontalAxisPos} left-8 w-2 h-2 bg-black rounded-full`}></div>
 
 						<!-- Axe horizontal -->
@@ -183,13 +304,23 @@
 					</div>
 				</div>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="ebiosRadar">
-		{#snippet control()}
-			<i class="fa-solid fa-gopuram mr-2"></i>{m.ebiosRadarParameters()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-gopuram mr-2"></i><span class="flex-1 text-left"
+				>{m.ebiosRadarParameters()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
 				<NumberField
 					{form}
@@ -222,13 +353,23 @@
 					bind:cachedValue={formDataCache['ebios_radar_red_zone_radius']}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="financial">
-		{#snippet control()}
-			<i class="fa-solid fa-coins mr-2"></i>{m.financialSettings()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-coins mr-2"></i><span class="flex-1 text-left"
+				>{m.financialSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
 				<Select
 					{form}
@@ -238,10 +379,26 @@
 						{ label: 'US Dollar ($)', value: '$' },
 						{ label: 'British Pound (£)', value: '£' },
 						{ label: 'Japanese Yen (¥)', value: '¥' },
+						{ label: 'Chinese Yuan (CN¥)', value: 'CN¥' },
+						{ label: 'Indian Rupee (₹)', value: '₹' },
+						{ label: 'South Korean Won (₩)', value: '₩' },
 						{ label: 'Canadian Dollar (C$)', value: 'C$' },
 						{ label: 'Australian Dollar (A$)', value: 'A$' },
 						{ label: 'New Zealand Dollar (NZ$)', value: 'NZ$' },
-						{ label: 'Swiss Franc (CHF)', value: 'CHF' }
+						{ label: 'Swiss Franc (CHF)', value: 'CHF' },
+						{ label: 'Singapore Dollar (S$)', value: 'S$' },
+						{ label: 'Hong Kong Dollar (HK$)', value: 'HK$' },
+						{ label: 'Swedish Krona (SEK)', value: 'SEK' },
+						{ label: 'Norwegian Krone (NOK)', value: 'NOK' },
+						{ label: 'Danish Krone (DKK)', value: 'DKK' },
+						{ label: 'Brazilian Real (R$)', value: 'R$' },
+						{ label: 'Mexican Peso (MX$)', value: 'MX$' },
+						{ label: 'South African Rand (ZAR)', value: 'ZAR' },
+						{ label: 'Turkish Lira (₺)', value: '₺' },
+						{ label: 'Polish Złoty (PLN)', value: 'PLN' },
+						{ label: 'Taiwan Dollar (NT$)', value: 'NT$' },
+						{ label: 'Thai Baht (฿)', value: '฿' },
+						{ label: 'Malaysian Ringgit (MYR)', value: 'MYR' }
 					]}
 					label={m.currency()}
 					helpText={m.currencyHelpText()}
@@ -256,13 +413,23 @@
 					step={1}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="mappings">
-		{#snippet control()}
-			<i class="fa-solid fa-diagram-project mr-2"></i>{m.requirementMappingSets()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-diagram-project mr-2"></i><span class="flex-1 text-left"
+				>{m.requirementMappingSets()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<NumberField
 					{form}
@@ -274,13 +441,23 @@
 					step={1}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="workflows">
-		{#snippet control()}
-			<i class="fa-solid fa-code-branch mr-2"></i>{m.workflows()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-code-branch mr-2"></i><span class="flex-1 text-left"
+				>{m.workflows()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -289,28 +466,54 @@
 					helpText={m.allowSelfValidationHelpText()}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="security">
-		{#snippet control()}
-			<i class="fa-solid fa-shield-halved mr-2"></i>{m.security()}
-		{/snippet}
-		{#snippet panel()}
-			<div class="p-4">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-shield-halved mr-2"></i><span class="flex-1 text-left"
+				>{m.security()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
 				<Checkbox
 					{form}
 					field="show_warning_external_links"
 					label={m.showWarningExternalLinks()}
 					helpText={m.showWarningExternalLinksHelpText()}
 				/>
+				<Checkbox
+					{form}
+					field="enforce_mfa"
+					label={m.enforceMfa()}
+					helpText={m.enforceMfaHelpText()}
+				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="assignments">
-		{#snippet control()}
-			<i class="fa-solid fa-clipboard-user mr-2"></i>{m.assignmentSettings()}
-		{/snippet}
-		{#snippet panel()}
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-clipboard-user mr-2"></i><span class="flex-1 text-left"
+				>{m.assignmentSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
 			<div class="p-4">
 				<Checkbox
 					{form}
@@ -319,6 +522,6 @@
 					helpText={m.allowAssignmentsToEntitiesDescription()}
 				/>
 			</div>
-		{/snippet}
+		</Accordion.ItemContent>
 	</Accordion.Item>
 </Accordion>

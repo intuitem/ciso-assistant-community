@@ -79,7 +79,7 @@ def get_answers(question, answers):
         return [get_answers(question, answer) for answer in answers]
     elif not answers.startswith("urn:"):
         return answers
-    for choice in question["choices"]:
+    for choice in question.get("choices", []):
         if choice["urn"] == answers:
             return choice["value"]
 

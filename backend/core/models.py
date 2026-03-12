@@ -20,7 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
 from django.core.files.storage import default_storage
 from django.db import models, transaction
-from django.db.models import F, Q, OuterRef, Subquery, Prefetch
+from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -38,6 +38,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
 
 from .base_models import (
@@ -341,7 +342,7 @@ class StoredLibrary(LibraryMixin):
 
         if dry_run:
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
             return (
@@ -387,7 +388,7 @@ class StoredLibrary(LibraryMixin):
                 outdated_library.delete()
 
             objects_meta = {
-                key: (1 if key == "framework" else len(value))
+                key: (1 if key in ("framework", "preset") else len(value))
                 for key, value in library_data["objects"].items()
             }
 
@@ -469,6 +470,10 @@ class StoredLibrary(LibraryMixin):
             self.is_loaded = True
             self.save()
         return error_msg
+
+    @property
+    def is_preset(self) -> bool:
+        return bool(self.content and "preset" in self.content)
 
     def delete(self, *args, **kwargs):
         library_filtering_labels = list(self.filtering_labels.all())
@@ -649,13 +654,14 @@ class LibraryUpdater:
                 requirement_nodes = new_framework["requirement_nodes"]
                 framework_dict = {**new_framework}
                 del framework_dict["requirement_nodes"]
+                framework_dict["urn"] = framework_dict["urn"].lower()
                 prev_fw = Framework.objects.filter(urn=framework_dict["urn"]).first()
                 prev_min = getattr(prev_fw, "min_score", None)
                 prev_max = getattr(prev_fw, "max_score", None)
                 prev_def = getattr(prev_fw, "scores_definition", None)
 
                 new_framework, _ = Framework.objects.update_or_create(
-                    urn=new_framework["urn"],
+                    urn=framework_dict["urn"],
                     defaults=framework_dict,
                     create_defaults={
                         **self.referential_object_dict,
@@ -820,14 +826,18 @@ class LibraryUpdater:
                         for k, v in requirement_node.items()
                         if k not in ["urn", "depth", "reference_controls", "threats"]
                     }
+                    if requirement_node_dict.get("parent_urn"):
+                        requirement_node_dict["parent_urn"] = requirement_node_dict[
+                            "parent_urn"
+                        ].lower()
                     requirement_node_dict["order_id"] = order_id
                     order_id += 1
-                    all_fields_to_update.update(requirement_node_dict.keys())
 
                     if urn in existing_requirement_node_objects:
                         requirement_node_object = existing_requirement_node_objects[urn]
                         for key, value in requirement_node_dict.items():
                             setattr(requirement_node_object, key, value)
+                        all_fields_to_update.update(requirement_node_dict.keys())
                         requirement_node_objects_to_update.append(
                             requirement_node_object
                         )
@@ -836,6 +846,7 @@ class LibraryUpdater:
                             urn=urn,
                             framework=new_framework,
                             **self.referential_object_dict,
+                            **self.i18n_object_dict,
                             **requirement_node_dict,
                         )
                         for ca in compliance_assessments:
@@ -1046,7 +1057,13 @@ class LibraryUpdater:
                     # Ensure all needed fields are included
                     fields_to_update = sorted(
                         all_fields_to_update.union(
-                            {"name", "description", "order_id", "questions"}
+                            {
+                                "name",
+                                "description",
+                                "order_id",
+                                "questions",
+                                "implementation_groups",
+                            }
                         )
                     )
                     RequirementNode.objects.bulk_update(
@@ -1960,7 +1977,7 @@ class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
         return update_translations_in_object(self.json_definition)
 
     @property
-    def grid(self) -> list:
+    def grid(self) -> list[list]:
         risk_matrix = self.parse_json()
         grid = []
         for row in risk_matrix["grid"]:
@@ -2195,6 +2212,47 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     def safe_display_str(self):
         fallback_ref = ":".join(self.urn.split(":")[5:])
         return self.display_short if self.display_short else fallback_ref
+
+    @property
+    def get_typical_evidence_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale_translations = translations.get(get_language(), {})
+        return locale_translations.get("typical_evidence", self.typical_evidence)
+
+    @property
+    def get_questions_translated(self) -> dict | None:
+        if not self.questions:
+            return None
+
+        current_lang = get_language()
+
+        def _translate_choice(choice: dict) -> dict:
+            tr = choice.get("translations", {}).get(current_lang, {})
+            return {
+                **choice,
+                **({} if not tr.get("value") else {"value": tr["value"]}),
+                **(
+                    {}
+                    if not tr.get("description")
+                    else {"description": tr["description"]}
+                ),
+            }
+
+        def _translate_question(q_content: dict) -> dict:
+            tr = q_content.get("translations", {}).get(current_lang, {})
+            translated = {**q_content}
+            if tr.get("text"):
+                translated["text"] = tr["text"]
+            if "choices" in q_content:
+                translated["choices"] = [
+                    _translate_choice(c) for c in q_content["choices"]
+                ]
+            return translated
+
+        return {
+            q_urn: _translate_question(q_content)
+            for q_urn, q_content in self.questions.items()
+        }
 
     class Meta:
         verbose_name = _("RequirementNode")
@@ -2627,7 +2685,7 @@ class Asset(
     )
     dora_criticality_assessment = models.CharField(
         max_length=50,
-        choices=dora.DORA_FUNCTION_CRITICALITY_CHOICES,
+        choices=dora.DORA_YES_NO_ASSESSMENT_CHOICES,
         blank=True,
         null=True,
         verbose_name=_("DORA Criticality Assessment"),
@@ -3983,7 +4041,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
         verbose_name_plural = _("Evidence Revisions")
 
 
-class Incident(NameDescriptionMixin, FolderMixin):
+class Incident(NameDescriptionMixin, FolderMixin, FilteringLabelMixin):
     class Status(models.TextChoices):
         NEW = "new", "New"
         ONGOING = "ongoing", "Ongoing"
@@ -4146,6 +4204,113 @@ class TimelineEntry(AbstractBaseModel, FolderMixin):
             raise ValidationError("Timestamp cannot be in the future.")
         self.folder = self.incident.folder
         super().save(*args, **kwargs)
+
+
+class Comment(AbstractBaseModel, FolderMixin):
+    body = models.TextField(verbose_name=_("Body"))
+    is_tainted = models.BooleanField(default=False, verbose_name=_("Edited"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Active"))
+    is_published = models.BooleanField(default=True)
+
+    author = models.ForeignKey(
+        "iam.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    requirement_assessment = models.ForeignKey(
+        "RequirementAssessment",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    risk_scenario = models.ForeignKey(
+        "RiskScenario",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    applied_control = models.ForeignKey(
+        "AppliedControl",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+    finding = models.ForeignKey(
+        "Finding",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="comments",
+    )
+
+    class Meta:
+        ordering = ["created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(
+                        requirement_assessment__isnull=False,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=False,
+                        applied_control__isnull=True,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=False,
+                        finding__isnull=True,
+                    )
+                    | Q(
+                        requirement_assessment__isnull=True,
+                        risk_scenario__isnull=True,
+                        applied_control__isnull=True,
+                        finding__isnull=False,
+                    )
+                ),
+                name="comment_exactly_one_parent",
+            )
+        ]
+
+    @property
+    def parent_object(self):
+        return (
+            self.requirement_assessment
+            or self.risk_scenario
+            or self.applied_control
+            or self.finding
+        )
+
+    def save(self, *args, **kwargs):
+        content_object = self.parent_object
+        if content_object is None:
+            raise ValidationError(
+                _("Comment must be attached to exactly one parent object.")
+            )
+
+        if not self._state.adding and self.pk:
+            try:
+                old = Comment.objects.get(pk=self.pk)
+                if old.body != self.body:
+                    self.is_tainted = True
+            except Comment.DoesNotExist:
+                pass
+        self.folder = content_object.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Comment by {self.author} on {self.created_at}"
 
 
 def _get_default_applied_control_cost():
@@ -4503,25 +4668,8 @@ class AppliedControl(
         return annual_cost
 
     @staticmethod
-    def _stringify_cost(cost: float, currency: str) -> str:
-        match currency:
-            case "$":
-                return f"${cost}"
-            case "€":
-                return f"{cost}€"
-            case "£":
-                return f"£{cost}"
-            case "A$":
-                return f"A${cost}"
-            case "NZ$":
-                return f"NZ${cost}"
-            case "C$":
-                return f"C${cost}"
-            case "¥":
-                return f"¥{cost}"
-
-        logger.error("Unknown currency detected", currency=currency)
-        return f"{cost} *"
+    def _stringify_cost(cost, currency: str) -> str:
+        return _fmt_currency(cost, currency)
 
     @property
     def display_cost(self) -> str:
@@ -4712,6 +4860,7 @@ class OrganisationObjective(
         Asset,
         blank=True,
         verbose_name="asset",
+        related_name="organisation_objectives",
     )
     tasks = models.ManyToManyField(
         "TaskTemplate",
@@ -4741,8 +4890,13 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    start_date = models.DateField(blank=True, null=True, verbose_name=_("Start date"))
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
-    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    closing_date = models.DateField(
+        blank=True, null=True, verbose_name=_("Closing date")
+    )
     metrics = models.ManyToManyField(
         "metrology.MetricInstance",
         verbose_name="Tracking metrics",
@@ -4939,6 +5093,10 @@ class RiskAssessment(Assessment):
         null=True,
         blank=True,
         related_name="risk_assessments",
+    )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
     )
 
     class Meta:
@@ -5899,6 +6057,10 @@ class ComplianceAssessment(Assessment):
         default=CalculationMethod.AVG,
         verbose_name=_("Score Calculation Method"),
     )
+    auto_sync = models.BooleanField(
+        default=False,
+        verbose_name=_("Automatic sync to actions"),
+    )
 
     fields_to_check = ["name", "version"]
 
@@ -6335,20 +6497,25 @@ class ComplianceAssessment(Assessment):
             ),
         }
 
-    def get_requirements_status_count(self):
-        requirements_status_count = []
-        for st in RequirementAssessment.Status:
-            requirements_status_count.append(
-                (
-                    RequirementAssessment.objects.filter(status=st)
-                    .filter(compliance_assessment=self)
-                    .count(),
-                    st,
-                )
-            )
+    def get_requirements_status_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Status]]:
+        queryset = (
+            RequirementAssessment.objects.filter(compliance_assessment=self)
+            .values("status")
+            .annotate(count=Count("status"))
+        )
+
+        count_by_status = {row["status"]: row["count"] for row in queryset}
+
+        requirements_status_count = [
+            (count_by_status.get(st, 0), st) for st in RequirementAssessment.Status
+        ]
         return requirements_status_count
 
-    def get_requirements_result_count(self):
+    def get_requirements_result_count(
+        self,
+    ) -> list[tuple[int, RequirementAssessment.Result]]:
         requirements_result_count = []
         selected_implementation_groups_set = (
             set(self.selected_implementation_groups)
@@ -7072,13 +7239,14 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             | Q(applied_controls__requirement_assessments=self)
         ).exists()
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-
+    def trigger_compliance_assessment_update_hooks(self):
         self.compliance_assessment.updated_at = timezone.now()
         self.compliance_assessment.save(update_fields=["updated_at"])
 
-        self.compliance_assessment.upsert_daily_metrics()
+    def save(self, *args, **kwargs) -> None:
+        super().save(*args, **kwargs)
+
+        self.trigger_compliance_assessment_update_hooks()
 
         # Recalculate selected IGs only when answers were updated
         # Use transaction.on_commit to avoid nested save conflicts
@@ -7173,6 +7341,92 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
             self.save(update_fields=["score", "is_scored"])
         elif is_result_computed:
             self.save(update_fields=["result"])
+
+
+class RequirementAssignment(AbstractBaseModel, FolderMixin):
+    """
+    Represents an assignment of a group of requirement assessments to one or multiple actors.
+    Used to delegate audit work within a compliance assessment to specific users or teams.
+    """
+
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        SUBMITTED = "submitted", _("Submitted")
+        CLOSED = "closed", _("Closed")
+        CHANGES_REQUESTED = "changes_requested", _("Changes Requested")
+
+    compliance_assessment = models.ForeignKey(
+        ComplianceAssessment,
+        on_delete=models.CASCADE,
+        related_name="requirement_assignments",
+        verbose_name=_("Compliance Assessment"),
+    )
+    actor = models.ManyToManyField(
+        "Actor",
+        related_name="requirement_assignments",
+        verbose_name=_("Assigned To"),
+    )
+    requirement_assessments = models.ManyToManyField(
+        RequirementAssessment,
+        related_name="assignments",
+        verbose_name=_("Requirement Assessments"),
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=32,
+        choices=Status.choices,
+        default=Status.DRAFT,
+        verbose_name=_("Status"),
+    )
+
+    class Meta:
+        permissions = [
+            (
+                "transition_requirementassignment",
+                "Can transition requirement assignment status",
+            )
+        ]
+        verbose_name = _("Requirement Assignment")
+        verbose_name_plural = _("Requirement Assignments")
+        ordering = ["created_at"]
+
+    def __str__(self) -> str:
+        actors = ", ".join(str(a) for a in self.actor.all())
+        return f"{self.compliance_assessment} - v{self.compliance_assessment.version}:{actors}"
+
+
+class RequirementAssignmentEvent(AbstractBaseModel, FolderMixin):
+    assignment = models.ForeignKey(
+        RequirementAssignment,
+        on_delete=models.CASCADE,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=50,
+        choices=RequirementAssignment.Status.choices,
+        verbose_name=_("Event type"),
+    )
+    event_actor = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Event actor"),
+    )
+    event_notes = models.TextField(
+        max_length=2000,
+        null=True,
+        blank=True,
+        verbose_name=_("Event notes"),
+    )
+
+    class Meta:
+        verbose_name = _("Requirement assignment event")
+        verbose_name_plural = _("Requirement assignment events")
+        ordering = ["-created_at"]
+
+    def __str__(self) -> str:
+        return f"{self.assignment} - {self.event_type} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
 
 
 class FindingsAssessment(Assessment):
@@ -7289,6 +7543,12 @@ class Finding(NameDescriptionMixin, FolderMixin, FilteringLabelMixin, ETADueDate
 
     findings_assessment = models.ForeignKey(
         FindingsAssessment, on_delete=models.CASCADE, related_name="findings"
+    )
+    threats = models.ManyToManyField(
+        Threat,
+        verbose_name=_("Threats"),
+        related_name="findings",
+        blank=True,
     )
     vulnerabilities = models.ManyToManyField(
         Vulnerability,
@@ -7649,11 +7909,13 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
             ]
 
         # Check if there are any TaskNode instances that are not within the date range
-        if self.schedule and "end_date" in self.schedule:
+        if self.pk and self.schedule and self.schedule.get("end_date"):
             end_date = self.schedule["end_date"]
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances that have a due date after the end date
-            TaskNode.objects.filter(task_template=self, due_date__gt=end_date).delete()
+            # Delete TaskNode instances whose scheduled date is after the end date
+            TaskNode.objects.filter(
+                task_template=self, scheduled_date__gt=end_date
+            ).delete()
         super().save(*args, **kwargs)
 
 
@@ -7666,6 +7928,12 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     ]
 
     due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    scheduled_date = models.DateField(
+        null=True,
+        blank=True,
+        verbose_name="Scheduled date",
+        help_text="Original date from the recurrence rule. Not user-editable.",
+    )
 
     status = models.CharField(
         max_length=50, default="pending", choices=TASK_STATUS_CHOICES
@@ -7687,6 +7955,8 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     )
 
     to_delete = models.BooleanField(default=False)
+
+    fields_to_check = ["task_template", "due_date"]
 
     def __str__(self):
         return f"{self.task_template.name} ({self.due_date})"
@@ -7722,6 +7992,13 @@ class TaskNode(AbstractBaseModel, FolderMixin):
     class Meta:
         verbose_name = "Task node"
         verbose_name_plural = "Task nodes"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["task_template", "due_date"],
+                condition=models.Q(due_date__isnull=False),
+                name="unique_tasknode_template_due_date",
+            ),
+        ]
 
 
 class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
@@ -7774,6 +8051,18 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
 
     policies = models.ManyToManyField(
         Policy,
+        blank=True,
+    )
+    processings = models.ManyToManyField(
+        "privacy.Processing",
+        blank=True,
+    )
+    accreditations = models.ManyToManyField(
+        "pmbok.Accreditation",
+        blank=True,
+    )
+    contracts = models.ManyToManyField(
+        "tprm.Contract",
         blank=True,
     )
     request_notes = models.TextField(null=True, blank=True)
@@ -7860,6 +8149,9 @@ class ValidationFlow(AbstractBaseModel, FolderMixin, FilteringLabelMixin):
             "evidences",
             "security_exceptions",
             "policies",
+            "processings",
+            "accreditations",
+            "contracts",
         ]
         for field in model_fields:
             if getattr(self, field).exists():
@@ -7912,7 +8204,9 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
 
     leader = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name="led_teams",
         verbose_name="Team Leader",
         help_text="The leader of the team",
@@ -7941,9 +8235,10 @@ class Team(ActorSyncMixin, NameDescriptionMixin, FolderMixin):
         emails = []
         if self.team_email:
             emails.append(self.team_email)
-        leader_email = self.leader.email
-        if leader_email:
-            emails.append(leader_email)
+        if self.leader:
+            leader_email = self.leader.email
+            if leader_email:
+                emails.append(leader_email)
         deputy_emails = self.deputies.exclude(email="").values_list("email", flat=True)
         emails.extend(deputy_emails)
         member_emails = self.members.exclude(email="").values_list("email", flat=True)
@@ -8035,6 +8330,76 @@ class Actor(AbstractBaseModel):
         return str(self.specific)
 
 
+class PresetJourney(NameDescriptionMixin, FolderMixin):
+    """Instance created when a user applies a preset definition."""
+
+    urn = models.CharField(max_length=255)
+    version = models.IntegerField(default=1)
+    object_refs = models.JSONField(default=dict)
+    applied_at = models.DateTimeField(auto_now_add=True)
+    applied_by = models.ForeignKey(
+        User, null=True, on_delete=models.SET_NULL, related_name="preset_journeys"
+    )
+
+    class Meta:
+        ordering = ["-applied_at"]
+
+    def __str__(self):
+        return self.name
+
+
+class PresetJourneyStep(AbstractBaseModel):
+    """A step in a preset journey with explicit completion tracking."""
+
+    class Status(models.TextChoices):
+        NOT_STARTED = "not_started", _("Not Started")
+        IN_PROGRESS = "in_progress", _("In Progress")
+        DONE = "done", _("Done")
+        SKIPPED = "skipped", _("Skipped")
+
+    journey = models.ForeignKey(
+        PresetJourney, related_name="steps", on_delete=models.CASCADE
+    )
+    key = models.CharField(max_length=100)
+    order = models.IntegerField()
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    translations = models.JSONField(null=True, blank=True)
+    target_model = models.CharField(max_length=100, blank=True, null=True)
+    target_ref = models.CharField(max_length=100, blank=True, null=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.NOT_STARTED
+    )
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(
+        User, null=True, blank=True, on_delete=models.SET_NULL
+    )
+    notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["order"]
+        unique_together = [["journey", "key"]]
+
+    @property
+    def get_title_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("title", self.title)
+
+    @property
+    def get_description_translated(self) -> str:
+        translations = self.translations if self.translations else {}
+        locale = get_language() or "en"
+        locale = locale.split("-")[0]
+        locale_translations = translations.get(locale, {})
+        return locale_translations.get("description", self.description)
+
+    def __str__(self):
+        return f"{self.journey.name} - {self.title}"
+
+
 common_exclude = ["created_at", "updated_at"]
 
 auditlog.register(
@@ -8119,6 +8484,10 @@ auditlog.register(
     exclude_fields=common_exclude,
 )
 auditlog.register(
+    Comment,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
     Terminology,
     exclude_fields=common_exclude,
 )
@@ -8144,6 +8513,19 @@ auditlog.register(
 )
 auditlog.register(
     TaskTemplate,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    RequirementAssignment,
+    exclude_fields=common_exclude,
+    m2m_fields={"actor", "requirement_assessments"},
+)
+auditlog.register(
+    PresetJourney,
+    exclude_fields=common_exclude,
+)
+auditlog.register(
+    PresetJourneyStep,
     exclude_fields=common_exclude,
 )
 # actions - 0: create, 1: update, 2: delete

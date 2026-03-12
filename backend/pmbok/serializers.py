@@ -43,6 +43,16 @@ class AccreditationReadSerializer(BaseModelSerializer):
     status = serializers.SerializerMethodField()
     category = serializers.SerializerMethodField()
     checklist_progress = serializers.SerializerMethodField()
+    validation_flows = FieldsRelatedField(
+        many=True,
+        fields=[
+            "id",
+            "ref_id",
+            "status",
+            {"approver": ["id", "email", "first_name", "last_name"]},
+        ],
+        source="validationflow_set",
+    )
 
     def get_status(self, obj):
         return obj.status.get_name_translated

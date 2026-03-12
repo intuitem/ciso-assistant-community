@@ -9,7 +9,7 @@ from django.db.models import CharField, Value, Case, When
 from django.db.models.functions import Lower, Cast
 import django_filters as df
 from django.contrib.auth.models import Permission
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.decorators import (
     action,
     api_view,
@@ -285,7 +285,7 @@ class RoleViewSet(BaseModelViewSet):
                 ug, _ = UserGroup.objects.get_or_create(
                     folder=folder,
                     name=role.name,
-                    defaults={"builtin": False},
+                    defaults={"builtin": True},
                 )
                 user_groups.append(ug)
 
@@ -309,14 +309,25 @@ class RoleViewSet(BaseModelViewSet):
         Update the user groups associated with the role.
         """
         with transaction.atomic():
+            editors_before = len(User.get_editors())
+
             role = serializer.save()
             self._ensure_default_permissions(role)
+
+            editors_after = len(User.get_editors())
+            if (
+                editors_after > editors_before
+                and editors_after > settings.LICENSE_SEATS
+            ):
+                raise serializers.ValidationError(
+                    {"permissions": "errorLicenseSeatsExceeded"}
+                )
 
             ug_ids = (
                 RoleAssignment.objects.filter(
                     role=role,
                     user_group__isnull=False,
-                    user_group__builtin=False,
+                    user_group__builtin=True,
                 )
                 .values_list("user_group_id", flat=True)
                 .distinct()
@@ -343,7 +354,7 @@ class RoleViewSet(BaseModelViewSet):
             if ug_ids:
                 # Delete only non-builtin groups that are now orphaned (no remaining RAs)
                 orphan_ug_ids = list(
-                    UserGroup.objects.filter(id__in=ug_ids, builtin=False)
+                    UserGroup.objects.filter(id__in=ug_ids, builtin=True)
                     .annotate(ra_count=models.Count("roleassignment"))
                     .filter(ra_count=0)
                     .values_list("id", flat=True)

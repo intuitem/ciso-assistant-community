@@ -1,0 +1,14 @@
+subject: "CISO Assistant: Your assignment on '${assessment_name}' has been ${decision}"
+body: |
+  Hello,
+
+  Your assignment on the following audit has been reviewed:
+
+  - Audit: ${assessment_name}
+  - Decision: ${decision}
+  ${reviewer_observation}
+
+  Please log in to your CISO Assistant portal for more details:
+  ${ciso_assistant_url}/auditee-dashboard
+
+  Thank you.

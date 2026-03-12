@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Select from '$lib/components/Forms/Select.svelte';
 	import type { SuperForm } from 'sveltekit-superforms';
@@ -12,9 +13,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		context?: {
-			selectElementaryActions?: boolean;
-		};
 	}
 
 	let {
@@ -23,7 +21,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		context = {},
 		updated_fields = new Set()
 	}: Props = $props();
 
@@ -52,7 +49,7 @@
 	}
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
 	cacheLock={cacheLocks['folder']}
@@ -60,51 +57,30 @@
 	label={m.folder()}
 	hidden
 />
-{#if context !== 'selectElementaryActions'}
-	<AutocompleteSelect
-		{form}
-		optionsEndpoint="operational-scenarios"
-		field="operational_scenario"
-		cacheLock={cacheLocks['operational_scenario']}
-		bind:cachedValue={formDataCache['operational_scenario']}
-		label={m.operationalScenario()}
-		hidden
-		onChange={async (e) => fetchDefaultRefId(e)}
-		mount={async (e) => fetchDefaultRefId(e)}
-	/>
-	<TextField
-		{form}
-		field="ref_id"
-		label={m.refId()}
-		cacheLock={cacheLocks['ref_id']}
-		bind:cachedValue={formDataCache['ref_id']}
-	/>
-	<Select
-		{form}
-		options={model.selectOptions['likelihood']}
-		field="likelihood"
-		label={m.likelihood()}
-		cacheLock={cacheLocks['likelihood']}
-		bind:cachedValue={formDataCache['likelihood']}
-		helpText={m.likelihoodHelpText()}
-	/>
-{:else}
-	<AutocompleteSelect
-		{form}
-		multiple
-		optionsEndpoint="elementary-actions"
-		optionsInfoFields={{
-			fields: [
-				{
-					field: 'attack_stage',
-					translate: true
-				}
-			],
-			classes: 'text-yellow-700'
-		}}
-		field="elementary_actions"
-		cacheLock={cacheLocks['elementary_actions']}
-		bind:cachedValue={formDataCache['elementary_actions']}
-		label={m.elementaryActions()}
-	/>
-{/if}
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="operational-scenarios"
+	field="operational_scenario"
+	cacheLock={cacheLocks['operational_scenario']}
+	bind:cachedValue={formDataCache['operational_scenario']}
+	label={m.operationalScenario()}
+	hidden
+	onChange={async (e) => fetchDefaultRefId(e)}
+	mount={async (e) => fetchDefaultRefId(e)}
+/>
+<TextField
+	{form}
+	field="ref_id"
+	label={m.refId()}
+	cacheLock={cacheLocks['ref_id']}
+	bind:cachedValue={formDataCache['ref_id']}
+/>
+<Select
+	{form}
+	options={model.selectOptions['likelihood']}
+	field="likelihood"
+	label={m.likelihood()}
+	cacheLock={cacheLocks['likelihood']}
+	bind:cachedValue={formDataCache['likelihood']}
+	helpText={m.likelihoodHelpText()}
+/>

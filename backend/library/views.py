@@ -19,7 +19,7 @@ from rest_framework.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
     HTTP_504_GATEWAY_TIMEOUT,
 )
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import FileUploadParser, JSONParser
 
 from django.http import HttpResponse
 
@@ -36,6 +36,7 @@ from .utils import LibraryImporter, preview_library
 
 
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.response import Response
 from .serializers import (
     StoredLibraryDetailedSerializer,
@@ -91,6 +92,14 @@ class StoredLibraryFilterSet(LibraryMixinFilterSet):
     is_update = df.BooleanFilter(
         method="filter_is_update",
     )
+    is_preset = df.BooleanFilter(
+        method="filter_is_preset",
+    )
+
+    def filter_is_preset(self, queryset, name, value):
+        if value:
+            return queryset.filter(content__preset__isnull=False)
+        return queryset.exclude(content__preset__isnull=False)
 
     def filter_is_loaded(self, queryset, name, value):
         return queryset.filter(is_loaded=value)
@@ -263,6 +272,81 @@ class StoredLibraryViewSet(BaseModelViewSet):
             logger.error("Failed to load library", error=e)
             return Response(
                 {"error": "Failed to load library"},  # This must translated
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="apply",
+        parser_classes=[JSONParser],
+    )
+    def apply_preset(self, request, pk):
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_loadedlibrary"),
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(status=HTTP_403_FORBIDDEN)
+
+        try:
+            key = "urn" if pk.startswith("urn:") else "id"
+            library = StoredLibrary.objects.get(**{key: pk})
+        except StoredLibrary.DoesNotExist:
+            return Response(data="Library not found.", status=HTTP_404_NOT_FOUND)
+
+        if not library.is_preset:
+            return Response(
+                {"error": "This library is not a preset."},
+                status=HTTP_400_BAD_REQUEST,
+            )
+
+        from library.preset_executor import PresetExecutor
+
+        folder_name = request.data.get("folder_name")
+        folder_id = request.data.get("folder_id")
+        create_objects = request.data.get("create_objects", True)
+        apply_feature_flags = request.data.get("apply_feature_flags", True)
+
+        # Only apply feature flags if user has permission to change global settings
+        if apply_feature_flags:
+            can_change_settings = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_globalsettings"),
+                folder=Folder.get_root_folder(),
+            )
+            if not can_change_settings:
+                apply_feature_flags = False
+
+        try:
+            executor = PresetExecutor(library, request.user, request)
+            journey = executor.apply(
+                folder_name=folder_name,
+                folder_id=folder_id,
+                create_objects=create_objects,
+                apply_feature_flags=apply_feature_flags,
+            )
+            return Response(
+                {"journey_id": str(journey.id)},
+                status=HTTP_201_CREATED,
+            )
+        except (ValidationError, DRFValidationError) as e:
+            logger.error("Failed to apply preset", error=e)
+            if hasattr(e, "detail"):
+                # DRF ValidationError — detail is a dict/list of clean strings
+                detail = e.detail
+            elif hasattr(e, "message_dict"):
+                detail = e.message_dict
+            else:
+                detail = "Validation failed."
+            return Response(
+                {"error": detail},
+                status=HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+        except Exception as e:
+            logger.error("Failed to apply preset", error=e)
+            return Response(
+                {"error": "Failed to apply preset."},
                 status=HTTP_422_UNPROCESSABLE_ENTITY,
             )
 
@@ -464,17 +548,24 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
                 if library is not None:
                     logger.info("Attempting to load newly uploaded library")
+                    # Check if a LoadedLibrary already exists for this urn/locale.
+                    # If so, this is an update scenario: the StoredLibrary must be
+                    # kept so the user can trigger the update via the _update endpoint.
+                    already_loaded = LoadedLibrary.objects.filter(
+                        urn=library.urn
+                    ).exists()
+
                     try:
                         load_error = library.load()
                     except (ValueError, ValidationError) as load_exc:
                         validation_detail = load_exc.args[0] if load_exc.args else None
                         logger.error(
-                            "Validation error while loading newly uploaded library, removing stored entry",
-                            name=library.name,
+                            "Validation error while loading newly uploaded library",
                             urn=library.urn,
                             error=validation_detail,
                         )
-                        library.delete()
+                        if not already_loaded:
+                            library.delete()
                         return HttpResponse(
                             json.dumps(
                                 {
@@ -485,13 +576,13 @@ class StoredLibraryViewSet(BaseModelViewSet):
                             ),
                             status=HTTP_422_UNPROCESSABLE_ENTITY,
                         )
-                    except Exception:
+                    except Exception as load_exc:
                         logger.exception(
-                            "Unexpected exception while loading newly uploaded library, removing stored entry",
+                            "Unexpected exception while loading newly uploaded library",
                             urn=library.urn,
-                            name=library.name,
                         )
-                        library.delete()
+                        if not already_loaded:
+                            library.delete()
                         return HttpResponse(
                             json.dumps(
                                 {
@@ -503,21 +594,34 @@ class StoredLibraryViewSet(BaseModelViewSet):
                         )
 
                     if load_error is not None:
-                        logger.error(
-                            "Failed to load newly uploaded library, removing stored entry",
-                            error=load_error,
-                            urn=library.urn,
-                        )
-                        library.delete()
-                        return HttpResponse(
-                            json.dumps(
+                        if not already_loaded:
+                            logger.error(
+                                "Failed to load newly uploaded library, removing stored entry",
+                                error=load_error,
+                                urn=library.urn,
+                            )
+                            library.delete()
+                            return HttpResponse(
+                                json.dumps(
+                                    {
+                                        "error": "libraryLoadFailed",
+                                        "detail": load_error,
+                                    }
+                                ),
+                                status=HTTP_422_UNPROCESSABLE_ENTITY,
+                            )
+                        else:
+                            logger.info(
+                                "Library already loaded, stored new version for update",
+                                urn=library.urn,
+                            )
+                            return Response(
                                 {
-                                    "error": "libraryLoadFailed",
-                                    "detail": load_error,
-                                }
-                            ),
-                            status=HTTP_422_UNPROCESSABLE_ENTITY,
-                        )
+                                    **StoredLibrarySerializer(library).data,
+                                    "warning": "libraryStoredForUpdate",
+                                },
+                                status=HTTP_201_CREATED,
+                            )
 
                 return Response(
                     StoredLibrarySerializer(library).data, status=HTTP_201_CREATED
@@ -525,7 +629,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
 
             except ValueError as e:
                 logger.error("Failed to store library content", error=e)
-                if library is not None:
+                if (
+                    library is not None
+                    and not LoadedLibrary.objects.filter(urn=library.urn).exists()
+                ):
                     library.delete()
                 return HttpResponse(
                     json.dumps({"error": "Failed to store library content."}),
@@ -539,7 +646,10 @@ class StoredLibraryViewSet(BaseModelViewSet):
             )
         except Exception:
             logger.exception("Upload library failed")
-            if library is not None:
+            if (
+                library is not None
+                and not LoadedLibrary.objects.filter(urn=library.urn).exists()
+            ):
                 library.delete()
             return HttpResponse(
                 json.dumps({"error": "invalidLibraryFileError"}),

@@ -46,8 +46,21 @@ export const navData = {
 						'view_riskscenario',
 						'view_referencecontrol',
 						'view_assessment',
-						'view_riskassessment'
+						'view_riskassessment',
+						'view_requirementassignment'
 					]
+				},
+				{
+					name: 'auditDashboard',
+					fa_icon: 'fa-solid fa-clipboard-check',
+					href: '/auditee-dashboard',
+					permissions: ['view_requirementassignment']
+				},
+				{
+					name: 'presets',
+					fa_icon: 'fa-solid fa-rocket',
+					href: '/presets',
+					permissions: ['add_loadedlibrary', 'view_presetjourney']
 				}
 			]
 		},
@@ -58,7 +71,7 @@ export const navData = {
 					name: 'domains',
 					fa_icon: 'fa-solid fa-sitemap',
 					href: '/folders',
-					exclude: ['BI-RL-TPR']
+					exclude: ['BI-RL-TPR', 'BI-RL-ADE']
 				},
 				{
 					name: 'perimeters',
@@ -264,7 +277,8 @@ export const navData = {
 				{
 					name: 'complianceAssessments',
 					fa_icon: 'fa-solid fa-certificate',
-					href: '/compliance-assessments'
+					href: '/compliance-assessments',
+					exclude: ['BI-RL-ADE']
 				},
 				{
 					name: 'evidences',

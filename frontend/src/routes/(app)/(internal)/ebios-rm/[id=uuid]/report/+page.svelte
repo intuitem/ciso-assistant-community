@@ -3,11 +3,12 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import RiskScenarioItem from '$lib/components/RiskMatrix/RiskScenarioItem.svelte';
 	import EcosystemCircularRadarChart from '$lib/components/Chart/EcosystemCircularRadarChart.svelte';
-	import GraphComponent from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
+	import OperatingModeGraph from '../../../operating-modes/[id=uuid]/graph/OperatingModeGraph.svelte';
 	import AttackPathFlowText from '$lib/components/EbiosRM/AttackPathFlowText.svelte';
 	import type { PageData } from './$types';
 	import type { RiskMatrixJsonDefinition, RiskScenario } from '$lib/utils/types';
@@ -82,7 +83,7 @@
 <div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
 	<div
-		class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
+		class="fixed top-36 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
 	>
 		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
 		<div class="flex flex-col gap-2 items-center">
@@ -257,7 +258,14 @@
 							{#if event.assets.length > 0}
 								<div>
 									<span class="font-semibold text-gray-700">{m.assets()}:</span>
-									<span class="ml-2">{event.assets.map((a) => a.str).join(', ')}</span>
+									{#each event.assets as asset, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/assets/${asset.id}`}
+											label={asset.str}
+											class="space-x-2 text-primary-800 hover:text-primary-600">{asset.str}</Anchor
+										>
+									{/each}
 								</div>
 							{/if}
 							{#if event.qualifications.length > 0}
@@ -381,13 +389,13 @@
 							{#if assessment.eta}
 								<div>
 									<span class="font-semibold text-gray-700">{m.eta()}:</span>
-									<span class="ml-2">{formatDateOrDateTime(assessment.eta)}</span>
+									<span class="ml-2">{formatDateOrDateTime(assessment.eta, getLocale())}</span>
 								</div>
 							{/if}
 							{#if assessment.due_date}
 								<div>
 									<span class="font-semibold text-gray-700">{m.dueDate()}:</span>
-									<span class="ml-2">{formatDateOrDateTime(assessment.due_date)}</span>
+									<span class="ml-2">{formatDateOrDateTime(assessment.due_date, getLocale())}</span>
 								</div>
 							{/if}
 							{#if assessment.status}
@@ -449,15 +457,23 @@
 							</div>
 						</div>
 						{#if roto.feared_events.length > 0}
-							<div class="mt-2 text-sm">
-								<span class="font-semibold text-gray-700">{m.fearedEvents()}:</span>
-								<span class="ml-2 text-gray-600"
-									>{reportData.feared_events
-										.filter((fe) => roto.feared_events.some((id) => id.id === fe.id))
-										.map((fe) => fe.name)
-										.join(', ')}</span
-								>
-							</div>
+							{@const fearedEvents = reportData.feared_events.filter((fe) =>
+								roto.feared_events.some((id) => id.id === fe.id)
+							)}
+							{#if fearedEvents.length > 0}
+								<div class="mt-2 text-sm">
+									<span class="font-semibold text-gray-700">{m.fearedEvents()}:</span>
+									{#each fearedEvents as fearedEvent, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/feared-events/${fearedEvent.id}`}
+											label={fearedEvent.name}
+											class="space-x-2 text-primary-800 hover:text-primary-600"
+											>{fearedEvent.name}</Anchor
+										>
+									{/each}
+								</div>
+							{/if}
 						{/if}
 						{#if roto.justification}
 							<div class="mt-2 text-sm">
@@ -721,9 +737,14 @@
 							{#if opScenario.threats && opScenario.threats.length > 0}
 								<div class="mt-3 text-sm">
 									<span class="font-semibold text-gray-700">{m.threats()}:</span>
-									<span class="ml-2 text-gray-700">
-										{opScenario.threats.map((t) => t.str).join(', ')}
-									</span>
+									{#each opScenario.threats as threat, index}
+										{index > 0 ? ', ' : ''}
+										<Anchor
+											href={`/threats/${threat.id}`}
+											label={threat.str}
+											class="space-x-2 text-primary-800 hover:text-primary-600">{threat.str}</Anchor
+										>
+									{/each}
 								</div>
 							{/if}
 							{#if opScenario.stakeholders && opScenario.stakeholders.length > 0}
@@ -787,27 +808,30 @@
 														{safeTranslate(mode.likelihood.name)}
 													</span>
 												</div>
-												{#if mode.elementary_actions.length > 0}
+												{#if mode.graph?.elementary_actions?.length > 0}
 													<div class="text-xs">
-														<span class="font-semibold text-gray-700">{m.elementaryActions()}:</span
+														<span class="font-semibold text-surface-700"
+															>{m.elementaryActions()}:</span
 														>
-														<span class="ml-1 text-gray-600">{mode.elementary_actions.length}</span>
+														<span class="ml-1 text-surface-600"
+															>{mode.graph.elementary_actions.length}</span
+														>
 													</div>
 												{/if}
 											</div>
 											<!-- Operating Mode Graph -->
 											{#if mode.graph}
-												<div class="mt-4 pt-4 border-t border-gray-200">
-													<h5 class="text-xs font-semibold text-gray-700 mb-2">
+												<div class="mt-4 pt-4 border-t border-surface-200">
+													<h5 class="text-xs font-semibold text-surface-700 mb-2">
 														{m.killChain()}
 													</h5>
-													<div class="bg-gray-50 rounded p-2" data-chart="operating-mode-{mode.id}">
-														<GraphComponent
-															data={{ nodes: mode.graph.nodes, links: mode.graph.links }}
-															panelNodes={mode.graph.panelNodes}
-															linkFlow={false}
-															height="400px"
-															zoomLevel={0.6}
+													<div class="h-[400px]" data-chart="operating-mode-{mode.id}">
+														<OperatingModeGraph
+															elementaryActions={mode.graph.elementary_actions}
+															killChainSteps={mode.graph.kill_chain_steps}
+															operatingModeId={mode.id}
+															graphColumns={mode.graph_columns ?? {}}
+															readonly={true}
 														/>
 													</div>
 												</div>
@@ -1070,7 +1094,7 @@
 														{/if}
 													</td>
 													<td class="px-3 py-2 text-sm">
-														{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+														{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 													</td>
 												</tr>
 											{/each}
@@ -1153,7 +1177,7 @@
 													{/if}
 												</td>
 												<td class="px-3 py-2 text-sm">
-													{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+													{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 												</td>
 											</tr>
 										{/each}
@@ -1231,7 +1255,7 @@
 											{/if}
 										</td>
 										<td class="px-3 py-2 text-sm">
-											{control.eta ? formatDateOrDateTime(control.eta) : '--'}
+											{control.eta ? formatDateOrDateTime(control.eta, getLocale()) : '--'}
 										</td>
 									</tr>
 								{/each}
@@ -1500,30 +1524,39 @@
 			page-break-before: always !important;
 		}
 
-		/* Fix operating mode graphs - scale to fit and wrap if needed */
 		[data-chart^='operating-mode-'] {
+			height: 400px !important;
+			max-height: 400px !important;
 			max-width: 100% !important;
-			max-height: 18cm !important;
 			overflow: hidden !important;
 			page-break-inside: avoid !important;
 			margin: 1cm 0 !important;
 		}
 
 		[data-chart^='operating-mode-'] > * {
+			height: 100% !important;
+			max-height: 400px !important;
 			max-width: 100% !important;
-			max-height: 18cm !important;
-			transform: scale(0.85) !important;
-			transform-origin: top left !important;
+			transform: none !important;
 		}
 
-		/* Ensure operating mode SVG elements scale properly */
-		[data-chart^='operating-mode-'] svg {
-			max-width: 100% !important;
-			height: auto !important;
+		:global(.svelte-flow__background),
+		:global(.svelte-flow__controls),
+		:global(.svelte-flow__minimap),
+		:global(.svelte-flow__panel) {
+			display: none !important;
+		}
+
+		/* Ensure SvelteFlow colors print correctly */
+		:global(.svelte-flow__edge-path),
+		:global(.svelte-flow__node),
+		:global(.svelte-flow svg) {
+			-webkit-print-color-adjust: exact !important;
+			print-color-adjust: exact !important;
 		}
 
 		/* Ensure chart containers don't create extra space */
-		:global([class*='h-[']) {
+		:global([class*='h-[']:not([data-chart^='operating-mode-'])) {
 			height: auto !important;
 			max-height: 25cm !important;
 		}

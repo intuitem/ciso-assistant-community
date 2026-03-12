@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { Accordion, ProgressRing } from '@skeletonlabs/skeleton-svelte';
+	import { Accordion, Progress } from '@skeletonlabs/skeleton-svelte';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { complianceResultColorMap, complianceStatusColorMap } from '$lib/utils/constants';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import * as m from '$paraglide/messages';
 	import { darkenColor } from '$lib/utils/helpers';
 	import { page } from '$app/state';
-	import {} from '@skeletonlabs/skeleton-svelte';
 	import { displayScoreColor, formatScoreValue } from '$lib/utils/helpers';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
@@ -78,11 +77,9 @@
 				multiple
 			>
 				<Accordion.Item value="requirement">
-					{#snippet lead()}
-						<i class="fa-solid fa-sitemap text-primary-500"></i>
-					{/snippet}
-					{#snippet control()}
-						<div class="flex flex-row space-x-4 items-center">
+					<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+						<i class="fa-solid fa-sitemap text-primary-500 mr-2"></i>
+						<div class="flex flex-row flex-1 space-x-4 items-center text-left">
 							<span class="font-bold text-lg text-gray-800">{domain.name}</span>
 
 							<!-- Compliance section -->
@@ -125,9 +122,20 @@
 								</div>
 							</div>
 						</div>
-					{/snippet}
-
-					{#snippet panel()}
+						<Accordion.ItemIndicator
+							class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+							><svg
+								xmlns="http://www.w3.org/2000/svg"
+								width="14px"
+								height="14px"
+								viewBox="0 0 448 512"
+								><path
+									d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+								/></svg
+							></Accordion.ItemIndicator
+						>
+					</Accordion.ItemTrigger>
+					<Accordion.ItemContent>
 						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 							{#each domain.perimeters as perimeter, perimeterIndex}
 								{@const assessment =
@@ -216,38 +224,58 @@
 
 												{#if requirementAssessment.is_scored}
 													<div class="flex flex-row space-x-2">
-														<ProgressRing
-															strokeWidth="20px"
-															meterStroke={displayScoreColor(
-																requirementAssessment.score,
-																assessment.max_score
-															)}
-															value={formatScoreValue(
-																requirementAssessment.score,
-																assessment.max_score
-															)}
-															classes="shrink-0"
-															size="size-10"
-														>
-															{requirementAssessment.score}
-														</ProgressRing>
+														<div class="shrink-0 relative">
+															<Progress
+																value={formatScoreValue(
+																	requirementAssessment.score,
+																	assessment.max_score
+																)}
+																min={0}
+																max={100}
+															>
+																<Progress.Circle class="[--size:--spacing(10)]">
+																	<Progress.CircleTrack />
+																	<Progress.CircleRange
+																		class={displayScoreColor(
+																			requirementAssessment.score,
+																			assessment.max_score
+																		)}
+																	/>
+																</Progress.Circle>
+																<div class="absolute inset-0 flex items-center justify-center">
+																	<span class="text-xs font-bold"
+																		>{requirementAssessment.score}</span
+																	>
+																</div>
+															</Progress>
+														</div>
 
 														{#if assessment.show_documentation_score}
-															<ProgressRing
-																strokeWidth="20px"
-																meterStroke={displayScoreColor(
-																	requirementAssessment.documentation_score,
-																	assessment.max_score
-																)}
-																value={formatScoreValue(
-																	requirementAssessment.documentation_score,
-																	assessment.max_score
-																)}
-																classes="shrink-0"
-																size="size-10"
-															>
-																{requirementAssessment.documentation_score}
-															</ProgressRing>
+															<div class="shrink-0 relative">
+																<Progress
+																	value={formatScoreValue(
+																		requirementAssessment.documentation_score,
+																		assessment.max_score
+																	)}
+																	min={0}
+																	max={100}
+																>
+																	<Progress.Circle class="[--size:--spacing(10)]">
+																		<Progress.CircleTrack />
+																		<Progress.CircleRange
+																			class={displayScoreColor(
+																				requirementAssessment.documentation_score,
+																				assessment.max_score
+																			)}
+																		/>
+																	</Progress.Circle>
+																	<div class="absolute inset-0 flex items-center justify-center">
+																		<span class="text-xs font-bold"
+																			>{requirementAssessment.documentation_score}</span
+																		>
+																	</div>
+																</Progress>
+															</div>
 														{/if}
 													</div>
 												{/if}
@@ -257,7 +285,7 @@
 								{/if}
 							{/each}
 						</div>
-					{/snippet}
+					</Accordion.ItemContent>
 				</Accordion.Item>
 			</Accordion>
 		{/each}
