@@ -265,7 +265,9 @@ DATA_WIZARD_COMMANDS = [
             "\nRequired columns: name\n"
             "Optional columns: ref_id, description, type (primary/support), "
             "domain, business_value, observation, reference_link (or link), "
-            "security_objectives, disaster_recovery_objectives, parent_assets, "
+            "security_objectives (or security_capabilities for support assets), "
+            "disaster_recovery_objectives (or recovery_capabilities for support assets), "
+            "parent_assets, "
             "labels (or filtering_labels / étiquette / label)\n"
         ),
         "requires_folder": True,
