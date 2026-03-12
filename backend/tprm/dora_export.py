@@ -1086,10 +1086,16 @@ def generate_b_05_02_supply_chains(
     )
 
     # Write supply chain data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_05.02 is (contract_ref, ict_service_type, provider_code, rank, recipient_code).
+    seen_keys = set()
+
     for contract in supply_chain_contracts:
         for solution in contract.solutions.all():
             contract_ref = contract.ref_id or str(contract.id)
-            ict_service_type = solution.dora_ict_service_type or ""
+            ict_service_type = solution.dora_ict_service_type
+            if not ict_service_type:
+                continue
 
             # Build supply chain from solution's provider
             chain = get_provider_chain(solution.provider_entity)
@@ -1110,6 +1116,17 @@ def generate_b_05_02_supply_chains(
                         recipient
                     )
                 recipient_code = recipient_code or "0"
+
+                key = (
+                    contract_ref,
+                    ict_service_type,
+                    provider_code,
+                    rank,
+                    recipient_code,
+                )
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
 
                 csv_writer.writerow(
                     [
