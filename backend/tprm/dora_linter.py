@@ -28,10 +28,12 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
     """
     results = []
 
-    # Get all provider entities from third-party contracts
-    provider_entities = Entity.objects.filter(
-        contracts__is_intragroup=False, contracts__isnull=False
-    ).distinct()
+    # Get all provider entities from non-draft third-party contracts
+    provider_entities = (
+        Entity.objects.filter(contracts__is_intragroup=False, contracts__isnull=False)
+        .exclude(contracts__status=Contract.Status.DRAFT)
+        .distinct()
+    )
 
     if not provider_entities.exists():
         return results
@@ -1092,9 +1094,11 @@ def lint_solutions() -> List[Dict[str, Any]]:
         descendants = business_function.get_descendants()
         business_function_asset_ids.update(asset.id for asset in descendants)
 
-    # Get solutions associated with business function assets or their children
+    # Get solutions associated with business function assets or their children,
+    # only if they belong to at least one non-draft contract
     solutions = (
         Solution.objects.filter(assets__id__in=business_function_asset_ids)
+        .exclude(contracts__status=Contract.Status.DRAFT)
         .distinct()
         .select_related("provider_entity")
         .prefetch_related("contracts")
@@ -1274,12 +1278,13 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
     """
     results = []
 
-    # Solutions on third-party contracts (same scope as generate_b_05_02)
+    # Solutions on non-draft third-party contracts (same scope as generate_b_05_02)
     solutions = (
         Solution.objects.filter(
             contracts__is_intragroup=False,
             contracts__provider_entity__isnull=False,
         )
+        .exclude(contracts__status=Contract.Status.DRAFT)
         .distinct()
         .select_related("provider_entity")
     )
@@ -1618,11 +1623,15 @@ def lint_conditional_fields() -> List[Dict[str, Any]]:
                 )
 
     # --- v8884: solutions in B_07.01 must have substitutability ---
-    # B_07.01 includes solutions on non-intragroup contracts with provider
-    b_07_01_solutions = Solution.objects.filter(
-        contracts__is_intragroup=False,
-        contracts__provider_entity__isnull=False,
-    ).distinct()
+    # B_07.01 includes solutions on non-draft, non-intragroup contracts with provider
+    b_07_01_solutions = (
+        Solution.objects.filter(
+            contracts__is_intragroup=False,
+            contracts__provider_entity__isnull=False,
+        )
+        .exclude(contracts__status=Contract.Status.DRAFT)
+        .distinct()
+    )
 
     missing_substitutability = b_07_01_solutions.filter(
         Q(dora_substitutability__isnull=True) | Q(dora_substitutability="")
