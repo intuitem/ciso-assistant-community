@@ -1062,7 +1062,7 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                     contract_ref = contract.ref_id or contract.name
                     results.append(
                         {
-                            "severity": "error",
+                            "severity": "warning",
                             "category": "B_02.02 Contracts",
                             "message": (
                                 f"Contract '{contract_ref}' has duplicate XBRL key in B_02.02: "
@@ -1394,7 +1394,7 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
                 contract_ref = contract.ref_id or contract.name
                 results.append(
                     {
-                        "severity": "error",
+                        "severity": "warning",
                         "category": "Assessment (B_07.01)",
                         "message": (
                             f"Contract '{contract_ref}' has duplicate XBRL key in B_07.01: "
