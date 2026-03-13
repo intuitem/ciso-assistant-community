@@ -183,8 +183,6 @@ def generate_b_01_01_main_entity(
         main_entity: The main builtin entity
         folder_prefix: Optional folder prefix to prepend to file path
     """
-    from datetime import datetime
-
     csv_buffer = io.StringIO()
     csv_writer = csv.writer(csv_buffer)
 
