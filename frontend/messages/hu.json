@@ -119,6 +119,7 @@
 	"frameworks": "Keretek",
 	"frameworksColon": "Keretek:",
 	"domains": "Tartományok",
+	"userFolderHelpText": "Tartomány, ahol a felhasználó látható mások számára, akik hozzáféréssel rendelkeznek (nem befolyásolja a felhasználói engedélyeket)",
 	"perimeters": "Hatókörök",
 	"users": "Felhasználók",
 	"user": "Felhasználó",

@@ -128,6 +128,7 @@
 	"frameworks": "Okviri",
 	"frameworksColon": "Okviri:",
 	"domains": "Domene",
+	"userFolderHelpText": "Domena gdje je korisnik vidljiv drugima koji imaju pristup tom opsegu (ne utječe na dozvole korisnika)",
 	"perimeters": "Perimetri",
 	"users": "Korisnici",
 	"user": "Korisnik",

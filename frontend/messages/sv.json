@@ -119,6 +119,7 @@
 	"frameworks": "Ramverk",
 	"frameworksColon": "Ramverk:",
 	"domains": "Domäner",
+	"userFolderHelpText": "Domän där användaren är synlig för andra med åtkomst till det området (påverkar inte användarbehörigheter)",
 	"perimeters": "Perimetrar",
 	"users": "Användare",
 	"user": "Användare",

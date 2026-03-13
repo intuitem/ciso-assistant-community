@@ -124,6 +124,7 @@
 	"frameworks": "Struktura",
 	"frameworksColon": "Struktury:",
 	"domains": "Domeny",
+	"userFolderHelpText": "Domena, w której użytkownik jest widoczny dla innych z dostępem do tego zakresu (nie wpływa na uprawnienia użytkownika)",
 	"perimeters": "Zakresy",
 	"users": "Użytkownicy",
 	"user": "Użytkownik",

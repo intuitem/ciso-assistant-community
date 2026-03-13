@@ -90,6 +90,7 @@
 	"frameworks": "Framework",
 	"frameworksColon": "Framework:",
 	"domains": "Domini",
+	"userFolderHelpText": "Dominio dove l'utente è visibile agli altri con accesso a tale ambito (non influisce sui permessi dell'utente)",
 	"perimeters": "Perimetri",
 	"users": "Utenti",
 	"user": "Utente",
