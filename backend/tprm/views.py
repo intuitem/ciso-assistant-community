@@ -220,9 +220,13 @@ class EntityViewSet(BaseModelViewSet):
         # Get export metadata (naming, identifiers)
         identifier_type = request.query_params.get("identifier_type", None)
         level = request.query_params.get("level", "IND")
+        naming_convention = request.query_params.get("naming_convention", "nbb")
         try:
             export_meta = dora_export.get_dora_export_metadata(
-                main_entity, identifier_type=identifier_type, level=level
+                main_entity,
+                identifier_type=identifier_type,
+                level=level,
+                naming_convention=naming_convention,
             )
         except ValueError:
             logger.exception("Error generating DORA export metadata")

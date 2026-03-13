@@ -21,17 +21,40 @@
 	// Available identifiers from the linter response
 	const availableIdentifiers: Array<{ type: string; value: string }> =
 		lintResults.available_identifiers || [];
+	const entityCountry: string = lintResults.entity_country || '';
+	const competentAuthority: string = lintResults.competent_authority || '';
 
 	// Export options state
 	let selectedIdentifierType = $state(
 		availableIdentifiers.length > 0 ? availableIdentifiers[0].type : ''
 	);
 	let selectedLevel = $state('IND');
+	let selectedNamingConvention = $state(entityCountry === 'BE' ? 'nbb' : 'eba');
+
+	// Live filename preview
+	let filenamePreview = $derived.by(() => {
+		const id = availableIdentifiers.find((i) => i.type === selectedIdentifierType);
+		if (!id) return '';
+		const code = id.value;
+		const key = id.type;
+		const level = selectedLevel;
+		if (selectedNamingConvention === 'eba') {
+			const country = entityCountry ? entityCountry.substring(0, 2).toUpperCase() : 'XX';
+			const refDate = `${new Date().getFullYear() - 1}-12-31`;
+			const now = new Date();
+			const pad = (n: number) => n.toString().padStart(2, '0');
+			const timestamp = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}T${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}z`;
+			return `${key}_${code}.${level}_${country}_DORA010100_DORA_${refDate}_${timestamp}.zip`;
+		}
+		const authority = competentAuthority || 'UNKNOWN';
+		return `${key}_${code}.${level}_${authority}_DOR_DORA_ROI.zip`;
+	});
 
 	function handleGenerateReport() {
 		const params = new URLSearchParams();
 		if (selectedIdentifierType) params.set('identifier_type', selectedIdentifierType);
 		params.set('level', selectedLevel);
+		params.set('naming_convention', selectedNamingConvention);
 		window.location.href = `/reports/dora-roi/download?${params.toString()}`;
 	}
 
@@ -259,7 +282,45 @@
 					</div>
 					<p class="mt-1 text-xs text-gray-500">Individual or consolidated reporting scope.</p>
 				</div>
+
+				<!-- Naming Convention selector -->
+				<div>
+					<label class="block text-sm font-medium text-gray-700 mb-2"> Naming Convention </label>
+					<div class="flex gap-4">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="naming_convention"
+								value="nbb"
+								bind:group={selectedNamingConvention}
+								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+							/>
+							<span class="text-sm text-gray-700">NBB format</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="naming_convention"
+								value="eba"
+								bind:group={selectedNamingConvention}
+								class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+							/>
+							<span class="text-sm text-gray-700">EBA standard</span>
+						</label>
+					</div>
+					<p class="mt-1 text-xs text-gray-500">
+						ZIP file naming format expected by your competent authority.
+					</p>
+				</div>
 			</div>
+
+			<!-- Filename preview -->
+			{#if filenamePreview}
+				<div class="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+					<div class="text-xs font-medium text-gray-500 mb-1">Filename preview</div>
+					<code class="text-sm text-gray-800 break-all">{filenamePreview}</code>
+				</div>
+			{/if}
 		</div>
 	{/if}
 

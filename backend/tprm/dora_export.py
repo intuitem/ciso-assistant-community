@@ -8,7 +8,7 @@ Each function generates a specific report and writes it to a ZIP file.
 import csv
 import io
 import json
-from datetime import date
+from datetime import date, datetime
 from typing import Dict, List, Optional, Any
 
 from django.db.models import QuerySet
@@ -18,11 +18,14 @@ from core.models import Asset
 
 # Helper Functions
 
-IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "VAT", "DUNS"]
+IDENTIFIER_PRIORITY = ["LEI", "EUID", "KBO", "CRN", "VAT", "PNR", "NIN", "DUNS"]
 
 
 def get_dora_export_metadata(
-    main_entity: Entity, identifier_type: str = None, level: str = "IND"
+    main_entity: Entity,
+    identifier_type: str = None,
+    level: str = "IND",
+    naming_convention: str = "nbb",
 ) -> dict:
     """
     Compute metadata for DORA RoI export.
@@ -31,6 +34,7 @@ def get_dora_export_metadata(
         main_entity: The main financial entity
         identifier_type: Explicit identifier key to use (e.g. "LEI", "KBO"). If None, uses priority list.
         level: Consolidation level — "IND" (individual) or "CON" (consolidated). Defaults to "IND".
+        naming_convention: "nbb" for NBB format, "eba" for EBA FAQ #24 format.
 
     Returns:
         Dictionary with:
@@ -55,9 +59,19 @@ def get_dora_export_metadata(
     folder_prefix = f"{key_name}_{code}.{level}_{authority}_DOR_DORA_ROI"
     entity_id = f"rs:{code}.{level}"
 
+    if naming_convention == "eba":
+        country = getattr(main_entity, "country", None) or "XX"
+        if len(country) > 2:
+            country = country[:2].upper()
+        ref_date = f"{date.today().year - 1}-12-31"
+        timestamp = datetime.now().strftime("%Y%m%dT%H%M%Sz")
+        filename = f"{key_name}_{code}.{level}_{country}_DORA010100_DORA_{ref_date}_{timestamp}.zip"
+    else:
+        filename = f"{folder_prefix}.zip"
+
     return {
         "folder_prefix": folder_prefix,
-        "filename": f"{folder_prefix}.zip",
+        "filename": filename,
         "entity_id": entity_id,
         "competent_authority": authority,
     }
@@ -122,12 +136,14 @@ def get_entity_identifier(
             return "eba_qCO:qx2000"
         elif key_upper == "EUID":
             return "eba_qCO:qx2002"
-        elif key_upper == "KBO":
+        elif key_upper in ("KBO", "CRN"):
             return "eba_qCO:qx2003"
         elif key_upper == "VAT":
             return "eba_qCO:qx2004"
+        elif key_upper in ("PNR", "NIN"):
+            return "eba_qCO:qx2005"
         else:
-            return "eba_qCO:qx2003"
+            return "eba_qCO:qx2001"
 
     # Try priority identifiers first
     for id_type in priority:
@@ -1086,9 +1102,9 @@ def generate_b_05_02_supply_chains(
     )
 
     # Get contracts with both provider and solutions
+    # NOTE: intragroup providers ARE included per EBA FAQ #70, #82, #84
     supply_chain_contracts = (
         contracts.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )
@@ -1281,9 +1297,9 @@ def generate_b_07_01_assessment(
     )
 
     # Get contracts with both provider and solutions
+    # NOTE: intragroup providers ARE included per EBA FAQ #70, #82, #84
     assessment_contracts = (
         contracts.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )

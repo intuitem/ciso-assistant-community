@@ -5,9 +5,11 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ fetch, url }) => {
 	const identifierType = url.searchParams.get('identifier_type') || '';
 	const level = url.searchParams.get('level') || 'IND';
+	const namingConvention = url.searchParams.get('naming_convention') || 'nbb';
 	const params = new URLSearchParams();
 	if (identifierType) params.set('identifier_type', identifierType);
 	params.set('level', level);
+	params.set('naming_convention', namingConvention);
 	const endpoint = `${BASE_API_URL}/entities/generate_dora_roi/?${params.toString()}`;
 
 	const res = await fetch(endpoint);
