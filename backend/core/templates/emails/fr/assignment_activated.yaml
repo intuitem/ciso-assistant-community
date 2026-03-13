@@ -9,6 +9,6 @@ body: |
   - Date d'échéance : ${due_date}
 
   Veuillez vous connecter à votre portail CISO Assistant pour commencer votre évaluation :
-  ${ciso_assistant_url}
+  ${ciso_assistant_url}/auditee-dashboard
 
   Merci.
