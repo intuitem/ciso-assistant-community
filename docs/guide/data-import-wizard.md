@@ -51,6 +51,12 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * type
   * `PR` : primary
   * `SP` : supporting
+* reference\_link (or link)
+* security\_objectives
+  * confidentiality: 3,integrity: 2,availability: 1,...
+* disaster\_recovery\_objectives
+  * rto: 1h01m01s,rpo: 2h01m01s,mtd: 3h
+* labels
 
 ### Special considerations
 
