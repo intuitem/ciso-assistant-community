@@ -94,7 +94,8 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from django.utils import timezone
-from django.db import models
+from django.db import models, IntegrityError
+from django.core.exceptions import ValidationError
 from datetime import datetime, date
 from typing import Optional, Final, ClassVar, Mapping
 from dataclasses import dataclass, field
@@ -2132,7 +2133,9 @@ class LoadFileView(APIView):
                     else:
                         # CSV: flat single-sheet import of task templates only
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        df = pd.read_csv(record_file, sep=None, engine="python").fillna(
+                            ""
+                        )
                         base_context = BaseContext(
                             request,
                             folders_map=folders_map,
@@ -2155,7 +2158,9 @@ class LoadFileView(APIView):
                         ).fillna("")
                     else:
                         file_type = RecordFileType.CSV
-                        df = pd.read_csv(record_file).fillna("")
+                        df = pd.read_csv(record_file, sep=None, engine="python").fillna(
+                            ""
+                        )
 
                     base_context = BaseContext(
                         request,
@@ -2872,16 +2877,8 @@ class LoadFileView(APIView):
             on_conflict=on_conflict,
         )
 
-        overall_results = {
-            "templates": {},
-            "task_nodes": {
-                "created": 0,
-                "updated": 0,
-                "skipped": 0,
-                "failed": 0,
-                "errors": [],
-            },
-        }
+        task_nodes_result = Result()
+        overall_results: dict = {"templates": {}}
 
         summary_sheet = "Summary" if "Summary" in sheet_names else sheet_names[0]
 
@@ -2898,6 +2895,7 @@ class LoadFileView(APIView):
         overall_results["templates"] = template_results
 
         if len(sheet_names) == 1 or template_results.get("stopped"):
+            overall_results["task_nodes"] = task_nodes_result.to_dict()
             return overall_results
 
         # Build counter → TaskTemplate map resolving each row's actual folder,
@@ -2923,8 +2921,6 @@ class LoadFileView(APIView):
                 tmpl = TaskTemplate.objects.filter(
                     name=rec_name, folder_id=row_folder_id
                 ).first()
-            if tmpl is None:
-                tmpl = TaskTemplate.objects.filter(name=rec_name).first()
             if tmpl is not None:
                 template_map[idx] = tmpl
 
@@ -2951,12 +2947,12 @@ class LoadFileView(APIView):
                 ).first()
 
             if template is None:
-                overall_results["task_nodes"]["errors"].append(
-                    {
-                        "error": f"TaskTemplate not found for sheet '{sheet_name}'; skipped."
-                    }
+                task_nodes_result.add_error(
+                    Error(
+                        record={"sheet": sheet_name},
+                        error=f"TaskTemplate not found for sheet '{sheet_name}'; skipped.",
+                    )
                 )
-                overall_results["task_nodes"]["failed"] += 1
                 continue
 
             sheet_df = normalize_datetime_columns(
@@ -2981,35 +2977,44 @@ class LoadFileView(APIView):
                 observation = str(row.get("observation", ""))
                 scheduled_date = _parse_date(row.get("scheduled_date")) or due_date
 
-                try:
-                    existing_node = TaskNode.objects.filter(
-                        task_template=template, due_date=due_date
-                    ).first()
+                existing_node = TaskNode.objects.filter(
+                    task_template=template, folder=template.folder, due_date=due_date
+                ).first()
 
-                    if existing_node is not None:
-                        match on_conflict:
-                            case ConflictMode.SKIP:
-                                overall_results["task_nodes"]["skipped"] += 1
-                                continue
-                            case ConflictMode.STOP:
-                                overall_results["task_nodes"]["errors"].append(
-                                    {
-                                        "error": (
-                                            f"Task node for '{template.name}' on"
-                                            f" {due_date} already exists"
-                                        )
-                                    }
+                if existing_node is not None:
+                    match on_conflict:
+                        case ConflictMode.SKIP:
+                            task_nodes_result.add_skipped()
+                            continue
+                        case ConflictMode.STOP:
+                            task_nodes_result.add_error(
+                                Error(
+                                    record={"due_date": str(due_date)},
+                                    error=(
+                                        f"Task node for '{template.name}' on"
+                                        f" {due_date} already exists"
+                                    ),
                                 )
-                                overall_results["task_nodes"]["failed"] += 1
-                                break
-                            case ConflictMode.UPDATE:
-                                existing_node.status = status_val
-                                existing_node.observation = observation
-                                existing_node.scheduled_date = scheduled_date
-                                existing_node.to_delete = False
+                            )
+                            break
+                        case ConflictMode.UPDATE:
+                            existing_node.status = status_val
+                            existing_node.observation = observation
+                            existing_node.scheduled_date = scheduled_date
+                            existing_node.to_delete = False
+                            try:
                                 existing_node.save()
-                                overall_results["task_nodes"]["updated"] += 1
-                    else:
+                            except (IntegrityError, ValidationError) as exc:
+                                task_nodes_result.add_error(
+                                    Error(
+                                        record={"due_date": str(due_date)},
+                                        error=str(exc),
+                                    )
+                                )
+                                continue
+                            task_nodes_result.add_updated()
+                else:
+                    try:
                         TaskNode.objects.create(
                             task_template=template,
                             due_date=due_date,
@@ -3019,14 +3024,17 @@ class LoadFileView(APIView):
                             scheduled_date=scheduled_date,
                             to_delete=False,
                         )
-                        overall_results["task_nodes"]["created"] += 1
-                except Exception as exc:
-                    logger.error("Task node import error: %s", exc)
-                    overall_results["task_nodes"]["failed"] += 1
-                    overall_results["task_nodes"]["errors"].append(
-                        {"error": str(exc), "record": {"due_date": due_date}}
-                    )
+                    except (IntegrityError, ValidationError) as exc:
+                        task_nodes_result.add_error(
+                            Error(
+                                record={"due_date": str(due_date)},
+                                error=str(exc),
+                            )
+                        )
+                        continue
+                    task_nodes_result.add_created()
 
+        overall_results["task_nodes"] = task_nodes_result.to_dict()
         return overall_results
 
     def _process_bia_excel(
