@@ -14,7 +14,8 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
-		error(400, 'Error generating DORA ROI file');
+		const message = await res.text();
+		error(res.status, message || 'Error generating DORA ROI file');
 	}
 
 	// Extract filename from Content-Disposition header if available
