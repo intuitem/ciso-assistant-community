@@ -5,7 +5,13 @@ icon: diagram-previous
 
 # Data import wizard
 
-Applicable for: Data import wizard (Pro) and CLI (Community and Pro)
+{% hint style="info" %}
+Applicable for: Data import wizard UI (Pro) and CLI (Community or Pro)\
+\
+Importing existing data from excel sheets is supported on the Pro plan through the UI and CLI, and on Community edition through the dedicated CLI, not a django command. The cli is available on the cli folder with the associated instructions.\
+Keep in mind that the CLI needs to reach the API as it wraps its actions around it.\
+The mention to the API is regarding the fact that users on both plans can still interact with the API directly in case they have some data prep phase on their end for batch import or equivalent.
+{% endhint %}
 
 ## Overview
 
