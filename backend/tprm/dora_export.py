@@ -1390,25 +1390,25 @@ def generate_b_99_01_aggregation(
 
     csv_writer.writerow(
         [
-            "c0010",
-            "c0020",
-            "c0030",
-            "c0040",
-            "c0050",
-            "c0060",
-            "c0070",
-            "c0080",
-            "c0090",
-            "c0100",
-            "c0110",
-            "c0120",
-            "c0130",
-            "c0140",
-            "c0150",
-            "c0160",
-            "c0170",
-            "c0180",
-            "c0190",
+            "c0010",  # Contracts: services (eba_CO:x1)
+            "c0020",  # Contracts: goods (eba_CO:x2)
+            "c0030",  # Contracts: goods and services (eba_CO:x3)
+            "c0040",  # Data sensitiveness: normal (eba_ZZ:x791)
+            "c0050",  # Data sensitiveness: sensitive (eba_ZZ:x792)
+            "c0060",  # Data sensitiveness: highly sensitive (eba_ZZ:x793)
+            "c0070",  # Discontinuing impact (functions): low (eba_ZZ:x791)
+            "c0080",  # Discontinuing impact (functions): medium (eba_ZZ:x792)
+            "c0090",  # Discontinuing impact (functions): high (eba_ZZ:x793)
+            "c0100",  # Substitutability: easily substitutable (eba_ZZ:x959)
+            "c0110",  # Substitutability: substitutable (eba_ZZ:x960)
+            "c0120",  # Substitutability: difficult to substitute (eba_ZZ:x961)
+            "c0130",  # Substitutability: not substitutable (eba_ZZ:x962)
+            "c0140",  # Reintegration: easy (eba_ZZ:x798)
+            "c0150",  # Reintegration: difficult (eba_ZZ:x966)
+            "c0160",  # Reintegration: not possible (eba_ZZ:x967)
+            "c0170",  # Discontinuing impact (ICT services): low (eba_ZZ:x791)
+            "c0180",  # Discontinuing impact (ICT services): medium (eba_ZZ:x792)
+            "c0190",  # Discontinuing impact (ICT services): high (eba_ZZ:x793)
         ]
     )
 
