@@ -21,7 +21,7 @@ def dora_data(app_config):
     # startup() creates a builtin "Main" entity — update it with DORA fields
     main_entity = Entity.get_main_entity()
     main_entity.name = "API Test Entity"
-    main_entity.legal_identifiers = {"LEI": "APITESTLEI00000000000"}
+    main_entity.legal_identifiers = {"LEI": "APITESTLEI0000000000"}
     main_entity.country = "BE"
     main_entity.currency = "EUR"
     main_entity.dora_entity_type = "eba_CT:x12"
@@ -183,7 +183,7 @@ class TestDoraExportEndpoint:
     def test_filename_matches_lei_pattern(self, authenticated_client, dora_data):
         response = authenticated_client.get(DORA_EXPORT_URL)
         disposition = response["Content-Disposition"]
-        assert "LEI_APITESTLEI00000000000" in disposition
+        assert "LEI_APITESTLEI0000000000" in disposition
         assert "IND_FSMA" in disposition
         assert disposition.endswith('.zip"')
 
@@ -252,7 +252,7 @@ class TestDoraExportEndpoint:
         response = authenticated_client.get(DORA_EXPORT_URL)
         rows = _read_csv_from_zip(response.content, "parameters.csv")
         params = dict(rows[1:])
-        assert "rs:APITESTLEI00000000000.IND" == params["entityID"]
+        assert "rs:APITESTLEI0000000000.IND" == params["entityID"]
         assert params["baseCurrency"] == "iso4217:EUR"
 
     def test_filing_indicators_all_true(self, authenticated_client, dora_data):
@@ -273,7 +273,7 @@ class TestDoraExportEndToEnd:
         response = authenticated_client.get(DORA_EXPORT_URL)
         rows = _read_csv_from_zip(response.content, "b_01.01.csv")
         assert len(rows) == 2
-        assert rows[1][0] == "APITESTLEI00000000000"
+        assert rows[1][0] == "APITESTLEI0000000000"
         assert rows[1][1] == "API Test Entity"
         assert rows[1][2] == "eba_GA:BE"
 
@@ -283,7 +283,7 @@ class TestDoraExportEndToEnd:
         response = authenticated_client.get(DORA_EXPORT_URL)
         rows = _read_csv_from_zip(response.content, "b_01.02.csv")
         leis = [r[0] for r in rows[1:]]
-        assert "APITESTLEI00000000000" in leis
+        assert "APITESTLEI0000000000" in leis
         assert "SUB00000000000000001" in leis
         # Branch VAT should NOT appear in b_01.02
         assert "BE0111111111" not in leis
@@ -311,7 +311,7 @@ class TestDoraExportEndToEnd:
         assert len(data) >= 1
         main_rows = [r for r in data if r[0] == "API-CA-001"]
         assert len(main_rows) >= 1
-        assert main_rows[0][1] == "APITESTLEI00000000000"  # beneficiary
+        assert main_rows[0][1] == "APITESTLEI0000000000"  # beneficiary
 
     def test_b0301_has_row_per_active_contract(self, authenticated_client, dora_data):
         response = authenticated_client.get(DORA_EXPORT_URL)
@@ -320,7 +320,7 @@ class TestDoraExportEndToEnd:
         # All active contracts get a row
         assert len(data) >= 2
         for row in data:
-            assert row[1] == "APITESTLEI00000000000"
+            assert row[1] == "APITESTLEI0000000000"
 
     def test_b0501_aggregates_expenses_per_provider(
         self, authenticated_client, dora_data
