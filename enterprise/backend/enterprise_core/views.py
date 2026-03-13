@@ -720,7 +720,9 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                 template.full_clean()
             except ValidationError as e:
                 return Response(
-                    e.message_dict if hasattr(e, "message_dict") else {"file": str(e)},
+                    e.message_dict
+                    if hasattr(e, "message_dict")
+                    else {"file": "invalidDocxTemplate"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             template.save()
