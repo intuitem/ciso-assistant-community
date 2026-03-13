@@ -1,5 +1,6 @@
 import io
 import logging
+from types import MappingProxyType
 import pandas as pd
 from rest_framework import status
 from rest_framework.views import APIView
@@ -94,7 +95,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.db import models
 from datetime import datetime, date
-from typing import Optional, Final, ClassVar
+from typing import Optional, Final, ClassVar, Mapping
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import enum
@@ -1210,13 +1211,13 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
 
     SERIALIZER_CLASS = TaskTemplateWriteSerializer
 
-    TASK_STATUS_MAP: Final[dict[str, str]] = {
+    TASK_STATUS_MAP: ClassVar[Mapping[str, str]] = MappingProxyType({
         "pending": "pending",
         "in_progress": "in_progress",
         "in progress": "in_progress",
         "completed": "completed",
         "cancelled": "cancelled",
-    }
+    })
 
     _M2M_CLEARABLE: ClassVar[frozenset[str]] = frozenset(
         {
