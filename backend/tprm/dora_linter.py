@@ -1144,6 +1144,7 @@ def lint_solutions() -> List[Dict[str, Any]]:
     solutions = (
         Solution.objects.filter(assets__id__in=business_function_asset_ids)
         .exclude(contracts__status=Contract.Status.DRAFT)
+        .exclude(contracts__dora_exclude=True)
         .distinct()
         .select_related("provider_entity")
         .prefetch_related("contracts")
@@ -1311,25 +1312,28 @@ def lint_solutions() -> List[Dict[str, Any]]:
 
 def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
     """
-    Validate solutions that appear in b_05.02 (ICT service supply chains).
+    Validate solutions that appear in b_05.02 and b_07.01.
 
-    b_05.02 includes all solutions on non-intragroup contracts with providers.
+    b_05.02 includes all solutions on contracts with providers.
     Column c0020 (Type of ICT services) is an explicit XBRL dimension and must
     not be empty — solutions without dora_ict_service_type are silently excluded
     from the export. This rule warns about such solutions so users can fix them.
+
+    Also checks b_07.01 for duplicate XBRL keys within a contract (same
+    ict_service_type on multiple solutions).
 
     Returns:
         List of validation results with severity levels (warning, ok)
     """
     results = []
 
-    # Solutions on non-draft third-party contracts (same scope as generate_b_05_02)
+    # Solutions on non-draft contracts with provider (same scope as generate_b_05_02)
     solutions = (
         Solution.objects.filter(
-            contracts__is_intragroup=False,
             contracts__provider_entity__isnull=False,
         )
         .exclude(contracts__status=Contract.Status.DRAFT)
+        .exclude(contracts__dora_exclude=True)
         .distinct()
         .select_related("provider_entity")
     )
@@ -1377,7 +1381,6 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
     # two solutions on the same contract share the same ict_service_type.
     assessment_contracts = (
         Contract.objects.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )
@@ -1530,7 +1533,6 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
     # and at least one solution with dora_ict_service_type set
     b_05_02_candidates = (
         Contract.objects.filter(
-            is_intragroup=False,
             provider_entity__isnull=False,
             solutions__isnull=False,
         )
@@ -1539,11 +1541,10 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
         .distinct()
     )
     # Further filter: at least one solution must have dora_ict_service_type
+    # Use Python filtering to avoid .exclude() bypassing prefetch cache
     b_05_02_contract_ids = set()
     for contract in b_05_02_candidates.prefetch_related("solutions"):
-        if contract.solutions.exclude(
-            Q(dora_ict_service_type__isnull=True) | Q(dora_ict_service_type="")
-        ).exists():
+        if any(s.dora_ict_service_type for s in contract.solutions.all()):
             b_05_02_contract_ids.add(contract.id)
 
     # --- Check 02.01_02.02: every B_02.01 contract should be in B_02.02 ---
@@ -1718,13 +1719,13 @@ def lint_conditional_fields() -> List[Dict[str, Any]]:
                 )
 
     # --- v8884: solutions in B_07.01 must have substitutability ---
-    # B_07.01 includes solutions on non-draft, non-intragroup contracts with provider
+    # B_07.01 includes solutions on non-draft contracts with provider
     b_07_01_solutions = (
         Solution.objects.filter(
-            contracts__is_intragroup=False,
             contracts__provider_entity__isnull=False,
         )
         .exclude(contracts__status=Contract.Status.DRAFT)
+        .exclude(contracts__dora_exclude=True)
         .distinct()
     )
 
