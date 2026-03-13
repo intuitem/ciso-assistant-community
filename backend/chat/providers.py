@@ -32,6 +32,15 @@ class LLM(Protocol):
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> Iterator[str]: ...
 
+    def tool_call(
+        self,
+        prompt: str,
+        tools: list[dict],
+        history: list[dict] | None = None,
+    ) -> dict | None:
+        """Try to get a tool call from the LLM. Returns {name, arguments} or None."""
+        ...
+
 
 class SentenceTransformerEmbedder:
     """Local embeddings using sentence-transformers. No external service needed."""
@@ -140,6 +149,70 @@ class OllamaLLM:
                     if content := data.get("message", {}).get("content"):
                         yield content
 
+    TOOL_SYSTEM_PROMPT = (
+        "You are a GRC (Governance, Risk, Compliance) assistant with access to an organizational database. "
+        "When the user asks about their data — listing, counting, searching, or summarizing objects like "
+        "controls, assets, risks, threats, incidents, compliance assessments, frameworks, etc. — "
+        "you MUST use the query_objects tool to retrieve the data. "
+        "Do NOT try to answer data questions from memory. Always call the tool."
+    )
+
+    def tool_call(
+        self,
+        prompt: str,
+        tools: list[dict],
+        history: list[dict] | None = None,
+    ) -> dict | None:
+        """
+        Send the user prompt with tool definitions to Ollama.
+        If the LLM decides to call a tool, return {name, arguments}.
+        If it responds with plain text (no tool call), return None.
+        """
+        messages = [{"role": "system", "content": self.TOOL_SYSTEM_PROMPT}]
+        if history:
+            for msg in history:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+        messages.append({"role": "user", "content": prompt})
+
+        try:
+            resp = self.client.post(
+                f"{self.base_url}/api/chat",
+                json={
+                    "model": self.model,
+                    "messages": messages,
+                    "tools": tools,
+                    "stream": False,
+                    "options": {"temperature": 0},
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            message = data.get("message", {})
+
+            tool_calls = message.get("tool_calls")
+            if tool_calls and len(tool_calls) > 0:
+                tc = tool_calls[0]
+                func = tc.get("function", {})
+                logger.info(
+                    "LLM tool_call response: name=%s, args=%s",
+                    func.get("name"),
+                    func.get("arguments"),
+                )
+                return {
+                    "name": func.get("name"),
+                    "arguments": func.get("arguments", {}),
+                }
+
+            # LLM chose not to call a tool
+            logger.info(
+                "LLM did not call a tool. Response content: %s",
+                message.get("content", "")[:200],
+            )
+        except Exception as e:
+            logger.warning("Tool call request failed: %s", e)
+
+        return None
+
     def _build_messages(
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> list[dict]:
@@ -168,6 +241,14 @@ class StubLLM:
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> Iterator[str]:
         yield self.generate(prompt, context)
+
+    def tool_call(
+        self,
+        prompt: str,
+        tools: list[dict],
+        history: list[dict] | None = None,
+    ) -> dict | None:
+        return None
 
 
 def get_chat_settings() -> dict:

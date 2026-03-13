@@ -14,8 +14,20 @@
 		collapseChat,
 		sendMessage,
 		startNewSession,
+		retryLastMessage,
+		copyToClipboard,
 		suggestedActions
 	} from './chatStore.svelte';
+
+	let copiedId = $state<string | null>(null);
+
+	async function handleCopy(text: string, id: string) {
+		const ok = await copyToClipboard(text);
+		if (ok) {
+			copiedId = id;
+			setTimeout(() => (copiedId = null), 1500);
+		}
+	}
 
 	let messagesContainer: HTMLElement | null = $state(null);
 	let inputElement: HTMLInputElement | null = $state(null);
@@ -144,7 +156,7 @@
 		<div bind:this={messagesContainer} class="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3">
 			{#each messages as message (message.id)}
 				{#if message.role === 'assistant'}
-					<div class="flex gap-2.5">
+					<div class="group flex gap-2.5">
 						<div
 							class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full
 								bg-violet-100 text-violet-600"
@@ -158,13 +170,22 @@
 							>
 								<MarkdownRenderer content={message.content} />
 							</div>
-							<div class="mt-1 px-1 text-[10px] text-gray-400">
-								{formatTime(message.timestamp)}
+							<div class="mt-1 flex items-center gap-1 px-1">
+								<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+								{#if message.id !== 'welcome' && message.content}
+									<button
+										onclick={() => handleCopy(message.content, message.id)}
+										class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+										title="Copy response"
+									>
+										<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-[10px]"></i>
+									</button>
+								{/if}
 							</div>
 						</div>
 					</div>
 				{:else}
-					<div class="flex flex-row-reverse gap-2.5">
+					<div class="group flex flex-row-reverse gap-2.5">
 						<div
 							class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full
 								bg-violet-600 text-white"
@@ -178,8 +199,22 @@
 							>
 								{message.content}
 							</div>
-							<div class="mt-1 px-1 text-[10px] text-gray-400">
-								{formatTime(message.timestamp)}
+							<div class="mt-1 flex items-center gap-1 px-1">
+								<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+								<button
+									onclick={() => handleCopy(message.content, message.id)}
+									class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+									title="Copy prompt"
+								>
+									<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-[10px]"></i>
+								</button>
+								<button
+									onclick={retryLastMessage}
+									class="text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+									title="Retry this prompt"
+								>
+									<i class="fa-solid fa-rotate-right text-[10px]"></i>
+								</button>
 							</div>
 						</div>
 					</div>
@@ -328,7 +363,7 @@
 			>
 				{#each messages as message (message.id)}
 					{#if message.role === 'assistant'}
-						<div class="flex gap-3">
+						<div class="group flex gap-3">
 							<div
 								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full
 									bg-violet-100 text-violet-600"
@@ -342,13 +377,22 @@
 								>
 									<MarkdownRenderer content={message.content} />
 								</div>
-								<div class="mt-1 px-1 text-[10px] text-gray-400">
-									{formatTime(message.timestamp)}
+								<div class="mt-1 flex items-center gap-1.5 px-1">
+									<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+									{#if message.id !== 'welcome' && message.content}
+										<button
+											onclick={() => handleCopy(message.content, message.id)}
+											class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+											title="Copy response"
+										>
+											<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-xs"></i>
+										</button>
+									{/if}
 								</div>
 							</div>
 						</div>
 					{:else}
-						<div class="flex flex-row-reverse gap-3">
+						<div class="group flex flex-row-reverse gap-3">
 							<div
 								class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full
 									bg-violet-600 text-white"
@@ -362,8 +406,22 @@
 								>
 									{message.content}
 								</div>
-								<div class="mt-1 px-1 text-[10px] text-gray-400">
-									{formatTime(message.timestamp)}
+								<div class="mt-1 flex items-center gap-1.5 px-1">
+									<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
+									<button
+										onclick={() => handleCopy(message.content, message.id)}
+										class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+										title="Copy prompt"
+									>
+										<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-xs"></i>
+									</button>
+									<button
+										onclick={retryLastMessage}
+										class="text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
+										title="Retry this prompt"
+									>
+										<i class="fa-solid fa-rotate-right text-xs"></i>
+									</button>
 								</div>
 							</div>
 						</div>

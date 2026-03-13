@@ -217,6 +217,34 @@ export function sendMessage(text: string) {
 	streamResponse(trimmed);
 }
 
+export function retryLastMessage() {
+	// Find the last user message
+	const lastUserMsg = [...messages].reverse().find((m) => m.role === 'user');
+	if (!lastUserMsg || isTyping) return;
+
+	// Remove the last assistant response (if it exists after the last user message)
+	const lastUserIdx = messages.lastIndexOf(lastUserMsg);
+	if (lastUserIdx < messages.length - 1) {
+		// Remove everything after the last user message
+		messages = messages.slice(0, lastUserIdx);
+	} else {
+		// Remove the user message itself — it will be re-added by sendMessage
+		messages = messages.slice(0, lastUserIdx);
+	}
+
+	// Re-send
+	sendMessage(lastUserMsg.content);
+}
+
+export async function copyToClipboard(text: string): Promise<boolean> {
+	try {
+		await navigator.clipboard.writeText(text);
+		return true;
+	} catch {
+		return false;
+	}
+}
+
 export function startNewSession() {
 	// Abort any in-flight request
 	if (abortController) {

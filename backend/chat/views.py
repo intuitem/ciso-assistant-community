@@ -13,7 +13,7 @@ from .serializers import (
     ChatSessionListSerializer,
     SendMessageSerializer,
 )
-from .providers import get_llm, get_embedder, is_ollama_available
+from .providers import get_llm, is_ollama_available
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             session.title = user_content[:100]
             session.save(update_fields=["title"])
 
-        # Detect intent: structured ORM query vs semantic search
+        # Try tool calling first, fall back to RAG semantic search
         from .rag import (
             search,
             graph_expand,
@@ -71,41 +71,62 @@ class ChatSessionViewSet(BaseModelViewSet):
             build_context_refs,
             get_accessible_folder_ids,
         )
-        from .orm_query import (
-            detect_intent,
-            detect_followup,
-            execute_query,
-            execute_followup,
-            format_query_result,
-        )
+        from .orm_query import format_query_result
+        from .tools import get_tools, dispatch_tool_call
 
         accessible_folders = get_accessible_folder_ids(request.user)
-        intent = detect_intent(user_content)
         context_refs = []
+        context = ""
         query_result = None
 
-        # Check for follow-up to a previous ORM query
-        followup = detect_followup(user_content)
-        if followup and intent != "query":
-            # Look for previous ORM query metadata in recent assistant messages
-            previous_meta = _get_last_query_meta(session)
-            if previous_meta:
-                query_result = execute_followup(
-                    followup, previous_meta, accessible_folders
-                )
-                if query_result:
-                    intent = "query"
+        # Step 1: Ask the LLM if this is a tool call (structured query)
+        llm = get_llm()
 
-        if intent == "query" and not query_result:
-            # Structured ORM query
-            query_result = execute_query(user_content, accessible_folders)
-            if not query_result:
-                # Fallback to semantic search if ORM query couldn't parse
-                intent = "search"
+        # Inject previous query metadata so the LLM can handle follow-ups
+        # like "give me more", "next page", "show me page 3"
+        last_query_meta = _get_last_query_meta(session)
+        tool_prompt = user_content
+        if last_query_meta:
+            tool_prompt = (
+                f"Previous query context: model={last_query_meta.get('model')}, "
+                f"domain={last_query_meta.get('domain', 'all')}, "
+                f"page={last_query_meta.get('page', 1)}, "
+                f"total_pages={last_query_meta.get('total_pages', 1)}, "
+                f"total_count={last_query_meta.get('total_count', 0)}. "
+                f"If the user asks for 'more', 'next', 'next page', etc., "
+                f"repeat the same query with page={last_query_meta.get('page', 1) + 1}.\n\n"
+                f"User message: {user_content}"
+            )
+
+        tool_response = llm.tool_call(
+            tool_prompt,
+            get_tools(),
+            history=list(
+                session.messages.order_by("created_at").values("role", "content")
+            )[-20:],
+        )
+
+        if tool_response and tool_response.get("name"):
+            logger.info(
+                "Tool call: %s(%s)",
+                tool_response["name"],
+                tool_response.get("arguments", {}),
+            )
+            query_result = dispatch_tool_call(
+                tool_response["name"],
+                tool_response.get("arguments", {}),
+                accessible_folders,
+            )
 
         if query_result:
-            context = format_query_result(query_result)
-            # Build refs from query results
+            context = (
+                "INSTRUCTIONS: The following data comes from a database query. "
+                "Present ONLY this data to the user. Use the total_count as the authoritative count. "
+                "The listed items are one page of results. Do NOT add explanations, "
+                "framework references, or commentary beyond what is in the data. "
+                "Do NOT hallucinate additional information.\n\n"
+                + format_query_result(query_result)
+            )
             for obj in query_result.get("objects", []):
                 context_refs.append(
                     {
@@ -115,26 +136,21 @@ class ChatSessionViewSet(BaseModelViewSet):
                         "source": "orm_query",
                     }
                 )
-            # Save query metadata for follow-up queries
+            # Save query metadata for follow-up (next page, etc.)
             context_refs.append(
                 {
-                    "source": "orm_query_meta",
-                    "model_name": query_result["model_name"],
-                    "app_label": _get_app_label(query_result["model_name"]),
-                    "display_name": query_result["display_name"],
-                    "filters_applied": query_result.get("filters_applied", []),
-                    "filters": _extract_saved_filters(query_result),
+                    "source": "query_meta",
+                    "model": tool_response.get("arguments", {}).get("model"),
+                    "domain": tool_response.get("arguments", {}).get("domain"),
                     "page": query_result.get("page", 1),
-                    "total_count": query_result["total_count"],
-                    "query_type": query_result["query_type"],
+                    "total_pages": query_result.get("total_pages", 1),
+                    "total_count": query_result.get("total_count", 0),
                 }
             )
-
-        if intent != "query":
-            # Semantic RAG search
+        else:
+            # Step 2: Semantic RAG search
             results = search(user_content, request.user, top_k=10)
 
-            # Graph expansion for structured objects
             structured = [r for r in results if r.get("source_type") == "model"]
             expanded = (
                 graph_expand(structured, accessible_folders) if structured else []
@@ -159,7 +175,6 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         def stream_response():
             """Generator for SSE streaming."""
-            llm = get_llm()
             full_response = ""
 
             try:
@@ -267,75 +282,50 @@ def chat_status(request):
     )
 
 
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def ollama_models(request):
+    """List available models from the Ollama server."""
+    from .providers import get_chat_settings
+
+    settings = get_chat_settings()
+    base_url = settings["ollama_base_url"]
+
+    try:
+        import httpx
+
+        resp = httpx.get(f"{base_url}/api/tags", timeout=5)
+        resp.raise_for_status()
+        data = resp.json()
+        models = [
+            {
+                "name": m["name"],
+                "size": m.get("size"),
+                "modified_at": m.get("modified_at"),
+            }
+            for m in data.get("models", [])
+        ]
+        return Response({"models": models})
+    except Exception as e:
+        logger.warning("Failed to fetch Ollama models: %s", e)
+        return Response(
+            {"models": [], "error": str(e)},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+
 def _get_last_query_meta(session) -> dict | None:
     """
-    Find the most recent ORM query metadata from the session's assistant messages.
-    Returns the saved query meta dict if found.
+    Find the most recent query metadata from the session's assistant messages.
+    Used to support follow-up queries like 'next page', 'give me more'.
     """
-    last_assistant_msgs = session.messages.filter(
-        role=ChatMessage.Role.ASSISTANT
-    ).order_by("-created_at")[:3]
-    for msg in last_assistant_msgs:
+    last_msgs = session.messages.filter(role=ChatMessage.Role.ASSISTANT).order_by(
+        "-created_at"
+    )[:3]
+    for msg in last_msgs:
         if not msg.context_refs:
             continue
         for ref in msg.context_refs:
-            if isinstance(ref, dict) and ref.get("source") == "orm_query_meta":
+            if isinstance(ref, dict) and ref.get("source") == "query_meta":
                 return ref
     return None
-
-
-def _get_app_label(model_name: str) -> str:
-    """Map a model name back to its app_label."""
-    from .orm_query import MODEL_REGISTRY
-
-    for _alias, (app_label, mname, _display) in MODEL_REGISTRY.items():
-        if mname == model_name:
-            return app_label
-    return "core"
-
-
-def _extract_saved_filters(query_result: dict) -> dict:
-    """
-    Extract the ORM filter kwargs from a query result so they can be
-    re-applied in a follow-up query. We rebuild from filters_applied labels.
-    """
-    # The filters_applied are human-readable labels like "domain = DEMO", "status = active"
-    # We need to save the actual ORM filter kwargs.
-    # For now, we extract what we can from the result metadata.
-    filters = {}
-
-    for label in query_result.get("filters_applied", []):
-        if label.startswith("domain = "):
-            # Need to look up folder IDs by name
-            domain_name = label[len("domain = ") :]
-            from iam.models import Folder
-
-            folder_ids = list(
-                Folder.objects.filter(name__in=domain_name.split(", ")).values_list(
-                    "id", flat=True
-                )
-            )
-            if folder_ids:
-                filters["folder_id__in"] = [str(fid) for fid in folder_ids]
-        elif label.startswith("status = "):
-            filters["status"] = label[len("status = ") :]
-        elif label.startswith("treatment = "):
-            filters["treatment"] = label[len("treatment = ") :]
-        elif label.startswith("result = "):
-            filters["result"] = label[len("result = ") :]
-        elif label.startswith("priority = P"):
-            try:
-                filters["priority"] = int(label[len("priority = P") :])
-            except ValueError:
-                pass
-        elif label.startswith("category = "):
-            filters["category"] = label[len("category = ") :]
-        elif label.startswith("effort = "):
-            filters["effort"] = label[len("effort = ") :]
-        elif label.startswith("severity = "):
-            try:
-                filters["severity"] = int(label[len("severity = ") :])
-            except ValueError:
-                pass
-
-    return filters

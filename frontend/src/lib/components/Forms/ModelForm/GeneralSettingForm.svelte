@@ -29,6 +29,26 @@
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
 
+	let ollamaModels = $state<{ label: string; value: string }[]>([]);
+	let ollamaModelsLoading = $state(false);
+
+	async function fetchOllamaModels() {
+		ollamaModelsLoading = true;
+		try {
+			const res = await fetch('/fe-api/chat/ollama-models');
+			if (res.ok) {
+				const data = await res.json();
+				ollamaModels = (data.models || []).map((m: { name: string }) => ({
+					label: m.name,
+					value: m.name
+				}));
+			}
+		} catch {
+			// Ollama not reachable — leave empty, text field fallback
+		}
+		ollamaModelsLoading = false;
+	}
+
 	let flipVertically = $derived(formDataCache['risk_matrix_flip_vertical'] ?? false);
 
 	let xAxis = $derived(formDataCache['risk_matrix_swap_axes'] ? 'probability' : 'impact');
@@ -502,7 +522,7 @@
 		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="chatAi">
-		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer" onclick={fetchOllamaModels}>
 			<i class="fa-solid fa-robot mr-2"></i><span class="flex-1 text-left"
 				>{m.chatAiSettings()}</span
 			>
@@ -523,18 +543,37 @@
 					label={m.ollamaBaseUrl()}
 					helpText={m.ollamaBaseUrlHelpText()}
 				/>
-				<TextField
-					{form}
-					field="ollama_model"
-					label={m.ollamaModel()}
-					helpText={m.ollamaModelHelpText()}
-				/>
-				<TextField
-					{form}
-					field="ollama_embed_model"
-					label={m.ollamaEmbedModel()}
-					helpText={m.ollamaEmbedModelHelpText()}
-				/>
+				{#if ollamaModels.length > 0}
+					<Select
+						{form}
+						field="ollama_model"
+						options={ollamaModels}
+						label={m.ollamaModel()}
+						helpText={m.ollamaModelHelpText()}
+						translateOptions={false}
+					/>
+					<Select
+						{form}
+						field="ollama_embed_model"
+						options={ollamaModels}
+						label={m.ollamaEmbedModel()}
+						helpText={m.ollamaEmbedModelHelpText()}
+						translateOptions={false}
+					/>
+				{:else}
+					<TextField
+						{form}
+						field="ollama_model"
+						label={m.ollamaModel()}
+						helpText={ollamaModelsLoading ? 'Loading models from Ollama...' : m.ollamaModelHelpText()}
+					/>
+					<TextField
+						{form}
+						field="ollama_embed_model"
+						label={m.ollamaEmbedModel()}
+						helpText={ollamaModelsLoading ? 'Loading models from Ollama...' : m.ollamaEmbedModelHelpText()}
+					/>
+				{/if}
 				<Select
 					{form}
 					field="embedding_backend"
