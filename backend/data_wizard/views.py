@@ -92,6 +92,7 @@ from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
 from django.utils import timezone
+from django.db import models
 from datetime import datetime, date
 from typing import Optional, Final, ClassVar
 from dataclasses import dataclass, field
@@ -142,7 +143,7 @@ def normalize_datetime_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def _parse_date(value) -> Optional[str]:
+def _parse_date(value: datetime | str | int | bool | None) -> Optional[str]:
     """Normalize a value to a YYYY-MM-DD string for DRF DateField."""
     if not value or value == "":
         return None
@@ -1239,7 +1240,7 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
     def create_context(self):
         return None, None
 
-    def find_existing(self, record_data: dict):
+    def find_existing(self, record_data: dict) -> Optional[TaskTemplate]:
         folder_id = record_data.get("folder")
         ref_id = record_data.get("ref_id")
         if ref_id:
@@ -1253,13 +1254,13 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         ).first()
 
     @staticmethod
-    def _resolve_actors(raw: str) -> list:
+    def _resolve_actors(raw: str) -> list[UUID]:
         """Resolve comma-separated user emails or team names to Actor IDs.
 
         Entries that cannot be matched are silently skipped with a log warning.
         """
-        actor_ids = []
-        for entry in str(raw or "").split(","):
+        actor_ids = set()
+        for entry in raw.split(","):
             entry = entry.strip()
             if not entry:
                 continue
@@ -1267,25 +1268,25 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             if actor is None:
                 actor = Actor.objects.filter(team__name__iexact=entry).first()
             if actor is not None:
-                actor_ids.append(actor.id)
+                actor_ids.add(actor.id)
             else:
                 # Mask the value to avoid leaking PII (emails) into application logs.
                 logger.warning(
                     "Task import: could not resolve assigned_to entry (masked: %s***); skipping.",
                     entry[:4] if entry else "",
                 )
-        return actor_ids
+        return list(actor_ids)
 
     @staticmethod
-    def _resolve_m2m_by_name(model, raw: str, field_label: str) -> list:
+    def _resolve_m2m_by_name(model: type[models.Model], raw: str) -> list[UUID]:
         """Resolve comma-separated names to model IDs.
 
         Falls back to matching ``str(obj)`` for models like RiskAssessment whose
         ``__str__`` returns ``"{name} - {version}"`` rather than just the name field.
         Unresolvable entries are skipped with a log warning.
         """
-        ids = []
-        for entry in str(raw or "").split(","):
+        ids = set()
+        for entry in raw.split(","):
             entry = entry.strip()
             if not entry:
                 continue
@@ -1297,14 +1298,14 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
                         obj = candidate
                         break
             if obj is not None:
-                ids.append(obj.id)
+                ids.add(obj.id)
             else:
                 logger.warning(
                     "Task import: could not resolve %s '%s'; skipping.",
-                    field_label,
+                    model._meta.model_name,
                     entry,
                 )
-        return ids
+        return list(ids)
 
     def prepare_create(
         self, record: dict, context: None
@@ -1333,9 +1334,9 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         schedule = None
         freq = str(record.get("schedule_frequency") or "").strip().upper()
         interval_raw = record.get("schedule_interval")
-        if freq and interval_raw not in (None, ""):
+        if freq and interval_raw:
             try:
-                interval = int(float(str(interval_raw)))
+                interval = int(interval_raw)
                 schedule = {"frequency": freq, "interval": interval}
                 for opt_key, col in [
                     ("end_date", "schedule_end_date"),
@@ -1375,12 +1376,12 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
             "is_recurrent": is_recurrent,
             "task_date": _parse_date(record.get("task_date")),
             "enabled": enabled,
-            "link": record.get("link") or "",
+            "link": record.get("link", ""),
         }
         if schedule is not None:
             data["schedule"] = schedule
 
-        raw_status = str(record.get("status") or "").lower().strip()
+        raw_status = str(record.get("status", "")).lower().strip()
         status = self.TASK_STATUS_MAP.get(raw_status)
         if status:
             data["status"] = status
@@ -1391,18 +1392,16 @@ class TaskTemplateRecordConsumer(RecordConsumer[None]):
         assigned_raw = record.get("assigned_to") or ""
         data["assigned_to"] = self._resolve_actors(assigned_raw) if assigned_raw else []
 
-        for col, model, field_label in [
-            ("assets", Asset, "asset"),
-            ("applied_controls", AppliedControl, "applied_control"),
-            ("evidences", Evidence, "evidence"),
-            ("compliance_assessments", ComplianceAssessment, "compliance_assessment"),
-            ("risk_assessments", RiskAssessment, "risk_assessment"),
-            ("findings_assessment", FindingsAssessment, "findings_assessment"),
+        for col_name, model in [
+            ("assets", Asset),
+            ("applied_controls", AppliedControl),
+            ("evidences", Evidence),
+            ("compliance_assessments", ComplianceAssessment),
+            ("risk_assessments", RiskAssessment),
+            ("findings_assessment", FindingsAssessment),
         ]:
-            raw = record.get(col) or ""
-            data[col] = (
-                self._resolve_m2m_by_name(model, raw, field_label) if raw else []
-            )
+            raw = record.get(col_name) or ""
+            data[col_name] = self._resolve_m2m_by_name(model, raw) if raw else []
 
         return data, None
 
@@ -2793,16 +2792,16 @@ class LoadFileView(APIView):
         # so multi-folder imports match nodes to the correct template.
         template_map: dict[int, TaskTemplate] = {}
         for idx, rec in enumerate(summary_records, start=1):
-            rec_name = str(rec.get("name") or "").strip()
+            rec_name = str(rec.get("name", "")).strip()
             if not rec_name:
                 continue
-            row_folder_name = str(rec.get("folder") or "").lower()
+            row_folder_name = str(rec.get("folder", "")).lower()
             row_folder_id = (
                 folders_map.get(row_folder_name, folder_id)
                 if row_folder_name
                 else folder_id
             )
-            ref_id = str(rec.get("ref_id") or "").strip()
+            ref_id = str(rec.get("ref_id", "")).strip()
             tmpl = None
             if ref_id:
                 tmpl = TaskTemplate.objects.filter(
@@ -2867,11 +2866,11 @@ class LoadFileView(APIView):
                 except (ValueError, TypeError):
                     pass
 
-                raw_status = str(row.get("status") or "").lower().strip()
+                raw_status = str(row.get("status", "")).lower().strip()
                 status_val = TaskTemplateRecordConsumer.TASK_STATUS_MAP.get(
                     raw_status, "pending"
                 )
-                observation = str(row.get("observation") or "")
+                observation = str(row.get("observation", ""))
                 scheduled_date = _parse_date(row.get("scheduled_date")) or due_date
 
                 try:
