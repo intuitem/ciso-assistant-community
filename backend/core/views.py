@@ -2088,6 +2088,20 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: ",".join(i["str"] for i in objs),
                 "escape": True,
             },
+            "security_capabilities": {
+                "source": "get_security_capabilities_display",
+                "label": "security_capabilities",
+                "format": lambda objs: ",".join(
+                    f"{k}: {v}" for obj in objs for k, v in obj.items()
+                ),
+                "escape": True,
+            },
+            "recovery_capabilities": {
+                "source": "get_recovery_capabilities_display",
+                "label": "recovery_capabilities",
+                "format": lambda objs: ",".join(i["str"] for i in objs),
+                "escape": True,
+            },
             "link": {"source": "reference_link", "label": "link", "escape": True},
             "owners": {
                 "source": "owner",
@@ -2119,7 +2133,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+        "prefetch_related": [
+            "owner",
+            "parent_assets",
+            "overridden_children_capabilities",
+            "filtering_labels",
+        ],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
