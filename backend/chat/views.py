@@ -141,7 +141,33 @@ class ChatSessionViewSet(BaseModelViewSet):
                 accessible_folders,
             )
 
-        if query_result:
+        # Track if this is a creation proposal (different SSE flow)
+        creation_proposal = None
+
+        if query_result and query_result.get("type") == "propose_create":
+            # Creation proposal — don't execute, let the user confirm via UI
+            creation_proposal = query_result
+            item_names = [i["name"] for i in query_result.get("items", [])]
+            context = (
+                "INSTRUCTIONS: You have proposed creating the following "
+                f"{query_result['display_name']}:\n"
+                + "\n".join(f"  - {name}" for name in item_names)
+                + "\n\nTell the user you're proposing to create these items. "
+                "The confirmation cards are shown in the UI — tell them to review and confirm. "
+                "Do NOT say you have created them. Be brief."
+            )
+            # Store proposal in context_refs for persistence
+            context_refs.append(
+                {
+                    "source": "pending_action",
+                    "action": "create",
+                    "model_key": query_result["model_key"],
+                    "url_slug": query_result["url_slug"],
+                    "display_name": query_result["display_name"],
+                    "items": query_result["items"],
+                }
+            )
+        elif query_result:
             context = (
                 "INSTRUCTIONS: The following data comes from a database query. "
                 "Present ONLY this data to the user. Use the total_count as the authoritative count. "
@@ -207,6 +233,20 @@ class ChatSessionViewSet(BaseModelViewSet):
             full_response = ""
 
             try:
+                # Emit pending_action event before streaming text if this is a creation proposal
+                if creation_proposal:
+                    action_data = json.dumps(
+                        {
+                            "type": "pending_action",
+                            "action": "create",
+                            "model_key": creation_proposal["model_key"],
+                            "url_slug": creation_proposal["url_slug"],
+                            "display_name": creation_proposal["display_name"],
+                            "items": creation_proposal["items"],
+                        }
+                    )
+                    yield f"data: {action_data}\n\n"
+
                 for token in llm.stream(
                     user_content, context, history=history_messages
                 ):

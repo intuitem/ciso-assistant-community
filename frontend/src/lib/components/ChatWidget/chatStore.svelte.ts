@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatView, SuggestedAction } from './types';
+import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
 
 const CHAT_API = '/fe-api/chat';
 
@@ -135,6 +135,20 @@ async function streamResponse(userMessage: string) {
 							msg.content += data.content;
 							messages = [...messages];
 						}
+					} else if (data.type === 'pending_action') {
+						const msg = messages.find((m) => m.id === assistantMessageId);
+						if (msg) {
+							msg.pendingAction = {
+								id: generateId(),
+								action: data.action,
+								modelKey: data.model_key,
+								urlSlug: data.url_slug,
+								displayName: data.display_name,
+								items: data.items,
+								status: 'pending'
+							};
+							messages = [...messages];
+						}
 					} else if (data.type === 'done') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg && data.context_refs) {
@@ -253,6 +267,55 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 export function setPageContext(context: { path: string; model?: string; title?: string }) {
 	currentPageContext = context;
+}
+
+export async function confirmAction(messageId: string) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
+
+	const action = msg.pendingAction;
+	action.status = 'creating';
+	action.results = [];
+	messages = [...messages];
+
+	for (const item of action.items) {
+		try {
+			const res = await fetch(`/fe-api/chat/create-object`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					url_slug: action.urlSlug,
+					fields: item
+				})
+			});
+
+			if (res.ok) {
+				const data = await res.json();
+				action.results!.push({ name: item.name, id: data.id });
+			} else {
+				const err = await res.json().catch(() => ({ detail: res.statusText }));
+				action.results!.push({
+					name: item.name,
+					error: err.detail || err.error || 'Creation failed'
+				});
+			}
+		} catch {
+			action.results!.push({ name: item.name, error: 'Network error' });
+		}
+		messages = [...messages];
+	}
+
+	const allOk = action.results!.every((r) => !r.error);
+	action.status = allOk ? 'created' : 'error';
+	messages = [...messages];
+}
+
+export function rejectAction(messageId: string) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
+
+	msg.pendingAction.status = 'rejected';
+	messages = [...messages];
 }
 
 export function startNewSession() {

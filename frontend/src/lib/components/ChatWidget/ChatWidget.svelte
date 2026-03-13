@@ -19,6 +19,8 @@
 		retryLastMessage,
 		copyToClipboard,
 		setPageContext,
+		confirmAction,
+		rejectAction,
 		suggestedActions
 	} from './chatStore.svelte';
 
@@ -198,6 +200,69 @@
 											{ref.name?.length > 30 ? ref.name.slice(0, 30) + '...' : ref.name}
 										</a>
 									{/each}
+								</div>
+							{/if}
+							{#if message.pendingAction}
+								{@const pa = message.pendingAction}
+								<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+									<div class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-600">
+										<i class="fa-solid fa-plus-circle text-violet-500"></i>
+										Create {pa.items.length}
+										{pa.displayName}
+									</div>
+									<ul class="mb-2 space-y-1">
+										{#each pa.items as item, i}
+											<li class="flex items-center gap-2 text-xs text-gray-700">
+												{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
+													<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+													<a
+														href="/{pa.urlSlug}/{pa.results[i].id}"
+														class="text-violet-600 hover:underline"
+													>
+														{item.name}
+													</a>
+												{:else if pa.status === 'error' && pa.results?.[i]?.error}
+													<i class="fa-solid fa-xmark text-red-500 text-[10px]"></i>
+													<span>{item.name}</span>
+													<span class="text-red-400">({pa.results[i].error})</span>
+												{:else if pa.status === 'creating'}
+													{#if pa.results && pa.results.length > i}
+														<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+													{:else}
+														<i class="fa-solid fa-spinner fa-spin text-violet-400 text-[10px]"></i>
+													{/if}
+													<span>{item.name}</span>
+												{:else}
+													<i class="fa-solid fa-circle text-gray-300 text-[8px]"></i>
+													<span>{item.name}</span>
+												{/if}
+											</li>
+										{/each}
+									</ul>
+									{#if pa.status === 'pending'}
+										<div class="flex gap-2">
+											<button
+												onclick={() => confirmAction(message.id)}
+												class="rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white
+													transition-colors hover:bg-violet-700"
+											>
+												<i class="fa-solid fa-check mr-1"></i>Confirm
+											</button>
+											<button
+												onclick={() => rejectAction(message.id)}
+												class="rounded-lg bg-gray-100 px-3 py-1.5 text-[11px] font-medium text-gray-600
+													transition-colors hover:bg-gray-200"
+											>
+												Cancel
+											</button>
+										</div>
+									{:else if pa.status === 'rejected'}
+										<div class="text-[11px] text-gray-400 italic">Cancelled</div>
+									{:else if pa.status === 'created'}
+										<div class="text-[11px] text-green-600 font-medium">
+											<i class="fa-solid fa-check-circle mr-1"></i>Created successfully
+										</div>
+									{/if}
 								</div>
 							{/if}
 							<div class="mt-1 flex items-center gap-1 px-1">
@@ -428,6 +493,69 @@
 												{ref.name?.length > 40 ? ref.name.slice(0, 40) + '...' : ref.name}
 											</a>
 										{/each}
+									</div>
+								{/if}
+								{#if message.pendingAction}
+									{@const pa = message.pendingAction}
+									<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm">
+										<div class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
+											<i class="fa-solid fa-plus-circle text-violet-500"></i>
+											Create {pa.items.length}
+											{pa.displayName}
+										</div>
+										<ul class="mb-3 space-y-1.5">
+											{#each pa.items as item, i}
+												<li class="flex items-center gap-2 text-sm text-gray-700">
+													{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
+														<i class="fa-solid fa-check text-green-500 text-xs"></i>
+														<a
+															href="/{pa.urlSlug}/{pa.results[i].id}"
+															class="text-violet-600 hover:underline"
+														>
+															{item.name}
+														</a>
+													{:else if pa.status === 'error' && pa.results?.[i]?.error}
+														<i class="fa-solid fa-xmark text-red-500 text-xs"></i>
+														<span>{item.name}</span>
+														<span class="text-red-400 text-xs">({pa.results[i].error})</span>
+													{:else if pa.status === 'creating'}
+														{#if pa.results && pa.results.length > i}
+															<i class="fa-solid fa-check text-green-500 text-xs"></i>
+														{:else}
+															<i class="fa-solid fa-spinner fa-spin text-violet-400 text-xs"></i>
+														{/if}
+														<span>{item.name}</span>
+													{:else}
+														<i class="fa-solid fa-circle text-gray-300 text-[9px]"></i>
+														<span>{item.name}</span>
+													{/if}
+												</li>
+											{/each}
+										</ul>
+										{#if pa.status === 'pending'}
+											<div class="flex gap-2">
+												<button
+													onclick={() => confirmAction(message.id)}
+													class="rounded-lg bg-violet-600 px-4 py-2 text-xs font-medium text-white
+														transition-colors hover:bg-violet-700"
+												>
+													<i class="fa-solid fa-check mr-1"></i>Confirm
+												</button>
+												<button
+													onclick={() => rejectAction(message.id)}
+													class="rounded-lg bg-gray-100 px-4 py-2 text-xs font-medium text-gray-600
+														transition-colors hover:bg-gray-200"
+												>
+													Cancel
+												</button>
+											</div>
+										{:else if pa.status === 'rejected'}
+											<div class="text-xs text-gray-400 italic">Cancelled</div>
+										{:else if pa.status === 'created'}
+											<div class="text-xs text-green-600 font-medium">
+												<i class="fa-solid fa-check-circle mr-1"></i>Created successfully
+											</div>
+										{/if}
 									</div>
 								{/if}
 								<div class="mt-1 flex items-center gap-1.5 px-1">

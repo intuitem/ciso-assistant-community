@@ -79,6 +79,22 @@ MODEL_MAP = {
     "folder": ("iam", "Folder", "Domains", "folders"),
 }
 
+# Models the LLM is allowed to propose creating.
+# Excludes complex models (framework, compliance_assessment, requirement_assessment, folder)
+# and models that require special setup flows.
+CREATABLE_MODELS = {
+    "applied_control",
+    "asset",
+    "risk_scenario",
+    "threat",
+    "evidence",
+    "vulnerability",
+    "security_exception",
+    "incident",
+    "entity",
+    "solution",
+}
+
 
 def _get_field_choices(
     app_label: str, model_name: str, field_name: str
@@ -266,6 +282,64 @@ def _build_tools() -> tuple[list[dict], dict]:
     # Merge in model-derived filter properties
     properties.update(filter_properties)
 
+    # --- propose_create tool ---
+    propose_create_tool = {
+        "type": "function",
+        "function": {
+            "name": "propose_create",
+            "description": (
+                "Propose creating one or more GRC objects. Use this when the user asks to "
+                "create, add, or import objects like controls, assets, threats, risk scenarios, etc. "
+                "The objects will NOT be created immediately — the user will review and confirm. "
+                "You can propose multiple objects at once by providing an array of items."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "model": {
+                        "type": "string",
+                        "enum": sorted(CREATABLE_MODELS),
+                        "description": (
+                            "The type of object to create. Same mapping as query_objects: "
+                            "'controls' → applied_control, 'assets' → asset, "
+                            "'risk scenarios' → risk_scenario, 'threats' → threat, "
+                            "'evidences' → evidence, 'vulnerabilities' → vulnerability, "
+                            "'exceptions' → security_exception, 'incidents' → incident, "
+                            "'entities'/'third parties' → entity, 'solutions' → solution."
+                        ),
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "description": "Name of the object to create (required)",
+                                },
+                                "description": {
+                                    "type": "string",
+                                    "description": "Optional description",
+                                },
+                            },
+                            "required": ["name"],
+                        },
+                        "description": (
+                            "List of objects to create. Each must have at least a 'name'. "
+                            "Parse user input intelligently: comma-separated lists, "
+                            "line-by-line lists, or natural language descriptions."
+                        ),
+                    },
+                    "domain": {
+                        "type": "string",
+                        "description": "Target domain/folder name for the new objects (e.g. 'DEMO', 'Production')",
+                    },
+                },
+                "required": ["model", "items"],
+            },
+        },
+    }
+
     tools = [
         {
             "type": "function",
@@ -285,6 +359,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                 },
             },
         },
+        propose_create_tool,
     ]
 
     return tools, valid_values
@@ -333,7 +408,7 @@ def _sanitize_arguments(arguments: dict) -> dict:
             continue
 
         # Coerce array fields (LLM may send a single string instead of an array)
-        if k in ("has_related", "has_no_related"):
+        if k in ("has_related", "has_no_related", "items"):
             if isinstance(v, str):
                 v = [v]
             if not isinstance(v, list) or not v:
@@ -349,6 +424,65 @@ def _sanitize_arguments(arguments: dict) -> dict:
     return cleaned
 
 
+def _build_create_proposal(
+    arguments: dict, accessible_folder_ids: list[str]
+) -> dict | None:
+    """
+    Build a structured creation proposal from LLM tool call arguments.
+    Does NOT create anything — returns a proposal for the frontend to confirm.
+    """
+    model_key = arguments.get("model")
+    if model_key not in CREATABLE_MODELS or model_key not in MODEL_MAP:
+        return None
+
+    app_label, model_name, display_name, url_slug = MODEL_MAP[model_key]
+
+    items = arguments.get("items", [])
+    if not items:
+        return None
+
+    # Resolve domain to folder ID
+    folder_id = None
+    domain = arguments.get("domain")
+    if domain:
+        from .orm_query import _resolve_domain
+
+        folder_ids = _resolve_domain(domain, accessible_folder_ids)
+        if folder_ids:
+            folder_id = folder_ids[0]
+
+    # If no domain specified, use first accessible folder
+    if not folder_id and accessible_folder_ids:
+        folder_id = accessible_folder_ids[0]
+
+    # Build proposal items — each gets name, description, and folder
+    proposal_items = []
+    for item in items:
+        if isinstance(item, str):
+            item = {"name": item}
+        if not isinstance(item, dict) or not item.get("name"):
+            continue
+        entry = {"name": item["name"].strip()}
+        if item.get("description"):
+            entry["description"] = item["description"].strip()
+        if folder_id:
+            entry["folder"] = folder_id
+        proposal_items.append(entry)
+
+    if not proposal_items:
+        return None
+
+    return {
+        "type": "propose_create",
+        "model_key": model_key,
+        "model_name": model_name,
+        "display_name": display_name,
+        "url_slug": url_slug,
+        "folder_id": folder_id,
+        "items": proposal_items,
+    }
+
+
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,
@@ -356,14 +490,18 @@ def dispatch_tool_call(
 ) -> dict | None:
     """
     Execute a tool call from the LLM.
-    Returns a result dict compatible with format_query_result().
+    Returns a result dict compatible with format_query_result(),
+    or a proposal dict for propose_create.
     """
-    if tool_name != "query_objects":
-        logger.warning("Unknown tool: %s", tool_name)
-        return None
-
     cleaned = _sanitize_arguments(arguments)
 
-    from .orm_query import execute_tool_query
+    if tool_name == "query_objects":
+        from .orm_query import execute_tool_query
 
-    return execute_tool_query(cleaned, accessible_folder_ids)
+        return execute_tool_query(cleaned, accessible_folder_ids)
+
+    if tool_name == "propose_create":
+        return _build_create_proposal(cleaned, accessible_folder_ids)
+
+    logger.warning("Unknown tool: %s", tool_name)
+    return None
