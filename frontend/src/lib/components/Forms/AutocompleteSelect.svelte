@@ -157,8 +157,10 @@
 		minSelect: $constraints && $constraints.required === true ? 1 : 0,
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
+		ulSelectedClass: multiple ? '!max-h-24 !overflow-y-auto' : '',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
+		outerDivClass: '!input !bg-surface-100 !px-2 !flex !relative',
+		ulOptionsClass : multiple ? '!absolute !left-0 !top-full' : '',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
 	};
@@ -519,7 +521,7 @@
 	};
 </script>
 
-<div class={baseClass} hidden={hidden || undefined}>
+<div class="mb-2 {baseClass}" hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
