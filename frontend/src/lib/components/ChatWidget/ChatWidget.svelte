@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade, scale } from 'svelte/transition';
 	import { tick } from 'svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import {
 		getView,
 		getMessages,
@@ -12,6 +13,7 @@
 		expandChat,
 		collapseChat,
 		sendMessage,
+		startNewSession,
 		suggestedActions
 	} from './chatStore.svelte';
 
@@ -112,6 +114,14 @@
 			</div>
 			<div class="flex items-center gap-1">
 				<button
+					onclick={startNewSession}
+					class="flex h-8 w-8 items-center justify-center rounded-lg text-white/80
+						transition-colors hover:bg-white/20 hover:text-white"
+					aria-label="New conversation"
+				>
+					<i class="fa-solid fa-plus text-sm"></i>
+				</button>
+				<button
 					onclick={expandChat}
 					class="flex h-8 w-8 items-center justify-center rounded-lg text-white/80
 						transition-colors hover:bg-white/20 hover:text-white"
@@ -146,7 +156,7 @@
 								class="rounded-2xl rounded-tl-sm bg-gray-100 px-3.5 py-2.5 text-sm
 									text-gray-800"
 							>
-								{message.content}
+								<MarkdownRenderer content={message.content} />
 							</div>
 							<div class="mt-1 px-1 text-[10px] text-gray-400">
 								{formatTime(message.timestamp)}
@@ -285,6 +295,14 @@
 				</div>
 				<div class="flex items-center gap-1">
 					<button
+						onclick={startNewSession}
+						class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
+							transition-colors hover:bg-white/20 hover:text-white"
+						aria-label="New conversation"
+					>
+						<i class="fa-solid fa-plus text-sm"></i>
+					</button>
+					<button
 						onclick={collapseChat}
 						class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
 							transition-colors hover:bg-white/20 hover:text-white"
@@ -322,7 +340,7 @@
 									class="rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm
 										text-gray-800"
 								>
-									{message.content}
+									<MarkdownRenderer content={message.content} />
 								</div>
 								<div class="mt-1 px-1 text-[10px] text-gray-400">
 									{formatTime(message.timestamp)}

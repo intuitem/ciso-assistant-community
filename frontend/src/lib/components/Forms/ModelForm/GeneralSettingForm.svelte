@@ -1,6 +1,8 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import NumberField from '../NumberField.svelte';
+	import TextField from '../TextField.svelte';
+	import TextArea from '../TextArea.svelte';
 	import { m } from '$paraglide/messages';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import type { SuperForm } from 'sveltekit-superforms';
@@ -495,6 +497,59 @@
 					field="enforce_mfa"
 					label={m.enforceMfa()}
 					helpText={m.enforceMfaHelpText()}
+				/>
+			</div>
+		</Accordion.ItemContent>
+	</Accordion.Item>
+	<Accordion.Item value="chatAi">
+		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer">
+			<i class="fa-solid fa-robot mr-2"></i><span class="flex-1 text-left"
+				>{m.chatAiSettings()}</span
+			>
+			<Accordion.ItemIndicator
+				class="transition-transform duration-200 data-[state=open]:rotate-0 data-[state=closed]:-rotate-90"
+				><svg xmlns="http://www.w3.org/2000/svg" width="14px" height="14px" viewBox="0 0 448 512"
+					><path
+						d="M201.4 374.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 306.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z"
+					/></svg
+				></Accordion.ItemIndicator
+			>
+		</Accordion.ItemTrigger>
+		<Accordion.ItemContent>
+			<div class="p-4 space-y-4">
+				<TextField
+					{form}
+					field="ollama_base_url"
+					label={m.ollamaBaseUrl()}
+					helpText={m.ollamaBaseUrlHelpText()}
+				/>
+				<TextField
+					{form}
+					field="ollama_model"
+					label={m.ollamaModel()}
+					helpText={m.ollamaModelHelpText()}
+				/>
+				<TextField
+					{form}
+					field="ollama_embed_model"
+					label={m.ollamaEmbedModel()}
+					helpText={m.ollamaEmbedModelHelpText()}
+				/>
+				<Select
+					{form}
+					field="embedding_backend"
+					options={[
+						{ label: 'Sentence Transformers (local)', value: 'sentence-transformers' },
+						{ label: 'Ollama', value: 'ollama' }
+					]}
+					label={m.embeddingBackend()}
+					helpText={m.embeddingBackendHelpText()}
+				/>
+				<TextArea
+					{form}
+					field="chat_system_prompt"
+					label={m.chatSystemPrompt()}
+					helpText={m.chatSystemPromptHelpText()}
 				/>
 			</div>
 		</Accordion.ItemContent>

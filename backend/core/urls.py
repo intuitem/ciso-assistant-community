@@ -149,6 +149,7 @@ urlpatterns = [
     path("data-wizard/", include("data_wizard.urls")),
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
+    path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),

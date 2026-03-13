@@ -556,7 +556,12 @@ export const GeneralSettingsSchema = z.object({
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
-	default_language: z.string().default('en').optional()
+	default_language: z.string().default('en').optional(),
+	ollama_base_url: z.string().default('http://localhost:11434').optional(),
+	ollama_model: z.string().default('mistral').optional(),
+	ollama_embed_model: z.string().default('snowflake-arctic-embed2').optional(),
+	embedding_backend: z.string().default('sentence-transformers').optional(),
+	chat_system_prompt: z.string().default('').optional()
 });
 
 export const FeatureFlagsSchema = z.object({
