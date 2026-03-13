@@ -1823,6 +1823,7 @@ def lint_dora_roi() -> Dict[str, Any]:
         "errors": sum(1 for r in results if r["severity"] == "error"),
         "warnings": sum(1 for r in results if r["severity"] == "warning"),
         "ok": sum(1 for r in results if r["severity"] == "ok"),
+        "info": sum(1 for r in results if r["severity"] == "info"),
     }
 
     # Build available identifiers for the frontend selector
