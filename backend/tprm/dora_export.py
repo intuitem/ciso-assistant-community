@@ -406,11 +406,14 @@ def generate_b_02_01_contracts(
         arrangement_type = contract.dora_contractual_arrangement or ""
 
         # b_02.01.0030: Overarching contractual arrangement reference number
-        overarching_ref = ""
+        # FAQ #124: c0030 is a FK and cannot be blank. When there is no
+        # overarching contract, type "Not Applicable" (no dropdown exists).
         if contract.overarching_contract:
             overarching_ref = contract.overarching_contract.ref_id or str(
                 contract.overarching_contract.id
             )
+        else:
+            overarching_ref = "Not Applicable"
 
         # b_02.01.0040: Currency
         currency = ""

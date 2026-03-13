@@ -789,7 +789,7 @@ class TestGenerateB0201(DoraExportTestMixin, DoraDataFactory, TestCase):
         )
         rows = self._read_csv(buf, self.CSV)
         main_row = next(r for r in rows[1:] if r[0] == "CA-001")
-        self.assertEqual(main_row[2], "")
+        self.assertEqual(main_row[2], "Not Applicable")
 
     def test_currency_prefix(self):
         buf = self._generate(
