@@ -557,11 +557,14 @@ export const GeneralSettingsSchema = z.object({
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
 	enforce_mfa: z.boolean().default(false).optional(),
 	default_language: z.string().default('en').optional(),
+	llm_provider: z.string().default('ollama').optional(),
 	ollama_base_url: z.string().default('http://localhost:11434').optional(),
 	ollama_model: z.string().default('mistral').optional(),
 	ollama_embed_model: z.string().default('snowflake-arctic-embed2').optional(),
 	embedding_backend: z.string().default('sentence-transformers').optional(),
-	chat_system_prompt: z.string().default('').optional()
+	chat_system_prompt: z.string().default('').optional(),
+	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
+	openai_model: z.string().default('').optional()
 });
 
 export const FeatureFlagsSchema = z.object({

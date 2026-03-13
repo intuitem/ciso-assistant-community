@@ -540,46 +540,74 @@
 		</Accordion.ItemTrigger>
 		<Accordion.ItemContent>
 			<div class="p-4 space-y-4">
-				<TextField
+				<Select
 					{form}
-					field="ollama_base_url"
-					label={m.ollamaBaseUrl()}
-					helpText={m.ollamaBaseUrlHelpText()}
+					field="llm_provider"
+					options={[
+						{ label: 'Ollama', value: 'ollama' },
+						{
+							label: 'OpenAI-compatible (LM Studio, vLLM, llama.cpp...)',
+							value: 'openai_compatible'
+						}
+					]}
+					label={m.llmProvider()}
+					helpText={m.llmProviderHelpText()}
 				/>
-				{#if ollamaModels.length > 0}
-					<Select
+				{#if $formStore.llm_provider === 'openai_compatible'}
+					<TextField
 						{form}
-						field="ollama_model"
-						options={ollamaModels}
-						label={m.ollamaModel()}
-						helpText={m.ollamaModelHelpText()}
-						translateOptions={false}
+						field="openai_api_base"
+						label={m.openaiApiBase()}
+						helpText={m.openaiApiBaseHelpText()}
 					/>
-					<Select
+					<TextField
 						{form}
-						field="ollama_embed_model"
-						options={ollamaModels}
-						label={m.ollamaEmbedModel()}
-						helpText={m.ollamaEmbedModelHelpText()}
-						translateOptions={false}
+						field="openai_model"
+						label={m.openaiModel()}
+						helpText={m.openaiModelHelpText()}
 					/>
 				{:else}
 					<TextField
 						{form}
-						field="ollama_model"
-						label={m.ollamaModel()}
-						helpText={ollamaModelsLoading
-							? 'Loading models from Ollama...'
-							: m.ollamaModelHelpText()}
+						field="ollama_base_url"
+						label={m.ollamaBaseUrl()}
+						helpText={m.ollamaBaseUrlHelpText()}
 					/>
-					<TextField
-						{form}
-						field="ollama_embed_model"
-						label={m.ollamaEmbedModel()}
-						helpText={ollamaModelsLoading
-							? 'Loading models from Ollama...'
-							: m.ollamaEmbedModelHelpText()}
-					/>
+					{#if ollamaModels.length > 0}
+						<Select
+							{form}
+							field="ollama_model"
+							options={ollamaModels}
+							label={m.ollamaModel()}
+							helpText={m.ollamaModelHelpText()}
+							translateOptions={false}
+						/>
+						<Select
+							{form}
+							field="ollama_embed_model"
+							options={ollamaModels}
+							label={m.ollamaEmbedModel()}
+							helpText={m.ollamaEmbedModelHelpText()}
+							translateOptions={false}
+						/>
+					{:else}
+						<TextField
+							{form}
+							field="ollama_model"
+							label={m.ollamaModel()}
+							helpText={ollamaModelsLoading
+								? 'Loading models from Ollama...'
+								: m.ollamaModelHelpText()}
+						/>
+						<TextField
+							{form}
+							field="ollama_embed_model"
+							label={m.ollamaEmbedModel()}
+							helpText={ollamaModelsLoading
+								? 'Loading models from Ollama...'
+								: m.ollamaEmbedModelHelpText()}
+						/>
+					{/if}
 				{/if}
 				<Select
 					{form}

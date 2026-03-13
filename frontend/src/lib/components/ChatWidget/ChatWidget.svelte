@@ -25,6 +25,7 @@
 	} from './chatStore.svelte';
 
 	let copiedId = $state<string | null>(null);
+	let expandedThinking = $state<Set<string>>(new Set());
 
 	// Keep page context in sync with current route
 	$effect(() => {
@@ -181,12 +182,43 @@
 							<i class="fa-solid fa-robot text-xs"></i>
 						</div>
 						<div>
-							<div
-								class="rounded-2xl rounded-tl-sm bg-gray-100 px-3.5 py-2.5 text-sm
-									text-gray-800"
-							>
-								<MarkdownRenderer content={message.content} />
-							</div>
+							{#if message.thinking}
+								{@const thinkingDone = !!message.content}
+								<button
+									onclick={() => {
+										const next = new Set(expandedThinking);
+										if (next.has(message.id)) next.delete(message.id);
+										else next.add(message.id);
+										expandedThinking = next;
+									}}
+									class="mb-1.5 flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5
+										text-[11px] text-amber-700 transition-colors hover:bg-amber-100"
+								>
+									<i
+										class="fa-solid fa-chevron-{expandedThinking.has(message.id)
+											? 'down'
+											: 'right'} text-[9px] transition-transform"
+									></i>
+									<i class="fa-solid fa-brain text-[10px] text-amber-500"></i>
+									{thinkingDone ? 'Thought' : 'Thinking...'}
+								</button>
+								{#if expandedThinking.has(message.id)}
+									<div
+										class="mb-1.5 max-h-48 overflow-y-auto rounded-xl bg-amber-50/60 px-3 py-2
+											text-[11px] leading-relaxed text-amber-900/70 border border-amber-100"
+									>
+										<MarkdownRenderer content={message.thinking} />
+									</div>
+								{/if}
+							{/if}
+							{#if message.content}
+								<div
+									class="rounded-2xl rounded-tl-sm bg-gray-100 px-3.5 py-2.5 text-sm
+										text-gray-800"
+								>
+									<MarkdownRenderer content={message.content} />
+								</div>
+							{/if}
 							{#if getClickableRefs(message).length > 0}
 								<div class="mt-1.5 flex flex-wrap gap-1 px-1">
 									{#each getClickableRefs(message) as ref}
@@ -474,12 +506,43 @@
 								<i class="fa-solid fa-robot text-sm"></i>
 							</div>
 							<div class="max-w-[80%]">
-								<div
-									class="rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm
-										text-gray-800"
-								>
-									<MarkdownRenderer content={message.content} />
-								</div>
+								{#if message.thinking}
+									{@const thinkingDone = !!message.content}
+									<button
+										onclick={() => {
+											const next = new Set(expandedThinking);
+											if (next.has(message.id)) next.delete(message.id);
+											else next.add(message.id);
+											expandedThinking = next;
+										}}
+										class="mb-2 flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-2
+											text-xs text-amber-700 transition-colors hover:bg-amber-100"
+									>
+										<i
+											class="fa-solid fa-chevron-{expandedThinking.has(message.id)
+												? 'down'
+												: 'right'} text-[10px] transition-transform"
+										></i>
+										<i class="fa-solid fa-brain text-xs text-amber-500"></i>
+										{thinkingDone ? 'Thought' : 'Thinking...'}
+									</button>
+									{#if expandedThinking.has(message.id)}
+										<div
+											class="mb-2 max-h-64 overflow-y-auto rounded-xl bg-amber-50/60 px-4 py-3
+												text-xs leading-relaxed text-amber-900/70 border border-amber-100"
+										>
+											<MarkdownRenderer content={message.thinking} />
+										</div>
+									{/if}
+								{/if}
+								{#if message.content}
+									<div
+										class="rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm
+											text-gray-800"
+									>
+										<MarkdownRenderer content={message.content} />
+									</div>
+								{/if}
 								{#if getClickableRefs(message).length > 0}
 									<div class="mt-1.5 flex flex-wrap gap-1.5 px-1">
 										{#each getClickableRefs(message) as ref}

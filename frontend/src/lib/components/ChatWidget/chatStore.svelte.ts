@@ -135,6 +135,12 @@ async function streamResponse(userMessage: string) {
 							msg.content += data.content;
 							messages = [...messages];
 						}
+					} else if (data.type === 'thinking') {
+						const msg = messages.find((m) => m.id === assistantMessageId);
+						if (msg) {
+							msg.thinking = (msg.thinking || '') + data.content;
+							messages = [...messages];
+						}
 					} else if (data.type === 'pending_action') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {

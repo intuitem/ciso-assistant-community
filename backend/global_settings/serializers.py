@@ -23,11 +23,14 @@ GENERAL_SETTINGS_KEYS = [
     "allow_assignments_to_entities",
     "enforce_mfa",
     "default_language",
+    "llm_provider",
     "ollama_base_url",
     "ollama_model",
     "ollama_embed_model",
     "embedding_backend",
     "chat_system_prompt",
+    "openai_api_base",
+    "openai_model",
 ]
 
 

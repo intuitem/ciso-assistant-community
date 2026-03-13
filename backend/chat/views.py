@@ -247,12 +247,13 @@ class ChatSessionViewSet(BaseModelViewSet):
                     )
                     yield f"data: {action_data}\n\n"
 
-                for token in llm.stream(
+                for token_type, token in llm.stream(
                     user_content, context, history=history_messages
                 ):
-                    full_response += token
-                    # SSE format
-                    data = json.dumps({"type": "token", "content": token})
+                    if token_type == "token":
+                        full_response += token
+                    # SSE format — "thinking" tokens go to a collapsible block in the UI
+                    data = json.dumps({"type": token_type, "content": token})
                     yield f"data: {data}\n\n"
 
                 # Save assistant message
@@ -343,6 +344,7 @@ def chat_status(request):
 
     return Response(
         {
+            "llm_provider": settings.get("llm_provider", "ollama"),
             "ollama_available": ollama_ok,
             "ollama_url": settings["ollama_base_url"],
             "ollama_model": settings["ollama_model"],
