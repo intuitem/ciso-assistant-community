@@ -15,6 +15,7 @@ export interface ContextRef {
 	ref_id?: string;
 	score?: number;
 	source?: string;
+	url?: string;
 }
 
 export interface SuggestedAction {

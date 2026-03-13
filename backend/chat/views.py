@@ -127,12 +127,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 "Do NOT hallucinate additional information.\n\n"
                 + format_query_result(query_result)
             )
+            url_slug = query_result.get("url_slug", "")
             for obj in query_result.get("objects", []):
                 context_refs.append(
                     {
                         "type": query_result["model_name"],
                         "id": obj.get("id", ""),
                         "name": obj.get("name", ""),
+                        "url": f"/{url_slug}/{obj.get('id', '')}",
                         "source": "orm_query",
                     }
                 )
@@ -309,7 +311,7 @@ def ollama_models(request):
     except Exception as e:
         logger.warning("Failed to fetch Ollama models: %s", e)
         return Response(
-            {"models": [], "error": str(e)},
+            {"models": [], "error": "Unable to connect to Ollama service."},
             status=status.HTTP_503_SERVICE_UNAVAILABLE,
         )
 

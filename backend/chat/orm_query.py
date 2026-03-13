@@ -46,7 +46,7 @@ def execute_tool_query(
     if model_key not in MODEL_MAP:
         return None
 
-    app_label, model_name, display_name = MODEL_MAP[model_key]
+    app_label, model_name, display_name, url_slug = MODEL_MAP[model_key]
 
     try:
         model_class = apps.get_model(app_label, model_name)
@@ -77,6 +77,7 @@ def execute_tool_query(
             return {
                 "model_name": model_name,
                 "display_name": display_name,
+                "url_slug": url_slug,
                 "query_type": action,
                 "filters_applied": [f"domain = {domain} (not found)"],
                 "total_count": 0,
@@ -192,7 +193,13 @@ def execute_tool_query(
     # Execute based on action
     if action == "summary":
         result = _build_summary(
-            qs, model_class, model_name, display_name, filters_applied, total_count
+            qs,
+            model_class,
+            model_name,
+            display_name,
+            url_slug,
+            filters_applied,
+            total_count,
         )
         result.update(pagination)
         return result
@@ -201,6 +208,7 @@ def execute_tool_query(
         result = {
             "model_name": model_name,
             "display_name": display_name,
+            "url_slug": url_slug,
             "query_type": "count",
             "filters_applied": filters_applied,
             "total_count": total_count,
@@ -209,7 +217,13 @@ def execute_tool_query(
         result.update(pagination)
         if total_count > 0:
             summary = _build_summary(
-                qs, model_class, model_name, display_name, filters_applied, total_count
+                qs,
+                model_class,
+                model_name,
+                display_name,
+                url_slug,
+                filters_applied,
+                total_count,
             )
             result["summary"] = summary.get("summary", {})
         return result
@@ -221,7 +235,13 @@ def execute_tool_query(
 
     if total_count > SUMMARY_THRESHOLD and page == 1:
         result = _build_summary(
-            qs, model_class, model_name, display_name, filters_applied, total_count
+            qs,
+            model_class,
+            model_name,
+            display_name,
+            url_slug,
+            filters_applied,
+            total_count,
         )
         result["objects"] = objects
         result["query_type"] = "summary_with_list"
@@ -231,6 +251,7 @@ def execute_tool_query(
     result = {
         "model_name": model_name,
         "display_name": display_name,
+        "url_slug": url_slug,
         "query_type": "list",
         "filters_applied": filters_applied,
         "total_count": total_count,
@@ -477,7 +498,7 @@ def _serialize_objects(queryset, model_class, model_name: str) -> list[dict]:
 
 
 def _build_summary(
-    qs, model_class, model_name, display_name, filters_applied, total_count
+    qs, model_class, model_name, display_name, url_slug, filters_applied, total_count
 ) -> dict:
     """Build a summary/breakdown of the queryset."""
     summary = {}
@@ -549,6 +570,7 @@ def _build_summary(
     return {
         "model_name": model_name,
         "display_name": display_name,
+        "url_slug": url_slug,
         "query_type": "summary",
         "filters_applied": filters_applied,
         "total_count": total_count,

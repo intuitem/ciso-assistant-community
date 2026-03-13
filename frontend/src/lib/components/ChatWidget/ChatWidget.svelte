@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade, scale } from 'svelte/transition';
 	import { tick } from 'svelte';
+	import type { ChatMessage } from './types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import {
 		getView,
@@ -78,6 +79,10 @@
 
 	function formatTime(date: Date): string {
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+	}
+
+	function getClickableRefs(message: ChatMessage) {
+		return (message.contextRefs || []).filter((ref) => ref.url && ref.source === 'orm_query');
 	}
 </script>
 
@@ -170,6 +175,21 @@
 							>
 								<MarkdownRenderer content={message.content} />
 							</div>
+							{#if getClickableRefs(message).length > 0}
+								<div class="mt-1.5 flex flex-wrap gap-1 px-1">
+									{#each getClickableRefs(message) as ref}
+										<a
+											href={ref.url}
+											class="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[10px]
+												text-violet-700 transition-colors hover:bg-violet-100 hover:text-violet-900"
+											title={ref.name}
+										>
+											<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+											{ref.name?.length > 30 ? ref.name.slice(0, 30) + '...' : ref.name}
+										</a>
+									{/each}
+								</div>
+							{/if}
 							<div class="mt-1 flex items-center gap-1 px-1">
 								<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
 								{#if message.id !== 'welcome' && message.content}
@@ -178,7 +198,11 @@
 										class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
 										title="Copy response"
 									>
-										<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-[10px]"></i>
+										<i
+											class="fa-solid {copiedId === message.id
+												? 'fa-check text-green-500'
+												: 'fa-copy'} text-[10px]"
+										></i>
 									</button>
 								{/if}
 							</div>
@@ -206,7 +230,11 @@
 									class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
 									title="Copy prompt"
 								>
-									<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-[10px]"></i>
+									<i
+										class="fa-solid {copiedId === message.id
+											? 'fa-check text-green-500'
+											: 'fa-copy'} text-[10px]"
+									></i>
 								</button>
 								<button
 									onclick={retryLastMessage}
@@ -377,6 +405,21 @@
 								>
 									<MarkdownRenderer content={message.content} />
 								</div>
+								{#if getClickableRefs(message).length > 0}
+									<div class="mt-1.5 flex flex-wrap gap-1.5 px-1">
+										{#each getClickableRefs(message) as ref}
+											<a
+												href={ref.url}
+												class="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[11px]
+													text-violet-700 transition-colors hover:bg-violet-100 hover:text-violet-900"
+												title={ref.name}
+											>
+												<i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+												{ref.name?.length > 40 ? ref.name.slice(0, 40) + '...' : ref.name}
+											</a>
+										{/each}
+									</div>
+								{/if}
 								<div class="mt-1 flex items-center gap-1.5 px-1">
 									<span class="text-[10px] text-gray-400">{formatTime(message.timestamp)}</span>
 									{#if message.id !== 'welcome' && message.content}
@@ -385,7 +428,11 @@
 											class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
 											title="Copy response"
 										>
-											<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-xs"></i>
+											<i
+												class="fa-solid {copiedId === message.id
+													? 'fa-check text-green-500'
+													: 'fa-copy'} text-xs"
+											></i>
 										</button>
 									{/if}
 								</div>
@@ -413,7 +460,11 @@
 										class="ml-1 text-gray-300 opacity-0 transition-opacity hover:text-gray-500 group-hover:opacity-100"
 										title="Copy prompt"
 									>
-										<i class="fa-solid {copiedId === message.id ? 'fa-check text-green-500' : 'fa-copy'} text-xs"></i>
+										<i
+											class="fa-solid {copiedId === message.id
+												? 'fa-check text-green-500'
+												: 'fa-copy'} text-xs"
+										></i>
 									</button>
 									<button
 										onclick={retryLastMessage}

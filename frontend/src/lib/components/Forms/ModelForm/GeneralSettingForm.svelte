@@ -522,7 +522,10 @@
 		</Accordion.ItemContent>
 	</Accordion.Item>
 	<Accordion.Item value="chatAi">
-		<Accordion.ItemTrigger class="flex w-full items-center cursor-pointer" onclick={fetchOllamaModels}>
+		<Accordion.ItemTrigger
+			class="flex w-full items-center cursor-pointer"
+			onclick={fetchOllamaModels}
+		>
 			<i class="fa-solid fa-robot mr-2"></i><span class="flex-1 text-left"
 				>{m.chatAiSettings()}</span
 			>
@@ -565,13 +568,17 @@
 						{form}
 						field="ollama_model"
 						label={m.ollamaModel()}
-						helpText={ollamaModelsLoading ? 'Loading models from Ollama...' : m.ollamaModelHelpText()}
+						helpText={ollamaModelsLoading
+							? 'Loading models from Ollama...'
+							: m.ollamaModelHelpText()}
 					/>
 					<TextField
 						{form}
 						field="ollama_embed_model"
 						label={m.ollamaEmbedModel()}
-						helpText={ollamaModelsLoading ? 'Loading models from Ollama...' : m.ollamaEmbedModelHelpText()}
+						helpText={ollamaModelsLoading
+							? 'Loading models from Ollama...'
+							: m.ollamaEmbedModelHelpText()}
 					/>
 				{/if}
 				<Select

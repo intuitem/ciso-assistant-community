@@ -14,32 +14,68 @@ from django.apps import apps
 logger = logging.getLogger(__name__)
 
 
-# Maps tool model param values to (app_label, model_name, display_name)
+# Maps tool model param values to (app_label, model_name, display_name, url_slug)
 MODEL_MAP = {
-    "applied_control": ("core", "AppliedControl", "Applied Controls"),
-    "asset": ("core", "Asset", "Assets"),
-    "risk_scenario": ("core", "RiskScenario", "Risk Scenarios"),
-    "risk_assessment": ("core", "RiskAssessment", "Risk Assessments"),
-    "compliance_assessment": ("core", "ComplianceAssessment", "Compliance Assessments"),
-    "threat": ("core", "Threat", "Threats"),
-    "evidence": ("core", "Evidence", "Evidences"),
-    "vulnerability": ("core", "Vulnerability", "Vulnerabilities"),
-    "security_exception": ("core", "SecurityException", "Security Exceptions"),
-    "incident": ("core", "Incident", "Incidents"),
-    "risk_acceptance": ("core", "RiskAcceptance", "Risk Acceptances"),
+    "applied_control": (
+        "core",
+        "AppliedControl",
+        "Applied Controls",
+        "applied-controls",
+    ),
+    "asset": ("core", "Asset", "Assets", "assets"),
+    "risk_scenario": ("core", "RiskScenario", "Risk Scenarios", "risk-scenarios"),
+    "risk_assessment": (
+        "core",
+        "RiskAssessment",
+        "Risk Assessments",
+        "risk-assessments",
+    ),
+    "compliance_assessment": (
+        "core",
+        "ComplianceAssessment",
+        "Compliance Assessments",
+        "compliance-assessments",
+    ),
+    "threat": ("core", "Threat", "Threats", "threats"),
+    "evidence": ("core", "Evidence", "Evidences", "evidences"),
+    "vulnerability": ("core", "Vulnerability", "Vulnerabilities", "vulnerabilities"),
+    "security_exception": (
+        "core",
+        "SecurityException",
+        "Security Exceptions",
+        "security-exceptions",
+    ),
+    "incident": ("core", "Incident", "Incidents", "incidents"),
+    "risk_acceptance": (
+        "core",
+        "RiskAcceptance",
+        "Risk Acceptances",
+        "risk-acceptances",
+    ),
     "requirement_assessment": (
         "core",
         "RequirementAssessment",
         "Requirement Assessments",
+        "requirement-assessments",
     ),
-    "framework": ("core", "Framework", "Frameworks"),
-    "entity": ("tprm", "Entity", "Entities"),
-    "solution": ("tprm", "Solution", "Solutions"),
-    "contract": ("tprm", "Contract", "Contracts"),
-    "entity_assessment": ("tprm", "EntityAssessment", "Entity Assessments"),
-    "ebios_rm_study": ("ebios_rm", "EbiosRMStudy", "EBIOS RM Studies"),
-    "feared_event": ("ebios_rm", "FearedEvent", "Feared Events"),
-    "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders"),
+    "framework": ("core", "Framework", "Frameworks", "frameworks"),
+    "entity": ("tprm", "Entity", "Entities", "entities"),
+    "solution": ("tprm", "Solution", "Solutions", "solutions"),
+    "contract": ("tprm", "Contract", "Contracts", "contracts"),
+    "entity_assessment": (
+        "tprm",
+        "EntityAssessment",
+        "Entity Assessments",
+        "entity-assessments",
+    ),
+    "ebios_rm_study": (
+        "ebios_rm",
+        "EbiosRMStudy",
+        "EBIOS RM Studies",
+        "ebios-rm-studies",
+    ),
+    "feared_event": ("ebios_rm", "FearedEvent", "Feared Events", "feared-events"),
+    "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders", "stakeholders"),
 }
 
 
