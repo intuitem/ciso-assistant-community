@@ -218,7 +218,17 @@ export function sendMessage(text: string) {
 }
 
 export function startNewSession() {
+	// Abort any in-flight request
+	if (abortController) {
+		abortController.abort();
+		abortController = null;
+	}
+	isTyping = false;
+
+	// Clear backend session reference — next message creates a fresh session
 	sessionId = null;
+
+	// Reset messages to welcome state
 	messages = [
 		{
 			id: 'welcome',

@@ -63,7 +63,7 @@ class ChatSessionViewSet(BaseModelViewSet):
             session.title = user_content[:100]
             session.save(update_fields=["title"])
 
-        # Perform RAG retrieval
+        # Detect intent: structured ORM query vs semantic search
         from .rag import (
             search,
             graph_expand,
@@ -71,16 +71,77 @@ class ChatSessionViewSet(BaseModelViewSet):
             build_context_refs,
             get_accessible_folder_ids,
         )
+        from .orm_query import (
+            detect_intent,
+            detect_followup,
+            execute_query,
+            execute_followup,
+            format_query_result,
+        )
 
-        results = search(user_content, request.user, top_k=10)
         accessible_folders = get_accessible_folder_ids(request.user)
+        intent = detect_intent(user_content)
+        context_refs = []
+        query_result = None
 
-        # Graph expansion for structured objects
-        structured = [r for r in results if r.get("source_type") == "model"]
-        expanded = graph_expand(structured, accessible_folders) if structured else []
+        # Check for follow-up to a previous ORM query
+        followup = detect_followup(user_content)
+        if followup and intent != "query":
+            # Look for previous ORM query metadata in recent assistant messages
+            previous_meta = _get_last_query_meta(session)
+            if previous_meta:
+                query_result = execute_followup(
+                    followup, previous_meta, accessible_folders
+                )
+                if query_result:
+                    intent = "query"
 
-        context = format_context(results, expanded)
-        context_refs = build_context_refs(results, expanded)
+        if intent == "query" and not query_result:
+            # Structured ORM query
+            query_result = execute_query(user_content, accessible_folders)
+            if not query_result:
+                # Fallback to semantic search if ORM query couldn't parse
+                intent = "search"
+
+        if query_result:
+            context = format_query_result(query_result)
+            # Build refs from query results
+            for obj in query_result.get("objects", []):
+                context_refs.append(
+                    {
+                        "type": query_result["model_name"],
+                        "id": obj.get("id", ""),
+                        "name": obj.get("name", ""),
+                        "source": "orm_query",
+                    }
+                )
+            # Save query metadata for follow-up queries
+            context_refs.append(
+                {
+                    "source": "orm_query_meta",
+                    "model_name": query_result["model_name"],
+                    "app_label": _get_app_label(query_result["model_name"]),
+                    "display_name": query_result["display_name"],
+                    "filters_applied": query_result.get("filters_applied", []),
+                    "filters": _extract_saved_filters(query_result),
+                    "page": query_result.get("page", 1),
+                    "total_count": query_result["total_count"],
+                    "query_type": query_result["query_type"],
+                }
+            )
+
+        if intent != "query":
+            # Semantic RAG search
+            results = search(user_content, request.user, top_k=10)
+
+            # Graph expansion for structured objects
+            structured = [r for r in results if r.get("source_type") == "model"]
+            expanded = (
+                graph_expand(structured, accessible_folders) if structured else []
+            )
+
+            context = format_context(results, expanded)
+            context_refs = build_context_refs(results, expanded)
 
         # Build conversation history for the LLM (exclude the message we just saved)
         history_messages = list(
@@ -204,3 +265,77 @@ def chat_status(request):
             "embedding_backend": settings["embedding_backend"],
         }
     )
+
+
+def _get_last_query_meta(session) -> dict | None:
+    """
+    Find the most recent ORM query metadata from the session's assistant messages.
+    Returns the saved query meta dict if found.
+    """
+    last_assistant_msgs = session.messages.filter(
+        role=ChatMessage.Role.ASSISTANT
+    ).order_by("-created_at")[:3]
+    for msg in last_assistant_msgs:
+        if not msg.context_refs:
+            continue
+        for ref in msg.context_refs:
+            if isinstance(ref, dict) and ref.get("source") == "orm_query_meta":
+                return ref
+    return None
+
+
+def _get_app_label(model_name: str) -> str:
+    """Map a model name back to its app_label."""
+    from .orm_query import MODEL_REGISTRY
+
+    for _alias, (app_label, mname, _display) in MODEL_REGISTRY.items():
+        if mname == model_name:
+            return app_label
+    return "core"
+
+
+def _extract_saved_filters(query_result: dict) -> dict:
+    """
+    Extract the ORM filter kwargs from a query result so they can be
+    re-applied in a follow-up query. We rebuild from filters_applied labels.
+    """
+    # The filters_applied are human-readable labels like "domain = DEMO", "status = active"
+    # We need to save the actual ORM filter kwargs.
+    # For now, we extract what we can from the result metadata.
+    filters = {}
+
+    for label in query_result.get("filters_applied", []):
+        if label.startswith("domain = "):
+            # Need to look up folder IDs by name
+            domain_name = label[len("domain = ") :]
+            from iam.models import Folder
+
+            folder_ids = list(
+                Folder.objects.filter(name__in=domain_name.split(", ")).values_list(
+                    "id", flat=True
+                )
+            )
+            if folder_ids:
+                filters["folder_id__in"] = [str(fid) for fid in folder_ids]
+        elif label.startswith("status = "):
+            filters["status"] = label[len("status = ") :]
+        elif label.startswith("treatment = "):
+            filters["treatment"] = label[len("treatment = ") :]
+        elif label.startswith("result = "):
+            filters["result"] = label[len("result = ") :]
+        elif label.startswith("priority = P"):
+            try:
+                filters["priority"] = int(label[len("priority = P") :])
+            except ValueError:
+                pass
+        elif label.startswith("category = "):
+            filters["category"] = label[len("category = ") :]
+        elif label.startswith("effort = "):
+            filters["effort"] = label[len("effort = ") :]
+        elif label.startswith("severity = "):
+            try:
+                filters["severity"] = int(label[len("severity = ") :])
+            except ValueError:
+                pass
+
+    return filters
