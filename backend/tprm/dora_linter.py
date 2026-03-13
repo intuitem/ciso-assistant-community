@@ -1041,6 +1041,44 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
         if contract_has_error:
             contracts_with_errors += 1
 
+    # Check for duplicate XBRL keys within B_02.02.
+    # The XBRL key is (contract_ref, entity_lei, provider_code, function_id, ict_service_type).
+    # Since entity_lei and provider_code are fixed per contract, duplicates arise when
+    # two solutions on the same contract share the same (function_id, ict_service_type).
+    for contract in b_02_02_contracts:
+        seen_keys = {}  # (function_id, ict_service_type) -> solution name
+        for solution in contract.solutions.all():
+            ict_service_type = solution.dora_ict_service_type or ""
+            if business_function_asset_ids:
+                functions = solution.assets.filter(
+                    id__in=business_function_asset_ids, is_business_function=True
+                )
+            else:
+                functions = solution.assets.filter(is_business_function=True)
+            for function in functions:
+                function_id = function.ref_id or str(function.id)
+                key = (function_id, ict_service_type)
+                if key in seen_keys:
+                    contract_ref = contract.ref_id or contract.name
+                    results.append(
+                        {
+                            "severity": "error",
+                            "category": "B_02.02 Contracts",
+                            "message": (
+                                f"Contract '{contract_ref}' has duplicate XBRL key in B_02.02: "
+                                f"function '{function_id}', ICT service type '{ict_service_type}' "
+                                f"appears in solutions '{seen_keys[key]}' and '{solution.name}'. "
+                                f"Only the first will be exported."
+                            ),
+                            "field": "solutions",
+                            "object_type": "contracts",
+                            "object_id": str(contract.id),
+                            "object_name": contract.name,
+                        }
+                    )
+                else:
+                    seen_keys[key] = solution.name
+
     # Add success message if all contracts are valid
     contracts_valid = total_contracts - contracts_with_errors
     if contracts_valid == total_contracts:
@@ -1332,6 +1370,46 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
                 "object_name": None,
             }
         )
+
+    # Check for duplicate XBRL keys within B_07.01.
+    # The XBRL key is (contract_ref, provider_code, ict_service_type).
+    # Since provider_code is fixed per contract, duplicates arise when
+    # two solutions on the same contract share the same ict_service_type.
+    assessment_contracts = (
+        Contract.objects.filter(
+            is_intragroup=False,
+            provider_entity__isnull=False,
+            solutions__isnull=False,
+        )
+        .exclude(status=Contract.Status.DRAFT)
+        .exclude(dora_exclude=True)
+        .distinct()
+        .prefetch_related("solutions")
+    )
+    for contract in assessment_contracts:
+        seen_types = {}  # ict_service_type -> solution name
+        for solution in contract.solutions.all():
+            ict_service_type = solution.dora_ict_service_type or ""
+            if ict_service_type in seen_types:
+                contract_ref = contract.ref_id or contract.name
+                results.append(
+                    {
+                        "severity": "error",
+                        "category": "Assessment (B_07.01)",
+                        "message": (
+                            f"Contract '{contract_ref}' has duplicate XBRL key in B_07.01: "
+                            f"ICT service type '{ict_service_type}' appears in solutions "
+                            f"'{seen_types[ict_service_type]}' and '{solution.name}'. "
+                            f"Only the first will be exported."
+                        ),
+                        "field": "solutions",
+                        "object_type": "contracts",
+                        "object_id": str(contract.id),
+                        "object_name": contract.name,
+                    }
+                )
+            else:
+                seen_types[ict_service_type] = solution.name
 
     return results
 
