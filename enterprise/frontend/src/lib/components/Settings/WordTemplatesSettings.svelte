@@ -148,11 +148,12 @@
 					const res = await fetch(`/fe-api/custom-word-templates/${existing.id}`, {
 						method: 'DELETE'
 					});
-					if (res.ok || res.status === 204) {
-						successMessage = m.templateReset();
-						await fetchData();
-						cancelEdit();
+					if (!res.ok && res.status !== 204) {
+						throw new Error('Failed to reset template');
 					}
+					successMessage = m.templateReset();
+					await fetchData();
+					cancelEdit();
 				} catch {
 					error = 'Failed to reset template';
 				}

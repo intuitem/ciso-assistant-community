@@ -57,12 +57,6 @@ def _load_custom_email_template(
             language=locale,
             is_active=True,
         ).first()
-        if not override and locale != "en":
-            override = CustomEmailTemplate.objects.filter(
-                template_key=template_name,
-                language="en",
-                is_active=True,
-            ).first()
         if override:
             return {"subject": override.subject, "body": override.body}
     except Exception as e:

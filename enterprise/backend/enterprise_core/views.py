@@ -24,6 +24,7 @@ from rest_framework import mixins, viewsets, filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from core.views import BaseModelViewSet, GenericFilterSet
 from core.utils import MAIN_ENTITY_DEFAULT_NAME
@@ -640,6 +641,10 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
             return CustomWordTemplateWriteSerializer
         return CustomWordTemplateReadSerializer
 
+    def perform_create(self, serializer):
+        """New records start inactive until a file is uploaded."""
+        serializer.save(is_active=False)
+
     @action(methods=["get"], detail=False, url_path="available")
     def available(self, request):
         """Return the registry of all overridable Word templates."""
@@ -710,6 +715,14 @@ class CustomWordTemplateViewSet(BaseModelViewSet):
                 )
 
             template.file = uploaded
+            template.is_active = True
+            try:
+                template.full_clean()
+            except ValidationError as e:
+                return Response(
+                    e.message_dict if hasattr(e, "message_dict") else {"file": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             template.save()
             return Response(status=status.HTTP_200_OK)
         except CustomWordTemplate.DoesNotExist:

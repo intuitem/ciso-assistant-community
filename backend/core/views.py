@@ -8981,12 +8981,6 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 language=lang,
                 is_active=True,
             ).first()
-            if not custom and lang != "en":
-                custom = CustomWordTemplate.objects.filter(
-                    template_key="audit_report",
-                    language="en",
-                    is_active=True,
-                ).first()
             if custom and custom.file:
                 custom.file.open("rb")
                 doc = DocxTemplate(io.BytesIO(custom.file.read()))
