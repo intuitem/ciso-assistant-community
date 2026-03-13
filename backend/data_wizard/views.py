@@ -2851,11 +2851,7 @@ class LoadFileView(APIView):
                 pd.read_excel(excel_file, sheet_name=sheet_name)
             ).fillna("")
 
-            stop_nodes = False
             for row in sheet_df.to_dict(orient="records"):
-                if stop_nodes:
-                    break
-
                 due_date = _parse_date(row.get("due_date"))
                 if not due_date:
                     continue
@@ -2893,8 +2889,7 @@ class LoadFileView(APIView):
                                     }
                                 )
                                 overall_results["task_nodes"]["failed"] += 1
-                                stop_nodes = True
-                                continue
+                                break
                             case ConflictMode.UPDATE:
                                 existing_node.status = status_val
                                 existing_node.observation = observation
