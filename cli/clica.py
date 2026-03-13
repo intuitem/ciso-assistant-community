@@ -262,11 +262,13 @@ DATA_WIZARD_COMMANDS = [
         "model_type": "Asset",
         "help": (
             "Import assets from CSV/Excel.\n"
-            "\nRequired columns: name\n\n"
+            "\nRequired columns: name\n"
             "Optional columns: ref_id, type (PR=primary/SP=support), description, "
-            "business_value, reference_link, observation, filtering_labels, "
-            "parent_assets, domain (folder name)\n"
-            "\nConflict detection: by name + folder"
+            "domain, business_value, observation, reference_link (or link), "
+            "security_objectives (or security_capabilities for support assets), "
+            "disaster_recovery_objectives (or recovery_capabilities for support assets), "
+            "parent_assets, "
+            "labels (or filtering_labels / étiquette / label)\n"
         ),
         "requires_folder": True,
         "requires_perimeter": False,

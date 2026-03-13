@@ -474,7 +474,9 @@ def send_task_node_due_soon_notification(actor_email, task_nodes, days):
         "days_remaining": days,
     }
 
-    rendered = render_email_template("task_node_due_soon", context)
+    rendered = render_email_template(
+        "task_node_due_soon", context, recipient_email=actor_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], actor_email)
     else:
@@ -496,7 +498,9 @@ def send_task_node_overdue_notification(actor_email, task_nodes):
         "task_list": format_task_node_list(task_nodes),
     }
 
-    rendered = render_email_template("task_node_overdue", context)
+    rendered = render_email_template(
+        "task_node_overdue", context, recipient_email=actor_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], actor_email)
     else:
@@ -534,7 +538,9 @@ def send_notification_email_expired_eta(owner_email, controls):
         "control_list": format_control_list(controls),
     }
 
-    rendered = render_email_template("expired_controls", context)
+    rendered = render_email_template(
+        "expired_controls", context, recipient_email=owner_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], owner_email)
     else:
@@ -655,7 +661,9 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
 
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [control]):
-            rendered = render_email_template("applied_control_assignment", context)
+            rendered = render_email_template(
+                "applied_control_assignment", context, recipient_email=email
+            )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
 
@@ -690,7 +698,9 @@ def send_task_template_assignment_notification(task_template_id, emails):
 
     for email in emails:
         if email and check_email_configuration(email, [task_template]):
-            rendered = render_email_template("task_template_assignment", context)
+            rendered = render_email_template(
+                "task_template_assignment", context, recipient_email=email
+            )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
 
@@ -731,7 +741,7 @@ def send_compliance_assessment_assignment_notification(
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [assessment]):
             rendered = render_email_template(
-                "compliance_assessment_assignment", context
+                "compliance_assessment_assignment", context, recipient_email=email
             )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
@@ -764,7 +774,9 @@ def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails
 
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [scenario]):
-            rendered = render_email_template("risk_scenario_assignment", context)
+            rendered = render_email_template(
+                "risk_scenario_assignment", context, recipient_email=email
+            )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
 
@@ -784,7 +796,9 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
     }
 
     template_name = "compliance_assessment_due_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=author_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], author_email)
     else:
@@ -808,7 +822,9 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
     }
 
     template_name = "applied_control_expiring_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], owner_email)
     else:
@@ -830,7 +846,9 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
         "expired_since": days,
     }
 
-    rendered = render_email_template("expired_evidences", context)
+    rendered = render_email_template(
+        "expired_evidences", context, recipient_email=owner_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], owner_email)
     else:
@@ -854,7 +872,9 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
     }
 
     template_name = "evidence_expiring_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], owner_email)
     else:
@@ -903,7 +923,9 @@ def send_validation_flow_created_notification(validation_flow):
         "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
     }
 
-    rendered = render_email_template("validation_flow_created", context)
+    rendered = render_email_template(
+        "validation_flow_created", context, recipient_email=approver_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], approver_email)
         logger.info(
@@ -942,7 +964,9 @@ def send_validation_flow_updated_notification(
         "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
     }
 
-    rendered = render_email_template("validation_flow_updated", context)
+    rendered = render_email_template(
+        "validation_flow_updated", context, recipient_email=recipient_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], recipient_email)
     else:
@@ -972,7 +996,9 @@ def send_validation_deadline_notification(approver_email, validations, days):
         "their": their,
     }
 
-    rendered = render_email_template("validation_deadline", context)
+    rendered = render_email_template(
+        "validation_deadline", context, recipient_email=approver_email
+    )
     if rendered:
         send_notification_email(rendered["subject"], rendered["body"], approver_email)
     else:
@@ -1153,7 +1179,9 @@ def send_assignment_activated_notification(assignment_id):
     for actor in assignment.actor.all():
         for email in actor.get_emails():
             if email and check_email_configuration(email, [assignment]):
-                rendered = render_email_template("assignment_activated", context)
+                rendered = render_email_template(
+                    "assignment_activated", context, recipient_email=email
+                )
                 if rendered:
                     send_notification_email(
                         rendered["subject"], rendered["body"], email
@@ -1196,7 +1224,9 @@ def send_assignment_submitted_notification(assignment_id):
 
     for email in recipient_emails:
         if check_email_configuration(email, [assignment]):
-            rendered = render_email_template("assignment_submitted", context)
+            rendered = render_email_template(
+                "assignment_submitted", context, recipient_email=email
+            )
             if rendered:
                 send_notification_email(rendered["subject"], rendered["body"], email)
 
@@ -1226,7 +1256,9 @@ def send_assignment_reviewed_notification(
     for actor in assignment.actor.all():
         for email in actor.get_emails():
             if email and check_email_configuration(email, [assignment]):
-                rendered = render_email_template("assignment_reviewed", context)
+                rendered = render_email_template(
+                    "assignment_reviewed", context, recipient_email=email
+                )
                 if rendered:
                     send_notification_email(
                         rendered["subject"], rendered["body"], email

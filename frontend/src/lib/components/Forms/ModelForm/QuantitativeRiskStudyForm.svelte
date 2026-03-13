@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import NumberField from '$lib/components/Forms/NumberField.svelte';
 	import MarkdownField from '$lib/components/Forms/MarkdownField.svelte';
@@ -106,9 +107,8 @@
 	}
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}

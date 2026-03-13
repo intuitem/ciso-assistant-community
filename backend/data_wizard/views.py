@@ -1,6 +1,7 @@
 import io
 import logging
 from types import MappingProxyType
+import re
 import pandas as pd
 from rest_framework import status
 from rest_framework.views import APIView
@@ -158,6 +159,59 @@ def _parse_datetime(value) -> Optional[str]:
     return value
 
 
+def _parse_time_to_seconds(s: str) -> int | None:
+    """Parse a time string like '4h', '2h30m', '24h10s', '01m30s' to seconds."""
+    if not s:
+        return None
+    s = s.strip()
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    m = re.fullmatch(r"(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?", s)
+    if not m or not any(m.groups()):
+        return None
+    h, mn, sc = (int(x) if x else 0 for x in m.groups())
+    return h * 3600 + mn * 60 + sc
+
+
+def _parse_security_objectives(raw: str) -> dict:
+    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}."""
+    result = {}
+    if not raw:
+        return result
+    for part in str(raw).split(","):
+        part = part.strip()
+        if ":" not in part:
+            continue
+        key, _, val = part.partition(":")
+        key = key.strip()
+        try:
+            v = int(val.strip())
+            if 0 <= v <= 4:
+                result[key] = {"value": v, "is_enabled": True}
+        except (ValueError, TypeError):
+            pass
+    return result
+
+
+def _parse_recovery_objectives(raw: str) -> dict:
+    """Parse 'rto: 4h,rpo: 5h,mtd: 6h' → {key: {"value": seconds}}."""
+    result = {}
+    if not raw:
+        return result
+    for part in str(raw).split(","):
+        part = part.strip()
+        if ":" not in part:
+            continue
+        key, _, val = part.partition(":")
+        key = key.strip()
+        secs = _parse_time_to_seconds(val.strip())
+        if secs is not None and secs >= 0:
+            result[key] = {"value": secs}
+    return result
+
+
 def _resolve_filtering_labels(value: Any) -> list[UUID]:
     """Parse pipe- or comma-separated label names and return list of FilteringLabel IDs.
 
@@ -239,6 +293,7 @@ class ModelType(enum.StrEnum):
 class Error:
     record: dict
     error: str
+    is_warning: bool = False
 
     def to_dict(self) -> dict:
         return {"record": self.record, "error": self.error}
@@ -252,6 +307,7 @@ class Result:
     failed: int = 0
     stopped: bool = False
     errors: list[Error] = field(default_factory=list)
+    warnings: list[Error] = field(default_factory=list)
     details: dict = field(default_factory=dict)
 
     @property
@@ -280,6 +336,11 @@ class Result:
             "failed": self.failed,
             "stopped": self.stopped,
             "errors": [error.to_dict() for error in self.errors],
+            **(
+                {"warnings": [w.to_dict() for w in self.warnings]}
+                if self.warnings
+                else {}
+            ),
             **({"details": self.details} if self.details else {}),
         }
 
@@ -392,11 +453,14 @@ class RecordConsumer[Context = None](ABC):
         for record in records:
             record_data, error = self.prepare_create(record, context)
             if error is not None:
-                results.add_error(error)
-                if self.on_conflict == ConflictMode.STOP:
-                    results.stopped = True
-                    break
-                continue
+                if error.is_warning:
+                    results.warnings.append(error)
+                else:
+                    results.add_error(error)
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+                    continue
 
             existing = None
             internal_id = record.get("internal_id")
@@ -477,6 +541,7 @@ class AssetRecordConsumer(RecordConsumer):
     SOURCE_KEY_MAP: ClassVar[Mapping[str, list[str]]] = MappingProxyType(
         {
             "reference_link": ["reference_link", "link"],
+            "filtering_labels": ["filtering_labels", "labels", "étiquette", "label"],
         }
     )
     TYPE_MAP: Final[dict[str, str]] = {
@@ -520,10 +585,54 @@ class AssetRecordConsumer(RecordConsumer):
             "observation": record.get("observation", ""),
         }
 
-        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        raw_labels = (
+            record.get("filtering_labels")
+            or record.get("labels")
+            or record.get("étiquette")
+            or record.get("label")
+        )
+        filtering_labels = _resolve_filtering_labels(raw_labels)
         if filtering_labels:
             data["filtering_labels"] = filtering_labels
 
+        # Accept both export column names and native field names for support assets
+        raw_sec = record.get("security_objectives") or record.get(
+            "security_capabilities", ""
+        )
+        raw_rec = record.get("disaster_recovery_objectives") or record.get(
+            "recovery_capabilities", ""
+        )
+
+        sec_objectives = _parse_security_objectives(raw_sec)
+        rec_objectives = _parse_recovery_objectives(raw_rec)
+
+        parse_warning_msgs = []
+        if raw_sec and not sec_objectives:
+            parse_warning_msgs.append(
+                f"Could not parse security_objectives: '{raw_sec}'"
+            )
+        if raw_rec and not rec_objectives:
+            parse_warning_msgs.append(
+                f"Could not parse disaster_recovery_objectives: '{raw_rec}'"
+            )
+
+        if asset_type == "PR":
+            if sec_objectives:
+                data["security_objectives"] = {"objectives": sec_objectives}
+            if rec_objectives:
+                data["disaster_recovery_objectives"] = {"objectives": rec_objectives}
+        else:  # SP (support)
+            if sec_objectives:
+                data["security_capabilities"] = {"objectives": sec_objectives}
+            if rec_objectives:
+                data["recovery_capabilities"] = {"objectives": rec_objectives}
+
+        if parse_warning_msgs:
+            return data, Error(
+                record=record,
+                error="; ".join(parse_warning_msgs),
+                is_warning=True,
+            )
         return data, None
 
     def process_records(self, records: list[dict]) -> Result:
