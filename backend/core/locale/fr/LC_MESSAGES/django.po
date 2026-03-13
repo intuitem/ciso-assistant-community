@@ -297,7 +297,7 @@ msgstr ""
 #: core/models.py:1669 core/models.py:1863 core/models.py:3621
 #: core/models.py:4204 core/models.py:6353
 msgid "Undefined"
-msgstr "Non défini"
+msgstr ""
 
 #: core/models.py:1692
 msgid "Parent URN"
