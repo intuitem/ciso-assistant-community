@@ -528,6 +528,10 @@ def generate_b_02_02_ict_services(
         )
 
     # Write contract-solution-function data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_02.02 is (c0010, c0020, c0030, c0050, c0060, c0130, c0150, c0160).
+    seen_keys = set()
+
     for contract in filtered_contracts:
         # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
@@ -632,6 +636,20 @@ def generate_b_02_02_ict_services(
 
                 # c0180: Level of reliance
                 reliance_level = solution.dora_reliance_level or ""
+
+                key = (
+                    contract_ref,
+                    entity_lei,
+                    provider_code,
+                    function_id,
+                    ict_service_type,
+                    provider_country,
+                    data_location_storage,
+                    data_location_processing,
+                )
+                if key in seen_keys:
+                    continue
+                seen_keys.add(key)
 
                 csv_writer.writerow(
                     [
