@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { fly, fade, scale } from 'svelte/transition';
 	import { tick } from 'svelte';
+	import { page } from '$app/stores';
 	import type { ChatMessage } from './types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import {
@@ -17,10 +18,19 @@
 		startNewSession,
 		retryLastMessage,
 		copyToClipboard,
+		setPageContext,
 		suggestedActions
 	} from './chatStore.svelte';
 
 	let copiedId = $state<string | null>(null);
+
+	// Keep page context in sync with current route
+	$effect(() => {
+		const path = $page.url.pathname;
+		const model = $page.data?.modelVerboseName;
+		const title = $page.data?.title;
+		setPageContext({ path, model, title });
+	});
 
 	async function handleCopy(text: string, id: string) {
 		const ok = await copyToClipboard(text);

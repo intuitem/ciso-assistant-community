@@ -50,6 +50,7 @@ class ChatSessionViewSet(BaseModelViewSet):
         serializer = SendMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user_content = serializer.validated_data["content"]
+        page_context = serializer.validated_data.get("page_context", {})
 
         # Save user message
         ChatMessage.objects.create(
@@ -82,21 +83,43 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Step 1: Ask the LLM if this is a tool call (structured query)
         llm = get_llm()
 
+        # Build page context prefix for the LLM
+        page_context_prefix = ""
+        if page_context:
+            page_path = page_context.get("path", "")
+            page_model = page_context.get("model", "")
+            page_title = page_context.get("title", "")
+            parts = []
+            if page_path:
+                parts.append(f"path={page_path}")
+            if page_model:
+                parts.append(f"model={page_model}")
+            if page_title:
+                parts.append(f"title={page_title}")
+            if parts:
+                page_context_prefix = (
+                    f"The user is currently viewing: {', '.join(parts)}. "
+                    "Use this context if the user refers to 'this', 'these', 'here', "
+                    "or asks about items on their current page.\n\n"
+                )
+
         # Inject previous query metadata so the LLM can handle follow-ups
         # like "give me more", "next page", "show me page 3"
         last_query_meta = _get_last_query_meta(session)
         tool_prompt = user_content
-        if last_query_meta:
-            tool_prompt = (
-                f"Previous query context: model={last_query_meta.get('model')}, "
-                f"domain={last_query_meta.get('domain', 'all')}, "
-                f"page={last_query_meta.get('page', 1)}, "
-                f"total_pages={last_query_meta.get('total_pages', 1)}, "
-                f"total_count={last_query_meta.get('total_count', 0)}. "
-                f"If the user asks for 'more', 'next', 'next page', etc., "
-                f"repeat the same query with page={last_query_meta.get('page', 1) + 1}.\n\n"
-                f"User message: {user_content}"
-            )
+        if page_context_prefix or last_query_meta:
+            tool_prompt = page_context_prefix
+            if last_query_meta:
+                tool_prompt += (
+                    f"Previous query context: model={last_query_meta.get('model')}, "
+                    f"domain={last_query_meta.get('domain', 'all')}, "
+                    f"page={last_query_meta.get('page', 1)}, "
+                    f"total_pages={last_query_meta.get('total_pages', 1)}, "
+                    f"total_count={last_query_meta.get('total_count', 0)}. "
+                    f"If the user asks for 'more', 'next', 'next page', etc., "
+                    f"repeat the same query with page={last_query_meta.get('page', 1) + 1}.\n\n"
+                )
+            tool_prompt += f"User message: {user_content}"
 
         tool_response = llm.tool_call(
             tool_prompt,
@@ -174,6 +197,10 @@ class ChatSessionViewSet(BaseModelViewSet):
             history_messages = history_messages[:-1]
         # Keep only the last 20 messages to stay within context limits
         history_messages = history_messages[-20:]
+
+        # Prepend page context to the LLM context so it knows where the user is
+        if page_context_prefix and not query_result:
+            context = page_context_prefix + context
 
         def stream_response():
             """Generator for SSE streaming."""

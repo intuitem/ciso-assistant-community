@@ -55,7 +55,9 @@ def execute_tool_query(
 
     # Base queryset filtered by accessible folders
     qs = model_class.objects.all()
-    if hasattr(model_class, "folder_id"):
+    if model_name == "Folder":
+        qs = qs.filter(id__in=accessible_folder_ids)
+    elif hasattr(model_class, "folder_id"):
         qs = qs.filter(folder_id__in=accessible_folder_ids)
     elif hasattr(model_class, "compliance_assessment"):
         qs = qs.filter(compliance_assessment__folder_id__in=accessible_folder_ids)
@@ -353,6 +355,9 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     now = timezone.now()
 
     if date_filter == "overdue":
+        if hasattr(model_class, "eta_missed_q"):
+            # Model defines its own "overdue" logic
+            return {"q": model_class.eta_missed_q(), "label": "overdue (ETA missed)"}
         if hasattr(model_class, "eta"):
             return {"q": Q(eta__lt=now.date()), "label": "overdue (ETA passed)"}
         if hasattr(model_class, "expiry_date"):

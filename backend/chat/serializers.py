@@ -59,6 +59,7 @@ class SendMessageSerializer(serializers.Serializer):
     """Input serializer for sending a message to a chat session."""
 
     content = serializers.CharField(max_length=10000)
+    page_context = serializers.DictField(required=False, default=dict)
 
 
 class IndexedDocumentReadSerializer(BaseModelSerializer):

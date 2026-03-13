@@ -2,6 +2,9 @@ import type { ChatMessage, ChatView, SuggestedAction } from './types';
 
 const CHAT_API = '/fe-api/chat';
 
+// Current page context — updated by ChatWidget via setPageContext()
+let currentPageContext = $state<{ path: string; model?: string; title?: string } | null>(null);
+
 let view = $state<ChatView>('closed');
 let messages = $state<ChatMessage[]>([
 	{
@@ -19,24 +22,24 @@ let abortController = $state<AbortController | null>(null);
 
 export const suggestedActions: SuggestedAction[] = [
 	{
-		label: 'Search controls',
-		prompt: 'Help me find controls related to access management',
-		icon: 'fa-solid fa-magnifying-glass'
+		label: 'Overdue controls',
+		prompt: 'Show me the controls that have missed their ETA',
+		icon: 'fa-solid fa-clock'
 	},
 	{
-		label: 'Explain a framework',
-		prompt: 'Explain the ISO 27001 framework and its key requirements',
-		icon: 'fa-solid fa-book'
-	},
-	{
-		label: 'Risk assessment help',
-		prompt: 'Guide me through creating a risk assessment',
+		label: 'Risk overview',
+		prompt: 'Give me a summary of my risk scenarios',
 		icon: 'fa-solid fa-shield-halved'
 	},
 	{
-		label: 'Compliance status',
-		prompt: 'Show me an overview of my compliance status',
-		icon: 'fa-solid fa-chart-pie'
+		label: 'Controls without evidence',
+		prompt: 'List the controls that have no evidence attached',
+		icon: 'fa-solid fa-triangle-exclamation'
+	},
+	{
+		label: 'My domains',
+		prompt: 'What are the domains I have access to?',
+		icon: 'fa-solid fa-folder-tree'
 	}
 ];
 
@@ -81,7 +84,10 @@ async function streamResponse(userMessage: string) {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ content: userMessage }),
+			body: JSON.stringify({
+				content: userMessage,
+				...(currentPageContext && { page_context: currentPageContext })
+			}),
 			signal: abortController.signal
 		});
 
@@ -243,6 +249,10 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 	} catch {
 		return false;
 	}
+}
+
+export function setPageContext(context: { path: string; model?: string; title?: string }) {
+	currentPageContext = context;
 }
 
 export function startNewSession() {

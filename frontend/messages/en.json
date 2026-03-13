@@ -1069,7 +1069,7 @@
 	"ollamaBaseUrl": "Ollama URL",
 	"ollamaBaseUrlHelpText": "Base URL of the Ollama server (e.g. http://localhost:11434)",
 	"ollamaModel": "LLM model",
-	"ollamaModelHelpText": "Ollama model to use for chat generation (e.g. mistral, mistral-small, qwen2.5)",
+	"ollamaModelHelpText": "Ollama model to use for chat generation. Recommended: qwen3:14b (best results for tool calling in EN/FR)",
 	"ollamaEmbedModel": "Embedding model",
 	"ollamaEmbedModelHelpText": "Ollama model to use for embeddings (e.g. snowflake-arctic-embed2)",
 	"embeddingBackend": "Embedding backend",

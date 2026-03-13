@@ -76,6 +76,7 @@ MODEL_MAP = {
     ),
     "feared_event": ("ebios_rm", "FearedEvent", "Feared Events", "feared-events"),
     "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders", "stakeholders"),
+    "folder": ("iam", "Folder", "Domains", "folders"),
 }
 
 
@@ -188,7 +189,8 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'entity assessments' → entity_assessment, "
                 "'EBIOS RM studies'/'études EBIOS' → ebios_rm_study, "
                 "'feared events'/'événements redoutés' → feared_event, "
-                "'stakeholders'/'parties prenantes' → stakeholder. "
+                "'stakeholders'/'parties prenantes' → stakeholder, "
+                "'domains'/'domaines'/'folders'/'dossiers'/'projects'/'projets' → folder. "
                 "IMPORTANT: when the user says 'controls' without further qualification, "
                 "use applied_control as the model with NO category filter."
             ),
