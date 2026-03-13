@@ -215,7 +215,7 @@ class EntityViewSet(BaseModelViewSet):
         related_solution_ids = set(related_solutions.values_list("id", flat=True))
         business_function_contracts = contracts.filter(
             solutions__id__in=related_solution_ids
-        )
+        ).distinct()
 
         # Get export metadata (naming, identifiers)
         identifier_type = request.query_params.get("identifier_type", None)

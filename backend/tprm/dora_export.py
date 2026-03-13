@@ -1308,6 +1308,10 @@ def generate_b_07_01_assessment(
     )
 
     # Write assessment data
+    # Track written dimension keys to avoid XBRL duplicate fact errors.
+    # The XBRL key for b_07.01 is (contract_ref, provider_code, ict_service_type).
+    seen_keys = set()
+
     for contract in assessment_contracts:
         # Iterate through all solutions in this contract
         for solution in contract.solutions.all():
@@ -1321,6 +1325,12 @@ def generate_b_07_01_assessment(
             provider_code = provider_code or "0"
 
             ict_service_type = solution.dora_ict_service_type or ""
+
+            key = (contract_ref, provider_code, ict_service_type)
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+
             substitutability = solution.dora_substitutability or ""
             non_substitutability_reason = (
                 solution.dora_non_substitutability_reason or ""
