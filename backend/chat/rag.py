@@ -4,6 +4,7 @@ Handles vector search, graph expansion via ORM, and context formatting.
 """
 
 import logging
+import os
 from typing import Any
 
 from iam.models import Folder, RoleAssignment
@@ -11,7 +12,7 @@ from iam.models import Folder, RoleAssignment
 logger = logging.getLogger(__name__)
 
 COLLECTION_NAME = "ciso_assistant"
-QDRANT_URL = "http://localhost:6333"
+QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
 
 
 def get_qdrant_client():
