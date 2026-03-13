@@ -1830,4 +1830,6 @@ def lint_dora_roi() -> Dict[str, Any]:
         "results": results,
         "summary": summary,
         "available_identifiers": available_identifiers,
+        "entity_country": main_entity.country if main_entity else "",
+        "competent_authority": main_entity.dora_competent_authority if main_entity else "",
     }

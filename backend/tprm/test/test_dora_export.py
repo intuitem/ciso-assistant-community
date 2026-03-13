@@ -324,18 +324,39 @@ class TestGetEntityIdentifier(TestCase):
         self.assertEqual(code_type, "eba_qCO:qx2004")
         self.assertEqual(key_name, "VAT")
 
-    def test_duns_maps_to_qx2003(self):
+    def test_duns_maps_to_qx2001(self):
         entity = Entity(legal_identifiers={"DUNS": "123456789"})
         code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "123456789")
-        self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(code_type, "eba_qCO:qx2001")
         self.assertEqual(key_name, "DUNS")
 
-    def test_unknown_key_falls_back_to_qx2003(self):
+    def test_crn_maps_to_qx2003(self):
+        entity = Entity(legal_identifiers={"CRN": "CRN123"})
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "CRN123")
+        self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(key_name, "CRN")
+
+    def test_pnr_maps_to_qx2005(self):
+        entity = Entity(legal_identifiers={"PNR": "P123"})
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "P123")
+        self.assertEqual(code_type, "eba_qCO:qx2005")
+        self.assertEqual(key_name, "PNR")
+
+    def test_nin_maps_to_qx2005(self):
+        entity = Entity(legal_identifiers={"NIN": "N456"})
+        code, code_type, key_name = dora_export.get_entity_identifier(entity)
+        self.assertEqual(code, "N456")
+        self.assertEqual(code_type, "eba_qCO:qx2005")
+        self.assertEqual(key_name, "NIN")
+
+    def test_unknown_key_falls_back_to_qx2001(self):
         entity = Entity(legal_identifiers={"CUSTOM_ID": "XYZ"})
         code, code_type, key_name = dora_export.get_entity_identifier(entity)
         self.assertEqual(code, "XYZ")
-        self.assertEqual(code_type, "eba_qCO:qx2003")
+        self.assertEqual(code_type, "eba_qCO:qx2001")
         self.assertEqual(key_name, "CUSTOM_ID")
 
     def test_priority_lei_over_vat(self):
@@ -1659,14 +1680,16 @@ class TestGenerateB0502(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         self._assert_col_count(rows, 7)
 
-    def test_only_third_party_with_solutions(self):
+    def test_contracts_with_providers_and_solutions(self):
         buf = self._generate(
             dora_export.generate_b_05_02_supply_chains, Contract.objects.all()
         )
         rows = self._read_csv(buf, self.CSV)
         refs = [r[0] for r in self._data_rows(rows)]
+        # Overarching contracts (no solutions) still excluded
         self.assertNotIn("CA-OVR", refs)
-        self.assertNotIn("CA-SUB", refs)
+        # CA-SUB is intragroup and no longer query-filtered, but its solution
+        # has no dora_ict_service_type so it's skipped in the row-level loop
 
     def test_rank_1_for_direct_providers(self):
         buf = self._generate(
@@ -2084,14 +2107,16 @@ class TestGenerateB0701(DoraExportTestMixin, DoraDataFactory, TestCase):
         rows = self._read_csv(buf, self.CSV)
         self._assert_col_count(rows, 12)
 
-    def test_only_third_party_with_solutions(self):
+    def test_contracts_with_providers_and_solutions(self):
         buf = self._generate(
             dora_export.generate_b_07_01_assessment, Contract.objects.all()
         )
         rows = self._read_csv(buf, self.CSV)
         refs = [r[0] for r in self._data_rows(rows)]
+        # Overarching contracts (no solutions) still excluded
         self.assertNotIn("CA-OVR", refs)
-        self.assertNotIn("CA-SUB", refs)
+        # Intragroup contracts ARE included per EBA FAQ #70, #82, #84
+        self.assertIn("CA-SUB", refs)
 
     def test_solution_dora_fields(self):
         buf = self._generate(
