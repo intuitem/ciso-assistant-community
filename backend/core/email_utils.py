@@ -8,11 +8,35 @@ from string import Template
 from typing import Dict, Optional
 from django.conf import settings
 from django.utils.translation import get_language
+from global_settings.models import GlobalSettings
+from iam.models import User
 import structlog
 
 logger = structlog.getLogger(__name__)
 
 TEMPLATE_BASE_PATH = Path(__file__).parent / "templates" / "emails"
+
+
+def get_locale_for_email(email: str) -> str:
+    """
+    Resolve the preferred locale for a given email address.
+    Looks up the user's preferences, falls back to admin default, then 'en'.
+    """
+    try:
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            return user.get_preferences().get("lang", "en")
+    except Exception as e:
+        logger.warning("Failed to resolve user locale for email lookup: %s", e)
+
+    try:
+        general = GlobalSettings.objects.filter(name="general").first()
+        if general and isinstance(general.value, dict):
+            return general.value.get("default_language", "en")
+    except Exception as e:
+        logger.warning("Failed to resolve default language from global settings: %s", e)
+
+    return "en"
 
 
 def load_email_template(
@@ -30,8 +54,8 @@ def load_email_template(
     """
     if locale is None:
         locale = get_language() or "en"
-        # Extract language code from locale like 'en-us' -> 'en'
-        locale = locale.split("-")[0].lower()
+    # Normalize locale: 'fr-FR' -> 'fr', '' -> 'en'
+    locale = locale.split("-")[0].lower() or "en"
 
     # Construct file path
     template_file = TEMPLATE_BASE_PATH / locale / f"{template_name}.yaml"
@@ -68,7 +92,10 @@ def load_email_template(
 
 
 def render_email_template(
-    template_name: str, context: Dict, locale: Optional[str] = None
+    template_name: str,
+    context: Dict,
+    locale: Optional[str] = None,
+    recipient_email: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Render email template with context variables
@@ -76,11 +103,14 @@ def render_email_template(
     Args:
         template_name: Name of the template (e.g., 'expired_controls')
         context: Dictionary of variables to substitute in template
-        locale: Language code. If None, uses current Django language
+        locale: Language code. If None, resolves from recipient_email or uses current Django language
+        recipient_email: Email address of recipient, used to resolve locale from user preferences
 
     Returns:
         Dictionary with 'subject' and 'body' keys, or empty dict if template not found
     """
+    if locale is None and recipient_email:
+        locale = get_locale_for_email(recipient_email)
     template_data = load_email_template(template_name, locale)
     if not template_data:
         logger.error(f"Failed to load template {template_name}")
@@ -265,7 +295,9 @@ def send_templated_notification(
     if not check_email_configuration(recipient_email, []):
         return False
 
-    rendered = render_email_template(template_name, context, locale)
+    rendered = render_email_template(
+        template_name, context, locale=locale, recipient_email=recipient_email
+    )
     if not rendered:
         return False
 

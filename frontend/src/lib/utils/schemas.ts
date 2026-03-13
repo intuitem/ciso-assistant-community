@@ -19,6 +19,33 @@ const toArrayPreprocessor = (value: unknown) => {
 	}
 };
 
+const CURRENCY_SYMBOLS = [
+	'€',
+	'$',
+	'£',
+	'¥',
+	'C$',
+	'A$',
+	'NZ$',
+	'CHF',
+	'CN¥',
+	'₹',
+	'₩',
+	'S$',
+	'HK$',
+	'SEK',
+	'NOK',
+	'DKK',
+	'R$',
+	'MX$',
+	'ZAR',
+	'₺',
+	'PLN',
+	'NT$',
+	'฿',
+	'MYR'
+] as const;
+
 // JSON schema
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type Literal = z.infer<typeof literalSchema>;
@@ -184,7 +211,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -340,6 +367,7 @@ export const AssetSchema = z.object({
 	applied_controls: z.string().uuid().optional().array().optional(),
 	vulnerabilities: z.string().uuid().optional().array().optional(),
 	incidents: z.string().uuid().optional().array().optional(),
+	organisation_objectives: z.string().uuid().optional().array().optional(),
 	is_business_function: z.boolean().default(false),
 	dora_licenced_activity: z.string().optional().nullable(),
 	dora_criticality_assessment: z.string().default('eba_BT:x21'),
@@ -521,13 +549,14 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
+	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
-	enforce_mfa: z.boolean().default(false).optional()
+	enforce_mfa: z.boolean().default(false).optional(),
+	default_language: z.string().default('en').optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -564,7 +593,8 @@ export const FeatureFlagsSchema = z.object({
 	data_breaches: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
-	comments: z.boolean().optional()
+	comments: z.boolean().optional(),
+	journeys: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -924,9 +954,17 @@ export const organisationObjectiveSchema = z.object({
 	metrics: z.string().uuid().optional().array().optional(),
 	applied_controls: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional().nullable(),
+	is_active: z.boolean().optional().default(true),
+	start_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	eta: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
-	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
+	due_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	closing_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish()
 });
+
+export const OrganisationObjectiveDuplicateSchema = z.object({
+	...organisationObjectiveSchema.shape
+});
+
 export const organisationIssueSchema = z.object({
 	...NameDescriptionMixin,
 	folder: z.string(),
@@ -1224,6 +1262,7 @@ export const TaskTemplateSchema = z.object({
 	compliance_assessments: z.string().uuid().optional().array().optional(),
 	risk_assessments: z.string().uuid().optional().array().optional(),
 	findings_assessment: z.string().uuid().optional().array().optional(),
+	objectives: z.string().uuid().optional().array().optional(),
 	observation: z.string().optional(),
 	evidences: z.union([z.string().uuid(), z.string()]).optional().array().optional(), // Allow both UUIDs and strings for evidences created from the form
 	schedule: z
@@ -1448,7 +1487,7 @@ export const teamSchema = z.object({
 	team_email: z.string().email().optional(),
 	folder: z.string(),
 	members: z.array(z.string().uuid().optional()).optional(),
-	leader: z.string().uuid(),
+	leader: z.string().uuid().optional().nullable(),
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
@@ -1462,6 +1501,7 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'risk-scenarios': RiskScenarioSchema,
 	'applied-controls': AppliedControlSchema,
 	'applied-controls_duplicate': AppliedControlDuplicateSchema,
+	'organisation-objectives_duplicate': OrganisationObjectiveDuplicateSchema,
 	policies: PolicySchema,
 	'risk-acceptances': RiskAcceptanceSchema,
 	'validation-flows': ValidationFlowSchema,

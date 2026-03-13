@@ -239,6 +239,7 @@ class CurrentUserView(views.APIView):
             "is_auditee": request.user.is_auditee,
             "is_admin": request.user.is_admin(),
             "is_local": request.user.is_local,
+            "is_sso": request.user.is_sso,
             "accessible_domains": [str(f) for f in accessible_domains],
             "domain_permissions": domain_permissions,
             "root_folder_id": Folder.get_root_folder().id,

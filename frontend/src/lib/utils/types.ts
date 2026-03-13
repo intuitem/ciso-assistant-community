@@ -19,6 +19,7 @@ export interface User {
 	is_auditee: boolean;
 	is_admin: boolean;
 	is_local: boolean;
+	is_sso: boolean;
 	is_superuser: boolean;
 	has_mfa_enabled: boolean;
 	accessible_domains: string[];

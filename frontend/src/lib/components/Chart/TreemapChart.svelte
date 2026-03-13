@@ -112,6 +112,7 @@
 	}
 
 	onMount(async () => {
+		if (tree.length === 0) return;
 		echarts = await import('echarts');
 		chart = echarts.init(document.getElementById(chart_id), null, { renderer: 'svg' });
 
