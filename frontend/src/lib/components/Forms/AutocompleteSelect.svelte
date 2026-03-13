@@ -79,7 +79,7 @@
 	let {
 		fieldContext = 'form-input',
 		label = undefined,
-		baseClass = '',
+		baseClass = 'mb-2',
 		field,
 		valuePath = field,
 		helpText = undefined,
@@ -521,7 +521,7 @@
 	};
 </script>
 
-<div class="mb-2 {baseClass}" hidden={hidden || undefined}>
+<div class="{baseClass}" hidden={hidden || undefined}>
 	{#if label !== undefined}
 		{#if $constraints?.required || mandatory}
 			<label class="text-sm font-semibold" for={field}
