@@ -2329,12 +2329,37 @@ export const listViewFields = {
 		}
 	},
 	'organisation-objectives': {
-		head: ['refId', 'name', 'domain', 'status', 'health', 'eta', 'dueDate', 'assignee'],
-		body: ['ref_id', 'name', 'folder', 'status', 'health', 'eta', 'due_date', 'assigned_to'],
+		head: [
+			'refId',
+			'name',
+			'domain',
+			'status',
+			'health',
+			'isActive',
+			'startDate',
+			'eta',
+			'dueDate',
+			'closingDate',
+			'assignee'
+		],
+		body: [
+			'ref_id',
+			'name',
+			'folder',
+			'status',
+			'health',
+			'is_active',
+			'start_date',
+			'eta',
+			'due_date',
+			'closing_date',
+			'assigned_to'
+		],
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: ORGANISATION_OBJECTIVE_STATUS_FILTER,
-			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER
+			health: ORGANISATION_OBJECTIVE_HEALTH_FILTER,
+			is_active: USER_IS_ACTIVE_FILTER
 		}
 	},
 	'organisation-issues': {
@@ -2953,6 +2978,20 @@ export const batchActions: Partial<Record<urlModel, BatchActionConfig[]>> = {
 			icon: 'fa-solid fa-arrow-right-arrow-left',
 			field: 'status',
 			optionsEndpoint: 'organisation-objectives/status'
+		},
+		{
+			type: 'change_field',
+			label: 'changeHealth',
+			icon: 'fa-solid fa-heart-pulse',
+			field: 'health',
+			optionsEndpoint: 'organisation-objectives/health'
+		},
+		{
+			type: 'change_field',
+			label: 'changeIsActive',
+			icon: 'fa-solid fa-toggle-on',
+			field: 'is_active',
+			optionsEndpoint: 'organisation-objectives/is_active'
 		},
 		{ type: 'delete', label: 'delete', icon: 'fa-solid fa-trash' }
 	],

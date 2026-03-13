@@ -6,6 +6,7 @@ from ciso_assistant.settings import CISO_ASSISTANT_URL
 from rest_framework.decorators import action
 
 from core.serializers import SerializerFactory
+from iam.models import Folder, Permission, RoleAssignment, User
 from iam.sso.models import SSOSettings
 from integrations.models import IntegrationProvider
 from core.serializers import SerializerFactory
@@ -16,6 +17,7 @@ from .serializers import (
     FeatureFlagsSerializer,
 )
 from django.conf import settings
+from django.db import transaction
 from .models import GlobalSettings
 import structlog
 
@@ -150,6 +152,7 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
             "builtin_metrics_retention_days": 730,  # 2 years default, minimum is 1
             "allow_assignments_to_entities": False,
             "enforce_mfa": False,
+            "default_language": "en",
         }
 
         settings, created = GlobalSettings.objects.get_or_create(name="general")
@@ -168,6 +171,45 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         settings.value["enabled_integrations"] = list(enabled_integrations)
 
         return Response(GeneralSettingsSerializer(settings).data.get("value"))
+
+    @action(detail=True, name="Get available languages")
+    def default_language(self, request, pk=None):
+        choices = {code: name for code, name in settings.LANGUAGES}
+        return Response(choices)
+
+    @action(detail=True, methods=["post"], name="Force language for all users")
+    def force_language(self, request, pk=None):
+        perm = Permission.objects.get(codename="change_user")
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=perm,
+            folder=Folder.get_root_folder(),
+        ):
+            return Response(
+                {"error": "You do not have permission to change user preferences."},
+                status=403,
+            )
+        general = GlobalSettings.objects.filter(name="general").first()
+        lang = (
+            general.value.get("default_language")
+            if general and isinstance(general.value, dict)
+            else None
+        )
+        if not lang or lang not in dict(settings.LANGUAGES):
+            return Response(
+                {"error": "No valid default language configured in general settings."},
+                status=400,
+            )
+        with transaction.atomic():
+            users = User.objects.select_for_update().all()
+            updated = 0
+            for user in users:
+                if not isinstance(user.preferences, dict):
+                    user.preferences = {}
+                user.preferences["lang"] = lang
+                user.save(update_fields=["preferences"])
+                updated += 1
+        return Response({"updated": updated, "language": lang})
 
     @action(detail=True, name="Get security objective scales")
     def security_objective_scale(self, request):
@@ -231,3 +273,20 @@ def get_sso_info(request):
             "callback_url": callback_url,
         }
     )
+
+
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def get_default_language(request):
+    """
+    Returns the configured default language. Falls back to English if unset or invalid.
+    """
+    general = GlobalSettings.objects.filter(name="general").first()
+    default_language = "en"
+    if general and isinstance(general.value, dict):
+        default_language = general.value.get("default_language", default_language)
+
+    if default_language not in dict(settings.LANGUAGES):
+        default_language = "en"
+
+    return Response({"default_language": default_language})

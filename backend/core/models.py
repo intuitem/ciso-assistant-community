@@ -38,6 +38,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
 
 from .base_models import (
@@ -4667,25 +4668,8 @@ class AppliedControl(
         return annual_cost
 
     @staticmethod
-    def _stringify_cost(cost: float, currency: str) -> str:
-        match currency:
-            case "$":
-                return f"${cost}"
-            case "€":
-                return f"{cost}€"
-            case "£":
-                return f"£{cost}"
-            case "A$":
-                return f"A${cost}"
-            case "NZ$":
-                return f"NZ${cost}"
-            case "C$":
-                return f"C${cost}"
-            case "¥":
-                return f"¥{cost}"
-
-        logger.error("Unknown currency detected", currency=currency)
-        return f"{cost} *"
+    def _stringify_cost(cost, currency: str) -> str:
+        return _fmt_currency(cost, currency)
 
     @property
     def display_cost(self) -> str:
@@ -4876,6 +4860,7 @@ class OrganisationObjective(
         Asset,
         blank=True,
         verbose_name="asset",
+        related_name="organisation_objectives",
     )
     tasks = models.ManyToManyField(
         "TaskTemplate",
@@ -4905,8 +4890,13 @@ class OrganisationObjective(
         default=Health.UNDEFINED,
         verbose_name=_("Health"),
     )
+    is_active = models.BooleanField(default=True, verbose_name=_("Is active"))
+    start_date = models.DateField(blank=True, null=True, verbose_name=_("Start date"))
     eta = models.DateField(blank=True, null=True, verbose_name=_("ETA"))
-    due_date = models.DateField(null=True, blank=True, verbose_name="Due date")
+    due_date = models.DateField(null=True, blank=True, verbose_name=_("Due date"))
+    closing_date = models.DateField(
+        blank=True, null=True, verbose_name=_("Closing date")
+    )
     metrics = models.ManyToManyField(
         "metrology.MetricInstance",
         verbose_name="Tracking metrics",

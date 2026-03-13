@@ -9,6 +9,6 @@ body: |
   ${reviewer_observation}
 
   Veuillez vous connecter à votre portail CISO Assistant pour plus de détails :
-  ${ciso_assistant_url}
+  ${ciso_assistant_url}/auditee-dashboard
 
   Merci.

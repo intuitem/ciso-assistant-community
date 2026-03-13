@@ -1672,6 +1672,7 @@ class AssetFilter(GenericFilterSet):
             "dora_licenced_activity",
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
+            "organisation_objectives",
         ]
 
 
@@ -2087,6 +2088,20 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: ",".join(i["str"] for i in objs),
                 "escape": True,
             },
+            "security_capabilities": {
+                "source": "get_security_capabilities_display",
+                "label": "security_capabilities",
+                "format": lambda objs: ",".join(
+                    f"{k}: {v}" for obj in objs for k, v in obj.items()
+                ),
+                "escape": True,
+            },
+            "recovery_capabilities": {
+                "source": "get_recovery_capabilities_display",
+                "label": "recovery_capabilities",
+                "format": lambda objs: ",".join(i["str"] for i in objs),
+                "escape": True,
+            },
             "link": {"source": "reference_link", "label": "link", "escape": True},
             "owners": {
                 "source": "owner",
@@ -2118,7 +2133,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+        "prefetch_related": [
+            "owner",
+            "parent_assets",
+            "overridden_children_capabilities",
+            "filtering_labels",
+        ],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
@@ -6254,7 +6274,15 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        return Response({"name": "Global", "children": folders_list})
+        root_folder = Folder.get_root_folder()
+        return Response(
+            {
+                "name": root_folder.name,
+                "uuid": str(root_folder.id),
+                "content_type": root_folder.content_type,
+                "children": folders_list,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -7572,7 +7600,8 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        return Response(request.user.preferences, status=status.HTTP_200_OK)
+        prefs = request.user.get_preferences()
+        return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
@@ -7586,8 +7615,10 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        request.user.preferences["lang"] = new_language
-        request.user.save()
+        prefs = request.user.get_preferences()
+        prefs["lang"] = new_language
+        request.user.preferences = prefs
+        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -8388,8 +8419,14 @@ class PresetJourneyViewSet(BaseModelViewSet):
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
+        apply_feature_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
         executor = PresetExecutor(stored_lib, request.user, request)
-        executor.upgrade_journey(journey)
+        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
         return Response(PresetJourneyReadSerializer(journey).data)
@@ -8446,7 +8483,14 @@ class PresetJourneyStepViewSet(BaseModelViewSet):
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "health",
+        "issues",
+        "assigned_to",
+        "is_active",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -8458,6 +8502,56 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
     @action(detail=False, name="Get health choices")
     def health(self, request):
         return Response(dict(OrganisationObjective.Health.choices))
+
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
+
+    @action(
+        detail=True,
+        name="Duplicate organisation objective",
+        methods=["post"],
+        serializer_class=OrganisationObjectiveDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, OrganisationObjective
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"results": "organisation objective not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        new_folder = data["folder"]
+        objective = self.get_object()
+        duplicate_objective = OrganisationObjective.objects.create(
+            name=data["name"],
+            description=data["description"],
+            folder=new_folder,
+            ref_id=objective.ref_id,
+            observation=objective.observation,
+            status=objective.status,
+            health=objective.health,
+            is_active=objective.is_active,
+            start_date=objective.start_date,
+            eta=objective.eta,
+            due_date=objective.due_date,
+            closing_date=objective.closing_date,
+        )
+        duplicate_objective.issues.set(objective.issues.all())
+        duplicate_objective.assets.set(objective.assets.all())
+        duplicate_objective.tasks.set(objective.tasks.all())
+        duplicate_objective.assigned_to.set(objective.assigned_to.all())
+        duplicate_objective.metrics.set(objective.metrics.all())
+
+        return Response(
+            {"results": OrganisationObjectiveReadSerializer(duplicate_objective).data}
+        )
 
 
 class OrganisationIssueViewSet(BaseModelViewSet):
@@ -12798,6 +12892,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "last_occurrence_status",
             "next_occurrence_status",
             "evidences",
+            "objectives",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
