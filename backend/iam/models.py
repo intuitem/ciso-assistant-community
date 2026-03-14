@@ -718,19 +718,61 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             prefs["lang"] = default_lang
         return prefs
 
+    # Maps Django HTML template names to YAML template keys
+    _TEMPLATE_KEY_MAP = {
+        "registration/first_connexion_email.html": "welcome",
+        "registration/first_connexion_email_sso.html": "welcome_sso",
+        "registration/password_reset_email.html": "password_reset",
+        "tprm/third_party_email.html": "questionnaire_assignment",
+    }
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
-        Sending a mail to a user for password resetting or creation
+        Sending a mail to a user for password resetting or creation.
+        Tries the YAML-based template system first (supports custom overrides),
+        falls back to the legacy Django HTML templates.
         """
-        # Resolve user's preferred language for email rendering
         user_lang = self.get_preferences().get("lang", "en")
+        uid = urlsafe_base64_encode(force_bytes(self.pk))
+        token = default_token_generator.make_token(self)
 
+        # Build context for the YAML template system
+        context = {
+            "set_password_url": f"{CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
+            "reset_password_url": f"{CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
+            "questionnaire_url": f"{CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            if object
+            else CISO_ASSISTANT_URL,
+        }
+
+        # Try YAML template system (supports custom overrides and Markdown)
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            try:
+                from core.email_utils import render_email_template
+
+                rendered = render_email_template(
+                    template_key, context, locale=user_lang
+                )
+                if rendered:
+                    subject = rendered["subject"]
+                    body = rendered["body"]
+                    html_body = rendered.get("html_body")
+                    return self._send_email(subject, body, html_body)
+            except Exception as e:
+                logger.warning(
+                    "YAML template rendering failed, falling back to Django template",
+                    template_key=template_key,
+                    exc_info=e,
+                )
+
+        # Fallback to legacy Django HTML templates
         header = {
             "email": self.email,
             "root_url": CISO_ASSISTANT_URL,
-            "uid": urlsafe_base64_encode(force_bytes(self.pk)),
+            "uid": uid,
             "user": self,
-            "token": default_token_generator.make_token(self),
+            "token": token,
             "protocol": "https",
             "pk": str(pk) if pk else None,
             "object": object,
@@ -739,14 +781,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         with translation_override(user_lang):
             email = render_to_string(email_template_name, header)
             subject = str(subject)
+
+        self._send_email(subject, email, email)
+
+    def _send_email(self, subject, body, html_body=None):
+        """Send an email with primary/rescue server fallback."""
         try:
             send_mail(
                 subject=subject,
-                message=email,
+                message=body,
                 from_email=None,
                 recipient_list=[self.email],
                 fail_silently=False,
-                html_message=email,
+                html_message=html_body,
             )
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
@@ -771,13 +818,17 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         password=EMAIL_HOST_PASSWORD_RESCUE,
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
                     ) as new_connection:
-                        EmailMessage(
+                        msg = EmailMessage(
                             subject=subject,
-                            body=email,
+                            body=body,
                             from_email=None,
                             to=[self.email],
                             connection=new_connection,
-                        ).send()
+                        )
+                        if html_body:
+                            msg.content_subtype = "html"
+                            msg.body = html_body
+                        msg.send()
                     logger.info(
                         "Email sent via rescue server",
                         recipient=self.email,
