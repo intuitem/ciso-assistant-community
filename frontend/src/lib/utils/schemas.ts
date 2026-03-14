@@ -19,6 +19,33 @@ const toArrayPreprocessor = (value: unknown) => {
 	}
 };
 
+const CURRENCY_SYMBOLS = [
+	'€',
+	'$',
+	'£',
+	'¥',
+	'C$',
+	'A$',
+	'NZ$',
+	'CHF',
+	'CN¥',
+	'₹',
+	'₩',
+	'S$',
+	'HK$',
+	'SEK',
+	'NOK',
+	'DKK',
+	'R$',
+	'MX$',
+	'ZAR',
+	'₺',
+	'PLN',
+	'NT$',
+	'฿',
+	'MYR'
+] as const;
+
 // JSON schema
 const literalSchema = z.union([z.string(), z.number(), z.boolean(), z.null()]);
 type Literal = z.infer<typeof literalSchema>;
@@ -184,7 +211,7 @@ export const AppliedControlSchema = z.object({
 	control_impact: z.number().optional().nullable(),
 	cost: z
 		.object({
-			currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
+			currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 			amortization_period: z.number().min(1).max(50).default(1),
 			build: z
 				.object({
@@ -522,13 +549,14 @@ export const GeneralSettingsSchema = z.object({
 	risk_matrix_swap_axes: z.boolean().default(false).optional(),
 	risk_matrix_flip_vertical: z.boolean().default(false).optional(),
 	risk_matrix_labels: z.enum(['ISO', 'EBIOS']).default('ISO').optional(),
-	currency: z.enum(['€', '$', '£', '¥', 'C$', 'A$', 'NZ$', 'CHF']).default('€'),
+	currency: z.enum(CURRENCY_SYMBOLS).default('€'),
 	daily_rate: z.number().default(500).optional(),
 	mapping_max_depth: z.coerce.number().int().min(2).max(5).default(3).optional(),
 	allow_self_validation: z.boolean().default(false).optional(),
 	show_warning_external_links: z.boolean().default(true).optional(),
 	allow_assignments_to_entities: z.boolean().default(false).optional(),
-	enforce_mfa: z.boolean().default(false).optional()
+	enforce_mfa: z.boolean().default(false).optional(),
+	default_language: z.string().default('en').optional()
 });
 
 export const FeatureFlagsSchema = z.object({
@@ -565,7 +593,8 @@ export const FeatureFlagsSchema = z.object({
 	data_breaches: z.boolean().optional(),
 	auditee_mode: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
-	comments: z.boolean().optional()
+	comments: z.boolean().optional(),
+	journeys: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({

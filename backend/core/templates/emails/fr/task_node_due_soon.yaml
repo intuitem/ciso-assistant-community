@@ -6,7 +6,6 @@ body: |
 
   ${task_list}
 
-  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces tâches :
-  ${ciso_assistant_url}
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces tâches : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.
