@@ -1958,6 +1958,7 @@
 	"isEnabled": "Ingeschakeld",
 	"isHighlighted": "Is gemarkeerd",
 	"isIntragroup": "Is intra-groep",
+	"doraExclude": "Uitsluiten van DORA RoI",
 	"isLocked": "Vergrendeld",
 	"isLockedHelpText": "Vergrendel deze beoordeling om wijzigingen eraan of aan de bijbehorende items te voorkomen.",
 	"isRecurrent": "Terugkerend",

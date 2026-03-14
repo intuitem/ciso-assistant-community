@@ -1961,6 +1961,7 @@
 	"isEnabled": "Habilitado",
 	"isHighlighted": "Está resaltado",
 	"isIntragroup": "Es Intragrupo",
+	"doraExclude": "Excluir del RoI DORA",
 	"isLocked": "Bloqueado",
 	"isLockedHelpText": "Bloquear esta evaluación para evitar cambios en ella o en los elementos asociados.",
 	"isRecurrent": "Recurrente",
