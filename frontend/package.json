@@ -85,7 +85,7 @@
 		"svelte-persisted-store": "^0.12.0",
 		"wx-svelte-grid": "^2.3.0"
 	},
-	"packageManager": "pnpm@10.31.0",
+	"packageManager": "pnpm@10.32.1",
 	"pnpm": {
 		"overrides": {
 			"esbuild": "^0.27.3",
@@ -101,7 +101,8 @@
 			"lodash-es": "^4.17.23",
 			"minimatch": "^10.2.3",
 			"ajv": "^6.14.0",
-			"rollup": "^4.59.0"
+			"rollup": "^4.59.0",
+			"flatted": "^3.4.1"
 		}
 	}
 }
