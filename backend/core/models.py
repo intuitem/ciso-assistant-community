@@ -17,7 +17,12 @@ import yaml
 from django.apps import apps
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    RegexValidator,
+    MinValueValidator,
+)
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
@@ -8528,4 +8533,69 @@ auditlog.register(
     PresetJourneyStep,
     exclude_fields=common_exclude,
 )
+
+
+class CustomEmailTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in email notification templates.
+    Each record overrides one template for one language.
+    The model lives in core so migrations are straightforward.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'expired_controls'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    subject = models.CharField(
+        max_length=500,
+        help_text=_("Email subject line, supports ${variable} substitution"),
+    )
+    body = models.TextField(
+        help_text=_("Email body, supports ${variable} substitution"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
+class CustomWordTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in Word report templates (.docx).
+    Each record overrides one template for one language.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'audit_report'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    file = models.FileField(
+        upload_to="custom_word_templates/",
+        validators=[
+            FileExtensionValidator(["docx"]),
+            validate_file_size,
+            validate_file_name,
+        ],
+        help_text=_("Custom .docx template file"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
 # actions - 0: create, 1: update, 2: delete
