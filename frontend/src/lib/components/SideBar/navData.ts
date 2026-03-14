@@ -168,7 +168,7 @@ export const navData = {
 					name: 'xRays',
 					fa_icon: 'fa-solid fa-bolt',
 					href: '/x-rays',
-					permissions: ['view_riskassessment', 'view_assessment']
+					permissions: ['view_riskassessment', 'view_complianceassessment']
 				},
 				{
 					name: 'incidents',
