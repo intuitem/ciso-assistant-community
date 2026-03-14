@@ -92,87 +92,117 @@
 </script>
 
 {#if page.data?.featureflags?.outgoing_webhooks}
-	<div class="flex flex-col gap-3">
+	<div class="flex flex-col gap-6">
 		<span class="text-gray-500">{m.configureOutgoingWebhooks()}</span>
-		<span class="flex flex-row justify-between">
-			<h3 class="h3">{allowMultiple ? m.webhookEndpoints() : m.webhookEndpoint()}</h3>
+
+		<div class="flex items-center justify-between">
+			<h3 class="text-base font-semibold flex items-center gap-2">
+				<i class="fa-solid fa-globe text-sm text-primary-500"></i>
+				{allowMultiple ? m.webhookEndpoints() : m.webhookEndpoint()}
+			</h3>
 			{#if data?.webhookEndpoints?.length == 0 || allowMultiple}
-				<button class="btn preset-filled-primary-500 w-fit" onclick={modalWebhookEndpointCreateForm}
-					><i class="fa-solid fa-plus mr-2"></i>{m.createWebhookEndpoint()}</button
+				<button
+					class="btn btn-sm preset-filled-primary-500"
+					onclick={modalWebhookEndpointCreateForm}
 				>
+					<i class="fa-solid fa-plus mr-1"></i>
+					{m.createWebhookEndpoint()}
+				</button>
 			{/if}
-		</span>
+		</div>
+
 		{#if displayedEndpoint}
-			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8">
+			<div class="grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 				{#if allowMultiple}
-					<div class="card p-2 bg-surface-50-950">
-						{#each data.webhookEndpoints as endpoint}
-							<span class="flex flex-row gap-4 items-center">
-								<button
-									onclick={() => {
-										displayedEndpoint = endpoint;
-									}}
-									class="text-secondary-600 hover:underline {JSON.stringify(displayedEndpoint) ===
+					<div class="card bg-white shadow-lg overflow-hidden">
+						{#each data.webhookEndpoints as endpoint, i}
+							{#if i > 0}
+								<hr class="border-surface-200" />
+							{/if}
+							<button
+								onclick={() => {
+									displayedEndpoint = endpoint;
+								}}
+								class="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-surface-50 transition-colors {JSON.stringify(
+									displayedEndpoint
+								) === JSON.stringify(endpoint)
+									? 'bg-surface-50 border-l-2 border-primary-500'
+									: ''}"
+							>
+								<i class="fa-solid fa-globe text-xs text-gray-400"></i>
+								<span
+									class="flex-1 truncate {JSON.stringify(displayedEndpoint) ===
 									JSON.stringify(endpoint)
 										? 'font-semibold'
 										: ''}"
 								>
-									{endpoint.name}</button
-								>
+									{endpoint.name}
+								</span>
 								{#if endpoint.is_active}
-									<span class="badge preset-tonal-success">{m.active()}</span>
+									<span class="badge preset-tonal-success text-xs">{m.active()}</span>
 								{/if}
-							</span>
+							</button>
 						{/each}
 					</div>
 				{/if}
-				<div class="card p-2 lg:col-span-2">
-					<div class="flex flex-col gap-4">
-						<span class="flex flex-row gap-2 items-center">
-							<h4 class="h4">
+				<div class="card bg-white shadow-lg lg:col-span-2">
+					<header class="flex items-center justify-between p-4 border-b border-surface-200">
+						<div class="flex items-center gap-2">
+							<h4 class="h4 font-semibold">
 								{displayedEndpoint.name}
 							</h4>
 							{#if displayedEndpoint.is_active}
-								<span class="badge preset-tonal-success">{m.active()}</span>
+								<span class="badge preset-tonal-success text-xs">{m.active()}</span>
 							{/if}
-						</span>
-						<a class="anchor" href={displayedEndpoint.url}>
-							{displayedEndpoint.url}
-						</a>
+						</div>
+					</header>
+					<div class="p-4 flex flex-col gap-4">
+						<div class="flex items-center gap-2 text-sm">
+							<i class="fa-solid fa-link text-xs text-gray-400"></i>
+							<a class="anchor truncate" href={displayedEndpoint.url}>
+								{displayedEndpoint.url}
+							</a>
+						</div>
 						<div>
-							<p class="font-medium">{m.events()}</p>
-							{#each Object.values(modelEventsMap(displayedEndpoint.event_types)).filter((e: Record) => e?.events?.length > 0) as model}
-								<div class="flex flex-col gap-3">
-									<span class="flex flex-row gap-3">
-										<p class="font-medium">{safeTranslate(model.i18nName)}</p>
-										<span class="flex flex-row gap-2">
+							<p class="font-medium text-sm mb-2">{m.events()}</p>
+							<div class="flex flex-col gap-2">
+								{#each Object.values(modelEventsMap(displayedEndpoint.event_types)).filter((e: Record) => e?.events?.length > 0) as model}
+									<div class="flex items-center gap-2 text-sm">
+										<span class="font-medium">{safeTranslate(model.i18nName)}</span>
+										<div class="flex flex-wrap gap-1">
 											{#each model.events as event}
 												{@const action = event.split('.')[1]}
-												<p>{safeTranslate(action)}</p>
+												<span class="badge preset-outlined-surface-500 text-xs"
+													>{safeTranslate(action)}</span
+												>
 											{/each}
-										</span>
-									</span>
-								</div>
-							{/each}
+										</div>
+									</div>
+								{/each}
+							</div>
 						</div>
-						<span class="flex flex-row gap-2">
-							<Anchor
-								class="btn preset-filled-primary-500 h-fit"
-								href="/settings/webhooks/endpoints/{displayedEndpoint.id}?next={page.url.pathname}"
-								><i class="fa-solid fa-pen-to-square mr-2"></i>{m.edit()}</Anchor
-							>
-							<button
-								aria-label={m.delete()}
-								onclick={(e) => {
-									modalConfirmDelete(displayedEndpoint.id, displayedEndpoint);
-									e.stopPropagation();
-								}}
-								class="btn preset-filled-error-500 h-fit cursor-pointer"
-								data-testid="tablerow-delete-button"
-								><i class="fa-solid fa-trash mr-2"></i>{m.delete()}</button
-							>
-						</span>
 					</div>
+					<footer class="flex items-center gap-2 p-4 border-t border-surface-200">
+						<Anchor
+							class="btn btn-sm preset-filled-primary-500"
+							href="/settings/webhooks/endpoints/{displayedEndpoint.id}?next={page.url.pathname}"
+						>
+							<i class="fa-solid fa-pen-to-square mr-1 text-xs"></i>
+							{m.edit()}
+						</Anchor>
+						<button
+							aria-label={m.delete()}
+							onclick={(e) => {
+								modalConfirmDelete(displayedEndpoint.id, displayedEndpoint);
+								e.stopPropagation();
+							}}
+							class="btn btn-sm preset-filled-error-500 cursor-pointer"
+							data-testid="tablerow-delete-button"
+						>
+							<i class="fa-solid fa-trash mr-1 text-xs"></i>
+							{m.delete()}
+						</button>
+					</footer>
 				</div>
 			</div>
 		{/if}

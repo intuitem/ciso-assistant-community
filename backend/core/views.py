@@ -8991,14 +8991,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             lang = request.user.preferences.get("lang")
             if lang not in ["fr", "en"]:
                 lang = "en"
-        template_path = (
-            Path(settings.BASE_DIR)
-            / "core"
-            / "templates"
-            / "core"
-            / f"audit_report_template_{lang}.docx"
-        )
-        doc = DocxTemplate(template_path)
+
+        # Check for custom Word template override
+        doc = None
+        try:
+            custom = CustomWordTemplate.objects.filter(
+                template_key="audit_report",
+                language=lang,
+                is_active=True,
+            ).first()
+            if custom and custom.file:
+                custom.file.open("rb")
+                doc = DocxTemplate(io.BytesIO(custom.file.read()))
+        except Exception as e:
+            logger.warning(
+                "Failed to load custom Word template, falling back to default",
+                exc_info=e,
+            )
+
+        if doc is None:
+            template_path = (
+                Path(__file__).resolve().parent
+                / "templates"
+                / "core"
+                / f"audit_report_template_{lang}.docx"
+            )
+            doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
