@@ -1688,7 +1688,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
