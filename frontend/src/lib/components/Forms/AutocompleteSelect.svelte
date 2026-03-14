@@ -213,13 +213,13 @@
 					const probeResponse = await fetch(probeEndpoint, { cache: browserCache });
 					if (probeResponse.ok) {
 						const probeData = await probeResponse.json();
-						const totalCount =
-							probeData?.count ?? probeData?.results?.length ?? probeData?.length ?? 0;
-						if (totalCount <= lazyThreshold) {
-							// Small dataset — use eager mode with the data we already have
+						const items = probeData?.results ?? probeData;
+						const totalCount = probeData?.count ?? (Array.isArray(items) ? items.length : 0);
+						const returnedCount = Array.isArray(items) ? items.length : 0;
+						if (totalCount <= lazyThreshold && returnedCount >= totalCount) {
+							// Small dataset with complete response — use eager mode
 							effectiveLazy = false;
-							const items = probeData?.results ?? probeData;
-							if (Array.isArray(items) && items.length > 0) {
+							if (returnedCount > 0) {
 								options = processOptions(items);
 							}
 							const isRequired = mandatory || $constraints?.required;
