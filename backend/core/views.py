@@ -3553,10 +3553,15 @@ class RiskAssessmentViewSet(BaseModelViewSet):
             risk_assessment = self.get_object()
             data = request.data
 
+            perimeter_id = data.get("perimeter")
+            perimeter = Perimeter.objects.get(id=perimeter_id) if perimeter_id else None
+            folder = Folder.objects.get(id=data.get("folder"))
+
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
                 description=data.get("description"),
-                perimeter=Perimeter.objects.get(id=data.get("perimeter")),
+                perimeter=perimeter,
+                folder=folder,
                 version=data.get("version"),
                 risk_matrix=risk_assessment.risk_matrix,
                 ref_id=data.get("ref_id"),
@@ -3606,7 +3611,13 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 duplicate_scenario.save()
 
             duplicate_risk_assessment.save()
-            return Response({"results": "risk assessment duplicated"})
+            return Response(
+                {
+                    "results": RiskAssessmentReadSerializer(
+                        duplicate_risk_assessment
+                    ).data
+                }
+            )
 
     @action(
         detail=True,

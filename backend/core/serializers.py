@@ -421,7 +421,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description"]
+        fields = ["name", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
