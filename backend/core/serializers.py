@@ -1368,9 +1368,11 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    duplicate_evidences = serializers.BooleanField(default=False)
+
     class Meta:
         model = AppliedControl
-        fields = ["name", "description", "folder"]
+        fields = ["name", "description", "folder", "duplicate_evidences"]
 
 
 class AppliedControlImportExportSerializer(BaseModelSerializer):
