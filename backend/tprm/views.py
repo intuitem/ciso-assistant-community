@@ -1,3 +1,5 @@
+import re
+
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_400_BAD_REQUEST
@@ -315,7 +317,8 @@ class EntityViewSet(BaseModelViewSet):
         zip_buffer.seek(0)
 
         response = HttpResponse(zip_buffer.getvalue(), content_type="application/zip")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        sanitized_filename = re.sub(r"[^\w.\-]", "_", filename)
+        response["Content-Disposition"] = f'attachment; filename="{sanitized_filename}"'
 
         return response
 
