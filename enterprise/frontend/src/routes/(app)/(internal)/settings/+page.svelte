@@ -8,6 +8,8 @@
 	import SSOSettings from '$lib/components/Settings/SSOSettings.svelte';
 	import FeatureFlagsSettings from '$lib/components/Settings/FeatureFlagsSettings.svelte';
 	import WebhooksSettings from '$lib/components/Settings/WebhooksSettings.svelte';
+	import EmailTemplatesSettings from '$lib/components/Settings/EmailTemplatesSettings.svelte';
+	import WordTemplatesSettings from '$lib/components/Settings/WordTemplatesSettings.svelte';
 
 	function deriveInitialTab(): string {
 		if (page.state?.settingsTab) return page.state.settingsTab;
@@ -78,6 +80,9 @@
 				></Tabs.Trigger
 			>
 		{/if}
+		<Tabs.Trigger value="emailTemplates"
+			><i class="fa-solid fa-file-lines"></i> {m.templates()}</Tabs.Trigger
+		>
 		<Tabs.Trigger value="integrations"
 			><i class="fa-solid fa-plug"></i> {m.integrations()}</Tabs.Trigger
 		>
@@ -98,6 +103,23 @@
 	</Tabs.Content>
 	<Tabs.Content value="webhooks">
 		<WebhooksSettings {data} allowMultiple />
+	</Tabs.Content>
+	<Tabs.Content value="emailTemplates">
+		<div class="space-y-8">
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-file-word mr-2"></i>{m.wordTemplates()}
+				</h3>
+				<WordTemplatesSettings />
+			</section>
+			<hr />
+			<section>
+				<h3 class="h4 font-semibold mb-4">
+					<i class="fa-solid fa-envelope mr-2"></i>{m.emailTemplates()}
+				</h3>
+				<EmailTemplatesSettings />
+			</section>
+		</div>
 	</Tabs.Content>
 	<Tabs.Content value="integrations">
 		<div>

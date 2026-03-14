@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.14"
 django = "^6.0.3"
 python-dotenv = "^1.0.1"
+markdown = "^3.10.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.2"
