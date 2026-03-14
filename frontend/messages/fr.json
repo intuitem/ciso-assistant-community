@@ -3087,6 +3087,7 @@
 	"integrationProviderHelpText": "Sélectionner le fournisseur d'intégration pour configurer la synchronisation au niveau objet",
 	"integrations": "Intégrations",
 	"isIntragroup": "Est intra-groupe",
+	"doraExclude": "Exclure du RoI DORA",
 	"issueType": "Type de carte",
 	"itsm": "ITSM",
 	"jira": "Jira",
