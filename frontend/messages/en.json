@@ -288,6 +288,7 @@
 	"existingControls": "Existing controls",
 	"strengthOfKnowledge": "Strength of knowledge",
 	"dueDate": "Due date",
+	"scheduledDate": "Originally scheduled",
 	"startDate": "Start date",
 	"closingDate": "Closing date",
 	"closingDateHelpText": "Actual date the objective was closed or completed",
