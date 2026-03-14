@@ -13,6 +13,7 @@
 	// Group results by severity
 	const errors = lintResults.results.filter((r: any) => r.severity === 'error');
 	const warnings = lintResults.results.filter((r: any) => r.severity === 'warning');
+	const infos = lintResults.results.filter((r: any) => r.severity === 'info');
 	const oks = lintResults.results.filter((r: any) => r.severity === 'ok');
 
 	// Determine if we can generate the report (no errors)
@@ -64,6 +65,8 @@
 				return 'text-red-600 bg-red-50 border-red-200';
 			case 'warning':
 				return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+			case 'info':
+				return 'text-blue-600 bg-blue-50 border-blue-200';
 			case 'ok':
 				return 'text-green-600 bg-green-50 border-green-200';
 			default:
@@ -108,7 +111,7 @@
 	<!-- Summary Card -->
 	<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
 		<h2 class="text-xl font-semibold text-gray-900 mb-4">Validation Summary</h2>
-		<div class="grid grid-cols-3 gap-4">
+		<div class="grid grid-cols-4 gap-4">
 			<div class="text-center p-4 rounded-lg bg-red-50 border border-red-200">
 				<div class="text-3xl font-bold text-red-600">{lintResults.summary.errors}</div>
 				<div class="text-sm text-red-600 mt-1">Errors</div>
@@ -116,6 +119,10 @@
 			<div class="text-center p-4 rounded-lg bg-yellow-50 border border-yellow-200">
 				<div class="text-3xl font-bold text-yellow-600">{lintResults.summary.warnings}</div>
 				<div class="text-sm text-yellow-600 mt-1">Warnings</div>
+			</div>
+			<div class="text-center p-4 rounded-lg bg-blue-50 border border-blue-200">
+				<div class="text-3xl font-bold text-blue-600">{lintResults.summary.info}</div>
+				<div class="text-sm text-blue-600 mt-1">Info</div>
 			</div>
 			<div class="text-center p-4 rounded-lg bg-green-50 border border-green-200">
 				<div class="text-3xl font-bold text-green-600">{lintResults.summary.ok}</div>
@@ -186,6 +193,38 @@
 								>
 									<i class="fa-solid fa-pencil"></i>
 									Review
+								</a>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+
+			{#if infos.length > 0}
+				<div class="space-y-2">
+					<h3 class="text-sm font-semibold text-blue-600 uppercase tracking-wide">Info</h3>
+					{#each infos as result}
+						{@const editUrl = getEditUrl(result)}
+						<div
+							class="flex items-start gap-3 p-4 rounded-lg border {getSeverityColor(
+								result.severity
+							)}"
+						>
+							<i class="fa-solid {getSeverityIcon(result.severity)} mt-0.5"></i>
+							<div class="flex-1">
+								<div class="font-medium text-sm">{result.category}</div>
+								<div class="text-sm mt-1">{result.message}</div>
+								{#if result.field}
+									<div class="text-xs mt-1 opacity-75">Field: {result.field}</div>
+								{/if}
+							</div>
+							{#if editUrl}
+								<a
+									href={editUrl}
+									class="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors flex items-center gap-2"
+								>
+									<i class="fa-solid fa-eye"></i>
+									View
 								</a>
 							{/if}
 						</div>
