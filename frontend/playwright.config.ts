@@ -6,7 +6,7 @@ const config: PlaywrightTestConfig = {
 		command: process.env.COMPOSE_TEST
 			? 'echo "The docker compose frontend server didn\'t start correctly"'
 			: 'pnpm run preview',
-		port: process.env.COMPOSE_TEST ? 3000 : 4173,
+		port: parseInt(process.env.FRONTEND_PORT || (process.env.COMPOSE_TEST ? '3000' : '4173')),
 		timeout: 120 * 1000,
 		reuseExistingServer: !process.env.CI
 	},
@@ -26,7 +26,7 @@ const config: PlaywrightTestConfig = {
 		[
 			'html',
 			{
-				open: process.env.CI ? 'never' : process.env.DOCKER ? 'always' : 'on-failure',
+				open: process.env.PW_HTML_OPEN || (process.env.CI ? 'never' : process.env.DOCKER ? 'always' : 'on-failure'),
 				outputFolder: 'tests/reports',
 				host: process.env.DOCKER ? '0.0.0.0' : 'localhost'
 			}
@@ -44,17 +44,7 @@ const config: PlaywrightTestConfig = {
 		{
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] }
-		},
-		{
-			name: 'firefox',
-			use: { ...devices['Desktop Firefox'] }
 		}
-		// {
-		// 	name: 'webkit',
-		// 	use: { ...devices['Desktop Safari'] },
-		// 	name: 'webkit',
-		// 	use: { ...devices['Desktop Safari'] },
-		// }
 	]
 };
 
