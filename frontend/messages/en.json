@@ -1300,6 +1300,7 @@
 	"selectRequirementsToAssign": "Select requirements to include in a new assignment",
 	"makeSureActorsHavePermissions": "Make sure that the assigned users have access to the domain of this audit",
 	"selectAllAvailable": "Select all available",
+	"clearSelection": "Clear selection",
 	"expandAll": "Expand all",
 	"collapseAll": "Collapse all",
 	"clickToSelect": "click to select",
@@ -1908,7 +1909,6 @@
 	"firstTimeLoginModalTitle": "Welcome to CISO Assistant!",
 	"firstTimeLoginModalDescription": "Choose how you'd like to get started. You can always change things later.",
 	"browsePresetsDescription": "Set up frameworks, risk assessments, and compliance journeys automatically",
-	"recommended": "Recommended",
 	"customizeFeatureFlags": "Customize my experience",
 	"customizeFeatureFlagsDescription": "Enable or disable modules to tailor the platform to your needs",
 	"skipForNow": "Skip for now",
@@ -2143,7 +2143,6 @@
 	"changeTreatment": "Change treatment",
 	"changeAssignee": "Change assignee",
 	"changeResult": "Change result",
-	"clearSelection": "Clear selection",
 	"itemsSelected": "{count} item(s) selected",
 	"batchActionConfirmDelete": "Are you sure you want to delete {count} item(s)?",
 	"batchActionConfirmChange": "Apply to {count} item(s):",
@@ -3681,6 +3680,8 @@
 	"showProcessed": "Show processed ({count})",
 	"hideProcessed": "Hide processed",
 	"ctrlEnterToPost": "Ctrl+Enter to post",
+	"confirmModalMessagePlural": "Are you sure? This action will permanently affect the following objects",
+	"syncAppliedControlsMessage": "The applied controls using this reference control will be synced to it. Please note that this cannot be undone.",
 	"presets": "Journeys",
 	"presetsDescription": "Follow guided journeys to set up your security program step by step. You can also explore the platform freely and unlock all capabilities from the settings.",
 	"availablePresets": "Available Templates",
@@ -3730,5 +3731,7 @@
 	"doneEditing": "Done editing",
 	"noLinkedObject": "— No linked object —",
 	"showDescriptions": "Show descriptions",
-	"hideDescriptions": "Hide descriptions"
+	"hideDescriptions": "Hide descriptions",
+	"syncToAppliedControl": "Sync to applied control",
+	"syncToReferenceControl": "Sync to reference control"
 }
