@@ -7907,21 +7907,33 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = "Task templates"
 
     def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        schedule_persisted = update_fields is None or "schedule" in set(update_fields)
+
         if self.schedule and "days_of_week" in self.schedule:
             # Only modify values that are not already in range 0-6
             self.schedule["days_of_week"] = [
                 day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
             ]
 
-        # Check if there are any TaskNode instances that are not within the date range
-        if self.pk and self.schedule and self.schedule.get("end_date"):
-            end_date = self.schedule["end_date"]
-            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances whose scheduled date is after the end date
-            TaskNode.objects.filter(
-                task_template=self, scheduled_date__gt=end_date
-            ).delete()
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            # Prune untouched pending TaskNodes beyond the end date
+            if schedule_persisted and self.schedule and self.schedule.get("end_date"):
+                end_date = self.schedule["end_date"]
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+                TaskNode.objects.filter(
+                    task_template=self,
+                    scheduled_date__gt=end_date,
+                    status="pending",
+                    due_date=F("scheduled_date"),
+                ).filter(
+                    Q(observation__isnull=True) | Q(observation=""),
+                ).exclude(
+                    evidences__isnull=False,
+                ).exclude(
+                    evidence_revisions__isnull=False,
+                ).delete()
 
 
 class TaskNode(AbstractBaseModel, FolderMixin):
