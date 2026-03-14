@@ -1,0 +1,46 @@
+export type ChatView = 'closed' | 'window' | 'expanded';
+
+export interface PendingAction {
+	id: string;
+	action: 'create';
+	modelKey: string;
+	urlSlug: string;
+	displayName: string;
+	items: { name: string; description?: string; folder?: string }[];
+	status: 'pending' | 'creating' | 'created' | 'error' | 'rejected';
+	results?: { name: string; id?: string; error?: string }[];
+}
+
+export interface ChatMessage {
+	id: string;
+	role: 'user' | 'assistant';
+	content: string;
+	thinking?: string;
+	timestamp: Date;
+	contextRefs?: ContextRef[];
+	pendingAction?: PendingAction;
+}
+
+export interface ContextRef {
+	type: string;
+	id?: string;
+	name: string;
+	ref_id?: string;
+	score?: number;
+	source?: string;
+	url?: string;
+}
+
+export interface SuggestedAction {
+	label: string;
+	prompt: string;
+	icon: string;
+}
+
+export interface ChatSession {
+	id: string;
+	title: string;
+	folder: string;
+	message_count: number;
+	created_at: string;
+}

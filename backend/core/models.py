@@ -4744,6 +4744,11 @@ class AppliedControl(
             self.eta < date.today() and self.status != "active" if self.eta else False
         )
 
+    @classmethod
+    def eta_missed_q(cls):
+        """Q filter for queryset-level ETA missed logic."""
+        return Q(eta__lt=date.today()) & ~Q(status="active")
+
     @property
     def days_until_eta(self):
         if not self.eta:

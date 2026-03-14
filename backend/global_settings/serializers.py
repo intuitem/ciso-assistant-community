@@ -23,6 +23,14 @@ GENERAL_SETTINGS_KEYS = [
     "allow_assignments_to_entities",
     "enforce_mfa",
     "default_language",
+    "llm_provider",
+    "ollama_base_url",
+    "ollama_model",
+    "ollama_embed_model",
+    "embedding_backend",
+    "chat_system_prompt",
+    "openai_api_base",
+    "openai_model",
 ]
 
 
@@ -241,6 +249,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     data_breaches = serializers.BooleanField(
         source="value.data_breaches", required=False, default=True
+    )
+    chat_mode = serializers.BooleanField(
+        source="value.chat_mode", required=False, default=False
     )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=False
