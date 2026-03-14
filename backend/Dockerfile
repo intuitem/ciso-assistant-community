@@ -50,5 +50,8 @@ RUN poetry install --no-root \
 #watch out for local files during dev and maintenance of .dockerignore
 COPY . .
 
+RUN groupadd -g 1001 app && useradd -u 1001 -g 1001 -m -s /usr/sbin/nologin app
+# USER app  # not activated by default to keep compatibility
+
 EXPOSE 8000
 ENTRYPOINT ["poetry", "run", "bash", "startup.sh"]
