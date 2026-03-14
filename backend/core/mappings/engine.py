@@ -15,17 +15,10 @@ import zlib
 
 class MappingEngine:
     def __init__(self):
-        # Values are compressed (zlib) JSON bytes of the RMS object.
-        self.all_rms: dict[tuple[str, str], bytes] = {}
-        self.framework_mappings: dict[str, list[str]] = defaultdict(list)
-        self.frameworks: dict[str, dict[str, int]] = defaultdict(dict)
-        self.direct_mappings: set[tuple[str, str]] = set()
-
-        if not self.frameworks:
-            self.load_frameworks()
-
-        if not self.direct_mappings:
-            self.load_rms_data()
+        self._all_rms = None
+        self._framework_mappings = None
+        self._frameworks = None
+        self._direct_mappings = None
 
         self.fields_to_map: list[str] = [
             "result",
@@ -43,6 +36,46 @@ class MappingEngine:
             "mapping_inference",
         ]
 
+    def _ensure_loaded(self):
+        if self._frameworks is None:
+            self.reload_cache()
+
+    @property
+    def all_rms(self):
+        self._ensure_loaded()
+        return self._all_rms
+
+    @all_rms.setter
+    def all_rms(self, value):
+        self._all_rms = value
+
+    @property
+    def framework_mappings(self):
+        self._ensure_loaded()
+        return self._framework_mappings
+
+    @framework_mappings.setter
+    def framework_mappings(self, value):
+        self._framework_mappings = value
+
+    @property
+    def frameworks(self):
+        self._ensure_loaded()
+        return self._frameworks
+
+    @frameworks.setter
+    def frameworks(self, value):
+        self._frameworks = value
+
+    @property
+    def direct_mappings(self):
+        self._ensure_loaded()
+        return self._direct_mappings
+
+    @direct_mappings.setter
+    def direct_mappings(self, value):
+        self._direct_mappings = value
+
     # --- Compression helpers ---
     def _compress_rms(self, obj: dict) -> bytes:
         return zlib.compress(json.dumps(obj, separators=(",", ":")).encode("utf-8"))
@@ -56,14 +89,30 @@ class MappingEngine:
             return None
         return self._decompress_rms(data)
 
+    def reload_cache(self) -> None:
+        """Reloads all engine cache data: frameworks and RMS data."""
+        self._frameworks = defaultdict(dict)
+        self._all_rms = {}
+        self._framework_mappings = defaultdict(list)
+        self._direct_mappings = set()
+
+        from django.db.utils import ProgrammingError, OperationalError
+
+        try:
+            self.load_frameworks()
+            self.load_rms_data()
+        except (ProgrammingError, OperationalError):
+            # Tables might not exist during migrations.
+            pass
+
     def load_rms_data(self) -> None:
         """
         Loads requirement mapping sets (RMS) from libraries.
         Builds internal structures: all_rms and framework_mappings.
         """
-        self.framework_mappings = defaultdict(list)
-        self.direct_mappings = set()
-        self.all_rms = {}
+        self._framework_mappings = defaultdict(list)
+        self._direct_mappings = set()
+        self._all_rms = {}
 
         for lib in StoredLibrary.objects.filter(
             Q(content__requirement_mapping_set__isnull=False)
@@ -78,7 +127,7 @@ class MappingEngine:
                     obj = content["requirement_mapping_set"]
                     index = (obj["source_framework_urn"], obj["target_framework_urn"])
                     obj["library_urn"] = library_urn
-                    self.all_rms[index] = self._compress_rms(obj)
+                    self._all_rms[index] = self._compress_rms(obj)
 
                 if "requirement_mapping_sets" in content:
                     for obj in content["requirement_mapping_sets"]:
@@ -87,14 +136,14 @@ class MappingEngine:
                             obj["target_framework_urn"],
                         )
                         obj["library_urn"] = library_urn
-                        self.all_rms[index] = self._compress_rms(obj)
+                        self._all_rms[index] = self._compress_rms(obj)
 
-        for src, tgt in self.all_rms:
-            self.framework_mappings[src].append(tgt)
-            self.direct_mappings.add((src, tgt))
+        for src, tgt in self._all_rms:
+            self._framework_mappings[src].append(tgt)
+            self._direct_mappings.add((src, tgt))
 
     def load_frameworks(self) -> None:
-        self.frameworks = dict(
+        self._frameworks = dict(
             [
                 (f.urn, {"min_score": f.min_score, "max_score": f.max_score})
                 for f in Framework.objects.all()
