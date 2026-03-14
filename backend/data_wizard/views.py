@@ -23,6 +23,7 @@ from core.models import (
     Policy,
     SecurityException,
     Incident,
+    Vulnerability,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -43,6 +44,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    VulnerabilityWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -275,6 +277,7 @@ class ModelType(enum.StrEnum):
     POLICY = "Policy"
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
+    VULNERABILITY = "Vulnerability"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
 
     @staticmethod
@@ -1306,6 +1309,134 @@ class IncidentRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
+class VulnerabilityRecordConsumer(RecordConsumer[None]):
+    """
+    Consumer for importing Vulnerability records.
+    """
+
+    SERIALIZER_CLASS = VulnerabilityWriteSerializer
+    SEVERITY_MAP: Final[dict[str, int]] = {
+        "undefined": -1,
+        "info": 0,
+        "low": 1,
+        "medium": 2,
+        "high": 3,
+        "critical": 4,
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "undefined": "--",
+        "potential": "potential",
+        "exploitable": "exploitable",
+        "mitigated": "mitigated",
+        "fixed": "fixed",
+        "not exploitable": "not_exploitable",
+        "unaffected": "unaffected",
+    }
+
+    def create_context(self):
+        return None, None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        folder_id = self.folder_id
+
+        raw_severity = record.get("severity")
+        if isinstance(raw_severity, str):
+            severity = self.SEVERITY_MAP.get(raw_severity.lower().strip(), -1)
+        elif isinstance(raw_severity, int) and -1 <= raw_severity <= 4:
+            severity = raw_severity
+        else:
+            severity = -1
+
+        raw_status = record.get("status")
+        if isinstance(raw_status, str):
+            status = self.STATUS_MAP.get(raw_status.lower().strip(), "--")
+        else:
+            status = "--"
+
+        applied_controls = []
+        for ap_name in (record.get("applied_controls") or "").splitlines():
+            ap_name = ap_name.strip()
+            if not ap_name:
+                continue
+            obj = AppliedControl.objects.filter(
+                name=ap_name, folder_id=folder_id
+            ).first()
+            if obj:
+                applied_controls.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No applied control named '{ap_name}' found in folder",
+                )
+
+        assets = []
+        for asset_name in (record.get("assets") or "").splitlines():
+            asset_name = asset_name.strip()
+            if not asset_name:
+                continue
+            obj = Asset.objects.filter(name=asset_name, folder_id=folder_id).first()
+            if obj:
+                assets.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No asset named '{asset_name}' found in folder",
+                )
+
+        security_exceptions = []
+        for se_name in (record.get("security_exceptions") or "").splitlines():
+            se_name = se_name.strip()
+            if not se_name:
+                continue
+            obj = SecurityException.objects.filter(
+                name=se_name, folder_id=folder_id
+            ).first()
+            if obj:
+                security_exceptions.append(obj.id)
+            else:
+                return {}, Error(
+                    record=record,
+                    error=f"No security exception named '{se_name}' found in folder",
+                )
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "status": status,
+            "severity": severity,
+            "folder": folder_id,
+            "applied_controls": applied_controls,
+            "assets": assets,
+            "security_exceptions": security_exceptions,
+        }
+
+        filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
+        if filtering_labels:
+            data["filtering_labels"] = filtering_labels
+
+        return data, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        if ref_id:
+            existing = Vulnerability.objects.filter(
+                ref_id=ref_id, folder_id=folder_id
+            ).first()
+            if existing:
+                return existing
+        return Vulnerability.objects.filter(
+            name=record_data.get("name"), folder_id=folder_id
+        ).first()
+
+
 class BusinessImpactAnalysisRecordConsumer(RecordConsumer[None]):
     SERIALIZER_CLASS = BusinessImpactAnalysisWriteSerializer
     SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
@@ -1995,6 +2126,12 @@ class LoadFileView(APIView):
                                 .process_records(records)
                                 .to_dict()
                             )
+                        case ModelType.VULNERABILITY:
+                            res = (
+                                VulnerabilityRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
                         case ModelType.BUSINESS_IMPACT_ANALYSIS:
                             res = (
                                 BusinessImpactAnalysisRecordConsumer(base_context)
@@ -2035,7 +2172,6 @@ class LoadFileView(APIView):
         matrix_id=None,
     ):
         folders_map = get_accessible_folders_map(request.user)
-
         # Dispatch to appropriate handler
         match model_type:
             case ModelType.COMPLIANCE_ASSESSMENT:
