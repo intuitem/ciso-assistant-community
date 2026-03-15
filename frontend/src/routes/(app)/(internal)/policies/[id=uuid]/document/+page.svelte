@@ -37,13 +37,26 @@
 	let diffRevisionA = $state('');
 	let diffRevisionB = $state('');
 	let showTemplateSelector = $state(!document);
+	let showVersionHistory = $state(true);
 
-	const statusColors: Record<string, string> = {
-		draft: 'bg-yellow-100 text-yellow-800',
-		in_review: 'bg-blue-100 text-blue-800',
-		change_requested: 'bg-red-100 text-red-800',
-		published: 'bg-green-100 text-green-800',
-		deprecated: 'bg-gray-100 text-gray-500'
+	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
+		draft: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: 'fa-pen' },
+		in_review: {
+			bg: 'bg-blue-50 border-blue-200',
+			text: 'text-blue-700',
+			icon: 'fa-magnifying-glass'
+		},
+		change_requested: {
+			bg: 'bg-red-50 border-red-200',
+			text: 'text-red-700',
+			icon: 'fa-rotate-left'
+		},
+		published: {
+			bg: 'bg-emerald-50 border-emerald-200',
+			text: 'text-emerald-700',
+			icon: 'fa-circle-check'
+		},
+		deprecated: { bg: 'bg-gray-50 border-gray-200', text: 'text-gray-500', icon: 'fa-archive' }
 	};
 
 	const statusLabels: Record<string, string> = {
@@ -54,20 +67,19 @@
 		deprecated: 'Deprecated'
 	};
 
-	function getStatusBadge(revisionStatus: string) {
-		return statusColors[revisionStatus] || 'bg-gray-100 text-gray-600';
+	function getStatusStyle(s: string) {
+		return statusStyles[s] || statusStyles.deprecated;
 	}
 
 	// All API calls go through the +server.ts proxy
 	const proxyUrl = `/policies/${policy.id}/document`;
 
 	async function proxyPost(body: Record<string, any>) {
-		const res = await fetch(proxyUrl, {
+		return fetch(proxyUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(body)
 		});
-		return res;
 	}
 
 	async function proxyGet(params: Record<string, string>) {
@@ -277,90 +289,109 @@
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
 </script>
 
-<div class="flex flex-col space-y-4 p-4">
-	<!-- Header -->
-	<div class="flex items-center justify-between">
-		<div class="flex items-center space-x-4">
-			<a href="/policies/{policy.id}" class="text-gray-500 hover:text-gray-700">
+<div class="flex flex-col h-full -m-8 bg-white min-h-screen">
+	<!-- Sticky header bar -->
+	<div
+		class="flex items-center justify-between px-6 py-3 border-b border-surface-300 bg-surface-50"
+	>
+		<div class="flex items-center gap-3">
+			<a
+				href="/policies/{policy.id}"
+				class="btn btn-sm preset-tonal-surface"
+				title="Back to policy"
+			>
 				<i class="fa-solid fa-arrow-left"></i>
 			</a>
-			<h1 class="text-2xl font-bold">{policy.name}</h1>
-			{#if currentRevision}
-				<span
-					class="px-3 py-1 rounded-full text-sm font-medium {getStatusBadge(
-						currentRevision.status
-					)}"
-				>
-					{statusLabels[currentRevision.status] || currentRevision.status}
-				</span>
-				<span class="text-sm text-gray-500">v{currentRevision.version_number}</span>
-			{/if}
+			<div class="flex items-center gap-2">
+				<h1 class="text-lg font-semibold truncate max-w-md">{policy.name}</h1>
+				{#if currentRevision}
+					{@const style = getStatusStyle(currentRevision.status)}
+					<span
+						class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border {style.bg} {style.text}"
+					>
+						<i class="fa-solid {style.icon} text-[10px]"></i>
+						{statusLabels[currentRevision.status] || currentRevision.status}
+					</span>
+					<span class="text-xs text-surface-500 font-mono">
+						v{currentRevision.version_number}
+					</span>
+				{/if}
+			</div>
 		</div>
 
-		<div class="flex items-center space-x-2">
+		<div class="flex items-center gap-2">
 			{#if currentRevision}
-				<button class="btn bg-gray-200 text-gray-700 hover:bg-gray-300" onclick={() => exportPdf()}>
-					<i class="fa-solid fa-file-pdf mr-1"></i>
-					{m.exportPdf()}
+				<button
+					class="btn btn-sm preset-tonal-surface"
+					onclick={() => exportPdf()}
+					title={m.exportPdf()}
+				>
+					<i class="fa-solid fa-file-pdf"></i>
+					<span class="hidden lg:inline ml-1">{m.exportPdf()}</span>
 				</button>
 			{/if}
 
 			{#if isDraft}
 				<button
-					class="btn {saved
-						? 'bg-green-500'
-						: 'bg-blue-500'} text-white hover:bg-blue-600 disabled:opacity-60"
+					class="btn btn-sm {saved
+						? 'preset-filled-success-500'
+						: 'preset-filled-primary-500'} disabled:opacity-50"
 					onclick={() => saveContent()}
 					disabled={saving}
 				>
 					{#if saving}
-						<i class="fa-solid fa-spinner fa-spin mr-1"></i>
-						Saving...
+						<i class="fa-solid fa-spinner fa-spin"></i>
+						<span class="ml-1">Saving...</span>
 					{:else if saved}
-						<i class="fa-solid fa-check mr-1"></i>
-						Saved
+						<i class="fa-solid fa-check"></i>
+						<span class="ml-1">Saved</span>
 					{:else}
-						<i class="fa-solid fa-save mr-1"></i>
-						Save
+						<i class="fa-solid fa-floppy-disk"></i>
+						<span class="ml-1">Save</span>
 					{/if}
 				</button>
-				<button
-					class="btn bg-orange-500 text-white hover:bg-orange-600"
-					onclick={() => submitForReview()}
-				>
-					<i class="fa-solid fa-paper-plane mr-1"></i>
-					{m.submitForReview()}
+				<button class="btn btn-sm preset-filled-warning-500" onclick={() => submitForReview()}>
+					<i class="fa-solid fa-paper-plane"></i>
+					<span class="ml-1 hidden lg:inline">{m.submitForReview()}</span>
 				</button>
 			{/if}
 
 			{#if isInReview}
-				<button class="btn bg-green-500 text-white hover:bg-green-600" onclick={() => approve()}>
-					<i class="fa-solid fa-check mr-1"></i>
-					Approve
+				<button class="btn btn-sm preset-filled-success-500" onclick={() => approve()}>
+					<i class="fa-solid fa-check"></i>
+					<span class="ml-1">Approve</span>
 				</button>
-				<button class="btn bg-red-400 text-white hover:bg-red-500" onclick={() => requestChanges()}>
-					<i class="fa-solid fa-rotate-left mr-1"></i>
-					{m.requestChanges()}
+				<button class="btn btn-sm preset-filled-error-500" onclick={() => requestChanges()}>
+					<i class="fa-solid fa-rotate-left"></i>
+					<span class="ml-1 hidden lg:inline">{m.requestChanges()}</span>
 				</button>
 			{/if}
 
 			{#if !hasDraft && document}
-				<button
-					class="btn bg-indigo-500 text-white hover:bg-indigo-600"
-					onclick={() => createNewDraft()}
-				>
-					<i class="fa-solid fa-plus mr-1"></i>
-					{m.createNewDraft()}
+				<button class="btn btn-sm preset-filled-primary-500" onclick={() => createNewDraft()}>
+					<i class="fa-solid fa-plus"></i>
+					<span class="ml-1 hidden lg:inline">{m.createNewDraft()}</span>
 				</button>
 			{/if}
 
 			{#if document}
 				<button
-					class="btn bg-red-100 text-red-600 hover:bg-red-200"
+					class="btn btn-sm preset-tonal-error"
 					onclick={() => deleteDocument()}
 					title="Delete document and all revisions"
 				>
 					<i class="fa-solid fa-trash"></i>
+				</button>
+			{/if}
+
+			<!-- Toggle version history sidebar -->
+			{#if document}
+				<button
+					class="btn btn-sm preset-tonal-surface"
+					onclick={() => (showVersionHistory = !showVersionHistory)}
+					title={m.versionHistory()}
+				>
+					<i class="fa-solid fa-clock-rotate-left"></i>
 				</button>
 			{/if}
 		</div>
@@ -368,198 +399,252 @@
 
 	<!-- Template selector (shown when no document exists) -->
 	{#if showTemplateSelector}
-		<div class="bg-white shadow rounded-lg p-6 border">
-			<h2 class="text-lg font-semibold mb-4">{m.documentEditor()}</h2>
-			<p class="text-gray-600 mb-6">Choose how to start your policy document:</p>
-
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-				<button
-					class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
-					onclick={() => createDocument(null)}
-				>
-					<i class="fa-solid fa-file-pen text-2xl text-gray-400 mb-2"></i>
-					<h3 class="font-medium">{m.startFromScratch()}</h3>
-					<p class="text-sm text-gray-500">Start with a blank document</p>
-				</button>
-
-				{#each templates as template}
-					<button
-						class="p-4 border-2 border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
-						onclick={() => createDocument(template.id)}
+		<div class="flex-1 flex items-center justify-center p-8">
+			<div class="max-w-3xl w-full">
+				<div class="text-center mb-8">
+					<div
+						class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-surface-100 mb-4"
 					>
-						<i class="fa-solid fa-file-lines text-2xl text-blue-400 mb-2"></i>
-						<h3 class="font-medium">{template.title}</h3>
-						{#if template.description}
-							<p class="text-sm text-gray-500">{template.description}</p>
-						{/if}
+						<i class="fa-solid fa-file-pen text-2xl text-surface-500"></i>
+					</div>
+					<h2 class="text-xl font-semibold mb-2">{m.documentEditor()}</h2>
+					<p class="text-surface-500">Choose how to start your policy document</p>
+				</div>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+					<button
+						class="group card p-5 border-2 border-dashed border-surface-300 hover:border-primary-400 hover:shadow-md transition-all text-left"
+						onclick={() => createDocument(null)}
+					>
+						<div
+							class="w-10 h-10 rounded-lg bg-surface-100 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
+						>
+							<i
+								class="fa-solid fa-file text-surface-400 group-hover:text-primary-500 transition-colors"
+							></i>
+						</div>
+						<h3 class="font-medium text-sm">{m.startFromScratch()}</h3>
+						<p class="text-xs text-surface-400 mt-1">Start with a blank document</p>
 					</button>
-				{/each}
+
+					{#each templates as template}
+						<button
+							class="group card p-5 border border-surface-200 hover:border-primary-400 hover:shadow-md transition-all text-left"
+							onclick={() => createDocument(template.id)}
+						>
+							<div
+								class="w-10 h-10 rounded-lg bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
+							>
+								<i class="fa-solid fa-file-lines text-primary-500"></i>
+							</div>
+							<h3 class="font-medium text-sm">{template.title}</h3>
+							{#if template.description}
+								<p class="text-xs text-surface-400 mt-1">{template.description}</p>
+							{/if}
+						</button>
+					{/each}
+				</div>
 			</div>
 		</div>
 	{/if}
 
 	<!-- Main editor area -->
 	{#if document && currentRevision}
-		<!-- Reviewer comments (if change requested) -->
+		<!-- Status banners -->
 		{#if currentRevision.status === 'change_requested' && currentRevision.reviewer_comments}
-			<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-				<div class="flex items-center space-x-2 mb-2">
-					<i class="fa-solid fa-comment-dots text-red-500"></i>
-					<span class="font-medium text-red-700">{m.reviewerComments()}</span>
+			<div
+				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+			>
+				<i class="fa-solid fa-comment-dots text-red-400 mt-0.5"></i>
+				<div class="flex-1 min-w-0">
+					<p class="text-sm font-medium text-red-700 mb-1">{m.reviewerComments()}</p>
+					<p class="text-sm text-red-600 whitespace-pre-line">
+						{currentRevision.reviewer_comments}
+					</p>
 				</div>
-				<p class="text-red-600">{currentRevision.reviewer_comments}</p>
 			</div>
 		{/if}
 
-		<!-- Review comments input (when in review) -->
 		{#if isInReview}
-			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-				<label for="reviewer-comments" class="block text-sm font-medium text-blue-700 mb-2">
-					{m.reviewerComments()} (for requesting changes)
-				</label>
-				<textarea
-					id="reviewer-comments"
-					bind:value={reviewerComments}
-					class="w-full border border-blue-300 rounded p-2 text-sm"
-					rows="2"
-					placeholder="Add comments explaining what changes are needed..."
-				></textarea>
+			<div
+				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"
+			>
+				<i class="fa-solid fa-pen-to-square text-blue-400 mt-0.5"></i>
+				<div class="flex-1 min-w-0">
+					<label for="reviewer-comments" class="text-sm font-medium text-blue-700 block mb-1">
+						{m.reviewerComments()}
+					</label>
+					<textarea
+						id="reviewer-comments"
+						bind:value={reviewerComments}
+						class="input w-full text-sm"
+						rows="2"
+						placeholder="Add comments explaining what changes are needed..."
+					></textarea>
+				</div>
 			</div>
 		{/if}
 
-		<div class="flex gap-4 flex-1">
-			<!-- Editor / Preview -->
-			<div class="flex-1 flex flex-col">
-				<div class="flex items-center space-x-2 mb-2">
-					<button
-						class="px-3 py-1 text-sm rounded {!showPreview
-							? 'bg-blue-500 text-white'
-							: 'bg-gray-200 text-gray-700'}"
-						onclick={() => {
-							showPreview = false;
-							showDiff = false;
-						}}
-					>
-						<i class="fa-solid fa-pen mr-1"></i> Edit
-					</button>
-					<button
-						class="px-3 py-1 text-sm rounded {showPreview && !showDiff
-							? 'bg-blue-500 text-white'
-							: 'bg-gray-200 text-gray-700'}"
-						onclick={() => {
-							showPreview = true;
-							showDiff = false;
-						}}
-					>
-						<i class="fa-solid fa-eye mr-1"></i>
-						{m.contentPreview()}
-					</button>
+		<div class="flex flex-1 overflow-hidden p-6 gap-4">
+			<!-- Editor / Preview column -->
+			<div class="flex-1 flex flex-col min-w-0">
+				<!-- Tab bar + change summary -->
+				<div class="flex items-center gap-1 mb-3">
+					<div class="flex rounded-lg border border-surface-300 overflow-hidden">
+						<button
+							class="px-3 py-1.5 text-sm font-medium transition-colors {!showPreview && !showDiff
+								? 'bg-primary-500 text-white'
+								: 'bg-surface-50 text-surface-600 hover:bg-surface-100'}"
+							onclick={() => {
+								showPreview = false;
+								showDiff = false;
+							}}
+						>
+							<i class="fa-solid fa-pen mr-1.5 text-xs"></i>Edit
+						</button>
+						<button
+							class="px-3 py-1.5 text-sm font-medium border-l border-surface-300 transition-colors {showPreview &&
+							!showDiff
+								? 'bg-primary-500 text-white'
+								: 'bg-surface-50 text-surface-600 hover:bg-surface-100'}"
+							onclick={() => {
+								showPreview = true;
+								showDiff = false;
+							}}
+						>
+							<i class="fa-solid fa-eye mr-1.5 text-xs"></i>{m.contentPreview()}
+						</button>
+					</div>
+
 					{#if isDraft}
 						<div class="flex-1"></div>
-						<label for="change-summary" class="text-sm text-gray-500">{m.changeSummary()}:</label>
-						<input
-							id="change-summary"
-							type="text"
-							bind:value={changeSummary}
-							class="border rounded px-2 py-1 text-sm w-64"
-							placeholder="Describe your changes..."
-						/>
+						<div class="flex items-center gap-2">
+							<label for="change-summary" class="text-xs text-surface-500 whitespace-nowrap">
+								{m.changeSummary()}
+							</label>
+							<input
+								id="change-summary"
+								type="text"
+								bind:value={changeSummary}
+								class="input text-sm w-56"
+								placeholder="Describe your changes..."
+							/>
+						</div>
 					{/if}
 				</div>
 
+				<!-- Content area -->
 				{#if showDiff}
 					<DiffViewer diff={diffResult} />
 				{:else if showPreview}
-					<div class="border rounded-lg p-6 bg-white overflow-auto flex-1 min-h-[500px]">
+					<div class="card border border-surface-200 p-6 overflow-auto flex-1 min-h-[500px]">
 						<MarkdownRenderer {content} />
 					</div>
 				{:else}
 					<textarea
 						bind:value={content}
-						class="w-full border rounded-lg p-4 font-mono text-sm flex-1 min-h-[500px] resize-y {!isDraft
-							? 'bg-gray-50'
+						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!isDraft
+							? 'bg-surface-50 cursor-not-allowed'
 							: ''}"
 						disabled={!isDraft}
 						placeholder="Write your policy document in Markdown..."
+						spellcheck="true"
 					></textarea>
 				{/if}
 			</div>
 
-			<!-- Sidebar: Version history -->
-			<div class="w-80 flex-shrink-0">
-				<div class="bg-white shadow rounded-lg border">
-					<div class="p-4 border-b">
-						<h3 class="font-semibold">{m.versionHistory()}</h3>
-					</div>
-					<div class="p-2 max-h-[400px] overflow-auto">
-						{#each revisions as revision}
-							<button
-								class="w-full text-left p-3 rounded hover:bg-gray-50 transition-colors {currentRevision?.id ===
-								revision.id
-									? 'bg-blue-50 border border-blue-200'
-									: ''}"
-								onclick={() => loadRevision(revision.id)}
-							>
-								<div class="flex items-center justify-between">
-									<span class="font-medium">v{revision.version_number}</span>
-									<span
-										class="px-2 py-0.5 rounded text-xs font-medium {getStatusBadge(
-											revision.status
-										)}"
-									>
-										{statusLabels[revision.status] || revision.status_display || revision.status}
-									</span>
-								</div>
-								{#if revision.author}
-									<p class="text-xs text-gray-500 mt-1">
-										{revision.author.str || revision.author.email || ''}
-									</p>
-								{/if}
-								{#if revision.change_summary}
-									<p class="text-xs text-gray-400 mt-1 truncate">
-										{revision.change_summary}
-									</p>
-								{/if}
-								<div class="flex items-center justify-between mt-1">
-									<p class="text-xs text-gray-400">
-										{new Date(revision.created_at).toLocaleDateString()}
-									</p>
-									{#if revision.status === 'draft' || revision.status === 'deprecated'}
-										<button
-											class="text-xs text-red-400 hover:text-red-600"
-											onclick={(e) => {
-												e.stopPropagation();
-												deleteRevision(revision.id);
-											}}
-											title="Delete revision"
-										>
-											<i class="fa-solid fa-trash"></i>
-										</button>
-									{/if}
-								</div>
-							</button>
-						{/each}
-					</div>
+			<!-- Version history sidebar -->
+			{#if showVersionHistory}
+				<div class="w-72 flex-shrink-0 flex flex-col">
+					<div class="card border border-surface-200 flex flex-col overflow-hidden flex-1">
+						<div class="px-4 py-3 border-b border-surface-200 bg-surface-50">
+							<h3 class="text-sm font-semibold flex items-center gap-2">
+								<i class="fa-solid fa-clock-rotate-left text-surface-400"></i>
+								{m.versionHistory()}
+							</h3>
+						</div>
 
-					<!-- Diff comparison -->
-					{#if revisions.length >= 2}
-						<div class="p-4 border-t">
-							<h4 class="text-sm font-medium mb-2">{m.compareDiff()}</h4>
-							<div class="flex flex-col space-y-2">
-								<select bind:value={diffRevisionA} class="text-sm border rounded p-1">
-									<option value="">From...</option>
-									{#each revisions as rev}
-										<option value={rev.id}>v{rev.version_number}</option>
-									{/each}
-								</select>
-								<select bind:value={diffRevisionB} class="text-sm border rounded p-1">
-									<option value="">To...</option>
-									{#each revisions as rev}
-										<option value={rev.id}>v{rev.version_number}</option>
-									{/each}
-								</select>
+						<div class="flex-1 overflow-auto p-1.5 space-y-1">
+							{#each revisions as revision}
+								{@const isActive = currentRevision?.id === revision.id}
+								{@const style = getStatusStyle(revision.status)}
 								<button
-									class="btn text-sm bg-gray-200 hover:bg-gray-300"
+									class="w-full text-left px-3 py-2.5 rounded-lg transition-colors {isActive
+										? 'bg-primary-50 ring-1 ring-primary-200'
+										: 'hover:bg-surface-50'}"
+									onclick={() => loadRevision(revision.id)}
+								>
+									<div class="flex items-center justify-between mb-1">
+										<span class="text-sm font-semibold {isActive ? 'text-primary-700' : ''}">
+											v{revision.version_number}
+										</span>
+										<span
+											class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border {style.bg} {style.text}"
+										>
+											<i class="fa-solid {style.icon} text-[8px]"></i>
+											{statusLabels[revision.status] || revision.status_display || revision.status}
+										</span>
+									</div>
+									{#if revision.author}
+										<p class="text-xs text-surface-500 truncate">
+											{revision.author.str || revision.author.email || ''}
+										</p>
+									{/if}
+									{#if revision.change_summary}
+										<p class="text-xs text-surface-400 mt-0.5 truncate italic">
+											{revision.change_summary}
+										</p>
+									{/if}
+									<div class="flex items-center justify-between mt-1.5">
+										<p class="text-[10px] text-surface-400">
+											{new Date(revision.created_at).toLocaleDateString()}
+										</p>
+										{#if revision.status === 'draft' || revision.status === 'deprecated'}
+											<button
+												class="text-[10px] text-surface-400 hover:text-red-500 transition-colors p-0.5"
+												onclick={(e) => {
+													e.stopPropagation();
+													deleteRevision(revision.id);
+												}}
+												title="Delete revision"
+											>
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										{/if}
+									</div>
+								</button>
+							{/each}
+
+							{#if revisions.length === 0}
+								<div class="text-center py-6 text-surface-400 text-sm">
+									<i class="fa-solid fa-inbox text-xl mb-2"></i>
+									<p>No revisions yet</p>
+								</div>
+							{/if}
+						</div>
+
+						<!-- Diff comparison -->
+						{#if revisions.length >= 2}
+							<div class="p-3 border-t border-surface-200 bg-surface-50 space-y-2">
+								<h4 class="text-xs font-semibold text-surface-500 uppercase tracking-wide">
+									{m.compareDiff()}
+								</h4>
+								<div class="flex gap-1.5">
+									<select bind:value={diffRevisionA} class="select text-xs flex-1 py-1">
+										<option value="">From...</option>
+										{#each revisions as rev}
+											<option value={rev.id}>v{rev.version_number}</option>
+										{/each}
+									</select>
+									<select bind:value={diffRevisionB} class="select text-xs flex-1 py-1">
+										<option value="">To...</option>
+										{#each revisions as rev}
+											<option value={rev.id}>v{rev.version_number}</option>
+										{/each}
+									</select>
+								</div>
+								<button
+									class="btn btn-sm preset-tonal-primary w-full"
 									onclick={() => loadDiff()}
 									disabled={!diffRevisionA || !diffRevisionB}
 								>
@@ -567,10 +652,10 @@
 									{m.compareDiff()}
 								</button>
 							</div>
-						</div>
-					{/if}
+						{/if}
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
 	{/if}
 </div>
