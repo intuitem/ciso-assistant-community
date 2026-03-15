@@ -27,11 +27,19 @@ function loadPersistedState(): PersistedState | null {
 		const raw = sessionStorage.getItem(STORAGE_KEY);
 		if (!raw) return null;
 		const data = JSON.parse(raw);
-		// Restore Date objects from ISO strings
+		// Restore Date objects and Sets from serialized form
 		if (Array.isArray(data.messages)) {
 			data.messages = data.messages.map((m: ChatMessage) => ({
 				...m,
-				timestamp: new Date(m.timestamp)
+				timestamp: new Date(m.timestamp),
+				...(m.pendingAction && {
+					pendingAction: {
+						...m.pendingAction,
+						selectedIndices: m.pendingAction.selectedIndices
+							? new Set(m.pendingAction.selectedIndices as unknown as number[])
+							: undefined
+					}
+				})
 			}));
 		}
 		return data;
@@ -43,7 +51,19 @@ function loadPersistedState(): PersistedState | null {
 function saveState() {
 	if (!browser) return;
 	try {
-		const data: PersistedState = { messages, sessionId, view };
+		// Serialize Sets as arrays for JSON compatibility
+		const serializable = messages.map((m) => ({
+			...m,
+			...(m.pendingAction && {
+				pendingAction: {
+					...m.pendingAction,
+					selectedIndices: m.pendingAction.selectedIndices
+						? [...m.pendingAction.selectedIndices]
+						: undefined
+				}
+			})
+		}));
+		const data = { messages: serializable, sessionId, view };
 		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 	} catch {
 		// Storage full or unavailable — ignore
@@ -256,18 +276,21 @@ async function streamResponse(userMessage: string) {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
 							if (data.action === 'attach') {
+								const indices = new Set<number>(data.items.map((_: unknown, i: number) => i));
 								msg.pendingAction = {
 									id: generateId(),
 									action: 'attach',
 									displayName: data.related_display,
 									items: data.items,
 									status: 'pending',
+									selectedIndices: indices,
 									parentModelKey: data.parent_model_key,
 									parentId: data.parent_id,
 									parentUrlSlug: data.parent_url_slug,
 									m2mField: data.m2m_field
 								};
 							} else {
+								const indices = new Set<number>(data.items.map((_: unknown, i: number) => i));
 								msg.pendingAction = {
 									id: generateId(),
 									action: data.action,
@@ -275,7 +298,8 @@ async function streamResponse(userMessage: string) {
 									urlSlug: data.url_slug,
 									displayName: data.display_name,
 									items: data.items,
-									status: 'pending'
+									status: 'pending',
+									selectedIndices: indices
 								};
 							}
 							messages = [...messages];
@@ -436,6 +460,13 @@ export async function confirmAction(messageId: string) {
 	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
 
 	const action = msg.pendingAction;
+	const selected = action.selectedIndices ?? new Set(action.items.map((_, i) => i));
+
+	if (selected.size === 0) return; // Nothing selected
+
+	// Filter to only selected items
+	const selectedItems = action.items.filter((_, i) => selected.has(i));
+
 	action.status = 'creating';
 	action.results = [];
 	messages = [...messages];
@@ -443,7 +474,7 @@ export async function confirmAction(messageId: string) {
 	if (action.action === 'attach') {
 		// Attach flow: PATCH the parent object to add M2M relationships
 		try {
-			const itemIds = action.items.map((i) => i.id).filter(Boolean);
+			const itemIds = selectedItems.map((i) => i.id).filter(Boolean);
 			const res = await fetch(`/fe-api/chat/attach-object`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -456,20 +487,19 @@ export async function confirmAction(messageId: string) {
 			});
 
 			if (res.ok) {
-				action.results = action.items.map((i) => ({ name: i.name, id: i.id }));
+				action.results = selectedItems.map((i) => ({ name: i.name, id: i.id }));
 				action.status = 'created';
-				// Refresh page data so the user sees the attached items
 				invalidateAll();
 			} else {
 				const err = await res.json().catch(() => ({ detail: res.statusText }));
-				action.results = action.items.map((i) => ({
+				action.results = selectedItems.map((i) => ({
 					name: i.name,
 					error: err.detail || err.error || 'Attachment failed'
 				}));
 				action.status = 'error';
 			}
 		} catch {
-			action.results = action.items.map((i) => ({
+			action.results = selectedItems.map((i) => ({
 				name: i.name,
 				error: 'Network error'
 			}));
@@ -477,8 +507,8 @@ export async function confirmAction(messageId: string) {
 		}
 		messages = [...messages];
 	} else {
-		// Create flow: POST each item individually
-		for (const item of action.items) {
+		// Create flow: POST each selected item individually
+		for (const item of selectedItems) {
 			try {
 				const res = await fetch(`/fe-api/chat/create-object`, {
 					method: 'POST',
@@ -513,6 +543,35 @@ export async function confirmAction(messageId: string) {
 		}
 	}
 	saveState();
+}
+
+export function toggleItemSelection(messageId: string, index: number) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
+
+	const selected = msg.pendingAction.selectedIndices ?? new Set<number>();
+	if (selected.has(index)) {
+		selected.delete(index);
+	} else {
+		selected.add(index);
+	}
+	msg.pendingAction.selectedIndices = new Set(selected);
+	messages = [...messages];
+}
+
+export function toggleAllSelection(messageId: string) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
+
+	const selected = msg.pendingAction.selectedIndices ?? new Set<number>();
+	if (selected.size === msg.pendingAction.items.length) {
+		// All selected → deselect all
+		msg.pendingAction.selectedIndices = new Set<number>();
+	} else {
+		// Some or none selected → select all
+		msg.pendingAction.selectedIndices = new Set(msg.pendingAction.items.map((_, i) => i));
+	}
+	messages = [...messages];
 }
 
 export function rejectAction(messageId: string) {

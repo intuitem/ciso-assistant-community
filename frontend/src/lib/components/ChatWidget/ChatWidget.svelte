@@ -23,6 +23,8 @@
 		setPageContext,
 		confirmAction,
 		rejectAction,
+		toggleItemSelection,
+		toggleAllSelection,
 		getSuggestedActions
 	} from './chatStore.svelte';
 
@@ -220,50 +222,88 @@
 							{/if}
 							{#if message.pendingAction}
 								{@const pa = message.pendingAction}
+								{@const selectedCount = pa.selectedIndices?.size ?? pa.items.length}
 								<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
-									<div class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-600">
-										{#if pa.action === 'attach'}
-											<i class="fa-solid fa-link text-violet-500"></i>
-											Attach {pa.items.length}
-											{pa.displayName}
-										{:else}
-											<i class="fa-solid fa-plus-circle text-violet-500"></i>
-											Create {pa.items.length}
-											{pa.displayName}
+									<div class="mb-2 flex items-center justify-between">
+										<div class="flex items-center gap-2 text-xs font-medium text-gray-600">
+											{#if pa.action === 'attach'}
+												<i class="fa-solid fa-link text-violet-500"></i>
+												Attach {pa.displayName}
+											{:else}
+												<i class="fa-solid fa-plus-circle text-violet-500"></i>
+												Create {pa.displayName}
+											{/if}
+										</div>
+										{#if pa.status === 'pending' && pa.items.length > 1}
+											<button
+												onclick={() => toggleAllSelection(message.id)}
+												class="text-[10px] text-violet-600 hover:text-violet-800"
+											>
+												{selectedCount === pa.items.length ? 'Deselect all' : 'Select all'}
+											</button>
 										{/if}
 									</div>
 									<ul class="mb-2 space-y-1">
 										{#each pa.items as item, i}
 											<li class="flex items-center gap-2 text-xs text-gray-700">
-												{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
-													<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
-													<span>{item.name}</span>
-												{:else if pa.status === 'error' && pa.results?.[i]?.error}
-													<i class="fa-solid fa-xmark text-red-500 text-[10px]"></i>
-													<span>{item.name}</span>
-													<span class="text-red-400">({pa.results[i].error})</span>
-												{:else if pa.status === 'creating'}
-													{#if pa.results && pa.results.length > i}
+												{#if pa.status === 'created'}
+													{#if pa.selectedIndices?.has(i)}
 														<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
 													{:else}
-														<i class="fa-solid fa-spinner fa-spin text-violet-400 text-[10px]"></i>
+														<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
 													{/if}
-													<span>{item.name}</span>
+													<span class:text-gray-400={!pa.selectedIndices?.has(i)}>{item.name}</span>
+												{:else if pa.status === 'error' && pa.results}
+													{@const resultIdx = [...(pa.selectedIndices ?? [])].indexOf(i)}
+													{#if resultIdx >= 0 && pa.results[resultIdx]?.error}
+														<i class="fa-solid fa-xmark text-red-500 text-[10px]"></i>
+														<span>{item.name}</span>
+														<span class="text-red-400">({pa.results[resultIdx].error})</span>
+													{:else if pa.selectedIndices?.has(i)}
+														<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
+														<span>{item.name}</span>
+													{:else}
+														<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
+														<span class="text-gray-400">{item.name}</span>
+													{/if}
+												{:else if pa.status === 'creating'}
+													{#if pa.selectedIndices?.has(i)}
+														<i class="fa-solid fa-spinner fa-spin text-violet-400 text-[10px]"></i>
+													{:else}
+														<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
+													{/if}
+													<span class:text-gray-400={!pa.selectedIndices?.has(i)}>{item.name}</span>
+												{:else if pa.status === 'pending'}
+													<label class="flex items-center gap-2 cursor-pointer">
+														<input
+															type="checkbox"
+															checked={pa.selectedIndices?.has(i) ?? true}
+															onchange={() => toggleItemSelection(message.id, i)}
+															class="h-3.5 w-3.5 rounded border-gray-300 text-violet-600
+																focus:ring-violet-500 cursor-pointer"
+														/>
+														<span>{item.name}</span>
+													</label>
 												{:else}
-													<i class="fa-solid fa-circle text-gray-300 text-[8px]"></i>
-													<span>{item.name}</span>
+													<i class="fa-solid fa-minus text-gray-300 text-[10px]"></i>
+													<span class="text-gray-400">{item.name}</span>
 												{/if}
 											</li>
 										{/each}
 									</ul>
 									{#if pa.status === 'pending'}
-										<div class="flex gap-2">
+										<div class="flex items-center gap-2">
 											<button
 												onclick={() => confirmAction(message.id)}
+												disabled={selectedCount === 0}
 												class="rounded-lg bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white
-													transition-colors hover:bg-violet-700"
+													transition-colors hover:bg-violet-700
+													disabled:opacity-40 disabled:hover:bg-violet-600"
 											>
-												<i class="fa-solid fa-check mr-1"></i>Confirm
+												<i class="fa-solid fa-check mr-1"></i>Confirm{selectedCount <
+												pa.items.length
+													? ` (${selectedCount})`
+													: ''}
 											</button>
 											<button
 												onclick={() => rejectAction(message.id)}
@@ -278,7 +318,8 @@
 									{:else if pa.status === 'created'}
 										<div class="text-[11px] text-green-600 font-medium">
 											<i class="fa-solid fa-check-circle mr-1"></i>
-											{pa.action === 'attach' ? 'Attached successfully' : 'Created successfully'}
+											{pa.action === 'attach' ? 'Attached' : 'Created'}
+											{selectedCount} item{selectedCount !== 1 ? 's' : ''} successfully
 										</div>
 									{/if}
 								</div>
@@ -544,50 +585,94 @@
 								{/if}
 								{#if message.pendingAction}
 									{@const pa = message.pendingAction}
+									{@const selectedCount = pa.selectedIndices?.size ?? pa.items.length}
 									<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm">
-										<div class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
-											{#if pa.action === 'attach'}
-												<i class="fa-solid fa-link text-violet-500"></i>
-												Attach {pa.items.length}
-												{pa.displayName}
-											{:else}
-												<i class="fa-solid fa-plus-circle text-violet-500"></i>
-												Create {pa.items.length}
-												{pa.displayName}
+										<div class="mb-2 flex items-center justify-between">
+											<div class="flex items-center gap-2 text-sm font-medium text-gray-600">
+												{#if pa.action === 'attach'}
+													<i class="fa-solid fa-link text-violet-500"></i>
+													Attach {pa.displayName}
+												{:else}
+													<i class="fa-solid fa-plus-circle text-violet-500"></i>
+													Create {pa.displayName}
+												{/if}
+											</div>
+											{#if pa.status === 'pending' && pa.items.length > 1}
+												<button
+													onclick={() => toggleAllSelection(message.id)}
+													class="text-xs text-violet-600 hover:text-violet-800"
+												>
+													{selectedCount === pa.items.length ? 'Deselect all' : 'Select all'}
+												</button>
 											{/if}
 										</div>
 										<ul class="mb-3 space-y-1.5">
 											{#each pa.items as item, i}
 												<li class="flex items-center gap-2 text-sm text-gray-700">
-													{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
-														<i class="fa-solid fa-check text-green-500 text-xs"></i>
-														<span>{item.name}</span>
-													{:else if pa.status === 'error' && pa.results?.[i]?.error}
-														<i class="fa-solid fa-xmark text-red-500 text-xs"></i>
-														<span>{item.name}</span>
-														<span class="text-red-400 text-xs">({pa.results[i].error})</span>
-													{:else if pa.status === 'creating'}
-														{#if pa.results && pa.results.length > i}
+													{#if pa.status === 'created'}
+														{#if pa.selectedIndices?.has(i)}
 															<i class="fa-solid fa-check text-green-500 text-xs"></i>
 														{:else}
-															<i class="fa-solid fa-spinner fa-spin text-violet-400 text-xs"></i>
+															<i class="fa-solid fa-minus text-gray-300 text-xs"></i>
 														{/if}
-														<span>{item.name}</span>
+														<span class:text-gray-400={!pa.selectedIndices?.has(i)}
+															>{item.name}</span
+														>
+													{:else if pa.status === 'error' && pa.results}
+														{@const resultIdx = [...(pa.selectedIndices ?? [])].indexOf(i)}
+														{#if resultIdx >= 0 && pa.results[resultIdx]?.error}
+															<i class="fa-solid fa-xmark text-red-500 text-xs"></i>
+															<span>{item.name}</span>
+															<span class="text-red-400 text-xs"
+																>({pa.results[resultIdx].error})</span
+															>
+														{:else if pa.selectedIndices?.has(i)}
+															<i class="fa-solid fa-check text-green-500 text-xs"></i>
+															<span>{item.name}</span>
+														{:else}
+															<i class="fa-solid fa-minus text-gray-300 text-xs"></i>
+															<span class="text-gray-400">{item.name}</span>
+														{/if}
+													{:else if pa.status === 'creating'}
+														{#if pa.selectedIndices?.has(i)}
+															<i class="fa-solid fa-spinner fa-spin text-violet-400 text-xs"></i>
+														{:else}
+															<i class="fa-solid fa-minus text-gray-300 text-xs"></i>
+														{/if}
+														<span class:text-gray-400={!pa.selectedIndices?.has(i)}
+															>{item.name}</span
+														>
+													{:else if pa.status === 'pending'}
+														<label class="flex items-center gap-2 cursor-pointer">
+															<input
+																type="checkbox"
+																checked={pa.selectedIndices?.has(i) ?? true}
+																onchange={() => toggleItemSelection(message.id, i)}
+																class="h-3.5 w-3.5 rounded border-gray-300 text-violet-600
+																	focus:ring-violet-500 cursor-pointer"
+															/>
+															<span>{item.name}</span>
+														</label>
 													{:else}
-														<i class="fa-solid fa-circle text-gray-300 text-[9px]"></i>
-														<span>{item.name}</span>
+														<i class="fa-solid fa-minus text-gray-300 text-xs"></i>
+														<span class="text-gray-400">{item.name}</span>
 													{/if}
 												</li>
 											{/each}
 										</ul>
 										{#if pa.status === 'pending'}
-											<div class="flex gap-2">
+											<div class="flex items-center gap-2">
 												<button
 													onclick={() => confirmAction(message.id)}
+													disabled={selectedCount === 0}
 													class="rounded-lg bg-violet-600 px-4 py-2 text-xs font-medium text-white
-														transition-colors hover:bg-violet-700"
+														transition-colors hover:bg-violet-700
+														disabled:opacity-40 disabled:hover:bg-violet-600"
 												>
-													<i class="fa-solid fa-check mr-1"></i>Confirm
+													<i class="fa-solid fa-check mr-1"></i>Confirm{selectedCount <
+													pa.items.length
+														? ` (${selectedCount})`
+														: ''}
 												</button>
 												<button
 													onclick={() => rejectAction(message.id)}
@@ -602,7 +687,8 @@
 										{:else if pa.status === 'created'}
 											<div class="text-xs text-green-600 font-medium">
 												<i class="fa-solid fa-check-circle mr-1"></i>
-												{pa.action === 'attach' ? 'Attached successfully' : 'Created successfully'}
+												{pa.action === 'attach' ? 'Attached' : 'Created'}
+												{selectedCount} item{selectedCount !== 1 ? 's' : ''} successfully
 											</div>
 										{/if}
 									</div>

@@ -8,6 +8,7 @@ export interface PendingAction {
 	displayName: string;
 	items: { id?: string; name: string; description?: string; folder?: string }[];
 	status: 'pending' | 'creating' | 'created' | 'error' | 'rejected';
+	selectedIndices?: Set<number>;
 	results?: { name: string; id?: string; error?: string }[];
 	// Attach-specific fields
 	parentModelKey?: string;
