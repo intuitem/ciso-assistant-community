@@ -89,8 +89,16 @@ class SuggestControlsWorkflow(Workflow):
             )
             return
 
-        # Step 4: Emit attach proposals
+        # Step 4: Parse LLM recommendations and emit attach proposals
         if new_candidates:
+            recommended = self._parse_recommended_indices(
+                getattr(self, "_last_response", ""), new_candidates
+            )
+            if not recommended:
+                # Fallback: if parsing fails, don't propose anything
+                # (the LLM text already explains what's relevant)
+                return
+
             from chat.tools import MODEL_MAP
 
             parent_info = MODEL_MAP.get("requirement_assessment")
@@ -105,9 +113,7 @@ class SuggestControlsWorkflow(Workflow):
                     "m2m_field": "applied_controls",
                     "related_model_key": "applied_control",
                     "related_display": related_info[2],
-                    "items": [
-                        {"id": c["id"], "name": c["name"]} for c in new_candidates[:10]
-                    ],
+                    "items": [{"id": c["id"], "name": c["name"]} for c in recommended],
                 }
                 yield self._pending_action(proposal)
 
@@ -253,5 +259,13 @@ class SuggestControlsWorkflow(Workflow):
             f"suggest what NEW controls should be created.\n\n"
             f"Keep your response concise. Use the control names as provided. "
             f"The user will see interactive buttons below your response to attach the controls — "
-            f"do NOT describe how to attach them."
+            f"do NOT describe how to attach them.\n\n"
+            f"**IMPORTANT:** At the very end of your response, output a JSON block listing "
+            f"ONLY the numbers of controls you recommend attaching (from the numbered list above). "
+            f"Use this exact format:\n"
+            f"```json\n"
+            f'{{"recommended": [1, 3, 5]}}\n'
+            f"```\n"
+            f"Only include controls that are genuinely relevant. Do NOT include controls you "
+            f"explicitly identified as not relevant."
         )

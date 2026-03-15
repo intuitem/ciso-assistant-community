@@ -7,6 +7,7 @@ Each step is just a Python method call — no DAGs, no state machines.
 
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from typing import Iterator
 
@@ -107,6 +108,44 @@ class Workflow:
     def _error(self, message: str) -> SSEEvent:
         """Emit an error event."""
         return SSEEvent(type="error", content=message)
+
+    def _parse_recommended_indices(
+        self, llm_response: str, candidates: list[dict]
+    ) -> list[dict]:
+        """
+        Parse the JSON block from the LLM response to get recommended items.
+
+        Expects the LLM to have output a block like:
+            ```json
+            {"recommended": [1, 3, 5]}
+            ```
+        where numbers are 1-based indices into the candidates list.
+        """
+        try:
+            # Find JSON in code fence
+            match = re.search(r"```json\s*(\{.*?\})\s*```", llm_response, re.DOTALL)
+            if not match:
+                # Try without code fence
+                match = re.search(
+                    r'\{\s*"recommended"\s*:\s*\[[\d\s,]*\]\s*\}', llm_response
+                )
+                if not match:
+                    logger.warning("Could not find recommended JSON in LLM response")
+                    return []
+                raw = match.group(0)
+            else:
+                raw = match.group(1)
+
+            data = json.loads(raw)
+            indices = data.get("recommended", [])
+            result = []
+            for idx in indices:
+                if isinstance(idx, int) and 1 <= idx <= len(candidates):
+                    result.append(candidates[idx - 1])
+            return result
+        except (json.JSONDecodeError, KeyError, TypeError) as e:
+            logger.warning("Failed to parse recommended items: %s", e)
+            return []
 
     def _stream_llm(
         self,

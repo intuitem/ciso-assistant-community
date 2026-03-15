@@ -66,8 +66,14 @@ class EvidenceGuidanceWorkflow(Workflow):
         guidance_prompt = self._build_guidance_prompt(context_info, new_candidates)
         yield from self._stream_llm(ctx, guidance_prompt)
 
-        # Step 4: Emit attach proposals
+        # Step 4: Parse LLM recommendations and emit attach proposals
         if new_candidates:
+            recommended = self._parse_recommended_indices(
+                getattr(self, "_last_response", ""), new_candidates
+            )
+            if not recommended:
+                return
+
             from chat.tools import MODEL_MAP
 
             parent_info = MODEL_MAP.get("requirement_assessment")
@@ -82,9 +88,7 @@ class EvidenceGuidanceWorkflow(Workflow):
                     "m2m_field": "evidences",
                     "related_model_key": "evidence",
                     "related_display": related_info[2],
-                    "items": [
-                        {"id": c["id"], "name": c["name"]} for c in new_candidates[:10]
-                    ],
+                    "items": [{"id": c["id"], "name": c["name"]} for c in recommended],
                 }
                 yield self._pending_action(proposal)
 
@@ -228,5 +232,12 @@ class EvidenceGuidanceWorkflow(Workflow):
             f"3. Recommend what new evidence the user should create and collect.\n\n"
             f"Keep your response concise and practical. Focus on what an auditor would expect to see. "
             f"The user will see interactive buttons below to attach existing evidences — "
-            f"do NOT describe how to attach them."
+            f"do NOT describe how to attach them.\n\n"
+            f"**IMPORTANT:** At the very end of your response, output a JSON block listing "
+            f"ONLY the numbers of evidences you recommend attaching (from the numbered list above). "
+            f"Use this exact format:\n"
+            f"```json\n"
+            f'{{"recommended": [1, 3, 5]}}\n'
+            f"```\n"
+            f"Only include evidences that are genuinely relevant to this requirement."
         )

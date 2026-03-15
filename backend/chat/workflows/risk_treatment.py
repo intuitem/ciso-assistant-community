@@ -69,8 +69,14 @@ class RiskTreatmentWorkflow(Workflow):
         ranking_prompt = self._build_treatment_prompt(scenario_info, new_candidates)
         yield from self._stream_llm(ctx, ranking_prompt)
 
-        # Step 4: Emit attach proposals if we have candidates
+        # Step 4: Parse LLM recommendations and emit attach proposals
         if new_candidates:
+            recommended = self._parse_recommended_indices(
+                getattr(self, "_last_response", ""), new_candidates
+            )
+            if not recommended:
+                return
+
             from chat.tools import MODEL_MAP
 
             parent_info = MODEL_MAP.get("risk_scenario")
@@ -85,9 +91,7 @@ class RiskTreatmentWorkflow(Workflow):
                     "m2m_field": "applied_controls",
                     "related_model_key": "applied_control",
                     "related_display": related_info[2],
-                    "items": [
-                        {"id": c["id"], "name": c["name"]} for c in new_candidates[:10]
-                    ],
+                    "items": [{"id": c["id"], "name": c["name"]} for c in recommended],
                 }
                 yield self._pending_action(proposal)
 
@@ -235,5 +239,12 @@ class RiskTreatmentWorkflow(Workflow):
             f"4. If gaps remain, suggest what NEW controls should be created.\n\n"
             f"Keep your response concise and actionable. "
             f"The user will see interactive buttons below to attach controls — "
-            f"do NOT describe how to attach them."
+            f"do NOT describe how to attach them.\n\n"
+            f"**IMPORTANT:** At the very end of your response, output a JSON block listing "
+            f"ONLY the numbers of controls you recommend attaching (from the numbered list above). "
+            f"Use this exact format:\n"
+            f"```json\n"
+            f'{{"recommended": [1, 3, 5]}}\n'
+            f"```\n"
+            f"Only include controls that are genuinely relevant to mitigating this risk."
         )

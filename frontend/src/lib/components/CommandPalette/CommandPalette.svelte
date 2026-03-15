@@ -29,7 +29,7 @@
 	// Action commands (non-navigation)
 	const actionCommands = [
 		{
-			label: safeTranslate('openAIAssistant'),
+			label: safeTranslate('openAssistant'),
 			icon: 'fa-solid fa-robot',
 			onSelect: () => {
 				opened = false;

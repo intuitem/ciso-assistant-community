@@ -175,10 +175,18 @@ class ChatSessionViewSet(BaseModelViewSet):
                                 )
                             yield event.encode()
 
+                        # Strip the JSON recommendation block before saving
+                        import re
+
+                        saved_response = re.sub(
+                            r"\s*```json\s*\{[^}]*\"recommended\"[^}]*\}\s*```\s*",
+                            "",
+                            full_response,
+                        ).rstrip()
                         ChatMessage.objects.create(
                             session=session,
                             role=ChatMessage.Role.ASSISTANT,
-                            content=full_response,
+                            content=saved_response or full_response,
                             context_refs=wf_context_refs,
                         )
                         done_data = json.dumps(

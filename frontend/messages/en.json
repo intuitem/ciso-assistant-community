@@ -3757,6 +3757,6 @@
 	"searchEllipsis": "Search...",
 	"commandPaletteOpen": "open",
 	"commandPaletteActions": "Actions",
-	"openAIAssistant": "Open AI Assistant",
+	"openAssistant": "AI Assistant",
 	"searchPagesAndActions": "Search pages and actions..."
 }
