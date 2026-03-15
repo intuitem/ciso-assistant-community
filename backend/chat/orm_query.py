@@ -172,6 +172,14 @@ def execute_tool_query(
             qs = qs.filter(**{f"{rel_name}__isnull": True})
             filters_applied.append(f"no {rel_name}")
 
+    # Compound relation filter — filter on properties of related objects
+    related_filter = arguments.get("related_filter")
+    if related_filter and isinstance(related_filter, dict):
+        rf_q = _build_related_filter(related_filter, model_class)
+        if rf_q:
+            qs = qs.filter(rf_q["q"]).distinct()
+            filters_applied.append(rf_q["label"])
+
     # Text search
     search = arguments.get("search")
     if search:
@@ -353,6 +361,72 @@ def _is_valid_relation(model_class, field_name: str) -> bool:
             "Ignoring invalid relation '%s' on %s", field_name, model_class.__name__
         )
         return False
+
+
+def _build_related_filter(related_filter: dict, model_class) -> dict | None:
+    """
+    Build a Q object for compound relation filters.
+
+    related_filter keys:
+        relation: field name of the relation (e.g., "evidences", "applied_controls")
+        condition: one of "status_is", "status_not", "overdue", "no_attachment",
+                   "result_is", "treatment_is"
+        value: value for status_is/status_not/result_is/treatment_is
+    """
+    relation = related_filter.get("relation")
+    condition = related_filter.get("condition")
+    value = related_filter.get("value")
+
+    if not relation or not condition:
+        return None
+
+    if not _is_valid_relation(model_class, relation):
+        return None
+
+    if condition == "status_is" and value:
+        return {
+            "q": Q(**{f"{relation}__status": value}),
+            "label": f"{relation} with status={value}",
+        }
+
+    if condition == "status_not" and value:
+        return {
+            "q": ~Q(**{f"{relation}__status": value}),
+            "label": f"{relation} with status!={value}",
+        }
+
+    if condition == "overdue":
+        from django.utils import timezone
+
+        today = timezone.now().date()
+        # Try eta first, then expiry_date
+        return {
+            "q": Q(**{f"{relation}__eta__lt": today})
+            | Q(**{f"{relation}__expiry_date__lt": today}),
+            "label": f"{relation} overdue",
+        }
+
+    if condition == "no_attachment":
+        # Specific to evidences → EvidenceRevision.attachment
+        return {
+            "q": Q(**{f"{relation}__isnull": False})
+            & ~Q(**{f"{relation}__revisions__attachment__isnull": False}),
+            "label": f"{relation} without attachments",
+        }
+
+    if condition == "result_is" and value:
+        return {
+            "q": Q(**{f"{relation}__result": value}),
+            "label": f"{relation} with result={value}",
+        }
+
+    if condition == "treatment_is" and value:
+        return {
+            "q": Q(**{f"{relation}__treatment": value}),
+            "label": f"{relation} with treatment={value}",
+        }
+
+    return None
 
 
 def _resolve_domain(domain_name: str, accessible_folder_ids: list[str]) -> list[str]:

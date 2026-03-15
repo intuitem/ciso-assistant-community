@@ -308,6 +308,49 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'applied_controls' (risk scenarios with no controls)."
             ),
         },
+        "related_filter": {
+            "type": "object",
+            "description": (
+                "Filter objects based on properties of their related objects. "
+                "Use this for compound queries like 'controls with expired evidences', "
+                "'controls with evidences lacking files', 'requirements with overdue controls', "
+                "'risk scenarios with deprecated controls'. "
+                "Combine with has_related/has_no_related for multi-relation queries."
+            ),
+            "properties": {
+                "relation": {
+                    "type": "string",
+                    "description": (
+                        "The relation field name to filter on (e.g., 'evidences', "
+                        "'applied_controls', 'threats', 'assets')"
+                    ),
+                },
+                "condition": {
+                    "type": "string",
+                    "enum": [
+                        "status_is",
+                        "status_not",
+                        "overdue",
+                        "no_attachment",
+                        "result_is",
+                        "treatment_is",
+                    ],
+                    "description": (
+                        "The condition to check on related objects: "
+                        "status_is/status_not (filter by related status), "
+                        "overdue (related objects past their ETA/expiry), "
+                        "no_attachment (evidences without uploaded files), "
+                        "result_is (requirement assessment result), "
+                        "treatment_is (risk scenario treatment)"
+                    ),
+                },
+                "value": {
+                    "type": "string",
+                    "description": "Value for status_is/status_not/result_is/treatment_is conditions",
+                },
+            },
+            "required": ["relation", "condition"],
+        },
         "search": {
             "type": "string",
             "description": "Search in name, description, or ref_id",

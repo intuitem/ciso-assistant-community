@@ -1,5 +1,6 @@
 import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
+import { invalidateAll } from '$app/navigation';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -58,10 +59,11 @@ let view = $state<ChatView>(restored?.view ?? 'closed');
 let messages = $state<ChatMessage[]>(restored?.messages ?? [WELCOME_MESSAGE]);
 let inputText = $state('');
 let isTyping = $state(false);
+let isStreaming = $state(false);
 let sessionId = $state<string | null>(restored?.sessionId ?? null);
 let abortController = $state<AbortController | null>(null);
 
-export const suggestedActions: SuggestedAction[] = [
+const defaultActions: SuggestedAction[] = [
 	{
 		label: 'Overdue controls',
 		prompt: 'Show me the controls that have missed their ETA',
@@ -83,6 +85,72 @@ export const suggestedActions: SuggestedAction[] = [
 		icon: 'fa-solid fa-folder-tree'
 	}
 ];
+
+// Contextual actions based on the current page
+const contextualActions: Record<string, SuggestedAction[]> = {
+	'requirement-assessments': [
+		{
+			label: 'Suggest controls',
+			prompt: 'What controls should I implement to comply with this requirement?',
+			icon: 'fa-solid fa-lightbulb'
+		},
+		{
+			label: 'Suggest evidence',
+			prompt: 'What evidence should I collect for this requirement?',
+			icon: 'fa-solid fa-file-circle-check'
+		}
+	],
+	'risk-scenarios': [
+		{
+			label: 'Suggest treatment',
+			prompt: 'How should I treat this risk scenario?',
+			icon: 'fa-solid fa-shield-halved'
+		}
+	],
+	'compliance-assessments': [
+		{
+			label: 'Compliance overview',
+			prompt: 'Give me an overview of this audit compliance status',
+			icon: 'fa-solid fa-chart-pie'
+		}
+	],
+	'risk-assessments': [
+		{
+			label: 'Risk overview',
+			prompt: 'Summarize the risk scenarios in this assessment',
+			icon: 'fa-solid fa-triangle-exclamation'
+		}
+	]
+};
+
+/**
+ * Detect the URL slug from the current page path.
+ * e.g. "/requirement-assessments/abc-123/edit" → "requirement-assessments"
+ */
+function getPageSlug(): string | null {
+	const path = currentPageContext?.path;
+	if (!path) return null;
+	const segments = path.replace(/^\//, '').split('/');
+	return segments[0] || null;
+}
+
+/**
+ * Check if the current page is a detail/edit page (has a UUID segment).
+ */
+function isDetailPage(): boolean {
+	const path = currentPageContext?.path;
+	if (!path) return false;
+	const segments = path.replace(/^\//, '').split('/');
+	return segments.length >= 2 && /^[0-9a-f-]{36}$/i.test(segments[1]);
+}
+
+export function getSuggestedActions(): SuggestedAction[] {
+	const slug = getPageSlug();
+	if (slug && isDetailPage() && contextualActions[slug]) {
+		return [...contextualActions[slug], ...defaultActions];
+	}
+	return defaultActions;
+}
 
 function generateId(): string {
 	return Date.now().toString(36) + Math.random().toString(36).slice(2);
@@ -146,6 +214,7 @@ async function streamResponse(userMessage: string) {
 			timestamp: new Date()
 		});
 		isTyping = false;
+		isStreaming = true;
 
 		// Read SSE stream
 		const reader = response.body?.getReader();
@@ -229,10 +298,21 @@ async function streamResponse(userMessage: string) {
 				}
 			}
 		}
+		isStreaming = false;
+		abortController = null;
 		saveState();
 	} catch (error) {
 		isTyping = false;
+		isStreaming = false;
+		abortController = null;
 		if (error instanceof DOMException && error.name === 'AbortError') {
+			// Append a note that the response was stopped
+			const lastMsg = messages[messages.length - 1];
+			if (lastMsg?.role === 'assistant' && lastMsg.content) {
+				lastMsg.content += '\n\n*— stopped*';
+				messages = [...messages];
+			}
+			saveState();
 			return;
 		}
 
@@ -265,6 +345,19 @@ export function setInputText(text: string) {
 
 export function getIsTyping(): boolean {
 	return isTyping;
+}
+
+export function getIsStreaming(): boolean {
+	return isStreaming;
+}
+
+export function stopStreaming() {
+	if (abortController) {
+		abortController.abort();
+		abortController = null;
+	}
+	isStreaming = false;
+	isTyping = false;
 }
 
 export function openChat() {
@@ -365,6 +458,8 @@ export async function confirmAction(messageId: string) {
 			if (res.ok) {
 				action.results = action.items.map((i) => ({ name: i.name, id: i.id }));
 				action.status = 'created';
+				// Refresh page data so the user sees the attached items
+				invalidateAll();
 			} else {
 				const err = await res.json().catch(() => ({ detail: res.statusText }));
 				action.results = action.items.map((i) => ({
@@ -413,6 +508,9 @@ export async function confirmAction(messageId: string) {
 		const allOk = action.results!.every((r) => !r.error);
 		action.status = allOk ? 'created' : 'error';
 		messages = [...messages];
+		if (allOk) {
+			invalidateAll();
+		}
 	}
 	saveState();
 }

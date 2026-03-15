@@ -90,7 +90,10 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Parse page context into structured reference
         parsed_context = parse_page_context(page_context) if page_context else None
 
-        # Step 1: Ask the LLM if this is a tool call (structured query)
+        # Step 1: Ask the LLM if this is a tool call (structured query or workflow)
+        from .workflows import get_workflow_tools, get_workflow_by_tool_name
+        from .workflows.base import WorkflowContext
+
         llm = get_llm()
 
         # Build page context prefix for the LLM
@@ -114,13 +117,92 @@ class ChatSessionViewSet(BaseModelViewSet):
                 )
             tool_prompt += f"User message: {user_content}"
 
+        # Combine standard tools + context-aware workflow tools
+        all_tools = get_tools() + get_workflow_tools(parsed_context)
+
+        history_for_tool = list(
+            session.messages.order_by("created_at").values("role", "content")
+        )[-20:]
+
         tool_response = llm.tool_call(
             tool_prompt,
-            get_tools(),
-            history=list(
-                session.messages.order_by("created_at").values("role", "content")
-            )[-20:],
+            all_tools,
+            history=history_for_tool,
         )
+
+        # Check if LLM selected a workflow
+        if tool_response and tool_response.get("name", "").startswith("workflow_"):
+            workflow = get_workflow_by_tool_name(tool_response["name"])
+            if workflow:
+                logger.info("Workflow selected: %s", workflow.name)
+
+                # Build conversation history (exclude the message we just saved)
+                wf_history = list(
+                    session.messages.order_by("created_at").values("role", "content")
+                )
+                if (
+                    wf_history
+                    and wf_history[-1]["role"] == "user"
+                    and wf_history[-1]["content"] == user_content
+                ):
+                    wf_history = wf_history[:-1]
+                wf_history = wf_history[-20:]
+
+                wf_ctx = WorkflowContext(
+                    user_message=user_content,
+                    parsed_context=parsed_context,
+                    accessible_folder_ids=accessible_folders,
+                    llm=llm,
+                    history=wf_history,
+                )
+
+                def stream_workflow():
+                    full_response = ""
+                    wf_context_refs = []
+                    try:
+                        for event in workflow.run(wf_ctx):
+                            if event.type == "token":
+                                full_response += (
+                                    event.content
+                                    if isinstance(event.content, str)
+                                    else ""
+                                )
+                            if event.type == "pending_action" and isinstance(
+                                event.content, dict
+                            ):
+                                wf_context_refs.append(
+                                    {"source": "pending_action", **event.content}
+                                )
+                            yield event.encode()
+
+                        ChatMessage.objects.create(
+                            session=session,
+                            role=ChatMessage.Role.ASSISTANT,
+                            content=full_response,
+                            context_refs=wf_context_refs,
+                        )
+                        done_data = json.dumps(
+                            {"type": "done", "context_refs": wf_context_refs}
+                        )
+                        yield f"data: {done_data}\n\n"
+
+                    except Exception as e:
+                        logger.error("Workflow stream error: %s", e)
+                        error_msg = "Sorry, I encountered an error. Please try again."
+                        ChatMessage.objects.create(
+                            session=session,
+                            role=ChatMessage.Role.ASSISTANT,
+                            content=error_msg,
+                        )
+                        error_data = json.dumps({"type": "error", "content": error_msg})
+                        yield f"data: {error_data}\n\n"
+
+                response = StreamingHttpResponse(
+                    stream_workflow(), content_type="text/event-stream"
+                )
+                response["Cache-Control"] = "no-cache"
+                response["X-Accel-Buffering"] = "no"
+                return response
 
         if tool_response and tool_response.get("name"):
             logger.info(

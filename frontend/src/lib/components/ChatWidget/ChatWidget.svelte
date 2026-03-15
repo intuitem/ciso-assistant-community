@@ -10,6 +10,8 @@
 		getInputText,
 		setInputText,
 		getIsTyping,
+		getIsStreaming,
+		stopStreaming,
 		openChat,
 		closeChat,
 		expandChat,
@@ -21,7 +23,7 @@
 		setPageContext,
 		confirmAction,
 		rejectAction,
-		suggestedActions
+		getSuggestedActions
 	} from './chatStore.svelte';
 
 	let copiedId = $state<string | null>(null);
@@ -50,6 +52,7 @@
 	const messages = $derived(getMessages());
 	const inputText = $derived(getInputText());
 	const isTyping = $derived(getIsTyping());
+	const isStreaming = $derived(getIsStreaming());
 	const hasUserMessages = $derived(messages.some((m) => m.role === 'user'));
 
 	$effect(() => {
@@ -368,7 +371,7 @@
 			<!-- Suggested actions (compact: 1-column list) -->
 			{#if !hasUserMessages}
 				<div class="mt-2 flex flex-col gap-2">
-					{#each suggestedActions as action}
+					{#each getSuggestedActions() as action}
 						<button
 							onclick={() => sendMessage(action.prompt)}
 							class="flex items-center gap-2.5 rounded-xl border border-violet-200 bg-violet-50
@@ -392,20 +395,33 @@
 					onkeydown={handleKeydown}
 					type="text"
 					placeholder="Ask a question..."
+					disabled={isStreaming}
 					class="flex-1 rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-sm
 						outline-none transition-colors placeholder:text-gray-400
-						focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+						focus:border-violet-400 focus:ring-2 focus:ring-violet-100
+						disabled:opacity-50"
 				/>
-				<button
-					onclick={handleSend}
-					disabled={!inputText.trim()}
-					class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
-						bg-violet-600 text-white transition-colors hover:bg-violet-700
-						disabled:opacity-40 disabled:hover:bg-violet-600"
-					aria-label="Send message"
-				>
-					<i class="fa-solid fa-paper-plane text-sm"></i>
-				</button>
+				{#if isStreaming}
+					<button
+						onclick={stopStreaming}
+						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
+							bg-red-500 text-white transition-colors hover:bg-red-600"
+						aria-label="Stop generating"
+					>
+						<i class="fa-solid fa-stop text-sm"></i>
+					</button>
+				{:else}
+					<button
+						onclick={handleSend}
+						disabled={!inputText.trim()}
+						class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl
+							bg-violet-600 text-white transition-colors hover:bg-violet-700
+							disabled:opacity-40 disabled:hover:bg-violet-600"
+						aria-label="Send message"
+					>
+						<i class="fa-solid fa-paper-plane text-sm"></i>
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -679,7 +695,7 @@
 				<!-- Suggested actions (expanded: 2x2 grid) -->
 				{#if !hasUserMessages}
 					<div class="mt-3 grid grid-cols-2 gap-3">
-						{#each suggestedActions as action}
+						{#each getSuggestedActions() as action}
 							<button
 								onclick={() => sendMessage(action.prompt)}
 								class="flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50
@@ -703,20 +719,33 @@
 						onkeydown={handleKeydown}
 						type="text"
 						placeholder="Ask a question..."
+						disabled={isStreaming}
 						class="flex-1 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm
 							outline-none transition-colors placeholder:text-gray-400
-							focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+							focus:border-violet-400 focus:ring-2 focus:ring-violet-100
+							disabled:opacity-50"
 					/>
-					<button
-						onclick={handleSend}
-						disabled={!inputText.trim()}
-						class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl
-							bg-violet-600 text-white transition-colors hover:bg-violet-700
-							disabled:opacity-40 disabled:hover:bg-violet-600"
-						aria-label="Send message"
-					>
-						<i class="fa-solid fa-paper-plane text-sm"></i>
-					</button>
+					{#if isStreaming}
+						<button
+							onclick={stopStreaming}
+							class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl
+								bg-red-500 text-white transition-colors hover:bg-red-600"
+							aria-label="Stop generating"
+						>
+							<i class="fa-solid fa-stop text-sm"></i>
+						</button>
+					{:else}
+						<button
+							onclick={handleSend}
+							disabled={!inputText.trim()}
+							class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl
+								bg-violet-600 text-white transition-colors hover:bg-violet-700
+								disabled:opacity-40 disabled:hover:bg-violet-600"
+							aria-label="Send message"
+						>
+							<i class="fa-solid fa-paper-plane text-sm"></i>
+						</button>
+					{/if}
 				</div>
 			</div>
 		</div>
