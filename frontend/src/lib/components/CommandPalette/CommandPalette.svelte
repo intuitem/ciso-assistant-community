@@ -6,6 +6,7 @@
 	import { page } from '$app/state';
 	import { navData } from '../SideBar/navData';
 	import { getSidebarVisibleItems } from '$lib/utils/sidebar-config';
+	import { expandChat } from '../ChatWidget/chatStore.svelte';
 	import { m } from '$paraglide/messages';
 
 	let opened = $state(false);
@@ -24,6 +25,18 @@
 			goto(link.href, { label: link.label, breadcrumbAction: 'replace' });
 		}
 	}));
+
+	// Action commands (non-navigation)
+	const actionCommands = [
+		{
+			label: safeTranslate('openAIAssistant'),
+			icon: 'fa-solid fa-robot',
+			onSelect: () => {
+				opened = false;
+				expandChat();
+			}
+		}
+	];
 
 	const featureFlags = $derived(page.data?.featureflags ?? {});
 	const sideBarVisibleItems = $derived(getSidebarVisibleItems(featureFlags));
@@ -54,9 +67,13 @@
 				return sideBarVisibleItems[visibilityKey] !== false;
 			})
 	);
+	let filteredActionCommands = $derived(
+		actionCommands.filter((cmd) => normalize(cmd.label).includes(normalize(searchText)))
+	);
+	let allFilteredCommands = $derived([...filteredNavigationCommands, ...filteredActionCommands]);
 
 	$effect(() => {
-		if (selected >= filteredNavigationCommands.length) {
+		if (selected >= allFilteredCommands.length) {
 			selected = 0;
 		}
 	});
@@ -84,23 +101,23 @@
 			opened = false;
 		} else if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			if (selected < filteredNavigationCommands.length - 1) {
+			if (selected < allFilteredCommands.length - 1) {
 				selected++;
 			}
 			document
-				.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)
-				?.scrollIntoView({ block: 'nearest' });
+				.querySelectorAll('[data-cmdk-item]')
+				?.[selected]?.scrollIntoView({ block: 'nearest' });
 		} else if (e.key === 'ArrowUp') {
 			e.preventDefault();
 			if (selected > 0) {
 				selected--;
 			}
 			document
-				.querySelector(`[data-cmdk-nav-btn]:nth-of-type(${selected + 1})`)
-				?.scrollIntoView({ block: 'nearest' });
+				.querySelectorAll('[data-cmdk-item]')
+				?.[selected]?.scrollIntoView({ block: 'nearest' });
 		} else if (e.key === 'Enter') {
-			const selectedLink = filteredNavigationCommands[selected];
-			if (selectedLink) selectedLink.onSelect();
+			const selectedCmd = allFilteredCommands[selected];
+			if (selectedCmd) selectedCmd.onSelect();
 		}
 	}
 </script>
@@ -129,7 +146,7 @@
 					type="text"
 					bind:value={searchText}
 					bind:this={searchInput}
-					placeholder={m.searchPages()}
+					placeholder={m.searchPagesAndActions()}
 				/>
 				<button
 					onclick={() => (opened = false)}
@@ -141,37 +158,72 @@
 
 			<!-- Results -->
 			<div class="max-h-72 overflow-y-auto overscroll-contain">
-				{#if filteredNavigationCommands.length > 0}
-					<div class="px-3 py-2">
-						<span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1"
-							>{m.commandPaletteNavigation()}</span
-						>
-					</div>
-					<div class="px-2 pb-2">
-						{#each filteredNavigationCommands as navigationCommand, index}
-							<button
-								class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer
-									{selected === index ? 'bg-violet-50 text-violet-900' : 'text-gray-700 hover:bg-gray-50'}"
-								data-cmdk-nav-btn=""
-								onmouseenter={() => {
-									selected = index;
-								}}
-								onclick={navigationCommand.onSelect}
+				{#if allFilteredCommands.length > 0}
+					{#if filteredNavigationCommands.length > 0}
+						<div class="px-3 py-2">
+							<span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1"
+								>{m.commandPaletteNavigation()}</span
 							>
-								{#if navigationCommand.icon}
-									<i
-										class="{navigationCommand.icon} w-4 text-center text-xs {selected === index
-											? 'text-violet-500'
-											: 'text-gray-400'}"
-									></i>
-								{/if}
-								<span class="flex-1 truncate">{navigationCommand.label}</span>
-								{#if selected === index}
-									<span class="text-[10px] text-violet-400">↵</span>
-								{/if}
-							</button>
-						{/each}
-					</div>
+						</div>
+						<div class="px-2 pb-2">
+							{#each filteredNavigationCommands as navigationCommand, index}
+								<button
+									class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer
+										{selected === index ? 'bg-violet-50 text-violet-900' : 'text-gray-700 hover:bg-gray-50'}"
+									data-cmdk-item=""
+									onmouseenter={() => {
+										selected = index;
+									}}
+									onclick={navigationCommand.onSelect}
+								>
+									{#if navigationCommand.icon}
+										<i
+											class="{navigationCommand.icon} w-4 text-center text-xs {selected === index
+												? 'text-violet-500'
+												: 'text-gray-400'}"
+										></i>
+									{/if}
+									<span class="flex-1 truncate">{navigationCommand.label}</span>
+									{#if selected === index}
+										<span class="text-[10px] text-violet-400">↵</span>
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{/if}
+					{#if filteredActionCommands.length > 0}
+						<div class="px-3 py-2">
+							<span class="text-[11px] font-semibold uppercase tracking-wider text-gray-400 px-1"
+								>{m.commandPaletteActions()}</span
+							>
+						</div>
+						<div class="px-2 pb-2">
+							{#each filteredActionCommands as actionCommand, index}
+								{@const globalIndex = filteredNavigationCommands.length + index}
+								<button
+									class="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors cursor-pointer
+										{selected === globalIndex ? 'bg-violet-50 text-violet-900' : 'text-gray-700 hover:bg-gray-50'}"
+									data-cmdk-item=""
+									onmouseenter={() => {
+										selected = globalIndex;
+									}}
+									onclick={actionCommand.onSelect}
+								>
+									{#if actionCommand.icon}
+										<i
+											class="{actionCommand.icon} w-4 text-center text-xs {selected === globalIndex
+												? 'text-violet-500'
+												: 'text-gray-400'}"
+										></i>
+									{/if}
+									<span class="flex-1 truncate">{actionCommand.label}</span>
+									{#if selected === globalIndex}
+										<span class="text-[10px] text-violet-400">↵</span>
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{/if}
 				{:else}
 					<div class="flex flex-col items-center justify-center py-10 text-gray-400">
 						<i class="fa-solid fa-magnifying-glass text-2xl mb-2"></i>

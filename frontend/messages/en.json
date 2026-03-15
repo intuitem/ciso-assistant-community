@@ -3755,5 +3755,8 @@
 	"commandPaletteNoResults": "No results found",
 	"commandPaletteNavigate": "navigate",
 	"searchEllipsis": "Search...",
-	"commandPaletteOpen": "open"
+	"commandPaletteOpen": "open",
+	"commandPaletteActions": "Actions",
+	"openAIAssistant": "Open AI Assistant",
+	"searchPagesAndActions": "Search pages and actions..."
 }
