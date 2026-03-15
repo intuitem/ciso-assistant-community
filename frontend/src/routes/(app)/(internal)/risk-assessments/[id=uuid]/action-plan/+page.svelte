@@ -17,6 +17,7 @@
 		owner: 'owner',
 		eta: 'eta',
 		expiry_date: 'expiryDate',
+		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
 		risk_scenarios: 'matchingScenarios'
@@ -97,6 +98,7 @@
 				'owner',
 				'eta',
 				'expiry_date',
+				'control_impact',
 				'effort',
 				'annual_cost',
 				'risk_scenarios'
