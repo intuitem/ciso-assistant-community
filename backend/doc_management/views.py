@@ -20,6 +20,25 @@ from .models import DocumentEdit, DocumentRevision, ManagedDocument
 
 logger = structlog.get_logger(__name__)
 
+TEMPLATES_BASE_DIR = (
+    Path(__file__).resolve().parent.parent / "library" / "policy_templates"
+)
+
+
+def _get_user_lang(request):
+    """Get the user's preferred language from their preferences."""
+    if hasattr(request, "user") and hasattr(request.user, "get_preferences"):
+        return request.user.get_preferences().get("lang", "en")
+    return "en"
+
+
+def _get_templates_dir(lang: str) -> Path:
+    """Resolve the templates directory for the given language, falling back to 'en'."""
+    localized = TEMPLATES_BASE_DIR / lang
+    if localized.exists() and any(localized.glob("*.md")):
+        return localized
+    return TEMPLATES_BASE_DIR / "en"
+
 
 class ManagedDocumentViewSet(BaseModelViewSet):
     """
@@ -32,10 +51,9 @@ class ManagedDocumentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def templates(self, request):
-        """List available policy templates."""
-        template_dir = (
-            Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-        )
+        """List available document templates in the user's preferred language."""
+        lang = _get_user_lang(request)
+        template_dir = _get_templates_dir(lang)
         templates = []
         if template_dir.exists():
             for f in sorted(template_dir.glob("*.md")):
@@ -43,6 +61,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 metadata = {
                     "id": f.stem,
                     "title": f.stem.replace("_", " ").title(),
+                    "lang": template_dir.name,
                 }
                 if content.startswith("---"):
                     parts = content.split("---", 2)
