@@ -23,13 +23,15 @@ export const load: PageServerLoad = async (event) => {
 	let policyDocument = null;
 	let currentRevisionContent = null;
 	try {
-		const docRes = await event.fetch(`${BASE_API_URL}/policy-documents/?policy=${event.params.id}`);
+		const docRes = await event.fetch(
+			`${BASE_API_URL}/managed-documents/?policy=${event.params.id}`
+		);
 		if (docRes.ok) {
 			const docData = await docRes.json();
 			policyDocument = docData.results?.[0] || null;
 			if (policyDocument?.current_revision?.id) {
 				const revRes = await event.fetch(
-					`${BASE_API_URL}/policy-document-revisions/${policyDocument.current_revision.id}/`
+					`${BASE_API_URL}/document-revisions/${policyDocument.current_revision.id}/`
 				);
 				if (revRes.ok) {
 					currentRevisionContent = await revRes.json();

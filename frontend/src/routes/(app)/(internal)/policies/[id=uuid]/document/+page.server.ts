@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	const policy = await policyRes.json();
 
 	// Try to find existing document for this policy
-	const docRes = await fetch(`${BASE_API_URL}/policy-documents/?policy=${params.id}`);
+	const docRes = await fetch(`${BASE_API_URL}/managed-documents/?policy=${params.id}`);
 	const docData = await docRes.json();
 
 	let document = docData.results?.[0] || null;
@@ -17,7 +17,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 	if (document) {
 		// Load revisions
 		const revRes = await fetch(
-			`${BASE_API_URL}/policy-document-revisions/?document=${document.id}&ordering=-version_number`
+			`${BASE_API_URL}/document-revisions/?document=${document.id}&ordering=-version_number`
 		);
 		const revData = await revRes.json();
 		revisions = revData.results || [];
@@ -25,21 +25,21 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		// Load current draft or current_revision content
 		const draft = revisions.find((r: any) => r.status === 'draft' || r.status === 'Draft');
 		if (draft) {
-			const fullRes = await fetch(`${BASE_API_URL}/policy-document-revisions/${draft.id}/`);
+			const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${draft.id}/`);
 			currentRevision = await fullRes.json();
 		} else if (document.current_revision?.id) {
 			const fullRes = await fetch(
-				`${BASE_API_URL}/policy-document-revisions/${document.current_revision.id}/`
+				`${BASE_API_URL}/document-revisions/${document.current_revision.id}/`
 			);
 			currentRevision = await fullRes.json();
 		} else if (revisions.length > 0) {
-			const fullRes = await fetch(`${BASE_API_URL}/policy-document-revisions/${revisions[0].id}/`);
+			const fullRes = await fetch(`${BASE_API_URL}/document-revisions/${revisions[0].id}/`);
 			currentRevision = await fullRes.json();
 		}
 	}
 
 	// Load available templates
-	const templatesRes = await fetch(`${BASE_API_URL}/policy-documents/templates/`);
+	const templatesRes = await fetch(`${BASE_API_URL}/managed-documents/templates/`);
 	const templates = await templatesRes.json();
 
 	return {

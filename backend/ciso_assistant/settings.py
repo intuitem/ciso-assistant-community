@@ -249,6 +249,7 @@ INSTALLED_APPS = [
     "crq",
     "metrology",
     "core",
+    "doc_management",
     "cal",
     "django_filters",
     "library",

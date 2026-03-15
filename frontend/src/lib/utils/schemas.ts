@@ -1493,13 +1493,16 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
-export const PolicyDocumentSchema = z.object({
-	policy: z.string().uuid(),
+export const ManagedDocumentSchema = z.object({
+	name: z.string().optional().default(''),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	policy: z.string().uuid().optional().nullable(),
 	folder: z.string(),
 	template_used: z.string().optional().nullable()
 });
 
-export const PolicyDocumentRevisionSchema = z.object({
+export const DocumentRevisionSchema = z.object({
 	document: z.string().uuid(),
 	folder: z.string(),
 	version_number: z.number().optional(),
@@ -1587,8 +1590,8 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
 	teams: teamSchema,
-	'policy-documents': PolicyDocumentSchema,
-	'policy-document-revisions': PolicyDocumentRevisionSchema
+	'managed-documents': ManagedDocumentSchema,
+	'document-revisions': DocumentRevisionSchema
 };
 
 export const modelSchema = (model: string) => {

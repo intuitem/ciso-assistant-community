@@ -13,39 +13,39 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 
 	switch (action) {
 		case 'create-document':
-			endpoint = `${BASE_API_URL}/policy-documents/`;
+			endpoint = `${BASE_API_URL}/managed-documents/`;
 			break;
 		case 'create-new-draft':
-			endpoint = `${BASE_API_URL}/policy-documents/${body.document_id}/create-new-draft/`;
+			endpoint = `${BASE_API_URL}/managed-documents/${body.document_id}/create-new-draft/`;
 			delete body.document_id;
 			break;
 		case 'save-revision':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/`;
 			delete body.revision_id;
 			method = 'PATCH';
 			break;
 		case 'submit-for-review':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/submit-for-review/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/submit-for-review/`;
 			delete body.revision_id;
 			break;
 		case 'approve':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/approve/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/approve/`;
 			delete body.revision_id;
 			break;
 		case 'request-changes':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/request-changes/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/request-changes/`;
 			delete body.revision_id;
 			break;
 		case 'start-editing':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/start-editing/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/start-editing/`;
 			delete body.revision_id;
 			break;
 		case 'stop-editing':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/stop-editing/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/stop-editing/`;
 			delete body.revision_id;
 			break;
 		case 'take-over-editing':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/take-over-editing/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${body.revision_id}/take-over-editing/`;
 			delete body.revision_id;
 			break;
 		default:
@@ -74,39 +74,39 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	switch (action) {
 		case 'revisions': {
 			const documentId = url.searchParams.get('document');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/?document=${documentId}&ordering=-version_number`;
+			endpoint = `${BASE_API_URL}/document-revisions/?document=${documentId}&ordering=-version_number`;
 			break;
 		}
 		case 'revision': {
 			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/`;
 			break;
 		}
 		case 'diff': {
 			const revisionId = url.searchParams.get('revision_id');
 			const otherId = url.searchParams.get('other_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/diff/${otherId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/diff/${otherId}/`;
 			break;
 		}
 		case 'editing-status': {
 			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/editing-status/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/editing-status/`;
 			break;
 		}
 		case 'edit-history': {
 			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/edit-history/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-history/`;
 			break;
 		}
 		case 'edit-snapshot': {
 			const revisionId = url.searchParams.get('revision_id');
 			const editId = url.searchParams.get('edit_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/edit-snapshot/${editId}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-snapshot/${editId}/`;
 			break;
 		}
 		case 'export-pdf': {
 			const revisionId = url.searchParams.get('revision_id');
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/export-pdf/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/export-pdf/`;
 			const res = await fetch(endpoint);
 			if (!res.ok) {
 				error(res.status as NumericRange<400, 599>, 'PDF export failed');
@@ -143,10 +143,10 @@ export const DELETE: RequestHandler = async ({ fetch, url }) => {
 	let endpoint: string;
 	switch (type) {
 		case 'document':
-			endpoint = `${BASE_API_URL}/policy-documents/${id}/`;
+			endpoint = `${BASE_API_URL}/managed-documents/${id}/`;
 			break;
 		case 'revision':
-			endpoint = `${BASE_API_URL}/policy-document-revisions/${id}/`;
+			endpoint = `${BASE_API_URL}/document-revisions/${id}/`;
 			break;
 		default:
 			error(400, { message: 'Unknown type' });

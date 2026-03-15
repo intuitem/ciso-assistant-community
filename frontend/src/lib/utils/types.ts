@@ -143,8 +143,8 @@ export const URL_MODEL = [
 	'dashboard-text-widgets',
 	'dashboard-builtin-widgets',
 	// policy documents
-	'policy-documents',
-	'policy-document-revisions'
+	'managed-documents',
+	'document-revisions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

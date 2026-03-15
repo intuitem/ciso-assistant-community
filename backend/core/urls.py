@@ -123,12 +123,6 @@ router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
-router.register(r"policy-documents", PolicyDocumentViewSet, basename="policy-documents")
-router.register(
-    r"policy-document-revisions",
-    PolicyDocumentRevisionViewSet,
-    basename="policy-document-revisions",
-)
 router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
 router.register(
     r"preset-journey-steps",
@@ -156,6 +150,7 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),

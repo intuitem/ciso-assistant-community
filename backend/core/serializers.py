@@ -1,5 +1,4 @@
 import importlib
-from pathlib import Path
 from typing import Any
 
 import structlog
@@ -1429,92 +1428,6 @@ class PolicyReadSerializer(AppliedControlReadSerializer):
 
     class Meta:
         model = Policy
-        fields = "__all__"
-
-
-class PolicyDocumentWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = PolicyDocument
-        fields = "__all__"
-
-    def create(self, validated_data):
-        document = super().create(validated_data)
-        # Auto-create an initial draft revision
-        request = self.context.get("request")
-        author = request.user if request else None
-        content = ""
-        if template_name := validated_data.get("template_used"):
-            template_dir = (
-                Path(__file__).resolve().parent.parent / "library" / "policy_templates"
-            )
-            template_path = template_dir / f"{template_name}.md"
-            if template_path.exists():
-                raw = template_path.read_text(encoding="utf-8")
-                # Strip YAML frontmatter
-                if raw.startswith("---"):
-                    parts = raw.split("---", 2)
-                    if len(parts) >= 3:
-                        content = parts[2].strip()
-                    else:
-                        content = raw
-                else:
-                    content = raw
-        revision = PolicyDocumentRevision.objects.create(
-            document=document,
-            version_number=1,
-            content=content,
-            author=author,
-        )
-        document.current_revision = revision
-        document.save()
-        return document
-
-
-class PolicyDocumentReadSerializer(BaseModelSerializer):
-    policy = FieldsRelatedField()
-    current_revision = FieldsRelatedField(
-        fields=["id", "version_number", "status", "published_at", "author"],
-    )
-    revision_count = serializers.SerializerMethodField()
-    latest_draft = serializers.SerializerMethodField()
-
-    class Meta:
-        model = PolicyDocument
-        fields = "__all__"
-
-    def get_revision_count(self, obj):
-        return obj.revisions.count()
-
-    def get_latest_draft(self, obj):
-        draft = obj.revisions.filter(status=PolicyDocumentRevision.Status.DRAFT).first()
-        return str(draft.id) if draft else None
-
-
-class PolicyDocumentRevisionWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = PolicyDocumentRevision
-        fields = "__all__"
-
-    def create(self, validated_data):
-        document = validated_data["document"]
-        max_version = PolicyDocumentRevision.objects.filter(
-            document=document
-        ).aggregate(models.Max("version_number"))["version_number__max"]
-        validated_data["version_number"] = (max_version or 0) + 1
-        request = self.context.get("request")
-        if request and not validated_data.get("author"):
-            validated_data["author"] = request.user
-        return super().create(validated_data)
-
-
-class PolicyDocumentRevisionReadSerializer(BaseModelSerializer):
-    document = FieldsRelatedField()
-    author = FieldsRelatedField(fields=["id", "email", "first_name", "last_name"])
-    reviewer = FieldsRelatedField(fields=["id", "email", "first_name", "last_name"])
-    status_display = serializers.CharField(source="get_status_display")
-
-    class Meta:
-        model = PolicyDocumentRevision
         fields = "__all__"
 
 
