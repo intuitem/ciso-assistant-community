@@ -565,6 +565,16 @@ ROUTES["client-settings"] = {
     "basename": "client-settings",
 }
 
+ROUTES["custom-email-templates"] = {
+    "viewset": "enterprise_core.views.CustomEmailTemplateViewSet",
+    "basename": "custom-email-templates",
+}
+
+ROUTES["custom-word-templates"] = {
+    "viewset": "enterprise_core.views.CustomWordTemplateViewSet",
+    "basename": "custom-word-templates",
+}
+
 MODULES["enterprise_core"] = {
     "path": "",
     "module": "enterprise_core.urls",
