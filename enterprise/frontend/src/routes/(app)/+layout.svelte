@@ -39,6 +39,11 @@
 		children
 	}: Props = $props();
 
+	const isMac = browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+	const modifierKey = isMac ? '⌘' : 'Ctrl';
+
+	let commandPalette: ReturnType<typeof CommandPalette> | undefined = $state();
+
 	let sidebarOpen = $state(true);
 
 	let classesSidebarOpen = $derived((open: boolean) => (open ? 'ml-64' : 'ml-7'));
@@ -184,6 +189,19 @@
 					{/if}
 				</div>
 				<div class="flex items-center gap-3 shrink-0">
+					<button
+						onclick={() => commandPalette?.toggle()}
+						class="flex items-center gap-2 shrink-0 rounded-lg border border-gray-200 bg-gray-50/80 px-3 py-1.5
+			text-xs text-gray-500 hover:bg-gray-100 hover:border-gray-300 hover:text-gray-700
+			transition-all duration-150 cursor-pointer"
+					>
+						<i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+						<span class="hidden sm:inline text-gray-400">{m.searchEllipsis()}</span>
+						<kbd
+							class="hidden sm:inline-flex items-center rounded border border-gray-200 bg-white px-1.5 py-0.5
+				font-mono text-[10px] text-gray-400">{modifierKey}K</kbd
+						>
+					</button>
 					{#if data?.featureflags?.focus_mode}
 						<FocusModeSelector orgTree={data?.orgTree} />
 					{/if}
@@ -208,7 +226,7 @@
 		</AppBar>
 	</div>
 	<!-- Router Slot -->
-	<CommandPalette />
+	<CommandPalette bind:this={commandPalette} />
 	<main
 		class="min-h-screen p-8 bg-linear-to-br from-violet-100 to-slate-200 transition-all duration-300 {classesSidebarOpen(
 			sidebarOpen
