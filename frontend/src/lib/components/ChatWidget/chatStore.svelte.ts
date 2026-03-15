@@ -1,6 +1,6 @@
 import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
-import { invalidateAll } from '$app/navigation';
+
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
@@ -489,7 +489,7 @@ export async function confirmAction(messageId: string) {
 			if (res.ok) {
 				action.results = selectedItems.map((i) => ({ name: i.name, id: i.id }));
 				action.status = 'created';
-				invalidateAll();
+				window.location.reload();
 			} else {
 				const err = await res.json().catch(() => ({ detail: res.statusText }));
 				action.results = selectedItems.map((i) => ({
@@ -539,7 +539,7 @@ export async function confirmAction(messageId: string) {
 		action.status = allOk ? 'created' : 'error';
 		messages = [...messages];
 		if (allOk) {
-			invalidateAll();
+			window.location.reload();
 		}
 	}
 	saveState();
