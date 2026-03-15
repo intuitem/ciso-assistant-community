@@ -76,6 +76,17 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/diff/${otherId}/`;
 			break;
 		}
+		case 'edit-history': {
+			const revisionId = url.searchParams.get('revision_id');
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/edit-history/`;
+			break;
+		}
+		case 'edit-snapshot': {
+			const revisionId = url.searchParams.get('revision_id');
+			const editId = url.searchParams.get('edit_id');
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/edit-snapshot/${editId}/`;
+			break;
+		}
 		case 'export-pdf': {
 			const revisionId = url.searchParams.get('revision_id');
 			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/export-pdf/`;

@@ -69,14 +69,16 @@
 <DetailView {data}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
-			<a
-				href="/policies/{policy.id}/document"
-				class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
-				data-testid="edit-document-button"
-			>
-				<i class="fa-solid fa-file-pen mr-2"></i>
-				{m.editDocument()}
-			</a>
+			{#if page.data?.featureflags?.policy_documents !== false}
+				<a
+					href="/policies/{policy.id}/document"
+					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
+					data-testid="edit-document-button"
+				>
+					<i class="fa-solid fa-file-pen mr-2"></i>
+					{m.editDocument()}
+				</a>
+			{/if}
 			{#if page.data?.featureflags?.validation_flows}
 				<button
 					class="btn text-gray-100 bg-linear-to-r from-orange-500 to-amber-500 h-fit"
@@ -97,7 +99,7 @@
 			{/key}
 		{/if}
 
-		{#if currentRevisionContent}
+		{#if page.data?.featureflags?.policy_documents !== false && currentRevisionContent}
 			<div class="card bg-white shadow rounded-lg border mt-4">
 				<div class="p-4 border-b flex items-center justify-between">
 					<div class="flex items-center space-x-3">
@@ -139,7 +141,7 @@
 					</div>
 				{/if}
 			</div>
-		{:else if policyDocument === null}
+		{:else if page.data?.featureflags?.policy_documents !== false && policyDocument === null}
 			<div class="card bg-white shadow rounded-lg border mt-4 p-6 text-center">
 				<i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 mb-3"></i>
 				<p class="text-gray-500 mb-3">No document has been created for this policy yet.</p>

@@ -428,6 +428,7 @@ ANALYST_PERMISSIONS_LIST = [
     "view_policydocumentrevision",
     "change_policydocumentrevision",
     "delete_policydocumentrevision",
+    "view_policydocumentedit",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -744,6 +745,7 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_policydocumentrevision",
     "change_policydocumentrevision",
     "delete_policydocumentrevision",
+    "view_policydocumentedit",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -903,6 +905,7 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_policydocumentrevision",
     "change_policydocumentrevision",
     "delete_policydocumentrevision",
+    "view_policydocumentedit",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -1199,6 +1202,7 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_policydocumentrevision",
     "change_policydocumentrevision",
     "delete_policydocumentrevision",
+    "view_policydocumentedit",
     "view_folder",
 ]
 

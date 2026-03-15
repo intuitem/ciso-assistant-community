@@ -5025,6 +5025,39 @@ class PolicyDocumentRevision(AbstractBaseModel, FolderMixin):
         return f"{self.document.policy.name} v{self.version_number}"
 
 
+class PolicyDocumentEdit(AbstractBaseModel, FolderMixin):
+    """Tracks each save of a draft revision for edit history."""
+
+    revision = models.ForeignKey(
+        PolicyDocumentRevision,
+        on_delete=models.CASCADE,
+        related_name="edits",
+    )
+    editor = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="policy_document_edits",
+    )
+    summary = models.CharField(max_length=500, blank=True)
+    content_snapshot = models.TextField(blank=True)
+    fields_to_check = []
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Policy document edit")
+        verbose_name_plural = _("Policy document edits")
+
+    def save(self, *args, **kwargs):
+        self.folder = self.revision.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        editor_str = self.editor.email if self.editor else "unknown"
+        return f"Edit by {editor_str} on {self.created_at}"
+
+
 class Vulnerability(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):

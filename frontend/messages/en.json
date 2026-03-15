@@ -3718,6 +3718,8 @@
 	"applyFeatureFlagsNoPermission": "You don't have permission to change feature flags.",
 	"journeys": "Journeys",
 	"journeysDescription": "Enable the presets and journeys section for guided onboarding workflows.",
+	"policyDocumentsFlag": "Policy document editor",
+	"policyDocumentsFlagDescription": "Enable the built-in markdown editor for authoring policy documents with version management, review workflows, and PDF export.",
 	"deleteJourney": "Delete journey",
 	"deleteJourneyConfirm": "Are you sure you want to delete this journey? This will not remove the objects created by the preset.",
 	"createNewDomain": "Create a new domain",

@@ -8391,6 +8391,67 @@ class PolicyDocumentRevisionViewSet(BaseModelViewSet):
     filterset_fields = ["document", "status"]
     ordering = ["-version_number"]
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        # Record edit history for draft revisions
+        if instance.status == PolicyDocumentRevision.Status.DRAFT:
+            PolicyDocumentEdit.objects.create(
+                revision=instance,
+                editor=self.request.user,
+                summary=instance.change_summary or "",
+                content_snapshot=instance.content,
+            )
+
+    @action(detail=True, methods=["get"], url_path="edit-history")
+    def edit_history(self, request, pk=None):
+        """Return the edit history for this revision."""
+        revision = self.get_object()
+        edits = revision.edits.select_related("editor").all()
+        data = [
+            {
+                "id": str(edit.id),
+                "editor": {
+                    "id": str(edit.editor.id),
+                    "email": edit.editor.email,
+                    "first_name": edit.editor.first_name,
+                    "last_name": edit.editor.last_name,
+                }
+                if edit.editor
+                else None,
+                "summary": edit.summary,
+                "created_at": edit.created_at.isoformat(),
+            }
+            for edit in edits
+        ]
+        return Response(data)
+
+    @action(detail=True, methods=["get"], url_path="edit-snapshot/(?P<edit_id>[^/.]+)")
+    def edit_snapshot(self, request, pk=None, edit_id=None):
+        """Return the content snapshot of a specific edit."""
+        revision = self.get_object()
+        try:
+            edit = revision.edits.get(pk=edit_id)
+        except PolicyDocumentEdit.DoesNotExist:
+            return Response(
+                {"error": "Edit not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(
+            {
+                "id": str(edit.id),
+                "content": edit.content_snapshot,
+                "summary": edit.summary,
+                "created_at": edit.created_at.isoformat(),
+                "editor": {
+                    "email": edit.editor.email,
+                    "first_name": edit.editor.first_name,
+                    "last_name": edit.editor.last_name,
+                }
+                if edit.editor
+                else None,
+            }
+        )
+
     @action(detail=True, methods=["post"], url_path="submit-for-review")
     def submit_for_review(self, request, pk=None):
         """Transition from draft to in_review."""

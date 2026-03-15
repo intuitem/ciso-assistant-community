@@ -38,6 +38,9 @@
 	let diffRevisionB = $state('');
 	let showTemplateSelector = $state(!document);
 	let showVersionHistory = $state(true);
+	let editHistory: any[] = $state([]);
+	let showEditHistory = $state(false);
+	let loadingEditHistory = $state(false);
 
 	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
 		draft: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: 'fa-pen' },
@@ -281,6 +284,45 @@
 		if (res.ok) {
 			currentRevision = await res.json();
 			content = currentRevision.content || '';
+			// Reset edit history when switching revisions
+			editHistory = [];
+			showEditHistory = false;
+		}
+	}
+
+	async function toggleEditHistory() {
+		if (showEditHistory) {
+			showEditHistory = false;
+			return;
+		}
+		if (!currentRevision) return;
+		loadingEditHistory = true;
+		try {
+			const res = await proxyGet({
+				_action: 'edit-history',
+				revision_id: currentRevision.id
+			});
+			if (res.ok) {
+				editHistory = await res.json();
+				showEditHistory = true;
+			}
+		} finally {
+			loadingEditHistory = false;
+		}
+	}
+
+	async function loadEditSnapshot(editId: string) {
+		if (!currentRevision) return;
+		const res = await proxyGet({
+			_action: 'edit-snapshot',
+			revision_id: currentRevision.id,
+			edit_id: editId
+		});
+		if (res.ok) {
+			const snapshot = await res.json();
+			content = snapshot.content;
+			showPreview = true;
+			showDiff = false;
 		}
 	}
 
@@ -622,6 +664,67 @@
 								</div>
 							{/if}
 						</div>
+
+						<!-- Edit history for current revision -->
+						{#if currentRevision}
+							<div class="border-t border-surface-200">
+								<button
+									class="w-full flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-surface-500 uppercase tracking-wide hover:bg-surface-50 transition-colors"
+									onclick={() => toggleEditHistory()}
+								>
+									<span class="flex items-center gap-1.5">
+										<i class="fa-solid fa-list-ul"></i>
+										Edit history
+									</span>
+									{#if loadingEditHistory}
+										<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+									{:else}
+										<i class="fa-solid fa-chevron-{showEditHistory ? 'up' : 'down'} text-[10px]"
+										></i>
+									{/if}
+								</button>
+
+								{#if showEditHistory}
+									<div class="max-h-48 overflow-auto">
+										{#if editHistory.length === 0}
+											<p class="px-4 py-3 text-xs text-surface-400 italic">No edits recorded yet</p>
+										{:else}
+											{#each editHistory as edit}
+												<button
+													class="w-full text-left px-4 py-2 hover:bg-surface-50 border-t border-surface-100 transition-colors"
+													onclick={() => loadEditSnapshot(edit.id)}
+													title="View this snapshot"
+												>
+													<div class="flex items-center justify-between">
+														<span class="text-xs text-surface-600">
+															{#if edit.editor}
+																{edit.editor.first_name || ''}
+																{edit.editor.last_name || edit.editor.email}
+															{:else}
+																Unknown
+															{/if}
+														</span>
+														<span class="text-[10px] text-surface-400">
+															{new Date(edit.created_at).toLocaleString(undefined, {
+																month: 'short',
+																day: 'numeric',
+																hour: '2-digit',
+																minute: '2-digit'
+															})}
+														</span>
+													</div>
+													{#if edit.summary}
+														<p class="text-[10px] text-surface-400 mt-0.5 truncate italic">
+															{edit.summary}
+														</p>
+													{/if}
+												</button>
+											{/each}
+										{/if}
+									</div>
+								{/if}
+							</div>
+						{/if}
 
 						<!-- Diff comparison -->
 						{#if revisions.length >= 2}
