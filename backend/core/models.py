@@ -5001,6 +5001,14 @@ class PolicyDocumentRevision(AbstractBaseModel, FolderMixin):
         validators=[validate_file_size, validate_file_name],
     )
     published_at = models.DateTimeField(null=True, blank=True)
+    editing_user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    editing_since = models.DateTimeField(null=True, blank=True)
     fields_to_check = ["document", "version_number"]
 
     class Meta:

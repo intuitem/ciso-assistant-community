@@ -8392,6 +8392,24 @@ class PolicyDocumentRevisionViewSet(BaseModelViewSet):
     ordering = ["-version_number"]
 
     def perform_update(self, serializer):
+        instance = self.get_object()
+        # Optimistic concurrency: check updated_at hasn't changed
+        expected_updated_at = self.request.data.get("expected_updated_at")
+        if (
+            expected_updated_at
+            and instance.status == PolicyDocumentRevision.Status.DRAFT
+        ):
+            from django.utils.dateparse import parse_datetime
+
+            expected = parse_datetime(expected_updated_at)
+            if expected and instance.updated_at > expected:
+                editing_info = ""
+                if instance.editing_user and instance.editing_user != self.request.user:
+                    editing_info = f" by {instance.editing_user.email}"
+                raise ValidationError(
+                    f"This revision has been modified{editing_info} since you loaded it. "
+                    "Please reload and re-apply your changes."
+                )
         instance = serializer.save()
         # Record edit history for draft revisions
         if instance.status == PolicyDocumentRevision.Status.DRAFT:
@@ -8401,6 +8419,71 @@ class PolicyDocumentRevisionViewSet(BaseModelViewSet):
                 summary=instance.change_summary or "",
                 content_snapshot=instance.content,
             )
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Mark the current user as editing this revision."""
+        revision = self.get_object()
+        # Check if someone else is currently editing (with a 10-min stale threshold)
+        if revision.editing_user and revision.editing_user != request.user:
+            if revision.editing_since:
+                elapsed = (timezone.now() - revision.editing_since).total_seconds()
+                if elapsed < 600:  # 10 minutes
+                    return Response(
+                        {
+                            "locked": True,
+                            "editing_user": {
+                                "email": revision.editing_user.email,
+                                "first_name": revision.editing_user.first_name,
+                                "last_name": revision.editing_user.last_name,
+                            },
+                            "editing_since": revision.editing_since.isoformat(),
+                        }
+                    )
+        revision.editing_user = request.user
+        revision.editing_since = timezone.now()
+        revision.save(update_fields=["editing_user", "editing_since"])
+        return Response({"locked": False})
+
+    @action(detail=True, methods=["post"], url_path="take-over-editing")
+    def take_over_editing(self, request, pk=None):
+        """Force-acquire the editing lock, overriding the current editor."""
+        revision = self.get_object()
+        revision.editing_user = request.user
+        revision.editing_since = timezone.now()
+        revision.save(update_fields=["editing_user", "editing_since"])
+        return Response({"locked": False})
+
+    @action(detail=True, methods=["post"], url_path="stop-editing")
+    def stop_editing(self, request, pk=None):
+        """Release the editing lock."""
+        revision = self.get_object()
+        if revision.editing_user == request.user:
+            revision.editing_user = None
+            revision.editing_since = None
+            revision.save(update_fields=["editing_user", "editing_since"])
+        return Response({"released": True})
+
+    @action(detail=True, methods=["get"], url_path="editing-status")
+    def editing_status(self, request, pk=None):
+        """Check who is currently editing."""
+        revision = self.get_object()
+        if revision.editing_user and revision.editing_since:
+            elapsed = (timezone.now() - revision.editing_since).total_seconds()
+            if elapsed < 600:
+                return Response(
+                    {
+                        "editing": True,
+                        "is_me": revision.editing_user == request.user,
+                        "editing_user": {
+                            "email": revision.editing_user.email,
+                            "first_name": revision.editing_user.first_name,
+                            "last_name": revision.editing_user.last_name,
+                        },
+                        "editing_since": revision.editing_since.isoformat(),
+                    }
+                )
+        return Response({"editing": False})
 
     @action(detail=True, methods=["get"], url_path="edit-history")
     def edit_history(self, request, pk=None):

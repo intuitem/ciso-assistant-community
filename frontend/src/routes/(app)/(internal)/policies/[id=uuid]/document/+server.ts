@@ -36,6 +36,18 @@ export const POST: RequestHandler = async ({ fetch, request }) => {
 			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/request-changes/`;
 			delete body.revision_id;
 			break;
+		case 'start-editing':
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/start-editing/`;
+			delete body.revision_id;
+			break;
+		case 'stop-editing':
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/stop-editing/`;
+			delete body.revision_id;
+			break;
+		case 'take-over-editing':
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${body.revision_id}/take-over-editing/`;
+			delete body.revision_id;
+			break;
 		default:
 			error(400, { message: 'Unknown action' });
 	}
@@ -74,6 +86,11 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 			const revisionId = url.searchParams.get('revision_id');
 			const otherId = url.searchParams.get('other_id');
 			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/diff/${otherId}/`;
+			break;
+		}
+		case 'editing-status': {
+			const revisionId = url.searchParams.get('revision_id');
+			endpoint = `${BASE_API_URL}/policy-document-revisions/${revisionId}/editing-status/`;
 			break;
 		}
 		case 'edit-history': {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
+	import { onMount, onDestroy } from 'svelte';
 	import DiffViewer from '$lib/components/PolicyEditor/DiffViewer.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
@@ -41,6 +42,8 @@
 	let editHistory: any[] = $state([]);
 	let showEditHistory = $state(false);
 	let loadingEditHistory = $state(false);
+	let lockedBy: any = $state(null);
+	let lastLoadedAt = $state(currentRevision?.updated_at || '');
 
 	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
 		draft: { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: 'fa-pen' },
@@ -128,22 +131,37 @@
 		}
 	}
 
+	let saveConflict = $state('');
+
 	async function saveContent() {
 		if (!currentRevision || currentRevision.status !== 'draft') return;
+		if (lockedBy) return;
 		saving = true;
 		saved = false;
+		saveConflict = '';
 		if (saveTimeout) clearTimeout(saveTimeout);
 		try {
 			const res = await proxyPost({
 				_action: 'save-revision',
 				revision_id: currentRevision.id,
 				content,
-				change_summary: changeSummary
+				change_summary: changeSummary,
+				expected_updated_at: lastLoadedAt
 			});
 			if (res.ok) {
 				currentRevision = await res.json();
+				lastLoadedAt = currentRevision.updated_at || '';
 				saved = true;
 				saveTimeout = setTimeout(() => (saved = false), 3000);
+			} else {
+				const errData = await res.json().catch(() => null);
+				if (res.status === 400 && errData) {
+					const msg =
+						typeof errData === 'string'
+							? errData
+							: errData.non_field_errors?.[0] || errData.detail || JSON.stringify(errData);
+					saveConflict = msg;
+				}
 			}
 		} finally {
 			saving = false;
@@ -280,15 +298,141 @@
 	}
 
 	async function loadRevision(revisionId: string) {
+		// Release lock on previous revision
+		if (currentRevision?.id && currentRevision.status === 'draft') {
+			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+		}
 		const res = await proxyGet({ _action: 'revision', revision_id: revisionId });
 		if (res.ok) {
 			currentRevision = await res.json();
 			content = currentRevision.content || '';
+			lastLoadedAt = currentRevision.updated_at || '';
 			// Reset edit history when switching revisions
 			editHistory = [];
 			showEditHistory = false;
+			// Check editing status and try to acquire lock for drafts
+			if (currentRevision.status === 'draft') {
+				await checkAndAcquireLock();
+			} else {
+				lockedBy = null;
+			}
 		}
 	}
+
+	async function checkAndAcquireLock() {
+		if (!currentRevision) return;
+		const wasLocked = !!lockedBy;
+		const res = await proxyPost({
+			_action: 'start-editing',
+			revision_id: currentRevision.id
+		});
+		if (res.ok) {
+			const data = await res.json();
+			if (data.locked) {
+				lockedBy = data.editing_user;
+				stopHeartbeat();
+			} else {
+				lockedBy = null;
+				startHeartbeat();
+				// If we were previously locked out, reload to get latest content
+				if (wasLocked) {
+					await refreshData();
+				}
+			}
+		}
+	}
+
+	function confirmTakeOver() {
+		const editorName = lockedBy
+			? `${lockedBy.first_name || ''} ${lockedBy.last_name || lockedBy.email}`.trim()
+			: 'another user';
+		const modalComponent: ModalComponent = {
+			ref: PromptConfirmModal,
+			props: {
+				bodyComponent: undefined
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: 'Take over editing',
+			body: `${editorName} may have unsaved changes that will be lost. Are you sure you want to take over?`,
+			response: (confirmed: boolean) => {
+				if (confirmed) takeOverEditing();
+			}
+		};
+		modalStore.trigger(modal);
+	}
+
+	async function takeOverEditing() {
+		if (!currentRevision) return;
+		const res = await proxyPost({
+			_action: 'take-over-editing',
+			revision_id: currentRevision.id
+		});
+		if (res.ok) {
+			lockedBy = null;
+			startHeartbeat();
+			await refreshData();
+		}
+	}
+
+	// Release lock when leaving the page
+	function releaseLock() {
+		if (currentRevision?.id && currentRevision.status === 'draft' && !lockedBy) {
+			// Use sendBeacon for beforeunload (fire-and-forget), fetch for normal nav
+			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
+		}
+	}
+
+	let heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+
+	function startHeartbeat() {
+		stopHeartbeat();
+		heartbeatInterval = setInterval(
+			async () => {
+				if (currentRevision?.status === 'draft' && !lockedBy) {
+					const res = await proxyPost({
+						_action: 'start-editing',
+						revision_id: currentRevision.id
+					});
+					if (res.ok) {
+						const data = await res.json();
+						if (data.locked) {
+							// Someone else took over — we've been evicted
+							lockedBy = data.editing_user;
+							stopHeartbeat();
+						}
+					}
+				}
+			},
+			3 * 60 * 1000
+		); // every 3 minutes
+	}
+
+	function stopHeartbeat() {
+		if (heartbeatInterval) {
+			clearInterval(heartbeatInterval);
+			heartbeatInterval = null;
+		}
+	}
+
+	onMount(() => {
+		if (currentRevision?.status === 'draft') {
+			checkAndAcquireLock().then(() => {
+				if (!lockedBy) startHeartbeat();
+			});
+		}
+		window.addEventListener('beforeunload', releaseLock);
+	});
+
+	onDestroy(() => {
+		stopHeartbeat();
+		releaseLock();
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('beforeunload', releaseLock);
+		}
+	});
 
 	async function toggleEditHistory() {
 		if (showEditHistory) {
@@ -327,6 +471,7 @@
 	}
 
 	let isDraft = $derived(currentRevision?.status === 'draft');
+	let canEdit = $derived(isDraft && !lockedBy);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
 </script>
@@ -373,7 +518,7 @@
 				</button>
 			{/if}
 
-			{#if isDraft}
+			{#if canEdit}
 				<button
 					class="btn btn-sm {saved
 						? 'preset-filled-success-500'
@@ -492,6 +637,43 @@
 
 	<!-- Main editor area -->
 	{#if document && currentRevision}
+		<!-- Lock / conflict banners -->
+		{#if lockedBy}
+			<div
+				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3"
+			>
+				<i class="fa-solid fa-lock text-amber-500"></i>
+				<div class="flex-1 text-sm text-amber-800">
+					<strong>{lockedBy.first_name || ''} {lockedBy.last_name || lockedBy.email}</strong>
+					is currently editing this draft. You can view it in read-only mode.
+				</div>
+				<button class="btn btn-sm preset-tonal-warning" onclick={() => checkAndAcquireLock()}>
+					<i class="fa-solid fa-rotate mr-1"></i> Retry
+				</button>
+				<button class="btn btn-sm preset-tonal-error" onclick={() => confirmTakeOver()}>
+					<i class="fa-solid fa-unlock mr-1"></i> Take over
+				</button>
+			</div>
+		{/if}
+
+		{#if saveConflict}
+			<div
+				class="mx-6 mt-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 px-4 py-3"
+			>
+				<i class="fa-solid fa-triangle-exclamation text-red-500"></i>
+				<div class="flex-1 text-sm text-red-700">{saveConflict}</div>
+				<button
+					class="btn btn-sm preset-tonal-error"
+					onclick={async () => {
+						saveConflict = '';
+						await refreshData();
+					}}
+				>
+					<i class="fa-solid fa-rotate mr-1"></i> Reload
+				</button>
+			</div>
+		{/if}
+
 		<!-- Status banners -->
 		{#if currentRevision.status === 'change_requested' && currentRevision.reviewer_comments}
 			<div
@@ -585,10 +767,10 @@
 				{:else}
 					<textarea
 						bind:value={content}
-						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!isDraft
+						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!canEdit
 							? 'bg-surface-50 cursor-not-allowed'
 							: ''}"
-						disabled={!isDraft}
+						disabled={!canEdit}
 						placeholder="Write your policy document in Markdown..."
 						spellcheck="true"
 					></textarea>
