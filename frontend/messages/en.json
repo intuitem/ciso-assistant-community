@@ -105,6 +105,8 @@
 	"versionHistory": "Version history",
 	"changeSummary": "Change summary",
 	"reviewerComments": "Reviewer comments",
+	"compareDiff": "Compare",
+	"deleteConfirmation": "Confirm deletion",
 	"startFromTemplate": "Start from template",
 	"startFromScratch": "Start from scratch",
 	"createNewDraft": "Create new draft",

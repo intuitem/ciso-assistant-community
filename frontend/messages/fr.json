@@ -100,6 +100,8 @@
 	"versionHistory": "Historique des versions",
 	"changeSummary": "Résumé des modifications",
 	"reviewerComments": "Commentaires du réviseur",
+	"compareDiff": "Comparer",
+	"deleteConfirmation": "Confirmer la suppression",
 	"startFromTemplate": "Partir d'un modèle",
 	"startFromScratch": "Partir de zéro",
 	"createNewDraft": "Créer un nouveau brouillon",
