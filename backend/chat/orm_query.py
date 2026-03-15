@@ -23,7 +23,7 @@ SUMMARY_THRESHOLD = 30
 
 
 def execute_tool_query(
-    arguments: dict, accessible_folder_ids: list[str]
+    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
 ) -> dict | None:
     """
     Execute a structured query from tool call arguments.
@@ -37,8 +37,12 @@ def execute_tool_query(
         date_filter: "overdue", "due_this_month", "expiring_this_month", "created_recently"
         search: text search in name/description/ref_id
         page: page number (default 1)
+
+    parsed_context: optional ParsedContext from page_context.py — when provided,
+        queries are auto-scoped to the parent object (e.g., risk scenarios for
+        a specific risk assessment).
     """
-    from .tools import MODEL_MAP
+    from .tools import MODEL_MAP, PARENT_CHILD_MAP
 
     model_key = arguments.get("model")
     action = arguments.get("action", "list")
@@ -63,6 +67,14 @@ def execute_tool_query(
         qs = qs.filter(compliance_assessment__folder_id__in=accessible_folder_ids)
 
     filters_applied = []
+
+    # Auto-scope to parent object when page context is available
+    if parsed_context and parsed_context.object_id:
+        for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
+            if child_key == model_key and fk_field:
+                qs = qs.filter(**{fk_field: parsed_context.object_id})
+                filters_applied.append(f"scoped to current {parsed_context.model_key}")
+                break
 
     # Domain/folder filter
     domain = arguments.get("domain")
@@ -300,7 +312,9 @@ def format_query_result(result: dict) -> str:
             parts.append(
                 f"\nShowing page {page} of {total_pages} ({len(result['objects'])} items):"
             )
-            parts.extend(_format_object_lines(result["objects"]))
+            parts.extend(
+                _format_object_lines(result["objects"], result.get("url_slug", ""))
+            )
         if result.get("has_more"):
             parts.append(
                 '\n(User can ask for "next page" or "page N" to see more, or narrow down with filters)'
@@ -317,7 +331,9 @@ def format_query_result(result: dict) -> str:
             )
         else:
             parts.append(f"[Query Result] {display}{filter_desc}: {total} total")
-        parts.extend(_format_object_lines(result["objects"]))
+        parts.extend(
+            _format_object_lines(result["objects"], result.get("url_slug", ""))
+        )
         if has_more:
             parts.append('\n(User can ask for "next page" or "page N" to see more)')
 
@@ -389,14 +405,24 @@ def _build_date_filter(date_filter: str, model_class) -> dict | None:
     return None
 
 
-def _format_object_lines(objects: list[dict]) -> list[str]:
-    """Format a list of serialized objects into display lines."""
+def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
+    """Format a list of serialized objects into display lines with markdown links."""
+    from django.conf import settings
+
+    base_url = getattr(settings, "CISO_ASSISTANT_URL", "").rstrip("/")
+
     lines = []
     for obj in objects:
-        line_parts = []
-        if obj.get("ref_id"):
-            line_parts.append(f"[{obj['ref_id']}]")
-        line_parts.append(obj.get("name", "Unnamed"))
+        name = obj.get("name", "Unnamed")
+        ref_id = obj.get("ref_id", "")
+
+        # Build a markdown link for the object name (full URL so sanitize-html allows it)
+        if url_slug and obj.get("id") and base_url:
+            display = f"[{ref_id}] {name}" if ref_id else name
+            name_part = f"[{display}]({base_url}/{url_slug}/{obj['id']})"
+        else:
+            name_part = f"[{ref_id}] {name}" if ref_id else name
+
         extras = []
         for key in (
             "status",
@@ -411,9 +437,11 @@ def _format_object_lines(objects: list[dict]) -> list[str]:
                 extras.append(f"{key}={obj[key]}")
         if obj.get("folder"):
             extras.append(f"domain={obj['folder']}")
+
+        line = f"  - {name_part}"
         if extras:
-            line_parts.append(f"({', '.join(extras)})")
-        lines.append(f"  - {' '.join(line_parts)}")
+            line += f" ({', '.join(extras)})"
+        lines.append(line)
     return lines
 
 

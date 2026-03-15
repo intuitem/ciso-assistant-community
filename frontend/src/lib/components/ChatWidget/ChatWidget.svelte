@@ -93,10 +93,6 @@
 	function formatTime(date: Date): string {
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 	}
-
-	function getClickableRefs(message: ChatMessage) {
-		return (message.contextRefs || []).filter((ref) => ref.url && ref.source === 'orm_query');
-	}
 </script>
 
 <svelte:window onkeydown={handleGlobalKeydown} />
@@ -219,40 +215,26 @@
 									<MarkdownRenderer content={message.content} />
 								</div>
 							{/if}
-							{#if getClickableRefs(message).length > 0}
-								<div class="mt-1.5 flex flex-wrap gap-1 px-1">
-									{#each getClickableRefs(message) as ref}
-										<a
-											href={ref.url}
-											class="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[10px]
-												text-violet-700 transition-colors hover:bg-violet-100 hover:text-violet-900"
-											title={ref.name}
-										>
-											<i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
-											{ref.name?.length > 30 ? ref.name.slice(0, 30) + '...' : ref.name}
-										</a>
-									{/each}
-								</div>
-							{/if}
 							{#if message.pendingAction}
 								{@const pa = message.pendingAction}
 								<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
 									<div class="mb-2 flex items-center gap-2 text-xs font-medium text-gray-600">
-										<i class="fa-solid fa-plus-circle text-violet-500"></i>
-										Create {pa.items.length}
-										{pa.displayName}
+										{#if pa.action === 'attach'}
+											<i class="fa-solid fa-link text-violet-500"></i>
+											Attach {pa.items.length}
+											{pa.displayName}
+										{:else}
+											<i class="fa-solid fa-plus-circle text-violet-500"></i>
+											Create {pa.items.length}
+											{pa.displayName}
+										{/if}
 									</div>
 									<ul class="mb-2 space-y-1">
 										{#each pa.items as item, i}
 											<li class="flex items-center gap-2 text-xs text-gray-700">
 												{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
 													<i class="fa-solid fa-check text-green-500 text-[10px]"></i>
-													<a
-														href="/{pa.urlSlug}/{pa.results[i].id}"
-														class="text-violet-600 hover:underline"
-													>
-														{item.name}
-													</a>
+													<span>{item.name}</span>
 												{:else if pa.status === 'error' && pa.results?.[i]?.error}
 													<i class="fa-solid fa-xmark text-red-500 text-[10px]"></i>
 													<span>{item.name}</span>
@@ -292,7 +274,8 @@
 										<div class="text-[11px] text-gray-400 italic">Cancelled</div>
 									{:else if pa.status === 'created'}
 										<div class="text-[11px] text-green-600 font-medium">
-											<i class="fa-solid fa-check-circle mr-1"></i>Created successfully
+											<i class="fa-solid fa-check-circle mr-1"></i>
+											{pa.action === 'attach' ? 'Attached successfully' : 'Created successfully'}
 										</div>
 									{/if}
 								</div>
@@ -543,40 +526,26 @@
 										<MarkdownRenderer content={message.content} />
 									</div>
 								{/if}
-								{#if getClickableRefs(message).length > 0}
-									<div class="mt-1.5 flex flex-wrap gap-1.5 px-1">
-										{#each getClickableRefs(message) as ref}
-											<a
-												href={ref.url}
-												class="inline-flex items-center gap-1 rounded-md bg-violet-50 px-2 py-0.5 text-[11px]
-													text-violet-700 transition-colors hover:bg-violet-100 hover:text-violet-900"
-												title={ref.name}
-											>
-												<i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-												{ref.name?.length > 40 ? ref.name.slice(0, 40) + '...' : ref.name}
-											</a>
-										{/each}
-									</div>
-								{/if}
 								{#if message.pendingAction}
 									{@const pa = message.pendingAction}
 									<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm">
 										<div class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
-											<i class="fa-solid fa-plus-circle text-violet-500"></i>
-											Create {pa.items.length}
-											{pa.displayName}
+											{#if pa.action === 'attach'}
+												<i class="fa-solid fa-link text-violet-500"></i>
+												Attach {pa.items.length}
+												{pa.displayName}
+											{:else}
+												<i class="fa-solid fa-plus-circle text-violet-500"></i>
+												Create {pa.items.length}
+												{pa.displayName}
+											{/if}
 										</div>
 										<ul class="mb-3 space-y-1.5">
 											{#each pa.items as item, i}
 												<li class="flex items-center gap-2 text-sm text-gray-700">
 													{#if pa.status === 'created' && pa.results?.[i] && !pa.results[i].error}
 														<i class="fa-solid fa-check text-green-500 text-xs"></i>
-														<a
-															href="/{pa.urlSlug}/{pa.results[i].id}"
-															class="text-violet-600 hover:underline"
-														>
-															{item.name}
-														</a>
+														<span>{item.name}</span>
 													{:else if pa.status === 'error' && pa.results?.[i]?.error}
 														<i class="fa-solid fa-xmark text-red-500 text-xs"></i>
 														<span>{item.name}</span>
@@ -616,7 +585,8 @@
 											<div class="text-xs text-gray-400 italic">Cancelled</div>
 										{:else if pa.status === 'created'}
 											<div class="text-xs text-green-600 font-medium">
-												<i class="fa-solid fa-check-circle mr-1"></i>Created successfully
+												<i class="fa-solid fa-check-circle mr-1"></i>
+												{pa.action === 'attach' ? 'Attached successfully' : 'Created successfully'}
 											</div>
 										{/if}
 									</div>

@@ -1,23 +1,64 @@
 import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
+import { browser } from '$app/environment';
 
 const CHAT_API = '/fe-api/chat';
+const STORAGE_KEY = 'ciso-chat-state';
+
+const WELCOME_MESSAGE: ChatMessage = {
+	id: 'welcome',
+	role: 'assistant',
+	content:
+		"Hello! I'm your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?",
+	timestamp: new Date()
+};
+
+// --- Session storage persistence ---
+
+interface PersistedState {
+	messages: ChatMessage[];
+	sessionId: string | null;
+	view: ChatView;
+}
+
+function loadPersistedState(): PersistedState | null {
+	if (!browser) return null;
+	try {
+		const raw = sessionStorage.getItem(STORAGE_KEY);
+		if (!raw) return null;
+		const data = JSON.parse(raw);
+		// Restore Date objects from ISO strings
+		if (Array.isArray(data.messages)) {
+			data.messages = data.messages.map((m: ChatMessage) => ({
+				...m,
+				timestamp: new Date(m.timestamp)
+			}));
+		}
+		return data;
+	} catch {
+		return null;
+	}
+}
+
+function saveState() {
+	if (!browser) return;
+	try {
+		const data: PersistedState = { messages, sessionId, view };
+		sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+	} catch {
+		// Storage full or unavailable — ignore
+	}
+}
+
+const restored = loadPersistedState();
 
 // Current page context — updated by ChatWidget via setPageContext()
 let currentPageContext = $state<{ path: string; model?: string; title?: string } | null>(null);
 
-let view = $state<ChatView>('closed');
-let messages = $state<ChatMessage[]>([
-	{
-		id: 'welcome',
-		role: 'assistant',
-		content:
-			"Hello! I'm your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?",
-		timestamp: new Date()
-	}
-]);
+let view = $state<ChatView>(restored?.view ?? 'closed');
+let messages = $state<ChatMessage[]>(restored?.messages ?? [WELCOME_MESSAGE]);
 let inputText = $state('');
 let isTyping = $state(false);
-let sessionId = $state<string | null>(null);
+let sessionId = $state<string | null>(restored?.sessionId ?? null);
 let abortController = $state<AbortController | null>(null);
 
 export const suggestedActions: SuggestedAction[] = [
@@ -64,6 +105,7 @@ async function ensureSession(): Promise<string> {
 
 	const data = await response.json();
 	sessionId = data.id;
+	saveState();
 	return data.id;
 }
 
@@ -144,15 +186,29 @@ async function streamResponse(userMessage: string) {
 					} else if (data.type === 'pending_action') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
-							msg.pendingAction = {
-								id: generateId(),
-								action: data.action,
-								modelKey: data.model_key,
-								urlSlug: data.url_slug,
-								displayName: data.display_name,
-								items: data.items,
-								status: 'pending'
-							};
+							if (data.action === 'attach') {
+								msg.pendingAction = {
+									id: generateId(),
+									action: 'attach',
+									displayName: data.related_display,
+									items: data.items,
+									status: 'pending',
+									parentModelKey: data.parent_model_key,
+									parentId: data.parent_id,
+									parentUrlSlug: data.parent_url_slug,
+									m2mField: data.m2m_field
+								};
+							} else {
+								msg.pendingAction = {
+									id: generateId(),
+									action: data.action,
+									modelKey: data.model_key,
+									urlSlug: data.url_slug,
+									displayName: data.display_name,
+									items: data.items,
+									status: 'pending'
+								};
+							}
 							messages = [...messages];
 						}
 					} else if (data.type === 'done') {
@@ -173,6 +229,7 @@ async function streamResponse(userMessage: string) {
 				}
 			}
 		}
+		saveState();
 	} catch (error) {
 		isTyping = false;
 		if (error instanceof DOMException && error.name === 'AbortError') {
@@ -186,6 +243,7 @@ async function streamResponse(userMessage: string) {
 				'Sorry, I could not connect to the chat service. Please check that the LLM service is configured and running.',
 			timestamp: new Date()
 		});
+		saveState();
 	}
 }
 
@@ -211,6 +269,7 @@ export function getIsTyping(): boolean {
 
 export function openChat() {
 	view = 'window';
+	saveState();
 }
 
 export function closeChat() {
@@ -219,14 +278,17 @@ export function closeChat() {
 		abortController.abort();
 		abortController = null;
 	}
+	saveState();
 }
 
 export function expandChat() {
 	view = 'expanded';
+	saveState();
 }
 
 export function collapseChat() {
 	view = 'window';
+	saveState();
 }
 
 export function sendMessage(text: string) {
@@ -240,6 +302,7 @@ export function sendMessage(text: string) {
 		timestamp: new Date()
 	});
 	inputText = '';
+	saveState();
 	streamResponse(trimmed);
 }
 
@@ -284,36 +347,74 @@ export async function confirmAction(messageId: string) {
 	action.results = [];
 	messages = [...messages];
 
-	for (const item of action.items) {
+	if (action.action === 'attach') {
+		// Attach flow: PATCH the parent object to add M2M relationships
 		try {
-			const res = await fetch(`/fe-api/chat/create-object`, {
+			const itemIds = action.items.map((i) => i.id).filter(Boolean);
+			const res = await fetch(`/fe-api/chat/attach-object`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					url_slug: action.urlSlug,
-					fields: item
+					parent_url_slug: action.parentUrlSlug,
+					parent_id: action.parentId,
+					m2m_field: action.m2mField,
+					item_ids: itemIds
 				})
 			});
 
 			if (res.ok) {
-				const data = await res.json();
-				action.results!.push({ name: item.name, id: data.id });
+				action.results = action.items.map((i) => ({ name: i.name, id: i.id }));
+				action.status = 'created';
 			} else {
 				const err = await res.json().catch(() => ({ detail: res.statusText }));
-				action.results!.push({
-					name: item.name,
-					error: err.detail || err.error || 'Creation failed'
-				});
+				action.results = action.items.map((i) => ({
+					name: i.name,
+					error: err.detail || err.error || 'Attachment failed'
+				}));
+				action.status = 'error';
 			}
 		} catch {
-			action.results!.push({ name: item.name, error: 'Network error' });
+			action.results = action.items.map((i) => ({
+				name: i.name,
+				error: 'Network error'
+			}));
+			action.status = 'error';
 		}
 		messages = [...messages];
-	}
+	} else {
+		// Create flow: POST each item individually
+		for (const item of action.items) {
+			try {
+				const res = await fetch(`/fe-api/chat/create-object`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						url_slug: action.urlSlug,
+						fields: item
+					})
+				});
 
-	const allOk = action.results!.every((r) => !r.error);
-	action.status = allOk ? 'created' : 'error';
-	messages = [...messages];
+				if (res.ok) {
+					const data = await res.json();
+					action.results!.push({ name: item.name, id: data.id });
+				} else {
+					const err = await res.json().catch(() => ({ detail: res.statusText }));
+					action.results!.push({
+						name: item.name,
+						error: err.detail || err.error || 'Creation failed'
+					});
+				}
+			} catch {
+				action.results!.push({ name: item.name, error: 'Network error' });
+			}
+			messages = [...messages];
+		}
+
+		const allOk = action.results!.every((r) => !r.error);
+		action.status = allOk ? 'created' : 'error';
+		messages = [...messages];
+	}
+	saveState();
 }
 
 export function rejectAction(messageId: string) {
@@ -322,6 +423,7 @@ export function rejectAction(messageId: string) {
 
 	msg.pendingAction.status = 'rejected';
 	messages = [...messages];
+	saveState();
 }
 
 export function startNewSession() {
@@ -336,13 +438,6 @@ export function startNewSession() {
 	sessionId = null;
 
 	// Reset messages to welcome state
-	messages = [
-		{
-			id: 'welcome',
-			role: 'assistant',
-			content:
-				"Hello! I'm your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?",
-			timestamp: new Date()
-		}
-	];
+	messages = [WELCOME_MESSAGE];
+	saveState();
 }

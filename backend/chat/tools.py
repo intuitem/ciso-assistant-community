@@ -5,6 +5,12 @@ Our code executes the safe, pre-built ORM queries.
 
 Enum values for filters are derived from the Django models at import time,
 so they stay in sync with model field choices without duplication.
+
+Architecture:
+    - Generic tools (query_objects, propose_create) are always available.
+    - Contextual tools (attach_existing) use page context to scope operations.
+    - PARENT_CHILD_MAP and ATTACHABLE_RELATIONS are declarative registries —
+      adding a new relationship is a one-line addition.
 """
 
 import logging
@@ -93,6 +99,40 @@ CREATABLE_MODELS = {
     "incident",
     "entity",
     "solution",
+}
+
+# --- Declarative relationship registries ---
+# Adding a new contextual relationship = one line here. No logic changes needed.
+
+# Parent → children via FK.  parent_model_key → [(child_model_key, fk_field_on_child)]
+PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
+    "risk_assessment": [
+        ("risk_scenario", "risk_assessment"),
+    ],
+    "compliance_assessment": [
+        # requirement_assessments are auto-created by the framework, not user-created
+    ],
+}
+
+# Parent → attachable objects via M2M.  parent_model_key → [(related_model_key, m2m_field_on_parent)]
+ATTACHABLE_RELATIONS: dict[str, list[tuple[str, str]]] = {
+    "requirement_assessment": [
+        ("applied_control", "applied_controls"),
+        ("evidence", "evidences"),
+    ],
+    "risk_scenario": [
+        ("applied_control", "applied_controls"),
+        ("threat", "threats"),
+        ("asset", "assets"),
+        ("vulnerability", "vulnerabilities"),
+    ],
+    "compliance_assessment": [
+        ("asset", "assets"),
+        ("evidence", "evidences"),
+    ],
+    "applied_control": [
+        ("evidence", "evidences"),
+    ],
 }
 
 
@@ -340,6 +380,53 @@ def _build_tools() -> tuple[list[dict], dict]:
         },
     }
 
+    # --- attach_existing tool ---
+    attachable_model_keys = set()
+    for relations in ATTACHABLE_RELATIONS.values():
+        for related_key, _ in relations:
+            attachable_model_keys.add(related_key)
+
+    attach_existing_tool = {
+        "type": "function",
+        "function": {
+            "name": "attach_existing",
+            "description": (
+                "Search for existing objects and propose attaching/linking them to the "
+                "object on the user's current page. Use this tool when:\n"
+                "- The user says 'attach', 'link', 'add existing', 'associate' controls, evidences, etc.\n"
+                "- The user asks what controls to implement, what to add, or how to comply with a requirement.\n"
+                "- The user asks for suggestions or recommendations for the current item.\n"
+                "This only works when the user is on a detail/edit page. "
+                "If no search term is provided, the system will automatically suggest relevant objects "
+                "based on the current item's context. The user will confirm before anything is linked."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "related_model": {
+                        "type": "string",
+                        "enum": sorted(attachable_model_keys),
+                        "description": (
+                            "Type of object to search for and attach. "
+                            "Same mapping as query_objects model names. "
+                            "When the user asks about 'controls to implement' or 'measures', "
+                            "use 'applied_control'."
+                        ),
+                    },
+                    "search": {
+                        "type": "string",
+                        "description": (
+                            "Optional search term to find objects to attach. "
+                            "Searches in name, description, and ref_id. "
+                            "If omitted, the system suggests objects based on the current item's context."
+                        ),
+                    },
+                },
+                "required": ["related_model"],
+            },
+        },
+    }
+
     tools = [
         {
             "type": "function",
@@ -360,6 +447,7 @@ def _build_tools() -> tuple[list[dict], dict]:
             },
         },
         propose_create_tool,
+        attach_existing_tool,
     ]
 
     return tools, valid_values
@@ -425,11 +513,14 @@ def _sanitize_arguments(arguments: dict) -> dict:
 
 
 def _build_create_proposal(
-    arguments: dict, accessible_folder_ids: list[str]
+    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
 ) -> dict | None:
     """
     Build a structured creation proposal from LLM tool call arguments.
     Does NOT create anything — returns a proposal for the frontend to confirm.
+
+    If parsed_context is provided and the target model is a child of the context
+    parent (via PARENT_CHILD_MAP), auto-injects the parent FK into each item.
     """
     model_key = arguments.get("model")
     if model_key not in CREATABLE_MODELS or model_key not in MODEL_MAP:
@@ -441,21 +532,42 @@ def _build_create_proposal(
     if not items:
         return None
 
-    # Resolve domain to folder ID
+    # Resolve folder: from parent context, domain argument, or first accessible
     folder_id = None
-    domain = arguments.get("domain")
-    if domain:
-        from .orm_query import _resolve_domain
+    parent_fk_field = None
+    parent_id = None
 
-        folder_ids = _resolve_domain(domain, accessible_folder_ids)
-        if folder_ids:
-            folder_id = folder_ids[0]
+    # Check if creating a child of the current page's object
+    if parsed_context and parsed_context.object_id:
+        for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
+            if child_key == model_key:
+                parent_fk_field = fk_field
+                parent_id = parsed_context.object_id
+                # Inherit folder from parent object
+                parent_info = MODEL_MAP.get(parsed_context.model_key)
+                if parent_info:
+                    try:
+                        parent_model = apps.get_model(parent_info[0], parent_info[1])
+                        parent_obj = parent_model.objects.filter(id=parent_id).first()
+                        if parent_obj and hasattr(parent_obj, "folder_id"):
+                            folder_id = str(parent_obj.folder_id)
+                    except Exception:
+                        pass
+                break
 
-    # If no domain specified, use first accessible folder
+    if not folder_id:
+        domain = arguments.get("domain")
+        if domain:
+            from .orm_query import _resolve_domain
+
+            folder_ids = _resolve_domain(domain, accessible_folder_ids)
+            if folder_ids:
+                folder_id = folder_ids[0]
+
     if not folder_id and accessible_folder_ids:
         folder_id = accessible_folder_ids[0]
 
-    # Build proposal items — each gets name, description, and folder
+    # Build proposal items — each gets name, description, folder, and parent FK
     proposal_items = []
     for item in items:
         if isinstance(item, str):
@@ -467,6 +579,8 @@ def _build_create_proposal(
             entry["description"] = item["description"].strip()
         if folder_id:
             entry["folder"] = folder_id
+        if parent_fk_field and parent_id:
+            entry[parent_fk_field] = parent_id
         proposal_items.append(entry)
 
     if not proposal_items:
@@ -483,25 +597,138 @@ def _build_create_proposal(
     }
 
 
+def _build_attach_proposal(
+    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
+) -> dict | None:
+    """
+    Search for existing objects and propose attaching them to the current page's object.
+    Returns a proposal dict with type="propose_attach".
+    """
+    if not parsed_context or not parsed_context.object_id:
+        return None
+
+    related_model_key = arguments.get("related_model")
+    if not related_model_key or related_model_key not in MODEL_MAP:
+        return None
+
+    # Validate this attachment is allowed
+    relations = ATTACHABLE_RELATIONS.get(parsed_context.model_key, [])
+    m2m_field = None
+    for rel_key, rel_field in relations:
+        if rel_key == related_model_key:
+            m2m_field = rel_field
+            break
+
+    if not m2m_field:
+        return None
+
+    # Get parent info
+    parent_info = MODEL_MAP.get(parsed_context.model_key)
+    if not parent_info:
+        return None
+
+    parent_url_slug = parent_info[3]
+    parent_display = parent_info[2]
+    related_info = MODEL_MAP[related_model_key]
+    related_display = related_info[2]
+
+    # Search for matching objects
+    search = arguments.get("search", "")
+    from .orm_query import execute_tool_query
+
+    # Smart suggest mode: when on a requirement assessment page looking for controls,
+    # and no explicit search term, use the requirement's name/description to search
+    if (
+        not search
+        and parsed_context.model_key == "requirement_assessment"
+        and related_model_key == "applied_control"
+    ):
+        try:
+            parent_model = apps.get_model(parent_info[0], parent_info[1])
+            ra_obj = (
+                parent_model.objects.select_related("requirement")
+                .filter(id=parsed_context.object_id)
+                .first()
+            )
+            if ra_obj and hasattr(ra_obj, "requirement") and ra_obj.requirement:
+                req = ra_obj.requirement
+                # Use the requirement's description or name as search context
+                search = req.description[:200] if req.description else (req.name or "")
+        except Exception:
+            pass
+
+    query_args = {
+        "model": related_model_key,
+        "action": "list",
+    }
+    if search:
+        query_args["search"] = search
+
+    query_result = execute_tool_query(query_args, accessible_folder_ids)
+    if not query_result or not query_result.get("objects"):
+        return None
+
+    # Get already-attached IDs to exclude them
+    try:
+        parent_model = apps.get_model(parent_info[0], parent_info[1])
+        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
+        if parent_obj:
+            existing_ids = set(
+                str(pk)
+                for pk in getattr(parent_obj, m2m_field).values_list("id", flat=True)
+            )
+        else:
+            existing_ids = set()
+    except Exception:
+        existing_ids = set()
+
+    # Filter out already-attached objects
+    available = [
+        obj for obj in query_result["objects"] if obj["id"] not in existing_ids
+    ]
+    if not available:
+        return None
+
+    return {
+        "type": "propose_attach",
+        "parent_model_key": parsed_context.model_key,
+        "parent_id": parsed_context.object_id,
+        "parent_url_slug": parent_url_slug,
+        "parent_display": parent_display,
+        "m2m_field": m2m_field,
+        "related_model_key": related_model_key,
+        "related_display": related_display,
+        "items": [
+            {"id": obj["id"], "name": obj["name"]}
+            for obj in available[:20]  # Cap at 20 suggestions
+        ],
+        "total_available": len(available),
+    }
+
+
 def dispatch_tool_call(
     tool_name: str,
     arguments: dict,
     accessible_folder_ids: list[str],
+    parsed_context=None,
 ) -> dict | None:
     """
     Execute a tool call from the LLM.
     Returns a result dict compatible with format_query_result(),
-    or a proposal dict for propose_create.
+    or a proposal dict for propose_create / propose_attach.
     """
     cleaned = _sanitize_arguments(arguments)
 
     if tool_name == "query_objects":
         from .orm_query import execute_tool_query
 
-        return execute_tool_query(cleaned, accessible_folder_ids)
+        return execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
 
     if tool_name == "propose_create":
-        return _build_create_proposal(cleaned, accessible_folder_ids)
+        return _build_create_proposal(cleaned, accessible_folder_ids, parsed_context)
+
+    if tool_name == "attach_existing":
+        return _build_attach_proposal(cleaned, accessible_folder_ids, parsed_context)
 
     logger.warning("Unknown tool: %s", tool_name)
     return None

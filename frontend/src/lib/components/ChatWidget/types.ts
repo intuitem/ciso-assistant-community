@@ -2,13 +2,18 @@ export type ChatView = 'closed' | 'window' | 'expanded';
 
 export interface PendingAction {
 	id: string;
-	action: 'create';
-	modelKey: string;
-	urlSlug: string;
+	action: 'create' | 'attach';
+	modelKey?: string;
+	urlSlug?: string;
 	displayName: string;
-	items: { name: string; description?: string; folder?: string }[];
+	items: { id?: string; name: string; description?: string; folder?: string }[];
 	status: 'pending' | 'creating' | 'created' | 'error' | 'rejected';
 	results?: { name: string; id?: string; error?: string }[];
+	// Attach-specific fields
+	parentModelKey?: string;
+	parentId?: string;
+	parentUrlSlug?: string;
+	m2mField?: string;
 }
 
 export interface ChatMessage {

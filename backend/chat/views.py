@@ -73,35 +73,28 @@ class ChatSessionViewSet(BaseModelViewSet):
             get_accessible_folder_ids,
         )
         from .orm_query import format_query_result
-        from .tools import get_tools, dispatch_tool_call
+        from .tools import (
+            get_tools,
+            dispatch_tool_call,
+            PARENT_CHILD_MAP,
+            ATTACHABLE_RELATIONS,
+            MODEL_MAP,
+        )
+        from .page_context import parse_page_context
 
         accessible_folders = get_accessible_folder_ids(request.user)
         context_refs = []
         context = ""
         query_result = None
 
+        # Parse page context into structured reference
+        parsed_context = parse_page_context(page_context) if page_context else None
+
         # Step 1: Ask the LLM if this is a tool call (structured query)
         llm = get_llm()
 
         # Build page context prefix for the LLM
-        page_context_prefix = ""
-        if page_context:
-            page_path = page_context.get("path", "")
-            page_model = page_context.get("model", "")
-            page_title = page_context.get("title", "")
-            parts = []
-            if page_path:
-                parts.append(f"path={page_path}")
-            if page_model:
-                parts.append(f"model={page_model}")
-            if page_title:
-                parts.append(f"title={page_title}")
-            if parts:
-                page_context_prefix = (
-                    f"The user is currently viewing: {', '.join(parts)}. "
-                    "Use this context if the user refers to 'this', 'these', 'here', "
-                    "or asks about items on their current page.\n\n"
-                )
+        page_context_prefix = _build_context_prompt(page_context, parsed_context)
 
         # Inject previous query metadata so the LLM can handle follow-ups
         # like "give me more", "next page", "show me page 3"
@@ -139,24 +132,28 @@ class ChatSessionViewSet(BaseModelViewSet):
                 tool_response["name"],
                 tool_response.get("arguments", {}),
                 accessible_folders,
+                parsed_context,
             )
 
-        # Track if this is a creation proposal (different SSE flow)
+        # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
 
         if query_result and query_result.get("type") == "propose_create":
             # Creation proposal — don't execute, let the user confirm via UI
             creation_proposal = query_result
-            item_names = [i["name"] for i in query_result.get("items", [])]
             context = (
-                "INSTRUCTIONS: You have proposed creating the following "
-                f"{query_result['display_name']}:\n"
-                + "\n".join(f"  - {name}" for name in item_names)
-                + "\n\nTell the user you're proposing to create these items. "
-                "The confirmation cards are shown in the UI — tell them to review and confirm. "
-                "Do NOT say you have created them. Be brief."
+                f"The system is proposing to create {len(query_result.get('items', []))} "
+                f"{query_result['display_name']}. "
+                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "YOUR RESPONSE MUST:\n"
+                "- Tell the user you're proposing to create these items (1 sentence).\n"
+                "- Tell them to review and use the Confirm/Cancel buttons below.\n\n"
+                "YOUR RESPONSE MUST NOT:\n"
+                "- List the items (the UI already shows them).\n"
+                "- Say you have created them.\n"
+                "- Generate links or URLs.\n"
+                "Keep it to 2-3 sentences maximum."
             )
-            # Store proposal in context_refs for persistence
             context_refs.append(
                 {
                     "source": "pending_action",
@@ -167,13 +164,47 @@ class ChatSessionViewSet(BaseModelViewSet):
                     "items": query_result["items"],
                 }
             )
+        elif query_result and query_result.get("type") == "propose_attach":
+            # Attach proposal — show existing objects to link
+            creation_proposal = query_result
+            context = (
+                f"The system found {len(query_result.get('items', []))} existing "
+                f"{query_result['related_display']} that can be attached to the current "
+                f"{query_result['parent_display']}. "
+                "Interactive confirmation cards are already displayed in the UI.\n\n"
+                "YOUR RESPONSE MUST:\n"
+                "- Briefly explain why these items were suggested (1 sentence).\n"
+                "- Tell the user to review and use the Confirm/Cancel buttons below.\n\n"
+                "YOUR RESPONSE MUST NOT:\n"
+                "- List the items (the UI already shows them).\n"
+                "- Generate links, URLs, or markdown links.\n"
+                "- Include IDs, UUIDs, or technical references.\n"
+                "- Describe how to use tools.\n"
+                "Keep it to 2-3 sentences maximum."
+            )
+            context_refs.append(
+                {
+                    "source": "pending_action",
+                    "action": "attach",
+                    "parent_model_key": query_result["parent_model_key"],
+                    "parent_id": query_result["parent_id"],
+                    "parent_url_slug": query_result["parent_url_slug"],
+                    "m2m_field": query_result["m2m_field"],
+                    "related_model_key": query_result["related_model_key"],
+                    "related_display": query_result["related_display"],
+                    "items": query_result["items"],
+                }
+            )
         elif query_result:
             context = (
                 "INSTRUCTIONS: The following data comes from a database query. "
                 "Present ONLY this data to the user. Use the total_count as the authoritative count. "
                 "The listed items are one page of results. Do NOT add explanations, "
                 "framework references, or commentary beyond what is in the data. "
-                "Do NOT hallucinate additional information.\n\n"
+                "Do NOT hallucinate additional information. "
+                "IMPORTANT: Items include markdown links like [Name](/path/id) — "
+                "you MUST preserve these links exactly as-is in your response so the user "
+                "can click them. Do NOT rewrite, shorten, or remove the links.\n\n"
                 + format_query_result(query_result)
             )
             url_slug = query_result.get("url_slug", "")
@@ -210,6 +241,55 @@ class ChatSessionViewSet(BaseModelViewSet):
             context = format_context(results, expanded)
             context_refs = build_context_refs(results, expanded)
 
+            # Step 3: Auto-suggest attachable objects when on a contextual page
+            # If the LLM didn't call a tool but we're on a detail/edit page
+            # with attachable relations, try attaching relevant objects automatically.
+            if parsed_context and parsed_context.object_id:
+                from .tools import ATTACHABLE_RELATIONS, _build_attach_proposal
+
+                relations = ATTACHABLE_RELATIONS.get(parsed_context.model_key, [])
+                if relations:
+                    # Try the first attachable relation (usually applied_controls)
+                    first_rel_key = relations[0][0]
+                    attach_result = _build_attach_proposal(
+                        {"related_model": first_rel_key},
+                        accessible_folders,
+                        parsed_context,
+                    )
+                    if attach_result and attach_result.get("items"):
+                        creation_proposal = attach_result
+                        item_names = [i["name"] for i in attach_result["items"]]
+                        # Replace the RAG context entirely — the attach cards ARE the response
+                        context = (
+                            f"The system found {len(item_names)} existing "
+                            f"{attach_result['related_display']} that may be relevant. "
+                            "Interactive confirmation cards are already displayed in the UI "
+                            "showing each item with a Confirm/Cancel button.\n\n"
+                            "YOUR RESPONSE MUST:\n"
+                            "- Briefly explain why these items were suggested (1-2 sentences).\n"
+                            "- Tell the user to review and use the buttons below to attach them.\n\n"
+                            "YOUR RESPONSE MUST NOT:\n"
+                            "- List the items (the UI already shows them).\n"
+                            "- Generate links, URLs, or markdown links.\n"
+                            "- Include IDs, UUIDs, or technical references.\n"
+                            "- Describe how to use tools or the attach_existing tool.\n"
+                            "- Use emojis.\n"
+                            "Keep it to 2-3 sentences maximum."
+                        )
+                        context_refs.append(
+                            {
+                                "source": "pending_action",
+                                "action": "attach",
+                                "parent_model_key": attach_result["parent_model_key"],
+                                "parent_id": attach_result["parent_id"],
+                                "parent_url_slug": attach_result["parent_url_slug"],
+                                "m2m_field": attach_result["m2m_field"],
+                                "related_model_key": attach_result["related_model_key"],
+                                "related_display": attach_result["related_display"],
+                                "items": attach_result["items"],
+                            }
+                        )
+
         # Build conversation history for the LLM (exclude the message we just saved)
         history_messages = list(
             session.messages.order_by("created_at").values("role", "content")
@@ -233,18 +313,37 @@ class ChatSessionViewSet(BaseModelViewSet):
             full_response = ""
 
             try:
-                # Emit pending_action event before streaming text if this is a creation proposal
+                # Emit pending_action event before streaming text
                 if creation_proposal:
-                    action_data = json.dumps(
-                        {
-                            "type": "pending_action",
-                            "action": "create",
-                            "model_key": creation_proposal["model_key"],
-                            "url_slug": creation_proposal["url_slug"],
-                            "display_name": creation_proposal["display_name"],
-                            "items": creation_proposal["items"],
-                        }
-                    )
+                    if creation_proposal.get("type") == "propose_attach":
+                        action_data = json.dumps(
+                            {
+                                "type": "pending_action",
+                                "action": "attach",
+                                "parent_model_key": creation_proposal[
+                                    "parent_model_key"
+                                ],
+                                "parent_id": creation_proposal["parent_id"],
+                                "parent_url_slug": creation_proposal["parent_url_slug"],
+                                "m2m_field": creation_proposal["m2m_field"],
+                                "related_model_key": creation_proposal[
+                                    "related_model_key"
+                                ],
+                                "related_display": creation_proposal["related_display"],
+                                "items": creation_proposal["items"],
+                            }
+                        )
+                    else:
+                        action_data = json.dumps(
+                            {
+                                "type": "pending_action",
+                                "action": "create",
+                                "model_key": creation_proposal["model_key"],
+                                "url_slug": creation_proposal["url_slug"],
+                                "display_name": creation_proposal["display_name"],
+                                "items": creation_proposal["items"],
+                            }
+                        )
                     yield f"data: {action_data}\n\n"
 
                 for token_type, token in llm.stream(
@@ -400,3 +499,73 @@ def _get_last_query_meta(session) -> dict | None:
             if isinstance(ref, dict) and ref.get("source") == "query_meta":
                 return ref
     return None
+
+
+def _build_context_prompt(page_context: dict, parsed_context) -> str:
+    """
+    Build a rich context prompt for the LLM based on the user's current page.
+    Includes structured hints about available contextual actions.
+    """
+    if not page_context:
+        return ""
+
+    from .tools import PARENT_CHILD_MAP, ATTACHABLE_RELATIONS, MODEL_MAP
+
+    parts = []
+    page_path = page_context.get("path", "")
+    page_model = page_context.get("model", "")
+    page_title = page_context.get("title", "")
+
+    info_parts = []
+    if page_path:
+        info_parts.append(f"path={page_path}")
+    if page_model:
+        info_parts.append(f"model={page_model}")
+    if page_title:
+        info_parts.append(f"title={page_title}")
+
+    if not info_parts:
+        return ""
+
+    parts.append(f"The user is currently viewing: {', '.join(info_parts)}.")
+
+    # Add contextual action hints when on a detail/edit page
+    if parsed_context and parsed_context.object_id:
+        actions = []
+
+        # Child creation hints
+        for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
+            if child_key in MODEL_MAP:
+                child_display = MODEL_MAP[child_key][2]
+                actions.append(
+                    f"- Create {child_display} linked to this {page_model or parsed_context.model_key}"
+                )
+
+        # Attachment hints
+        for rel_key, m2m_field in ATTACHABLE_RELATIONS.get(
+            parsed_context.model_key, []
+        ):
+            if rel_key in MODEL_MAP:
+                rel_display = MODEL_MAP[rel_key][2]
+                actions.append(
+                    f"- Attach existing {rel_display} to this {page_model or parsed_context.model_key} "
+                    f"(use attach_existing tool with related_model='{rel_key}')"
+                )
+
+        if actions:
+            parts.append("\nContextual actions available on this page:")
+            parts.extend(actions)
+            parts.append(
+                "\nIMPORTANT: When the user asks about implementing, complying, "
+                "what controls to add, or what to do for a requirement — "
+                "DO NOT just describe actions in text. Instead, USE the attach_existing "
+                "or propose_create tools to provide actionable confirmation cards. "
+                "The user expects interactive buttons, not instructions."
+            )
+
+    parts.append(
+        "\nUse this context if the user refers to 'this', 'these', 'here', "
+        "or asks about items on their current page.\n"
+    )
+
+    return "\n".join(parts) + "\n"
