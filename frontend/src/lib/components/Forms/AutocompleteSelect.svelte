@@ -74,6 +74,7 @@
 		placeholder?: string;
 		lazy?: boolean;
 		lazyLimit?: number;
+		lazyThreshold?: number;
 	}
 
 	let {
@@ -122,7 +123,8 @@
 		optionSnippet = undefined,
 		placeholder = '',
 		lazy = false,
-		lazyLimit = 10
+		lazyLimit = 10,
+		lazyThreshold = 50
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -168,6 +170,7 @@
 	let lazyHasSearched = $state(false);
 	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 	let lazyInputEl = $state<HTMLInputElement | null>(null);
+	let effectiveLazy = $state(lazy);
 	const LAZY_HINT_VALUE = '__lazy_hint__';
 	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
@@ -203,8 +206,38 @@
 		try {
 			if (optionsEndpoint) {
 				if (lazy) {
-					// In lazy mode, only fetch currently selected items (for edit mode)
-					await fetchSelectedItems();
+					// Probe with a capped fetch to decide lazy vs eager
+					const probeEndpoint = buildEndpoint({
+						limit: String(lazyThreshold + 1)
+					});
+					const probeResponse = await fetch(probeEndpoint, { cache: browserCache });
+					if (probeResponse.ok) {
+						const probeData = await probeResponse.json();
+						const items = probeData?.results ?? probeData;
+						const totalCount = probeData?.count ?? (Array.isArray(items) ? items.length : 0);
+						const returnedCount = Array.isArray(items) ? items.length : 0;
+						if (totalCount <= lazyThreshold && returnedCount >= totalCount) {
+							// Small dataset with complete response — use eager mode
+							effectiveLazy = false;
+							if (returnedCount > 0) {
+								options = processOptions(items);
+							}
+							const isRequired = mandatory || $constraints?.required;
+							const hasNoOptions = options.length === 0;
+							const isMissing = isRequired && hasNoOptions;
+							if (updateMissingConstraint) {
+								updateMissingConstraint(field, isMissing);
+							}
+						} else {
+							// Large dataset — stay in lazy mode, only fetch selected items
+							effectiveLazy = true;
+							await fetchSelectedItems();
+						}
+					} else {
+						// Probe failed — fall back to lazy mode
+						effectiveLazy = true;
+						await fetchSelectedItems();
+					}
 				} else {
 					const endpoint = buildEndpoint();
 					const response = await fetch(endpoint, { cache: browserCache });
@@ -245,7 +278,7 @@
 		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
 		if (ids.length === 0) return;
 
-		const lazyBase = lazy ? `${optionsEndpoint}/autocomplete` : undefined;
+		const lazyBase = effectiveLazy ? `${optionsEndpoint}/autocomplete` : undefined;
 		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
 		const response = await fetch(endpoint, { cache: browserCache });
 		if (response.ok) {
@@ -257,7 +290,7 @@
 	}
 
 	async function lazySearch(searchTerm: string) {
-		if (!lazy || !optionsEndpoint) return;
+		if (!effectiveLazy || !optionsEndpoint) return;
 		if (!searchTerm || searchTerm.length < 2) {
 			// Keep only already-selected options visible
 			options = selected.length > 0 ? [...selected] : [];
@@ -470,11 +503,12 @@
 	run(() => {
 		_disabled =
 			disabled ||
-			(Boolean(selected.length && options.length === 1 && $constraints?.required) && !lazy);
+			(Boolean(selected.length && options.length === 1 && $constraints?.required) &&
+				!effectiveLazy);
 	});
 
 	$effect(() => {
-		if (!lazy || !lazyInputEl) return;
+		if (!effectiveLazy || !lazyInputEl) return;
 		const el = lazyInputEl;
 		const handler = () => {
 			const text = el.value;
@@ -557,7 +591,7 @@
 
 		<MultiSelect
 			bind:selected
-			options={lazy && selected.length > 0 && !lazyHasSearched
+			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
 				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
 				: options}
 			{...multiSelectOptions}
@@ -566,13 +600,13 @@
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={lazy ? passthroughFilter : fastFilter}
-			noMatchingOptionsMsg={lazy
+			filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
+			noMatchingOptionsMsg={effectiveLazy
 				? isLoading || lazySearchPending
 					? m.searching()
 					: m.typeToSearch()
 				: undefined}
-			placeholder={placeholder || (lazy ? m.typeToSearch() : '')}
+			placeholder={placeholder || (effectiveLazy ? m.typeToSearch() : '')}
 			bind:input={lazyInputEl}
 		>
 			{#snippet option({ option })}
