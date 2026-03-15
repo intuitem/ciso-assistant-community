@@ -859,6 +859,49 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_node', urlModel: 'task-nodes' }
 		]
 	},
+	'policy-documents': {
+		name: 'policydocument',
+		localName: 'policyDocument',
+		localNamePlural: 'policyDocuments',
+		verboseName: 'Policy document',
+		verboseNamePlural: 'Policy documents',
+		foreignKeyFields: [
+			{ field: 'policy', urlModel: 'policies' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		reverseForeignKeyFields: [{ field: 'document', urlModel: 'policy-document-revisions' }],
+		detailViewFields: [
+			{ field: 'policy' },
+			{ field: 'folder' },
+			{ field: 'template_used' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'policy-document-revisions': {
+		name: 'policydocumentrevision',
+		localName: 'policyDocumentRevision',
+		localNamePlural: 'policyDocumentRevisions',
+		verboseName: 'Policy document revision',
+		verboseNamePlural: 'Policy document revisions',
+		foreignKeyFields: [
+			{ field: 'document', urlModel: 'policy-documents' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'document' },
+			{ field: 'version_number' },
+			{ field: 'status' },
+			{ field: 'author' },
+			{ field: 'reviewer' },
+			{ field: 'change_summary' },
+			{ field: 'reviewer_comments' },
+			{ field: 'published_at', type: 'datetime' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',

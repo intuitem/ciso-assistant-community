@@ -4937,6 +4937,94 @@ class Policy(AppliedControl):
         super(Policy, self).save(*args, **kwargs)
 
 
+class PolicyDocument(AbstractBaseModel, FolderMixin):
+    policy = models.OneToOneField(
+        Policy, on_delete=models.CASCADE, related_name="document"
+    )
+    current_revision = models.ForeignKey(
+        "PolicyDocumentRevision",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
+    template_used = models.CharField(max_length=200, null=True, blank=True)
+    fields_to_check = ["policy"]
+
+    class Meta:
+        verbose_name = _("Policy document")
+        verbose_name_plural = _("Policy documents")
+
+    def save(self, *args, **kwargs):
+        self.folder = self.policy.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Document for {self.policy.name}"
+
+
+class PolicyDocumentRevision(AbstractBaseModel, FolderMixin):
+    class Status(models.TextChoices):
+        DRAFT = "draft", _("Draft")
+        IN_REVIEW = "in_review", _("In review")
+        CHANGE_REQUESTED = "change_requested", _("Change requested")
+        PUBLISHED = "published", _("Published")
+        DEPRECATED = "deprecated", _("Deprecated")
+
+    document = models.ForeignKey(
+        PolicyDocument, on_delete=models.CASCADE, related_name="revisions"
+    )
+    version_number = models.PositiveIntegerField(default=1)
+    content = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.DRAFT
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="authored_policy_revisions",
+    )
+    reviewer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_policy_revisions",
+    )
+    reviewer_comments = models.TextField(null=True, blank=True)
+    change_summary = models.CharField(max_length=500, blank=True)
+    pdf_snapshot = models.FileField(
+        null=True,
+        blank=True,
+        validators=[validate_file_size, validate_file_name],
+    )
+    published_at = models.DateTimeField(null=True, blank=True)
+    fields_to_check = ["document", "version_number"]
+
+    class Meta:
+        ordering = ["-version_number"]
+        verbose_name = _("Policy document revision")
+        verbose_name_plural = _("Policy document revisions")
+
+    def save(self, *args, **kwargs):
+        self.folder = self.document.folder
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        if self.status == self.Status.DRAFT:
+            existing = self.document.revisions.filter(status=self.Status.DRAFT).exclude(
+                pk=self.pk
+            )
+            if existing.exists():
+                raise ValidationError("Only one draft revision allowed per document.")
+        super().clean()
+
+    def __str__(self):
+        return f"{self.document.policy.name} v{self.version_number}"
+
+
 class Vulnerability(
     NameDescriptionMixin, FolderMixin, PublishInRootFolderMixin, FilteringLabelMixin
 ):

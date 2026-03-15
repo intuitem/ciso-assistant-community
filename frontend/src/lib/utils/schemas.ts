@@ -1492,6 +1492,22 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
+export const PolicyDocumentSchema = z.object({
+	policy: z.string().uuid(),
+	folder: z.string(),
+	template_used: z.string().optional().nullable()
+});
+
+export const PolicyDocumentRevisionSchema = z.object({
+	document: z.string().uuid(),
+	folder: z.string(),
+	version_number: z.number().optional(),
+	content: z.string().optional().default(''),
+	status: z.string().optional().default('draft'),
+	change_summary: z.string().optional().default(''),
+	reviewer_comments: z.string().optional().nullable()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1569,7 +1585,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'dashboard-widgets': DashboardWidgetSchema,
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
-	teams: teamSchema
+	teams: teamSchema,
+	'policy-documents': PolicyDocumentSchema,
+	'policy-document-revisions': PolicyDocumentRevisionSchema
 };
 
 export const modelSchema = (model: string) => {

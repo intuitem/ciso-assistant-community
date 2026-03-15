@@ -1689,6 +1689,10 @@ export const listViewFields = {
 			filtering_labels: LABELS_FILTER
 		}
 	},
+	'policy-document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],
 		body: ['ref_id', 'name', 'description', 'framework'],

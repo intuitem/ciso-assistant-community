@@ -8309,6 +8309,254 @@ class EvidenceRevisionViewSet(BaseModelViewSet):
         return response
 
 
+class PolicyDocumentViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows policy documents to be viewed or edited.
+    """
+
+    model = PolicyDocument
+    filterset_fields = ["policy", "folder"]
+
+    @action(detail=False, methods=["get"])
+    def templates(self, request):
+        """List available policy templates."""
+        template_dir = (
+            Path(__file__).resolve().parent.parent / "library" / "policy_templates"
+        )
+        templates = []
+        if template_dir.exists():
+            for f in sorted(template_dir.glob("*.md")):
+                content = f.read_text(encoding="utf-8")
+                metadata = {"id": f.stem, "title": f.stem.replace("_", " ").title()}
+                if content.startswith("---"):
+                    parts = content.split("---", 2)
+                    if len(parts) >= 3:
+                        import yaml
+
+                        try:
+                            fm = yaml.safe_load(parts[1])
+                            if isinstance(fm, dict):
+                                metadata.update(fm)
+                        except yaml.YAMLError:
+                            pass
+                templates.append(metadata)
+        return Response(templates)
+
+    @action(detail=True, methods=["post"], url_path="create-new-draft")
+    def create_new_draft(self, request, pk=None):
+        """Create a new draft revision cloned from the current revision."""
+        document = self.get_object()
+        source = document.current_revision
+        if not source:
+            # Try to find the latest revision
+            source = document.revisions.first()
+        content = source.content if source else ""
+        max_version = (
+            document.revisions.aggregate(models.Max("version_number"))[
+                "version_number__max"
+            ]
+            or 0
+        )
+        # Check no existing draft
+        if document.revisions.filter(
+            status=PolicyDocumentRevision.Status.DRAFT
+        ).exists():
+            return Response(
+                {"error": "A draft revision already exists for this document."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision = PolicyDocumentRevision.objects.create(
+            document=document,
+            version_number=max_version + 1,
+            content=content,
+            author=request.user,
+            status=PolicyDocumentRevision.Status.DRAFT,
+        )
+        return Response(
+            {
+                "id": str(revision.id),
+                "version_number": revision.version_number,
+                "status": revision.status,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class PolicyDocumentRevisionViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows policy document revisions to be viewed or edited.
+    """
+
+    model = PolicyDocumentRevision
+    filterset_fields = ["document", "status"]
+    ordering = ["-version_number"]
+
+    @action(detail=True, methods=["post"], url_path="submit-for-review")
+    def submit_for_review(self, request, pk=None):
+        """Transition from draft to in_review."""
+        revision = self.get_object()
+        if revision.status != PolicyDocumentRevision.Status.DRAFT:
+            return Response(
+                {"error": "Only draft revisions can be submitted for review."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision.status = PolicyDocumentRevision.Status.IN_REVIEW
+        revision.save()
+        return Response({"status": "in_review"})
+
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        """Approve a revision: set published, deprecate previous, generate PDF."""
+        revision = self.get_object()
+        if revision.status != PolicyDocumentRevision.Status.IN_REVIEW:
+            return Response(
+                {"error": "Only in-review revisions can be approved."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision.status = PolicyDocumentRevision.Status.PUBLISHED
+        revision.published_at = timezone.now()
+        revision.reviewer = request.user
+        revision.save()
+
+        # Deprecate previous published revisions
+        revision.document.revisions.filter(
+            status=PolicyDocumentRevision.Status.PUBLISHED
+        ).exclude(pk=revision.pk).update(
+            status=PolicyDocumentRevision.Status.DEPRECATED
+        )
+
+        # Set as current revision
+        revision.document.current_revision = revision
+        revision.document.save()
+
+        # Generate PDF snapshot
+        try:
+            self._generate_pdf_snapshot(revision)
+        except Exception as e:
+            logger.warning("Failed to generate PDF snapshot", error=str(e))
+
+        return Response({"status": "published"})
+
+    @action(detail=True, methods=["post"], url_path="request-changes")
+    def request_changes(self, request, pk=None):
+        """Request changes on an in-review revision."""
+        revision = self.get_object()
+        if revision.status != PolicyDocumentRevision.Status.IN_REVIEW:
+            return Response(
+                {"error": "Only in-review revisions can have changes requested."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision.status = PolicyDocumentRevision.Status.CHANGE_REQUESTED
+        revision.reviewer = request.user
+        revision.reviewer_comments = request.data.get("reviewer_comments", "")
+        revision.save()
+        return Response({"status": "change_requested"})
+
+    @action(detail=True, methods=["get"], url_path="diff/(?P<other_id>[^/.]+)")
+    def diff(self, request, pk=None, other_id=None):
+        """Compute unified diff between this revision and another."""
+        import difflib
+
+        revision = self.get_object()
+        try:
+            other = PolicyDocumentRevision.objects.get(pk=other_id)
+        except PolicyDocumentRevision.DoesNotExist:
+            return Response(
+                {"error": "Other revision not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        diff_lines = list(
+            difflib.unified_diff(
+                other.content.splitlines(keepends=True),
+                revision.content.splitlines(keepends=True),
+                fromfile=f"v{other.version_number}",
+                tofile=f"v{revision.version_number}",
+            )
+        )
+        return Response({"diff": "".join(diff_lines)})
+
+    @action(detail=True, methods=["get"], url_path="export-pdf")
+    def export_pdf(self, request, pk=None):
+        """Export revision content as a PDF document."""
+        import markdown as md_lib
+
+        revision = self.get_object()
+        content_html = md_lib.markdown(
+            revision.content,
+            extensions=["tables", "fenced_code", "toc"],
+        )
+        author_name = ""
+        if revision.author:
+            author_name = (
+                f"{revision.author.first_name} {revision.author.last_name}".strip()
+                or revision.author.email
+            )
+        context = {
+            "policy_name": revision.document.policy.name,
+            "version_number": revision.version_number,
+            "status": revision.status,
+            "status_display": revision.get_status_display(),
+            "author_name": author_name,
+            "published_at": (
+                revision.published_at.strftime("%Y-%m-%d")
+                if revision.published_at
+                else ""
+            ),
+            "date": timezone.now().strftime("%Y-%m-%d"),
+            "content_html": content_html,
+        }
+        html_string = render_to_string("core/policy_document_pdf.html", context)
+        pdf = HTML(string=html_string).write_pdf()
+        response = HttpResponse(pdf, content_type="application/pdf")
+        filename = slugify(revision.document.policy.name)
+        response["Content-Disposition"] = (
+            f'attachment; filename="{filename}_v{revision.version_number}.pdf"'
+        )
+        return response
+
+    @action(detail=False, name="Get status choices")
+    def status(self, request):
+        return Response(dict(PolicyDocumentRevision.Status.choices))
+
+    def _generate_pdf_snapshot(self, revision):
+        """Generate and save a PDF snapshot for a revision."""
+        import markdown as md_lib
+        from django.core.files.base import ContentFile
+
+        content_html = md_lib.markdown(
+            revision.content,
+            extensions=["tables", "fenced_code", "toc"],
+        )
+        author_name = ""
+        if revision.author:
+            author_name = (
+                f"{revision.author.first_name} {revision.author.last_name}".strip()
+                or revision.author.email
+            )
+        context = {
+            "policy_name": revision.document.policy.name,
+            "version_number": revision.version_number,
+            "status": revision.status,
+            "status_display": revision.get_status_display(),
+            "author_name": author_name,
+            "published_at": (
+                revision.published_at.strftime("%Y-%m-%d")
+                if revision.published_at
+                else ""
+            ),
+            "date": timezone.now().strftime("%Y-%m-%d"),
+            "content_html": content_html,
+        }
+        html_string = render_to_string("core/policy_document_pdf.html", context)
+        pdf_content = HTML(string=html_string).write_pdf()
+        filename = slugify(revision.document.policy.name)
+        revision.pdf_snapshot.save(
+            f"{filename}_v{revision.version_number}.pdf",
+            ContentFile(pdf_content),
+            save=True,
+        )
+
+
 class UploadAttachmentView(APIView):
     parser_classes = (FileUploadParser,)
     serializer_class = AttachmentUploadSerializer
