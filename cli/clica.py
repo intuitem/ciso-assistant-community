@@ -263,7 +263,7 @@ DATA_WIZARD_COMMANDS = [
         "help": (
             "Import assets from CSV/Excel.\n"
             "\nRequired columns: name\n"
-            "Optional columns: ref_id, description, type (primary/support), "
+            "Optional columns: ref_id, type (PR=primary/SP=support), description, "
             "domain, business_value, observation, reference_link (or link), "
             "security_objectives (or security_capabilities for support assets), "
             "disaster_recovery_objectives (or recovery_capabilities for support assets), "
@@ -278,7 +278,17 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_applied_controls",
         "model_type": "AppliedControl",
-        "help": "Import applied controls using the Data Wizard backend.",
+        "help": (
+            "Import applied controls from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, category, "
+            "status (to_do/in_progress/on_hold/active/deprecated), csf_function, "
+            "priority, effort (XS/S/M/L/XL), control_impact (1-5), "
+            "start_date, eta, expiry_date, link, observation, reference_control "
+            "(ref_id), filtering_labels, owner (semicolon-separated emails/team names), "
+            "domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -287,7 +297,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_evidences",
         "model_type": "Evidence",
-        "help": "Import evidences using the Data Wizard backend.",
+        "help": (
+            "Import evidences from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, filtering_labels, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -296,7 +311,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_users",
         "model_type": "User",
-        "help": "Import users using the Data Wizard backend.",
+        "help": (
+            "Import users from CSV/Excel.\n"
+            "\nRequired columns: email\n\n"
+            "Optional columns: first_name, last_name\n"
+            "\nConflict detection: by email"
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -305,7 +325,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_folders",
         "model_type": "Folder",
-        "help": "Import folders using the Data Wizard backend.",
+        "help": (
+            "Import folders (domains) from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: description, domain (parent folder name)\n"
+            "\nConflict detection: by name + parent folder"
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -314,7 +339,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_perimeters",
         "model_type": "Perimeter",
-        "help": "Import perimeters using the Data Wizard backend.",
+        "help": (
+            "Import perimeters from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, status, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -323,16 +353,31 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_compliance_assessments",
         "model_type": "ComplianceAssessment",
-        "help": "Import compliance assessments using the Data Wizard backend.",
+        "help": (
+            "Import compliance assessment results from CSV/Excel.\n"
+            "Creates a new assessment and updates matching requirement results.\n"
+            "\nRequired columns: ref_id or urn, assessable (must be truthy)\n\n"
+            "Optional columns: compliance_result, requirement_progress, observations, "
+            "score, implementation_score, documentation_score, answers\n"
+            "\nNote: always creates a new assessment; conflict management is not applicable."
+        ),
         "requires_folder": False,
         "requires_perimeter": True,
         "requires_framework": True,
         "requires_matrix": False,
+        "supports_conflict": False,
     },
     {
         "command": "import_findings_assessments",
         "model_type": "FindingsAssessment",
-        "help": "Import findings assessments using the Data Wizard backend.",
+        "help": (
+            "Import findings into a new findings assessment from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, status, "
+            "severity (info/low/medium/high/critical), priority (1-4), "
+            "eta, due_date, observation, filtering_labels\n"
+            "\nConflict detection: by name within the created assessment"
+        ),
         "requires_folder": False,
         "requires_perimeter": True,
         "requires_framework": False,
@@ -341,16 +386,33 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_risk_assessment",
         "model_type": "RiskAssessment",
-        "help": "Import risk assessments using the Data Wizard backend.",
+        "help": (
+            "Import risk scenarios into a new risk assessment from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, threat, "
+            "existing_applied_controls (newline-separated names), "
+            "additional_controls (newline-separated names), "
+            "inherent_proba, inherent_impact, "
+            "current_proba, current_impact, "
+            "residual_proba, residual_impact, treatment\n"
+            "\nNote: always creates a new risk assessment; conflict management is not applicable."
+        ),
         "requires_folder": False,
         "requires_perimeter": True,
         "requires_framework": False,
         "requires_matrix": True,
+        "supports_conflict": False,
     },
     {
         "command": "import_elementary_actions",
         "model_type": "ElementaryAction",
-        "help": "Import elementary actions using the Data Wizard backend.",
+        "help": (
+            "Import elementary actions from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, "
+            "attack_stage (know/enter/discover/exploit), icon, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -359,7 +421,14 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_reference_controls",
         "model_type": "ReferenceControl",
-        "help": "Import reference controls using the Data Wizard backend.",
+        "help": (
+            "Import reference controls from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, "
+            "category (policy/process/technical/physical/procedure), "
+            "function (govern/identify/protect/detect/respond/recover), domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -368,7 +437,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_threats",
         "model_type": "Threat",
-        "help": "Import threats using the Data Wizard backend.",
+        "help": (
+            "Import threats from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -377,7 +451,16 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_processings",
         "model_type": "Processing",
-        "help": "Import processings using the Data Wizard backend.",
+        "help": (
+            "Import privacy processings from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, status, "
+            "dpia_required (true/false), dpia_reference, "
+            "processing_nature (comma-separated), "
+            "assigned_to (comma-separated user emails), "
+            "labels (comma-separated), domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -386,7 +469,15 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_policies",
         "model_type": "Policy",
-        "help": "Import policies using the Data Wizard backend.",
+        "help": (
+            "Import policies from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, "
+            "status (to_do/in_progress/on_hold/active/deprecated), "
+            "csf_function, priority, effort (XS/S/M/L/XL), "
+            "eta, expiry_date, link, filtering_labels, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -395,7 +486,15 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_security_exceptions",
         "model_type": "SecurityException",
-        "help": "Import security exceptions using the Data Wizard backend.",
+        "help": (
+            "Import security exceptions from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, "
+            "severity (info/low/medium/high/critical), "
+            "status (draft/in_review/approved/resolved/expired/deprecated), "
+            "expiration_date, observation, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -404,7 +503,16 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_incidents",
         "model_type": "Incident",
-        "help": "Import incidents using the Data Wizard backend.",
+        "help": (
+            "Import incidents from CSV/Excel.\n"
+            "\nRequired columns: name\n\n"
+            "Optional columns: ref_id, description, "
+            "severity (critical/major/moderate/minor/low/unknown), "
+            "status (new/ongoing/resolved/closed/dismissed), "
+            "detection (internal/external), link, reported_at, "
+            "filtering_labels, domain\n"
+            "\nConflict detection: by name + folder"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -413,7 +521,14 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_tprm",
         "model_type": "TPRM",
-        "help": "Import third-party records using the Data Wizard backend.",
+        "help": (
+            "Import TPRM records from a multi-sheet Excel file.\n"
+            "Expected sheets: Entities, Solutions, Contracts (processed in order).\n"
+            "\nEntities columns: name*, ref_id, description, domain\n"
+            "Solutions columns: name*, ref_id, description, provider_entity_ref_id*\n"
+            "Contracts columns: name*, ref_id, description, provider_entity_ref_id*, solution_ref_id\n"
+            "\nConflict detection: by name + folder (entities/solutions/contracts)"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -422,7 +537,12 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_ebios_rm_study_arm",
         "model_type": "EbiosRMStudyARM",
-        "help": "Import EBIOS RM ARM studies using the Data Wizard backend.",
+        "help": (
+            "Import an EBIOS RM study from an ARM-format multi-sheet Excel file.\n"
+            "Creates the study, feared events, RoTo couples, stakeholders, "
+            "strategic scenarios, and elementary actions.\n"
+            "\nConflict detection: by name within the study for each entity type"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -431,7 +551,13 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_ebios_rm_study",
         "model_type": "EbiosRMStudyExcel",
-        "help": "Import EBIOS RM Excel studies using the Data Wizard backend.",
+        "help": (
+            "Import an EBIOS RM study from an EBIOS Excel export file.\n"
+            "Processes sheets prefixed with workshop numbers (1.1 Study, 1.3 Feared Events, etc.).\n"
+            "Creates the study, assets, feared events, RoTo couples, stakeholders, "
+            "strategic scenarios, attack paths, elementary actions, and operational scenarios.\n"
+            "\nConflict detection: by name within the study for each entity type"
+        ),
         "requires_folder": True,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -440,7 +566,13 @@ DATA_WIZARD_COMMANDS = [
     {
         "command": "import_bia",
         "model_type": "BusinessImpactAnalysis",
-        "help": "Import business impact analyses (multi-sheet Excel) using the Data Wizard backend.",
+        "help": (
+            "Import Business Impact Analyses from a multi-sheet Excel file.\n"
+            "Single-sheet: imports BIA summary records only.\n"
+            "Multi-sheet: Summary sheet + per-asset sheets + '<name> - Thresholds' sheets.\n"
+            "\nSummary columns: name*, ref_id, description, observation, eta, due_date\n"
+            "\nConflict detection: by name + folder (BIA), by bia + asset (asset assessments)"
+        ),
         "requires_folder": False,
         "requires_perimeter": False,
         "requires_framework": False,
@@ -453,14 +585,18 @@ DATA_WIZARD_COMMANDS = [
 
 
 def register_data_wizard_command(config: Dict[str, object]) -> None:
-    command_name = str(config["command"])
+    command_name = config["command"]
     cli_name = command_name.replace("_", "-")
-    model_type = str(config["model_type"])
-    help_text = str(config["help"])
-    requires_folder = bool(config.get("requires_folder", False))
-    requires_perimeter = bool(config.get("requires_perimeter", False))
-    requires_framework = bool(config.get("requires_framework", False))
-    requires_matrix = bool(config.get("requires_matrix", False))
+
+    model_type = config["model_type"]
+    help_text = config["help"]
+
+    requires_folder = config.get("requires_folder", False)
+    requires_perimeter = config.get("requires_perimeter", False)
+    requires_framework = config.get("requires_framework", False)
+    requires_matrix = config.get("requires_matrix", False)
+    supports_conflict = config.get("supports_conflict", True)
+
     show_folder_option = config.get(
         "show_folder_option",
         model_type
@@ -512,6 +648,7 @@ def register_data_wizard_command(config: Dict[str, object]) -> None:
         type=click.Choice(["stop", "skip", "update"], case_sensitive=False),
         default="stop",
         help="How to handle existing records: stop (default), skip, or update.",
+        hidden=not supports_conflict,
     )
     def command(
         file,

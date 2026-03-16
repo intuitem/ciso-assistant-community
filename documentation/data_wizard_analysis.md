@@ -84,12 +84,14 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 | `observation` | No | Free text |
+| `owner` | No | Semicolon-delimited list of user emails and/or team names. Resolved case-insensitively: first by user email, then by team name. Unresolved entries are skipped with a warning. |
+
+> **Note:** The `owner` field resolves entries against existing users (by email) and teams (by name). Ensure any referenced users and teams are created in CISO Assistant before importing. Unresolved entries will be skipped with a warning and will not block the import.
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `cost` | JSONField | Medium (complex structure) |
-| `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
 | `assets` | M2M | Medium |
 
