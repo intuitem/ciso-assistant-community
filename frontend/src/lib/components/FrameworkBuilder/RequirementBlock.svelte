@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getBuilderContext, type BuilderRequirement } from './builder-state.svelte';
+	import { getBuilderContext, type BuilderRequirement } from './builder-state';
 	import QuestionEditor from './QuestionEditor.svelte';
 
 	interface Props {
@@ -10,14 +10,13 @@
 
 	let { requirement, sectionIndex, reqIndex }: Props = $props();
 
-	const state = getBuilderContext();
+	const builder = getBuilderContext();
+	const { framework: frameworkStore, errors: errorsStore } = builder;
 	let confirmDelete = $state(false);
-
-	const igDef = $derived(state.framework.implementation_groups_definition);
 
 	async function saveField(field: string, value: unknown) {
 		(requirement.node as Record<string, unknown>)[field] = value;
-		await state.updateNode(requirement.node.id, { [field]: value });
+		await builder.updateNode(requirement.node.id, { [field]: value });
 	}
 
 	// All questions in this requirement (for depends_on editor)
@@ -62,7 +61,7 @@
 					type="button"
 					class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
 					onclick={() => {
-						state.deleteRequirement(sectionIndex, reqIndex);
+						builder.deleteRequirement(sectionIndex, reqIndex);
 						confirmDelete = false;
 					}}
 				>
@@ -88,10 +87,10 @@
 	</div>
 
 	<!-- Implementation groups -->
-	{#if igDef && igDef.length > 0}
+	{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 		<div class="px-4 py-2 border-b border-gray-100">
 			<span class="text-xs text-gray-500 mr-2">Groups:</span>
-			{#each igDef as ig}
+			{#each $frameworkStore.implementation_groups_definition as ig}
 				{@const refId = (ig as Record<string, string>).ref_id}
 				{@const selected = (requirement.node.implementation_groups ?? []).includes(refId)}
 				<button
@@ -102,10 +101,10 @@
 					onclick={() => {
 						const current = requirement.node.implementation_groups ?? [];
 						const next = selected
-							? current.filter((g: string) => g !== refId)
+							? current.filter((g) => g !== refId)
 							: [...current, refId];
 						requirement.node.implementation_groups = next;
-						state.updateNode(requirement.node.id, { implementation_groups: next });
+						builder.updateNode(requirement.node.id, { implementation_groups: next });
 					}}
 				>
 					{refId}
@@ -129,15 +128,15 @@
 		<button
 			type="button"
 			class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-			onclick={() => state.addQuestion(sectionIndex, reqIndex)}
+			onclick={() => builder.addQuestion(sectionIndex, reqIndex)}
 		>
 			<i class="fa-solid fa-plus mr-1"></i>Add question
 		</button>
 	</div>
 
-	{#if state.errors.has(`node-${requirement.node.id}`)}
+	{#if $errorsStore.has(`node-${requirement.node.id}`)}
 		<div class="px-4 py-2 bg-red-50 border-t border-red-200">
-			<p class="text-xs text-red-600">{state.errors.get(`node-${requirement.node.id}`)}</p>
+			<p class="text-xs text-red-600">{$errorsStore.get(`node-${requirement.node.id}`)}</p>
 		</div>
 	{/if}
 </div>

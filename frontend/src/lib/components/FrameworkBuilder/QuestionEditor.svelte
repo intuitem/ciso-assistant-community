@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { getBuilderContext, type Question } from './builder-state.svelte';
+	import { getBuilderContext, type Question } from './builder-state';
 	import TypeSelector from './TypeSelector.svelte';
 	import ChoiceListEditor from './ChoiceListEditor.svelte';
 	import DependsOnEditor from './DependsOnEditor.svelte';
@@ -15,13 +15,11 @@
 
 	let { question, sectionIndex, reqIndex, qIndex, siblingQuestions }: Props = $props();
 
-	const state = getBuilderContext();
+	const builder = getBuilderContext();
+	const { framework: frameworkStore, errors: errorsStore } = builder;
 
 	let expanded = $state(false);
 	let confirmDelete = $state(false);
-
-	// Drag state
-	let draggedIndex: number | null = $state(null);
 
 	const typeIcons: Record<string, string> = {
 		text: 'fa-font',
@@ -59,7 +57,7 @@
 	);
 
 	async function saveField(field: string, value: unknown) {
-		await state.updateQuestion(question.id, { [field]: value });
+		await builder.updateQuestion(question.id, { [field]: value });
 	}
 
 	async function changeType(newType: string) {
@@ -126,7 +124,7 @@
 							type="button"
 							class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50 hover:bg-red-100"
 							onclick={() => {
-								state.deleteQuestion(sectionIndex, reqIndex, qIndex);
+								builder.deleteQuestion(sectionIndex, reqIndex, qIndex);
 								confirmDelete = false;
 							}}
 						>
@@ -220,18 +218,18 @@
 					{sectionIndex}
 					{reqIndex}
 					{qIndex}
-					implementationGroups={state.framework.implementation_groups_definition}
-					minScore={state.framework.min_score}
-					maxScore={state.framework.max_score}
+					implementationGroups={$frameworkStore.implementation_groups_definition}
+					minScore={$frameworkStore.min_score}
+					maxScore={$frameworkStore.max_score}
 				/>
 			{/if}
 
 			<!-- Depends on -->
 			<DependsOnEditor {question} availableQuestions={availableForDependsOn} />
 
-			{#if state.errors.has(`question-${question.id}`)}
+			{#if $errorsStore.has(`question-${question.id}`)}
 				<p class="text-xs text-red-600">
-					{state.errors.get(`question-${question.id}`)}
+					{$errorsStore.get(`question-${question.id}`)}
 				</p>
 			{/if}
 		</div>

@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import {
-		BuilderState,
+		createBuilderState,
 		setBuilderContext,
 		type Framework,
 		type RequirementNode,
 		type Question
-	} from './builder-state.svelte';
+	} from './builder-state';
 	import { initBuilderApi } from './builder-api';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import SectionBlock from './SectionBlock.svelte';
@@ -21,8 +21,15 @@
 
 	initBuilderApi(fetch, framework.id);
 
-	const state = new BuilderState(framework, requirementNodes, questions);
-	setBuilderContext(state);
+	const builder = createBuilderState(framework, requirementNodes, questions);
+	setBuilderContext(builder);
+
+	const {
+		framework: frameworkStore,
+		sections: sectionsStore,
+		errors: errorsStore,
+		saving: savingStore
+	} = builder;
 
 	// Drag state for sections
 	let draggedSectionIndex: number | null = $state(null);
@@ -38,7 +45,7 @@
 	function handleSectionDrop(e: DragEvent, dropIndex: number) {
 		e.preventDefault();
 		if (draggedSectionIndex === null || draggedSectionIndex === dropIndex) return;
-		state.reorderSections(draggedSectionIndex, dropIndex);
+		builder.reorderSections(draggedSectionIndex, dropIndex);
 		draggedSectionIndex = null;
 	}
 
@@ -53,7 +60,7 @@
 				for (const entry of entries) {
 					if (entry.isIntersecting) {
 						const id = (entry.target as HTMLElement).dataset.sectionId;
-						if (id) state.activeSection = id;
+						if (id) builder.activeSection.set(id);
 					}
 				}
 			},
@@ -74,37 +81,35 @@
 	<div class="space-y-2">
 		<input
 			type="text"
-			value={state.framework.name}
+			value={$frameworkStore.name}
 			placeholder="Framework name"
 			class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors py-1"
 			onblur={(e) => {
-				state.framework.name = e.currentTarget.value;
-				state.updateFramework({ name: e.currentTarget.value });
+				builder.updateFramework({ name: e.currentTarget.value });
 			}}
 		/>
 		<textarea
-			value={state.framework.description ?? ''}
+			value={$frameworkStore.description ?? ''}
 			placeholder="Framework description (optional)"
 			rows="2"
 			class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors resize-none py-1"
 			onblur={(e) => {
-				state.framework.description = e.currentTarget.value;
-				state.updateFramework({ description: e.currentTarget.value || null });
+				builder.updateFramework({ description: e.currentTarget.value || null });
 			}}
 		></textarea>
-		{#if state.errors.has('framework')}
-			<p class="text-xs text-red-600">{state.errors.get('framework')}</p>
+		{#if $errorsStore.has('framework')}
+			<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
 		{/if}
 	</div>
 
 	<!-- Sections -->
-	{#each state.sections as section, sectionIndex (section.node.id)}
+	{#each $sectionsStore as section, sectionIndex (section.node.id)}
 		<!-- Add section button between sections -->
 		{#if sectionIndex > 0}
 			<button
 				type="button"
 				class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
-				onclick={() => state.addSection(sectionIndex - 1)}
+				onclick={() => builder.addSection(sectionIndex - 1)}
 			>
 				<i class="fa-solid fa-plus mr-1"></i>Insert section
 			</button>
@@ -127,13 +132,13 @@
 	<button
 		type="button"
 		class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
-		onclick={() => state.addSection()}
+		onclick={() => builder.addSection()}
 	>
 		<i class="fa-solid fa-plus mr-1"></i>Add section
 	</button>
 
 	<!-- Empty state -->
-	{#if state.sections.length === 0}
+	{#if $sectionsStore.length === 0}
 		<div class="text-center py-16">
 			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
 				<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
@@ -143,7 +148,7 @@
 			<button
 				type="button"
 				class="btn preset-filled-primary-500 px-6"
-				onclick={() => state.addSection()}
+				onclick={() => builder.addSection()}
 			>
 				<i class="fa-solid fa-plus mr-2"></i>Add first section
 			</button>
@@ -151,7 +156,7 @@
 	{/if}
 
 	<!-- Global errors -->
-	{#each [...state.errors.entries()] as [key, message] (key)}
+	{#each [...$errorsStore.entries()] as [key, message] (key)}
 		{#if key.startsWith('add-') || key.startsWith('reorder-')}
 			<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
 				{message}

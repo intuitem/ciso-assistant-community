@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
-	import { getBuilderContext, type BuilderSection } from './builder-state.svelte';
+	import { getBuilderContext, type BuilderSection } from './builder-state';
 	import RequirementBlock from './RequirementBlock.svelte';
 
 	interface Props {
@@ -10,15 +10,17 @@
 
 	let { section, sectionIndex }: Props = $props();
 
-	const state = getBuilderContext();
+	const builder = getBuilderContext();
+	const { errors: errorsStore } = builder;
 	let confirmDelete = $state(false);
+	let collapsed = $state(section.collapsed);
 
 	// Drag state for requirements within this section
 	let draggedReqIndex: number | null = $state(null);
 
 	async function saveField(field: string, value: unknown) {
 		(section.node as Record<string, unknown>)[field] = value;
-		await state.updateNode(section.node.id, { [field]: value });
+		await builder.updateNode(section.node.id, { [field]: value });
 	}
 
 	function handleReqDragStart(index: number) {
@@ -32,7 +34,7 @@
 	function handleReqDrop(e: DragEvent, dropIndex: number) {
 		e.preventDefault();
 		if (draggedReqIndex === null || draggedReqIndex === dropIndex) return;
-		state.reorderRequirements(sectionIndex, draggedReqIndex, dropIndex);
+		builder.reorderRequirements(sectionIndex, draggedReqIndex, dropIndex);
 		draggedReqIndex = null;
 	}
 
@@ -69,9 +71,9 @@
 		<button
 			type="button"
 			class="text-gray-400 hover:text-gray-600 transition-colors"
-			onclick={() => (section.collapsed = !section.collapsed)}
+			onclick={() => (collapsed = !collapsed)}
 		>
-			<i class="fa-solid {section.collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-sm"></i>
+			<i class="fa-solid {collapsed ? 'fa-chevron-right' : 'fa-chevron-down'} text-sm"></i>
 		</button>
 
 		{#if confirmDelete}
@@ -80,7 +82,7 @@
 				type="button"
 				class="text-xs text-red-600 font-medium px-2 py-1 rounded bg-red-50 hover:bg-red-100"
 				onclick={() => {
-					state.deleteSection(sectionIndex);
+					builder.deleteSection(sectionIndex);
 					confirmDelete = false;
 				}}
 			>
@@ -104,14 +106,14 @@
 		{/if}
 	</div>
 
-	{#if state.errors.has(`node-${section.node.id}`)}
+	{#if $errorsStore.has(`node-${section.node.id}`)}
 		<p class="text-xs text-red-600 ml-8 mb-2">
-			{state.errors.get(`node-${section.node.id}`)}
+			{$errorsStore.get(`node-${section.node.id}`)}
 		</p>
 	{/if}
 
 	<!-- Section children -->
-	{#if !section.collapsed}
+	{#if !collapsed}
 		<div transition:slide={{ duration: 200 }} class="space-y-4 ml-4">
 			{#each section.requirements as req, reqIndex (req.node.id)}
 				<div
@@ -130,7 +132,7 @@
 			<button
 				type="button"
 				class="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-				onclick={() => state.addRequirement(sectionIndex)}
+				onclick={() => builder.addRequirement(sectionIndex)}
 			>
 				<i class="fa-solid fa-plus mr-1"></i>Add requirement
 			</button>

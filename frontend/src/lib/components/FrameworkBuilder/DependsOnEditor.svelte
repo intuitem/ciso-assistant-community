@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getBuilderContext, type Question } from './builder-state.svelte';
+	import { getBuilderContext, type Question } from './builder-state';
 
 	interface Props {
 		question: Question;
@@ -8,7 +8,7 @@
 
 	let { question, availableQuestions }: Props = $props();
 
-	const state = getBuilderContext();
+	const builder = getBuilderContext();
 
 	let active = $state(!!question.depends_on);
 	let dependsOn = $state<{
@@ -27,7 +27,7 @@
 		if (active) {
 			// Remove condition
 			active = false;
-			state.updateQuestion(question.id, { depends_on: null });
+			builder.updateQuestion(question.id, { depends_on: null });
 			question.depends_on = null;
 		} else {
 			active = true;
@@ -37,7 +37,7 @@
 	function save() {
 		if (!dependsOn.question || dependsOn.answers.length === 0) return;
 		const value = { ...dependsOn };
-		state.updateQuestion(question.id, { depends_on: value });
+		builder.updateQuestion(question.id, { depends_on: value });
 		question.depends_on = value;
 	}
 

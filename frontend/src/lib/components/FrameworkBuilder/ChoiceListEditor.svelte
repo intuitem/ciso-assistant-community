@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getBuilderContext, type QuestionChoice } from './builder-state.svelte';
+	import { getBuilderContext, type QuestionChoice } from './builder-state';
 
 	interface Props {
 		choices: QuestionChoice[];
@@ -21,13 +21,14 @@
 		maxScore = 100
 	}: Props = $props();
 
-	const state = getBuilderContext();
+	const builder = getBuilderContext();
+	const { errors: errorsStore } = builder;
 	let draggedIndex: number | null = $state(null);
 	let expandedIndex: number | null = $state(null);
 	let confirmDeleteIndex: number | null = $state(null);
 
 	async function saveField(choiceId: string, field: string, value: unknown) {
-		await state.updateChoice(choiceId, { [field]: value });
+		await builder.updateChoice(choiceId, { [field]: value });
 	}
 
 	function handleDragStart(index: number) {
@@ -41,7 +42,7 @@
 	function handleDrop(e: DragEvent, dropIndex: number) {
 		e.preventDefault();
 		if (draggedIndex === null || draggedIndex === dropIndex) return;
-		state.reorderChoices(sectionIndex, reqIndex, qIndex, draggedIndex, dropIndex);
+		builder.reorderChoices(sectionIndex, reqIndex, qIndex, draggedIndex, dropIndex);
 		draggedIndex = null;
 	}
 
@@ -56,7 +57,7 @@
 		<button
 			type="button"
 			class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-			onclick={() => state.addChoice(sectionIndex, reqIndex, qIndex)}
+			onclick={() => builder.addChoice(sectionIndex, reqIndex, qIndex)}
 		>
 			<i class="fa-solid fa-plus mr-1"></i>Add choice
 		</button>
@@ -114,7 +115,7 @@
 						type="button"
 						class="text-xs text-red-600 font-medium"
 						onclick={() => {
-							state.deleteChoice(sectionIndex, reqIndex, qIndex, index);
+							builder.deleteChoice(sectionIndex, reqIndex, qIndex, index);
 							confirmDeleteIndex = null;
 						}}
 					>
@@ -248,8 +249,8 @@
 			{/if}
 		</div>
 
-		{#if state.errors.has(`choice-${choice.id}`)}
-			<p class="text-xs text-red-600 px-1">{state.errors.get(`choice-${choice.id}`)}</p>
+		{#if $errorsStore.has(`choice-${choice.id}`)}
+			<p class="text-xs text-red-600 px-1">{$errorsStore.get(`choice-${choice.id}`)}</p>
 		{/if}
 	{/each}
 

@@ -7863,6 +7863,117 @@ class FrameworkViewSet(BaseModelViewSet):
             )
         )
 
+    @action(detail=True, methods=["post"], name="Duplicate framework")
+    def duplicate(self, request, pk):
+        """Deep-clone a framework with all requirement nodes, questions, and choices."""
+        import uuid
+
+        source = self.get_object()  # checks read permission
+        folder_id = request.data.get("folder", source.folder_id)
+        folder = Folder.objects.get(id=folder_id)
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_framework"),
+            folder=folder,
+        ):
+            raise PermissionDenied(
+                {"folder": "You do not have permission to create frameworks in this folder"}
+            )
+
+        # Clone framework
+        new_framework = Framework.objects.create(
+            name=request.data.get("name", f"{source.name} (copy)"),
+            description=source.description,
+            annotation=source.annotation,
+            folder_id=folder_id,
+            min_score=source.min_score,
+            max_score=source.max_score,
+            scores_definition=source.scores_definition,
+            implementation_groups_definition=source.implementation_groups_definition,
+            outcomes_definition=source.outcomes_definition,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider,
+        )
+
+        # Map old URNs to new URNs for parent_urn remapping
+        urn_map = {}
+        nodes = RequirementNode.objects.filter(framework=source).order_by("order_id")
+        for node in nodes:
+            old_urn = node.urn
+            new_urn = f"urn:intuitem:risk:req_node:{uuid.uuid4()}" if old_urn else None
+            urn_map[old_urn] = new_urn
+
+        # Clone requirement nodes
+        node_id_map = {}  # old node id -> new node id
+        for node in nodes:
+            old_id = node.id
+            new_node = RequirementNode.objects.create(
+                urn=urn_map.get(node.urn),
+                ref_id=node.ref_id,
+                name=node.name,
+                description=node.description,
+                annotation=node.annotation,
+                framework=new_framework,
+                parent_urn=urn_map.get(node.parent_urn, node.parent_urn),
+                order_id=node.order_id,
+                assessable=node.assessable,
+                implementation_groups=node.implementation_groups,
+                typical_evidence=node.typical_evidence,
+                weight=node.weight,
+                importance=node.importance,
+                folder_id=folder_id,
+                locale=node.locale,
+                default_locale=node.default_locale,
+                translations=node.translations,
+            )
+            node_id_map[old_id] = new_node.id
+
+        # Clone questions and choices
+        questions = (
+            Question.objects.filter(requirement_node__framework=source)
+            .prefetch_related("choices")
+            .order_by("order")
+        )
+        for q in questions:
+            new_req_node_id = node_id_map.get(q.requirement_node_id)
+            if not new_req_node_id:
+                continue
+            new_question = Question.objects.create(
+                urn=f"urn:intuitem:risk:question:{uuid.uuid4()}",
+                ref_id=q.ref_id,
+                text=q.text,
+                annotation=q.annotation,
+                type=q.type,
+                config=q.config,
+                depends_on=q.depends_on,
+                order=q.order,
+                weight=q.weight,
+                requirement_node_id=new_req_node_id,
+                folder_id=folder_id,
+                translations=q.translations,
+            )
+            for choice in q.choices.all():
+                QuestionChoice.objects.create(
+                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}" if choice.urn else None,
+                    ref_id=choice.ref_id,
+                    value=choice.value,
+                    annotation=choice.annotation,
+                    add_score=choice.add_score,
+                    compute_result=choice.compute_result,
+                    order=choice.order,
+                    description=choice.description,
+                    color=choice.color,
+                    select_implementation_groups=choice.select_implementation_groups,
+                    question=new_question,
+                    folder_id=folder_id,
+                    translations=choice.translations,
+                )
+
+        serializer = FrameworkReadSerializer(new_framework)
+        return Response(serializer.data, status=201)
+
     @action(detail=False, name="Get used frameworks")
     def used(self, request):
         viewable_framework = RoleAssignment.get_accessible_object_ids(

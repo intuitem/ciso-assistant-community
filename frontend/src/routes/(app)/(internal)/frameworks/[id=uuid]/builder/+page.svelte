@@ -17,21 +17,13 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					endpoint: 'frameworks',
+					endpoint: `frameworks/${data.framework.id}/duplicate`,
 					payload: {
 						name: `${data.framework.name} (copy)`,
-						description: data.framework.description ?? '',
-						annotation: data.framework.annotation ?? '',
 						folder:
 							typeof data.framework.folder === 'string'
 								? data.framework.folder
-								: data.framework.folder.id,
-						min_score: data.framework.min_score,
-						max_score: data.framework.max_score,
-						scores_definition: data.framework.scores_definition,
-						implementation_groups_definition:
-							data.framework.implementation_groups_definition,
-						reference_controls: []
+								: data.framework.folder.id
 					}
 				})
 			});
