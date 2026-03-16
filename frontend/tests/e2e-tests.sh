@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+# NOTE: For parallel test execution, use run_functional_tests.py instead:
+#   python3 frontend/tests/run_functional_tests.py --help
 APP_DIR=$(realpath "$(dirname "$0")/../..")
 DB_DIR=$APP_DIR/backend/db
 DB_NAME=test-database.sqlite3
