@@ -496,6 +496,37 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             }
         )
 
+    @staticmethod
+    def _inline_images(html_content):
+        """Replace document attachment image URLs with base64 data URIs for PDF export."""
+        import base64
+        import re
+
+        def replace_match(match):
+            attachment_id = match.group(1)
+            try:
+                attachment = DocumentAttachment.objects.get(pk=attachment_id)
+                if attachment.file and attachment.file.storage.exists(
+                    attachment.file.name
+                ):
+                    file_data = attachment.file.read()
+                    content_type = (
+                        mimetypes.guess_type(attachment.file.name)[0]
+                        or "application/octet-stream"
+                    )
+                    b64 = base64.b64encode(file_data).decode("ascii")
+                    return f'src="data:{content_type};base64,{b64}"'
+            except DocumentAttachment.DoesNotExist:
+                pass
+            return match.group(0)
+
+        # Match src attributes pointing to serve-image with an attachment_id
+        return re.sub(
+            r'src="[^"]*[?&]_action=serve-image&amp;attachment_id=([0-9a-f-]+)"',
+            replace_match,
+            html_content,
+        )
+
     @action(detail=True, methods=["get"], url_path="export-pdf")
     def export_pdf(self, request, pk=None):
         """Export revision content as a PDF document."""
@@ -506,6 +537,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             revision.content,
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
+        content_html = self._inline_images(content_html)
         author_name = ""
         if revision.author:
             author_name = (
@@ -550,6 +582,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             revision.content,
             extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
+        content_html = self._inline_images(content_html)
         author_name = ""
         if revision.author:
             author_name = (
