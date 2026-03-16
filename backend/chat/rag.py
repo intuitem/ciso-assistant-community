@@ -42,7 +42,12 @@ def search(
 ) -> list[dict]:
     """
     Permission-aware semantic search over the vector store.
-    Filters results by the user's accessible folders.
+
+    Searches two partitions and merges results:
+    - User data (models, documents): filtered by accessible folders
+    - Library knowledge (frameworks, threats): shared, no folder filter
+
+    Results are merged and sorted by score.
     """
     from qdrant_client.models import Filter, FieldCondition, MatchAny, MatchValue
 
@@ -52,38 +57,68 @@ def search(
     embedder = get_embedder()
 
     query_vector = embedder.embed_query(query)
+    all_results = []
 
-    # Build permission filter
-    accessible_folders = get_accessible_folder_ids(user)
-    must_conditions = [
-        FieldCondition(
-            key="folder_id",
-            match=MatchAny(any=accessible_folders),
-        )
-    ]
+    # --- Search 1: User data (permission-filtered) ---
+    if source_type != "library":
+        accessible_folders = get_accessible_folder_ids(user)
+        user_conditions = [
+            FieldCondition(
+                key="folder_id",
+                match=MatchAny(any=accessible_folders),
+            )
+        ]
+        if source_type:
+            user_conditions.append(
+                FieldCondition(key="source_type", match=MatchValue(value=source_type))
+            )
+        if object_type:
+            user_conditions.append(
+                FieldCondition(key="object_type", match=MatchValue(value=object_type))
+            )
 
-    # Optional type filters
-    if source_type:
-        must_conditions.append(
-            FieldCondition(key="source_type", match=MatchValue(value=source_type))
-        )
-    if object_type:
-        must_conditions.append(
-            FieldCondition(key="object_type", match=MatchValue(value=object_type))
-        )
+        try:
+            user_results = client.query_points(
+                collection_name=COLLECTION_NAME,
+                query=query_vector,
+                limit=top_k,
+                query_filter=Filter(must=user_conditions),
+            )
+            all_results.extend(user_results.points)
+        except Exception as e:
+            logger.error("qdrant_user_search_failed", error=str(e))
 
-    query_filter = Filter(must=must_conditions)
+    # --- Search 2: Library knowledge (shared, no folder filter) ---
+    if source_type in (None, "library"):
+        library_conditions = [
+            FieldCondition(key="source_type", match=MatchValue(value="library"))
+        ]
+        if object_type:
+            library_conditions.append(
+                FieldCondition(key="object_type", match=MatchValue(value=object_type))
+            )
 
-    try:
-        results = client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=query_vector,
-            limit=top_k,
-            query_filter=query_filter,
-        )
-    except Exception as e:
-        logger.error("Qdrant search failed: %s", e)
-        return []
+        try:
+            library_results = client.query_points(
+                collection_name=COLLECTION_NAME,
+                query=query_vector,
+                limit=top_k,
+                query_filter=Filter(must=library_conditions),
+            )
+            all_results.extend(library_results.points)
+        except Exception as e:
+            logger.error("qdrant_library_search_failed", error=str(e))
+
+    # Merge, deduplicate, sort by score, take top_k
+    seen_ids = set()
+    merged = []
+    for r in sorted(all_results, key=lambda x: x.score, reverse=True):
+        rid = str(r.id)
+        if rid not in seen_ids:
+            seen_ids.add(rid)
+            merged.append(r)
+        if len(merged) >= top_k:
+            break
 
     return [
         {
@@ -96,8 +131,9 @@ def search(
             "name": r.payload.get("name", ""),
             "ref_id": r.payload.get("ref_id", ""),
             "framework": r.payload.get("framework", ""),
+            "urn": r.payload.get("urn", ""),
         }
-        for r in results.points
+        for r in merged
     ]
 
 
@@ -201,6 +237,8 @@ def format_context(results: list[dict], expanded: list[dict] | None = None) -> s
         header = f"[Source {i}: {source_label}"
         if ref:
             header += f" - {ref}"
+        if r.get("urn"):
+            header += f" ({r['urn']})"
         header += f" (score: {r['score']:.2f})]"
         parts.append(f"{header}\n{r['text']}")
 
@@ -228,6 +266,13 @@ def build_context_refs(
             ref["ref_id"] = r["ref_id"]
         if r.get("score"):
             ref["score"] = round(r["score"], 3)
+        # Library citations
+        if r.get("source_type") == "library":
+            ref["source"] = "library"
+            if r.get("framework"):
+                ref["framework"] = r["framework"]
+            if r.get("urn"):
+                ref["urn"] = r["urn"]
         refs.append(ref)
 
     if expanded:

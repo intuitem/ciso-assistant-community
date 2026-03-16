@@ -64,6 +64,7 @@ class Command(BaseCommand):
             "source_type": PayloadSchemaType.KEYWORD,
             "object_type": PayloadSchemaType.KEYWORD,
             "object_id": PayloadSchemaType.KEYWORD,
+            "urn": PayloadSchemaType.KEYWORD,
         }
         for field, schema_type in indexes.items():
             client.create_payload_index(
