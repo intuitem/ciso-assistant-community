@@ -7920,8 +7920,15 @@ class FrameworkViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], name="Framework as an Excel template")
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
-        req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
-        has_questions = any(rn.questions for rn in req_nodes)
+        req_nodes = list(
+            RequirementNode.objects.filter(framework=fwk)
+            .prefetch_related("questions__choices")
+            .order_by("urn")
+        )
+        questions_by_node = {
+            rn.id: build_questions_dict(rn) for rn in req_nodes
+        }
+        has_questions = any(questions_by_node.values())
         entries = []
 
         for rn in req_nodes:
@@ -7938,9 +7945,10 @@ class FrameworkViewSet(BaseModelViewSet):
             }
 
             if has_questions:
-                if rn.questions:
+                q_dict = questions_by_node.get(rn.id)
+                if q_dict:
                     lines = []
-                    for q_urn, question in rn.questions.items():
+                    for q_urn, question in q_dict.items():
                         q_text = question.get("text", "")
                         if not q_text:
                             continue
@@ -8888,9 +8896,18 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         req_nodes = {
             node.id: node
             for node in RequirementNode.objects.filter(id__in=req_node_ids)
+            .prefetch_related("questions__choices")
         }
+        questions_by_node = {
+            node_id: build_questions_dict(node)
+            for node_id, node in req_nodes.items()
+        }
+        has_questions = any(questions_by_node.values())
 
-        has_questions = any(rn.questions for rn in req_nodes.values())
+        # Pre-build answers dicts for all requirement assessments
+        answers_by_req = {}
+        for req in requirement_assessments:
+            answers_by_req[req.id] = build_answers_dict(req.answers.all())
 
         for req in requirement_assessments:
             req_node = req_nodes.get(req.requirement.id)
@@ -8917,10 +8934,11 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["score"] = req.score
 
             if has_questions:
-                if req_node.questions:
-                    answers = req.answers or {}
+                q_dict = questions_by_node.get(req_node.id)
+                if q_dict:
+                    answers = answers_by_req.get(req.id, {})
                     lines = []
-                    for q_urn, question in req_node.questions.items():
+                    for q_urn, question in q_dict.items():
                         q_text = question.get("text", "")
                         if not q_text:
                             continue
@@ -9282,12 +9300,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
     def update_requirement(self, request, pk):
         compliance_assessment = get_object_or_404(self.get_queryset(), pk=pk)
 
-        viewable_objects, _, _ = RoleAssignment.get_accessible_object_ids(
+        _, changeable_objects, _ = RoleAssignment.get_accessible_object_ids(
             folder=Folder.get_root_folder(),
             user=request.user,
             object_type=ComplianceAssessment,
         )
-        if compliance_assessment.id not in viewable_objects:
+        if compliance_assessment.id not in changeable_objects:
             return Response(status=status.HTTP_403_FORBIDDEN)
         try:
             urn = request.data.get("urn")
@@ -14137,6 +14155,7 @@ class QuestionViewSet(BaseModelViewSet):
     """API endpoint for Question CRUD."""
 
     model = Question
+    search_fields = ["text", "annotation"]
     filterset_fields = [
         "requirement_node",
         "type",
@@ -14161,6 +14180,7 @@ class QuestionChoiceViewSet(BaseModelViewSet):
     """API endpoint for QuestionChoice CRUD."""
 
     model = QuestionChoice
+    search_fields = ["value", "description"]
     filterset_fields = [
         "question",
         "urn",
@@ -14174,6 +14194,7 @@ class AnswerViewSet(BaseModelViewSet):
     """API endpoint for Answer CRUD."""
 
     model = Answer
+    search_fields = []
     filterset_fields = [
         "requirement_assessment",
         "question",
