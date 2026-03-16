@@ -947,6 +947,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         # Experimental: process evidences on TaskTemplate update
+
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
@@ -967,16 +968,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     if hasattr(request.data, "_mutable"):
                         request.data._mutable = True
                     request.data["filtering_labels"] = self._process_labels(labels)
-            else:
-                # Field is missing entirely - add empty list to clear labels
-                # Make request.data mutable if needed (e.g., for multipart/form-data)
-                if hasattr(request.data, "_mutable"):
-                    request.data._mutable = True
-                # Use setlist() for QueryDict to properly set an empty list
-                if hasattr(request.data, "setlist"):
-                    request.data.setlist("filtering_labels", [])
-                else:
-                    request.data["filtering_labels"] = []
 
         return super().update(request, *args, **kwargs)
 
