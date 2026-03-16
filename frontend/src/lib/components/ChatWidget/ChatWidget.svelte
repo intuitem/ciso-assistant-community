@@ -48,7 +48,7 @@
 	}
 
 	let messagesContainer: HTMLElement | null = $state(null);
-	let inputElement: HTMLInputElement | null = $state(null);
+	let inputElement: HTMLTextAreaElement | null = $state(null);
 
 	const view = $derived(getView());
 	const messages = $derived(getMessages());
@@ -79,6 +79,9 @@
 
 	function handleSend() {
 		sendMessage(inputText);
+		if (inputElement) {
+			inputElement.style.height = 'auto';
+		}
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -86,6 +89,11 @@
 			e.preventDefault();
 			handleSend();
 		}
+	}
+
+	function autoResize(el: HTMLTextAreaElement) {
+		el.style.height = 'auto';
+		el.style.height = Math.min(el.scrollHeight, 150) + 'px';
 	}
 
 	function handleGlobalKeydown(e: KeyboardEvent) {
@@ -352,7 +360,7 @@
 						</div>
 						<div class="flex flex-col items-end">
 							<div
-								class="rounded-2xl rounded-tr-sm bg-violet-600 px-3.5 py-2.5 text-sm
+								class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 px-3.5 py-2.5 text-sm
 									text-white"
 							>
 								{message.content}
@@ -429,19 +437,20 @@
 
 		<!-- Input area -->
 		<div class="border-t border-gray-200 px-4 py-3">
-			<div class="flex items-center gap-2">
-				<input
+			<div class="flex items-end gap-2">
+				<textarea
 					bind:this={inputElement}
 					bind:value={() => inputText, (v) => setInputText(v)}
 					onkeydown={handleKeydown}
-					type="text"
+					oninput={(e) => autoResize(e.currentTarget)}
 					placeholder="Ask a question..."
 					disabled={isStreaming}
-					class="flex-1 rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-sm
+					rows="1"
+					class="flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 px-3.5 py-2.5 text-sm
 						outline-none transition-colors placeholder:text-gray-400
 						focus:border-violet-400 focus:ring-2 focus:ring-violet-100
 						disabled:opacity-50"
-				/>
+				></textarea>
 				{#if isStreaming}
 					<button
 						onclick={stopStreaming}
@@ -721,7 +730,7 @@
 							</div>
 							<div class="flex max-w-[80%] flex-col items-end">
 								<div
-									class="rounded-2xl rounded-tr-sm bg-violet-600 px-4 py-3 text-sm
+									class="whitespace-pre-wrap rounded-2xl rounded-tr-sm bg-violet-600 px-4 py-3 text-sm
 										text-white"
 								>
 									{message.content}
@@ -798,19 +807,20 @@
 
 			<!-- Input area -->
 			<div class="border-t border-gray-200 px-6 py-4">
-				<div class="flex items-center gap-3">
-					<input
+				<div class="flex items-end gap-3">
+					<textarea
 						bind:this={inputElement}
 						bind:value={() => inputText, (v) => setInputText(v)}
 						onkeydown={handleKeydown}
-						type="text"
+						oninput={(e) => autoResize(e.currentTarget)}
 						placeholder="Ask a question..."
 						disabled={isStreaming}
-						class="flex-1 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm
+						rows="1"
+						class="flex-1 resize-none rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm
 							outline-none transition-colors placeholder:text-gray-400
 							focus:border-violet-400 focus:ring-2 focus:ring-violet-100
 							disabled:opacity-50"
-					/>
+					></textarea>
 					{#if isStreaming}
 						<button
 							onclick={stopStreaming}

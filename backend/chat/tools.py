@@ -13,11 +13,11 @@ Architecture:
       adding a new relationship is a one-line addition.
 """
 
-import logging
+import structlog
 
 from django.apps import apps
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 # Maps tool model param values to (app_label, model_name, display_name, url_slug)

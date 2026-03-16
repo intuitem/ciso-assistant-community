@@ -7,14 +7,14 @@ No regex, no intent detection, no i18n concerns — the LLM handles
 natural language understanding in any language.
 """
 
-import logging
+import structlog
 from datetime import timedelta
 
 from django.apps import apps
 from django.db.models import Q, Count
 from django.utils import timezone
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Page size for paginated list results
 LIST_PAGE_SIZE = 20

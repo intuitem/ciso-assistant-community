@@ -5,10 +5,10 @@ Each extractor handles a specific file type and produces semantically meaningful
 
 import csv
 import io
-import logging
+import structlog
 from dataclasses import dataclass
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 CHUNK_SIZE = 500  # Target tokens per chunk (approx 4 chars per token)
 CHUNK_OVERLAP = 50  # Token overlap between chunks

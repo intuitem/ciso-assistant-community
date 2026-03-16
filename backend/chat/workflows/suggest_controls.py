@@ -11,7 +11,7 @@ Steps:
     4. Emit attach proposals for matching controls (deterministic)
 """
 
-import logging
+import structlog
 from typing import Iterator
 
 from django.apps import apps
@@ -20,7 +20,7 @@ from django.db.models import Q
 from chat.page_context import ParsedContext
 from .base import Workflow, WorkflowContext, SSEEvent
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class SuggestControlsWorkflow(Workflow):

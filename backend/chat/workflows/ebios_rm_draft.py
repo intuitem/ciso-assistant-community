@@ -14,7 +14,7 @@ Steps:
 """
 
 import json
-import logging
+import structlog
 import re
 from typing import Iterator
 
@@ -23,7 +23,7 @@ from django.db.models import Q
 
 from .base import Workflow, WorkflowContext, SSEEvent
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class EbiosRMAssistWorkflow(Workflow):

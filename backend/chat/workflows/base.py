@@ -6,7 +6,7 @@ Each step is just a Python method call — no DAGs, no state machines.
 """
 
 import json
-import logging
+import structlog
 import re
 import time
 from dataclasses import dataclass, field
@@ -14,7 +14,7 @@ from typing import Iterator
 
 from chat.page_context import ParsedContext
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Appended to all workflow LLM prompts
 LANGUAGE_INSTRUCTION = (
@@ -161,10 +161,10 @@ class Workflow:
         t0 = time.time()
         result = ctx.llm.generate(prompt, context, history=ctx.history)
         logger.info(
-            "[%s] _call_llm took %.2fs (%d chars)",
-            self.name,
-            time.time() - t0,
-            len(result),
+            "call_llm_complete",
+            workflow=self.name,
+            duration=round(time.time() - t0, 2),
+            chars=len(result),
         )
         return result
 
@@ -190,8 +190,8 @@ class Workflow:
         # Store the complete response for the caller
         self._last_response = "".join(full_response)
         logger.info(
-            "[%s] _stream_llm took %.2fs (%d chars)",
-            self.name,
-            time.time() - t0,
-            len(self._last_response),
+            "stream_llm_complete",
+            workflow=self.name,
+            duration=round(time.time() - t0, 2),
+            chars=len(self._last_response),
         )

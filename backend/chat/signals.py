@@ -3,12 +3,12 @@ Django signals to trigger incremental re-indexing of model objects
 when they are created, updated, or deleted.
 """
 
-import logging
+import structlog
 
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Models to index for RAG
 INDEXED_MODELS = [

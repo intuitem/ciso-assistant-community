@@ -64,6 +64,7 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
 

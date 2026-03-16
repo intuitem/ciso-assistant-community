@@ -6,9 +6,9 @@ and sentence-transformers fallback for embeddings.
 
 from typing import Protocol, Iterator
 import json
-import logging
+import structlog
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 # Shared system prompts — used by all LLM implementations
@@ -324,9 +324,9 @@ class OllamaLLM:
                 tc = tool_calls[0]
                 func = tc.get("function", {})
                 logger.info(
-                    "LLM tool_call response: name=%s, args=%s",
-                    func.get("name"),
-                    func.get("arguments"),
+                    "tool_call_response",
+                    name=func.get("name"),
+                    args=func.get("arguments"),
                 )
                 return {
                     "name": func.get("name"),
@@ -334,11 +334,11 @@ class OllamaLLM:
                 }
 
             logger.info(
-                "LLM did not call a tool. Response content: %s",
-                message.get("content", "")[:200],
+                "no_tool_called",
+                content=message.get("content", "")[:200],
             )
         except Exception as e:
-            logger.warning("Tool call request failed: %s", e)
+            logger.warning("tool_call_failed", error=str(e))
 
         return None
 
@@ -447,9 +447,9 @@ class OpenAICompatibleLLM:
                     except json.JSONDecodeError:
                         arguments = {}
                 logger.info(
-                    "LLM tool_call response: name=%s, args=%s",
-                    func.get("name"),
-                    arguments,
+                    "tool_call_response",
+                    name=func.get("name"),
+                    args=arguments,
                 )
                 return {
                     "name": func.get("name"),
@@ -457,11 +457,11 @@ class OpenAICompatibleLLM:
                 }
 
             logger.info(
-                "LLM did not call a tool. Response content: %s",
-                message.get("content", "")[:200],
+                "no_tool_called",
+                content=message.get("content", "")[:200],
             )
         except Exception as e:
-            logger.warning("Tool call request failed: %s", e)
+            logger.warning("tool_call_failed", error=str(e))
 
         return None
 
@@ -586,7 +586,7 @@ def get_llm() -> LLM:
     except Exception:
         pass
 
-    logger.info("No LLM server available, running in retrieval-only mode")
+    logger.info("no_llm_available", mode="retrieval-only")
     return StubLLM()
 
 

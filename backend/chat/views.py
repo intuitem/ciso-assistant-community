@@ -1,5 +1,5 @@
 import json
-import logging
+import structlog
 import time
 
 from django.http import StreamingHttpResponse
@@ -16,7 +16,7 @@ from .serializers import (
 )
 from .providers import get_llm, is_ollama_available
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
@@ -132,16 +132,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             history=history_for_tool,
         )
         logger.info(
-            "Tool selection took %.2fs → %s",
-            time.time() - t0,
-            tool_response.get("name") if tool_response else "no tool",
+            "tool_selection_complete",
+            duration=round(time.time() - t0, 2),
+            tool=tool_response.get("name") if tool_response else "no tool",
         )
 
         # Check if LLM selected a workflow
         if tool_response and tool_response.get("name", "").startswith("workflow_"):
             workflow = get_workflow_by_tool_name(tool_response["name"])
             if workflow:
-                logger.info("Workflow selected: %s", workflow.name)
+                logger.info("workflow_selected", workflow=workflow.name)
 
                 # Build conversation history (exclude the message we just saved)
                 wf_history = list(
@@ -198,9 +198,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                             context_refs=wf_context_refs,
                         )
                         logger.info(
-                            "Workflow '%s' completed in %.2fs",
-                            workflow.name,
-                            time.time() - wf_start,
+                            "workflow_complete",
+                            workflow=workflow.name,
+                            duration=round(time.time() - wf_start, 2),
                         )
                         done_data = json.dumps(
                             {"type": "done", "context_refs": wf_context_refs}
@@ -243,7 +243,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                 accessible_folders,
                 parsed_context,
             )
-            logger.info("Tool dispatch took %.2fs", time.time() - t1)
+            logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
@@ -465,7 +465,9 @@ class ChatSessionViewSet(BaseModelViewSet):
                     # SSE format — "thinking" tokens go to a collapsible block in the UI
                     data = json.dumps({"type": token_type, "content": token})
                     yield f"data: {data}\n\n"
-                logger.info("LLM response streaming took %.2fs", time.time() - t_stream)
+                logger.info(
+                    "llm_stream_complete", duration=round(time.time() - t_stream, 2)
+                )
 
                 # Save assistant message
                 ChatMessage.objects.create(

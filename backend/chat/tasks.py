@@ -2,13 +2,13 @@
 Huey background tasks for document ingestion and object indexing.
 """
 
-import logging
+import structlog
 import uuid
 
 from django.utils import timezone
 from huey.contrib.djhuey import db_task
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @db_task()

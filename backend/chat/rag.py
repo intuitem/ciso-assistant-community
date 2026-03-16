@@ -3,13 +3,13 @@ RAG retrieval layer with permission-aware filtering.
 Handles vector search, graph expansion via ORM, and context formatting.
 """
 
-import logging
+import structlog
 import os
 from typing import Any
 
 from iam.models import Folder, RoleAssignment
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 COLLECTION_NAME = "ciso_assistant"
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
