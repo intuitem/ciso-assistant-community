@@ -3144,6 +3144,8 @@
 	"height": "Height",
 	"showTarget": "Show target",
 	"showLegend": "Show title and legend",
+	"showInferences": "Show the inferences",
+	"hideInferences": "Hide the inferences",
 	"widgetConfig": "Widget configuration",
 	"target": "Target",
 	"actual": "Actual",
@@ -3751,5 +3753,11 @@
 	"doneEditing": "Done editing",
 	"noLinkedObject": "— No linked object —",
 	"showDescriptions": "Show descriptions",
-	"hideDescriptions": "Hide descriptions"
+	"hideDescriptions": "Hide descriptions",
+	"searchPages": "Search pages...",
+	"commandPaletteNavigation": "Navigation",
+	"commandPaletteNoResults": "No results found",
+	"commandPaletteNavigate": "navigate",
+	"searchEllipsis": "Search...",
+	"commandPaletteOpen": "open"
 }

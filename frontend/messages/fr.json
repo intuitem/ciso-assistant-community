@@ -3716,5 +3716,11 @@
 	"doneEditing": "Terminé",
 	"noLinkedObject": "— Aucun objet lié —",
 	"showDescriptions": "Afficher les descriptions",
-	"hideDescriptions": "Masquer les descriptions"
+	"hideDescriptions": "Masquer les descriptions",
+	"searchPages": "Rechercher des pages...",
+	"commandPaletteNavigation": "Navigation",
+	"commandPaletteNoResults": "Aucun résultat trouvé",
+	"commandPaletteNavigate": "naviguer",
+	"searchEllipsis": "Rechercher...",
+	"commandPaletteOpen": "ouvrir"
 }
