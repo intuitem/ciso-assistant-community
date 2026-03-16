@@ -8,6 +8,7 @@ from .views import (
     CurrentUserView,
     LoginView,
     PasswordResetView,
+    ResetMFAView,
     ResetPasswordConfirmView,
     SessionTokenView,
     SetPasswordView,
@@ -27,6 +28,7 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("set-password/", SetPasswordView.as_view(), name="set-password"),
+    path("reset-mfa/", ResetMFAView.as_view(), name="reset-mfa"),
     path("revoke-sessions/", RevokeOtherSessionsView.as_view()),
     path("sso/", include("iam.sso.urls")),
     path(
