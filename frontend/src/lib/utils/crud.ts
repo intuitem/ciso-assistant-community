@@ -188,6 +188,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'applied-controls' },
+			{ field: 'folder', urlModel: 'task-templates' },
 			{ field: 'folder', urlModel: 'processings' },
 			{
 				field: 'folder',
@@ -929,7 +930,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }]
+		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
 	},
 	'feature-flags': {
 		name: 'featureFlags',
@@ -1984,6 +1985,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
+			{ field: 'scheduled_date' },
 			{ field: 'due_date' },
 			{ field: 'status' },
 			{ field: 'observation' }

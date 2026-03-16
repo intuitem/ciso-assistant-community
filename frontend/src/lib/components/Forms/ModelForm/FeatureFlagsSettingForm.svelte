@@ -211,6 +211,11 @@
 					description: m.commentsDescription()
 				},
 				{
+					field: 'journeys',
+					label: m.journeys(),
+					description: m.journeysDescription()
+				},
+				{
 					field: 'experimental',
 					label: m.experimental(),
 					description: m.experimentalFeatures()

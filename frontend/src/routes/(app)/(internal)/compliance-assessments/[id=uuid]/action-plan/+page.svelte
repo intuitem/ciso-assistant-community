@@ -7,12 +7,15 @@
 	let { data } = $props();
 
 	const appliedControlsHead = {
+		ref_id: 'refId',
 		name: 'name',
 		status: 'status',
 		priority: 'priority',
 		category: 'category',
+		csf_function: 'csfFunction',
 		owner: 'owner',
 		eta: 'eta',
+		expiry_date: 'expiryDate',
 		control_impact: 'controlImpact',
 		effort: 'effort',
 		annual_cost: 'cost',
@@ -89,12 +92,15 @@
 			orderBy={{ identifier: 'eta', direction: 'desc' }}
 			baseEndpoint="/compliance-assessments/{page.params.id}/action-plan"
 			fields={[
+				'ref_id',
 				'name',
 				'status',
 				'priority',
 				'category',
+				'csf_function',
 				'owner',
 				'eta',
+				'expiry_date',
 				'control_impact',
 				'effort',
 				'annual_cost',
