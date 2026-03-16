@@ -20,12 +20,15 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 		const outgoing = new FormData();
 		outgoing.append('file', new Blob([bytes], { type: file.type }), file.name);
 		const endpoint = `${BASE_API_URL}/managed-documents/${documentId}/upload-image/`;
+		console.log('Uploading to:', endpoint, 'file size:', bytes.length, 'type:', file.type);
 		const res = await fetch(endpoint, {
 			method: 'POST',
 			body: outgoing
 		});
 		if (!res.ok) {
-			error(res.status as NumericRange<400, 599>, await res.json());
+			const errorBody = await res.text();
+			console.error('Upload failed:', res.status, errorBody);
+			error(res.status as NumericRange<400, 599>, errorBody);
 		}
 		return json(await res.json(), { status: res.status });
 	}

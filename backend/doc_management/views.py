@@ -504,7 +504,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         revision = self.get_object()
         content_html = md_lib.markdown(
             revision.content,
-            extensions=["tables", "fenced_code", "toc"],
+            extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
         author_name = ""
         if revision.author:
@@ -548,7 +548,7 @@ class DocumentRevisionViewSet(BaseModelViewSet):
 
         content_html = md_lib.markdown(
             revision.content,
-            extensions=["tables", "fenced_code", "toc"],
+            extensions=["tables", "fenced_code", "toc", "nl2br"],
         )
         author_name = ""
         if revision.author:

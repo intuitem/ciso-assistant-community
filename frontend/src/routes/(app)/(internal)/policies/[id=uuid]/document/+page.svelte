@@ -509,8 +509,46 @@
 		const start = textareaEl.selectionStart;
 		const end = textareaEl.selectionEnd;
 		content = content.substring(0, start) + text + content.substring(end);
-		// Restore cursor position after the inserted text
 		const newPos = start + text.length;
+		requestAnimationFrame(() => {
+			textareaEl?.setSelectionRange(newPos, newPos);
+			textareaEl?.focus();
+		});
+	}
+
+	function wrapSelection(before: string, after: string) {
+		if (!textareaEl) return;
+		const start = textareaEl.selectionStart;
+		const end = textareaEl.selectionEnd;
+		const selected = content.substring(start, end);
+		const placeholder = selected || 'text';
+		const replacement = before + placeholder + after;
+		content = content.substring(0, start) + replacement + content.substring(end);
+		requestAnimationFrame(() => {
+			if (selected) {
+				// Keep the original text selected (inside the markers)
+				textareaEl?.setSelectionRange(
+					start + before.length,
+					start + before.length + selected.length
+				);
+			} else {
+				// Select the placeholder so the user can type over it
+				textareaEl?.setSelectionRange(
+					start + before.length,
+					start + before.length + placeholder.length
+				);
+			}
+			textareaEl?.focus();
+		});
+	}
+
+	function insertLinePrefix(prefix: string) {
+		if (!textareaEl) return;
+		const start = textareaEl.selectionStart;
+		// Find the beginning of the current line
+		const lineStart = content.lastIndexOf('\n', start - 1) + 1;
+		content = content.substring(0, lineStart) + prefix + content.substring(lineStart);
+		const newPos = start + prefix.length;
 		requestAnimationFrame(() => {
 			textareaEl?.setSelectionRange(newPos, newPos);
 			textareaEl?.focus();
@@ -826,6 +864,82 @@
 						</button>
 					</div>
 
+					{#if canEdit && !showPreview && !showDiff}
+						<div class="flex items-center gap-0.5 ml-2 border-l border-surface-200 pl-2">
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => wrapSelection('**', '**')}
+								title="Bold (Ctrl+B)"
+							>
+								<i class="fa-solid fa-bold text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => wrapSelection('*', '*')}
+								title="Italic (Ctrl+I)"
+							>
+								<i class="fa-solid fa-italic text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => insertLinePrefix('# ')}
+								title="Heading"
+							>
+								<i class="fa-solid fa-heading text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => insertLinePrefix('- ')}
+								title="Bullet list"
+							>
+								<i class="fa-solid fa-list-ul text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => insertLinePrefix('1. ')}
+								title="Numbered list"
+							>
+								<i class="fa-solid fa-list-ol text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => wrapSelection('[', '](url)')}
+								title="Link"
+							>
+								<i class="fa-solid fa-link text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() =>
+									insertAtCursor(
+										'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell	 | Cell	 |\n'
+									)}
+								title="Table"
+							>
+								<i class="fa-solid fa-table text-xs"></i>
+							</button>
+							<button
+								class="btn btn-sm preset-tonal-surface px-2"
+								onclick={() => fileInputEl?.click()}
+								title="Insert image"
+								disabled={uploading}
+							>
+								{#if uploading}
+									<i class="fa-solid fa-spinner fa-spin text-xs"></i>
+								{:else}
+									<i class="fa-solid fa-image text-xs"></i>
+								{/if}
+							</button>
+							<input
+								type="file"
+								accept="image/*"
+								class="hidden"
+								bind:this={fileInputEl}
+								onchange={handleFileInput}
+							/>
+						</div>
+					{/if}
+
 					{#if isDraft}
 						<div class="flex-1"></div>
 						<div class="flex items-center gap-2">
@@ -843,65 +957,59 @@
 					{/if}
 				</div>
 
-				<!-- Image toolbar + upload indicator -->
-				{#if canEdit}
-					<div class="flex items-center gap-2 mb-2">
-						<button
-							class="btn btn-sm preset-tonal-surface"
-							onclick={() => fileInputEl?.click()}
-							title="Insert image"
-							disabled={uploading}
-						>
-							<i class="fa-solid fa-image mr-1"></i>
-							Image
-						</button>
-						<input
-							type="file"
-							accept="image/*"
-							class="hidden"
-							bind:this={fileInputEl}
-							onchange={handleFileInput}
-						/>
-						{#if uploading}
-							<span class="text-xs text-surface-500 flex items-center gap-1.5">
-								<i class="fa-solid fa-spinner fa-spin"></i>
-								Uploading...
-							</span>
-						{/if}
-					</div>
-				{/if}
-
 				<!-- Content area -->
 				{#if showDiff}
 					{#if editDiffMeta.from_edit && editDiffMeta.to_edit}
 						<div
-							class="flex items-center gap-2 mb-2 text-xs text-surface-500 bg-surface-50 rounded-lg px-3 py-2 border border-surface-200"
+							class="flex items-stretch gap-0 mb-2 rounded-lg border border-surface-200 overflow-hidden text-xs"
 						>
-							<span class="font-medium">
-								{editDiffMeta.from_edit.editor?.first_name || ''}
-								{editDiffMeta.from_edit.editor?.last_name ||
-									editDiffMeta.from_edit.editor?.email ||
-									'Unknown'},
-								{new Date(editDiffMeta.from_edit.created_at).toLocaleString(undefined, {
-									month: 'short',
-									day: 'numeric',
-									hour: '2-digit',
-									minute: '2-digit'
-								})}
-							</span>
-							<i class="fa-solid fa-arrow-right text-[10px]"></i>
-							<span class="font-medium">
-								{editDiffMeta.to_edit.editor?.first_name || ''}
-								{editDiffMeta.to_edit.editor?.last_name ||
-									editDiffMeta.to_edit.editor?.email ||
-									'Unknown'},
-								{new Date(editDiffMeta.to_edit.created_at).toLocaleString(undefined, {
-									month: 'short',
-									day: 'numeric',
-									hour: '2-digit',
-									minute: '2-digit'
-								})}
-							</span>
+							<div class="flex-1 px-3 py-2 bg-red-50/60">
+								<div class="flex items-center gap-1.5 text-red-700">
+									<i class="fa-solid fa-minus-circle text-[10px]"></i>
+									<span class="font-semibold">
+										{editDiffMeta.from_edit.editor?.first_name || ''}
+										{editDiffMeta.from_edit.editor?.last_name ||
+											editDiffMeta.from_edit.editor?.email ||
+											'Unknown'}
+									</span>
+								</div>
+								<p class="text-surface-400 mt-0.5">
+									{new Date(editDiffMeta.from_edit.created_at).toLocaleString(undefined, {
+										month: 'short',
+										day: 'numeric',
+										hour: '2-digit',
+										minute: '2-digit'
+									})}
+									{#if editDiffMeta.from_edit.summary}
+										&middot; <span class="italic">{editDiffMeta.from_edit.summary}</span>
+									{/if}
+								</p>
+							</div>
+							<div class="flex items-center px-2 bg-surface-100 text-surface-400">
+								<i class="fa-solid fa-arrow-right text-[10px]"></i>
+							</div>
+							<div class="flex-1 px-3 py-2 bg-emerald-50/60">
+								<div class="flex items-center gap-1.5 text-emerald-700">
+									<i class="fa-solid fa-plus-circle text-[10px]"></i>
+									<span class="font-semibold">
+										{editDiffMeta.to_edit.editor?.first_name || ''}
+										{editDiffMeta.to_edit.editor?.last_name ||
+											editDiffMeta.to_edit.editor?.email ||
+											'Unknown'}
+									</span>
+								</div>
+								<p class="text-surface-400 mt-0.5">
+									{new Date(editDiffMeta.to_edit.created_at).toLocaleString(undefined, {
+										month: 'short',
+										day: 'numeric',
+										hour: '2-digit',
+										minute: '2-digit'
+									})}
+									{#if editDiffMeta.to_edit.summary}
+										&middot; <span class="italic">{editDiffMeta.to_edit.summary}</span>
+									{/if}
+								</p>
+							</div>
 						</div>
 					{/if}
 					<DiffViewer diff={editDiffResult || diffResult} />
@@ -1018,6 +1126,17 @@
 										{#if editHistory.length === 0}
 											<p class="px-4 py-3 text-xs text-surface-400 italic">No edits recorded yet</p>
 										{:else}
+											<div class="flex items-center gap-1 px-4 pt-2 pb-1">
+												<span
+													class="w-3 text-center text-[9px] font-bold text-red-400 flex-shrink-0"
+													title="Older version (removed lines)">A</span
+												>
+												<span
+													class="w-3 text-center text-[9px] font-bold text-emerald-500 flex-shrink-0"
+													title="Newer version (added lines)">B</span
+												>
+												<span class="flex-1"></span>
+											</div>
 											{#each editHistory as edit}
 												<div
 													class="flex items-center gap-1 px-4 py-2 hover:bg-surface-50 border-t border-surface-100 transition-colors"
@@ -1027,8 +1146,8 @@
 														name="edit-diff-a"
 														value={edit.id}
 														bind:group={editDiffA}
-														class="w-3 h-3 flex-shrink-0"
-														title="Select as A"
+														class="w-3 h-3 flex-shrink-0 accent-red-400"
+														title="Select as A (from)"
 														onclick={(e) => e.stopPropagation()}
 													/>
 													<input
@@ -1036,8 +1155,8 @@
 														name="edit-diff-b"
 														value={edit.id}
 														bind:group={editDiffB}
-														class="w-3 h-3 flex-shrink-0"
-														title="Select as B"
+														class="w-3 h-3 flex-shrink-0 accent-emerald-500"
+														title="Select as B (to)"
 														onclick={(e) => e.stopPropagation()}
 													/>
 													<button
