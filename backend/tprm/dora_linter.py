@@ -61,7 +61,7 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
                 {
                     "severity": "error",
                     "category": "Provider Entities",
-                    "message": f"Provider entity '{provider.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS) for DORA reporting",
+                    "message": f"Provider entity '{provider.name}' must have at least one legal identifier",
                     "field": "legal_identifiers",
                     "object_type": "entities",
                     "object_id": str(provider.id),
@@ -76,7 +76,7 @@ def lint_provider_entities() -> List[Dict[str, Any]]:
                 {
                     "severity": "error",
                     "category": "Provider Entities",
-                    "message": f"Provider entity '{provider.name}' must have a country set for DORA reporting",
+                    "message": f"Provider entity '{provider.name}' must have a country set",
                     "field": "country",
                     "object_type": "entities",
                     "object_id": str(provider.id),
@@ -196,7 +196,7 @@ def lint_main_entity(entity: Entity) -> List[Dict[str, Any]]:
             {
                 "severity": "error",
                 "category": "Main Entity",
-                "message": "Main entity must have at least one legal identifier (LEI, EUID, VAT, or DUNS)",
+                "message": "Main entity must have at least one legal identifier",
                 "field": "legal_identifiers",
                 "object_type": "entities",
                 "object_id": str(entity.id),
@@ -378,7 +378,7 @@ def lint_subsidiaries(main_entity: Entity) -> List[Dict[str, Any]]:
                 {
                     "severity": "error",
                     "category": "Subsidiaries",
-                    "message": f"Subsidiary '{subsidiary.name}' must have at least one legal identifier (LEI, EUID, VAT, or DUNS)",
+                    "message": f"Subsidiary '{subsidiary.name}' must have at least one legal identifier",
                     "field": "legal_identifiers",
                     "object_type": "entities",
                     "object_id": str(subsidiary.id),
@@ -1073,9 +1073,9 @@ def lint_b_02_02_contracts() -> List[Dict[str, Any]]:
                             "severity": "warning",
                             "category": "B_02.02 Contracts",
                             "message": (
-                                f"Contract '{contract_ref}' has solutions '{seen_keys[key]}' and '{solution.name}' "
-                                f"with duplicate function/service type/location combination in B_02.02 "
-                                f"— only the first will be exported"
+                                f"Solutions '{seen_keys[key]}' and '{solution.name}' "
+                                f"on contract '{contract_ref}' share the same function/service type/location combination "
+                                f"— data from '{solution.name}' will be lost in the export"
                             ),
                             "field": "solutions",
                             "object_type": "contracts",
@@ -1209,6 +1209,22 @@ def lint_solutions() -> List[Dict[str, Any]]:
                 }
             )
 
+        # Warn if data locations are set but storage_of_data flag is not checked
+        if not solution.storage_of_data and (
+            solution.data_location_storage or solution.data_location_processing
+        ):
+            results.append(
+                {
+                    "severity": "warning",
+                    "category": "Solutions",
+                    "message": f"Solution '{solution.name}' has data locations set but 'Storage of data' is not enabled",
+                    "field": "storage_of_data",
+                    "object_type": "solutions",
+                    "object_id": str(solution.id),
+                    "object_name": solution.name,
+                }
+            )
+
         # Check data_location_processing (only required when storage_of_data is enabled)
         if solution.storage_of_data and not solution.data_location_processing:
             results.append(
@@ -1230,7 +1246,7 @@ def lint_solutions() -> List[Dict[str, Any]]:
                     {
                         "severity": "error",
                         "category": "Solutions",
-                        "message": f"Solution '{solution.name}' has provider entity '{solution.provider_entity.name}' without a country set",
+                        "message": f"Provider entity '{solution.provider_entity.name}' of solution '{solution.name}' must have a country set",
                         "field": "country",
                         "object_type": "entities",
                         "object_id": str(solution.provider_entity.id),
@@ -1343,7 +1359,7 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
                 "category": "Supply Chain (B_05.02)",
                 "message": (
                     f"Solution '{solution.name}' has no ICT service type "
-                    f"— it will be excluded from the B_05.02 export"
+                    f"— it will be excluded from the export"
                 ),
                 "field": "dora_ict_service_type",
                 "object_type": "solutions",
@@ -1390,9 +1406,9 @@ def lint_supply_chain_solutions() -> List[Dict[str, Any]]:
                         "severity": "warning",
                         "category": "Assessment (B_07.01)",
                         "message": (
-                            f"Contract '{contract_ref}' has solutions '{seen_types[ict_service_type]}' and '{solution.name}' "
-                            f"with the same ICT service type in B_07.01 "
-                            f"— only the first will be exported"
+                            f"Solutions '{seen_types[ict_service_type]}' and '{solution.name}' "
+                            f"on contract '{contract_ref}' share the same ICT service type "
+                            f"— assessment data from '{solution.name}' will be lost in the export"
                         ),
                         "field": "solutions",
                         "object_type": "contracts",
@@ -1558,7 +1574,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
                 {
                     "severity": "error",
                     "category": "Cross-table (B_02.01 \u2194 B_02.02)",
-                    "message": f"Contract '{contract_ref}' is missing from B_02.02: {reason}",
+                    "message": f"Contract '{contract_ref}' will not appear in the ICT services report: {reason}",
                     "field": "solutions",
                     "object_type": "contracts",
                     "object_id": str(contract.id),
@@ -1570,7 +1586,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
             {
                 "severity": "ok",
                 "category": "Cross-table (B_02.01 \u2194 B_02.02)",
-                "message": f"All {all_contracts.count()} contracts in B_02.01 are also present in B_02.02",
+                "message": f"All {all_contracts.count()} contracts will appear in the ICT services report",
                 "field": None,
                 "object_type": None,
                 "object_id": None,
@@ -1606,7 +1622,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
                 {
                     "severity": severity,
                     "category": "Cross-table (B_02.01 \u2194 B_05.02)",
-                    "message": f"Contract '{contract_ref}' is missing from B_05.02: {reason}",
+                    "message": f"Contract '{contract_ref}' will not appear in the supply chain report: {reason}",
                     "field": "solutions",
                     "object_type": "contracts",
                     "object_id": str(contract.id),
@@ -1618,7 +1634,7 @@ def lint_cross_table_consistency() -> List[Dict[str, Any]]:
             {
                 "severity": "ok",
                 "category": "Cross-table (B_02.01 \u2194 B_05.02)",
-                "message": f"All {all_contracts.count()} contracts in B_02.01 are also present in B_05.02",
+                "message": f"All {all_contracts.count()} contracts will appear in the supply chain report",
                 "field": None,
                 "object_type": None,
                 "object_id": None,
