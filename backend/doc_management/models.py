@@ -3,12 +3,12 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
+from core.models import I18nObjectMixin, Policy
 from core.validators import validate_file_name, validate_file_size
 from iam.models import FolderMixin, User
-from core.models import Policy
 
 
-class ManagedDocument(AbstractBaseModel, FolderMixin):
+class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     class DocumentType(models.TextChoices):
         POLICY = "policy", _("Policy")
         PROCEDURE = "procedure", _("Procedure")
@@ -25,12 +25,12 @@ class ManagedDocument(AbstractBaseModel, FolderMixin):
     name = models.CharField(max_length=200, blank=True, verbose_name=_("Name"))
     description = models.TextField(blank=True, verbose_name=_("Description"))
     # Optional link to a parent policy — future document types may link to other objects
-    policy = models.OneToOneField(
+    policy = models.ForeignKey(
         Policy,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name="document",
+        related_name="documents",
     )
     current_revision = models.ForeignKey(
         "DocumentRevision",
@@ -40,7 +40,7 @@ class ManagedDocument(AbstractBaseModel, FolderMixin):
         related_name="+",
     )
     template_used = models.CharField(max_length=200, null=True, blank=True)
-    fields_to_check = []
+    fields_to_check = ["policy", "locale"]
 
     class Meta:
         verbose_name = _("Managed document")

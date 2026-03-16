@@ -33,9 +33,27 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         return None
 
     def create(self, validated_data):
+        # Default locale to user's preferred language
+        request = self.context.get("request")
+        if "locale" not in validated_data or not validated_data.get("locale"):
+            lang = "en"
+            if (
+                request
+                and hasattr(request, "user")
+                and hasattr(request.user, "get_preferences")
+            ):
+                lang = request.user.get_preferences().get("lang", "en")
+            validated_data["locale"] = lang
+
+        # Set default_locale=True only if no sibling document exists for this policy
+        policy = validated_data.get("policy")
+        if policy and ManagedDocument.objects.filter(policy=policy).exists():
+            validated_data.setdefault("default_locale", False)
+        else:
+            validated_data.setdefault("default_locale", True)
+
         document = super().create(validated_data)
         # Auto-create an initial draft revision
-        request = self.context.get("request")
         author = request.user if request else None
         content = ""
         if template_name := validated_data.get("template_used"):

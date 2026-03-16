@@ -1,16 +1,29 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch, params }) => {
+export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
 	// Load the policy
 	const policyRes = await fetch(`${BASE_API_URL}/policies/${params.id}/`);
 	const policy = await policyRes.json();
 
-	// Try to find existing document for this policy
-	const docRes = await fetch(`${BASE_API_URL}/managed-documents/?policy=${params.id}`);
-	const docData = await docRes.json();
+	// Determine user's preferred locale
+	const userLocale = cookies.get('LOCALE') || 'en';
 
-	let document = docData.results?.[0] || null;
+	// Fetch all documents for this policy (for locale switcher)
+	const allDocsRes = await fetch(`${BASE_API_URL}/managed-documents/?policy=${params.id}`);
+	const allDocsData = await allDocsRes.json();
+	const allDocuments = allDocsData.results || [];
+
+	// Extract available locales from existing documents
+	const availableLocales: string[] = allDocuments.map((d: any) => d.locale || 'en');
+
+	// Try to find the document matching user's locale
+	let document =
+		allDocuments.find((d: any) => d.locale === userLocale) ||
+		allDocuments.find((d: any) => d.default_locale) ||
+		allDocuments[0] ||
+		null;
+
 	let revisions: any[] = [];
 	let currentRevision: any = null;
 
@@ -47,6 +60,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 		document,
 		revisions,
 		currentRevision,
-		templates
+		templates,
+		availableLocales,
+		userLocale
 	};
 };

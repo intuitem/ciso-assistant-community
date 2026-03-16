@@ -55,7 +55,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
     """
 
     model = ManagedDocument
-    filterset_fields = ["policy", "folder", "document_type"]
+    filterset_fields = ["policy", "folder", "document_type", "locale"]
     serializers_module = "doc_management.serializers"
 
     @action(detail=False, methods=["get"])
@@ -228,8 +228,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 if instance.editing_user and instance.editing_user != self.request.user:
                     editing_info = f" by {instance.editing_user.email}"
                 raise ValidationError(
-                    f"This revision has been modified{editing_info} since you loaded it. "
-                    "Please reload and re-apply your changes."
+                    {
+                        "__all__": f"This revision has been modified{editing_info} since you loaded it. "
+                        "Please reload and re-apply your changes."
+                    }
                 )
         instance = serializer.save()
         # Record edit history for draft revisions

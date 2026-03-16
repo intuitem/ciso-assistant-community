@@ -101,6 +101,21 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	let endpoint: string;
 
 	switch (action) {
+		case 'documents-by-locale': {
+			const locale = url.searchParams.get('locale');
+			// Get the policy ID from the URL path: /policies/{id}/document
+			const pathParts = url.pathname.split('/');
+			const policyIdx = pathParts.indexOf('policies');
+			const policyId = policyIdx >= 0 ? pathParts[policyIdx + 1] : '';
+			const docsEndpoint = `${BASE_API_URL}/managed-documents/?policy=${policyId}&locale=${locale}`;
+			const docsRes = await fetch(docsEndpoint);
+			if (!docsRes.ok) {
+				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());
+			}
+			const docsData = await docsRes.json();
+			const doc = docsData.results?.[0] || null;
+			return json(doc);
+		}
 		case 'revisions': {
 			const documentId = url.searchParams.get('document');
 			endpoint = `${BASE_API_URL}/document-revisions/?document=${documentId}&ordering=-version_number`;

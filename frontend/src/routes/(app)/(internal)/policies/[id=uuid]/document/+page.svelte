@@ -11,6 +11,7 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { LOCALE_MAP } from '$lib/utils/locales';
 
 	interface Props {
 		data: any;
@@ -25,6 +26,9 @@
 	let revisions: any[] = $state(data.revisions);
 	let currentRevision: any = $state(data.currentRevision);
 	let templates = $derived(data.templates);
+	let availableLocales: string[] = $state(data.availableLocales || []);
+	let currentLocale = $state(data.document?.locale || data.userLocale || 'en');
+	let showLocalePicker = $state(false);
 
 	let content = $state(currentRevision?.content || '');
 	let changeSummary = $state('');
@@ -93,11 +97,12 @@
 		return fetch(`${proxyUrl}?${qs}`);
 	}
 
-	async function createDocument(templateId: string | null) {
+	async function createDocument(templateId: string | null, locale?: string) {
 		const body: Record<string, any> = {
 			_action: 'create-document',
 			policy: policy.id,
-			folder: policy.folder?.id || policy.folder
+			folder: policy.folder?.id || policy.folder,
+			locale: locale || currentLocale
 		};
 		if (templateId) {
 			body.template_used = templateId;
@@ -107,10 +112,51 @@
 		if (res.ok) {
 			const newDoc = await res.json();
 			document = newDoc;
+			currentLocale = newDoc.locale || currentLocale;
+			if (!availableLocales.includes(currentLocale)) {
+				availableLocales = [...availableLocales, currentLocale];
+			}
 			showTemplateSelector = false;
+			addingTranslationLocale = '';
+			newTranslationLocale = '';
 			await refreshData();
 		}
 	}
+
+	async function switchLocale(locale: string) {
+		if (locale === currentLocale) return;
+		// Release lock on current revision
+		if (currentRevision?.id && currentRevision.status === 'draft' && !lockedBy) {
+			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			stopHeartbeat();
+		}
+		// Fetch the document for the target locale
+		const res = await fetch(
+			`/policies/${policy.id}/document?_action=documents-by-locale&locale=${locale}`
+		);
+		if (!res.ok) return;
+		const docData = await res.json();
+		if (docData) {
+			document = docData;
+			currentLocale = locale;
+			await refreshData();
+			// Acquire lock if draft
+			if (currentRevision?.status === 'draft') {
+				await checkAndAcquireLock();
+			}
+		}
+		showLocalePicker = false;
+	}
+
+	function startAddTranslation() {
+		showLocalePicker = false;
+		// Show template selector for the new locale
+		addingTranslationLocale = newTranslationLocale;
+		showTemplateSelector = true;
+	}
+
+	let addingTranslationLocale = $state('');
+	let newTranslationLocale = $state('');
 
 	async function refreshData() {
 		if (!document) return;
@@ -124,10 +170,12 @@
 			const fullRes = await proxyGet({ _action: 'revision', revision_id: draft.id });
 			currentRevision = await fullRes.json();
 			content = currentRevision.content || '';
+			lastLoadedAt = currentRevision.updated_at || '';
 		} else if (revisions.length > 0) {
 			const fullRes = await proxyGet({ _action: 'revision', revision_id: revisions[0].id });
 			currentRevision = await fullRes.json();
 			content = currentRevision.content || '';
+			lastLoadedAt = currentRevision.updated_at || '';
 		}
 	}
 
@@ -615,6 +663,76 @@
 			</a>
 			<div class="flex items-center gap-2">
 				<h1 class="text-lg font-semibold truncate max-w-md">{policy.name}</h1>
+
+				<!-- Locale selector -->
+				{#if document || availableLocales.length > 0}
+					<div class="relative">
+						<button
+							class="btn btn-sm preset-tonal-surface gap-1"
+							onclick={() => (showLocalePicker = !showLocalePicker)}
+							title="Document language"
+						>
+							{#if LOCALE_MAP[currentLocale as keyof typeof LOCALE_MAP]?.flag}
+								<span>{LOCALE_MAP[currentLocale as keyof typeof LOCALE_MAP].flag}</span>
+							{/if}
+							<span class="uppercase text-xs font-semibold">{currentLocale}</span>
+							<i class="fa-solid fa-chevron-down text-[8px] ml-0.5"></i>
+						</button>
+
+						{#if showLocalePicker}
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="absolute top-full left-0 mt-1 bg-white border border-surface-200 rounded-lg shadow-lg z-50 min-w-[180px] py-1"
+								onmouseleave={() => (showLocalePicker = false)}
+							>
+								{#each availableLocales as locale}
+									<button
+										class="w-full text-left px-3 py-1.5 text-sm hover:bg-surface-50 flex items-center gap-2 {locale ===
+										currentLocale
+											? 'bg-primary-50 text-primary-700'
+											: ''}"
+										onclick={() => switchLocale(locale)}
+									>
+										{#if LOCALE_MAP[locale as keyof typeof LOCALE_MAP]?.flag}
+											<span>{LOCALE_MAP[locale as keyof typeof LOCALE_MAP].flag}</span>
+										{/if}
+										<span class="uppercase font-medium">{locale}</span>
+										{#if locale === currentLocale}
+											<i class="fa-solid fa-check text-xs ml-auto"></i>
+										{/if}
+									</button>
+								{/each}
+								<div class="border-t border-surface-200 mt-1 pt-1">
+									<div class="px-3 py-1.5">
+										<select class="select text-xs w-full py-1" bind:value={newTranslationLocale}>
+											<option value=""
+												>{m.addTranslation ? m.addTranslation() : 'Add translation...'}</option
+											>
+											{#each Object.entries(LOCALE_MAP) as [code, info]}
+												{#if !availableLocales.includes(code)}
+													<option value={code}>
+														{info.flag || ''}
+														{code.toUpperCase()}
+													</option>
+												{/if}
+											{/each}
+										</select>
+										{#if newTranslationLocale}
+											<button
+												class="btn btn-sm preset-filled-primary-500 w-full mt-1"
+												onclick={() => startAddTranslation()}
+											>
+												<i class="fa-solid fa-plus mr-1"></i>
+												{m.create ? m.create() : 'Create'}
+											</button>
+										{/if}
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+				{/if}
+
 				{#if currentRevision}
 					{@const style = getStatusStyle(currentRevision.status)}
 					<span
@@ -722,10 +840,23 @@
 					<p class="text-surface-500">Choose how to start your policy document</p>
 				</div>
 
+				{#if addingTranslationLocale}
+					<div
+						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium mb-2"
+					>
+						<i class="fa-solid fa-language"></i>
+						Adding translation:
+						{#if LOCALE_MAP[addingTranslationLocale as keyof typeof LOCALE_MAP]?.flag}
+							<span>{LOCALE_MAP[addingTranslationLocale as keyof typeof LOCALE_MAP].flag}</span>
+						{/if}
+						<span class="uppercase">{addingTranslationLocale}</span>
+					</div>
+				{/if}
+
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
 					<button
 						class="group card p-5 border-2 border-dashed border-surface-300 hover:border-primary-400 hover:shadow-md transition-all text-left"
-						onclick={() => createDocument(null)}
+						onclick={() => createDocument(null, addingTranslationLocale || undefined)}
 					>
 						<div
 							class="w-10 h-10 rounded-lg bg-surface-100 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
@@ -741,7 +872,7 @@
 					{#each templates as template}
 						<button
 							class="group card p-5 border border-surface-200 hover:border-primary-400 hover:shadow-md transition-all text-left"
-							onclick={() => createDocument(template.id)}
+							onclick={() => createDocument(template.id, addingTranslationLocale || undefined)}
 						>
 							<div
 								class="w-10 h-10 rounded-lg bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center mb-3 transition-colors"
