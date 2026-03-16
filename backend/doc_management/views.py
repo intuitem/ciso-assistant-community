@@ -1,5 +1,7 @@
 import difflib
+import mimetypes
 from pathlib import Path
+from uuid import UUID
 
 import structlog
 import yaml
@@ -11,12 +13,14 @@ from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from weasyprint import HTML
 
 from core.views import BaseModelViewSet
+from iam.models import RoleAssignment, Folder
 
-from .models import DocumentEdit, DocumentRevision, ManagedDocument
+from .models import DocumentAttachment, DocumentEdit, DocumentRevision, ManagedDocument
 
 logger = structlog.get_logger(__name__)
 
@@ -75,6 +79,57 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 templates.append(metadata)
         return Response(templates)
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-image",
+        parser_classes=[MultiPartParser],
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image file and attach it to this document."""
+        document = self.get_object()
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # Validate image content type
+        content_type = uploaded_file.content_type or ""
+        if not content_type.startswith("image/"):
+            return Response(
+                {"error": "Only image files are allowed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attachment = DocumentAttachment(
+            document=document,
+            file=uploaded_file,
+            uploaded_by=request.user,
+        )
+        try:
+            attachment.full_clean()
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for field_messages in e.message_dict.values():
+                    messages.extend(field_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e.message)]
+            return Response(
+                {"error": " ".join(messages)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attachment.save()
+        return Response(
+            {
+                "id": str(attachment.id),
+                "url": f"/document-attachments/{attachment.id}/file/",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
     @action(detail=True, methods=["post"], url_path="create-new-draft")
     def create_new_draft(self, request, pk=None):
         """Create a new draft revision cloned from the current revision."""
@@ -108,6 +163,39 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 "status": revision.status,
             },
             status=status.HTTP_201_CREATED,
+        )
+
+
+class DocumentAttachmentViewSet(BaseModelViewSet):
+    """
+    API endpoint for serving document attachment files.
+    """
+
+    model = DocumentAttachment
+
+    @action(detail=True, methods=["get"])
+    def file(self, request, pk=None):
+        """Serve the attachment file with correct content type."""
+        object_ids_view = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, DocumentAttachment
+        )[0]
+        if UUID(pk) not in object_ids_view:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        attachment = self.get_object()
+        if not attachment.file or not attachment.file.storage.exists(
+            attachment.file.name
+        ):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        content_type = (
+            mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        )
+        return HttpResponse(
+            attachment.file,
+            content_type=content_type,
+            headers={
+                "Content-Disposition": f"inline; filename={attachment.file.name.split('/')[-1]}"
+            },
+            status=status.HTTP_200_OK,
         )
 
 
@@ -348,6 +436,59 @@ class DocumentRevisionViewSet(BaseModelViewSet):
             )
         )
         return Response({"diff": "".join(diff_lines)})
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="edit-diff/(?P<edit_a_id>[^/.]+)/(?P<edit_b_id>[^/.]+)",
+    )
+    def edit_diff(self, request, pk=None, edit_a_id=None, edit_b_id=None):
+        """Compute unified diff between two DocumentEdit content snapshots."""
+        revision = self.get_object()
+        try:
+            edit_a = revision.edits.select_related("editor").get(pk=edit_a_id)
+        except DocumentEdit.DoesNotExist:
+            return Response(
+                {"error": "Edit A not found in this revision."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        try:
+            edit_b = revision.edits.select_related("editor").get(pk=edit_b_id)
+        except DocumentEdit.DoesNotExist:
+            return Response(
+                {"error": "Edit B not found in this revision."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        def _edit_info(edit):
+            return {
+                "id": str(edit.id),
+                "editor": {
+                    "email": edit.editor.email,
+                    "first_name": edit.editor.first_name,
+                    "last_name": edit.editor.last_name,
+                }
+                if edit.editor
+                else None,
+                "created_at": edit.created_at.isoformat(),
+                "summary": edit.summary,
+            }
+
+        diff_lines = list(
+            difflib.unified_diff(
+                edit_a.content_snapshot.splitlines(keepends=True),
+                edit_b.content_snapshot.splitlines(keepends=True),
+                fromfile=f"Edit by {edit_a.editor.email if edit_a.editor else 'unknown'}",
+                tofile=f"Edit by {edit_b.editor.email if edit_b.editor else 'unknown'}",
+            )
+        )
+        return Response(
+            {
+                "diff": "".join(diff_lines),
+                "from_edit": _edit_info(edit_a),
+                "to_edit": _edit_info(edit_b),
+            }
+        )
 
     @action(detail=True, methods=["get"], url_path="export-pdf")
     def export_pdf(self, request, pk=None):

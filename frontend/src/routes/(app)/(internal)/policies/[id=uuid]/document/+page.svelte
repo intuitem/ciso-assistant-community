@@ -293,6 +293,8 @@
 		if (res.ok) {
 			const jsonData = await res.json();
 			diffResult = jsonData.diff;
+			editDiffResult = '';
+			editDiffMeta = {};
 			showDiff = true;
 		}
 	}
@@ -474,6 +476,91 @@
 	let canEdit = $derived(isDraft && !lockedBy);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
+
+	// Image upload state
+	let uploading = $state(false);
+	let textareaEl: HTMLTextAreaElement | undefined = $state();
+	let fileInputEl: HTMLInputElement | undefined = $state();
+
+	async function uploadImage(file: File) {
+		if (!document) return;
+		uploading = true;
+		try {
+			const formData = new FormData();
+			formData.append('_action', 'upload-image');
+			formData.append('document_id', document.id);
+			formData.append('file', file);
+			const res = await fetch(proxyUrl, { method: 'POST', body: formData });
+			if (res.ok) {
+				const data = await res.json();
+				const imageUrl = `${proxyUrl}?_action=serve-image&attachment_id=${data.id}`;
+				const markdownImg = `![image](${imageUrl})`;
+				insertAtCursor(markdownImg);
+			}
+		} finally {
+			uploading = false;
+		}
+	}
+
+	function insertAtCursor(text: string) {
+		if (!textareaEl) {
+			content += '\n' + text;
+			return;
+		}
+		const start = textareaEl.selectionStart;
+		const end = textareaEl.selectionEnd;
+		content = content.substring(0, start) + text + content.substring(end);
+		// Restore cursor position after the inserted text
+		const newPos = start + text.length;
+		requestAnimationFrame(() => {
+			textareaEl?.setSelectionRange(newPos, newPos);
+			textareaEl?.focus();
+		});
+	}
+
+	function handlePaste(e: ClipboardEvent) {
+		if (!canEdit || !e.clipboardData) return;
+		const items = e.clipboardData.items;
+		for (const item of items) {
+			if (item.type.startsWith('image/')) {
+				e.preventDefault();
+				const file = item.getAsFile();
+				if (file) uploadImage(file);
+				return;
+			}
+		}
+	}
+
+	function handleFileInput(e: Event) {
+		const input = e.target as HTMLInputElement;
+		if (input.files?.[0]) {
+			uploadImage(input.files[0]);
+			input.value = '';
+		}
+	}
+
+	// Edit diff state
+	let editDiffA = $state('');
+	let editDiffB = $state('');
+	let editDiffResult = $state('');
+	let editDiffMeta: { from_edit?: any; to_edit?: any } = $state({});
+
+	async function compareEdits() {
+		if (!currentRevision || !editDiffA || !editDiffB) return;
+		const res = await proxyGet({
+			_action: 'edit-diff',
+			revision_id: currentRevision.id,
+			edit_a_id: editDiffA,
+			edit_b_id: editDiffB
+		});
+		if (res.ok) {
+			const data = await res.json();
+			editDiffResult = data.diff;
+			editDiffMeta = { from_edit: data.from_edit, to_edit: data.to_edit };
+			showDiff = true;
+			showPreview = false;
+		}
+	}
 </script>
 
 <div class="flex flex-col h-full -m-8 bg-white min-h-screen">
@@ -757,9 +844,68 @@
 					{/if}
 				</div>
 
+				<!-- Image toolbar + upload indicator -->
+				{#if canEdit}
+					<div class="flex items-center gap-2 mb-2">
+						<button
+							class="btn btn-sm preset-tonal-surface"
+							onclick={() => fileInputEl?.click()}
+							title="Insert image"
+							disabled={uploading}
+						>
+							<i class="fa-solid fa-image mr-1"></i>
+							Image
+						</button>
+						<input
+							type="file"
+							accept="image/*"
+							class="hidden"
+							bind:this={fileInputEl}
+							onchange={handleFileInput}
+						/>
+						{#if uploading}
+							<span class="text-xs text-surface-500 flex items-center gap-1.5">
+								<i class="fa-solid fa-spinner fa-spin"></i>
+								Uploading...
+							</span>
+						{/if}
+					</div>
+				{/if}
+
 				<!-- Content area -->
 				{#if showDiff}
-					<DiffViewer diff={diffResult} />
+					{#if editDiffMeta.from_edit && editDiffMeta.to_edit}
+						<div
+							class="flex items-center gap-2 mb-2 text-xs text-surface-500 bg-surface-50 rounded-lg px-3 py-2 border border-surface-200"
+						>
+							<span class="font-medium">
+								{editDiffMeta.from_edit.editor?.first_name || ''}
+								{editDiffMeta.from_edit.editor?.last_name ||
+									editDiffMeta.from_edit.editor?.email ||
+									'Unknown'},
+								{new Date(editDiffMeta.from_edit.created_at).toLocaleString(undefined, {
+									month: 'short',
+									day: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</span>
+							<i class="fa-solid fa-arrow-right text-[10px]"></i>
+							<span class="font-medium">
+								{editDiffMeta.to_edit.editor?.first_name || ''}
+								{editDiffMeta.to_edit.editor?.last_name ||
+									editDiffMeta.to_edit.editor?.email ||
+									'Unknown'},
+								{new Date(editDiffMeta.to_edit.created_at).toLocaleString(undefined, {
+									month: 'short',
+									day: 'numeric',
+									hour: '2-digit',
+									minute: '2-digit'
+								})}
+							</span>
+						</div>
+					{/if}
+					<DiffViewer diff={editDiffResult || diffResult} />
 				{:else if showPreview}
 					<div class="card border border-surface-200 p-6 overflow-auto flex-1 min-h-[500px]">
 						<MarkdownRenderer {content} />
@@ -767,6 +913,8 @@
 				{:else}
 					<textarea
 						bind:value={content}
+						bind:this={textareaEl}
+						onpaste={handlePaste}
 						class="input w-full flex-1 min-h-[500px] resize-y font-mono text-sm leading-relaxed p-4 {!canEdit
 							? 'bg-surface-50 cursor-not-allowed'
 							: ''}"
@@ -872,36 +1020,70 @@
 											<p class="px-4 py-3 text-xs text-surface-400 italic">No edits recorded yet</p>
 										{:else}
 											{#each editHistory as edit}
-												<button
-													class="w-full text-left px-4 py-2 hover:bg-surface-50 border-t border-surface-100 transition-colors"
-													onclick={() => loadEditSnapshot(edit.id)}
-													title="View this snapshot"
+												<div
+													class="flex items-center gap-1 px-4 py-2 hover:bg-surface-50 border-t border-surface-100 transition-colors"
 												>
-													<div class="flex items-center justify-between">
-														<span class="text-xs text-surface-600">
-															{#if edit.editor}
-																{edit.editor.first_name || ''}
-																{edit.editor.last_name || edit.editor.email}
-															{:else}
-																Unknown
-															{/if}
-														</span>
-														<span class="text-[10px] text-surface-400">
-															{new Date(edit.created_at).toLocaleString(undefined, {
-																month: 'short',
-																day: 'numeric',
-																hour: '2-digit',
-																minute: '2-digit'
-															})}
-														</span>
-													</div>
-													{#if edit.summary}
-														<p class="text-[10px] text-surface-400 mt-0.5 truncate italic">
-															{edit.summary}
-														</p>
-													{/if}
-												</button>
+													<input
+														type="radio"
+														name="edit-diff-a"
+														value={edit.id}
+														bind:group={editDiffA}
+														class="w-3 h-3 flex-shrink-0"
+														title="Select as A"
+														onclick={(e) => e.stopPropagation()}
+													/>
+													<input
+														type="radio"
+														name="edit-diff-b"
+														value={edit.id}
+														bind:group={editDiffB}
+														class="w-3 h-3 flex-shrink-0"
+														title="Select as B"
+														onclick={(e) => e.stopPropagation()}
+													/>
+													<button
+														class="flex-1 text-left"
+														onclick={() => loadEditSnapshot(edit.id)}
+														title="View this snapshot"
+													>
+														<div class="flex items-center justify-between">
+															<span class="text-xs text-surface-600">
+																{#if edit.editor}
+																	{edit.editor.first_name || ''}
+																	{edit.editor.last_name || edit.editor.email}
+																{:else}
+																	Unknown
+																{/if}
+															</span>
+															<span class="text-[10px] text-surface-400">
+																{new Date(edit.created_at).toLocaleString(undefined, {
+																	month: 'short',
+																	day: 'numeric',
+																	hour: '2-digit',
+																	minute: '2-digit'
+																})}
+															</span>
+														</div>
+														{#if edit.summary}
+															<p class="text-[10px] text-surface-400 mt-0.5 truncate italic">
+																{edit.summary}
+															</p>
+														{/if}
+													</button>
+												</div>
 											{/each}
+											{#if editHistory.length >= 2}
+												<div class="px-4 py-2 border-t border-surface-100">
+													<button
+														class="btn btn-sm preset-tonal-primary w-full"
+														onclick={() => compareEdits()}
+														disabled={!editDiffA || !editDiffB}
+													>
+														<i class="fa-solid fa-code-compare mr-1"></i>
+														Compare edits
+													</button>
+												</div>
+											{/if}
 										{/if}
 									</div>
 								{/if}

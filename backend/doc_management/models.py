@@ -133,6 +133,38 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         return f"{self.document.display_name} v{self.version_number}"
 
 
+class DocumentAttachment(AbstractBaseModel, FolderMixin):
+    """Image or file attached to a managed document, for embedding in markdown."""
+
+    document = models.ForeignKey(
+        ManagedDocument,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(
+        validators=[validate_file_size, validate_file_name],
+    )
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="document_attachments",
+    )
+    fields_to_check = []
+
+    class Meta:
+        verbose_name = _("Document attachment")
+        verbose_name_plural = _("Document attachments")
+
+    def save(self, *args, **kwargs):
+        self.folder = self.document.folder
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Attachment for {self.document.display_name}"
+
+
 class DocumentEdit(AbstractBaseModel, FolderMixin):
     """Tracks each save of a draft revision for edit history."""
 

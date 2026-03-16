@@ -1,6 +1,10 @@
 from rest_framework import routers
 
-from .views import DocumentRevisionViewSet, ManagedDocumentViewSet
+from .views import (
+    DocumentAttachmentViewSet,
+    DocumentRevisionViewSet,
+    ManagedDocumentViewSet,
+)
 
 router = routers.DefaultRouter()
 router.register(
@@ -10,6 +14,11 @@ router.register(
     r"document-revisions",
     DocumentRevisionViewSet,
     basename="document-revisions",
+)
+router.register(
+    r"document-attachments",
+    DocumentAttachmentViewSet,
+    basename="document-attachments",
 )
 
 urlpatterns = router.urls

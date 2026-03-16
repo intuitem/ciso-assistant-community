@@ -2,8 +2,36 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-// Create a policy document
+// Create a policy document or upload image
 export const POST: RequestHandler = async ({ fetch, request }) => {
+	const contentType = request.headers.get('content-type') || '';
+
+	// Handle multipart uploads (image upload)
+	if (contentType.includes('multipart/form-data')) {
+		const formData = await request.formData();
+		const action = formData.get('_action') as string;
+
+		if (action === 'upload-image') {
+			const documentId = formData.get('document_id') as string;
+			const file = formData.get('file') as File;
+			if (!documentId || !file) {
+				error(400, { message: 'Missing document_id or file' });
+			}
+			const uploadForm = new FormData();
+			uploadForm.append('file', file);
+			const endpoint = `${BASE_API_URL}/managed-documents/${documentId}/upload-image/`;
+			const res = await fetch(endpoint, {
+				method: 'POST',
+				body: uploadForm
+			});
+			if (!res.ok) {
+				error(res.status as NumericRange<400, 599>, await res.json());
+			}
+			return json(await res.json(), { status: res.status });
+		}
+		error(400, { message: 'Unknown multipart action' });
+	}
+
 	const body = await request.json();
 	const action = body._action;
 	delete body._action;
@@ -119,6 +147,29 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 					'Content-Disposition': res.headers.get('Content-Disposition') || 'attachment'
 				}
 			});
+		}
+		case 'serve-image': {
+			const attachmentId = url.searchParams.get('attachment_id');
+			const imageEndpoint = `${BASE_API_URL}/document-attachments/${attachmentId}/file/`;
+			const res = await fetch(imageEndpoint);
+			if (!res.ok) {
+				error(res.status as NumericRange<400, 599>, 'Image fetch failed');
+			}
+			const imageBuffer = await res.arrayBuffer();
+			return new Response(imageBuffer, {
+				status: 200,
+				headers: {
+					'Content-Type': res.headers.get('Content-Type') || 'application/octet-stream',
+					'Cache-Control': 'public, max-age=3600'
+				}
+			});
+		}
+		case 'edit-diff': {
+			const revisionId = url.searchParams.get('revision_id');
+			const editAId = url.searchParams.get('edit_a_id');
+			const editBId = url.searchParams.get('edit_b_id');
+			endpoint = `${BASE_API_URL}/document-revisions/${revisionId}/edit-diff/${editAId}/${editBId}/`;
+			break;
 		}
 		default:
 			error(400, { message: 'Unknown action' });
