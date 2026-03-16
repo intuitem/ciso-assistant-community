@@ -1,0 +1,161 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import {
+		BuilderState,
+		setBuilderContext,
+		type Framework,
+		type RequirementNode,
+		type Question
+	} from './builder-state.svelte';
+	import { initBuilderApi } from './builder-api';
+	import BuilderMinimap from './BuilderMinimap.svelte';
+	import SectionBlock from './SectionBlock.svelte';
+
+	interface Props {
+		framework: Framework;
+		requirementNodes: RequirementNode[];
+		questions: Question[];
+	}
+
+	let { framework, requirementNodes, questions }: Props = $props();
+
+	initBuilderApi(fetch, framework.id);
+
+	const state = new BuilderState(framework, requirementNodes, questions);
+	setBuilderContext(state);
+
+	// Drag state for sections
+	let draggedSectionIndex: number | null = $state(null);
+
+	function handleSectionDragStart(index: number) {
+		draggedSectionIndex = index;
+	}
+
+	function handleSectionDragOver(e: DragEvent) {
+		e.preventDefault();
+	}
+
+	function handleSectionDrop(e: DragEvent, dropIndex: number) {
+		e.preventDefault();
+		if (draggedSectionIndex === null || draggedSectionIndex === dropIndex) return;
+		state.reorderSections(draggedSectionIndex, dropIndex);
+		draggedSectionIndex = null;
+	}
+
+	function handleSectionDragEnd() {
+		draggedSectionIndex = null;
+	}
+
+	// IntersectionObserver for minimap active section
+	onMount(() => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				for (const entry of entries) {
+					if (entry.isIntersecting) {
+						const id = (entry.target as HTMLElement).dataset.sectionId;
+						if (id) state.activeSection = id;
+					}
+				}
+			},
+			{ rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+		);
+
+		const elements = document.querySelectorAll('[data-section-id]');
+		elements.forEach((el) => observer.observe(el));
+
+		return () => observer.disconnect();
+	});
+</script>
+
+<BuilderMinimap />
+
+<div class="max-w-3xl mx-auto px-4 py-8 space-y-8">
+	<!-- Framework metadata -->
+	<div class="space-y-2">
+		<input
+			type="text"
+			value={state.framework.name}
+			placeholder="Framework name"
+			class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors py-1"
+			onblur={(e) => {
+				state.framework.name = e.currentTarget.value;
+				state.updateFramework({ name: e.currentTarget.value });
+			}}
+		/>
+		<textarea
+			value={state.framework.description ?? ''}
+			placeholder="Framework description (optional)"
+			rows="2"
+			class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors resize-none py-1"
+			onblur={(e) => {
+				state.framework.description = e.currentTarget.value;
+				state.updateFramework({ description: e.currentTarget.value || null });
+			}}
+		></textarea>
+		{#if state.errors.has('framework')}
+			<p class="text-xs text-red-600">{state.errors.get('framework')}</p>
+		{/if}
+	</div>
+
+	<!-- Sections -->
+	{#each state.sections as section, sectionIndex (section.node.id)}
+		<!-- Add section button between sections -->
+		{#if sectionIndex > 0}
+			<button
+				type="button"
+				class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-300 hover:text-gray-500 hover:border-gray-300 transition-colors opacity-0 hover:opacity-100"
+				onclick={() => state.addSection(sectionIndex - 1)}
+			>
+				<i class="fa-solid fa-plus mr-1"></i>Insert section
+			</button>
+		{/if}
+
+		<div
+			class:opacity-50={draggedSectionIndex === sectionIndex}
+			draggable="true"
+			ondragstart={() => handleSectionDragStart(sectionIndex)}
+			ondragover={handleSectionDragOver}
+			ondrop={(e) => handleSectionDrop(e, sectionIndex)}
+			ondragend={handleSectionDragEnd}
+			role="listitem"
+		>
+			<SectionBlock {section} {sectionIndex} />
+		</div>
+	{/each}
+
+	<!-- Add section at bottom -->
+	<button
+		type="button"
+		class="w-full py-4 border-2 border-dashed border-gray-300 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-400 transition-colors"
+		onclick={() => state.addSection()}
+	>
+		<i class="fa-solid fa-plus mr-1"></i>Add section
+	</button>
+
+	<!-- Empty state -->
+	{#if state.sections.length === 0}
+		<div class="text-center py-16">
+			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+				<i class="fa-solid fa-layer-group text-2xl text-gray-400"></i>
+			</div>
+			<h3 class="text-lg font-medium text-gray-600 mb-1">No sections yet</h3>
+			<p class="text-sm text-gray-400 mb-4">Start building your framework by adding a section.</p>
+			<button
+				type="button"
+				class="btn preset-filled-primary-500 px-6"
+				onclick={() => state.addSection()}
+			>
+				<i class="fa-solid fa-plus mr-2"></i>Add first section
+			</button>
+		</div>
+	{/if}
+
+	<!-- Global errors -->
+	{#each [...state.errors.entries()] as [key, message] (key)}
+		{#if key.startsWith('add-') || key.startsWith('reorder-')}
+			<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
+				{message}
+			</div>
+		{/if}
+	{/each}
+</div>
