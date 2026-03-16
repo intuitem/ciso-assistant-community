@@ -273,6 +273,24 @@ def _parse_library_yaml(filepath) -> list[dict]:
     entries = []
     objects = data.get("objects", {})
 
+    # Index the library itself as a summary entry
+    if library_name:
+        lib_description = data.get("description", "")
+        entries.append(
+            {
+                "urn": data.get("urn", ""),
+                "ref_id": library_ref_id,
+                "name": library_name,
+                "description": lib_description,
+                "annotation": "",
+                "framework": library_name,
+                "framework_ref_id": library_ref_id,
+                "provider": provider,
+                "locale": locale,
+                "object_type": "framework",
+            }
+        )
+
     # Extract framework requirement nodes
     framework = objects.get("framework", {})
     if isinstance(framework, dict):

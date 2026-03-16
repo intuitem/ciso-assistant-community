@@ -91,53 +91,62 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Parse page context into structured reference
         parsed_context = parse_page_context(page_context) if page_context else None
 
-        # Step 1: Ask the LLM if this is a tool call (structured query or workflow)
+        # Step 1: Route to tool or workflow
         from .workflows import get_workflow_tools, get_workflow_by_tool_name
         from .workflows.base import WorkflowContext
 
         llm = get_llm()
 
-        # Build page context prefix for the LLM
-        page_context_prefix = _build_context_prompt(page_context, parsed_context)
+        # Step 1a: Deterministic pre-routing for workflows.
+        # Small LLMs are unreliable at tool selection with 5+ tools,
+        # so we match workflows by context + keywords first.
+        pre_routed_workflow = _match_workflow(user_content, parsed_context)
+        if pre_routed_workflow:
+            logger.info("workflow_pre_routed", workflow=pre_routed_workflow.name)
+            tool_response = {"name": f"workflow_{pre_routed_workflow.name}"}
+        else:
+            # Step 1b: LLM-based tool selection
+            # Build page context prefix for the LLM
+            page_context_prefix = _build_context_prompt(page_context, parsed_context)
 
-        # Inject previous query metadata so the LLM can handle follow-ups
-        # like "give me more", "next page", "show me page 3"
-        last_query_meta = _get_last_query_meta(session)
-        tool_prompt = user_content
-        if page_context_prefix or last_query_meta:
-            tool_prompt = page_context_prefix
-            if last_query_meta:
-                tool_prompt += (
-                    f"Previous query context: model={last_query_meta.get('model')}, "
-                    f"domain={last_query_meta.get('domain', 'all')}, "
-                    f"page={last_query_meta.get('page', 1)}, "
-                    f"total_pages={last_query_meta.get('total_pages', 1)}, "
-                    f"total_count={last_query_meta.get('total_count', 0)}. "
-                    f"If the user asks for 'more', 'next', 'next page', etc., "
-                    f"repeat the same query with page={last_query_meta.get('page', 1) + 1}.\n\n"
-                )
-            tool_prompt += f"User message: {user_content}"
+            # Inject previous query metadata so the LLM can handle follow-ups
+            # like "give me more", "next page", "show me page 3"
+            last_query_meta = _get_last_query_meta(session)
+            tool_prompt = user_content
+            if page_context_prefix or last_query_meta:
+                tool_prompt = page_context_prefix
+                if last_query_meta:
+                    tool_prompt += (
+                        f"Previous query context: model={last_query_meta.get('model')}, "
+                        f"domain={last_query_meta.get('domain', 'all')}, "
+                        f"page={last_query_meta.get('page', 1)}, "
+                        f"total_pages={last_query_meta.get('total_pages', 1)}, "
+                        f"total_count={last_query_meta.get('total_count', 0)}. "
+                        f"If the user asks for 'more', 'next', 'next page', etc., "
+                        f"repeat the same query with page={last_query_meta.get('page', 1) + 1}.\n\n"
+                    )
+                tool_prompt += f"User message: {user_content}"
 
-        # Combine standard tools + context-aware workflow tools
-        all_tools = get_tools() + get_workflow_tools(parsed_context)
+            # Combine standard tools + context-aware workflow tools
+            all_tools = get_tools() + get_workflow_tools(parsed_context)
 
-        history_for_tool = list(
-            session.messages.order_by("created_at").values("role", "content")
-        )[-20:]
+            history_for_tool = list(
+                session.messages.order_by("created_at").values("role", "content")
+            )[-20:]
 
-        t0 = time.time()
-        tool_response = llm.tool_call(
-            tool_prompt,
-            all_tools,
-            history=history_for_tool,
-        )
-        logger.info(
-            "tool_selection_complete",
-            duration=round(time.time() - t0, 2),
-            tool=tool_response.get("name") if tool_response else "no tool",
-        )
+            t0 = time.time()
+            tool_response = llm.tool_call(
+                tool_prompt,
+                all_tools,
+                history=history_for_tool,
+            )
+            logger.info(
+                "tool_selection_complete",
+                duration=round(time.time() - t0, 2),
+                tool=tool_response.get("name") if tool_response else "no tool",
+            )
 
-        # Check if LLM selected a workflow
+        # Check if LLM selected a workflow (or pre-routed)
         if tool_response and tool_response.get("name", "").startswith("workflow_"):
             workflow = get_workflow_by_tool_name(tool_response["name"])
             if workflow:
@@ -305,6 +314,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                     "items": query_result["items"],
                 }
             )
+        elif query_result and query_result.get("type") == "search_library":
+            context = (
+                "INSTRUCTIONS: The following data comes from the frameworks knowledge base. "
+                "Present this information to the user in a clear, structured way. "
+                "When citing requirements, always include the framework name and reference ID. "
+                "Do NOT hallucinate additional information beyond what is provided.\n\n"
+                + query_result.get("text", "No results found.")
+            )
         elif query_result:
             context = (
                 "INSTRUCTIONS: The following data comes from a database query. "
@@ -340,7 +357,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 }
             )
         else:
-            # Step 2: Semantic RAG search
+            # Step 2: Knowledge graph + Semantic RAG search
+            # Check the knowledge graph for framework context, but only for
+            # general questions — skip when on action pages (detail/edit)
+            # where workflows and attach proposals are the expected path.
+            graph_context = ""
+            if not (parsed_context and parsed_context.object_id):
+                graph_context = _get_graph_context(user_content)
+
             results = search(user_content, request.user, top_k=10)
 
             structured = [r for r in results if r.get("source_type") == "model"]
@@ -348,7 +372,10 @@ class ChatSessionViewSet(BaseModelViewSet):
                 graph_expand(structured, accessible_folders) if structured else []
             )
 
-            context = format_context(results, expanded)
+            context = ""
+            if graph_context:
+                context = "FRAMEWORK KNOWLEDGE BASE:\n" + graph_context + "\n\n"
+            context += format_context(results, expanded)
             context_refs = build_context_refs(results, expanded)
 
             # Step 3: Auto-suggest attachable objects when on a contextual page
@@ -683,3 +710,175 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     )
 
     return "\n".join(parts) + "\n"
+
+
+def _get_graph_context(user_message: str) -> str:
+    """
+    Query the knowledge graph for framework-related context.
+    Extracts potential framework references from the user message and
+    returns structured graph data if matches are found.
+
+    This runs on every RAG fallback to ensure framework knowledge is always
+    available, regardless of whether the LLM selected the search_library tool.
+    """
+    from .knowledge_graph import (
+        find_frameworks,
+        get_framework_detail,
+        format_graph_result,
+    )
+
+    # Try finding frameworks mentioned in the query
+    # Split on common separators and try each token + the full query
+    tokens = set()
+    for sep in [" et ", " and ", " vs ", " versus ", " ou ", " or ", ",", "/"]:
+        if sep in user_message.lower():
+            for part in user_message.lower().split(sep):
+                cleaned = part.strip().strip("?!.\"'")
+                if len(cleaned) >= 2:
+                    tokens.add(cleaned)
+
+    # Also try individual words (3+ chars) for framework name matching
+    for word in user_message.split():
+        cleaned = word.strip("?!.,\"'()").strip()
+        if len(cleaned) >= 3:
+            tokens.add(cleaned.lower())
+
+    # Search the graph for each token
+    found_frameworks = {}
+    for token in tokens:
+        results = find_frameworks(query=token)
+        for fw in results:
+            if fw["urn"] not in found_frameworks:
+                found_frameworks[fw["urn"]] = fw
+
+    if not found_frameworks:
+        return ""
+
+    # Get details for found frameworks (cap at 5 to avoid context overflow)
+    parts = []
+    for urn in list(found_frameworks)[:5]:
+        detail = get_framework_detail(found_frameworks[urn]["name"])
+        if detail:
+            parts.append(format_graph_result(detail))
+
+    if not parts:
+        return ""
+
+    return "\n\n---\n\n".join(parts)
+
+
+# ---------------------------------------------------------------------------
+# Deterministic workflow pre-routing
+# ---------------------------------------------------------------------------
+
+# Maps (model_key, keyword_set) → workflow_name.
+# If the user is on a matching page and the message contains any keyword,
+# the workflow is selected without asking the LLM.
+_WORKFLOW_ROUTES: list[tuple[str, set[str], str]] = [
+    (
+        "requirement_assessment",
+        {
+            # EN
+            "control",
+            "controls",
+            "implement",
+            "comply",
+            "compliance",
+            "what to do",
+            "what should",
+            "how to",
+            "suggest",
+            "recommend",
+            "measure",
+            "measures",
+            # FR
+            "contrôle",
+            "contrôles",
+            "mesure",
+            "mesures",
+            "implémenter",
+            "conformité",
+            "conformer",
+            "que faire",
+            "quoi faire",
+            "comment",
+            "suggérer",
+            "recommander",
+        },
+        "suggest_controls",
+    ),
+    (
+        "risk_scenario",
+        {
+            # EN
+            "treat",
+            "treatment",
+            "mitigat",
+            "control",
+            "controls",
+            "reduce",
+            "accept",
+            "avoid",
+            "transfer",
+            "what to do",
+            "how to",
+            "suggest",
+            "recommend",
+            # FR
+            "traitement",
+            "traiter",
+            "atténuer",
+            "contrôle",
+            "contrôles",
+            "réduire",
+            "accepter",
+            "éviter",
+            "transférer",
+            "que faire",
+            "comment",
+            "suggérer",
+            "recommander",
+        },
+        "risk_treatment",
+    ),
+    (
+        "applied_control",
+        {
+            # EN
+            "evidence",
+            "evidences",
+            "proof",
+            "prove",
+            "document",
+            "what evidence",
+            "how to demonstrate",
+            "audit",
+            # FR
+            "preuve",
+            "preuves",
+            "documenter",
+            "démontrer",
+            "audit",
+        },
+        "evidence_guidance",
+    ),
+]
+
+
+def _match_workflow(user_message: str, parsed_context) -> "Workflow | None":
+    """
+    Match a workflow based on page context + message keywords.
+    Returns the workflow instance if matched, None otherwise.
+    """
+    if not parsed_context or not parsed_context.object_id:
+        return None
+
+    msg_lower = user_message.lower()
+
+    for model_key, keywords, workflow_name in _WORKFLOW_ROUTES:
+        if parsed_context.model_key != model_key:
+            continue
+        if any(kw in msg_lower for kw in keywords):
+            from .workflows import get_workflow_by_tool_name
+
+            return get_workflow_by_tool_name(f"workflow_{workflow_name}")

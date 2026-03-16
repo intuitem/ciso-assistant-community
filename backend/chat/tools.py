@@ -511,6 +511,72 @@ def _build_tools() -> tuple[list[dict], dict]:
         },
     }
 
+    # --- search_library tool ---
+    search_library_tool = {
+        "type": "function",
+        "function": {
+            "name": "search_library",
+            "description": (
+                "Search the security frameworks knowledge base (150+ frameworks). "
+                "Use this for questions ABOUT frameworks, standards, regulations, or their content. "
+                "This tool knows the structure of each framework (sections, requirements, controls, threats) "
+                "and can compare frameworks, find cross-framework mappings, and trace threat-control relationships.\n"
+                "Use 'find_frameworks' to search/list frameworks by name or keyword.\n"
+                "Use 'get_framework_detail' to get the structure and metadata of a specific framework.\n"
+                "Use 'compare_frameworks' to compare two frameworks side by side.\n"
+                "Use 'search_requirements' to find specific requirements by keyword.\n"
+                "Use 'find_mappings' to find how requirements map between two frameworks.\n"
+                "Use 'find_controls_for_threat' to find what requirements/controls address a given threat.\n\n"
+                "DO NOT use this tool for questions about the user's own data (their controls, risk scenarios, "
+                "compliance assessments, etc.) — use query_objects for that."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": [
+                            "find_frameworks",
+                            "get_framework_detail",
+                            "compare_frameworks",
+                            "search_requirements",
+                            "find_mappings",
+                            "find_controls_for_threat",
+                        ],
+                        "description": "The type of knowledge base query to perform.",
+                    },
+                    "query": {
+                        "type": "string",
+                        "description": (
+                            "Search text (for find_frameworks, search_requirements, "
+                            "find_controls_for_threat)."
+                        ),
+                    },
+                    "framework": {
+                        "type": "string",
+                        "description": (
+                            "Framework name, ref_id, or URN "
+                            "(for get_framework_detail, search_requirements, find_mappings source)."
+                        ),
+                    },
+                    "framework_b": {
+                        "type": "string",
+                        "description": "Second framework for compare_frameworks or find_mappings target.",
+                    },
+                    "provider": {
+                        "type": "string",
+                        "description": "Filter frameworks by provider/publisher (for find_frameworks).",
+                    },
+                    "locale": {
+                        "type": "string",
+                        "description": "Filter frameworks by locale, e.g. 'en', 'fr' (for find_frameworks).",
+                    },
+                },
+                "required": ["action"],
+            },
+        },
+    }
+
     tools = [
         {
             "type": "function",
@@ -518,7 +584,7 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "name": "query_objects",
                 "description": (
                     "Query, list, count, or get a summary of objects in the GRC system. "
-                    "Use this for any question about assets, controls, risk scenarios, "
+                    "Use this for any question about the user's own assets, controls, risk scenarios, "
                     "compliance assessments, threats, incidents, evidences, vulnerabilities, "
                     "security exceptions, risk acceptances, frameworks, entities, solutions, "
                     "contracts, or any other GRC object."
@@ -532,6 +598,7 @@ def _build_tools() -> tuple[list[dict], dict]:
         },
         propose_create_tool,
         attach_existing_tool,
+        search_library_tool,
     ]
 
     return tools, valid_values
@@ -816,6 +883,10 @@ def dispatch_tool_call(
     Returns a result dict compatible with format_query_result(),
     or a proposal dict for propose_create / propose_attach.
     """
+    # search_library has its own parameter space — skip query_objects sanitization
+    if tool_name == "search_library":
+        return _dispatch_search_library(arguments)
+
     cleaned = _sanitize_arguments(arguments)
 
     if tool_name == "query_objects":
@@ -831,3 +902,53 @@ def dispatch_tool_call(
 
     logger.warning("Unknown tool: %s", tool_name)
     return None
+
+
+def _dispatch_search_library(arguments: dict) -> dict | None:
+    """Dispatch a search_library tool call to the knowledge graph."""
+    from .knowledge_graph import (
+        find_frameworks,
+        get_framework_detail,
+        compare_frameworks,
+        search_requirements,
+        find_mappings,
+        find_controls_for_threat,
+        format_graph_result,
+    )
+
+    action = arguments.get("action", "")
+    query = arguments.get("query", "")
+    framework = arguments.get("framework", "")
+    framework_b = arguments.get("framework_b", "")
+    provider = arguments.get("provider", "")
+    locale = arguments.get("locale", "")
+
+    if action == "find_frameworks":
+        data = find_frameworks(query=query, provider=provider, locale=locale)
+    elif action == "get_framework_detail":
+        identifier = framework or query
+        data = get_framework_detail(identifier)
+    elif action == "compare_frameworks":
+        fw_a = framework or query
+        fw_b = framework_b
+        if not fw_b:
+            return {
+                "type": "search_library",
+                "text": "Please specify two frameworks to compare.",
+            }
+        data = compare_frameworks(fw_a, fw_b)
+    elif action == "search_requirements":
+        data = search_requirements(query=query, framework=framework)
+    elif action == "find_mappings":
+        if not framework:
+            return {
+                "type": "search_library",
+                "text": "Please specify a source framework.",
+            }
+        data = find_mappings(source_framework=framework, target_framework=framework_b)
+    elif action == "find_controls_for_threat":
+        data = find_controls_for_threat(query)
+    else:
+        return {"type": "search_library", "text": f"Unknown action: {action}"}
+
+    return {"type": "search_library", "text": format_graph_result(data)}
