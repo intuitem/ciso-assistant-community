@@ -17,7 +17,12 @@ import yaml
 from django.apps import apps
 from django.core import serializers
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, RegexValidator, MinValueValidator
+from django.core.validators import (
+    FileExtensionValidator,
+    MaxValueValidator,
+    RegexValidator,
+    MinValueValidator,
+)
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
@@ -38,6 +43,7 @@ from library.helpers import (
     update_translations_in_object,
 )
 
+from core.utils import format_currency as _fmt_currency
 from global_settings.models import GlobalSettings
 
 from .base_models import (
@@ -4667,25 +4673,8 @@ class AppliedControl(
         return annual_cost
 
     @staticmethod
-    def _stringify_cost(cost: float, currency: str) -> str:
-        match currency:
-            case "$":
-                return f"${cost}"
-            case "€":
-                return f"{cost}€"
-            case "£":
-                return f"£{cost}"
-            case "A$":
-                return f"A${cost}"
-            case "NZ$":
-                return f"NZ${cost}"
-            case "C$":
-                return f"C${cost}"
-            case "¥":
-                return f"¥{cost}"
-
-        logger.error("Unknown currency detected", currency=currency)
-        return f"{cost} *"
+    def _stringify_cost(cost, currency: str) -> str:
+        return _fmt_currency(cost, currency)
 
     @property
     def display_cost(self) -> str:
@@ -7918,21 +7907,33 @@ class TaskTemplate(NameDescriptionMixin, FolderMixin):
         verbose_name_plural = "Task templates"
 
     def save(self, *args, **kwargs):
+        update_fields = kwargs.get("update_fields")
+        schedule_persisted = update_fields is None or "schedule" in set(update_fields)
+
         if self.schedule and "days_of_week" in self.schedule:
             # Only modify values that are not already in range 0-6
             self.schedule["days_of_week"] = [
                 day % 7 if day > 6 else day for day in self.schedule["days_of_week"]
             ]
 
-        # Check if there are any TaskNode instances that are not within the date range
-        if self.pk and self.schedule and self.schedule.get("end_date"):
-            end_date = self.schedule["end_date"]
-            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
-            # Delete TaskNode instances whose scheduled date is after the end date
-            TaskNode.objects.filter(
-                task_template=self, scheduled_date__gt=end_date
-            ).delete()
-        super().save(*args, **kwargs)
+        with transaction.atomic():
+            super().save(*args, **kwargs)
+            # Prune untouched pending TaskNodes beyond the end date
+            if schedule_persisted and self.schedule and self.schedule.get("end_date"):
+                end_date = self.schedule["end_date"]
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+                TaskNode.objects.filter(
+                    task_template=self,
+                    scheduled_date__gt=end_date,
+                    status="pending",
+                    due_date=F("scheduled_date"),
+                ).filter(
+                    Q(observation__isnull=True) | Q(observation=""),
+                ).exclude(
+                    evidences__isnull=False,
+                ).exclude(
+                    evidence_revisions__isnull=False,
+                ).delete()
 
 
 class TaskNode(AbstractBaseModel, FolderMixin):
@@ -8544,4 +8545,69 @@ auditlog.register(
     PresetJourneyStep,
     exclude_fields=common_exclude,
 )
+
+
+class CustomEmailTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in email notification templates.
+    Each record overrides one template for one language.
+    The model lives in core so migrations are straightforward.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'expired_controls'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    subject = models.CharField(
+        max_length=500,
+        help_text=_("Email subject line, supports ${variable} substitution"),
+    )
+    body = models.TextField(
+        help_text=_("Email body, supports ${variable} substitution"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
+class CustomWordTemplate(AbstractBaseModel, FolderMixin):
+    """
+    Allows admins to override built-in Word report templates (.docx).
+    Each record overrides one template for one language.
+    Access is gated by the enterprise viewset and UI.
+    """
+
+    template_key = models.CharField(
+        max_length=100,
+        help_text=_("Template identifier, e.g. 'audit_report'"),
+    )
+    language = models.CharField(
+        max_length=10,
+        help_text=_("Language code, e.g. 'en', 'fr'"),
+    )
+    file = models.FileField(
+        upload_to="custom_word_templates/",
+        validators=[
+            FileExtensionValidator(["docx"]),
+            validate_file_size,
+            validate_file_name,
+        ],
+        help_text=_("Custom .docx template file"),
+    )
+    is_active = models.BooleanField(default=True)
+
+    fields_to_check = ["template_key", "language"]
+
+    def __str__(self):
+        return f"{self.template_key} ({self.language})"
+
+
 # actions - 0: create, 1: update, 2: delete

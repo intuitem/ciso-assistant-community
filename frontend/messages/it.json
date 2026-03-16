@@ -1761,6 +1761,7 @@
 	"isCritical": "È critico",
 	"isEnabled": "Abilitato",
 	"isIntragroup": "È intra-gruppo",
+	"doraExclude": "Escludere dal RoI DORA",
 	"isLocked": "Bloccato",
 	"isRecurrent": "Periodico",
 	"isRecurrentHelpText": "Controlla se l'attività è periodica",

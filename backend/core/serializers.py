@@ -421,7 +421,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description"]
+        fields = ["name", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -1216,7 +1216,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if annual_cost == 0:
             return ""
         currency = self.get_currency(obj)
-        return f"{annual_cost:,.2f} {currency}"
+        return AppliedControl._stringify_cost(f"{annual_cost:,.2f}", currency)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -1368,9 +1368,11 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    duplicate_evidences = serializers.BooleanField(default=False)
+
     class Meta:
         model = AppliedControl
-        fields = ["name", "description", "folder"]
+        fields = ["name", "description", "folder", "duplicate_evidences"]
 
 
 class AppliedControlImportExportSerializer(BaseModelSerializer):
