@@ -514,17 +514,13 @@ class MappingEngine:
                     .items()
                 ):
                     copied_value = mif_value.copy()
-                    if mapping_set_info and not copied_value.get(
-                        "used_mapping_set"
-                    ):
+                    if mapping_set_info and not copied_value.get("used_mapping_set"):
                         copied_value["used_mapping_set"] = mapping_set_info
                     merge_source_requirement_assessment(mif_id, copied_value)
 
                 # Also record the intermediate requirement itself so
                 # the user sees which mapping set was used for this hop.
-                src_fw_urn = requirement_mapping_set.get(
-                    "source_framework_urn", ""
-                )
+                src_fw_urn = requirement_mapping_set.get("source_framework_urn", "")
                 src_fw_info = self.frameworks.get(src_fw_urn, {})
                 merge_source_requirement_assessment(
                     src,
@@ -538,9 +534,7 @@ class MappingEngine:
                         "is_scored": src_assessment.get("is_scored"),
                         "source_framework": {
                             "id": src_fw_info.get("id", ""),
-                            "name": src_fw_info.get(
-                                "name", src_fw_urn
-                            ),
+                            "name": src_fw_info.get("name", src_fw_urn),
                         },
                         "used_mapping_set": mapping_set_info,
                     },
