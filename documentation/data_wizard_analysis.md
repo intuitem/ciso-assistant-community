@@ -30,6 +30,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
 | `BusinessImpactAnalysis` | Multi-sheet Excel (Summary, Assessments, Thresholds) | **Supported** |
+| `TaskTemplate` | Multi-sheet Excel (Summary + per-template node sheets) or CSV | **Supported** |
 
 ---
 
@@ -627,6 +628,70 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
+### 21. TaskTemplate (Multi-sheet Import)
+
+**Behavior:** Creates `TaskTemplate` objects (and optionally imports past `TaskNode` occurrences) from the multi-sheet workbook produced by the task export, or from a flat CSV for template-only imports.
+
+**Sheet layout (Excel):**
+
+| Sheet | Purpose |
+|-------|---------|
+| `Summary` | One row per template — creates/updates `TaskTemplate` objects |
+| `{N}-{name}` | One row per past task node occurrence for template N |
+
+> Future task nodes (due_date > today) are skipped on import because they are regenerated from the schedule.
+
+#### Summary Sheet Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `ref_id` | No | Reference ID — used as primary lookup key when present |
+| `name` | **Yes** | Task template name |
+| `description` | No | |
+| `folder` | No | Folder name lookup (falls back to form-selected folder) |
+| `is_recurrent` | No | Boolean (`true`/`false`, `1`/`0`, `yes`/`no`) — defaults to `false` |
+| `enabled` | No | Boolean — defaults to `true` |
+| `link` | No | URL |
+| `assigned_to` | No | Comma-separated user emails or team names |
+| `assets` | No | Comma-separated asset names or ref_ids |
+| `applied_controls` | No | Comma-separated control names or ref_ids |
+| `evidences` | No | Comma-separated evidence names |
+| `compliance_assessments` | No | Comma-separated assessment names (supports `"name - version"` format) |
+| `risk_assessments` | No | Comma-separated assessment names (supports `"name - version"` format) |
+| `findings_assessment` | No | Comma-separated findings assessment names |
+| `schedule_frequency` | No | `DAILY`, `WEEKLY`, `MONTHLY`, or `YEARLY` (recurrent only) |
+| `schedule_interval` | No | Integer — repeat every N periods (recurrent only) |
+| `schedule_days_of_week` | No | Comma-separated integers 1–7, Mon=1, Sun=7 (WEEKLY) |
+| `schedule_weeks_of_month` | No | Comma-separated integers -1–4 (1=first, -1=last) |
+| `schedule_months_of_year` | No | Comma-separated month numbers 1–12 (YEARLY) |
+| `schedule_end_date` | No | Date (YYYY-MM-DD) — schedule end |
+| `schedule_occurrences` | No | Integer — stop after N occurrences |
+| `schedule_overdue_behavior` | No | `DELAY_NEXT` or `NO_IMPACT` |
+| `task_date` | No | Due date for non-recurrent tasks (YYYY-MM-DD) |
+| `status` | No | `pending`, `in_progress`, `completed`, `cancelled` (non-recurrent only — sets the single node) |
+| `observation` | No | Free text (non-recurrent only — sets the single node) |
+
+#### Per-template Node Sheet Fields (`{N}-{template name}`)
+
+Each sheet imports past occurrences for one template. The sheet name is `"{counter}-{name}"` truncated to 31 characters, matching the export format.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `due_date` | **Yes** | Date (YYYY-MM-DD) — rows with future dates are skipped |
+| `scheduled_date` | No | Date (YYYY-MM-DD) — defaults to `due_date` |
+| `status` | No | `pending`, `in_progress`, `completed`, `cancelled` |
+| `observation` | No | Free text |
+
+**Special considerations:**
+
+- **M2M resolution for versioned models:** `risk_assessments` and `compliance_assessments` export as `"name - version"`. The importer strips the version suffix and matches by name, then verifies `str(candidate) == entry` to handle duplicates.
+- **PII protection:** Actor lookup warnings mask email addresses beyond the first 4 characters in server logs.
+- **on_conflict applies to nodes:** SKIP/STOP/UPDATE conflict mode applies to both templates and their task nodes.
+- **Multi-folder imports:** Each summary row's `folder` column is used to resolve its folder independently — the form-selected folder is only the fallback.
+- **CSV mode:** When a CSV is uploaded instead of Excel, only `TaskTemplate` objects are created (no node sheets). All summary fields are supported.
+
+---
+
 ## Models NOT Supported by Data Wizard
 
 ### Core App (`core/models.py`)
@@ -654,8 +719,8 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | HistoricalMetric | Not supported | Low |
 | Campaign | Not supported | Medium |
 | RiskAcceptance | **Not supported** | **High** |
-| TaskTemplate | Not supported | Medium |
-| TaskNode | Not supported | Low |
+| TaskTemplate | **Supported** (multi-sheet) | Done |
+| TaskNode | **Supported** (via TaskTemplate import) | Done |
 | ValidationFlow | Not supported | Low |
 | FlowEvent | Not supported | Low |
 | Team | Not supported | Medium |
@@ -728,9 +793,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Category | Count |
 |----------|-------|
 | **Total Models Identified** | ~70 |
-| **Models with Direct Import Support** | 19 |
+| **Models with Direct Import Support** | 21 |
 | **Models with Indirect Import Support** | ~12 (via EBIOS/TPRM) |
-| **Models NOT Supported** | ~42 |
+| **Models NOT Supported** | ~40 |
 
 ---
 
@@ -762,6 +827,13 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 12. ~~**BusinessImpactAnalysis**~~ - ✅ Now supported (multi-sheet)
 13. ~~**AssetAssessment**~~ - ✅ Now supported (via BIA import)
 14. ~~**EscalationThreshold**~~ - ✅ Now supported (via BIA import)
+
+### Medium Priority (completed)
+
+- ~~**TaskTemplate**~~ - ✅ Now supported (multi-sheet Excel + CSV)
+
+### Low Priority (completed)
+- ~~**TaskNode**~~ - ✅ Now supported (via TaskTemplate import)
 
 ### Medium Priority
 
