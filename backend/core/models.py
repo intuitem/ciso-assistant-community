@@ -7793,10 +7793,53 @@ class RequirementAssessment(AbstractBaseModel, FolderMixin, ETADueDateMixin):
         # Atomic update and save
         self.save(update_fields=["score", "result", "is_scored"])
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
+    _CEL_RELEVANT_FIELDS = frozenset({"score", "result", "status"})
 
+    def _get_cel_relevant_changed_fields(self) -> set[str]:
+        if not self.pk:
+            return set()
+        old = (
+            RequirementAssessment.objects.filter(pk=self.pk)
+            .values("score", "result", "status")
+            .first()
+        )
+        if old is None:
+            return set()
+        return {f for f in self._CEL_RELEVANT_FIELDS if getattr(self, f) != old[f]}
+
+    def _defer_cel_evaluation(self):
+        ca = self.compliance_assessment
+        conn = transaction.get_connection()
+        pending = getattr(conn, "_pending_cel_evaluations", None)
+        if pending is None:
+            pending = set()
+            conn._pending_cel_evaluations = pending
+        if ca.pk not in pending:
+            pending.add(ca.pk)
+
+            def _do_cel_evaluation(ca_ref=ca, pending_ref=pending):
+                pending_ref.discard(ca_ref.pk)
+                from core.cel_service import evaluate_outcomes
+
+                evaluate_outcomes(ca_ref)
+
+            transaction.on_commit(_do_cel_evaluation)
+
+    def save(self, *args, **kwargs) -> None:
+        update_fields = kwargs.get("update_fields")
+        cel_fields_touched = True
+        if update_fields is not None:
+            cel_fields_touched = bool(self._CEL_RELEVANT_FIELDS & set(update_fields))
+
+        cel_changed = (
+            self._get_cel_relevant_changed_fields() if cel_fields_touched else set()
+        )
+
+        super().save(*args, **kwargs)
         self.trigger_compliance_assessment_update_hooks()
+
+        if cel_changed:
+            self._defer_cel_evaluation()
 
 
 class RequirementAssignment(AbstractBaseModel, FolderMixin):
