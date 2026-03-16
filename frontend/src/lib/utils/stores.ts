@@ -36,6 +36,8 @@ showNotification.subscribe((val) => {
 	if (browser) return (localStorage.showNotification = val);
 });
 
+export const getStartedTrigger = writable(false);
+
 export const pageTitle = writable('');
 export const modelName = writable('');
 export const modelDescription = writable('');

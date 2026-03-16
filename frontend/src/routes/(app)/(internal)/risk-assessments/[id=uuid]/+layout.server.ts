@@ -122,7 +122,9 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 	const initialDataDuplicate = {
 		name: risk_assessment.name,
 		description: risk_assessment.description,
-		version: risk_assessment.version
+		version: risk_assessment.version,
+		folder: risk_assessment.folder.id,
+		perimeter: risk_assessment.perimeter?.id
 	};
 
 	const riskAssessmentDuplicateForm = await superValidate(

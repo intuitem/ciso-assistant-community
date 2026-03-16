@@ -32,6 +32,11 @@
 	"addComplianceAssessment": "Νέος έλεγχος",
 	"addEvidence": "Προσθήκη αποδεικτικού",
 	"addDomain": "Προσθήκη τομέα",
+	"createIamGroups": "Δημιουργία ομάδων IAM",
+	"iamGroups": "Ομάδες IAM",
+	"whenEnabledIamGroupsAreCreatedAutomatically": "Οι ομάδες IAM χρησιμοποιούνται για την ανάθεση ρόλων σε χρήστες",
+	"globalFolderMustKeepIamGroupsEnabled": "Ο καθολικός φάκελος πρέπει να διατηρεί τις ομάδες IAM ενεργές.",
+	"cannotDisableIamGroupsAssignedUsers": "Δεν μπορείτε να απενεργοποιήσετε τις ομάδες IAM όσο είναι ανατεθειμένες σε χρήστες.",
 	"addPerimeter": "Προσθήκη ορίου",
 	"addUser": "Προσθήκη χρήστη",
 	"addPolicy": "Προσθήκη πολιτικής",
@@ -157,6 +162,8 @@
 	"focusModeTooltip": "Εστίαση σε συγκεκριμένο τομέα",
 	"objectNotReachableFromCurrentFocus": "Αυτό το αντικείμενο δεν είναι προσβάσιμο από την τρέχουσα εστίαση. Ανακατεύθυνση στην προβολή λίστας.",
 	"objectNotFound": "Το αντικείμενο δεν βρέθηκε. Ανακατεύθυνση στην προβολή λίστας.",
+	"autoSync": "Αυτόματος ημερήσιος συγχρονισμός με εργασίες",
+	"autoSyncHelpText": "Όταν ενεργοποιηθεί, μια εργασία θα εκτελέσει αυτόματο συγχρονισμό με εργασίες καθημερινά. Οι κλειστές αξιολογήσεις αποκλείονται.",
 	"clearFocus": "Εκκαθάριση εστίασης",
 	"noDomainsAvailable": "Δεν υπάρχουν διαθέσιμοι τομείς",
 	"urn": "URN",
@@ -178,6 +185,7 @@
 	"next": "Επόμενο",
 	"previous": "Προηγούμενο",
 	"show": "Εμφάνιση",
+	"showStakeholdersName": "Εμφάνιση ονόματος ενδιαφερόμενων μερών",
 	"entries": "εγγραφές",
 	"searchPlaceholder": "Αναζήτηση...",
 	"noEntriesFound": "Δεν βρέθηκαν εγγραφές",
@@ -1824,5 +1832,7 @@
 	"processingTimeout": "Processing timeout",
 	"maliciousFileDetected": "Malicious file detected",
 	"serverConfigurationError": "Server configuration error",
-	"libraryLoadFailed": "Library load failed"
+	"libraryLoadFailed": "Library load failed",
+	"sortAscending": "Ταξινόμηση Α → Ω",
+	"sortDescending": "Ταξινόμηση Ω → Α"
 }

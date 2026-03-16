@@ -1,4 +1,5 @@
 import hashlib
+from decimal import Decimal
 from enum import Enum
 
 import json
@@ -16,6 +17,77 @@ from dateutil import relativedelta as rd
 from uuid import UUID
 
 logger = structlog.get_logger(__name__)
+
+
+# Currency formatting conventions: (position, space)
+# position: "before" or "after" the amount
+# space: whether to include a space between symbol and amount
+_CURRENCY_FORMAT = {
+    # Symbol before, no space: $100
+    "$": ("before", False),
+    "£": ("before", False),
+    "¥": ("before", False),
+    "CN¥": ("before", False),
+    "₹": ("before", False),
+    "₩": ("before", False),
+    "A$": ("before", False),
+    "NZ$": ("before", False),
+    "S$": ("before", False),
+    "₺": ("before", False),
+    "NT$": ("before", False),
+    "฿": ("before", False),
+    "MYR": ("before", False),
+    # Symbol before, with space: CHF 100
+    "C$": ("before", True),
+    "CHF": ("before", True),
+    "HK$": ("before", True),
+    "R$": ("before", True),
+    "MX$": ("before", True),
+    "ZAR": ("before", True),
+    # Symbol after, with space: 100 €
+    "€": ("after", True),
+    "SEK": ("after", True),
+    "NOK": ("after", True),
+    "DKK": ("after", True),
+    "PLN": ("after", True),
+}
+
+
+def get_global_currency() -> str:
+    """Get the currency from global settings, defaulting to €."""
+    from global_settings.models import GlobalSettings
+
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    return general_settings.value.get("currency", "€") if general_settings else "€"
+
+
+def format_currency(value, currency: str) -> str:
+    """Format a numeric value with its currency symbol in the correct position.
+
+    Respects per-currency conventions for symbol position (before/after)
+    and spacing. For large values, uses abbreviated forms (K, M, B).
+    """
+    if not currency:
+        return f"{value} *"
+
+    if isinstance(value, (int, float, Decimal)):
+        if value >= 1_000_000_000:
+            formatted = f"{value / 1_000_000_000:.1f}B"
+        elif value >= 1_000_000:
+            formatted = f"{value / 1_000_000:.1f}M"
+        elif value >= 1_000:
+            formatted = f"{value / 1_000:.0f}K"
+        else:
+            formatted = f"{value:,.0f}"
+    else:
+        formatted = str(value)
+
+    position, space = _CURRENCY_FORMAT.get(currency, ("before", True))
+    sep = " " if space else ""
+
+    if position == "after":
+        return f"{formatted}{sep}{currency}"
+    return f"{currency}{sep}{formatted}"
 
 
 def sizeof_json(obj) -> int:
@@ -415,18 +487,25 @@ def _date_matches_schedule(task, date_to_check):
 
         # Check week of month
         if weeks_of_month:
-            day = date_to_check.day
-            week_of_month = ((day - 1) // 7) + 1
+            first_day = date(date_to_check.year, date_to_check.month, 1)
+            first_matching_day = first_day
+            while first_matching_day.weekday() != weekday:
+                first_matching_day += timedelta(days=1)
+            occurrence = ((date_to_check.day - first_matching_day.day) // 7) + 1
 
             # Check for last week special case (-1)
             if -1 in weeks_of_month:
-                last_day = calendar.monthrange(date_to_check.year, date_to_check.month)[
-                    1
-                ]
-                if last_day - date_to_check.day < 7:
+                last_day_num = calendar.monthrange(
+                    date_to_check.year, date_to_check.month
+                )[1]
+                last_date = date(date_to_check.year, date_to_check.month, last_day_num)
+                last_matching_day = last_date
+                while last_matching_day.weekday() != weekday:
+                    last_matching_day -= timedelta(days=1)
+                if date_to_check == last_matching_day:
                     return True
 
-            return week_of_month in weeks_of_month
+            return occurrence in weeks_of_month
 
         return True
 
@@ -721,7 +800,7 @@ def update_selected_implementation_groups(compliance_assessment):
             if not isinstance(question_answers, list):
                 question_answers = [question_answers]
 
-            for choice in question["choices"]:
+            for choice in question.get("choices", []):
                 if choice["urn"] in question_answers:
                     igs_to_select.update(choice.get("select_implementation_groups", []))
 

@@ -1,0 +1,16 @@
+subject: "CISO Assistant: Vous avez été affecté à '${scenario_name}'"
+body: |
+  Bonjour,
+
+  Vous avez été affecté au scénario de risque suivant :
+
+  - Nom : ${scenario_name}
+  - Description : ${scenario_description}
+  - ID : ${scenario_ref_id}
+  - Appréciation des risques : ${risk_assessment_name}
+  - Traitement : ${scenario_treatment}
+  - Domaine : ${folder_name}
+
+  Connectez-vous à votre portail CISO Assistant pour consulter et gérer ce scénario de risque : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.
