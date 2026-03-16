@@ -140,6 +140,7 @@
 		{form}
 		field="folder"
 		cacheLock={cacheLocks['folder']}
+		contentTypes={['DO', 'GL', 'EN']}
 		bind:cachedValue={formDataCache['folder']}
 		label={m.folder()}
 		onChange={handleFolderChange}
