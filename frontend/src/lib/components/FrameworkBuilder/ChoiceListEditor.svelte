@@ -226,7 +226,6 @@
 												? current.filter((g: string) => g !== refId)
 												: [...current, refId];
 											saveField(choice.id, 'select_implementation_groups', next);
-											choice.select_implementation_groups = next;
 										}}
 									>
 										{refId}

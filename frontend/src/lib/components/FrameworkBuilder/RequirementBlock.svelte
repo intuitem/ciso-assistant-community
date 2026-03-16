@@ -15,7 +15,6 @@
 	let confirmDelete = $state(false);
 
 	async function saveField(field: string, value: unknown) {
-		(requirement.node as Record<string, unknown>)[field] = value;
 		await builder.updateNode(requirement.node.id, { [field]: value });
 	}
 
@@ -103,7 +102,6 @@
 						const next = selected
 							? current.filter((g) => g !== refId)
 							: [...current, refId];
-						requirement.node.implementation_groups = next;
 						builder.updateNode(requirement.node.id, { implementation_groups: next });
 					}}
 				>

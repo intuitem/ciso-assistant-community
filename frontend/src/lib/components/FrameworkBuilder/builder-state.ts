@@ -340,6 +340,17 @@ export function createBuilderState(
 	}
 
 	async function updateNode(nodeId: string, patch: Record<string, unknown>) {
+		// Optimistic local update
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				node: sec.node.id === nodeId ? { ...sec.node, ...patch } : sec.node,
+				requirements: sec.requirements.map((req) => ({
+					...req,
+					node: req.node.id === nodeId ? { ...req.node, ...patch } : req.node
+				}))
+			}))
+		);
 		try {
 			saving.set(true);
 			await apiUpdate('requirement-nodes', nodeId, patch);
@@ -395,6 +406,22 @@ export function createBuilderState(
 	}
 
 	async function updateQuestion(questionId: string, patch: Record<string, unknown>) {
+		// Optimistic local update
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: sec.requirements.map((req) => ({
+					...req,
+					questions: req.questions.map((q) => ({
+						...q,
+						question:
+							q.question.id === questionId
+								? { ...q.question, ...patch }
+								: q.question
+					}))
+				}))
+			}))
+		);
 		try {
 			saving.set(true);
 			await apiUpdate('questions', questionId, patch);
@@ -474,6 +501,24 @@ export function createBuilderState(
 	}
 
 	async function updateChoice(choiceId: string, patch: Record<string, unknown>) {
+		// Optimistic local update
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: sec.requirements.map((req) => ({
+					...req,
+					questions: req.questions.map((q) => ({
+						...q,
+						question: {
+							...q.question,
+							choices: q.question.choices.map((c) =>
+								c.id === choiceId ? { ...c, ...patch } : c
+							)
+						}
+					}))
+				}))
+			}))
+		);
 		try {
 			saving.set(true);
 			await apiUpdate('question-choices', choiceId, patch);

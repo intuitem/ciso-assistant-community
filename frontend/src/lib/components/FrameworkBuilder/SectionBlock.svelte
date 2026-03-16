@@ -19,7 +19,6 @@
 	let draggedReqIndex: number | null = $state(null);
 
 	async function saveField(field: string, value: unknown) {
-		(section.node as Record<string, unknown>)[field] = value;
 		await builder.updateNode(section.node.id, { [field]: value });
 	}
 

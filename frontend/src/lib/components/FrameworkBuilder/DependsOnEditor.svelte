@@ -28,7 +28,6 @@
 			// Remove condition
 			active = false;
 			builder.updateQuestion(question.id, { depends_on: null });
-			question.depends_on = null;
 		} else {
 			active = true;
 		}
@@ -38,7 +37,6 @@
 		if (!dependsOn.question || dependsOn.answers.length === 0) return;
 		const value = { ...dependsOn };
 		builder.updateQuestion(question.id, { depends_on: value });
-		question.depends_on = value;
 	}
 
 	function toggleAnswer(urn: string) {

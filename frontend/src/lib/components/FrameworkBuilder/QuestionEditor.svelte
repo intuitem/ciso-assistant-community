@@ -69,7 +69,6 @@
 		) {
 			if (!confirm('Changing type will delete existing choices. Continue?')) return;
 		}
-		question.type = newType as Question['type'];
 		await saveField('type', newType);
 	}
 </script>
@@ -163,7 +162,6 @@
 				rows="2"
 				class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none resize-none"
 				onblur={(e) => {
-					question.text = e.currentTarget.value;
 					saveField('text', e.currentTarget.value);
 				}}
 			></textarea>
@@ -177,7 +175,6 @@
 						value={question.ref_id ?? ''}
 						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
 						onblur={(e) => {
-							question.ref_id = e.currentTarget.value;
 							saveField('ref_id', e.currentTarget.value || null);
 						}}
 					/>
@@ -191,7 +188,6 @@
 						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
 						onblur={(e) => {
 							const val = Number(e.currentTarget.value) || 1;
-							question.weight = val;
 							saveField('weight', val);
 						}}
 					/>
@@ -204,7 +200,6 @@
 						placeholder="Optional note..."
 						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
 						onblur={(e) => {
-							question.annotation = e.currentTarget.value;
 							saveField('annotation', e.currentTarget.value || null);
 						}}
 					/>
