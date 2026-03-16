@@ -42,7 +42,7 @@
 	}
 </script>
 
-<div data-section-id={section.node.id} class="scroll-mt-16">
+<div data-section-id={section.node.id} class="scroll-mt-32">
 	<!-- Section header -->
 	<div class="flex items-center gap-3 group mb-3">
 		<div class="w-1 h-10 bg-blue-500 rounded-full shrink-0"></div>

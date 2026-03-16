@@ -1,8 +1,24 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { getBuilderContext } from './builder-state';
+
+	interface Props {
+		frameworkId: string;
+	}
+
+	let { frameworkId }: Props = $props();
 
 	const builder = getBuilderContext();
 	const { sections: sectionsStore, activeSection: activeSectionStore, saving: savingStore } = builder;
+
+	let topOffset = $state(0);
+
+	onMount(() => {
+		const appBar = document.querySelector('[data-scope="app-bar"]');
+		if (appBar) {
+			topOffset = appBar.getBoundingClientRect().height;
+		}
+	});
 
 	function scrollToSection(sectionId: string) {
 		const el = document.querySelector(`[data-section-id="${sectionId}"]`);
@@ -13,11 +29,20 @@
 	}
 </script>
 
-<div class="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-	<div class="max-w-3xl mx-auto flex items-center gap-2 py-3 px-4 overflow-x-auto">
-		<span class="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0"
-			>Sections</span
+<div
+	class="sticky z-40 bg-white border-b border-gray-200 shadow-sm rounded-t-lg"
+	style="top: {topOffset}px"
+>
+	<div class="flex items-center gap-3 py-2 px-4">
+		<a
+			href="/frameworks/{frameworkId}"
+			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
 		>
+			<i class="fa-solid fa-arrow-left"></i>
+		</a>
+
+		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+
 		{#each $sectionsStore as section (section.node.id)}
 			<button
 				type="button"

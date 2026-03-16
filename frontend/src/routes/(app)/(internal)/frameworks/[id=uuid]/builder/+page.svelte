@@ -37,18 +37,17 @@
 	}
 </script>
 
-<div class="bg-gray-50 min-h-screen">
-	<!-- Back link -->
-	<div class="max-w-3xl mx-auto px-4 pt-4">
-		<a
-			href="/frameworks/{data.framework.id}"
-			class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-		>
-			<i class="fa-solid fa-arrow-left mr-1"></i>Back to framework
-		</a>
-	</div>
-
+<div class="min-h-screen">
 	{#if data.isImported}
+		<!-- Back link for import guard only -->
+		<div class="max-w-3xl mx-auto px-4 pt-4">
+			<a
+				href="/frameworks/{data.framework.id}"
+				class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+			>
+				<i class="fa-solid fa-arrow-left mr-1"></i>Back to framework
+			</a>
+		</div>
 		<!-- Import guard -->
 		<div class="max-w-lg mx-auto mt-16 text-center">
 			<div

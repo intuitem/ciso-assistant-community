@@ -74,9 +74,10 @@
 	});
 </script>
 
-<BuilderMinimap />
+<div class="card !p-0 bg-white shadow-lg overflow-visible">
+<BuilderMinimap frameworkId={framework.id} />
 
-<div class="max-w-3xl mx-auto px-4 py-8 space-y-8">
+<div class="max-w-3xl mx-auto px-6 py-8 space-y-8">
 	<!-- Framework metadata -->
 	<div class="space-y-2">
 		<input
@@ -163,4 +164,5 @@
 			</div>
 		{/if}
 	{/each}
+</div>
 </div>
