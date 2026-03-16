@@ -176,7 +176,7 @@ def _resolve_filtering_labels(value) -> list[UUID]:
                 label.full_clean()
                 label.save()
             except Exception:
-                continue
+                logging.error(f"Failed to save label: {value}")
         label_ids.append(label.id)
     return label_ids
 
