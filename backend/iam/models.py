@@ -87,6 +87,7 @@ ALLOWED_PERMISSION_APPS = (
     "crq",
     "pmbok",
     "iam",
+    "global_settings",
 )
 
 IGNORED_PERMISSION_MODELS = (
