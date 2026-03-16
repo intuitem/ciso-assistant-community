@@ -487,10 +487,9 @@
 		uploading = true;
 		try {
 			const formData = new FormData();
-			formData.append('_action', 'upload-image');
-			formData.append('document_id', document.id);
 			formData.append('file', file);
-			const res = await fetch(proxyUrl, { method: 'POST', body: formData });
+			const uploadUrl = `${proxyUrl}?_action=upload-image&document_id=${document.id}`;
+			const res = await fetch(uploadUrl, { method: 'POST', body: formData });
 			if (res.ok) {
 				const data = await res.json();
 				const imageUrl = `${proxyUrl}?_action=serve-image&attachment_id=${data.id}`;

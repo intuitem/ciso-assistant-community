@@ -173,7 +173,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
-		request.headers.set('Content-Type', 'application/json');
+		// Only set Content-Type to JSON if the request doesn't already have a
+		// content type (e.g. multipart/form-data set automatically by FormData body)
+		const existingCt = request.headers.get('Content-Type') || '';
+		if (!existingCt || existingCt === 'text/plain;charset=UTF-8') {
+			request.headers.set('Content-Type', 'application/json');
+		}
 		request.headers.set('Accept-Language', currentLang);
 
 		const token = event.cookies.get('token');

@@ -3,33 +3,31 @@ import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 // Create a policy document or upload image
-export const POST: RequestHandler = async ({ fetch, request }) => {
-	const contentType = request.headers.get('content-type') || '';
-
-	// Handle multipart uploads (image upload)
-	if (contentType.includes('multipart/form-data')) {
-		const formData = await request.formData();
-		const action = formData.get('_action') as string;
-
-		if (action === 'upload-image') {
-			const documentId = formData.get('document_id') as string;
-			const file = formData.get('file') as File;
-			if (!documentId || !file) {
-				error(400, { message: 'Missing document_id or file' });
-			}
-			const uploadForm = new FormData();
-			uploadForm.append('file', file);
-			const endpoint = `${BASE_API_URL}/managed-documents/${documentId}/upload-image/`;
-			const res = await fetch(endpoint, {
-				method: 'POST',
-				body: uploadForm
-			});
-			if (!res.ok) {
-				error(res.status as NumericRange<400, 599>, await res.json());
-			}
-			return json(await res.json(), { status: res.status });
+export const POST: RequestHandler = async ({ fetch, request, url }) => {
+	// Handle image uploads — read file into memory and forward as multipart
+	if (url.searchParams.get('_action') === 'upload-image') {
+		const documentId = url.searchParams.get('document_id');
+		if (!documentId) {
+			error(400, { message: 'Missing document_id' });
 		}
-		error(400, { message: 'Unknown multipart action' });
+		const incoming = await request.formData();
+		const file = incoming.get('file') as File | null;
+		if (!file) {
+			error(400, { message: 'Missing file' });
+		}
+		// Rebuild FormData with a concrete Blob so fetch serialises it correctly
+		const bytes = new Uint8Array(await file.arrayBuffer());
+		const outgoing = new FormData();
+		outgoing.append('file', new Blob([bytes], { type: file.type }), file.name);
+		const endpoint = `${BASE_API_URL}/managed-documents/${documentId}/upload-image/`;
+		const res = await fetch(endpoint, {
+			method: 'POST',
+			body: outgoing
+		});
+		if (!res.ok) {
+			error(res.status as NumericRange<400, 599>, await res.json());
+		}
+		return json(await res.json(), { status: res.status });
 	}
 
 	const body = await request.json();

@@ -13,7 +13,12 @@ from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser
+from rest_framework.parsers import (
+    FileUploadParser,
+    FormParser,
+    JSONParser,
+    MultiPartParser,
+)
 from rest_framework.response import Response
 from weasyprint import HTML
 
@@ -83,12 +88,13 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         detail=True,
         methods=["post"],
         url_path="upload-image",
-        parser_classes=[MultiPartParser],
+        parser_classes=[MultiPartParser, FormParser, FileUploadParser],
     )
     def upload_image(self, request, pk=None):
         """Upload an image file and attach it to this document."""
         document = self.get_object()
-        uploaded_file = request.FILES.get("file")
+        # FileUploadParser puts file in request.data['file'], MultiPartParser in request.FILES['file']
+        uploaded_file = request.FILES.get("file") or request.data.get("file")
         if not uploaded_file:
             return Response(
                 {"error": "No file provided."},
