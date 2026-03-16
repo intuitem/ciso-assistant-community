@@ -7925,9 +7925,7 @@ class FrameworkViewSet(BaseModelViewSet):
             .prefetch_related("questions__choices")
             .order_by("urn")
         )
-        questions_by_node = {
-            rn.id: build_questions_dict(rn) for rn in req_nodes
-        }
+        questions_by_node = {rn.id: build_questions_dict(rn) for rn in req_nodes}
         has_questions = any(questions_by_node.values())
         entries = []
 
@@ -8895,12 +8893,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         req_node_ids = [req.requirement.id for req in requirement_assessments]
         req_nodes = {
             node.id: node
-            for node in RequirementNode.objects.filter(id__in=req_node_ids)
-            .prefetch_related("questions__choices")
+            for node in RequirementNode.objects.filter(
+                id__in=req_node_ids
+            ).prefetch_related("questions__choices")
         }
         questions_by_node = {
-            node_id: build_questions_dict(node)
-            for node_id, node in req_nodes.items()
+            node_id: build_questions_dict(node) for node_id, node in req_nodes.items()
         }
         has_questions = any(questions_by_node.values())
 
