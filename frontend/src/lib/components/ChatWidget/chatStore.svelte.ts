@@ -1,7 +1,6 @@
 import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
 
-
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
 
@@ -139,6 +138,13 @@ const contextualActions: Record<string, SuggestedAction[]> = {
 			label: 'Risk overview',
 			prompt: 'Summarize the risk scenarios in this assessment',
 			icon: 'fa-solid fa-triangle-exclamation'
+		}
+	],
+	'ebios-rm': [
+		{
+			label: 'Assist study',
+			prompt: 'Help me conduct this EBIOS RM study',
+			icon: 'fa-solid fa-wand-magic-sparkles'
 		}
 	]
 };

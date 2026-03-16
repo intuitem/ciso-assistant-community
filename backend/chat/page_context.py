@@ -43,6 +43,9 @@ def parse_page_context(page_context: dict) -> ParsedContext | None:
     for model_key, (_, _, _, url_slug) in MODEL_MAP.items():
         slug_to_key[url_slug] = model_key
 
+    # Route aliases for pages whose URL differs from the API slug
+    slug_to_key["ebios-rm"] = "ebios_rm_study"
+
     # Strip leading/trailing slashes and split
     segments = [s for s in path.strip("/").split("/") if s]
     if not segments:

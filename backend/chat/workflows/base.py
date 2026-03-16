@@ -8,6 +8,7 @@ Each step is just a Python method call — no DAGs, no state machines.
 import json
 import logging
 import re
+import time
 from dataclasses import dataclass, field
 from typing import Iterator
 
@@ -147,6 +148,26 @@ class Workflow:
             logger.warning("Failed to parse recommended items: %s", e)
             return []
 
+    def _call_llm(
+        self,
+        ctx: WorkflowContext,
+        prompt: str,
+        context: str = "",
+    ) -> str:
+        """
+        Non-streaming LLM call. Returns the full response text.
+        Use for structured output (JSON generation) that shouldn't be shown to the user.
+        """
+        t0 = time.time()
+        result = ctx.llm.generate(prompt, context, history=ctx.history)
+        logger.info(
+            "[%s] _call_llm took %.2fs (%d chars)",
+            self.name,
+            time.time() - t0,
+            len(result),
+        )
+        return result
+
     def _stream_llm(
         self,
         ctx: WorkflowContext,
@@ -161,9 +182,16 @@ class Workflow:
         """
         if not skip_language_hint:
             prompt = prompt + LANGUAGE_INSTRUCTION
+        t0 = time.time()
         full_response = []
         for token_type, token in ctx.llm.stream(prompt, context, history=ctx.history):
             full_response.append(token if token_type == "token" else "")
             yield SSEEvent(type=token_type, content=token)
         # Store the complete response for the caller
         self._last_response = "".join(full_response)
+        logger.info(
+            "[%s] _stream_llm took %.2fs (%d chars)",
+            self.name,
+            time.time() - t0,
+            len(self._last_response),
+        )

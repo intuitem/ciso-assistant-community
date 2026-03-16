@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 
 from django.http import StreamingHttpResponse
 from rest_framework import viewsets, status
@@ -124,10 +125,16 @@ class ChatSessionViewSet(BaseModelViewSet):
             session.messages.order_by("created_at").values("role", "content")
         )[-20:]
 
+        t0 = time.time()
         tool_response = llm.tool_call(
             tool_prompt,
             all_tools,
             history=history_for_tool,
+        )
+        logger.info(
+            "Tool selection took %.2fs → %s",
+            time.time() - t0,
+            tool_response.get("name") if tool_response else "no tool",
         )
 
         # Check if LLM selected a workflow
@@ -159,6 +166,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                 def stream_workflow():
                     full_response = ""
                     wf_context_refs = []
+                    wf_start = time.time()
                     try:
                         for event in workflow.run(wf_ctx):
                             if event.type == "token":
@@ -189,13 +197,23 @@ class ChatSessionViewSet(BaseModelViewSet):
                             content=saved_response or full_response,
                             context_refs=wf_context_refs,
                         )
+                        logger.info(
+                            "Workflow '%s' completed in %.2fs",
+                            workflow.name,
+                            time.time() - wf_start,
+                        )
                         done_data = json.dumps(
                             {"type": "done", "context_refs": wf_context_refs}
                         )
                         yield f"data: {done_data}\n\n"
 
                     except Exception as e:
-                        logger.error("Workflow stream error: %s", e)
+                        logger.error(
+                            "Workflow '%s' error after %.2fs: %s",
+                            workflow.name,
+                            time.time() - wf_start,
+                            e,
+                        )
                         error_msg = "Sorry, I encountered an error. Please try again."
                         ChatMessage.objects.create(
                             session=session,
@@ -218,12 +236,14 @@ class ChatSessionViewSet(BaseModelViewSet):
                 tool_response["name"],
                 tool_response.get("arguments", {}),
             )
+            t1 = time.time()
             query_result = dispatch_tool_call(
                 tool_response["name"],
                 tool_response.get("arguments", {}),
                 accessible_folders,
                 parsed_context,
             )
+            logger.info("Tool dispatch took %.2fs", time.time() - t1)
 
         # Track if this is a creation/attach proposal (different SSE flow)
         creation_proposal = None
@@ -436,6 +456,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                         )
                     yield f"data: {action_data}\n\n"
 
+                t_stream = time.time()
                 for token_type, token in llm.stream(
                     user_content, context, history=history_messages
                 ):
@@ -444,6 +465,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     # SSE format — "thinking" tokens go to a collapsible block in the UI
                     data = json.dumps({"type": token_type, "content": token})
                     yield f"data: {data}\n\n"
+                logger.info("LLM response streaming took %.2fs", time.time() - t_stream)
 
                 # Save assistant message
                 ChatMessage.objects.create(

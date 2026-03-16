@@ -81,7 +81,21 @@ MODEL_MAP = {
         "ebios-rm-studies",
     ),
     "feared_event": ("ebios_rm", "FearedEvent", "Feared Events", "feared-events"),
+    "ro_to": ("ebios_rm", "RoTo", "RoTo Couples", "ro-to"),
     "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders", "stakeholders"),
+    "strategic_scenario": (
+        "ebios_rm",
+        "StrategicScenario",
+        "Strategic Scenarios",
+        "strategic-scenarios",
+    ),
+    "attack_path": ("ebios_rm", "AttackPath", "Attack Paths", "attack-paths"),
+    "operational_scenario": (
+        "ebios_rm",
+        "OperationalScenario",
+        "Operational Scenarios",
+        "operational-scenarios",
+    ),
     "folder": ("iam", "Folder", "Domains", "folders"),
 }
 
@@ -99,6 +113,13 @@ CREATABLE_MODELS = {
     "incident",
     "entity",
     "solution",
+    "ebios_rm_study",
+    "feared_event",
+    "ro_to",
+    "stakeholder",
+    "strategic_scenario",
+    "attack_path",
+    "operational_scenario",
 }
 
 # --- Declarative relationship registries ---
@@ -111,6 +132,14 @@ PARENT_CHILD_MAP: dict[str, list[tuple[str, str]]] = {
     ],
     "compliance_assessment": [
         # requirement_assessments are auto-created by the framework, not user-created
+    ],
+    "ebios_rm_study": [
+        ("feared_event", "ebios_rm_study"),
+        ("ro_to", "ebios_rm_study"),
+        ("stakeholder", "ebios_rm_study"),
+        ("strategic_scenario", "ebios_rm_study"),
+        ("attack_path", "ebios_rm_study"),
+        ("operational_scenario", "ebios_rm_study"),
     ],
 }
 
@@ -245,7 +274,11 @@ def _build_tools() -> tuple[list[dict], dict]:
                 "'entity assessments' → entity_assessment, "
                 "'EBIOS RM studies'/'études EBIOS' → ebios_rm_study, "
                 "'feared events'/'événements redoutés' → feared_event, "
+                "'RoTo couples'/'couples SO/OV' → ro_to, "
                 "'stakeholders'/'parties prenantes' → stakeholder, "
+                "'strategic scenarios'/'scénarios stratégiques' → strategic_scenario, "
+                "'attack paths'/'chemins d\\'attaque' → attack_path, "
+                "'operational scenarios'/'scénarios opérationnels' → operational_scenario, "
                 "'domains'/'domaines'/'folders'/'dossiers'/'projects'/'projets' → folder. "
                 "IMPORTANT: when the user says 'controls' without further qualification, "
                 "use applied_control as the model with NO category filter."
@@ -372,9 +405,11 @@ def _build_tools() -> tuple[list[dict], dict]:
             "name": "propose_create",
             "description": (
                 "Propose creating one or more GRC objects. Use this when the user asks to "
-                "create, add, or import objects like controls, assets, threats, risk scenarios, etc. "
+                "create, add, or import objects like controls, assets, threats, risk scenarios, "
+                "EBIOS RM studies, etc. "
                 "The objects will NOT be created immediately — the user will review and confirm. "
-                "You can propose multiple objects at once by providing an array of items."
+                "You can propose multiple objects at once by providing an array of items. "
+                "For EBIOS RM studies, a risk matrix from loaded libraries will be automatically assigned."
             ),
             "parameters": {
                 "type": "object",
@@ -388,7 +423,13 @@ def _build_tools() -> tuple[list[dict], dict]:
                             "'risk scenarios' → risk_scenario, 'threats' → threat, "
                             "'evidences' → evidence, 'vulnerabilities' → vulnerability, "
                             "'exceptions' → security_exception, 'incidents' → incident, "
-                            "'entities'/'third parties' → entity, 'solutions' → solution."
+                            "'entities'/'third parties' → entity, 'solutions' → solution, "
+                            "'EBIOS RM study'/'étude EBIOS' → ebios_rm_study, "
+                            "'feared events' → feared_event, 'RoTo couples' → ro_to, "
+                            "'stakeholders' → stakeholder, "
+                            "'strategic scenarios' → strategic_scenario, "
+                            "'attack paths' → attack_path, "
+                            "'operational scenarios' → operational_scenario."
                         ),
                     },
                     "items": {
@@ -624,6 +665,21 @@ def _build_create_proposal(
             entry["folder"] = folder_id
         if parent_fk_field and parent_id:
             entry[parent_fk_field] = parent_id
+
+        # EBIOS RM studies require a risk matrix — auto-inject if available
+        if model_key == "ebios_rm_study" and "risk_matrix" not in entry:
+            try:
+                RiskMatrix = apps.get_model("core", "RiskMatrix")
+                matrix = (
+                    RiskMatrix.objects.filter(folder_id__in=accessible_folder_ids)
+                    .order_by("-created_at")
+                    .first()
+                )
+                if matrix:
+                    entry["risk_matrix"] = str(matrix.id)
+            except Exception:
+                pass
+
         proposal_items.append(entry)
 
     if not proposal_items:
