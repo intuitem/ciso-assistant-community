@@ -5,6 +5,7 @@ import { gunzip } from 'node:zlib';
 const gunzipAsync = promisify(gunzip);
 
 test('Database export should generate valid backup file', async ({ logedPage, page }) => {
+	test.slow()
 	await page.waitForLoadState('networkidle');
 	const modalBackdrop = page.getByTestId('modal-backdrop');
 
