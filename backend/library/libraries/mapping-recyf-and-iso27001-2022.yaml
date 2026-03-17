@@ -6,10 +6,10 @@ ref_id: mapping-recyf-and-iso27001-2022
 name: ReCyF <-> ISO/IEC 27001:2022
 description: "Mapping between RECYF : R\xC9F\xC9RENTIEL CYBER France - Version 2.5\
   \ du 17/03/2026 and International standard ISO/IEC 27001:2022"
-copyright: intuitem
+copyright: ANSSI
 version: 1
 publication_date: 2026-03-17
-provider: intuitem
+provider: ANSSI
 packager: intuitem
 dependencies:
 - urn:intuitem:risk:library:recyf
