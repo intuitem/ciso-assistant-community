@@ -97,7 +97,7 @@ class SyncEvent(AbstractBaseModel, FolderMixin):
         WEBHOOK = "webhook"
         SCHEDULED = "scheduled"
 
-    id = models.IntegerField(primary_key=True, editable=False)
+    id = models.BigAutoField(primary_key=True, editable=False)
 
     mapping = models.ForeignKey(
         SyncMapping, related_name="sync_events", on_delete=models.CASCADE
