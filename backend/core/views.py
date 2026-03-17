@@ -2089,7 +2089,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             },
             "is_business_function": {
                 "source": "is_business_function",
-                "label": "is_business_function",
+                "label": "Is a business function ?",
             },
         },
         "wrap_columns": ["name", "description", "observation"],
