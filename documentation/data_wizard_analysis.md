@@ -29,6 +29,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `TPRM` | Multi-sheet Excel (Entities, Solutions, Contracts) | **Supported** |
 | `EbiosRMStudyARM` | Multi-sheet Excel (ARM format) | **Supported** |
 | `EbiosRMStudyExcel` | Multi-sheet Excel (Native export format) | **Supported** |
+| `BusinessImpactAnalysis` | Multi-sheet Excel (Summary, Assessments, Thresholds) | **Supported** |
 
 ---
 
@@ -48,13 +49,13 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `reference_link` | No | URL (also accepts `link`) |
 | `observation` | No | Free text |
 | `parent_assets` | No | Comma/pipe-separated ref_ids (linked in second pass) |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `owner` | M2M Actor | Medium |
 | `asset_class` | FK AssetClass | Medium |
-| `filtering_labels` | M2M | Medium |
 | `security_objectives` | JSONField | Low (complex) |
 | `disaster_recovery_objectives` | JSONField | Low (complex) |
 | DORA-related fields | Various | Low |
@@ -81,6 +82,8 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `effort` | No | Mapped: XS, S, M, L, XL (or full names) |
 | `control_impact` | No | Integer (1-5), also accepts `impact` |
 | `reference_control` | No | Lookup by ref_id (also accepts `reference_control_ref_id`) |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
+| `observation` | No | Free text |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -89,7 +92,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `owner` | M2M Actor | Medium |
 | `evidences` | M2M | Medium |
 | `assets` | M2M | Medium |
-| `filtering_labels` | M2M | Medium |
 
 ---
 
@@ -102,13 +104,13 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `description` | No | |
 | `ref_id` | No | Reference ID |
 | `domain` | No | Folder lookup |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
 | `attachment` | FileField | Medium |
 | `link` | URLField | High |
-| `filtering_labels` | M2M | Medium |
 | `expiry_date` | DateField | Medium |
 | `owner` | FK User | Medium |
 
@@ -205,21 +207,20 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `ref_id` | No | Reference ID |
 | `status` | No | |
 | `severity` | No | Mapped: info, low, medium, high, critical |
-| `filtering_labels` | No | Pipe-separated values |
+| `filtering_labels` | No | Pipe- or comma-separated values (created if missing) |
+| `eta` | No | Date (YYYY-MM-DD) |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `priority` | No | Integer (1-4: P1-P4) |
+| `observation` | No | Free text |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
 |-------|------|----------|
-| `cvss_vector` | CharField | High |
-| `cwe_id` | CharField | High |
-| `purl` | CharField | Medium |
-| `owner` | FK User | High |
-| `eta` | DateField | High |
-| `due_date` | DateField | High |
-| `recommendation` | TextField | Medium |
-| `remediation_link` | URLField | Medium |
+| `owner` | M2M Actor | High |
 | `applied_controls` | M2M | Medium |
 | `evidences` | M2M | Medium |
+| `threats` | M2M | Medium |
+| `vulnerabilities` | M2M | Medium |
 
 ---
 
@@ -237,6 +238,17 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observations` | No | Maps to `observation` |
 | `implementation_score` | No | Maps to `score` |
 | `documentation_score` | No | |
+| `score` | No | Single-score mode (when no documentation_score) |
+| `Q: <question text>` | No | Flattened questionnaire answers (see below) |
+
+**Dynamic Questionnaire Support (Q: columns):**
+
+For frameworks using dynamic questionnaires, the export/import supports flattened question columns:
+
+- **Export:** Each question appears as a column header `Q: <question text>`. Cell values are human-readable choice texts. Multiple-choice answers are pipe-separated (`choice1 | choice2`). Text/date answers appear as-is.
+- **Import:** The importer matches `Q: ` column headers to the requirement's question texts, reverse-maps choice values to URNs, and builds the `answers` JSON. The existing `compute_score_and_result()` then automatically computes score and compliance result from the imported answers.
+- Columns only appear when the framework has questions. Non-questionnaire frameworks are unaffected.
+- Conditional question visibility (`depends_on`) is handled automatically during score/result computation.
 
 **Missing RequirementAssessment Fields:**
 | Field | Type | Priority |
@@ -271,6 +283,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `existing_applied_controls` | No | Newline-separated, creates/finds controls |
 | `additional_controls` | No | Newline-separated |
 | `treatment` | No | Defaults to "open" |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing, set post-save) |
 
 **Missing RiskScenario Fields:**
 | Field | Type | Priority |
@@ -281,7 +294,6 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `threats` | M2M | High |
 | `assets` | M2M | High |
 | `vulnerabilities` | M2M | Medium |
-| `filtering_labels` | M2M | Medium |
 
 ---
 
@@ -369,6 +381,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `expiry_date` | No | Date (YYYY-MM-DD) |
 | `link` | No | URL |
 | `effort` | No | XS, S, M, L, XL |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -376,7 +389,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `owner` | M2M Actor | High |
 | `evidences` | M2M | Medium |
 | `reference_control` | FK | Medium |
-| `filtering_labels` | M2M | Medium |
 | `cost` | IntegerField | Low |
 | `start_date` | DateField | Low |
 
@@ -422,6 +434,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `detection` | No | Mapped: internal/internally_detected, external/externally_detected |
 | `link` | No | URL |
 | `reported_at` | No | DateTime |
+| `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |
@@ -546,6 +559,74 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ---
 
+### 20. BusinessImpactAnalysis (Multi-sheet Import)
+
+**Behavior:** Creates a `BusinessImpactAnalysis` object plus `AssetAssessment` and `EscalationThreshold` child objects from a three-sheet workbook produced by the BIA export.
+
+**Sheet layout:**
+
+| Sheet | Purpose |
+|-------|---------|
+| `Summary` | One row per BIA — creates/updates `BusinessImpactAnalysis` objects |
+| `<BIA name>` | One row per asset — creates/updates `AssetAssessment` objects |
+| `<BIA name> - thresholds` | One row per point-in-time — creates/updates `EscalationThreshold` objects |
+
+#### Summary Sheet Fields
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `internal_id` | No | UUID of an existing BIA — used in UPDATE mode to locate the record by PK |
+| `name` | **Yes** | BIA name |
+| `description` | No | |
+| `perimeter` | No | Perimeter name lookup |
+| `perimeter_ref_id` | No | Alternative perimeter lookup by ref_id |
+| `risk_matrix` | No | Risk matrix name lookup (ignored when a matrix is selected on the import form) |
+| `risk_matrix_ref_id` | No | Alternative risk matrix lookup by ref_id (same precedence rule) |
+| `domain` | No | Folder/domain name lookup (falls back to form-selected folder) |
+| `version` | No | |
+| `status` | No | |
+| `eta` | No | Date (YYYY-MM-DD) |
+| `due_date` | No | Date (YYYY-MM-DD) |
+| `observation` | No | |
+
+> **Note:** `authors` and `reviewers` columns are present in the export for reference but are not processed during import.
+
+#### Asset Assessment Sheet Fields (`<BIA name>`)
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `bia_name` | **Yes** | Links row to the BIA created from Summary sheet |
+| `asset` | **Yes** | Asset name or ref_id lookup |
+| `asset_ref_id` | No | Alternative asset lookup by ref_id |
+| `recovery_documented` | No | Boolean |
+| `recovery_tested` | No | Boolean |
+| `recovery_targets_met` | No | Boolean |
+| `dependencies` | No | Comma-separated asset names |
+| `associated_controls` | No | Comma-separated control names |
+| `evidences` | No | Comma-separated evidence names |
+| `observation` | No | |
+
+#### Threshold Sheet Fields (`<BIA name> - thresholds`)
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `bia_name` | **Yes** | Links row to the BIA |
+| `asset` | **Yes** | Asset name or ref_id lookup |
+| `asset_ref_id` | No | Alternative asset lookup by ref_id |
+| `point_in_time` | **Yes** | Integer — time index for the threshold |
+| `quali_impact` | No | Integer index into BIA risk matrix impact levels; validated against matrix range |
+| `quanti_impact` | No | Decimal value |
+| `quanti_impact_unit` | No | Defaults to `"currency"` |
+| `qualifications` | No | Comma-separated Terminology names |
+| `justification` | No | |
+
+**Special considerations:**
+
+- **Get-or-create on AssetAssessment:** When importing a threshold sheet, if no `AssetAssessment` exists yet for the given BIA + asset pair, one is automatically created (with `folder` inherited from the BIA). This allows threshold-only imports without a prior assessment import pass.
+- **Matrix validation on `quali_impact`:** The value is validated against the impact count of the BIA's risk matrix. Values outside `[0, n_impacts - 1]` produce a clear row-level error rather than silently passing an invalid index to the database.
+
+---
+
 ## Models NOT Supported by Data Wizard
 
 ### Core App (`core/models.py`)
@@ -585,9 +666,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 | Model | Status | Priority to Add |
 |-------|--------|-----------------|
-| BusinessImpactAnalysis | **Not supported** | **High** |
-| AssetAssessment | **Not supported** | **High** |
-| EscalationThreshold | Not supported | Medium |
+| BusinessImpactAnalysis | **Supported** (multi-sheet) | Done |
+| AssetAssessment | **Supported** (via BIA import) | Done |
+| EscalationThreshold | **Supported** (via BIA import) | Done |
 
 ### EBIOS RM App (`ebios_rm/models.py`)
 
@@ -647,7 +728,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | Category | Count |
 |----------|-------|
 | **Total Models Identified** | ~70 |
-| **Models with Direct Import Support** | 16 |
+| **Models with Direct Import Support** | 19 |
 | **Models with Indirect Import Support** | ~12 (via EBIOS/TPRM) |
 | **Models NOT Supported** | ~42 |
 
@@ -678,8 +759,9 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 
 ### High Priority (Resilience)
 
-12. **BusinessImpactAnalysis** - BIA import
-13. **AssetAssessment** - Asset assessments for BIA
+12. ~~**BusinessImpactAnalysis**~~ - ✅ Now supported (multi-sheet)
+13. ~~**AssetAssessment**~~ - ✅ Now supported (via BIA import)
+14. ~~**EscalationThreshold**~~ - ✅ Now supported (via BIA import)
 
 ### Medium Priority
 
@@ -694,6 +776,6 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 For existing supported models, prioritize adding:
 1. `owner` field (FK to User) - across all models
 2. `eta` and `due_date` fields - for task tracking
-3. `filtering_labels` (M2M) - for organization
+3. ~~`filtering_labels` (M2M) - for organization~~ ✅ Added to Asset, AppliedControl, Evidence, Finding, Policy, Incident, RiskScenario
 4. `applied_controls` and `evidences` (M2M) - for linking
 5. `threats` and `assets` (M2M) - for RiskScenario

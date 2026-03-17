@@ -7,6 +7,11 @@ from core.models import (
     ComplianceAssessment,
     Evidence,
     OrganisationIssue,
+    RequirementAssignment,
+    RiskAssessment,
+    RiskScenario,
+    TaskNode,
+    TaskTemplate,
     ValidationFlow,
 )
 from iam.models import User
@@ -43,6 +48,29 @@ def check_controls_with_expired_eta():
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_notification_email_expired_eta(owner_email, controls)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="5"))
+def check_compliance_assessments_due_in_month():
+    """Check for ComplianceAssessments due in 30 days"""
+    target_date = date.today() + timedelta(days=30)
+    assessments_due_soon = (
+        ComplianceAssessment.objects.filter(due_date=target_date)
+        .exclude(status__in=["done", "deprecated"])
+        .prefetch_related("authors")
+    )
+
+    author_assessments = defaultdict(list)
+    for assessment in assessments_due_soon:
+        for author in assessment.authors.all():
+            for email in author.get_emails():
+                author_assessments[email].append(assessment)
+
+    for author_email, assessments in author_assessments.items():
+        send_compliance_assessment_due_soon_notification(
+            author_email, assessments, days=30
+        )
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -96,6 +124,27 @@ def check_compliance_assessments_due_tomorrow():
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="17"))
+def check_applied_controls_expiring_in_month():
+    """Check for AppliedControls expiring in 30 days"""
+    target_date = date.today() + timedelta(days=30)
+    controls_expiring_soon = (
+        AppliedControl.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["deprecated"])
+        .prefetch_related("owner")
+    )
+
+    owner_controls = defaultdict(list)
+    for control in controls_expiring_soon:
+        for owner in control.owner.all():
+            for email in owner.get_emails():
+                owner_controls[email].append(control)
+
+    for owner_email, controls in owner_controls.items():
+        send_applied_control_expiring_soon_notification(owner_email, controls, days=30)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="20"))
 def check_applied_controls_expiring_in_week():
     """Check for AppliedControls due in 7 days"""
@@ -139,6 +188,27 @@ def check_applied_controls_expiring_tomorrow():
     # Send personalized email to each owner
     for owner_email, controls in owner_controls.items():
         send_applied_control_expiring_soon_notification(owner_email, controls, days=1)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="27"))
+def check_evidences_expiring_in_month():
+    """Check for Evidences expiring in 30 days"""
+    target_date = date.today() + timedelta(days=30)
+    evidences_expiring_soon = (
+        Evidence.objects.filter(expiry_date=target_date)
+        .exclude(status__in=["expired"])
+        .prefetch_related("owner")
+    )
+
+    owner_evidences = defaultdict(list)
+    for evidence in evidences_expiring_soon:
+        for owner in evidence.owner.all():
+            for email in owner.get_emails():
+                owner_evidences[email].append(evidence)
+
+    for owner_email, evidences in owner_evidences.items():
+        send_evidence_expiring_soon_notification(owner_email, evidences, days=30)
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -213,6 +283,27 @@ def check_evidences_expired():
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="37"))
+def check_validation_flows_deadline_in_month():
+    """Check for ValidationFlows with deadline in 30 days (only submitted status)"""
+    target_date = date.today() + timedelta(days=30)
+    validations_due_soon = ValidationFlow.objects.filter(
+        validation_deadline=target_date, status=ValidationFlow.Status.SUBMITTED
+    )
+
+    approver_validations = {}
+    for validation in validations_due_soon:
+        if validation.approver and validation.approver.email:
+            approver_email = validation.approver.email
+            if approver_email not in approver_validations:
+                approver_validations[approver_email] = []
+            approver_validations[approver_email].append(validation)
+
+    for approver_email, validations in approver_validations.items():
+        send_validation_deadline_notification(approver_email, validations, days=30)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
 @db_periodic_task(crontab(hour="6", minute="40"))
 def check_validation_flows_deadline_in_week():
     """Check for ValidationFlows with deadline in 7 days (only submitted status)"""
@@ -258,6 +349,176 @@ def check_validation_flows_deadline_tomorrow():
         send_validation_deadline_notification(approver_email, validations, days=1)
 
 
+def _get_task_recurrence_interval_days(task_template):
+    """Return the approximate recurrence interval in days, or None if not recurrent."""
+    if not task_template.is_recurrent or not task_template.schedule:
+        return None
+    schedule = task_template.schedule
+    interval = schedule.get("interval", 1)
+    frequency = schedule.get("frequency", "DAILY")
+    multipliers = {"DAILY": 1, "WEEKLY": 7, "MONTHLY": 30, "YEARLY": 365}
+    return interval * multipliers.get(frequency, 1)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="6", minute="55"))
+def check_task_nodes_due_in_month():
+    """Check for TaskNodes due in 30 days. Skip if the recurrence interval is < 30 days."""
+    target_date = date.today() + timedelta(days=30)
+    nodes_due_soon = (
+        TaskNode.objects.filter(
+            due_date=target_date, status__in=["pending", "in_progress"]
+        )
+        .select_related("task_template")
+        .filter(task_template__enabled=True)
+        .prefetch_related("task_template__assigned_to")
+    )
+
+    actor_nodes = defaultdict(list)
+    for node in nodes_due_soon:
+        interval_days = _get_task_recurrence_interval_days(node.task_template)
+        if interval_days is not None and interval_days < 30:
+            continue
+        for actor in node.task_template.assigned_to.all():
+            for email in actor.get_emails():
+                actor_nodes[email].append(node)
+
+    for email, nodes in actor_nodes.items():
+        send_task_node_due_soon_notification(email, nodes, days=30)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="0"))
+def check_task_nodes_due_in_week():
+    """Check for TaskNodes due in 7 days. Skip if the recurrence interval is < 7 days."""
+    target_date = date.today() + timedelta(days=7)
+    nodes_due_soon = (
+        TaskNode.objects.filter(
+            due_date=target_date, status__in=["pending", "in_progress"]
+        )
+        .select_related("task_template")
+        .filter(task_template__enabled=True)
+        .prefetch_related("task_template__assigned_to")
+    )
+
+    # Group by actor email, skipping high-frequency recurrent tasks
+    actor_nodes = defaultdict(list)
+    for node in nodes_due_soon:
+        interval_days = _get_task_recurrence_interval_days(node.task_template)
+        if interval_days is not None and interval_days < 7:
+            continue
+        for actor in node.task_template.assigned_to.all():
+            for email in actor.get_emails():
+                actor_nodes[email].append(node)
+
+    for email, nodes in actor_nodes.items():
+        send_task_node_due_soon_notification(email, nodes, days=7)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="5"))
+def check_task_nodes_due_tomorrow():
+    """Check for TaskNodes due in 1 day."""
+    target_date = date.today() + timedelta(days=1)
+    nodes_due_tomorrow = (
+        TaskNode.objects.filter(
+            due_date=target_date, status__in=["pending", "in_progress"]
+        )
+        .select_related("task_template")
+        .filter(task_template__enabled=True)
+        .prefetch_related("task_template__assigned_to")
+    )
+
+    actor_nodes = defaultdict(list)
+    for node in nodes_due_tomorrow:
+        for actor in node.task_template.assigned_to.all():
+            for email in actor.get_emails():
+                actor_nodes[email].append(node)
+
+    for email, nodes in actor_nodes.items():
+        send_task_node_due_soon_notification(email, nodes, days=1)
+
+
+# @db_periodic_task(crontab(minute="*/1"))  # for testing
+@db_periodic_task(crontab(hour="7", minute="10"))
+def check_task_nodes_overdue():
+    """Check for TaskNodes that are past due and still pending."""
+    overdue_nodes = (
+        TaskNode.objects.filter(due_date__lt=date.today(), status="pending")
+        .select_related("task_template")
+        .filter(task_template__enabled=True)
+        .prefetch_related("task_template__assigned_to")
+    )
+
+    actor_nodes = defaultdict(list)
+    for node in overdue_nodes:
+        for actor in node.task_template.assigned_to.all():
+            for email in actor.get_emails():
+                actor_nodes[email].append(node)
+
+    for email, nodes in actor_nodes.items():
+        send_task_node_overdue_notification(email, nodes)
+
+
+@task()
+def send_task_node_due_soon_notification(actor_email, task_nodes, days):
+    """Send notification when TaskNodes are due soon."""
+    if not check_email_configuration(actor_email, task_nodes):
+        return
+
+    from .email_utils import render_email_template, format_task_node_list
+
+    context = {
+        "task_count": len(task_nodes),
+        "task_list": format_task_node_list(task_nodes),
+        "days_remaining": days,
+    }
+
+    rendered = render_email_template(
+        "task_node_due_soon", context, recipient_email=actor_email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            actor_email,
+            rendered.get("html_body"),
+        )
+    else:
+        logger.error(
+            f"Failed to render task_node_due_soon email template for {actor_email}"
+        )
+
+
+@task()
+def send_task_node_overdue_notification(actor_email, task_nodes):
+    """Send notification for overdue TaskNodes."""
+    if not check_email_configuration(actor_email, task_nodes):
+        return
+
+    from .email_utils import render_email_template, format_task_node_list
+
+    context = {
+        "task_count": len(task_nodes),
+        "task_list": format_task_node_list(task_nodes),
+    }
+
+    rendered = render_email_template(
+        "task_node_overdue", context, recipient_email=actor_email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            actor_email,
+            rendered.get("html_body"),
+        )
+    else:
+        logger.error(
+            f"Failed to render task_node_overdue email template for {actor_email}"
+        )
+
+
 @db_periodic_task(crontab(hour="6", minute="50"))
 def check_expired_organisation_issues():
     expired_issues_query = OrganisationIssue.objects.filter(
@@ -287,9 +548,16 @@ def send_notification_email_expired_eta(owner_email, controls):
         "control_list": format_control_list(controls),
     }
 
-    rendered = render_email_template("expired_controls", context)
+    rendered = render_email_template(
+        "expired_controls", context, recipient_email=owner_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render expired_controls email template for {owner_email}"
@@ -297,13 +565,12 @@ def send_notification_email_expired_eta(owner_email, controls):
 
 
 @task()
-def send_notification_email(subject, message, owner_email):
+def send_notification_email(subject, message, owner_email, html_message=None):
     try:
         logger.debug(
             "Sending notification email",
-            subject=subject,
-            message=message,
             recipient=owner_email,
+            has_html=html_message is not None,
         )
         send_mail(
             subject=subject,
@@ -311,6 +578,7 @@ def send_notification_email(subject, message, owner_email):
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[owner_email],
             fail_silently=False,
+            html_message=html_message,
         )
         logger.info(
             "Notification email sent successfully",
@@ -326,13 +594,12 @@ def send_notification_email(subject, message, owner_email):
         )
 
 
-@task()
 def check_email_configuration(owner_email, controls):
     notifications_enable_mailing = GlobalSettings.objects.get(name="general").value.get(
         "notifications_enable_mailing", False
     )
     if not notifications_enable_mailing:
-        logger.warning(
+        logger.info(
             "Email notification is disabled. You can enable it under Extra/Settings. Skipping for now."
         )
         return False
@@ -409,9 +676,16 @@ def send_applied_control_assignment_notification(control_id, assigned_user_email
 
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [control]):
-            rendered = render_email_template("applied_control_assignment", context)
+            rendered = render_email_template(
+                "applied_control_assignment", context, recipient_email=email
+            )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -444,9 +718,16 @@ def send_task_template_assignment_notification(task_template_id, emails):
 
     for email in emails:
         if email and check_email_configuration(email, [task_template]):
-            rendered = render_email_template("task_template_assignment", context)
+            rendered = render_email_template(
+                "task_template_assignment", context, recipient_email=email
+            )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -485,10 +766,54 @@ def send_compliance_assessment_assignment_notification(
     for email in assigned_user_emails:
         if email and check_email_configuration(email, [assessment]):
             rendered = render_email_template(
-                "compliance_assessment_assignment", context
+                "compliance_assessment_assignment", context, recipient_email=email
             )
             if rendered:
-                send_notification_email(rendered["subject"], rendered["body"], email)
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_risk_scenario_assignment_notification(scenario_id, assigned_user_emails):
+    """Send notification when RiskScenario is assigned to users"""
+    if not assigned_user_emails:
+        return
+
+    try:
+        scenario = RiskScenario.objects.get(id=scenario_id)
+    except RiskScenario.DoesNotExist:
+        logger.error(f"RiskScenario with id {scenario_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "scenario_name": scenario.name,
+        "scenario_description": scenario.description or "No description provided",
+        "scenario_ref_id": scenario.ref_id or "N/A",
+        "risk_assessment_name": scenario.risk_assessment.name
+        if scenario.risk_assessment
+        else "N/A",
+        "scenario_treatment": scenario.get_treatment_display(),
+        "folder_name": scenario.folder.name if scenario.folder else "Default",
+    }
+
+    for email in assigned_user_emails:
+        if email and check_email_configuration(email, [scenario]):
+            rendered = render_email_template(
+                "risk_scenario_assignment", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
 
 
 @task()
@@ -503,13 +828,19 @@ def send_compliance_assessment_due_soon_notification(author_email, assessments, 
         "assessment_count": len(assessments),
         "assessment_list": format_assessment_list(assessments),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "compliance_assessment_due_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=author_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], author_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            author_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {author_email}"
@@ -528,13 +859,19 @@ def send_applied_control_expiring_soon_notification(owner_email, controls, days)
         "control_count": len(controls),
         "control_list": format_control_list(controls),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "applied_control_expiring_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
@@ -552,12 +889,18 @@ def send_notification_email_expired_evidence(owner_email, evidences, days=0):
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "expired_since": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
-    rendered = render_email_template("expired_evidences", context)
+    rendered = render_email_template(
+        "expired_evidences", context, recipient_email=owner_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render expired_evidences email template for {owner_email}"
@@ -576,13 +919,19 @@ def send_evidence_expiring_soon_notification(owner_email, evidences, days):
         "evidence_count": len(evidences),
         "evidence_list": format_evidence_list(evidences),
         "days_remaining": days,
-        "days_text": "day" if days == 1 else "days",
     }
 
     template_name = "evidence_expiring_soon"
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        template_name, context, recipient_email=owner_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], owner_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            owner_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
             f"Failed to render {template_name} email template for {owner_email}"
@@ -629,15 +978,65 @@ def send_validation_flow_created_notification(validation_flow):
         "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
     }
 
-    rendered = render_email_template("validation_flow_created", context)
+    rendered = render_email_template(
+        "validation_flow_created", context, recipient_email=approver_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            approver_email,
+            rendered.get("html_body"),
+        )
         logger.info(
             f"Sent validation flow creation notification to {approver_email} for {validation_flow.ref_id}"
         )
     else:
         logger.error(
             f"Failed to render validation_flow_created email template for {approver_email}"
+        )
+
+
+@task()
+def send_validation_flow_updated_notification(
+    validation_flow_id, recipient_email, new_status, actor_name, event_notes
+):
+    """Send notification when a validation flow status changes."""
+    if not check_email_configuration(recipient_email, [validation_flow_id]):
+        return
+
+    try:
+        validation_flow = ValidationFlow.objects.get(id=validation_flow_id)
+    except ValidationFlow.DoesNotExist:
+        logger.error(f"ValidationFlow with id {validation_flow_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    context = {
+        "validation_ref_id": validation_flow.ref_id,
+        "new_status": new_status,
+        "actor_name": actor_name,
+        "folder_name": validation_flow.folder.name
+        if validation_flow.folder
+        else "Unknown",
+        "event_notes": event_notes or "",
+        "validation_url": f"{getattr(settings, 'CISO_ASSISTANT_URL', 'http://localhost:5173')}/validation-flows/{validation_flow.id}",
+    }
+
+    rendered = render_email_template(
+        "validation_flow_updated", context, recipient_email=recipient_email
+    )
+    if rendered:
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            recipient_email,
+            rendered.get("html_body"),
+        )
+    else:
+        logger.error(
+            f"Failed to render validation_flow_updated email template for {recipient_email}"
         )
 
 
@@ -649,7 +1048,6 @@ def send_validation_deadline_notification(approver_email, validations, days):
 
     from .email_utils import render_email_template, format_validation_list
 
-    template_name = f"validation_deadline_d{days}"
     s = "s" if len(validations) > 1 else ""
     are = "are" if len(validations) > 1 else "is"
     their = "their" if len(validations) > 1 else "its"
@@ -663,12 +1061,19 @@ def send_validation_deadline_notification(approver_email, validations, days):
         "their": their,
     }
 
-    rendered = render_email_template(template_name, context)
+    rendered = render_email_template(
+        "validation_deadline", context, recipient_email=approver_email
+    )
     if rendered:
-        send_notification_email(rendered["subject"], rendered["body"], approver_email)
+        send_notification_email(
+            rendered["subject"],
+            rendered["body"],
+            approver_email,
+            rendered.get("html_body"),
+        )
     else:
         logger.error(
-            f"Failed to render {template_name} email template for {approver_email}"
+            f"Failed to render validation_deadline email template for {approver_email}"
         )
 
 
@@ -704,6 +1109,68 @@ def lock_overdue_compliance_assessments():
         logger.info(f"Successfully locked {count} overdue compliance assessments")
     else:
         logger.debug("No overdue compliance assessments found to lock")
+
+
+# @db_periodic_task(crontab(minute="*/5"))  # for testing
+@db_periodic_task(crontab(hour="2", minute="45"))
+def auto_sync_assessments():
+    """Automatically sync to actions for assessments with auto_sync enabled, skipping locked ones"""
+    risk_assessments = RiskAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ra_count = 0
+    for assessment in risk_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(
+                reset_residual=False, dry_run=False
+            )
+            if changes:
+                ra_count += 1
+                logger.info(
+                    "Auto-synced risk assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync risk assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    compliance_assessments = ComplianceAssessment.objects.filter(
+        auto_sync=True, is_locked=False
+    ).exclude(status__in=["done", "deprecated"])
+
+    ca_count = 0
+    for assessment in compliance_assessments:
+        try:
+            changes = assessment.sync_to_applied_controls(dry_run=False)
+            if changes:
+                ca_count += 1
+                logger.info(
+                    "Auto-synced compliance assessment",
+                    assessment_id=str(assessment.id),
+                    assessment_name=assessment.name,
+                    changes_count=len(changes),
+                )
+        except Exception as e:
+            logger.error(
+                "Failed to auto-sync compliance assessment",
+                assessment_id=str(assessment.id),
+                assessment_name=assessment.name,
+                error=str(e),
+            )
+
+    if ra_count > 0 or ca_count > 0:
+        logger.info(
+            f"Auto-sync completed: {ra_count} risk assessments, {ca_count} compliance assessments synced"
+        )
+    else:
+        logger.debug("Auto-sync completed: no assessments needed syncing")
 
 
 # @db_periodic_task(crontab(minute="*/1"))  # for testing
@@ -756,3 +1223,124 @@ def mark_expired_evidences():
         logger.info(f"Successfully marked {count} evidences as expired")
     else:
         logger.debug("No expired evidences found to mark")
+
+
+@task()
+def send_assignment_activated_notification(assignment_id):
+    """Send notification when a RequirementAssignment is started (draft -> in_progress)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+            "compliance_assessment__framework",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "framework_name": ca.framework.name if ca.framework else "N/A",
+        "due_date": ca.due_date.strftime("%Y-%m-%d") if ca.due_date else "Not set",
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_activated", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )
+
+
+@task()
+def send_assignment_submitted_notification(assignment_id):
+    """Send notification when a RequirementAssignment is submitted for review."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    actor_names = ", ".join(str(a) for a in assignment.actor.all())
+    requirement_count = assignment.requirement_assessments.count()
+
+    context = {
+        "assessment_name": ca.name,
+        "actor_names": actor_names,
+        "requirement_count": str(requirement_count),
+    }
+
+    # Notify reviewers, fallback to authors
+    reviewers = ca.reviewers.all()
+    if not reviewers or not reviewers.exists():
+        reviewers = ca.authors.all()
+
+    recipient_emails = set()
+    for reviewer in reviewers:
+        for email in reviewer.get_emails():
+            if email:
+                recipient_emails.add(email)
+
+    for email in recipient_emails:
+        if check_email_configuration(email, [assignment]):
+            rendered = render_email_template(
+                "assignment_submitted", context, recipient_email=email
+            )
+            if rendered:
+                send_notification_email(
+                    rendered["subject"],
+                    rendered["body"],
+                    email,
+                    rendered.get("html_body"),
+                )
+
+
+@task()
+def send_assignment_reviewed_notification(
+    assignment_id, decision, reviewer_observation=""
+):
+    """Send notification when a RequirementAssignment is reviewed (closed, reopened, or changes_requested)."""
+    try:
+        assignment = RequirementAssignment.objects.select_related(
+            "compliance_assessment",
+        ).get(id=assignment_id)
+    except RequirementAssignment.DoesNotExist:
+        logger.error(f"RequirementAssignment with id {assignment_id} not found")
+        return
+
+    from .email_utils import render_email_template
+
+    ca = assignment.compliance_assessment
+    context = {
+        "assessment_name": ca.name,
+        "decision": decision.replace("_", " ").title(),
+        "reviewer_observation": reviewer_observation,
+    }
+
+    for actor in assignment.actor.all():
+        for email in actor.get_emails():
+            if email and check_email_configuration(email, [assignment]):
+                rendered = render_email_template(
+                    "assignment_reviewed", context, recipient_email=email
+                )
+                if rendered:
+                    send_notification_email(
+                        rendered["subject"],
+                        rendered["body"],
+                        email,
+                        rendered.get("html_body"),
+                    )

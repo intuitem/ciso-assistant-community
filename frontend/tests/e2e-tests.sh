@@ -104,22 +104,7 @@ if [[ "$(id -u "$(whoami)")" -eq 0 ]]; then
   echo "Running this script with a root account is highly discouraged as it can cause bugs with playwright."
 fi
 
-if python3 -c "
-import socket
-try :
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	# Using python to check if the port is opened is safer for compatibility
-	# But it increase the execution time of the script with the timeout
-	# A local TCP connection should never reach a 1s delay
-	s.settimeout(1)
-	s.connect(('localhost', $BACKEND_PORT))
-	port_already_in_used = True
-except :
-	port_already_in_used = False
-s.close()
-# We use "not" because 0 is True and 1 is False in bash
-exit(not port_already_in_used)
-"; then
+if nc -z -w1 localhost $BACKEND_PORT 2>/dev/null; then
   echo "The port $BACKEND_PORT is already in use!"
   echo "You can either:"
   echo "- Kill the process which is currently using this port."
@@ -128,7 +113,7 @@ exit(not port_already_in_used)
 fi
 
 for PORT in $MAILER_WEB_SERVER_PORT $MAILER_SMTP_SERVER_PORT; do
-  if python3 -c "import socket;exit(0 if 0 == socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost',$PORT)) else 1)"; then
+  if nc -z -w1 localhost $PORT 2>/dev/null; then
     if [[ ! " ${SCRIPT_SHORT_ARGS[@]} " =~ " -m " ]]; then
       echo "The port $PORT is already in use!"
       echo "Please stop the running process using the port or change the mailer port and try again."

@@ -3,6 +3,7 @@ from global_settings.models import GlobalSettings
 from rest_framework import serializers
 from core.serializers import (
     BaseModelSerializer,
+    FolderWriteSerializer as CommunityFolderWriteSerializer,
     UserWriteSerializer as CommunityUserWriteSerializer,
 )
 from core.serializer_fields import FieldsRelatedField
@@ -13,6 +14,7 @@ from global_settings.serializers import (
     FeatureFlagsSerializer as CommunityFeatureFlagSerializer,
 )
 
+from core.models import CustomEmailTemplate, CustomWordTemplate
 from .models import ClientSettings, LogEntryAction
 from auditlog.models import LogEntry
 from global_settings.serializers import (
@@ -23,18 +25,12 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 
-class FolderWriteSerializer(BaseModelSerializer):
-    class Meta:
-        model = Folder
-        exclude = [
-            "builtin",
-            "content_type",
-        ]
-
+class FolderWriteSerializer(CommunityFolderWriteSerializer):
     def validate_parent_folder(self, parent_folder):
         """
         Check that the folders graph will not contain cycles
         """
+        parent_folder = super().validate_parent_folder(parent_folder)
         if not self.instance:
             return parent_folder
         if parent_folder:
@@ -180,6 +176,65 @@ class LogEntrySerializer(serializers.ModelSerializer):
         model = LogEntry
         fields = "__all__"
         read_only_fields = ["id", "timestamp", "actor", "action", "changes_text"]
+
+
+class CustomEmailTemplateReadSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomEmailTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "subject",
+            "body",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomEmailTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomEmailTemplate
+        fields = [
+            "id",
+            "template_key",
+            "language",
+            "subject",
+            "body",
+            "is_active",
+        ]
+        read_only_fields = ["id"]
+
+
+class CustomWordTemplateReadSerializer(BaseModelSerializer):
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            return obj.file.name.split("/")[-1]
+        return None
+
+    class Meta:
+        model = CustomWordTemplate
+        fields = [
+            "id",
+            "folder",
+            "template_key",
+            "language",
+            "file",
+            "is_active",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class CustomWordTemplateWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = CustomWordTemplate
+        fields = ["id", "template_key", "language", "is_active"]
+        read_only_fields = ["id"]
 
 
 class FeatureFlagsSerializer(CommunityFeatureFlagSerializer):

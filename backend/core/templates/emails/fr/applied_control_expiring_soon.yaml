@@ -1,0 +1,11 @@
+subject: "CISO Assistant: Mesure expirant dans ${days_remaining} jour(s)"
+body: |
+  Bonjour,
+
+  Vous avez ${control_count} mesure(s) expirant dans ${days_remaining} jour(s):
+
+  ${control_list}
+
+  Veuillez vous connecter à votre portail CISO Assistant pour réviser et compléter ces mesures : [Accéder à CISO Assistant](${ciso_assistant_url})
+
+  Merci.

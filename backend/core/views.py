@@ -1,4 +1,4 @@
-from django.db.utils import OperationalError, ProgrammingError
+from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
@@ -121,6 +121,7 @@ from core.models import (
     RiskMatrix,
     RiskScenario,
     AssetClass,
+    Terminology,
 )
 from core.serializers import ComplianceAssessmentReadSerializer
 from core.utils import (
@@ -257,7 +258,12 @@ def escape_excel_formula(value):
     if value is None:
         return ""
     s = str(value)
-    return "'" + s if s and s[0] in "=" else s
+    if not s:
+        return ""
+    stripped = s.lstrip(" \t\r\n")
+    if stripped and stripped[0] in ("=", "+", "-", "@"):
+        return "'" + s
+    return s
 
 
 def create_xlsx_response(entries, filename, wrap_columns=None):
@@ -364,8 +370,9 @@ class ExportMixin:
         if format_func:
             value = format_func(value)
 
-        if field_config.get("escape") and value:
-            value = escape_excel_formula(value)
+        if isinstance(value, str):
+            if field_config.get("escape", True):
+                value = escape_excel_formula(value)
 
         return value if value is not None else ""
 
@@ -540,6 +547,11 @@ class ExportMixin:
 
 
 class GenericFilterSet(df.FilterSet):
+    class UUIDInFilter(df.BaseInFilter, df.UUIDFilter):
+        pass
+
+    id = UUIDInFilter(field_name="id", lookup_expr="in")
+
     @classmethod
     def filter_for_lookup(cls, field, lookup_type):
         DEFAULTS = dict(cls.FILTER_DEFAULTS)
@@ -1660,6 +1672,7 @@ class AssetFilter(GenericFilterSet):
             "dora_licenced_activity",
             "dora_criticality_assessment",
             "dora_discontinuing_impact",
+            "organisation_objectives",
         ]
 
 
@@ -1675,23 +1688,21 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
-        return (
-            super()
-            .get_queryset()
-            .select_related("asset_class", "folder")
-            .prefetch_related(
-                "parent_assets",
-                "child_assets",
-                "owner",
-                "security_exceptions",
-                "filtering_labels",
-                "personal_data",
-                "overridden_children_capabilities",
-            )
+        qs = super().get_queryset().select_related("asset_class", "folder")
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "parent_assets",
+            "child_assets",
+            "owner",
+            "security_exceptions",
+            "filtering_labels",
+            "personal_data",
+            "overridden_children_capabilities",
         )
 
     def _get_optimized_object_data(self, queryset):
@@ -1813,6 +1824,24 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
             if content.get("value") is not None and content.get("value") > 0
         ]
 
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        """Minimal endpoint for autocomplete selects — skips graph traversal."""
+        from core.serializers import AssetAutocompleteSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = AssetAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
+
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get type choices")
     def type(self, request):
@@ -1836,7 +1865,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA criticality assessment choices")
     def dora_criticality_assessment(self, request):
-        return Response(dict(dora.DORA_FUNCTION_CRITICALITY_CHOICES))
+        return Response(dict(dora.DORA_YES_NO_ASSESSMENT_CHOICES))
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
     @action(detail=False, name="Get DORA discontinuing impact choices")
@@ -2059,6 +2088,20 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: ",".join(i["str"] for i in objs),
                 "escape": True,
             },
+            "security_capabilities": {
+                "source": "get_security_capabilities_display",
+                "label": "security_capabilities",
+                "format": lambda objs: ",".join(
+                    f"{k}: {v}" for obj in objs for k, v in obj.items()
+                ),
+                "escape": True,
+            },
+            "recovery_capabilities": {
+                "source": "get_recovery_capabilities_display",
+                "label": "recovery_capabilities",
+                "format": lambda objs: ",".join(i["str"] for i in objs),
+                "escape": True,
+            },
             "link": {"source": "reference_link", "label": "link", "escape": True},
             "owners": {
                 "source": "owner",
@@ -2090,7 +2133,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+        "prefetch_related": [
+            "owner",
+            "parent_assets",
+            "overridden_children_capabilities",
+            "filtering_labels",
+        ],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
@@ -3497,18 +3545,25 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
 
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            data = request.data
+
+            perimeter = data.get("perimeter")
+            folder = data.get("folder")
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
                 description=data.get("description"),
-                perimeter=Perimeter.objects.get(id=data.get("perimeter")),
+                perimeter=perimeter,
+                folder=folder,
                 version=data.get("version"),
                 risk_matrix=risk_assessment.risk_matrix,
                 ref_id=data.get("ref_id"),
@@ -3558,7 +3613,13 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 duplicate_scenario.save()
 
             duplicate_risk_assessment.save()
-            return Response({"results": "risk assessment duplicated"})
+            return Response(
+                {
+                    "results": RiskAssessmentReadSerializer(
+                        duplicate_risk_assessment
+                    ).data
+                }
+            )
 
     @action(
         detail=True,
@@ -4340,52 +4401,83 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def get_controls_info(self, request):
-        nodes = list()
-        links = list()
-        for ac in AppliedControl.objects.all():
-            related_items_count = 0
-            for ca in ComplianceAssessment.objects.filter(
-                requirement_assessments__applied_controls=ac
-            ).distinct():
-                audit_coverage = (
-                    RequirementAssessment.objects.filter(compliance_assessment=ca)
-                    .filter(applied_controls=ac)
-                    .count()
-                )
-                related_items_count += audit_coverage
-                links.append(
-                    {
-                        "source": ca.id,
-                        "target": ac.id,
-                        "coverage": audit_coverage,
-                    }
-                )
-            for ra in RiskAssessment.objects.filter(
-                risk_scenarios__applied_controls=ac
-            ).distinct():
-                risk_coverage = (
-                    RiskScenario.objects.filter(risk_assessment=ra)
-                    .filter(applied_controls=ac)
-                    .count()
-                )
-                related_items_count += risk_coverage
-                links.append(
-                    {
-                        "source": ra.id,
-                        "target": ac.id,
-                        "coverage": risk_coverage,
-                    }
-                )
+        folder_id = request.query_params.get("folder", None)
+        scoped_folder = (
+            Folder.objects.get(id=folder_id) if folder_id else Folder.get_root_folder()
+        )
+
+        (view_ac_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, AppliedControl
+        )
+        (view_ca_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, ComplianceAssessment
+        )
+        (view_ra_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            scoped_folder, request.user, RiskAssessment
+        )
+
+        ac_qs = AppliedControl.objects.filter(id__in=view_ac_ids).only("id", "name")
+        ca_qs = ComplianceAssessment.objects.filter(id__in=view_ca_ids).only(
+            "id", "name"
+        )
+        ra_qs = RiskAssessment.objects.filter(id__in=view_ra_ids).only("id", "name")
+
+        ac_ids = list(ac_qs.values_list("id", flat=True))
+        ca_ids = set(ca_qs.values_list("id", flat=True))
+        ra_ids = set(ra_qs.values_list("id", flat=True))
+
+        audit_rows = (
+            RequirementAssessment.objects.filter(
+                compliance_assessment_id__in=ca_ids, applied_controls__id__in=ac_ids
+            )
+            .values("compliance_assessment_id", "applied_controls")
+            .annotate(coverage=Count("id"))
+        )
+
+        risk_rows = (
+            RiskScenario.objects.filter(
+                risk_assessment_id__in=ra_ids, applied_controls__id__in=ac_ids
+            )
+            .values("risk_assessment_id", "applied_controls")
+            .annotate(coverage=Count("id"))
+        )
+
+        links = []
+        used_audit_ids = set()
+        used_ra_ids = set()
+
+        ac_counter = {ac_id: 0 for ac_id in ac_ids}
+
+        for row in audit_rows:
+            ca_id = row["compliance_assessment_id"]
+            ac_id = row["applied_controls"]
+            cov = row["coverage"]
+            links.append({"source": ca_id, "target": ac_id, "coverage": cov})
+            used_audit_ids.add(ca_id)
+            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
+
+        for row in risk_rows:
+            ra_id = row["risk_assessment_id"]
+            ac_id = row["applied_controls"]
+            cov = row["coverage"]
+            links.append({"source": ra_id, "target": ac_id, "coverage": cov})
+            used_ra_ids.add(ra_id)
+            ac_counter[ac_id] = ac_counter.get(ac_id, 0) + cov
+
+        nodes = []
+
+        for ac in ac_qs:
             nodes.append(
                 {
                     "id": ac.id,
                     "label": ac.name,
                     "shape": "hexagon",
-                    "counter": related_items_count,
+                    "counter": ac_counter.get(ac.id, 0),
                     "color": "#47e845",
                 }
             )
-        for audit in ComplianceAssessment.objects.all():
+
+        for audit in ca_qs.filter(id__in=used_audit_ids):
             nodes.append(
                 {
                     "id": audit.id,
@@ -4394,21 +4486,13 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                     "color": "#5D4595",
                 }
             )
-        for ra in RiskAssessment.objects.all():
+
+        for ra in ra_qs.filter(id__in=used_ra_ids):
             nodes.append(
-                {
-                    "id": ra.id,
-                    "label": ra.name,
-                    "shape": "square",
-                    "color": "#E6499F",
-                }
+                {"id": ra.id, "label": ra.name, "shape": "square", "color": "#E6499F"}
             )
-        return Response(
-            {
-                "nodes": nodes,
-                "links": links,
-            }
-        )
+
+        return Response({"nodes": nodes, "links": links})
 
     @action(detail=False, name="Get priority chart data")
     def priority_chart_data(self, request):
@@ -4621,18 +4705,21 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
             return Response(
-                {"results": "applied control duplicated"},
+                {"results": "applied control not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         applied_control = self.get_object()
-        data = request.data
-        new_folder = Folder.objects.get(id=data["folder"])
+        new_folder = data["folder"]
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -4918,6 +5005,122 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
+class ActionPlanBudgetOverview:
+    """Mixin that computes budget aggregation over an applied controls queryset."""
+
+    @staticmethod
+    def _safe_float(value, default=0):
+        """Coerce a JSON-sourced value to float, returning default on failure."""
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def _compute_annual_cost(ctrl, daily_rate):
+        """Compute annual cost without per-control GlobalSettings lookup."""
+        if not ctrl.cost:
+            return 0
+        _f = ActionPlanBudgetOverview._safe_float
+        build_cost = ctrl.cost.get("build", {})
+        run_cost = ctrl.cost.get("run", {})
+        amortization_period = _f(ctrl.cost.get("amortization_period", 1), 1) or 1
+        annual_cost = 0
+        build_fixed = _f(build_cost.get("fixed_cost", 0))
+        build_people = _f(build_cost.get("people_days", 0))
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+        run_fixed = _f(run_cost.get("fixed_cost", 0))
+        run_people = _f(run_cost.get("people_days", 0))
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+        return annual_cost
+
+    @staticmethod
+    def compute_budget_overview(queryset):
+        from core.utils import get_global_currency, format_currency
+        from global_settings.models import GlobalSettings
+
+        # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
+        _f = ActionPlanBudgetOverview._safe_float
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = _f(
+            general_settings.value.get("daily_rate", 500) if general_settings else 500,
+            500,
+        )
+
+        currency = get_global_currency()
+        fmt = lambda v: format_currency(v, currency)
+
+        controls = list(queryset)
+        count = len(controls)
+        by_status: dict = {}
+        by_priority: dict = {}
+        by_category: dict = {}
+        total_annual_cost = 0.0
+        count_with_cost = 0
+
+        for ctrl in controls:
+            cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
+            if cost > 0:
+                count_with_cost += 1
+            total_annual_cost += cost
+
+            # by status — use raw value as key, display value for frontend
+            s = ctrl.status or "_unset"
+            status_label = ctrl.get_status_display() if ctrl.status else "not_set"
+            bucket = by_status.setdefault(
+                s, {"status": status_label, "count": 0, "total": 0.0}
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by priority
+            p = ctrl.priority if ctrl.priority is not None else "_unset"
+            priority_label = (
+                ctrl.get_priority_display() if ctrl.priority is not None else "not_set"
+            )
+            bucket = by_priority.setdefault(
+                p,
+                {"priority": priority_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by category
+            c = ctrl.category or "_unset"
+            category_label = ctrl.get_category_display() if ctrl.category else "not_set"
+            bucket = by_category.setdefault(
+                c,
+                {"category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+        # Pre-format totals with proper currency position
+        for bucket in by_status.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_priority.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_category.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        return {
+            "count": count,
+            "count_with_cost": count_with_cost,
+            "total_annual_cost": round(total_annual_cost, 2),
+            "total_annual_cost_display": fmt(round(total_annual_cost, 2)),
+            "currency": currency,
+            "by_status": [v for v in by_status.values() if v["count"] > 0],
+            "by_priority": [v for v in by_priority.values() if v["count"] > 0],
+            "by_category": [v for v in by_category.values() if v["count"] > 0],
+        }
+
+
 class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
@@ -5106,6 +5309,22 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             AppliedControl,
         )
         return qs.filter(id__in=viewable_controls)
+
+
+class ComplianceAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, ComplianceAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))
+
+
+class RiskAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, RiskAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -5773,6 +5992,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
         evidence_model = related_model("evidences")
         security_exception_model = related_model("security_exceptions")
         policy_model = related_model("policies")
+        processing_model = related_model("processings")
+        accreditation_model = related_model("accreditations")
+        contract_model = related_model("contracts")
 
         queryset = queryset.select_related("requester", "approver").prefetch_related(
             Prefetch("events", queryset=events_qs),
@@ -5795,6 +6017,18 @@ class ValidationFlowViewSet(BaseModelViewSet):
                 "policies",
                 queryset=policy_model.objects.select_related("folder"),
             ),
+            Prefetch(
+                "processings",
+                queryset=processing_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "accreditations",
+                queryset=accreditation_model.objects.select_related("folder"),
+            ),
+            Prefetch(
+                "contracts",
+                queryset=contract_model.objects.select_related("folder"),
+            ),
         )
 
         m2m_through_fields = {
@@ -5808,6 +6042,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "has_evidences": ValidationFlow.evidences.through,
             "has_security_exceptions": ValidationFlow.security_exceptions.through,
             "has_policies": ValidationFlow.policies.through,
+            "has_processings": ValidationFlow.processings.through,
+            "has_accreditations": ValidationFlow.accreditations.through,
+            "has_contracts": ValidationFlow.contracts.through,
         }
         annotations = {
             alias: Exists(through.objects.filter(validationflow_id=OuterRef("pk")))
@@ -5836,6 +6073,9 @@ class ValidationFlowViewSet(BaseModelViewSet):
             "evidences": "Evidences",
             "security_exceptions": "Security Exceptions",
             "policies": "Policies",
+            "processings": "Processings",
+            "accreditations": "Accreditations",
+            "contracts": "Contracts",
         }
         return Response(model_types)
 
@@ -6046,6 +6286,15 @@ class UserGroupViewSet(BaseModelViewSet):
         filters.SearchFilter,
     ]
 
+    def destroy(self, request, *args, **kwargs):
+        user_group = self.get_object()
+        if user_group.builtin:
+            return Response(
+                {"error": "attemptToDeleteBuiltinUserGroup"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
 class RoleAssignmentViewSet(BaseModelViewSet):
     """
@@ -6173,7 +6422,15 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        return Response({"name": "Global", "children": folders_list})
+        root_folder = Folder.get_root_folder()
+        return Response(
+            {
+                "name": root_folder.name,
+                "uuid": str(root_folder.id),
+                "content_type": root_folder.content_type,
+                "children": folders_list,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -6337,6 +6594,7 @@ class FolderViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["get"])
     def export(self, request, pk):
+        """Export the domain as a zip file containing a JSON dump of all objects and their relationships"""
         include_attachments = True
         instance = self.get_object()
 
@@ -6613,12 +6871,77 @@ class FolderViewSet(BaseModelViewSet):
             logger.error("Cyclic dependency detected", error=str(e))
             raise ValidationError({"error": "Cyclic dependency detected"})
 
+    def _import_terminologies(
+        self,
+        names: str | List[str] | None,
+        field_path: Terminology.FieldPath,
+    ) -> QuerySet[Terminology] | Terminology | None:
+        """
+        Ensure that requested terminologies exist and are visible. If not, create them. If they exist but are not visible, make them visible.
+
+        Args:
+            names: name of the Terminology (str) to import, or list of names for multiple Terminologies.
+            field_path: which Terminology.FieldPath to assign
+
+        Returns:
+            - For single input: Terminology object
+            - For list input: QuerySet of Terminology objects
+            - For None or empty list: None
+        """
+        if not names:
+            return None
+
+        # Convert single value to list
+        single_value = False
+        if isinstance(names, str):  # Foreign key case
+            names = [names]
+            single_value = True
+
+        # Fetch existing
+        existing = Terminology.objects.filter(name__in=names, field_path=field_path)
+        existing_names = set(existing.values_list("name", flat=True))
+
+        # Create missing
+        missing_names = set(names) - existing_names
+        if missing_names:
+            Terminology.objects.bulk_create(
+                [
+                    Terminology(name=name, field_path=field_path, is_visible=True)
+                    for name in missing_names
+                ],
+                ignore_conflicts=True,
+            )
+
+        # Ensure visibility
+        Terminology.objects.filter(
+            name__in=names, field_path=field_path, is_visible=False
+        ).update(is_visible=True)
+
+        result_qs = Terminology.objects.filter(name__in=names, field_path=field_path)
+
+        if single_value:
+            return result_qs.first()
+        return result_qs
+
     def _import_objects(
-        self, parsed_data: dict, domain_name: str, load_missing_libraries: bool, user
-    ):
+        self,
+        parsed_data: dict,
+        domain_name: str,
+        load_missing_libraries: bool,
+        user: User,
+    ) -> dict[str, str]:
         """
         Import and validate objects using appropriate serializers.
         Handles both validation and creation in separate phases within a transaction.
+
+        Args:
+            parsed_data: The data parsed from the uploaded JSON dump.
+            domain_name: The name choosen by the user for the new domain being created.
+            load_missing_libraries: Whether to automatically load missing libraries from stored ones.
+            user: The user performing the import, for permission checks.
+
+        Returns:
+            A dict with success message if no error was encountered.
         """
         validation_errors = []
         required_libraries = []
@@ -6808,10 +7131,23 @@ class FolderViewSet(BaseModelViewSet):
                     }
                 )
 
-    def _create_model_objects(self, model, objects, link_dump_database_ids):
-        """Create all objects for a model after validation."""
+    def _create_model_objects(
+        self,
+        model: models.Model,
+        objects: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create all objects for a model after validation. Creation happens in batch of size `self.batch_size`.
+
+        Args:
+            model: Current model for which objects are being created.
+            objects: List of all objects from the dump, used to filter only those relevant for the current model.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         logger.debug("Creating objects for model", model=model)
 
+        # rebuild model name and keep objects only of this model for creation
         model_name = f"{model._meta.app_label}.{model._meta.model_name}"
         model_objects = [obj for obj in objects if obj["model"] == model_name]
 
@@ -6842,15 +7178,33 @@ class FolderViewSet(BaseModelViewSet):
                 link_dump_database_ids=link_dump_database_ids,
             )
 
-    def _create_batch(self, model, batch, link_dump_database_ids):
-        """Create a batch of objects with proper relationship handling."""
+    def _create_batch(
+        self,
+        model: models.Model,
+        batch: List[dict],
+        link_dump_database_ids: dict[str, Any],
+    ) -> None:
+        """
+        Create a batch of objects with proper relationship handling in 4 main steps:
+        1. Handle special cases (e.g. library objects, folder reference)
+        2. Process model-specific relationships, separating m2m relationships to be handled in the fourth step, after the object is created (because it requires the database ID of the created object to be set)
+        3. Create the object
+        4. Handle many-to-many relationships
+
+        Args:
+            model: Current model for which objects are being created.
+            batch: Sublist of all objects from the dump to create in this batch.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+        """
         # Create all objects in the batch within a single transaction
         with transaction.atomic():
-            for obj in batch:
-                obj_id = obj.get("id")
-                fields = obj.get("fields", {}).copy()
+            try:
+                objects_creation_data = []
 
-                try:
+                for obj in batch:
+                    obj_id = obj.get("id")
+                    fields = obj.get("fields", {}).copy()
+
                     # Handle library objects
                     if fields.get("library") or model == LoadedLibrary:
                         logger.info(f"Skipping creation of library object {obj_id}")
@@ -6862,6 +7216,7 @@ class FolderViewSet(BaseModelViewSet):
                         fields["folder"] = link_dump_database_ids.get("base_folder")
 
                     # Process model-specific relationships
+                    # Handling of m2m happens in a second step (see call to self._set_many_to_many_relations),
                     many_to_many_map_ids = {}
                     fields = self._process_model_relationships(
                         model=model,
@@ -6870,41 +7225,100 @@ class FolderViewSet(BaseModelViewSet):
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
 
+                    # Run clean to validate unique constraints
                     try:
-                        # Run clean to validate unique constraints
                         model(**fields).clean()
                     except ValidationError as e:
                         for field, error in e.error_dict.items():
                             fields[field] = f"{fields[field]} {uuid.uuid4()}"
 
-                    logger.debug("Creating object", fields=fields)
-
                     # Create the object
-                    obj_created = model.objects.create(**fields)
+                    logger.debug("Creating object", fields=fields)
+                    objects_creation_data.append(
+                        {
+                            "id": obj_id,
+                            "fields": fields,
+                            "many_to_many_map_ids": many_to_many_map_ids,
+                        }
+                    )
+
+                # Use bulk_create for models without custom save() or for
+                # RequirementAssessment (whose side effects are handled
+                # explicitly below). Fall back to individual create() for
+                # other models with custom save() to preserve their side
+                # effects without double-writing.
+                is_requirement_assessment = model is RequirementAssessment
+                has_save_override = model.save is not models.Model.save
+
+                if has_save_override and not is_requirement_assessment:
+                    created_objects = []
+                    for object_creation_data in objects_creation_data:
+                        obj_created = model.objects.create(
+                            **object_creation_data["fields"]
+                        )
+                        created_objects.append(obj_created)
+                else:
+                    objects_to_create = [
+                        model(**ocd["fields"]) for ocd in objects_creation_data
+                    ]
+                    created_objects = model.objects.bulk_create(objects_to_create)
+
+                if is_requirement_assessment:
+                    seen_cas = set()
+                    for ra in created_objects:
+                        ca_id = ra.compliance_assessment_id
+                        if ca_id not in seen_cas:
+                            seen_cas.add(ca_id)
+                            ra.trigger_compliance_assessment_update_hooks()
+
+                for obj_created, object_creation_data in zip(
+                    created_objects, objects_creation_data
+                ):
+                    if obj_created.id is None:
+                        obj_created.refresh_from_db()
+
+                    obj_id = object_creation_data["id"]
                     link_dump_database_ids[obj_id] = obj_created.id
 
-                    # Handle many-to-many relationships
+                    many_to_many_map_ids = object_creation_data["many_to_many_map_ids"]
                     self._set_many_to_many_relations(
                         model=model,
                         obj=obj_created,
                         many_to_many_map_ids=many_to_many_map_ids,
                     )
 
-                except Exception as e:
-                    logger.error("Error creating object", obj=obj, exc_info=True)
-                    # This will trigger a rollback of the entire batch
-                    raise ValidationError(
-                        f"Error creating {model._meta.model_name}: {str(e)}"
-                    )
+            except Exception as e:
+                logger.error(
+                    "Error creating object batch",
+                    model=model._meta.model_name,
+                    exc_info=True,
+                )
+                # This will trigger a rollback of the entire batch
+                raise ValidationError(
+                    f"Error creating {model._meta.model_name}: {str(e)}"
+                )
 
     def _process_model_relationships(
         self,
-        model,
-        fields,
-        link_dump_database_ids,
-        many_to_many_map_ids,
+        model: models.Model,
+        fields: dict[str, Any],
+        link_dump_database_ids: dict[str, Any],
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
     ):
-        """Process model-specific relationships."""
+        """
+        Process model-specific relationships:
+         - M2M relationships are removed from `fields` and stored in a separate map to be processed later (see `_set_many_to_many_relations`).
+         - Other relationships are directly converted to their database IDs or instances.
+
+        Args:
+            model: Current model for which the object is being created
+            fields: The fields of the object being created.
+            link_dump_database_ids: Mapping of dump ID to real database ID/Object/URN of created objects, used to resolve object relationships.
+            many_to_many_map_ids: A map to store the IDs, names or QuerySet of related objects for m2m relationships.
+
+        Returns:
+            The updated fields with relationships processed (except for m2m which are removed).
+        """
 
         def get_mapped_ids(
             ids: List[str], link_dump_database_ids: Dict[str, str]
@@ -6927,9 +7341,9 @@ class FolderViewSet(BaseModelViewSet):
                 )
 
             case "riskassessment":
-                _fields["perimeter"] = Perimeter.objects.get(
+                _fields["perimeter"] = Perimeter.objects.filter(
                     id=link_dump_database_ids.get(_fields["perimeter"])
-                )
+                ).first()  # filter.first to handle when no perimeter on the riskassessment (since it's optional)
                 _fields["risk_matrix"] = RiskMatrix.objects.get(
                     urn=_fields.get("risk_matrix")
                 )
@@ -7001,6 +7415,10 @@ class FolderViewSet(BaseModelViewSet):
                 _fields["risk_assessment"] = RiskAssessment.objects.get(
                     id=link_dump_database_ids.get(_fields["risk_assessment"])
                 )
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields.get("risk_origin"), Terminology.FieldPath.ROTO_RISK_ORIGIN
+                )
+                # TODO: feels complicated, may be simplified
                 # Process all related _fields at once
                 related__fields = [
                     "threats",
@@ -7017,7 +7435,9 @@ class FolderViewSet(BaseModelViewSet):
                         else f"{field}_ids"
                     )
                     if field == "qualifications":
-                        many_to_many_map_ids[map_key] = _fields.pop(field, [])
+                        many_to_many_map_ids[map_key] = self._import_terminologies(
+                            _fields.pop(field, []), Terminology.FieldPath.QUALIFICATIONS
+                        )
                     else:
                         many_to_many_map_ids[map_key] = get_mapped_ids(
                             _fields.pop(field, []), link_dump_database_ids
@@ -7025,6 +7445,10 @@ class FolderViewSet(BaseModelViewSet):
 
             case "entity":
                 _fields.pop("owned_folders", None)
+                many_to_many_map_ids["relationship_ids"] = self._import_terminologies(
+                    _fields.pop("relationship", []),
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,
+                )  # relationship_ids are in fact names of the relationships
 
             case "ebiosrmstudy":
                 _fields.update(
@@ -7055,7 +7479,10 @@ class FolderViewSet(BaseModelViewSet):
                 )
                 many_to_many_map_ids.update(
                     {
-                        "qualification_ids": _fields.pop("qualifications", []),
+                        "qualification_ids": self._import_terminologies(
+                            _fields.pop("qualifications", []),
+                            Terminology.FieldPath.QUALIFICATIONS,
+                        ),
                         "asset_ids": get_mapped_ids(
                             _fields.pop("assets", []), link_dump_database_ids
                         ),
@@ -7069,10 +7496,11 @@ class FolderViewSet(BaseModelViewSet):
                 many_to_many_map_ids["feared_event_ids"] = get_mapped_ids(
                     _fields.pop("feared_events", []), link_dump_database_ids
                 )
-                _fields["risk_origin"], _ = Terminology.objects.get_or_create(
-                    name=_fields["risk_origin"],
-                    is_visible=True,
-                    field_path=Terminology.FieldPath.ROTO_RISK_ORIGIN,
+                _fields["risk_origin"] = self._import_terminologies(
+                    _fields[
+                        "risk_origin"
+                    ],  # risk origin must exist, it's a mandatory field on RoTo
+                    Terminology.FieldPath.ROTO_RISK_ORIGIN,
                 )
 
             case "stakeholder":
@@ -7085,6 +7513,10 @@ class FolderViewSet(BaseModelViewSet):
                             id=link_dump_database_ids.get(_fields["entity"])
                         ),
                     }
+                )
+                _fields["category"] = self._import_terminologies(
+                    _fields["category"],
+                    Terminology.FieldPath.ENTITY_RELATIONSHIP,  # category must exist, it's a mandatory field on Stakeholder
                 )
                 many_to_many_map_ids["applied_controls"] = get_mapped_ids(
                     _fields.pop("applied_controls", []), link_dump_database_ids
@@ -7134,8 +7566,21 @@ class FolderViewSet(BaseModelViewSet):
 
         return _fields
 
-    def _set_many_to_many_relations(self, model, obj, many_to_many_map_ids):
-        """Set many-to-many relationships after object creation."""
+    def _set_many_to_many_relations(
+        self,
+        model: models.Model,
+        obj: models.Model,
+        many_to_many_map_ids: dict[str, QuerySet | List[UUID | str] | None],
+    ) -> None:
+        """
+        Set many-to-many relationships after object creation.
+
+        Args:
+            model: Current model for which the object was created.
+            obj: The created object for which to set the m2m relationships.
+            many_to_many_map_ids: A map containing the IDs, names or QuerySet of related objects for m2m relationships.
+
+        """
         model_name = model._meta.model_name
 
         match model_name:
@@ -7175,37 +7620,8 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
-
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
-
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
                 for field, model_class in {
                     "vulnerability_ids": (Vulnerability, "vulnerabilities"),
@@ -7235,35 +7651,8 @@ class FolderViewSet(BaseModelViewSet):
 
             case "fearedevent":
                 if qualification_ids := many_to_many_map_ids.get("qualification_ids"):
-                    # Get existing qualifications
-                    existing_qualifications = Terminology.objects.filter(
-                        name__in=qualification_ids
-                    )
-                    existing_names = set(
-                        existing_qualifications.values_list("name", flat=True)
-                    )
+                    obj.qualifications.set(qualification_ids)
 
-                    # Find missing names
-                    missing_names = set(qualification_ids) - existing_names
-
-                    # Create missing qualifications
-                    if missing_names:
-                        Terminology.objects.bulk_create(
-                            [
-                                Terminology(
-                                    name=name,
-                                    is_visible=True,
-                                    field_path=Terminology.FieldPath.QUALIFICATIONS,
-                                )
-                                for name in missing_names
-                            ],
-                            ignore_conflicts=True,
-                        )
-
-                    # Now set all qualifications
-                    obj.qualifications.set(
-                        Terminology.objects.filter(name__in=qualification_ids)
-                    )
                 if asset_ids := many_to_many_map_ids.get("asset_ids"):
                     obj.assets.set(Asset.objects.filter(id__in=asset_ids))
 
@@ -7291,6 +7680,10 @@ class FolderViewSet(BaseModelViewSet):
                     obj.threats.set(
                         Threat.objects.filter(Q(id__in=uuids) | Q(urn__in=urns))
                     )
+
+            case "entity":
+                if relationship_ids := many_to_many_map_ids.get("relationship_ids"):
+                    obj.relationship.set(relationship_ids)
 
     def _split_uuids_urns(self, ids: List[str]) -> Tuple[List[str], List[str]]:
         """Split a list of strings into UUIDs and URNs."""
@@ -7355,7 +7748,8 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        return Response(request.user.preferences, status=status.HTTP_200_OK)
+        prefs = request.user.get_preferences()
+        return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
@@ -7369,8 +7763,10 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        request.user.preferences["lang"] = new_language
-        request.user.save()
+        prefs = request.user.get_preferences()
+        prefs["lang"] = new_language
+        request.user.preferences = prefs
+        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -7641,7 +8037,9 @@ class FrameworkViewSet(BaseModelViewSet):
     def excel_template(self, request, pk):
         fwk = Framework.objects.get(id=pk)
         req_nodes = RequirementNode.objects.filter(framework=fwk).order_by("urn")
+        has_questions = any(rn.questions for rn in req_nodes)
         entries = []
+
         for rn in req_nodes:
             entry = {
                 "urn": rn.urn,
@@ -7654,6 +8052,33 @@ class FrameworkViewSet(BaseModelViewSet):
                 "score": "",
                 "observations": "",
             }
+
+            if has_questions:
+                if rn.questions:
+                    lines = []
+                    for q_urn, question in rn.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        if q_type == "multiple_choice":
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(
+                                f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                            )
+                        elif q_type in ("text", "date"):
+                            lines.append(f"{q_text} >> [free text]")
+                        else:
+                            choice_values = [
+                                c.get("value", "") for c in question.get("choices", [])
+                            ]
+                            lines.append(f"{q_text} >> [{' / '.join(choice_values)}]")
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         # Create DataFrame from entries
@@ -7669,30 +8094,23 @@ class FrameworkViewSet(BaseModelViewSet):
             # Get the worksheet
             worksheet = writer.sheets["Sheet1"]
 
-            # For text wrapping, we need to define which columns need wrapping
-            # Assuming 'description' and 'observations' columns need text wrapping
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
 
-            # Find the indices of the columns that need wrapping
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
 
-            # Apply text wrapping to those columns
             from openpyxl.styles import Alignment
 
             for col_idx in wrap_indices:
-                for row_idx in range(
-                    2, len(df) + 2
-                ):  # +2 because of header row and 1-indexing
+                for row_idx in range(2, len(df) + 2):
                     cell = worksheet.cell(row=row_idx, column=col_idx)
                     cell.alignment = Alignment(wrap_text=True)
 
-            # Adjust column widths for better readability
             for idx, col in enumerate(df.columns):
-                column_width = 40  # default width
+                column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for wrapped text columns
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -8062,10 +8480,18 @@ class UploadAttachmentView(APIView):
                 revision.attachment = attachment
                 try:
                     revision.full_clean()
-                except ValidationError:
+                except ValidationError as e:
                     revision.attachment = old_attachment
+                    messages = []
+                    if hasattr(e, "message_dict"):
+                        for field_messages in e.message_dict.values():
+                            messages.extend(field_messages)
+                    elif hasattr(e, "messages"):
+                        messages = e.messages
+                    else:
+                        messages = [str(e.message)]
                     return Response(
-                        {"detail": "File too large or unsupported format."},
+                        {"detail": " ".join(messages)},
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 if old_attachment:
@@ -8093,10 +8519,126 @@ class QuickStartView(APIView):
             return Response(objects, status=status.HTTP_201_CREATED)
 
 
+class PresetJourneyViewSet(BaseModelViewSet):
+    model = PresetJourney
+    filterset_fields = ["folder"]
+    search_fields = ["name", "description"]
+
+    @action(detail=True, methods=["get"])
+    def dashboard(self, request, pk=None):
+        journey = self.get_object()
+        from core.serializers import (
+            PresetJourneyReadSerializer,
+            PresetJourneyStepReadSerializer,
+        )
+
+        steps = PresetJourneyStepReadSerializer(journey.steps.all(), many=True).data
+        stats = self._compute_stats(journey)
+        journey_data = PresetJourneyReadSerializer(journey).data
+        return Response(
+            {
+                "journey": journey_data,
+                "steps": steps,
+                "stats": stats,
+            }
+        )
+
+    @action(detail=True, methods=["post"])
+    def rename(self, request, pk=None):
+        journey = self.get_object()
+        name = request.data.get("name", "").strip()
+        if not name:
+            return Response(
+                {"detail": "Name is required."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        journey.name = name
+        journey.save(update_fields=["name"])
+        from core.serializers import PresetJourneyReadSerializer
+
+        return Response(PresetJourneyReadSerializer(journey).data)
+
+    @action(detail=True, methods=["post"])
+    def upgrade(self, request, pk=None):
+        journey = self.get_object()
+        stored_lib = (
+            StoredLibrary.objects.filter(urn=journey.urn).order_by("-version").first()
+        )
+        if not stored_lib or stored_lib.version <= journey.version:
+            return Response({"detail": "Already up to date."})
+        from library.preset_executor import PresetExecutor
+
+        apply_feature_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
+        executor = PresetExecutor(stored_lib, request.user, request)
+        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
+        from core.serializers import PresetJourneyReadSerializer
+
+        return Response(PresetJourneyReadSerializer(journey).data)
+
+    def _compute_stats(self, journey):
+        folder = journey.folder
+        steps = journey.steps.all()
+        total_steps = steps.count()
+        completed_steps = steps.filter(
+            status__in=[PresetJourneyStep.Status.DONE, PresetJourneyStep.Status.SKIPPED]
+        ).count()
+
+        stats = {
+            "total_steps": total_steps,
+            "completed_steps": completed_steps,
+            "progress_percent": (
+                round(completed_steps / total_steps * 100) if total_steps > 0 else 0
+            ),
+            "assets": Asset.objects.filter(folder=folder).count(),
+            "risk_scenarios": RiskScenario.objects.filter(
+                risk_assessment__folder=folder
+            ).count(),
+            "applied_controls": AppliedControl.objects.filter(folder=folder).count(),
+        }
+
+        # Compliance progress per compliance assessment in object_refs
+        compliance_stats = {}
+        readable_ca_qs = ComplianceAssessment.objects.all()
+        for ref_name, obj_id in (journey.object_refs or {}).items():
+            try:
+                ca = readable_ca_qs.get(id=obj_id, folder=folder)
+                total_ra = ca.requirement_assessments.count()
+                assessed_ra = ca.requirement_assessments.exclude(status="to_do").count()
+                compliance_stats[ref_name] = {
+                    "name": ca.name,
+                    "total": total_ra,
+                    "assessed": assessed_ra,
+                    "percent": (
+                        round(assessed_ra / total_ra * 100) if total_ra > 0 else 0
+                    ),
+                }
+            except (ComplianceAssessment.DoesNotExist, ValueError):
+                continue
+        stats["compliance"] = compliance_stats
+        return stats
+
+
+class PresetJourneyStepViewSet(BaseModelViewSet):
+    model = PresetJourneyStep
+    filterset_fields = ["journey", "status"]
+    search_fields = ["title", "description"]
+
+
 class OrganisationObjectiveViewSet(BaseModelViewSet):
     model = OrganisationObjective
 
-    filterset_fields = ["folder", "status", "health", "issues", "assigned_to"]
+    filterset_fields = [
+        "folder",
+        "status",
+        "health",
+        "issues",
+        "assigned_to",
+        "is_active",
+    ]
     search_fields = ["name", "description"]
 
     @method_decorator(cache_page(60 * LONG_CACHE_TTL))
@@ -8108,6 +8650,56 @@ class OrganisationObjectiveViewSet(BaseModelViewSet):
     @action(detail=False, name="Get health choices")
     def health(self, request):
         return Response(dict(OrganisationObjective.Health.choices))
+
+    @action(detail=False, name="Get is_active choices")
+    def is_active(self, request):
+        return Response({"true": str(_("Yes")), "false": str(_("No"))})
+
+    @action(
+        detail=True,
+        name="Duplicate organisation objective",
+        methods=["post"],
+        serializer_class=OrganisationObjectiveDuplicateSerializer,
+    )
+    def duplicate(self, request, pk):
+        serializer = OrganisationObjectiveDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, OrganisationObjective
+        )
+        if UUID(pk) not in object_ids_view:
+            return Response(
+                {"results": "organisation objective not found"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        new_folder = data["folder"]
+        objective = self.get_object()
+        duplicate_objective = OrganisationObjective.objects.create(
+            name=data["name"],
+            description=data["description"],
+            folder=new_folder,
+            ref_id=objective.ref_id,
+            observation=objective.observation,
+            status=objective.status,
+            health=objective.health,
+            is_active=objective.is_active,
+            start_date=objective.start_date,
+            eta=objective.eta,
+            due_date=objective.due_date,
+            closing_date=objective.closing_date,
+        )
+        duplicate_objective.issues.set(objective.issues.all())
+        duplicate_objective.assets.set(objective.assets.all())
+        duplicate_objective.tasks.set(objective.tasks.all())
+        duplicate_objective.assigned_to.set(objective.assigned_to.all())
+        duplicate_objective.metrics.set(objective.metrics.all())
+
+        return Response(
+            {"results": OrganisationObjectiveReadSerializer(duplicate_objective).data}
+        )
 
 
 class OrganisationIssueViewSet(BaseModelViewSet):
@@ -8420,6 +9012,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for node in RequirementNode.objects.filter(id__in=req_node_ids)
         }
 
+        has_questions = any(rn.questions for rn in req_nodes.values())
+
         for req in requirement_assessments:
             req_node = req_nodes.get(req.requirement.id)
             if not req_node:
@@ -8443,6 +9037,62 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 entry["documentation_score"] = req.documentation_score
             else:
                 entry["score"] = req.score
+
+            if has_questions:
+                if req_node.questions:
+                    answers = req.answers or {}
+                    lines = []
+                    for q_urn, question in req_node.questions.items():
+                        q_text = question.get("text", "")
+                        if not q_text:
+                            continue
+                        q_type = question.get("type")
+                        choices_map = {
+                            c["urn"]: c.get("value", "")
+                            for c in question.get("choices", [])
+                        }
+                        answer_value = answers.get(q_urn)
+                        readable = ""
+                        if answer_value:
+                            if q_type in ("text", "date"):
+                                readable = str(answer_value)
+                            elif q_type == "multiple_choice" and isinstance(
+                                answer_value, list
+                            ):
+                                readable = " | ".join(
+                                    choices_map.get(a, a) for a in answer_value
+                                )
+                            else:
+                                readable = choices_map.get(
+                                    answer_value, str(answer_value)
+                                )
+                        # Show choices hint when no answer
+                        if not readable:
+                            choice_values = list(choices_map.values())
+                            if q_type == "multiple_choice":
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} (multiple) >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                            elif q_type in ("text", "date"):
+                                lines.append(
+                                    escape_excel_formula(f"{q_text} >> [free text]")
+                                )
+                            else:
+                                lines.append(
+                                    escape_excel_formula(
+                                        f"{q_text} >> [{' / '.join(choice_values)}]"
+                                    )
+                                )
+                        else:
+                            lines.append(
+                                escape_excel_formula(f"{q_text} >> {readable}")
+                            )
+                    entry["answers"] = "\n\n".join(lines)
+                else:
+                    entry["answers"] = ""
+
             entries.append(entry)
 
         df = pd.DataFrame(entries)
@@ -8452,7 +9102,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             df.to_excel(writer, index=False)
             worksheet = writer.sheets["Sheet1"]
 
-            wrap_columns = ["name", "description", "observations"]
+            wrap_columns = ["name", "description", "observations", "answers"]
             wrap_indices = [
                 df.columns.get_loc(col) + 1 for col in wrap_columns if col in df.columns
             ]
@@ -8465,7 +9115,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             for idx, col in enumerate(df.columns):
                 column_width = 40
                 if col in wrap_columns:
-                    column_width = 60  # wider for compliance assessments
+                    column_width = 60
                 worksheet.column_dimensions[
                     worksheet.cell(row=1, column=idx + 1).column_letter
                 ].width = column_width
@@ -8489,14 +9139,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             lang = request.user.preferences.get("lang")
             if lang not in ["fr", "en"]:
                 lang = "en"
-        template_path = (
-            Path(settings.BASE_DIR)
-            / "core"
-            / "templates"
-            / "core"
-            / f"audit_report_template_{lang}.docx"
-        )
-        doc = DocxTemplate(template_path)
+
+        # Check for custom Word template override
+        doc = None
+        try:
+            custom = CustomWordTemplate.objects.filter(
+                template_key="audit_report",
+                language=lang,
+                is_active=True,
+            ).first()
+            if custom and custom.file:
+                custom.file.open("rb")
+                doc = DocxTemplate(io.BytesIO(custom.file.read()))
+        except Exception as e:
+            logger.warning(
+                "Failed to load custom Word template, falling back to default",
+                exc_info=e,
+            )
+
+        if doc is None:
+            template_path = (
+                Path(__file__).resolve().parent
+                / "templates"
+                / "core"
+                / f"audit_report_template_{lang}.docx"
+            )
+            doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
@@ -8930,10 +9598,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
+                        "mapping_inference",
                     ]:
-                        if field in source and source[field] is not None:
-                            setattr(req, field, source[field])
-                        requirement_assessments_to_update.append(req)
+                        value = source.get(field)
+                        if value is not None:
+                            setattr(req, field, value)
+                    requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
@@ -8944,6 +9614,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
+                        "mapping_inference",
                     ],
                     batch_size=500,
                 )
@@ -9071,19 +9742,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=True
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
+        # Auditee filtering: scope to assigned requirements only
         auditee_folders = get_auditee_filtered_folder_ids(request.user)
         if auditee_folders and compliance_assessment.folder_id in auditee_folders:
             user_actors = Actor.get_all_for_user(request.user)
-            assigned_ra_ids = set(
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
                     compliance_assessment=compliance_assessment,
                     actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments = [
-                ra for ra in requirement_assessments if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments if ra.id in ra_ids
             ]
+
         requirement_nodes = list(
             RequirementNode.objects.filter(framework=_framework)
             .select_related("framework")
@@ -9123,19 +9795,20 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 include_non_assessable=not assessable
             )
         )
-        # Auditee filtering: only show assigned requirement assessments
+        # Auditee filtering: scope to assigned requirements only
         auditee_folders = get_auditee_filtered_folder_ids(request.user)
         if auditee_folders and compliance_assessment.folder_id in auditee_folders:
             user_actors = Actor.get_all_for_user(request.user)
-            assigned_ra_ids = set(
+            ra_ids = set(
                 RequirementAssignment.objects.filter(
                     compliance_assessment=compliance_assessment,
                     actor__in=user_actors,
                 ).values_list("requirement_assessments__id", flat=True)
             )
             requirement_assessments_objects = [
-                ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+                ra for ra in requirement_assessments_objects if ra.id in ra_ids
             ]
+
         requirements_objects = list(
             RequirementNode.objects.filter(framework=compliance_assessment.framework)
             .select_related("framework")
@@ -9238,7 +9911,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="auditee-dashboard")
     def auditee_dashboard(self, request):
-        """Returns aggregated progress data for the auditee's assigned audits."""
+        """Returns per-assignment progress data for the auditee's dashboard."""
         user_actors = Actor.get_all_for_user(request.user)
         assignments = (
             RequirementAssignment.objects.filter(actor__in=user_actors)
@@ -9247,7 +9920,8 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                 "compliance_assessment__framework",
                 "compliance_assessment__folder",
             )
-            .prefetch_related("requirement_assessments")
+            .prefetch_related("requirement_assessments", "actor")
+            .distinct()
         )
 
         # Only include compliance assessments the user can view
@@ -9255,34 +9929,31 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             Folder.get_root_folder(), request.user, ComplianceAssessment
         )
 
-        # Group by compliance assessment
-        ca_map = defaultdict(list)
-        for assignment in assignments:
-            if assignment.compliance_assessment_id in viewable_ca_ids:
-                ca_map[assignment.compliance_assessment_id].append(assignment)
-
         dashboard_data = []
-        for ca_id, group in ca_map.items():
-            ca = group[0].compliance_assessment
-            ra_ids = set()
-            for assignment in group:
-                ra_ids.update(
-                    assignment.requirement_assessments.values_list("id", flat=True)
-                )
+        for assignment in assignments:
+            if assignment.compliance_assessment_id not in viewable_ca_ids:
+                continue
 
+            ca = assignment.compliance_assessment
+            ra_ids = assignment.requirement_assessments.values_list("id", flat=True)
             ras = RequirementAssessment.objects.filter(
                 id__in=ra_ids, requirement__assessable=True
             )
             total = ras.count()
             done = ras.exclude(result="not_assessed").count()
 
+            actor_names = ", ".join(str(a) for a in assignment.actor.all())
+
             dashboard_data.append(
                 {
                     "id": str(ca.id),
+                    "assignment_id": str(assignment.id),
                     "name": ca.name,
                     "folder": ca.folder.name if ca.folder else None,
                     "framework": ca.framework.name if ca.framework else None,
                     "status": ca.status,
+                    "assignment_status": assignment.status,
+                    "actor": actor_names,
                     "total_requirements": total,
                     "assessed_requirements": done,
                     "progress_percent": round(done / total * 100) if total > 0 else 0,
@@ -9741,6 +10412,588 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
         threat_metrics.update({"tree": tree, "graph": {"nodes": nodes}})
 
         return Response(threat_metrics, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["get"], url_path="section_compliance")
+    def section_compliance(self, request, pk):
+        """Aggregates compliance results and scores per top-level requirement group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        requirement_nodes = list(
+            RequirementNode.objects.filter(framework=framework).all()
+        )
+        # Build children dict
+        children_dict = defaultdict(list)
+        for rn in requirement_nodes:
+            parent = rn.parent_urn or "root"
+            children_dict[parent].append(rn)
+
+        top_level_nodes = children_dict.get("root", [])
+        for node in top_level_nodes:
+            if node.order_id is None:
+                node.order_id = 0
+        top_level_nodes.sort(key=lambda x: x.order_id)
+
+        # Build RA map
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        ra_by_req_id = {}
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            ra_by_req_id[str(ra.requirement_id)] = ra
+
+        def collect_assessable_descendants(node_urn):
+            result = []
+            for child in children_dict.get(node_urn, []):
+                if child.assessable:
+                    ra = ra_by_req_id.get(str(child.id))
+                    if ra:
+                        if not ig or (ig & set(child.implementation_groups or [])):
+                            result.append(ra)
+                result.extend(collect_assessable_descendants(child.urn))
+            return result
+
+        sections = []
+        for node in top_level_nodes:
+            assessable_list = []
+            if node.assessable:
+                ra = ra_by_req_id.get(str(node.id))
+                if ra and (not ig or (ig & set(node.implementation_groups or []))):
+                    assessable_list.append(ra)
+            assessable_list.extend(collect_assessable_descendants(node.urn))
+
+            if not assessable_list:
+                continue
+
+            results = defaultdict(int)
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+            for ra in assessable_list:
+                results[ra.result] += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            if is_sum:
+                section_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                section_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                section_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                section_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            node_name = (
+                get_referential_translation(node, "name")
+                or node.name
+                or node.ref_id
+                or str(node.id)
+            )
+            sections.append(
+                {
+                    "ref_id": node.ref_id,
+                    "name": node_name,
+                    "total_assessable": len(assessable_list),
+                    "results": dict(results),
+                    "score": section_score,
+                    "documentation_score": section_doc_score,
+                    "scored_count": scored_count,
+                    "total_weight": total_weight,
+                }
+            )
+
+        return Response(
+            {
+                "sections": sections,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="controls_coverage")
+    def controls_coverage(self, request, pk):
+        """Controls coverage analysis for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Filter by implementation groups and auditee
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        # Annotate with control counts
+        ra_control_counts = (
+            RequirementAssessment.objects.filter(id__in=[ra.id for ra in filtered_ras])
+            .annotate(control_count=Count("applied_controls"))
+            .values("id", "control_count")
+        )
+        count_map = {str(r["id"]): r["control_count"] for r in ra_control_counts}
+
+        with_controls = 0
+        without_controls = 0
+        requirements_by_control_count = defaultdict(int)
+        all_control_ids = set()
+
+        for ra in filtered_ras:
+            cc = count_map.get(str(ra.id), 0)
+            if cc > 0:
+                with_controls += 1
+            else:
+                without_controls += 1
+            bucket = str(cc) if cc <= 2 else "3+"
+            requirements_by_control_count[bucket] += 1
+
+        # Get all controls linked to filtered RAs
+        # Note: no IAM filtering here — coverage metrics must be comprehensive
+        # to avoid misleadingly low percentages. Only aggregates are exposed.
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        control_ids = set(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("appliedcontrol_id", flat=True)
+        )
+
+        control_status_distribution = defaultdict(int)
+        if control_ids:
+            controls = AppliedControl.objects.filter(id__in=control_ids)
+            for c in controls:
+                control_status_distribution[c.status] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_controls": with_controls,
+                "without_controls": without_controls,
+                "coverage_percent": round(with_controls / total * 100, 1)
+                if total > 0
+                else 0,
+                "control_status_distribution": dict(control_status_distribution),
+                "requirements_by_control_count": dict(requirements_by_control_count),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="evidence_coverage")
+    def evidence_coverage(self, request, pk):
+        """Evidence coverage analysis — direct (on RA) and indirect (via applied controls)."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+
+        # Note: no IAM filtering on evidence/controls — coverage metrics must be
+        # comprehensive to avoid misleadingly low percentages. Only aggregates are exposed.
+
+        # Direct evidence: RA.evidences M2M
+        ra_with_direct = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", flat=True)
+        )
+
+        # Indirect evidence: RA → applied_controls → evidences
+        ra_control_pairs = list(
+            RequirementAssessment.applied_controls.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("requirementassessment_id", "appliedcontrol_id")
+        )
+        control_ids = set(pair[1] for pair in ra_control_pairs)
+        controls_with_evidence = (
+            set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("appliedcontrol_id", flat=True)
+            )
+            if control_ids
+            else set()
+        )
+        ra_with_indirect = set()
+        for ra_id, ctrl_id in ra_control_pairs:
+            if ctrl_id in controls_with_evidence:
+                ra_with_indirect.add(ra_id)
+
+        # Combine
+        ra_with_any_evidence = ra_with_direct | ra_with_indirect
+        with_evidence = len(ra_with_any_evidence)
+        without_evidence = len(filtered_ras) - with_evidence
+        direct_only = len(ra_with_direct - ra_with_indirect)
+        indirect_only = len(ra_with_indirect - ra_with_direct)
+        both = len(ra_with_direct & ra_with_indirect)
+
+        # Evidence status distribution
+        all_evidence_ids = set(
+            RequirementAssessment.evidences.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("evidence_id", flat=True)
+        )
+        if control_ids:
+            all_evidence_ids |= set(
+                AppliedControl.evidences.through.objects.filter(
+                    appliedcontrol_id__in=control_ids
+                ).values_list("evidence_id", flat=True)
+            )
+        evidence_status_distribution = defaultdict(int)
+        if all_evidence_ids:
+            for status_val in Evidence.objects.filter(
+                id__in=all_evidence_ids
+            ).values_list("status", flat=True):
+                evidence_status_distribution[status_val] += 1
+
+        total = len(filtered_ras)
+        return Response(
+            {
+                "total_assessable": total,
+                "with_evidence": with_evidence,
+                "without_evidence": without_evidence,
+                "coverage_percent": round(with_evidence / total * 100, 1)
+                if total > 0
+                else 0,
+                "direct_only": direct_only,
+                "indirect_only": indirect_only,
+                "both": both,
+                "evidence_status_distribution": dict(evidence_status_distribution),
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="exceptions_summary")
+    def exceptions_summary(self, request, pk):
+        """Security exceptions summary for this compliance assessment."""
+        compliance_assessment = self.get_object()
+        ig = (
+            set(compliance_assessment.selected_implementation_groups)
+            if compliance_assessment.selected_implementation_groups
+            else None
+        )
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            if ig and not (ig & set(ra.requirement.implementation_groups or [])):
+                continue
+            filtered_ras.append(ra)
+
+        ra_ids_list = [ra.id for ra in filtered_ras]
+        exception_ids = set(
+            RequirementAssessment.security_exceptions.through.objects.filter(
+                requirementassessment_id__in=ra_ids_list
+            ).values_list("securityexception_id", flat=True)
+        )
+        # IAM: intersect with user-visible exceptions
+        (viewable_exception_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, SecurityException
+        )
+        exception_ids &= set(viewable_exception_ids)
+
+        if not exception_ids:
+            return Response(
+                {
+                    "total": 0,
+                    "status_distribution": {},
+                    "severity_distribution": {},
+                    "exceptions": [],
+                }
+            )
+
+        exceptions = SecurityException.objects.filter(id__in=exception_ids)
+        status_distribution = defaultdict(int)
+        severity_distribution = defaultdict(int)
+        exception_list = []
+        for exc in exceptions:
+            status_distribution[exc.status] += 1
+            severity_distribution[exc.get_severity_display()] += 1
+            exception_list.append(
+                {
+                    "id": str(exc.id),
+                    "name": exc.name,
+                    "status": exc.status,
+                    "severity": exc.get_severity_display(),
+                    "expiration_date": str(exc.expiration_date)
+                    if exc.expiration_date
+                    else None,
+                }
+            )
+
+        return Response(
+            {
+                "total": len(exception_ids),
+                "status_distribution": dict(status_distribution),
+                "severity_distribution": dict(severity_distribution),
+                "exceptions": exception_list,
+            }
+        )
+
+    @action(detail=True, methods=["get"], url_path="compliance_timeline")
+    def compliance_timeline(self, request, pk):
+        """Returns compliance metrics over time from HistoricalMetric snapshots."""
+        compliance_assessment = self.get_object()
+
+        # Get historical data for this assessment
+        metrics = HistoricalMetric.objects.filter(
+            model="ComplianceAssessment", object_id=pk
+        ).order_by("date")
+
+        timeline = []
+        for m in metrics:
+            data = m.data.get("reqs", {})
+            timeline.append(
+                {
+                    "date": m.date.isoformat(),
+                    "progress_perc": data.get("progress_perc", 0),
+                    "score": data.get("score", 0),
+                    "per_result": data.get("per_result", {}),
+                    "per_status": data.get("per_status", {}),
+                }
+            )
+
+        return Response({"timeline": timeline})
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="implementation_groups_breakdown",
+    )
+    def implementation_groups_breakdown(self, request, pk):
+        """Breakdown of compliance results by implementation group."""
+        compliance_assessment = self.get_object()
+        framework = compliance_assessment.framework
+
+        ig_definition = framework.implementation_groups_definition
+        if not ig_definition:
+            return Response({"groups": []})
+
+        ras = RequirementAssessment.objects.filter(
+            compliance_assessment=compliance_assessment,
+            requirement__assessable=True,
+        ).select_related("requirement")
+
+        # Auditee filtering
+        auditee_folders = get_auditee_filtered_folder_ids(request.user)
+        ra_ids = None
+        if auditee_folders and compliance_assessment.folder_id in auditee_folders:
+            user_actors = Actor.get_all_for_user(request.user)
+            ra_ids = set(
+                RequirementAssignment.objects.filter(
+                    compliance_assessment=compliance_assessment,
+                    actor__in=user_actors,
+                ).values_list("requirement_assessments__id", flat=True)
+            )
+
+        # Build filtered RA list
+        filtered_ras = []
+        for ra in ras:
+            if ra_ids is not None and ra.id not in ra_ids:
+                continue
+            filtered_ras.append(ra)
+
+        groups = []
+        for group_def in ig_definition:
+            group_ref_id = group_def.get("ref_id")
+            group_name = group_def.get("name", group_ref_id)
+
+            matching_ras = [
+                ra
+                for ra in filtered_ras
+                if group_ref_id in (ra.requirement.implementation_groups or [])
+            ]
+
+            if not matching_ras:
+                groups.append(
+                    {
+                        "ref_id": group_ref_id,
+                        "name": group_name,
+                        "total_assessable": 0,
+                        "results": {},
+                        "progress_percent": 0,
+                        "score": None,
+                        "documentation_score": None,
+                        "scored_count": 0,
+                    }
+                )
+                continue
+
+            results = defaultdict(int)
+            assessed = 0
+            weighted_score = 0
+            total_weight = 0
+            doc_weighted_score = 0
+            doc_total_weight = 0
+            scored_count = 0
+            is_sum = (
+                compliance_assessment.score_calculation_method
+                == compliance_assessment.CalculationMethod.SUM
+            )
+
+            for ra in matching_ras:
+                results[ra.result] += 1
+                if ra.result != "not_assessed":
+                    assessed += 1
+                if ra.is_scored and ra.result != "not_applicable":
+                    weight = ra.requirement.weight if ra.requirement.weight else 1
+                    weighted_score += (ra.score or 0) * weight
+                    total_weight += weight
+                    scored_count += 1
+                    if compliance_assessment.show_documentation_score:
+                        doc_weighted_score += (ra.documentation_score or 0) * weight
+                        doc_total_weight += weight
+
+            total = len(matching_ras)
+            if is_sum:
+                group_score = (
+                    int(weighted_score * 10) / 10 if total_weight > 0 else None
+                )
+                group_doc_score = (
+                    int(doc_weighted_score * 10) / 10 if doc_total_weight > 0 else None
+                )
+            else:
+                group_score = (
+                    int((weighted_score / total_weight) * 10) / 10
+                    if total_weight > 0
+                    else None
+                )
+                group_doc_score = (
+                    int((doc_weighted_score / doc_total_weight) * 10) / 10
+                    if doc_total_weight > 0
+                    else None
+                )
+
+            groups.append(
+                {
+                    "ref_id": group_ref_id,
+                    "name": group_name,
+                    "total_assessable": total,
+                    "results": dict(results),
+                    "progress_percent": round(assessed / total * 100)
+                    if total > 0
+                    else 0,
+                    "score": group_score,
+                    "documentation_score": group_doc_score,
+                    "scored_count": scored_count,
+                }
+            )
+
+        return Response(
+            {
+                "groups": groups,
+                "score_calculation_method": compliance_assessment.score_calculation_method,
+                "max_score": compliance_assessment.max_score,
+                "min_score": compliance_assessment.min_score,
+            }
+        )
 
     @action(detail=False, methods=["get"], name="Get compliance analytics")
     def analytics(self, request):
@@ -10700,41 +11953,25 @@ class FindingsAssessmentViewSet(BaseModelViewSet):
                     "color": "hsl(80deg, 80%, 60%)",
                 },
                 "resolved": {"localName": "resolved", "color": "hsl(120deg, 80%, 45%)"},
+                "closed": {"localName": "closed", "color": "hsl(120deg, 60%, 35%)"},
                 "dismissed": {"localName": "dismissed", "color": "#5470c6"},
                 "deprecated": {"localName": "deprecated", "color": "#91cc75"},
                 "--": {"localName": "undefined", "color": "#CCCCCC"},
             }
 
-            grouped_status_counts = {}
+            status_values = []
 
             for status, count in metrics["status_distribution"].items():
                 mapping_info = status_mapping.get(
-                    status, {"localName": "other", "color": "#CCCCCC"}
+                    status, {"localName": status, "color": "#CCCCCC"}
                 )
-                local_name = mapping_info["localName"]
-                color = mapping_info["color"]
-
-                if local_name in grouped_status_counts:
-                    grouped_status_counts[local_name]["value"] += count
-                else:
-                    grouped_status_counts[local_name] = {
+                status_values.append(
+                    {
                         "value": count,
-                        "localName": local_name,
-                        "itemStyle": {"color": color},
+                        "localName": mapping_info["localName"],
+                        "itemStyle": {"color": mapping_info["color"]},
                     }
-
-            status_values = list(grouped_status_counts.values())
-
-            expected_statuses = ["open", "mitigate", "accept", "avoid", "transfer"]
-            for status in expected_statuses:
-                if not any(item["localName"] == status for item in status_values):
-                    status_values.append(
-                        {
-                            "value": 0,
-                            "localName": status,
-                            "itemStyle": {"color": "#CCCCCC"},
-                        }
-                    )
+                )
 
             return {"values": status_values}
 
@@ -11379,7 +12616,9 @@ class IncidentViewSet(ExportMixin, BaseModelViewSet):
 
         incident = (
             Incident.objects.select_related("folder")
-            .prefetch_related("owners", "entities", "assets", "threats")
+            .prefetch_related(
+                "owners", "entities", "assets", "threats", "qualifications"
+            )
             .get(id=pk)
         )
 
@@ -11758,6 +12997,50 @@ class TimelineEntryViewSet(BaseModelViewSet):
         return super().perform_destroy(instance)
 
 
+class CommentViewSet(BaseModelViewSet):
+    model = Comment
+    filterset_fields = [
+        "requirement_assessment",
+        "risk_scenario",
+        "applied_control",
+        "finding",
+        "is_active",
+        "author",
+    ]
+    search_fields = ["body"]
+    ordering = ["created_at"]
+
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .select_related(
+                "folder",
+                "author",
+                "requirement_assessment",
+                "risk_scenario",
+                "applied_control",
+                "finding",
+            )
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.author_id != self.request.user.id:
+            raise PermissionDenied({"error": "You can only edit your own comments."})
+        super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        if instance.author_id != self.request.user.id:
+            if not self.request.user.is_admin():
+                raise PermissionDenied(
+                    {"error": "You can only delete your own comments."}
+                )
+        return super().perform_destroy(instance)
+
+
 class TaskTemplateFilter(GenericFilterSet):
     folder = df.ModelMultipleChoiceFilter(queryset=Folder.objects.all())
 
@@ -11778,6 +13061,7 @@ class TaskTemplateFilter(GenericFilterSet):
             "last_occurrence_status",
             "next_occurrence_status",
             "evidences",
+            "objectives",
         ]
 
     def filter_last_occurrence_status(self, queryset, name, values):
@@ -12085,13 +13369,20 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
+        today = timezone.localdate()
+        task_templates = list(task_templates)
+        task_templates_by_id = {
+            str(template.id): template for template in task_templates
+        }
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
+                if not template.task_date:
+                    continue
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
-            start_date_param = start or template.task_date or datetime.now().date()
+            start_date_param = start or template.task_date or today
             end_date_param = end or template.schedule.get("end_date")
 
             if not end_date_param:
@@ -12109,63 +13400,146 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             tasks = _generate_occurrences(template, start_date, end_date)
             tasks_list.extend(tasks)
 
-        processed_tasks_identifiers = set()  # Track tasks we've already processed
+            # Preserve TaskNodes manually rescheduled by the user
+            # (due_date != scheduled_date)
+            # Unmodified nodes (due_date == scheduled_date)
+            # can be safely garbage-collected on schedule changes.
+            existing_nodes = TaskNode.objects.filter(
+                task_template=template,
+            ).filter(
+                Q(
+                    scheduled_date__gte=start_date,
+                    scheduled_date__lte=end_date,
+                )
+                | (
+                    Q(due_date__gte=start_date, due_date__lte=end_date)
+                    & (
+                        Q(scheduled_date__isnull=True)
+                        | ~Q(due_date=F("scheduled_date"))
+                    )
+                )
+            )
+            generated_scheduled_dates = {t["due_date"] for t in tasks}
+            for node in existing_nodes:
+                if node.due_date != node.scheduled_date:
+                    # Always preserve user-rescheduled nodes
+                    node.to_delete = False
+                    node.save(update_fields=["to_delete"])
+                    if node.due_date and start_date <= node.due_date <= end_date:
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                elif node.scheduled_date not in generated_scheduled_dates:
+                    effective_date = node.due_date or node.scheduled_date
+                    if effective_date and effective_date < today:
+                        # Preserve past nodes whose slot was removed
+                        node.to_delete = False
+                        node.save(update_fields=["to_delete"])
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
 
-        # Sort tasks by due date
+        def _parse_due_date(val):
+            """Normalize due_date to a date object"""
+            if isinstance(val, str):
+                return datetime.strptime(val, "%Y-%m-%d").date()
+            return val
+
+        # Sort tasks by due date, skip entries without a due_date
         sorted_tasks = sorted(
-            [t for t in tasks_list if t.get("due_date")], key=lambda x: x["due_date"]
+            [t for t in tasks_list if t.get("due_date")],
+            key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        # Process all past tasks and next 10 upcoming tasks
-        current_date = datetime.now().date()
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize.
+        # Every virtual task in the calendar range gets a DB record so it is
+        # clickable/editable in the UI.
+        # NOTE: All virtual tasks in the range are materialized. Currently the
+        # calendar UI fetches one month at a time; if that changes, consider
+        # adding an upper bound here.
+        tasks_to_process_ids = set()
+        for task in sorted_tasks:
+            if not task.get("virtual"):
+                continue
+            template_id = task.get("task_template")
+            task_date = task.get("due_date")
+            if template_id and task_date:
+                tasks_to_process_ids.add((template_id, task_date))
 
-        # First separate past and future tasks
-        past_tasks = [task for task in sorted_tasks if task["due_date"] <= current_date]
-        next_tasks = [task for task in sorted_tasks if task["due_date"] > current_date]
+        processed_tasks_identifiers = set()
+        materialized_node_ids = {
+            str(task["id"])
+            for task in tasks_list
+            if task and not task.get("virtual") and task.get("id")
+        }
 
-        # Combined list of tasks to process (past and next 10)
-        tasks_to_process = past_tasks + next_tasks
-
-        # Directly modify tasks in the original tasks_list
         for i in range(len(tasks_list)):
             task = tasks_list[i]
-            task_date = task["due_date"]
-            task_template_id = task["task_template"]
+            task_date = task.get("due_date")
+            if not task_date:
+                continue
 
-            # Create a unique identifier for this task to avoid duplication
+            # Already-serialized TaskNodes from the DB don't need processing
+            if not task.get("virtual"):
+                continue
+
+            task_template_id = task["task_template"]
             task_identifier = (task_template_id, task_date)
 
-            # Skip if we've already processed this task
             if task_identifier in processed_tasks_identifiers:
                 continue
 
-            # Check if this task should be processed (is in past or next 10)
-            if task in tasks_to_process:
+            if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                # Get or create the TaskNode
-                task_template = TaskTemplate.objects.get(id=task_template_id)
-                task_node, created = TaskNode.objects.get_or_create(
+                task_template = task_templates_by_id[str(task_template_id)]
+
+                # Check if a node already exists for this recurrence slot
+                rescheduled_node = TaskNode.objects.filter(
                     task_template=task_template,
-                    due_date=task_date,
-                    defaults={
-                        "status": "pending",
-                        "folder": task_template.folder,
-                    },
-                )
+                    scheduled_date=task_date,
+                ).first()
+                if rescheduled_node:
+                    if rescheduled_node.due_date != task_date:
+                        # Node was rescheduled — already preserved in
+                        # the existing_nodes loop, drop the virtual entry.
+                        tasks_list[i] = None
+                        continue
+                    task_node = rescheduled_node
+                else:
+                    try:
+                        task_node, created = TaskNode.objects.get_or_create(
+                            task_template=task_template,
+                            due_date=task_date,
+                            defaults={
+                                "scheduled_date": task_date,
+                                "status": "pending",
+                                "folder": task_template.folder,
+                            },
+                        )
+                    except IntegrityError:
+                        existing_node = TaskNode.objects.filter(
+                            task_template=task_template,
+                            due_date=task_date,
+                        ).first()
+                        if not existing_node:
+                            tasks_list[i] = None
+                            continue
+                        task_node = existing_node
+                if str(task_node.id) in materialized_node_ids:
+                    tasks_list[i] = None
+                    continue
+                materialized_node_ids.add(str(task_node.id))
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
-                # Replace the task dictionary with the actual TaskNode in the original list
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
-        return tasks_list
+        return [task for task in tasks_list if task is not None]
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
-                # Soft-delete all existing TaskNode instances associated with this TaskTemplate
-                TaskNode.objects.filter(
-                    task_template=task_template, due_date__gt=date.today()
+                today = timezone.localdate()
+                # Soft-delete future TaskNode instances for re-evaluation.
+                TaskNode.objects.filter(task_template=task_template).filter(
+                    Q(scheduled_date__gte=today)
+                    | Q(scheduled_date__isnull=True, due_date__gte=today)
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
@@ -12183,21 +13557,37 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if end_date_param:
                         end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                     else:
-                        end_date = datetime.now().date() + delta
+                        end_date = today + delta
                     # Ensure end_date is not before the calculated delta
-                    if end_date < datetime.now().date() + delta:
-                        end_date = datetime.now().date() + delta
+                    min_end_date = today + delta
+                    if end_date < min_end_date:
+                        end_date = min_end_date
                 else:
                     end_date = start_date
                 # Generate the task nodes
                 self.task_calendar(
-                    task_templates=TaskTemplate.objects.filter(id=task_template.id),
+                    task_templates=self.get_queryset().filter(id=task_template.id),
                     start=start_date,
                     end=end_date,
                 )
 
-                # garbage-collect
-                TaskNode.objects.filter(to_delete=True).delete()
+                # garbage-collect — only delete untouched nodes
+                TaskNode.objects.filter(
+                    to_delete=True,
+                    task_template=task_template,
+                    status="pending",
+                    due_date=F("scheduled_date"),
+                ).filter(
+                    Q(observation__isnull=True) | Q(observation=""),
+                ).exclude(
+                    evidences__isnull=False,
+                ).exclude(
+                    evidence_revisions__isnull=False,
+                ).delete()
+                # Clear to_delete on surviving nodes
+                TaskNode.objects.filter(
+                    to_delete=True, task_template=task_template
+                ).update(to_delete=False)
 
     @action(
         detail=False,
@@ -12216,7 +13606,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             end = timezone.now().date() + relativedelta.relativedelta(months=1)
         return Response(
             self.task_calendar(
-                task_templates=TaskTemplate.objects.filter(enabled=True),
+                task_templates=self.get_queryset().filter(enabled=True),
                 start=start,
                 end=end,
             )
@@ -12629,11 +14019,17 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
     Requirement assignments delegate groups of requirement assessments to specific actors.
     """
 
+    permission_overrides = {
+        "set_status": "transition_requirementassignment",
+        "requirements_list": "view_requirementassignment",
+    }
+
     model = RequirementAssignment
     filterset_fields = [
         "folder",
         "compliance_assessment",
         "actor",
+        "status",
     ]
 
     def get_queryset(self):
@@ -12647,6 +14043,12 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
             .prefetch_related(
                 "actor",
                 "requirement_assessments",
+                Prefetch(
+                    "events",
+                    queryset=RequirementAssignmentEvent.objects.select_related(
+                        "event_actor"
+                    ),
+                ),
             )
         )
         auditee_folders = get_auditee_filtered_folder_ids(self.request.user)
@@ -12656,3 +14058,235 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
                 ~Q(folder_id__in=auditee_folders) | Q(actor__in=user_actors)
             ).distinct()
         return qs
+
+    EDITABLE_STATUSES = ("draft", "in_progress")
+
+    def update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot edit assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        assignment = self.get_object()
+        if assignment.status not in self.EDITABLE_STATUSES:
+            return Response(
+                {"error": f"Cannot delete assignment in '{assignment.status}' status."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        return super().destroy(request, *args, **kwargs)
+
+    # Valid transitions: (from_status, to_status) → config
+    # reviewer_only: auditee-only users are forbidden
+    # actor_only: only assigned actors can perform this transition
+    # check_completion: all assessable requirements must be assessed
+    # observation: "clear" removes it, "optional" keeps if provided, "required" must be provided
+    TRANSITIONS = {
+        ("draft", "in_progress"): {"reviewer_only": True},
+        ("in_progress", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("changes_requested", "submitted"): {
+            "actor_only": True,
+            "check_completion": True,
+            "observation": "clear",
+        },
+        ("submitted", "closed"): {
+            "reviewer_only": True,
+            "observation": "optional",
+        },
+        ("submitted", "changes_requested"): {
+            "reviewer_only": True,
+            "observation": "required",
+        },
+        ("closed", "submitted"): {
+            "reviewer_only": True,
+            "observation": "clear",
+        },
+    }
+
+    @action(detail=True, methods=["post"], url_path="set_status")
+    def set_status(self, request, pk=None):
+        """Transition assignment to a new status.
+
+        Accepts {"status": "<target_status>", "reviewer_observation": "..."}.
+        Valid transitions and their constraints are defined in TRANSITIONS.
+        """
+        assignment = self.get_object()
+        target = request.data.get("status")
+        if not target:
+            return Response(
+                {"error": "Missing 'status' field."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        key = (assignment.status, target)
+        config = self.TRANSITIONS.get(key)
+        if config is None:
+            return Response(
+                {
+                    "error": f"Invalid transition from '{assignment.status}' to '{target}'."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Reviewer-only check: auditee-only users are forbidden
+        if config.get("reviewer_only"):
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if (
+                auditee_folders
+                and assignment.compliance_assessment.folder_id in auditee_folders
+            ):
+                return Response(
+                    {"error": "Auditee users cannot perform this action."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Actor-only check: user must be an assigned actor
+        if config.get("actor_only"):
+            user_actors = Actor.get_all_for_user(request.user)
+            if not assignment.actor.filter(id__in=[a.id for a in user_actors]).exists():
+                return Response(
+                    {"error": "You are not assigned to this assignment."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+
+        # Completion check: all assessable requirements must be assessed
+        if config.get("check_completion"):
+            unassessed_count = assignment.requirement_assessments.filter(
+                requirement__assessable=True, result="not_assessed"
+            ).count()
+            if unassessed_count > 0:
+                return Response(
+                    {
+                        "error": f"{unassessed_count} requirement(s) have not been assessed yet.",
+                        "unassessed_count": unassessed_count,
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        # Handle reviewer_observation (stored as event_notes)
+        obs_rule = config.get("observation")
+        observation = request.data.get("reviewer_observation")
+        if obs_rule == "required" and not observation:
+            return Response(
+                {"error": "Reviewer observation is required for this transition."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Apply transition
+        assignment.status = target
+        assignment.save(update_fields=["status"])
+
+        # Create event for traceability
+        RequirementAssignmentEvent.objects.create(
+            assignment=assignment,
+            event_type=target,
+            event_actor=request.user,
+            event_notes=observation if obs_rule in ("required", "optional") else None,
+            folder=assignment.folder,
+        )
+
+        # Send notification
+        try:
+            self._send_transition_notification(assignment, key, observation or "")
+        except Exception:
+            logger.error(
+                "Failed to send assignment notification",
+                assignment_id=str(assignment.id),
+                transition=f"{key[0]} -> {key[1]}",
+                exc_info=True,
+            )
+
+        return Response({"status": target})
+
+    @action(detail=True, methods=["get"])
+    def requirements_list(self, request, pk=None):
+        """Returns the scoped requirements list for this assignment.
+
+        Authorization is enforced by get_queryset() which filters
+        auditee-only users to their own assignments.
+        """
+        assignment = self.get_object()
+        compliance_assessment = assignment.compliance_assessment
+
+        assigned_ra_ids = set(
+            assignment.requirement_assessments.values_list("id", flat=True)
+        )
+
+        requirement_assessments_objects = list(
+            compliance_assessment.get_requirement_assessments(
+                include_non_assessable=True
+            )
+        )
+        requirement_assessments_objects = [
+            ra for ra in requirement_assessments_objects if ra.id in assigned_ra_ids
+        ]
+
+        requirements_objects = list(
+            RequirementNode.objects.filter(framework=compliance_assessment.framework)
+            .select_related("framework")
+            .prefetch_related("reference_controls", "threats")
+        )
+        nodes_by_urn = {node.urn: node for node in requirements_objects}
+        for node in requirements_objects:
+            parent = nodes_by_urn.get(node.parent_urn)
+            if parent:
+                node._parent_requirement_obj = parent
+        for ra in requirement_assessments_objects:
+            req = getattr(ra, "requirement", None)
+            if req:
+                parent = nodes_by_urn.get(req.parent_urn)
+                if parent:
+                    req._parent_requirement_obj = parent
+
+        requirement_assessments = RequirementAssessmentReadSerializer(
+            requirement_assessments_objects, many=True
+        ).data
+        requirements = RequirementNodeReadSerializer(
+            requirements_objects, many=True
+        ).data
+
+        return Response(
+            {
+                "requirements": requirements,
+                "requirement_assessments": requirement_assessments,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @staticmethod
+    def _send_transition_notification(assignment, transition_key, observation=""):
+        from_status, to_status = transition_key
+        if to_status == "in_progress":
+            from core.tasks import send_assignment_activated_notification
+
+            send_assignment_activated_notification(assignment.id)
+        elif to_status == "submitted" and from_status in (
+            "in_progress",
+            "changes_requested",
+        ):
+            from core.tasks import send_assignment_submitted_notification
+
+            send_assignment_submitted_notification(assignment.id)
+        elif to_status in ("closed", "changes_requested") or (
+            to_status == "submitted" and from_status == "closed"
+        ):
+            from core.tasks import send_assignment_reviewed_notification
+
+            decision = "reopened" if from_status == "closed" else to_status
+            send_assignment_reviewed_notification(assignment.id, decision, observation)

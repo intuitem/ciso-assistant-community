@@ -18,6 +18,10 @@ export interface User {
 	is_third_party: boolean;
 	is_auditee: boolean;
 	is_admin: boolean;
+	is_local: boolean;
+	is_sso: boolean;
+	is_superuser: boolean;
+	has_mfa_enabled: boolean;
 	accessible_domains: string[];
 	domain_permissions: Record<string, string[]>;
 	root_folder_id: string;

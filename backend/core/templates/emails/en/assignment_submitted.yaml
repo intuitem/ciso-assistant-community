@@ -1,0 +1,13 @@
+subject: "CISO Assistant: Assignment submitted for '${assessment_name}'"
+body: |
+  Hello,
+
+  An assignment has been submitted for review on the following audit:
+
+  - Audit: ${assessment_name}
+  - Submitted by: ${actor_names}
+  - Requirements assessed: ${requirement_count}
+
+  Please log in to your CISO Assistant portal to review the submission: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.

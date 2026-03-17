@@ -510,17 +510,50 @@ class OperationalScenarioImportExportSerializer(BaseModelSerializer):
 
 
 class ElementaryActionWriteSerializer(BaseModelSerializer):
-    operating_modes = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=OperatingMode.objects.all(),
-        required=False,
-        allow_null=True,
-        write_only=True,
-    )
-
     class Meta:
         model = ElementaryAction
         exclude = ["created_at", "updated_at"]
+
+    def validate(self, attrs):
+        attack_stage = attrs.get("attack_stage")
+        instance = self.instance
+
+        if (
+            instance
+            and attack_stage is not None
+            and attack_stage != instance.attack_stage
+        ):
+            conflicting_modes = {}
+
+            # Case 1: EA is used as an action in kill chains — check antecedents
+            for kc in KillChain.objects.filter(
+                elementary_action=instance
+            ).select_related("operating_mode__operational_scenario__ebios_rm_study"):
+                bad_antecedents = kc.antecedents.filter(attack_stage__gt=attack_stage)
+                if bad_antecedents.exists():
+                    mo = kc.operating_mode
+                    op_scenario = mo.operational_scenario
+                    study = op_scenario.ebios_rm_study
+                    conflicting_modes[str(mo.id)] = f"{study} → {op_scenario} → {mo}"
+
+            # Case 2: EA is used as an antecedent — check the action it feeds into
+            for kc in KillChain.objects.filter(antecedents=instance).select_related(
+                "operating_mode__operational_scenario__ebios_rm_study",
+                "elementary_action",
+            ):
+                if attack_stage > kc.elementary_action.attack_stage:
+                    mo = kc.operating_mode
+                    op_scenario = mo.operational_scenario
+                    study = op_scenario.ebios_rm_study
+                    conflicting_modes[str(mo.id)] = f"{study} → {op_scenario} → {mo}"
+
+            if conflicting_modes:
+                error_messages = ["killChainConsistencyError"]
+                for _, label in sorted(conflicting_modes.items(), key=lambda x: x[1]):
+                    error_messages.append(f"{label}")
+                raise serializers.ValidationError({"attack_stage": error_messages})
+
+        return super().validate(attrs)
 
 
 from core.serializers import ThreatReadSerializer
@@ -548,7 +581,6 @@ class OperatingModeWriteSerializer(BaseModelSerializer):
 class OperatingModeReadSerializer(BaseModelSerializer):
     operational_scenario = FieldsRelatedField()
     folder = FieldsRelatedField()
-    elementary_actions = FieldsRelatedField(many=True)
     likelihood = serializers.JSONField(source="get_likelihood_display")
     ebios_rm_study = FieldsRelatedField()
 

@@ -1,3 +1,4 @@
+from django.conf import settings as django_settings
 from rest_framework import serializers
 
 from .models import GlobalSettings
@@ -20,6 +21,8 @@ GENERAL_SETTINGS_KEYS = [
     "show_warning_external_links",
     "builtin_metrics_retention_days",
     "allow_assignments_to_entities",
+    "enforce_mfa",
+    "default_language",
 ]
 
 
@@ -68,6 +71,14 @@ class GeneralSettingsSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError(
                         {
                             "builtin_metrics_retention_days": "Retention days must be at least 1"
+                        }
+                    )
+            if key == "default_language":
+                valid_codes = [code for code, _ in django_settings.LANGUAGES]
+                if value not in valid_codes:
+                    raise serializers.ValidationError(
+                        {
+                            "default_language": f"Invalid language. Must be one of: {valid_codes}"
                         }
                     )
             setattr(instance, "value", validated_data["value"])
@@ -233,6 +244,15 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     )
     auditee_mode = serializers.BooleanField(
         source="value.auditee_mode", required=False, default=False
+    )
+    advanced_analytics = serializers.BooleanField(
+        source="value.advanced_analytics", required=False, default=False
+    )
+    comments = serializers.BooleanField(
+        source="value.comments", required=False, default=True
+    )
+    journeys = serializers.BooleanField(
+        source="value.journeys", required=False, default=True
     )
 
     class Meta:

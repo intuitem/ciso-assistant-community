@@ -560,6 +560,9 @@
 
 	let openState = $state(false);
 
+	// Search state lifted here so it survives BatchActionBar show/hide cycles
+	let searchValue = $state('');
+
 	// Batch selection state
 	let selectedIds: Set<string> = $state(new Set());
 
@@ -614,7 +617,7 @@
 </script>
 
 <div class="card table-wrap {classesBase}">
-	<header class="flex justify-between items-center space-x-8 p-2">
+	<header class="flex items-center justify-between gap-2 px-2 h-16">
 		{#if hasBatchActions && selectedIds.size > 0}
 			<BatchActionBar
 				{selectedIds}
@@ -633,7 +636,7 @@
 					onPointerDownOutside={() => (openState = false)}
 					closeOnInteractOutside={false}
 				>
-					<Popover.Trigger class="btn preset-filled-primary-500 self-end relative">
+					<Popover.Trigger class="btn preset-filled-primary-500 h-9 inline-flex items-center">
 						<i class="fa-solid fa-filter mr-2"></i>
 						{m.filters()}
 						{#if filterCount}
@@ -673,7 +676,7 @@
 				</Popover>
 			{/if}
 			{#if search}
-				<Search {handler} />
+				<Search {handler} bind:value={searchValue} />
 			{/if}
 			{#if pagination && rowsPerPage}
 				<RowsPerPage {handler} />
@@ -937,10 +940,13 @@
 															{value.name}
 														{:else}
 															<!-- NOTE: We will have to handle the ellipses for RTL languages-->
-															{#if value?.length > 300}
-																{safeTranslate(value ?? '-').slice(0, 300)}...
+															{@const displayValue = ['name', 'description', 'ref_id'].includes(key)
+																? (value ?? '-')
+																: safeTranslate(value ?? '-')}
+															{#if displayValue?.length > 300}
+																{displayValue.slice(0, 300)}...
 															{:else}
-																{safeTranslate(value ?? '-')}
+																{displayValue}
 															{/if}
 														{/if}
 														{@render badge?.(key, row)}

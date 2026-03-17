@@ -1,0 +1,16 @@
+subject: "CISO Assistant: You have been assigned to '${scenario_name}'"
+body: |
+  Hello,
+
+  You have been assigned to the following Risk Scenario:
+
+  - Name: ${scenario_name}
+  - Description: ${scenario_description}
+  - Reference ID: ${scenario_ref_id}
+  - Risk Assessment: ${risk_assessment_name}
+  - Treatment: ${scenario_treatment}
+  - Domain: ${folder_name}
+
+  Log in to your CISO Assistant portal to view and manage this risk scenario: [Go to CISO Assistant](${ciso_assistant_url})
+
+  Thank you.
