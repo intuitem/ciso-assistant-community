@@ -34,14 +34,6 @@
 		deprecated: 'bg-gray-100 text-gray-500'
 	};
 
-	const statusLabels: Record<string, string> = {
-		draft: 'Draft',
-		in_review: 'In review',
-		change_requested: 'Change requested',
-		published: 'Published',
-		deprecated: 'Deprecated'
-	};
-
 	function modalRequestValidation(): void {
 		const modalComponent: ModalComponent = {
 			ref: CreateModal,
@@ -112,7 +104,7 @@
 								currentRevisionContent.status
 							] || 'bg-gray-100 text-gray-600'}"
 						>
-							{statusLabels[currentRevisionContent.status] || currentRevisionContent.status}
+							{currentRevisionContent.status_display || currentRevisionContent.status}
 						</span>
 						<span class="text-sm text-gray-500">
 							v{currentRevisionContent.version_number}
@@ -132,7 +124,13 @@
 				{#if currentRevisionContent.published_at}
 					<div class="px-4 py-2 border-t text-xs text-gray-400">
 						{m.publishedAt()}:
-						{new Date(currentRevisionContent.published_at).toLocaleDateString()}
+						{new Date(currentRevisionContent.published_at).toLocaleString(undefined, {
+							year: 'numeric',
+							month: 'short',
+							day: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit'
+						})}
 						{#if currentRevisionContent.author}
 							&middot;
 							{currentRevisionContent.author.first_name || ''}
@@ -144,7 +142,7 @@
 		{:else if page.data?.featureflags?.policy_documents !== false && policyDocument === null}
 			<div class="card bg-white shadow rounded-lg border mt-4 p-6 text-center">
 				<i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 mb-3"></i>
-				<p class="text-gray-500 mb-3">No document has been created for this policy yet.</p>
+				<p class="text-gray-500 mb-3">{m.noDocumentCreatedYet()}</p>
 				<a
 					href="/policies/{policy.id}/document"
 					class="btn bg-blue-500 text-white hover:bg-blue-600 inline-flex"

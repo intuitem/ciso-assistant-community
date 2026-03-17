@@ -3647,6 +3647,11 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                     updated_instance, current_status, new_status
                 )
 
+                # Sync policy document revisions based on flow status
+                self._sync_policy_document_revisions(
+                    updated_instance, new_status, request_user, event_notes
+                )
+
                 # Cascade folder changes to events if needed
                 if old_folder_id != updated_instance.folder_id:
                     FlowEvent.objects.filter(validation_flow=updated_instance).update(
@@ -3709,6 +3714,80 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
                 )
 
         return updated_instance
+
+    def _sync_policy_document_revisions(
+        self, validation_flow, new_status: str, reviewer=None, event_notes=None
+    ):
+        """
+        Sync policy document revisions based on validation flow status transitions.
+        Only active when the validation_flows feature flag is enabled.
+
+        Handles the multi-flow scenario (e.g. colleague opinion + manager approval):
+        - accepted: only publish if ALL other flows on the policy are also
+          accepted (or in a terminal state). Otherwise, wait.
+        - change_requested: apply immediately — any reviewer can flag changes.
+        - rejected/dropped: only revert to draft if NO other submitted/accepted
+          flows remain on the policy.
+        """
+        from global_settings.utils import ff_is_enabled
+
+        if not ff_is_enabled("validation_flows"):
+            return
+
+        for policy in validation_flow.policies.all():
+            if not hasattr(policy, "documents"):
+                continue
+
+            # All other flows targeting this policy (excluding the current one)
+            other_flows = policy.validationflow_set.exclude(pk=validation_flow.pk)
+
+            if new_status == "accepted":
+                # Only publish when no other flow is still pending (submitted)
+                # or requesting changes
+                pending = other_flows.filter(
+                    status__in=["submitted", "change_requested"]
+                ).exists()
+                if pending:
+                    continue
+                for doc in policy.documents.all():
+                    revision = doc.revisions.filter(status="in_review").first()
+                    if not revision:
+                        continue
+                    revision.publish(reviewer=reviewer)
+                    try:
+                        from doc_management.views import DocumentRevisionViewSet
+
+                        DocumentRevisionViewSet._generate_pdf_snapshot(
+                            DocumentRevisionViewSet(), revision
+                        )
+                    except Exception as e:
+                        logger.warning(
+                            "Failed to generate PDF snapshot from validation flow",
+                            error=str(e),
+                        )
+
+            elif new_status == "change_requested":
+                # Any reviewer can flag changes immediately
+                for doc in policy.documents.all():
+                    revision = doc.revisions.filter(status="in_review").first()
+                    if not revision:
+                        continue
+                    revision.mark_change_requested(
+                        reviewer=reviewer, comments=event_notes or ""
+                    )
+
+            elif new_status in ("rejected", "dropped"):
+                # Only revert if no other flow is still active
+                still_active = other_flows.filter(
+                    status__in=["submitted", "accepted"]
+                ).exists()
+                if still_active:
+                    continue
+                for doc in policy.documents.all():
+                    revision = doc.revisions.filter(status="in_review").first()
+                    if not revision:
+                        continue
+                    revision.revert_to_draft()
 
     def _manage_associated_objects_lock(
         self, validation_flow, old_status: str, new_status: str

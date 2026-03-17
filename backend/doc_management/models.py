@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.base_models import AbstractBaseModel
@@ -128,6 +129,38 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
             if existing.exists():
                 raise ValidationError("Only one draft revision allowed per document.")
         super().clean()
+
+    def publish(self, reviewer=None):
+        """Publish this revision: set PUBLISHED, deprecate old, set as current."""
+        self.status = self.Status.PUBLISHED
+        self.published_at = timezone.now()
+        if reviewer:
+            self.reviewer = reviewer
+        self.save()
+
+        # Deprecate previous published revisions
+        self.document.revisions.filter(status=self.Status.PUBLISHED).exclude(
+            pk=self.pk
+        ).update(status=self.Status.DEPRECATED)
+
+        # Set as current revision
+        self.document.current_revision = self
+        self.document.save()
+
+    def mark_change_requested(self, reviewer=None, comments=""):
+        """Mark this revision as needing changes."""
+        self.status = self.Status.CHANGE_REQUESTED
+        if reviewer:
+            self.reviewer = reviewer
+        self.reviewer_comments = comments
+        self.save()
+
+    def revert_to_draft(self):
+        """Revert this revision back to draft status."""
+        self.status = self.Status.DRAFT
+        self.reviewer = None
+        self.reviewer_comments = None
+        self.save()
 
     def __str__(self):
         return f"{self.document.display_name} v{self.version_number}"

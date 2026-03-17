@@ -1,7 +1,10 @@
 import { BASE_API_URL } from '$lib/utils/constants';
+import { loadValidationFlowFormData } from '$lib/utils/load';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
+export const load: PageServerLoad = async (event) => {
+	const { fetch, params, cookies, locals } = event;
+
 	// Load the policy
 	const policyRes = await fetch(`${BASE_API_URL}/policies/${params.id}/`);
 	const policy = await policyRes.json();
@@ -55,6 +58,35 @@ export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
 	const templatesRes = await fetch(`${BASE_API_URL}/managed-documents/templates/`);
 	const templates = await templatesRes.json();
 
+	// Load validation flow data when feature flag is ON
+	let validationFlowForm = null;
+	let validationFlowModel = null;
+	let activeValidationFlows: any[] = [];
+
+	if (locals.featureflags?.validation_flows) {
+		const vfData = await loadValidationFlowFormData({
+			event,
+			folderId: policy.folder?.id || policy.folder,
+			targetField: 'policies',
+			targetIds: [params.id]
+		});
+		validationFlowForm = vfData.validationFlowForm;
+		validationFlowModel = vfData.validationFlowModel;
+
+		// Fetch active (submitted) flows for this policy
+		try {
+			const flowsRes = await fetch(
+				`${BASE_API_URL}/validation-flows/?policies=${params.id}&status=submitted`
+			);
+			if (flowsRes.ok) {
+				const flowsData = await flowsRes.json();
+				activeValidationFlows = flowsData.results || [];
+			}
+		} catch {
+			// Silently ignore — validation flows are optional
+		}
+	}
+
 	return {
 		policy,
 		document,
@@ -62,6 +94,9 @@ export const load: PageServerLoad = async ({ fetch, params, cookies }) => {
 		currentRevision,
 		templates,
 		availableLocales,
-		userLocale
+		userLocale,
+		validationFlowForm,
+		validationFlowModel,
+		activeValidationFlows
 	};
 };

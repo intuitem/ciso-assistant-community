@@ -233,15 +233,25 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                         "Please reload and re-apply your changes."
                     }
                 )
+        old_content = instance.content
         instance = serializer.save()
-        # Record edit history for draft revisions
-        if instance.status == DocumentRevision.Status.DRAFT:
+        # Record edit history for draft revisions, only if content actually changed
+        if (
+            instance.status == DocumentRevision.Status.DRAFT
+            and instance.content != old_content
+        ):
             DocumentEdit.objects.create(
                 revision=instance,
                 editor=self.request.user,
                 summary=instance.change_summary or "",
                 content_snapshot=instance.content,
             )
+            # Cap edit history to the 20 most recent entries per revision
+            MAX_EDITS_PER_REVISION = 20
+            edit_ids_to_keep = instance.edits.order_by("-created_at").values_list(
+                "pk", flat=True
+            )[:MAX_EDITS_PER_REVISION]
+            instance.edits.exclude(pk__in=list(edit_ids_to_keep)).delete()
 
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):
@@ -383,19 +393,19 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can be approved."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        revision.status = DocumentRevision.Status.PUBLISHED
-        revision.published_at = timezone.now()
-        revision.reviewer = request.user
-        revision.save()
 
-        # Deprecate previous published revisions
-        revision.document.revisions.filter(
-            status=DocumentRevision.Status.PUBLISHED
-        ).exclude(pk=revision.pk).update(status=DocumentRevision.Status.DEPRECATED)
+        # Soft guard: block manual approve when validation_flows flag is ON
+        # and the revision's policy has an active (submitted) ValidationFlow.
+        if self._has_active_validation_flow(revision):
+            return Response(
+                {
+                    "error": "This revision is managed by a validation flow. "
+                    "Please use the validation flow to approve it."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
-        # Set as current revision
-        revision.document.current_revision = revision
-        revision.document.save()
+        revision.publish(reviewer=request.user)
 
         # Generate PDF snapshot
         try:
@@ -414,10 +424,22 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 {"error": "Only in-review revisions can have changes requested."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        revision.status = DocumentRevision.Status.CHANGE_REQUESTED
-        revision.reviewer = request.user
-        revision.reviewer_comments = request.data.get("reviewer_comments", "")
-        revision.save()
+
+        # Soft guard: block manual request-changes when validation_flows flag is ON
+        # and the revision's policy has an active (submitted) ValidationFlow.
+        if self._has_active_validation_flow(revision):
+            return Response(
+                {
+                    "error": "This revision is managed by a validation flow. "
+                    "Please use the validation flow to request changes."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        revision.mark_change_requested(
+            reviewer=request.user,
+            comments=request.data.get("reviewer_comments", ""),
+        )
         return Response({"status": "change_requested"})
 
     @action(
@@ -532,38 +554,8 @@ class DocumentRevisionViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="export-pdf")
     def export_pdf(self, request, pk=None):
         """Export revision content as a PDF document."""
-        import markdown as md_lib
-
         revision = self.get_object()
-        content_html = md_lib.markdown(
-            revision.content,
-            extensions=["tables", "fenced_code", "toc", "nl2br"],
-        )
-        content_html = self._inline_images(content_html)
-        author_name = ""
-        if revision.author:
-            author_name = (
-                f"{revision.author.first_name} {revision.author.last_name}".strip()
-                or revision.author.email
-            )
-        context = {
-            "policy_name": revision.document.display_name,
-            "version_number": revision.version_number,
-            "status": revision.status,
-            "status_display": revision.get_status_display(),
-            "author_name": author_name,
-            "published_at": (
-                revision.published_at.strftime("%Y-%m-%d")
-                if revision.published_at
-                else ""
-            ),
-            "date": timezone.now().strftime("%Y-%m-%d"),
-            "content_html": content_html,
-        }
-        html_string = render_to_string(
-            "doc_management/policy_document_pdf.html", context
-        )
-        pdf = HTML(string=html_string).write_pdf()
+        pdf = self._render_pdf_bytes(revision)
         response = HttpResponse(pdf, content_type="application/pdf")
         filename = slugify(revision.document.display_name)
         response["Content-Disposition"] = (
@@ -575,10 +567,25 @@ class DocumentRevisionViewSet(BaseModelViewSet):
     def status(self, request):
         return Response(dict(DocumentRevision.Status.choices))
 
-    def _generate_pdf_snapshot(self, revision):
-        """Generate and save a PDF snapshot for a revision."""
+    @staticmethod
+    def _has_active_validation_flow(revision):
+        """Check if this revision's policy has an active (submitted) ValidationFlow.
+
+        Returns True only when the validation_flows feature flag is ON AND there
+        is at least one submitted ValidationFlow linked to the policy.
+        """
+        from global_settings.utils import ff_is_enabled
+
+        if not ff_is_enabled("validation_flows"):
+            return False
+        policy = revision.document.policy
+        if not policy:
+            return False
+        return policy.validationflow_set.filter(status="submitted").exists()
+
+    def _render_pdf_bytes(self, revision):
+        """Render a revision to PDF bytes (shared by export and snapshot)."""
         import markdown as md_lib
-        from django.core.files.base import ContentFile
 
         content_html = md_lib.markdown(
             revision.content,
@@ -608,7 +615,13 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         html_string = render_to_string(
             "doc_management/policy_document_pdf.html", context
         )
-        pdf_content = HTML(string=html_string).write_pdf()
+        return HTML(string=html_string).write_pdf()
+
+    def _generate_pdf_snapshot(self, revision):
+        """Generate and save a PDF snapshot for a revision."""
+        from django.core.files.base import ContentFile
+
+        pdf_content = self._render_pdf_bytes(revision)
         filename = slugify(revision.document.display_name)
         revision.pdf_snapshot.save(
             f"{filename}_v{revision.version_number}.pdf",

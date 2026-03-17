@@ -2,8 +2,10 @@
 	import { m } from '$paraglide/messages';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
+	import { page } from '$app/state';
 	import DiffViewer from '$lib/components/PolicyEditor/DiffViewer.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -67,14 +69,6 @@
 			icon: 'fa-circle-check'
 		},
 		deprecated: { bg: 'bg-gray-50 border-gray-200', text: 'text-gray-500', icon: 'fa-archive' }
-	};
-
-	const statusLabels: Record<string, string> = {
-		draft: 'Draft',
-		in_review: 'In review',
-		change_requested: 'Change requested',
-		published: 'Published',
-		deprecated: 'Deprecated'
 	};
 
 	function getStatusStyle(s: string) {
@@ -225,7 +219,34 @@
 		});
 		if (res.ok) {
 			await refreshData();
+			// When validation flows are enabled, open the create validation flow modal
+			if (validationFlowsEnabled && data.validationFlowForm && data.validationFlowModel) {
+				openValidationFlowModal();
+			}
 		}
+	}
+
+	function openValidationFlowModal() {
+		const modalComponent: ModalComponent = {
+			ref: CreateModal,
+			props: {
+				form: data.validationFlowForm,
+				model: data.validationFlowModel,
+				debug: false,
+				invalidateAll: true,
+				formAction: '/validation-flows?/create',
+				onConfirm: async () => {
+					await invalidateAll();
+					await refreshData();
+				}
+			}
+		};
+		const modal: ModalSettings = {
+			type: 'component',
+			component: modalComponent,
+			title: m.requestValidation()
+		};
+		modalStore.trigger(modal);
 	}
 
 	async function approve() {
@@ -283,35 +304,27 @@
 	}
 
 	function deleteRevision(revisionId: string) {
-		confirmAndDelete(
-			m.deleteConfirmation ? m.deleteConfirmation() : 'Delete revision',
-			'This will permanently delete this revision.',
-			async () => {
-				const qs = new URLSearchParams({ _type: 'revision', id: revisionId }).toString();
-				const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
-				if (res.ok) {
-					await refreshData();
-				}
+		confirmAndDelete(m.deleteRevision(), m.deleteRevisionConfirmation(), async () => {
+			const qs = new URLSearchParams({ _type: 'revision', id: revisionId }).toString();
+			const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
+			if (res.ok) {
+				await refreshData();
 			}
-		);
+		});
 	}
 
 	function deleteDocument() {
 		if (!document) return;
-		confirmAndDelete(
-			m.deleteConfirmation ? m.deleteConfirmation() : 'Delete document',
-			'This will permanently delete this document and all its revisions.',
-			async () => {
-				const qs = new URLSearchParams({ _type: 'document', id: document.id }).toString();
-				const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
-				if (res.ok) {
-					document = null;
-					currentRevision = null;
-					revisions = [];
-					showTemplateSelector = true;
-				}
+		confirmAndDelete(m.deleteDocumentTitle(), m.deleteDocumentConfirmation(), async () => {
+			const qs = new URLSearchParams({ _type: 'document', id: document.id }).toString();
+			const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
+			if (res.ok) {
+				document = null;
+				currentRevision = null;
+				revisions = [];
+				showTemplateSelector = true;
 			}
-		);
+		});
 	}
 
 	async function exportPdf() {
@@ -405,8 +418,8 @@
 		const modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			title: 'Take over editing',
-			body: `${editorName} may have unsaved changes that will be lost. Are you sure you want to take over?`,
+			title: m.takeOverEditingTitle(),
+			body: m.takeOverEditingConfirmation({ user: editorName }),
 			response: (confirmed: boolean) => {
 				if (confirmed) takeOverEditing();
 			}
@@ -524,6 +537,8 @@
 	let canEdit = $derived(isDraft && !lockedBy);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
+	let validationFlowsEnabled = $derived(page.data?.featureflags?.validation_flows);
+	let activeValidationFlows = $derived(data.activeValidationFlows || []);
 
 	// Image upload state
 	let uploading = $state(false);
@@ -657,7 +672,7 @@
 			<a
 				href="/policies/{policy.id}"
 				class="btn btn-sm preset-tonal-surface"
-				title="Back to policy"
+				title={m.backToPolicy()}
 			>
 				<i class="fa-solid fa-arrow-left"></i>
 			</a>
@@ -670,7 +685,7 @@
 						<button
 							class="btn btn-sm preset-tonal-surface gap-1"
 							onclick={() => (showLocalePicker = !showLocalePicker)}
-							title="Document language"
+							title={m.documentLanguage()}
 						>
 							{#if LOCALE_MAP[currentLocale as keyof typeof LOCALE_MAP]?.flag}
 								<span>{LOCALE_MAP[currentLocale as keyof typeof LOCALE_MAP].flag}</span>
@@ -739,7 +754,7 @@
 						class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border {style.bg} {style.text}"
 					>
 						<i class="fa-solid {style.icon} text-[10px]"></i>
-						{statusLabels[currentRevision.status] || currentRevision.status}
+						{currentRevision.status_display || currentRevision.status}
 					</span>
 					<span class="text-xs text-surface-500 font-mono">
 						v{currentRevision.version_number}
@@ -770,13 +785,13 @@
 				>
 					{#if saving}
 						<i class="fa-solid fa-spinner fa-spin"></i>
-						<span class="ml-1">Saving...</span>
+						<span class="ml-1">{m.saving()}</span>
 					{:else if saved}
 						<i class="fa-solid fa-check"></i>
-						<span class="ml-1">Saved</span>
+						<span class="ml-1">{m.saved()}</span>
 					{:else}
 						<i class="fa-solid fa-floppy-disk"></i>
-						<span class="ml-1">Save</span>
+						<span class="ml-1">{m.save()}</span>
 					{/if}
 				</button>
 				<button class="btn btn-sm preset-filled-warning-500" onclick={() => submitForReview()}>
@@ -785,10 +800,10 @@
 				</button>
 			{/if}
 
-			{#if isInReview}
+			{#if isInReview && !validationFlowsEnabled}
 				<button class="btn btn-sm preset-filled-success-500" onclick={() => approve()}>
 					<i class="fa-solid fa-check"></i>
-					<span class="ml-1">Approve</span>
+					<span class="ml-1">{m.approve()}</span>
 				</button>
 				<button class="btn btn-sm preset-filled-error-500" onclick={() => requestChanges()}>
 					<i class="fa-solid fa-rotate-left"></i>
@@ -807,7 +822,7 @@
 				<button
 					class="btn btn-sm preset-tonal-error"
 					onclick={() => deleteDocument()}
-					title="Delete document and all revisions"
+					title={m.deleteDocumentAndRevisions()}
 				>
 					<i class="fa-solid fa-trash"></i>
 				</button>
@@ -837,7 +852,7 @@
 						<i class="fa-solid fa-file-pen text-2xl text-surface-500"></i>
 					</div>
 					<h2 class="text-xl font-semibold mb-2">{m.documentEditor()}</h2>
-					<p class="text-surface-500">Choose how to start your policy document</p>
+					<p class="text-surface-500">{m.chooseDocumentTemplate()}</p>
 				</div>
 
 				{#if addingTranslationLocale}
@@ -845,7 +860,7 @@
 						class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 text-sm font-medium mb-2"
 					>
 						<i class="fa-solid fa-language"></i>
-						Adding translation:
+						{m.addingTranslation()}
 						{#if LOCALE_MAP[addingTranslationLocale as keyof typeof LOCALE_MAP]?.flag}
 							<span>{LOCALE_MAP[addingTranslationLocale as keyof typeof LOCALE_MAP].flag}</span>
 						{/if}
@@ -866,7 +881,7 @@
 							></i>
 						</div>
 						<h3 class="font-medium text-sm">{m.startFromScratch()}</h3>
-						<p class="text-xs text-surface-400 mt-1">Start with a blank document</p>
+						<p class="text-xs text-surface-400 mt-1">{m.startWithBlankDocument()}</p>
 					</button>
 
 					{#each templates as template}
@@ -899,14 +914,17 @@
 			>
 				<i class="fa-solid fa-lock text-amber-500"></i>
 				<div class="flex-1 text-sm text-amber-800">
-					<strong>{lockedBy.first_name || ''} {lockedBy.last_name || lockedBy.email}</strong>
-					is currently editing this draft. You can view it in read-only mode.
+					{m.userEditingDraft({
+						user: `${lockedBy.first_name || ''} ${lockedBy.last_name || lockedBy.email}`.trim()
+					})}
 				</div>
 				<button class="btn btn-sm preset-tonal-warning" onclick={() => checkAndAcquireLock()}>
-					<i class="fa-solid fa-rotate mr-1"></i> Retry
+					<i class="fa-solid fa-rotate mr-1"></i>
+					{m.retry()}
 				</button>
 				<button class="btn btn-sm preset-tonal-error" onclick={() => confirmTakeOver()}>
-					<i class="fa-solid fa-unlock mr-1"></i> Take over
+					<i class="fa-solid fa-unlock mr-1"></i>
+					{m.takeOverEditing()}
 				</button>
 			</div>
 		{/if}
@@ -944,7 +962,7 @@
 			</div>
 		{/if}
 
-		{#if isInReview}
+		{#if isInReview && !validationFlowsEnabled}
 			<div
 				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"
 			>
@@ -958,8 +976,32 @@
 						bind:value={reviewerComments}
 						class="input w-full text-sm"
 						rows="2"
-						placeholder="Add comments explaining what changes are needed..."
+						placeholder={m.addReviewerComments()}
 					></textarea>
+				</div>
+			</div>
+		{/if}
+
+		{#if isInReview && validationFlowsEnabled && activeValidationFlows.length > 0}
+			<div
+				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3"
+			>
+				<i class="fa-solid fa-clipboard-check text-indigo-400 mt-0.5"></i>
+				<div class="flex-1 min-w-0">
+					<p class="text-sm font-medium text-indigo-700 mb-1">
+						{m.pendingValidationFlow()}
+					</p>
+					{#each activeValidationFlows as flow}
+						<a
+							href="/validation-flows/{flow.id}"
+							class="text-sm text-indigo-600 hover:text-indigo-800 underline"
+						>
+							{flow.ref_id || flow.str || 'Validation flow'}
+							{#if flow.approver?.str}
+								— {m.approver()}: {flow.approver.str}
+							{/if}
+						</a>
+					{/each}
 				</div>
 			</div>
 		{/if}
@@ -979,7 +1021,7 @@
 								showDiff = false;
 							}}
 						>
-							<i class="fa-solid fa-pen mr-1.5 text-xs"></i>Edit
+							<i class="fa-solid fa-pen mr-1.5 text-xs"></i>{m.editTab()}
 						</button>
 						<button
 							class="px-3 py-1.5 text-sm font-medium border-l border-surface-300 transition-colors {showPreview &&
@@ -1000,42 +1042,42 @@
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => wrapSelection('**', '**')}
-								title="Bold (Ctrl+B)"
+								title={`${m.formatBold()} (Ctrl+B)`}
 							>
 								<i class="fa-solid fa-bold text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => wrapSelection('*', '*')}
-								title="Italic (Ctrl+I)"
+								title={`${m.formatItalic()} (Ctrl+I)`}
 							>
 								<i class="fa-solid fa-italic text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => insertLinePrefix('# ')}
-								title="Heading"
+								title={m.formatHeading()}
 							>
 								<i class="fa-solid fa-heading text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => insertLinePrefix('- ')}
-								title="Bullet list"
+								title={m.bulletList()}
 							>
 								<i class="fa-solid fa-list-ul text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => insertLinePrefix('1. ')}
-								title="Numbered list"
+								title={m.numberedList()}
 							>
 								<i class="fa-solid fa-list-ol text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => wrapSelection('[', '](url)')}
-								title="Link"
+								title={m.insertLink()}
 							>
 								<i class="fa-solid fa-link text-xs"></i>
 							</button>
@@ -1045,14 +1087,14 @@
 									insertAtCursor(
 										'\n| Column 1 | Column 2 |\n|----------|----------|\n| Cell	 | Cell	 |\n'
 									)}
-								title="Table"
+								title={m.insertTable()}
 							>
 								<i class="fa-solid fa-table text-xs"></i>
 							</button>
 							<button
 								class="btn btn-sm preset-tonal-surface px-2"
 								onclick={() => fileInputEl?.click()}
-								title="Insert image"
+								title={m.insertImage()}
 								disabled={uploading}
 							>
 								{#if uploading}
@@ -1082,7 +1124,7 @@
 								type="text"
 								bind:value={changeSummary}
 								class="input text-sm w-56"
-								placeholder="Describe your changes..."
+								placeholder={m.describeYourChanges()}
 							/>
 						</div>
 					{/if}
@@ -1157,7 +1199,7 @@
 							? 'bg-surface-50 cursor-not-allowed'
 							: ''}"
 						disabled={!canEdit}
-						placeholder="Write your policy document in Markdown..."
+						placeholder={m.writeDocumentPlaceholder()}
 						spellcheck="true"
 					></textarea>
 				{/if}
@@ -1192,7 +1234,7 @@
 											class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border {style.bg} {style.text}"
 										>
 											<i class="fa-solid {style.icon} text-[8px]"></i>
-											{statusLabels[revision.status] || revision.status_display || revision.status}
+											{revision.status_display || revision.status}
 										</span>
 									</div>
 									{#if revision.author}
@@ -1207,7 +1249,12 @@
 									{/if}
 									<div class="flex items-center justify-between mt-1.5">
 										<p class="text-[10px] text-surface-400">
-											{new Date(revision.created_at).toLocaleDateString()}
+											{new Date(revision.created_at).toLocaleString(undefined, {
+												month: 'short',
+												day: 'numeric',
+												hour: '2-digit',
+												minute: '2-digit'
+											})}
 										</p>
 										{#if revision.status === 'draft' || revision.status === 'deprecated'}
 											<button
@@ -1216,7 +1263,7 @@
 													e.stopPropagation();
 													deleteRevision(revision.id);
 												}}
-												title="Delete revision"
+												title={m.deleteRevision()}
 											>
 												<i class="fa-solid fa-trash"></i>
 											</button>
@@ -1228,7 +1275,7 @@
 							{#if revisions.length === 0}
 								<div class="text-center py-6 text-surface-400 text-sm">
 									<i class="fa-solid fa-inbox text-xl mb-2"></i>
-									<p>No revisions yet</p>
+									<p>{m.noRevisionsYet()}</p>
 								</div>
 							{/if}
 						</div>
@@ -1242,7 +1289,7 @@
 								>
 									<span class="flex items-center gap-1.5">
 										<i class="fa-solid fa-list-ul"></i>
-										Edit history
+										{m.editHistory()}
 									</span>
 									{#if loadingEditHistory}
 										<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
@@ -1255,16 +1302,18 @@
 								{#if showEditHistory}
 									<div class="max-h-48 overflow-auto">
 										{#if editHistory.length === 0}
-											<p class="px-4 py-3 text-xs text-surface-400 italic">No edits recorded yet</p>
+											<p class="px-4 py-3 text-xs text-surface-400 italic">
+												{m.noEditsRecordedYet()}
+											</p>
 										{:else}
 											<div class="flex items-center gap-1 px-4 pt-2 pb-1">
 												<span
 													class="w-3 text-center text-[9px] font-bold text-red-400 flex-shrink-0"
-													title="Older version (removed lines)">A</span
+													title={m.olderVersion()}>A</span
 												>
 												<span
 													class="w-3 text-center text-[9px] font-bold text-emerald-500 flex-shrink-0"
-													title="Newer version (added lines)">B</span
+													title={m.newerVersion()}>B</span
 												>
 												<span class="flex-1"></span>
 											</div>
@@ -1278,7 +1327,7 @@
 														value={edit.id}
 														bind:group={editDiffA}
 														class="w-3 h-3 flex-shrink-0 accent-red-400"
-														title="Select as A (from)"
+														title={m.selectAsFrom()}
 														onclick={(e) => e.stopPropagation()}
 													/>
 													<input
@@ -1287,13 +1336,13 @@
 														value={edit.id}
 														bind:group={editDiffB}
 														class="w-3 h-3 flex-shrink-0 accent-emerald-500"
-														title="Select as B (to)"
+														title={m.selectAsTo()}
 														onclick={(e) => e.stopPropagation()}
 													/>
 													<button
 														class="flex-1 text-left"
 														onclick={() => loadEditSnapshot(edit.id)}
-														title="View this snapshot"
+														title={m.viewSnapshot()}
 													>
 														<div class="flex items-center justify-between">
 															<span class="text-xs text-surface-600">
@@ -1329,7 +1378,7 @@
 														disabled={!editDiffA || !editDiffB}
 													>
 														<i class="fa-solid fa-code-compare mr-1"></i>
-														Compare edits
+														{m.compareEdits()}
 													</button>
 												</div>
 											{/if}
@@ -1347,13 +1396,13 @@
 								</h4>
 								<div class="flex gap-1.5">
 									<select bind:value={diffRevisionA} class="select text-xs flex-1 py-1">
-										<option value="">From...</option>
+										<option value="">{m.diffFrom()}...</option>
 										{#each revisions as rev}
 											<option value={rev.id}>v{rev.version_number}</option>
 										{/each}
 									</select>
 									<select bind:value={diffRevisionB} class="select text-xs flex-1 py-1">
-										<option value="">To...</option>
+										<option value="">{m.diffTo()}...</option>
 										{#each revisions as rev}
 											<option value={rev.id}>v{rev.version_number}</option>
 										{/each}
