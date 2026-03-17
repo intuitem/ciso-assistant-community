@@ -50,7 +50,7 @@
 		{#each $sectionsStore as section (section.node.id)}
 			<button
 				type="button"
-				class="shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors {$activeSectionStore ===
+				class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors {$activeSectionStore ===
 				section.node.id
 					? 'bg-blue-600 text-white'
 					: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
