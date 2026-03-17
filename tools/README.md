@@ -4,6 +4,8 @@ The `example_framework.xlsx` file will help you understand the structure of a fr
 
 The `prepare_framework_v2.py` script can be used to create an Excel file with the base structure of a CISO Assistant framework in v2 format.
 
+The `check_library_v2.py` script can be used to check that the structure of a CISO Assistant Excel library file is correct.
+
 The `convert_library_v2.py` script can be used to transform an Excel file to a CISO Assistant library.
 
 The `convert_library_v1.py` script is the previous version working on the previous Excel file format.
@@ -63,6 +65,35 @@ python prepare_framework_v2.py -i prepare_framework_v2_config.yaml
 
 > [!TIP]
 > See ["Format of Excel files"](#format-of-excel-files) for a better understanding of Excel and YAML configuration file values.
+
+
+### > `check_library_v2.py`
+
+Usage (simplified): 
+```bash
+python check_library_v2.py your_library_file.xlsx [--verbose]
+```
+
+Usage (advanced):
+```bash
+python check_library_v2.py your_library_file.xlsx [-e|--external-refs ./ref1.yaml,ref2.yaml,...] [--verbose]
+```
+
+Arguments:
+- **`-e, --external-refs`**: YAML files containing external references mentioned in the library. Use it to check the following columns if necessary : `threats`, `reference_controls`. Separate external references with commas (e.g., `./threats1.yaml,./refs/ref_ctrl.yaml,../test.yaml`)
+- **`-b, --bulk`**: Enable bulk mode to process all Excel files in a directory.
+- **`--verbose`**: Enable verbose output. Verbose messages start with a 💬 (speech bubble) emoji.
+
+
+To launch it, open a shell in a command line, and type:
+
+```bash
+python check_library_v2.py your_library_file.xlsx
+```
+
+Messages will be displayed in the shell, telling you if there's a problem with your library, if there's anything to consider, and if your library is suitable for conversion with `convert_library_v2.py`.
+
+By reading the output messages and reading the instructions when they're displayed, you will be able to fix your Excel library easily, saving you from wasting time figuring out what's wrong with your framework.
 
 
 ### > `convert_library_v2.py`
@@ -281,6 +312,10 @@ The `_content` tab for a `reference_controls` object contains the following colu
 
 A `_meta` of type `requirement_mapping_set` contains the following keys:
 - type (*): must be `requirement_mapping_set`
+- urn (*)
+- ref_id (*)
+- name (*)
+- description (*)
 - source_framework_urn (*)
 - source_node_base_urn (*)
 - target_framework_urn (*)
