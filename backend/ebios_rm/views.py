@@ -5,7 +5,10 @@ import django_filters as df
 import pandas as pd
 from django.http import HttpResponse
 from core.serializers import RiskMatrixReadSerializer
-from core.views import BaseModelViewSet as AbstractBaseModelViewSet, GenericFilterSet
+from core.views import (
+    BaseModelViewSet as AbstractBaseModelViewSet,
+    GenericFilterSet,
+)
 from core.models import Terminology
 from openpyxl.styles import Alignment
 
@@ -29,7 +32,6 @@ from django.views.decorators.cache import cache_page
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
-
 
 import structlog
 
@@ -926,6 +928,9 @@ class StakeholderFilter(df.FilterSet):
 class StakeholderViewSet(BaseModelViewSet):
     model = Stakeholder
     filterset_class = StakeholderFilter
+    search_fields = ["entity__name", "category__name"]
+
+    ordering_mapping = {"entity": "entity__name"}
 
     @action(detail=False, name="Get category choices")
     def category(self, request):
