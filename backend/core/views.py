@@ -5009,22 +5009,31 @@ class ActionPlanBudgetOverview:
     """Mixin that computes budget aggregation over an applied controls queryset."""
 
     @staticmethod
+    def _safe_float(value, default=0):
+        """Coerce a JSON-sourced value to float, returning default on failure."""
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
     def _compute_annual_cost(ctrl, daily_rate):
         """Compute annual cost without per-control GlobalSettings lookup."""
         if not ctrl.cost:
             return 0
+        _f = ActionPlanBudgetOverview._safe_float
         build_cost = ctrl.cost.get("build", {})
         run_cost = ctrl.cost.get("run", {})
-        amortization_period = ctrl.cost.get("amortization_period", 1)
+        amortization_period = _f(ctrl.cost.get("amortization_period", 1), 1) or 1
         annual_cost = 0
-        build_fixed = build_cost.get("fixed_cost", 0)
-        build_people = build_cost.get("people_days", 0)
+        build_fixed = _f(build_cost.get("fixed_cost", 0))
+        build_people = _f(build_cost.get("people_days", 0))
         if build_fixed > 0:
             annual_cost += build_fixed / amortization_period
         if build_people > 0:
             annual_cost += (build_people * daily_rate) / amortization_period
-        run_fixed = run_cost.get("fixed_cost", 0)
-        run_people = run_cost.get("people_days", 0)
+        run_fixed = _f(run_cost.get("fixed_cost", 0))
+        run_people = _f(run_cost.get("people_days", 0))
         if run_fixed > 0:
             annual_cost += run_fixed
         if run_people > 0:
@@ -5037,9 +5046,11 @@ class ActionPlanBudgetOverview:
         from global_settings.models import GlobalSettings
 
         # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
+        _f = ActionPlanBudgetOverview._safe_float
         general_settings = GlobalSettings.objects.filter(name="general").first()
-        daily_rate = (
-            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        daily_rate = _f(
+            general_settings.value.get("daily_rate", 500) if general_settings else 500,
+            500,
         )
 
         currency = get_global_currency()
@@ -5060,33 +5071,35 @@ class ActionPlanBudgetOverview:
             total_annual_cost += cost
 
             # by status — use raw value as key, display value for frontend
-            s = ctrl.status
-            if s:
-                bucket = by_status.setdefault(
-                    s, {"status": ctrl.get_status_display(), "count": 0, "total": 0.0}
-                )
-                bucket["count"] += 1
-                bucket["total"] += cost
+            s = ctrl.status or "_unset"
+            status_label = ctrl.get_status_display() if ctrl.status else "not_set"
+            bucket = by_status.setdefault(
+                s, {"status": status_label, "count": 0, "total": 0.0}
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
 
             # by priority
-            p = ctrl.priority
-            if p is not None:
-                bucket = by_priority.setdefault(
-                    p,
-                    {"priority": ctrl.get_priority_display(), "count": 0, "total": 0.0},
-                )
-                bucket["count"] += 1
-                bucket["total"] += cost
+            p = ctrl.priority if ctrl.priority is not None else "_unset"
+            priority_label = (
+                ctrl.get_priority_display() if ctrl.priority is not None else "not_set"
+            )
+            bucket = by_priority.setdefault(
+                p,
+                {"priority": priority_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
 
             # by category
-            c = ctrl.category
-            if c:
-                bucket = by_category.setdefault(
-                    c,
-                    {"category": ctrl.get_category_display(), "count": 0, "total": 0.0},
-                )
-                bucket["count"] += 1
-                bucket["total"] += cost
+            c = ctrl.category or "_unset"
+            category_label = ctrl.get_category_display() if ctrl.category else "not_set"
+            bucket = by_category.setdefault(
+                c,
+                {"category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
 
         # Pre-format totals with proper currency position
         for bucket in by_status.values():
@@ -5302,7 +5315,7 @@ class ComplianceAssessmentActionPlanBudgetOverview(
     ActionPlanBudgetOverview, ComplianceAssessmentActionPlanList
 ):
     def get(self, request, *args, **kwargs):
-        qs = self.get_queryset()
+        qs = self.filter_queryset(self.get_queryset())
         return Response(self.compute_budget_overview(qs))
 
 
@@ -5310,7 +5323,7 @@ class RiskAssessmentActionPlanBudgetOverview(
     ActionPlanBudgetOverview, RiskAssessmentActionPlanList
 ):
     def get(self, request, *args, **kwargs):
-        qs = self.get_queryset()
+        qs = self.filter_queryset(self.get_queryset())
         return Response(self.compute_budget_overview(qs))
 
 

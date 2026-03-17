@@ -1460,5 +1460,5 @@ class QuantitativeRiskStudyActionPlanBudgetOverview(
     ActionPlanBudgetOverview, QuantitativeRiskStudyActionPlanList
 ):
     def get(self, request, *args, **kwargs):
-        qs = self.get_queryset()
+        qs = self.filter_queryset(self.get_queryset())
         return Response(self.compute_budget_overview(qs))

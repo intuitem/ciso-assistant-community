@@ -2426,7 +2426,7 @@
 	"totalAnnualCost": "Coût annuel total (tous statuts)",
 	"controlsWithCostData": "Mesures avec données de coût",
 	"noCostDataAvailable": "Ajoutez des coûts aux mesures appliquées pour voir un aperçu budgétaire",
-	"budgetOverviewHint": "Coûts ventilés par statut de mesure. Basé sur {x} des {y} mesures avec données de coût.",
+	"budgetOverviewHint": "Répartition des coûts par statut des mesures. Basée sur {x} mesures sur {y} avec des données de coût.",
 	"annualCostDisplay": "Coût annuel",
 	"amortizationPeriod": "Durée d'amortissement (années)",
 	"amortizationPeriodHelpText": "Période sur laquelle on amortit le coût de build",
