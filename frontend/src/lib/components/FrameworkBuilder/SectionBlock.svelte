@@ -45,10 +45,14 @@
 <div data-section-id={section.node.id} class="scroll-mt-32">
 	<!-- Section header -->
 	<div class="flex items-center gap-3 group mb-3">
-		<div class="w-1 h-10 bg-blue-500 rounded-full shrink-0"></div>
-
 		<span class="cursor-grab text-gray-300 group-hover:text-gray-400">
 			<i class="fa-solid fa-grip-vertical text-sm"></i>
+		</span>
+
+		<span
+			class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-semibold flex items-center justify-center shrink-0"
+		>
+			{sectionIndex + 1}
 		</span>
 
 		<input
