@@ -906,7 +906,7 @@
 	{/if}
 
 	<!-- Main editor area -->
-	{#if document && currentRevision}
+	{#if document && currentRevision && !showTemplateSelector}
 		<!-- Lock / conflict banners -->
 		{#if lockedBy}
 			<div
