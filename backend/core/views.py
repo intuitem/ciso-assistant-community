@@ -5005,6 +5005,109 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
+class ActionPlanBudgetOverview:
+    """Mixin that computes budget aggregation over an applied controls queryset."""
+
+    @staticmethod
+    def _compute_annual_cost(ctrl, daily_rate):
+        """Compute annual cost without per-control GlobalSettings lookup."""
+        if not ctrl.cost:
+            return 0
+        build_cost = ctrl.cost.get("build", {})
+        run_cost = ctrl.cost.get("run", {})
+        amortization_period = ctrl.cost.get("amortization_period", 1)
+        annual_cost = 0
+        build_fixed = build_cost.get("fixed_cost", 0)
+        build_people = build_cost.get("people_days", 0)
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+        run_fixed = run_cost.get("fixed_cost", 0)
+        run_people = run_cost.get("people_days", 0)
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+        return annual_cost
+
+    @staticmethod
+    def compute_budget_overview(queryset):
+        from core.utils import get_global_currency, format_currency
+        from global_settings.models import GlobalSettings
+
+        # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = (
+            general_settings.value.get("daily_rate", 500) if general_settings else 500
+        )
+
+        currency = get_global_currency()
+        fmt = lambda v: format_currency(v, currency)
+
+        controls = list(queryset)
+        count = len(controls)
+        by_status: dict = {}
+        by_priority: dict = {}
+        by_category: dict = {}
+        total_annual_cost = 0.0
+        count_with_cost = 0
+
+        for ctrl in controls:
+            cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
+            if cost > 0:
+                count_with_cost += 1
+            total_annual_cost += cost
+
+            # by status — use raw value as key, display value for frontend
+            s = ctrl.status
+            if s:
+                bucket = by_status.setdefault(
+                    s, {"status": ctrl.get_status_display(), "count": 0, "total": 0.0}
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+
+            # by priority
+            p = ctrl.priority
+            if p is not None:
+                bucket = by_priority.setdefault(
+                    p,
+                    {"priority": ctrl.get_priority_display(), "count": 0, "total": 0.0},
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+
+            # by category
+            c = ctrl.category
+            if c:
+                bucket = by_category.setdefault(
+                    c,
+                    {"category": ctrl.get_category_display(), "count": 0, "total": 0.0},
+                )
+                bucket["count"] += 1
+                bucket["total"] += cost
+
+        # Pre-format totals with proper currency position
+        for bucket in by_status.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_priority.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_category.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        return {
+            "count": count,
+            "count_with_cost": count_with_cost,
+            "total_annual_cost": round(total_annual_cost, 2),
+            "total_annual_cost_display": fmt(round(total_annual_cost, 2)),
+            "currency": currency,
+            "by_status": [v for v in by_status.values() if v["count"] > 0],
+            "by_priority": [v for v in by_priority.values() if v["count"] > 0],
+            "by_category": [v for v in by_category.values() if v["count"] > 0],
+        }
+
+
 class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
@@ -5193,6 +5296,22 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             AppliedControl,
         )
         return qs.filter(id__in=viewable_controls)
+
+
+class ComplianceAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, ComplianceAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        return Response(self.compute_budget_overview(qs))
+
+
+class RiskAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, RiskAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.get_queryset()
+        return Response(self.compute_budget_overview(qs))
 
 
 class PolicyViewSet(AppliedControlViewSet):
