@@ -10,30 +10,71 @@ def normalize_header(value):
 
 
 def natural_sort_key(ref):
-    """
-    Sorts references like:
-    1.2-EI/EE
-    1.10-EI/EE
-    2.1-XX
-    by treating numeric parts as numbers.
-    """
     if ref is None:
         return []
+
     text = str(ref).strip()
     parts = re.split(r"(\d+)", text)
+
     key = []
     for part in parts:
         if part.isdigit():
             key.append(int(part))
         else:
             key.append(part.lower())
+
     return key
 
 
+def split_reference(ref):
+    """
+    Example:
+    5.B.2-EI/EE -> ("5.B.2", "EI, EE")
+    4.1-EI/EE   -> ("4.1", "EI, EE")
+    """
+    if not ref:
+        return "", ""
+
+    ref = str(ref).strip()
+
+    if "-" in ref:
+        left, right = ref.split("-", 1)
+        groups = [g.strip() for g in right.split("/") if g.strip()]
+        return left.strip(), ", ".join(groups)
+
+    return ref, ""
+
+
+def extract_objectif_id(objectif):
+    """
+    "Objectif de sécurité 3" -> "3"
+    """
+    if not objectif:
+        return ""
+
+    match = re.search(r"(\d+)", str(objectif))
+    return match.group(1) if match else ""
+
+
+def extract_thematique_id(reference):
+    """
+    Rules:
+    - 3.A.1-EI/EE -> "3.A"
+    - 4.1-EI/EE   -> ""   (no level-2 ref_id)
+    """
+    if not reference:
+        return ""
+
+    ref = str(reference).strip().split("-")[0]
+    parts = ref.split(".")
+
+    if len(parts) >= 2 and parts[1].isalpha():
+        return f"{parts[0]}.{parts[1]}"
+
+    return ""
+
+
 def read_csv_rows(input_csv_path):
-    """
-    Reads CSV and auto-handles common French/Excel separators.
-    """
     with open(input_csv_path, "r", encoding="utf-8-sig", newline="") as f:
         sample = f.read(4096)
         f.seek(0)
@@ -61,25 +102,22 @@ def convert_nis2_csv_to_ciso_assistant(input_csv_path: str, output_xlsx_path: st
 
     col_idx = {name: i for i, name in enumerate(headers)}
 
-    required = ["Référence", "Contenu", "Objectif", "Thématique", "Cibles"]
+    required = ["Référence", "Contenu", "Objectif", "Thématique"]
     missing = [c for c in required if c not in col_idx]
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
 
     parsed_rows = []
     for row in data_rows:
-        # pad short rows if needed
         if len(row) < len(headers):
             row = row + [""] * (len(headers) - len(row))
 
-        reference = row[col_idx["Référence"]].strip()
-        contenu = row[col_idx["Contenu"]].strip()
-        objectif = row[col_idx["Objectif"]].strip()
-        thematique = row[col_idx["Thématique"]].strip()
-        cibles = row[col_idx["Cibles"]].strip()
+        reference = str(row[col_idx["Référence"]] or "").strip()
+        contenu = str(row[col_idx["Contenu"]] or "").strip()
+        objectif = str(row[col_idx["Objectif"]] or "").strip()
+        thematique = str(row[col_idx["Thématique"]] or "").strip()
 
-        # skip fully empty rows
-        if not any([reference, contenu, objectif, thematique, cibles]):
+        if not any([reference, contenu, objectif, thematique]):
             continue
 
         parsed_rows.append({
@@ -87,10 +125,8 @@ def convert_nis2_csv_to_ciso_assistant(input_csv_path: str, output_xlsx_path: st
             "Contenu": contenu,
             "Objectif": objectif,
             "Thématique": thematique,
-            "Cibles": cibles,
         })
 
-    # Sort by reference using natural sort
     parsed_rows.sort(key=lambda r: natural_sort_key(r["Référence"]))
 
     wb = Workbook()
@@ -110,32 +146,61 @@ def convert_nis2_csv_to_ciso_assistant(input_csv_path: str, output_xlsx_path: st
     last_thematique = None
 
     for row in parsed_rows:
-        reference = row["Référence"]
+        full_reference = row["Référence"]
         contenu = row["Contenu"]
         objectif = row["Objectif"]
         thematique = row["Thématique"]
-        cibles = row["Cibles"]
 
-        # depth 1 row when Objectif changes
+        objectif_id = extract_objectif_id(objectif)
+        thematique_id = extract_thematique_id(full_reference)
+        ref_id, implementation_groups = split_reference(full_reference)
+
+        # Depth 1
         if objectif != last_objectif:
-            ws.append(["", 1, "", objectif, "", ""])
+            ws.append([
+                "",
+                1,
+                objectif_id,
+                objectif,
+                "",
+                "",
+            ])
             last_objectif = objectif
             last_thematique = None
 
-        # depth 2 row when Thématique changes
-        if thematique != last_thematique:
-            ws.append(["", 2, "", thematique, "", ""])
-            last_thematique = thematique
+        # Case 1: there is a real level 2 (e.g. 3.A.1)
+        if thematique_id:
+            if thematique != last_thematique:
+                ws.append([
+                    "",
+                    2,
+                    thematique_id,
+                    thematique,
+                    "",
+                    "",
+                ])
+                last_thematique = thematique
 
-        # depth 3 row for every requirement
-        ws.append([
-            "x",
-            3,
-            reference,
-            "",
-            contenu,
-            cibles,
-        ])
+            ws.append([
+                "x",
+                3,
+                ref_id,
+                "",
+                contenu,
+                implementation_groups,
+            ])
+
+        # Case 2: no level 2 (e.g. 4.1), requirement becomes level 2
+        else:
+            last_thematique = None
+            ws.append([
+                "x",
+                2,
+                ref_id,
+                "",
+                contenu,
+                implementation_groups,
+            ])
 
     wb.save(output_xlsx_path)
 
