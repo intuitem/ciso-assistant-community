@@ -455,7 +455,7 @@ flowchart TB
 
     class YAML source
     class Parse,Nodes,Edges build
-    class FW,RN,TH,RC graph
+    class FW,RN,TH,RC kg
     class Q1,Q2,Q3,Q4,Q5,Q6 query
 ```
 
