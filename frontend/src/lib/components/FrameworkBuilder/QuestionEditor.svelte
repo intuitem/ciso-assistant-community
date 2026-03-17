@@ -160,7 +160,7 @@
 				value={question.text ?? ''}
 				placeholder="Enter your question..."
 				rows="2"
-				class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none resize-none"
+				class="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 				onblur={(e) => {
 					saveField('text', e.currentTarget.value);
 				}}
@@ -173,7 +173,7 @@
 					<input
 						type="text"
 						value={question.ref_id ?? ''}
-						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							saveField('ref_id', e.currentTarget.value || null);
 						}}
@@ -185,7 +185,7 @@
 						type="number"
 						value={question.weight}
 						min="0"
-						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							const val = Number(e.currentTarget.value) || 1;
 							saveField('weight', val);
@@ -198,7 +198,7 @@
 						type="text"
 						value={question.annotation ?? ''}
 						placeholder="Optional note..."
-						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+						class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 						onblur={(e) => {
 							saveField('annotation', e.currentTarget.value || null);
 						}}

@@ -148,7 +148,7 @@
 							<input
 								type="text"
 								value={choice.ref_id ?? ''}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) => saveField(choice.id, 'ref_id', e.currentTarget.value)}
 							/>
 						</label>
@@ -159,7 +159,7 @@
 								value={choice.add_score ?? ''}
 								min={minScore}
 								max={maxScore}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onblur={(e) =>
 									saveField(
 										choice.id,
@@ -175,7 +175,7 @@
 							<span class="text-xs text-gray-500">Result</span>
 							<select
 								value={choice.compute_result ?? ''}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none"
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
 								onchange={(e) =>
 									saveField(choice.id, 'compute_result', e.currentTarget.value || null)}
 							>
@@ -240,7 +240,7 @@
 						<textarea
 							value={choice.description ?? ''}
 							rows="2"
-							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none resize-none"
+							class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 							onblur={(e) => saveField(choice.id, 'description', e.currentTarget.value || null)}
 						></textarea>
 					</label>

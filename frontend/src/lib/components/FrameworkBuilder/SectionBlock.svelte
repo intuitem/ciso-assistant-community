@@ -55,7 +55,7 @@
 			type="text"
 			value={section.node.ref_id ?? ''}
 			placeholder="ID"
-			class="w-20 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none transition-colors text-gray-500"
+			class="w-20 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 			onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 		/>
 
@@ -63,7 +63,7 @@
 			type="text"
 			value={section.node.name ?? ''}
 			placeholder="Section name"
-			class="flex-1 text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none transition-colors"
+			class="flex-1 text-xl font-semibold bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 			onblur={(e) => saveField('name', e.currentTarget.value || null)}
 		/>
 

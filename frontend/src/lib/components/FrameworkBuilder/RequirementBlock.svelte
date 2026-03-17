@@ -34,14 +34,14 @@
 					type="text"
 					value={requirement.node.ref_id ?? ''}
 					placeholder="Ref ID"
-					class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none transition-colors text-gray-500"
+					class="w-24 text-xs font-mono bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors text-gray-500"
 					onblur={(e) => saveField('ref_id', e.currentTarget.value || null)}
 				/>
 				<input
 					type="text"
 					value={requirement.node.name ?? ''}
 					placeholder="Requirement name"
-					class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none transition-colors"
+					class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 					onblur={(e) => saveField('name', e.currentTarget.value || null)}
 				/>
 			</div>
@@ -49,7 +49,7 @@
 				value={requirement.node.description ?? ''}
 				placeholder="Description (optional)"
 				rows="1"
-				class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none transition-colors resize-none"
+				class="w-full text-xs text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
 				onblur={(e) => saveField('description', e.currentTarget.value || null)}
 			></textarea>
 		</div>

@@ -84,7 +84,7 @@
 				type="text"
 				value={$frameworkStore.name}
 				placeholder="Framework name"
-				class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors py-1"
+				class="w-full text-2xl font-bold bg-transparent border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors py-1"
 				onblur={(e) => {
 					builder.updateFramework({ name: e.currentTarget.value });
 				}}
@@ -93,7 +93,7 @@
 				value={$frameworkStore.description ?? ''}
 				placeholder="Framework description (optional)"
 				rows="2"
-				class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none transition-colors resize-none py-1"
+				class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
 				onblur={(e) => {
 					builder.updateFramework({ description: e.currentTarget.value || null });
 				}}
