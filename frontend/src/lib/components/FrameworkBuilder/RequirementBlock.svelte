@@ -40,7 +40,9 @@
 				<input
 					type="text"
 					value={requirement.node.name ?? ''}
-					placeholder="Requirement name"
+					placeholder={requirement.node.description
+						? requirement.node.description.slice(0, 60) + (requirement.node.description.length > 60 ? '...' : '')
+						: 'Requirement name'}
 					class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 					onblur={(e) => saveField('name', e.currentTarget.value || null)}
 				/>
