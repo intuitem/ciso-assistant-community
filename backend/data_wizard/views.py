@@ -489,6 +489,8 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
+            "is_business_function": record.get("is_business_function", "").lower()
+            == "true",
         }
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
