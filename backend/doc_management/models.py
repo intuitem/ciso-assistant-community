@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -119,33 +119,31 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
 
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
-        super().save(*args, **kwargs)
-
-    def clean(self):
         if self.status == self.Status.DRAFT:
             existing = self.document.revisions.filter(status=self.Status.DRAFT).exclude(
                 pk=self.pk
             )
             if existing.exists():
                 raise ValidationError("Only one draft revision allowed per document.")
-        super().clean()
+        super().save(*args, **kwargs)
 
     def publish(self, reviewer=None):
         """Publish this revision: set PUBLISHED, deprecate old, set as current."""
-        self.status = self.Status.PUBLISHED
-        self.published_at = timezone.now()
-        if reviewer:
-            self.reviewer = reviewer
-        self.save()
+        with transaction.atomic():
+            self.status = self.Status.PUBLISHED
+            self.published_at = timezone.now()
+            if reviewer:
+                self.reviewer = reviewer
+            self.save()
 
-        # Deprecate previous published revisions
-        self.document.revisions.filter(status=self.Status.PUBLISHED).exclude(
-            pk=self.pk
-        ).update(status=self.Status.DEPRECATED)
+            # Deprecate previous published revisions
+            self.document.revisions.filter(status=self.Status.PUBLISHED).exclude(
+                pk=self.pk
+            ).update(status=self.Status.DEPRECATED)
 
-        # Set as current revision
-        self.document.current_revision = self
-        self.document.save()
+            # Set as current revision
+            self.document.current_revision = self
+            self.document.save()
 
     def mark_change_requested(self, reviewer=None, comments=""):
         """Mark this revision as needing changes."""

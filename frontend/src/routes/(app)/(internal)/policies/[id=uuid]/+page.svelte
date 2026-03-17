@@ -61,7 +61,7 @@
 <DetailView {data}>
 	{#snippet actions()}
 		<div class="flex flex-col space-y-2">
-			{#if page.data?.featureflags?.policy_documents !== false}
+			{#if page.data?.featureflags?.policy_documents}
 				<a
 					href="/policies/{policy.id}/document"
 					class="btn text-gray-100 bg-linear-to-r from-blue-500 to-indigo-500 h-fit"
@@ -91,7 +91,7 @@
 			{/key}
 		{/if}
 
-		{#if page.data?.featureflags?.policy_documents !== false && currentRevisionContent}
+		{#if page.data?.featureflags?.policy_documents && currentRevisionContent}
 			<div class="card bg-white shadow rounded-lg border mt-4">
 				<div class="p-4 border-b flex items-center justify-between">
 					<div class="flex items-center space-x-3">
@@ -133,13 +133,13 @@
 						})}
 						{#if currentRevisionContent.author}
 							&middot;
-							{currentRevisionContent.author.first_name || ''}
-							{currentRevisionContent.author.last_name || ''}
+							{currentRevisionContent.author.str ||
+								`${currentRevisionContent.author.first_name || ''} ${currentRevisionContent.author.last_name || ''}`.trim()}
 						{/if}
 					</div>
 				{/if}
 			</div>
-		{:else if page.data?.featureflags?.policy_documents !== false && policyDocument === null}
+		{:else if page.data?.featureflags?.policy_documents && policyDocument === null}
 			<div class="card bg-white shadow rounded-lg border mt-4 p-6 text-center">
 				<i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 mb-3"></i>
 				<p class="text-gray-500 mb-3">{m.noDocumentCreatedYet()}</p>

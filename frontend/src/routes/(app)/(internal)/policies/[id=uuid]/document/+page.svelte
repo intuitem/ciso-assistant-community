@@ -159,7 +159,7 @@
 		const revData = await revRes.json();
 		revisions = revData.results || [];
 
-		const draft = revisions.find((r: any) => r.status === 'draft' || r.status === 'Draft');
+		const draft = revisions.find((r: any) => r.status === 'draft');
 		if (draft) {
 			const fullRes = await proxyGet({ _action: 'revision', revision_id: draft.id });
 			currentRevision = await fullRes.json();

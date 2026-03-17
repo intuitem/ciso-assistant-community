@@ -3722,71 +3722,88 @@ class ValidationFlowWriteSerializer(BaseModelSerializer):
         Sync policy document revisions based on validation flow status transitions.
         Only active when the validation_flows feature flag is enabled.
 
-        Handles the multi-flow scenario (e.g. colleague opinion + manager approval):
-        - accepted: only publish if ALL other flows on the policy are also
-          accepted (or in a terminal state). Otherwise, wait.
-        - change_requested: apply immediately — any reviewer can flag changes.
-        - rejected/dropped: only revert to draft if NO other submitted/accepted
-          flows remain on the policy.
+        Instead of reacting to the individual transition, recomputes the desired
+        revision state from the full set of current flow statuses on the policy.
+        This makes the outcome deterministic regardless of the order in which
+        multiple flows reach their final states.
+
+        Priority rules (evaluated on ALL flows targeting the policy):
+        1. Any flow is change_requested → revision should be change_requested
+        2. Any flow is still submitted → leave revision as-is (waiting)
+        3. All flows are terminal and at least one is accepted → publish
+        4. All flows are terminal with none accepted → revert to draft
         """
         from global_settings.utils import ff_is_enabled
 
         if not ff_is_enabled("validation_flows"):
             return
 
+        TERMINAL_STATUSES = {"accepted", "rejected", "revoked", "dropped", "expired"}
+
         for policy in validation_flow.policies.all():
             if not hasattr(policy, "documents"):
                 continue
 
-            # All other flows targeting this policy (excluding the current one)
-            other_flows = policy.validationflow_set.exclude(pk=validation_flow.pk)
+            # Collect statuses of ALL flows targeting this policy
+            all_flow_statuses = set(
+                policy.validationflow_set.values_list("status", flat=True)
+            )
 
-            if new_status == "accepted":
-                # Only publish when no other flow is still pending (submitted)
-                # or requesting changes
-                pending = other_flows.filter(
-                    status__in=["submitted", "change_requested"]
-                ).exists()
-                if pending:
-                    continue
+            # Rule 1: any flow requesting changes → mark revision
+            if "change_requested" in all_flow_statuses:
+                for doc in policy.documents.all():
+                    revision = doc.revisions.filter(status="in_review").first()
+                    if revision:
+                        revision.mark_change_requested(
+                            reviewer=reviewer, comments=event_notes or ""
+                        )
+                continue
+
+            # Rule 2: any flow still submitted → waiting, do nothing
+            if "submitted" in all_flow_statuses:
+                continue
+
+            # All flows are in terminal states
+            all_terminal = all_flow_statuses.issubset(TERMINAL_STATUSES)
+            if not all_terminal:
+                continue
+
+            # Rule 3: at least one accepted → publish
+            if "accepted" in all_flow_statuses:
                 for doc in policy.documents.all():
                     revision = doc.revisions.filter(status="in_review").first()
                     if not revision:
                         continue
                     revision.publish(reviewer=reviewer)
-                    try:
-                        from doc_management.views import DocumentRevisionViewSet
+                    # Defer PDF generation until after transaction commits
+                    # to avoid holding the transaction open during I/O
+                    # and to prevent orphaned files on rollback.
+                    rev_id = revision.id
 
-                        DocumentRevisionViewSet._generate_pdf_snapshot(
-                            DocumentRevisionViewSet(), revision
-                        )
-                    except Exception as e:
-                        logger.warning(
-                            "Failed to generate PDF snapshot from validation flow",
-                            error=str(e),
-                        )
+                    def _generate_pdf(rid=rev_id):
+                        try:
+                            from doc_management.models import DocumentRevision
+                            from doc_management.views import (
+                                DocumentRevisionViewSet,
+                            )
 
-            elif new_status == "change_requested":
-                # Any reviewer can flag changes immediately
-                for doc in policy.documents.all():
-                    revision = doc.revisions.filter(status="in_review").first()
-                    if not revision:
-                        continue
-                    revision.mark_change_requested(
-                        reviewer=reviewer, comments=event_notes or ""
-                    )
+                            rev = DocumentRevision.objects.get(pk=rid)
+                            DocumentRevisionViewSet._generate_pdf_snapshot(
+                                DocumentRevisionViewSet(), rev
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                "Failed to generate PDF snapshot from validation flow",
+                                error=str(e),
+                            )
 
-            elif new_status in ("rejected", "dropped"):
-                # Only revert if no other flow is still active
-                still_active = other_flows.filter(
-                    status__in=["submitted", "accepted"]
-                ).exists()
-                if still_active:
-                    continue
-                for doc in policy.documents.all():
-                    revision = doc.revisions.filter(status="in_review").first()
-                    if not revision:
-                        continue
+                    transaction.on_commit(_generate_pdf)
+                continue
+
+            # Rule 4: all terminal, none accepted → revert to draft
+            for doc in policy.documents.all():
+                revision = doc.revisions.filter(status="in_review").first()
+                if revision:
                     revision.revert_to_draft()
 
     def _manage_associated_objects_lock(

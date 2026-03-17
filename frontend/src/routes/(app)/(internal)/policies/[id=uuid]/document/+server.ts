@@ -20,14 +20,12 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 		const outgoing = new FormData();
 		outgoing.append('file', new Blob([bytes], { type: file.type }), file.name);
 		const endpoint = `${BASE_API_URL}/managed-documents/${documentId}/upload-image/`;
-		console.log('Uploading to:', endpoint, 'file size:', bytes.length, 'type:', file.type);
 		const res = await fetch(endpoint, {
 			method: 'POST',
 			body: outgoing
 		});
 		if (!res.ok) {
 			const errorBody = await res.text();
-			console.error('Upload failed:', res.status, errorBody);
 			error(res.status as NumericRange<400, 599>, errorBody);
 		}
 		return json(await res.json(), { status: res.status });
@@ -95,7 +93,7 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 };
 
 // Proxy GET requests for revisions, diffs, PDF export
-export const GET: RequestHandler = async ({ fetch, url }) => {
+export const GET: RequestHandler = async ({ fetch, url, params }) => {
 	const action = url.searchParams.get('_action');
 
 	let endpoint: string;
@@ -103,11 +101,7 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	switch (action) {
 		case 'documents-by-locale': {
 			const locale = url.searchParams.get('locale');
-			// Get the policy ID from the URL path: /policies/{id}/document
-			const pathParts = url.pathname.split('/');
-			const policyIdx = pathParts.indexOf('policies');
-			const policyId = policyIdx >= 0 ? pathParts[policyIdx + 1] : '';
-			const docsEndpoint = `${BASE_API_URL}/managed-documents/?policy=${policyId}&locale=${locale}`;
+			const docsEndpoint = `${BASE_API_URL}/managed-documents/?policy=${params.id}&locale=${locale}`;
 			const docsRes = await fetch(docsEndpoint);
 			if (!docsRes.ok) {
 				error(docsRes.status as NumericRange<400, 599>, await docsRes.json());

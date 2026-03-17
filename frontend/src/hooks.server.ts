@@ -173,10 +173,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
-		// Only set Content-Type to JSON if the request doesn't already have a
-		// content type (e.g. multipart/form-data set automatically by FormData body)
+		// Only set Content-Type to JSON if the request doesn't carry a file upload.
+		// FormData bodies need the browser-generated multipart boundary — overriding
+		// Content-Type to application/json would break file uploads.
 		const existingCt = request.headers.get('Content-Type') || '';
-		if (!existingCt || existingCt === 'text/plain;charset=UTF-8') {
+		const isMultipart = existingCt.includes('multipart') || existingCt.includes('form-data');
+		if (!isMultipart) {
 			request.headers.set('Content-Type', 'application/json');
 		}
 		request.headers.set('Accept-Language', currentLang);

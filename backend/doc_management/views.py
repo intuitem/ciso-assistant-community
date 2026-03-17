@@ -6,13 +6,14 @@ from uuid import UUID
 import structlog
 import yaml
 from django.db import models
-from django.forms import ValidationError
+from django.forms import ValidationError as DjangoValidationError
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.text import slugify
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import (
     FileUploadParser,
     FormParser,
@@ -114,7 +115,7 @@ class ManagedDocumentViewSet(BaseModelViewSet):
         )
         try:
             attachment.full_clean()
-        except ValidationError as e:
+        except DjangoValidationError as e:
             messages = []
             if hasattr(e, "message_dict"):
                 for field_messages in e.message_dict.values():
@@ -182,10 +183,14 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"])
     def file(self, request, pk=None):
         """Serve the attachment file with correct content type."""
+        try:
+            pk_uuid = UUID(pk)
+        except (ValueError, AttributeError):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         object_ids_view = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, DocumentAttachment
         )[0]
-        if UUID(pk) not in object_ids_view:
+        if pk_uuid not in object_ids_view:
             return Response(status=status.HTTP_403_FORBIDDEN)
         attachment = self.get_object()
         if not attachment.file or not attachment.file.storage.exists(
@@ -195,12 +200,17 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         content_type = (
             mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
         )
+        filename = slugify(attachment.file.name.split("/")[-1].rsplit(".", 1)[0])
+        extension = (
+            attachment.file.name.rsplit(".", 1)[-1]
+            if "." in attachment.file.name
+            else ""
+        )
+        safe_filename = f"{filename}.{extension}" if extension else filename
         return HttpResponse(
             attachment.file,
             content_type=content_type,
-            headers={
-                "Content-Disposition": f"inline; filename={attachment.file.name.split('/')[-1]}"
-            },
+            headers={"Content-Disposition": f'inline; filename="{safe_filename}"'},
             status=status.HTTP_200_OK,
         )
 
@@ -544,9 +554,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
                 pass
             return match.group(0)
 
-        # Match src attributes pointing to serve-image with an attachment_id
+        # Match src attributes pointing to serve-image with a UUID attachment_id
+        UUID_RE = r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
         return re.sub(
-            r'src="[^"]*[?&]_action=serve-image&amp;attachment_id=([0-9a-f-]+)"',
+            r'src="[^"]*[?&]_action=serve-image&amp;attachment_id=(' + UUID_RE + r')"',
             replace_match,
             html_content,
         )

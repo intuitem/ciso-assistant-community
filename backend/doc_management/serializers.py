@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from django.db import models
+from django.db import models, transaction
 from rest_framework import serializers
 
 from core.serializer_fields import FieldsRelatedField
@@ -105,17 +105,35 @@ class DocumentRevisionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = DocumentRevision
         fields = "__all__"
+        # Workflow fields are managed exclusively by dedicated actions
+        # (submit-for-review, approve, request-changes, start-editing, etc.)
+        # and model methods — not directly writable via PATCH.
+        read_only_fields = [
+            "status",
+            "reviewer",
+            "reviewer_comments",
+            "published_at",
+            "pdf_snapshot",
+            "editing_user",
+            "editing_since",
+            "version_number",
+            "author",
+        ]
 
     def create(self, validated_data):
         document = validated_data["document"]
-        max_version = DocumentRevision.objects.filter(document=document).aggregate(
-            models.Max("version_number")
-        )["version_number__max"]
-        validated_data["version_number"] = (max_version or 0) + 1
         request = self.context.get("request")
         if request and not validated_data.get("author"):
             validated_data["author"] = request.user
-        return super().create(validated_data)
+        with transaction.atomic():
+            # Lock existing revisions to prevent concurrent version_number collisions
+            max_version = (
+                DocumentRevision.objects.select_for_update()
+                .filter(document=document)
+                .aggregate(models.Max("version_number"))["version_number__max"]
+            )
+            validated_data["version_number"] = (max_version or 0) + 1
+            return super().create(validated_data)
 
 
 class DocumentRevisionReadSerializer(BaseModelSerializer):
