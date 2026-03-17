@@ -4,6 +4,7 @@
 	import type { TableSource } from '$lib/components/ModelTable/types';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import ActionPlanBudgetOverview from '$lib/components/DataViz/ActionPlanBudgetOverview.svelte';
 
 	let { data } = $props();
 
@@ -61,6 +62,9 @@
 		>
 	</p>
 </div>
+<ActionPlanBudgetOverview
+	budgetEndpoint={`/risk-assessments/${page.params.id}/action-plan/budget-overview`}
+/>
 <div class="flex flex-col space-y-4 bg-white p-4 shadow rounded-lg space-x-2">
 	<div class="flex justify-between items-center w-full">
 		<div class="flex-1">
