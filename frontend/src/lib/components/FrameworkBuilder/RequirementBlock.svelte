@@ -88,7 +88,7 @@
 	<!-- Implementation groups -->
 	{#if $frameworkStore.implementation_groups_definition && $frameworkStore.implementation_groups_definition.length > 0}
 		<div class="px-4 py-2 border-b border-gray-100">
-			<span class="text-xs text-gray-500 mr-2">Groups:</span>
+			<span class="text-xs text-gray-500 mr-2">Implementation groups:</span>
 			{#each $frameworkStore.implementation_groups_definition as ig}
 				{@const refId = (ig as Record<string, string>).ref_id}
 				{@const selected = (requirement.node.implementation_groups ?? []).includes(refId)}
@@ -99,9 +99,7 @@
 						: 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'}"
 					onclick={() => {
 						const current = requirement.node.implementation_groups ?? [];
-						const next = selected
-							? current.filter((g) => g !== refId)
-							: [...current, refId];
+						const next = selected ? current.filter((g) => g !== refId) : [...current, refId];
 						builder.updateNode(requirement.node.id, { implementation_groups: next });
 					}}
 				>

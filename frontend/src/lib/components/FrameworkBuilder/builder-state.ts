@@ -98,17 +98,9 @@ export interface BuilderStore {
 	addRequirement: (sectionIndex: number, afterIndex?: number) => Promise<void>;
 	deleteRequirement: (sectionIndex: number, reqIndex: number) => Promise<void>;
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => Promise<void>;
-	addQuestion: (
-		sectionIndex: number,
-		reqIndex: number,
-		type?: Question['type']
-	) => Promise<void>;
+	addQuestion: (sectionIndex: number, reqIndex: number, type?: Question['type']) => Promise<void>;
 	updateQuestion: (questionId: string, patch: Record<string, unknown>) => Promise<void>;
-	deleteQuestion: (
-		sectionIndex: number,
-		reqIndex: number,
-		qIndex: number
-	) => Promise<void>;
+	deleteQuestion: (sectionIndex: number, reqIndex: number, qIndex: number) => Promise<void>;
 	addChoice: (sectionIndex: number, reqIndex: number, qIndex: number) => Promise<void>;
 	updateChoice: (choiceId: string, patch: Record<string, unknown>) => Promise<void>;
 	deleteChoice: (
@@ -118,11 +110,7 @@ export interface BuilderStore {
 		choiceIndex: number
 	) => Promise<void>;
 	reorderSections: (fromIndex: number, toIndex: number) => Promise<void>;
-	reorderRequirements: (
-		sectionIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) => Promise<void>;
+	reorderRequirements: (sectionIndex: number, fromIndex: number, toIndex: number) => Promise<void>;
 	reorderQuestions: (
 		sectionIndex: number,
 		reqIndex: number,
@@ -139,50 +127,61 @@ export interface BuilderStore {
 	updateFramework: (patch: Record<string, unknown>) => Promise<void>;
 }
 
-function buildTree(
-	nodes: RequirementNode[],
-	questions: Question[]
-): BuilderSection[] {
+function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
+	// Map questions by requirement_node id
 	const questionsByNode = new Map<string, Question[]>();
 	for (const q of questions) {
-		const nodeId =
-			typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
 		if (!questionsByNode.has(nodeId)) {
 			questionsByNode.set(nodeId, []);
 		}
 		questionsByNode.get(nodeId)!.push(q);
 	}
 
-	const sectionNodes: RequirementNode[] = [];
-	const requirementsByParent = new Map<string, RequirementNode[]>();
-
+	// Build parent_urn -> children lookup
+	const childrenByUrn = new Map<string, RequirementNode[]>();
 	for (const node of nodes) {
-		if (!node.assessable && !node.parent_urn) {
-			sectionNodes.push(node);
-		} else if (node.parent_urn) {
-			if (!requirementsByParent.has(node.parent_urn)) {
-				requirementsByParent.set(node.parent_urn, []);
+		if (node.parent_urn) {
+			if (!childrenByUrn.has(node.parent_urn)) {
+				childrenByUrn.set(node.parent_urn, []);
 			}
-			requirementsByParent.get(node.parent_urn)!.push(node);
-		} else if (node.assessable && !node.parent_urn) {
-			sectionNodes.push(node);
+			childrenByUrn.get(node.parent_urn)!.push(node);
 		}
 	}
+	for (const children of childrenByUrn.values()) {
+		children.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+	}
 
-	sectionNodes.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
+	// Recursively collect all descendant nodes that have questions or are assessable
+	function collectRequirements(parentUrn: string): BuilderRequirement[] {
+		const children = childrenByUrn.get(parentUrn) ?? [];
+		const result: BuilderRequirement[] = [];
+
+		for (const child of children) {
+			const nodeQuestions = (questionsByNode.get(child.id) ?? [])
+				.sort((a, b) => a.order - b.order)
+				.map((q) => ({ question: q }));
+
+			// If this node has questions or is assessable, show it as a requirement
+			if (nodeQuestions.length > 0 || child.assessable) {
+				result.push({ node: child, questions: nodeQuestions });
+			}
+
+			// Also collect from deeper descendants
+			if (child.urn) {
+				result.push(...collectRequirements(child.urn));
+			}
+		}
+
+		return result;
+	}
+
+	// Top-level sections: non-assessable with no parent, or assessable with no parent
+	const sectionNodes = nodes
+		.filter((n) => !n.parent_urn)
+		.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
 
 	return sectionNodes.map((sectionNode) => {
-		const childNodes = (requirementsByParent.get(sectionNode.urn ?? '') ?? []).sort(
-			(a, b) => (a.order_id ?? 0) - (b.order_id ?? 0)
-		);
-
-		const requirements: BuilderRequirement[] = childNodes.map((reqNode) => ({
-			node: reqNode,
-			questions: (questionsByNode.get(reqNode.id) ?? [])
-				.sort((a, b) => a.order - b.order)
-				.map((q) => ({ question: q }))
-		}));
-
 		if (sectionNode.assessable) {
 			const directQuestions = (questionsByNode.get(sectionNode.id) ?? [])
 				.sort((a, b) => a.order - b.order)
@@ -193,6 +192,8 @@ function buildTree(
 				collapsed: false
 			};
 		}
+
+		const requirements = sectionNode.urn ? collectRequirements(sectionNode.urn) : [];
 
 		return {
 			node: sectionNode,
@@ -241,9 +242,7 @@ export function createBuilderState(
 	async function addSection(afterIndex?: number) {
 		const currentSections = get(sections);
 		const order =
-			afterIndex !== undefined
-				? (afterIndex + 1) * 100 + 50
-				: currentSections.length * 100;
+			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
 
 		try {
 			saving.set(true);
@@ -414,10 +413,7 @@ export function createBuilderState(
 					...req,
 					questions: req.questions.map((q) => ({
 						...q,
-						question:
-							q.question.id === questionId
-								? { ...q.question, ...patch }
-								: q.question
+						question: q.question.id === questionId ? { ...q.question, ...patch } : q.question
 					}))
 				}))
 			}))
@@ -482,9 +478,7 @@ export function createBuilderState(
 					...qCopy.question,
 					choices: [...qCopy.question.choices, created]
 				};
-				reqCopy.questions = reqCopy.questions.map((qq, i) =>
-					i === qIndex ? qCopy : qq
-				);
+				reqCopy.questions = reqCopy.questions.map((qq, i) => (i === qIndex ? qCopy : qq));
 				copy[sectionIndex] = {
 					...copy[sectionIndex],
 					requirements: copy[sectionIndex].requirements.map((r, i) =>
@@ -511,9 +505,7 @@ export function createBuilderState(
 						...q,
 						question: {
 							...q.question,
-							choices: q.question.choices.map((c) =>
-								c.id === choiceId ? { ...c, ...patch } : c
-							)
+							choices: q.question.choices.map((c) => (c.id === choiceId ? { ...c, ...patch } : c))
 						}
 					}))
 				}))
@@ -538,7 +530,8 @@ export function createBuilderState(
 		choiceIndex: number
 	) {
 		const section = get(sections)[sectionIndex];
-		const choice = section?.requirements[reqIndex]?.questions[qIndex]?.question.choices[choiceIndex];
+		const choice =
+			section?.requirements[reqIndex]?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
 		try {
 			saving.set(true);
@@ -551,9 +544,7 @@ export function createBuilderState(
 					...qCopy.question,
 					choices: qCopy.question.choices.filter((_, i) => i !== choiceIndex)
 				};
-				reqCopy.questions = reqCopy.questions.map((qq, i) =>
-					i === qIndex ? qCopy : qq
-				);
+				reqCopy.questions = reqCopy.questions.map((qq, i) => (i === qIndex ? qCopy : qq));
 				copy[sectionIndex] = {
 					...copy[sectionIndex],
 					requirements: copy[sectionIndex].requirements.map((r, i) =>
@@ -581,9 +572,7 @@ export function createBuilderState(
 			saving.set(true);
 			const current = get(sections);
 			await Promise.all(
-				current.map((s, i) =>
-					apiUpdate('requirement-nodes', s.node.id, { order_id: i * 100 })
-				)
+				current.map((s, i) => apiUpdate('requirement-nodes', s.node.id, { order_id: i * 100 }))
 			);
 		} catch (e) {
 			setError('reorder-sections', (e as Error).message);
@@ -592,11 +581,7 @@ export function createBuilderState(
 		}
 	}
 
-	async function reorderRequirements(
-		sectionIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) {
+	async function reorderRequirements(sectionIndex: number, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		sections.update((s) => {
 			const copy = [...s];
@@ -610,9 +595,7 @@ export function createBuilderState(
 			saving.set(true);
 			const reqs = get(sections)[sectionIndex].requirements;
 			await Promise.all(
-				reqs.map((r, i) =>
-					apiUpdate('requirement-nodes', r.node.id, { order_id: i * 100 })
-				)
+				reqs.map((r, i) => apiUpdate('requirement-nodes', r.node.id, { order_id: i * 100 }))
 			);
 		} catch (e) {
 			setError('reorder-requirements', (e as Error).message);
@@ -637,9 +620,7 @@ export function createBuilderState(
 			req.questions = qs;
 			copy[sectionIndex] = {
 				...copy[sectionIndex],
-				requirements: copy[sectionIndex].requirements.map((r, i) =>
-					i === reqIndex ? req : r
-				)
+				requirements: copy[sectionIndex].requirements.map((r, i) => (i === reqIndex ? req : r))
 			};
 			return copy;
 		});
@@ -675,17 +656,14 @@ export function createBuilderState(
 			req.questions = req.questions.map((q, i) => (i === qIndex ? qItem : q));
 			copy[sectionIndex] = {
 				...copy[sectionIndex],
-				requirements: copy[sectionIndex].requirements.map((r, i) =>
-					i === reqIndex ? req : r
-				)
+				requirements: copy[sectionIndex].requirements.map((r, i) => (i === reqIndex ? req : r))
 			};
 			return copy;
 		});
 		try {
 			saving.set(true);
 			const choices =
-				get(sections)[sectionIndex].requirements[reqIndex].questions[qIndex].question
-					.choices;
+				get(sections)[sectionIndex].requirements[reqIndex].questions[qIndex].question.choices;
 			await Promise.all(
 				choices.map((c, i) => apiUpdate('question-choices', c.id, { order: i * 100 }))
 			);
@@ -700,7 +678,7 @@ export function createBuilderState(
 		try {
 			saving.set(true);
 			await apiUpdate('frameworks', frameworkId, patch);
-			framework.update((f) => ({ ...f, ...patch } as Framework));
+			framework.update((f) => ({ ...f, ...patch }) as Framework);
 			clearError('framework');
 		} catch (e) {
 			setError('framework', (e as Error).message);

@@ -1775,8 +1775,12 @@ class FrameworkWriteSerializer(FrameworkReadSerializer):
     # Override ReferentialSerializer's source-mapped fields so DRF writes
     # to the actual model columns instead of the read-only translation properties.
     name = serializers.CharField(max_length=200, required=False, allow_blank=True)
-    description = serializers.CharField(required=False, allow_blank=True, allow_null=True)
-    annotation = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    description = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
+    annotation = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
     # reference_controls is a read-only property on Framework, not a writable DB field.
     reference_controls = serializers.ListField(required=False, read_only=True)
 

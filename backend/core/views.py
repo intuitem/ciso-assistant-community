@@ -7878,7 +7878,9 @@ class FrameworkViewSet(BaseModelViewSet):
             folder=folder,
         ):
             raise PermissionDenied(
-                {"folder": "You do not have permission to create frameworks in this folder"}
+                {
+                    "folder": "You do not have permission to create frameworks in this folder"
+                }
             )
 
         # Clone framework
@@ -7956,7 +7958,9 @@ class FrameworkViewSet(BaseModelViewSet):
             )
             for choice in q.choices.all():
                 QuestionChoice.objects.create(
-                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}" if choice.urn else None,
+                    urn=f"urn:intuitem:risk:choice:{uuid.uuid4()}"
+                    if choice.urn
+                    else None,
                     ref_id=choice.ref_id,
                     value=choice.value,
                     annotation=choice.annotation,

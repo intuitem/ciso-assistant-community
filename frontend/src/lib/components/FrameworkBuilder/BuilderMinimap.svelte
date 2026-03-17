@@ -9,7 +9,11 @@
 	let { frameworkId }: Props = $props();
 
 	const builder = getBuilderContext();
-	const { sections: sectionsStore, activeSection: activeSectionStore, saving: savingStore } = builder;
+	const {
+		sections: sectionsStore,
+		activeSection: activeSectionStore,
+		saving: savingStore
+	} = builder;
 
 	let topOffset = $state(0);
 
