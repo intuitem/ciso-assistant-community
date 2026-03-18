@@ -113,6 +113,7 @@
 			addingTranslationLocale = '';
 			newTranslationLocale = '';
 			await refreshData();
+			await checkAndAcquireLock();
 		}
 	}
 
