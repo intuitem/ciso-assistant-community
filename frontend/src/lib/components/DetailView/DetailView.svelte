@@ -440,7 +440,7 @@
 					class="anchor text-sm"
 				>
 					<i class="fa-solid fa-arrow-left"></i>
-					{m.backToWorkshop()} (3)
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
 				</Anchor>
 			</div>
 		{/if}
