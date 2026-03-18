@@ -45,13 +45,6 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                 lang = request.user.get_preferences().get("lang", "en")
             validated_data["locale"] = lang
 
-        # Set default_locale=True only if no sibling document exists for this policy
-        policy = validated_data.get("policy")
-        if policy and ManagedDocument.objects.filter(policy=policy).exists():
-            validated_data.setdefault("default_locale", False)
-        else:
-            validated_data.setdefault("default_locale", True)
-
         # Auto-create an initial draft revision atomically with the document
         author = request.user if request else None
         content = ""
@@ -69,6 +62,19 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                 else:
                     content = raw
         with transaction.atomic():
+            # Set default_locale inside the transaction to avoid race conditions
+            # where two concurrent creates both see no siblings and both set True
+            policy = validated_data.get("policy")
+            if policy:
+                has_siblings = (
+                    ManagedDocument.objects.select_for_update()
+                    .filter(policy=policy)
+                    .exists()
+                )
+                validated_data.setdefault("default_locale", not has_siblings)
+            else:
+                validated_data.setdefault("default_locale", True)
+
             document = super().create(validated_data)
             revision = DocumentRevision.objects.create(
                 document=document,

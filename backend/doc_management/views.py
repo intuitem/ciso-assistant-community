@@ -147,29 +147,37 @@ class ManagedDocumentViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="create-new-draft")
     def create_new_draft(self, request, pk=None):
         """Create a new draft revision cloned from the current revision."""
+        from django.db import transaction
+
         document = self.get_object()
         source = document.current_revision
         if not source:
             source = document.revisions.first()
         content = source.content if source else ""
-        max_version = (
-            document.revisions.aggregate(models.Max("version_number"))[
-                "version_number__max"
-            ]
-            or 0
-        )
-        if document.revisions.filter(status=DocumentRevision.Status.DRAFT).exists():
-            return Response(
-                {"error": "A draft revision already exists for this document."},
-                status=status.HTTP_400_BAD_REQUEST,
+
+        with transaction.atomic():
+            # Lock existing revisions to serialize draft creation and version numbering
+            revisions_qs = DocumentRevision.objects.select_for_update().filter(
+                document=document
             )
-        revision = DocumentRevision.objects.create(
-            document=document,
-            version_number=max_version + 1,
-            content=content,
-            author=request.user,
-            status=DocumentRevision.Status.DRAFT,
-        )
+            if revisions_qs.filter(status=DocumentRevision.Status.DRAFT).exists():
+                return Response(
+                    {"error": "A draft revision already exists for this document."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            max_version = (
+                revisions_qs.aggregate(models.Max("version_number"))[
+                    "version_number__max"
+                ]
+                or 0
+            )
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=max_version + 1,
+                content=content,
+                author=request.user,
+                status=DocumentRevision.Status.DRAFT,
+            )
         return Response(
             {
                 "id": str(revision.id),
