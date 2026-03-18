@@ -7,6 +7,8 @@ from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from structlog import get_logger
+import os
+from datetime import datetime
 
 from .models import SSOSettings
 from iam.models import User
@@ -19,6 +21,27 @@ class RedirectToProviderView(APIView):
     handle_json_input = False
 
     def post(self, request, *args, **kwargs):
+        expiration_date = os.environ.get("LICENSE_EXPIRATION")
+        if expiration_date is not None:
+            print("expiration_date = " + str(expiration_date) + "]")
+            try:
+                expiration_date = datetime.fromisoformat(expiration_date)
+                if expiration_date < datetime.now():
+                    return render_authentication_error(
+                        request,
+                        provider=request.POST.get("provider"),
+                        error="The license is expired.",
+                    )
+            except Exception:
+                logger.error(
+                    "Failed to check license expiration date because of the format. Check that it it under ISO format."
+                )
+                return render_authentication_error(
+                    request,
+                    provider=request.POST.get("provider"),
+                    error="Failed to check the license's expiration date.",
+                )
+
         form = RedirectToProviderForm(request.POST)
         if not form.is_valid():
             return render_authentication_error(
