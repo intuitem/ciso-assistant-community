@@ -4,25 +4,61 @@
 
 	interface Props {
 		requirement: BuilderRequirement;
-		sectionIndex: number;
-		reqIndex: number;
 	}
 
-	let { requirement, sectionIndex, reqIndex }: Props = $props();
+	let { requirement }: Props = $props();
 
 	const builder = getBuilderContext();
 	const { framework: frameworkStore, errors: errorsStore } = builder;
 	let confirmDelete = $state(false);
 
+	const depthColors = [
+		'border-l-blue-400',
+		'border-l-violet-400',
+		'border-l-amber-400',
+		'border-l-emerald-400'
+	];
+	const depthColor = $derived(depthColors[requirement.depth % depthColors.length]);
+
 	async function saveField(field: string, value: unknown) {
 		await builder.updateNode(requirement.node.id, { [field]: value });
 	}
 
-	// All questions in this requirement (for depends_on editor)
 	const allQuestions = $derived(requirement.questions.map((q) => q.question));
+
+	// Drag state for children
+	let draggedChildIndex: number | null = $state(null);
+
+	function handleChildDragStart(index: number) {
+		draggedChildIndex = index;
+	}
+	function handleChildDragOver(e: DragEvent) {
+		e.preventDefault();
+	}
+	function handleChildDrop(e: DragEvent, dropIndex: number) {
+		e.preventDefault();
+		if (draggedChildIndex === null || draggedChildIndex === dropIndex) return;
+		builder.reorderRequirements(requirement.node.id, draggedChildIndex, dropIndex);
+		draggedChildIndex = null;
+	}
+	function handleChildDragEnd() {
+		draggedChildIndex = null;
+	}
 </script>
 
-<div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+<div style="margin-left: {Math.min(requirement.depth, 3) * 16}px">
+<div
+	class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden {requirement.depth > 0 ? `border-l-4 ${depthColor}` : ''}"
+>
+	<!-- Parent breadcrumb for deep nesting -->
+	{#if requirement.depth >= 3 && requirement.node.parent_urn}
+		<div class="px-4 pt-2 pb-0">
+			<span class="text-[10px] text-gray-400">
+				<i class="fa-solid fa-turn-up fa-rotate-90 mr-1"></i>nested under {requirement.node.parent_urn.split(':').pop()?.slice(0, 12)}
+			</span>
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div class="px-4 py-3 border-b border-gray-100 flex items-start gap-3 group">
 		<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1">
@@ -41,7 +77,8 @@
 					type="text"
 					value={requirement.node.name ?? ''}
 					placeholder={requirement.node.description
-						? requirement.node.description.slice(0, 60) + (requirement.node.description.length > 60 ? '...' : '')
+						? requirement.node.description.slice(0, 60) +
+							(requirement.node.description.length > 60 ? '...' : '')
 						: 'Requirement name'}
 					class="flex-1 text-sm font-medium bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 px-0.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors"
 					onblur={(e) => saveField('name', e.currentTarget.value || null)}
@@ -62,7 +99,7 @@
 					type="button"
 					class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50"
 					onclick={() => {
-						builder.deleteRequirement(sectionIndex, reqIndex);
+						builder.deleteRequirement(requirement.node.id);
 						confirmDelete = false;
 					}}
 				>
@@ -101,7 +138,9 @@
 						: 'bg-gray-50 border-gray-200 text-gray-400 hover:border-gray-300'}"
 					onclick={() => {
 						const current = requirement.node.implementation_groups ?? [];
-						const next = selected ? current.filter((g) => g !== refId) : [...current, refId];
+						const next = selected
+							? current.filter((g) => g !== refId)
+							: [...current, refId];
 						builder.updateNode(requirement.node.id, { implementation_groups: next });
 					}}
 				>
@@ -116,8 +155,7 @@
 		{#each requirement.questions as bq, qIndex (bq.question.id)}
 			<QuestionEditor
 				question={bq.question}
-				{sectionIndex}
-				{reqIndex}
+				reqNodeId={requirement.node.id}
 				{qIndex}
 				siblingQuestions={allQuestions}
 			/>
@@ -126,10 +164,19 @@
 		<button
 			type="button"
 			class="w-full py-2 border-2 border-dashed border-gray-200 rounded-lg text-xs text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-			onclick={() => builder.addQuestion(sectionIndex, reqIndex)}
+			onclick={() => builder.addQuestion(requirement.node.id)}
 		>
 			<i class="fa-solid fa-plus mr-1"></i>Add question
 		</button>
+		{#if requirement.node.urn}
+			<button
+				type="button"
+				class="w-full py-1 text-[11px] text-gray-300 hover:text-gray-500 transition-colors"
+				onclick={() => builder.addRequirement(requirement.node.id, requirement.node.urn ?? '')}
+			>
+				<i class="fa-solid fa-plus mr-1"></i>Add sub-requirement
+			</button>
+		{/if}
 	</div>
 
 	{#if $errorsStore.has(`node-${requirement.node.id}`)}
@@ -137,4 +184,24 @@
 			<p class="text-xs text-red-600">{$errorsStore.get(`node-${requirement.node.id}`)}</p>
 		</div>
 	{/if}
+</div>
+
+<!-- Children rendered as siblings (outside card) to avoid compound padding -->
+{#if requirement.children.length > 0}
+	<div class="space-y-3 mt-2">
+		{#each requirement.children as child, childIndex (child.node.id)}
+			<div
+				class:opacity-50={draggedChildIndex === childIndex}
+				draggable="true"
+				ondragstart={() => handleChildDragStart(childIndex)}
+				ondragover={handleChildDragOver}
+				ondrop={(e) => handleChildDrop(e, childIndex)}
+				ondragend={handleChildDragEnd}
+				role="listitem"
+			>
+				<svelte:self requirement={child} />
+			</div>
+		{/each}
+	</div>
+{/if}
 </div>

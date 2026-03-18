@@ -7,13 +7,12 @@
 
 	interface Props {
 		question: Question;
-		sectionIndex: number;
-		reqIndex: number;
+		reqNodeId: string;
 		qIndex: number;
 		siblingQuestions: Question[];
 	}
 
-	let { question, sectionIndex, reqIndex, qIndex, siblingQuestions }: Props = $props();
+	let { question, reqNodeId, qIndex, siblingQuestions }: Props = $props();
 
 	const builder = getBuilderContext();
 	const { framework: frameworkStore, errors: errorsStore } = builder;
@@ -123,7 +122,7 @@
 							type="button"
 							class="text-xs text-red-600 font-medium px-2 py-0.5 rounded bg-red-50 hover:bg-red-100"
 							onclick={() => {
-								builder.deleteQuestion(sectionIndex, reqIndex, qIndex);
+								builder.deleteQuestion(reqNodeId, qIndex);
 								confirmDelete = false;
 							}}
 						>
@@ -210,8 +209,7 @@
 			{#if isChoiceType}
 				<ChoiceListEditor
 					choices={question.choices}
-					{sectionIndex}
-					{reqIndex}
+					{reqNodeId}
 					{qIndex}
 					implementationGroups={$frameworkStore.implementation_groups_definition}
 					minScore={$frameworkStore.min_score}

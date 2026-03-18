@@ -3,8 +3,7 @@
 
 	interface Props {
 		choices: QuestionChoice[];
-		sectionIndex: number;
-		reqIndex: number;
+		reqNodeId: string;
 		qIndex: number;
 		implementationGroups?: Record<string, unknown>[] | null;
 		minScore?: number;
@@ -13,8 +12,7 @@
 
 	let {
 		choices,
-		sectionIndex,
-		reqIndex,
+		reqNodeId,
 		qIndex,
 		implementationGroups = null,
 		minScore = 0,
@@ -42,7 +40,7 @@
 	function handleDrop(e: DragEvent, dropIndex: number) {
 		e.preventDefault();
 		if (draggedIndex === null || draggedIndex === dropIndex) return;
-		builder.reorderChoices(sectionIndex, reqIndex, qIndex, draggedIndex, dropIndex);
+		builder.reorderChoices(reqNodeId, qIndex, draggedIndex, dropIndex);
 		draggedIndex = null;
 	}
 
@@ -57,7 +55,7 @@
 		<button
 			type="button"
 			class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-			onclick={() => builder.addChoice(sectionIndex, reqIndex, qIndex)}
+			onclick={() => builder.addChoice(reqNodeId, qIndex)}
 		>
 			<i class="fa-solid fa-plus mr-1"></i>Add choice
 		</button>
@@ -115,7 +113,7 @@
 						type="button"
 						class="text-xs text-red-600 font-medium"
 						onclick={() => {
-							builder.deleteChoice(sectionIndex, reqIndex, qIndex, index);
+							builder.deleteChoice(reqNodeId, qIndex, index);
 							confirmDeleteIndex = null;
 						}}
 					>

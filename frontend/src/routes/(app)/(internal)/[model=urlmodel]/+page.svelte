@@ -245,6 +245,15 @@
 										data-testid="viz-button"><i class="fa-solid fa-diagram-project"></i></Anchor
 									>
 								{/if}
+								{#if URLModel === 'frameworks'}
+									<a
+										href="/frameworks/new/builder"
+										class="inline-block p-3 text-gray-50 bg-pink-500 hover:bg-pink-400 w-12 focus:relative"
+										data-testid="add-button"
+										id="add-button"
+										title={m.addFramework()}><i class="fa-solid fa-file-circle-plus mr-2"></i></a
+									>
+								{/if}
 							{/if}
 						</div>
 						{#if exportPopupOpen}

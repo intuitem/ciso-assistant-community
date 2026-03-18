@@ -70,6 +70,8 @@ export interface Framework {
 export interface BuilderRequirement {
 	node: RequirementNode;
 	questions: BuilderQuestion[];
+	children: BuilderRequirement[];
+	depth: number;
 }
 
 export interface BuilderQuestion {
@@ -82,6 +84,68 @@ export interface BuilderSection {
 	collapsed: boolean;
 }
 
+// --- Recursive helpers ---
+
+/** Recursively map over a requirement tree, applying fn to each requirement */
+function mapRequirements(
+	reqs: BuilderRequirement[],
+	fn: (req: BuilderRequirement) => BuilderRequirement
+): BuilderRequirement[] {
+	return reqs.map((req) => {
+		const updated = fn(req);
+		return { ...updated, children: mapRequirements(updated.children, fn) };
+	});
+}
+
+/** Find a requirement by node ID in a recursive tree */
+function findRequirement(
+	reqs: BuilderRequirement[],
+	nodeId: string
+): BuilderRequirement | null {
+	for (const req of reqs) {
+		if (req.node.id === nodeId) return req;
+		const found = findRequirement(req.children, nodeId);
+		if (found) return found;
+	}
+	return null;
+}
+
+/** Remove a requirement by node ID from a recursive tree */
+function removeRequirement(
+	reqs: BuilderRequirement[],
+	nodeId: string
+): BuilderRequirement[] {
+	return reqs
+		.filter((req) => req.node.id !== nodeId)
+		.map((req) => ({ ...req, children: removeRequirement(req.children, nodeId) }));
+}
+
+/** Add a child requirement under a parent node ID */
+function addChildToRequirement(
+	reqs: BuilderRequirement[],
+	parentNodeId: string,
+	child: BuilderRequirement
+): BuilderRequirement[] {
+	return reqs.map((req) => {
+		if (req.node.id === parentNodeId) {
+			return { ...req, children: [...req.children, child] };
+		}
+		return { ...req, children: addChildToRequirement(req.children, parentNodeId, child) };
+	});
+}
+
+/** Apply a function to a specific requirement found by node ID */
+function updateRequirementById(
+	reqs: BuilderRequirement[],
+	nodeId: string,
+	fn: (req: BuilderRequirement) => BuilderRequirement
+): BuilderRequirement[] {
+	return reqs.map((req) => {
+		if (req.node.id === nodeId) return fn(req);
+		return { ...req, children: updateRequirementById(req.children, nodeId, fn) };
+	});
+}
+
 // --- State ---
 
 const CONTEXT_KEY = 'framework-builder';
@@ -92,34 +156,22 @@ export interface BuilderStore {
 	saving: Writable<boolean>;
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
-	// Methods
 	addSection: (afterIndex?: number) => Promise<void>;
 	deleteSection: (sectionIndex: number) => Promise<void>;
-	addRequirement: (sectionIndex: number, afterIndex?: number) => Promise<void>;
-	deleteRequirement: (sectionIndex: number, reqIndex: number) => Promise<void>;
+	addRequirement: (parentNodeId: string, parentUrn: string) => Promise<void>;
+	deleteRequirement: (nodeId: string) => Promise<void>;
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => Promise<void>;
-	addQuestion: (sectionIndex: number, reqIndex: number, type?: Question['type']) => Promise<void>;
+	addQuestion: (reqNodeId: string, type?: Question['type']) => Promise<void>;
 	updateQuestion: (questionId: string, patch: Record<string, unknown>) => Promise<void>;
-	deleteQuestion: (sectionIndex: number, reqIndex: number, qIndex: number) => Promise<void>;
-	addChoice: (sectionIndex: number, reqIndex: number, qIndex: number) => Promise<void>;
+	deleteQuestion: (reqNodeId: string, qIndex: number) => Promise<void>;
+	addChoice: (reqNodeId: string, qIndex: number) => Promise<void>;
 	updateChoice: (choiceId: string, patch: Record<string, unknown>) => Promise<void>;
-	deleteChoice: (
-		sectionIndex: number,
-		reqIndex: number,
-		qIndex: number,
-		choiceIndex: number
-	) => Promise<void>;
+	deleteChoice: (reqNodeId: string, qIndex: number, choiceIndex: number) => Promise<void>;
 	reorderSections: (fromIndex: number, toIndex: number) => Promise<void>;
-	reorderRequirements: (sectionIndex: number, fromIndex: number, toIndex: number) => Promise<void>;
-	reorderQuestions: (
-		sectionIndex: number,
-		reqIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) => Promise<void>;
+	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => Promise<void>;
+	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => Promise<void>;
 	reorderChoices: (
-		sectionIndex: number,
-		reqIndex: number,
+		reqNodeId: string,
 		qIndex: number,
 		fromIndex: number,
 		toIndex: number
@@ -128,17 +180,16 @@ export interface BuilderStore {
 }
 
 function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
-	// Map questions by requirement_node id
 	const questionsByNode = new Map<string, Question[]>();
 	for (const q of questions) {
-		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		const nodeId =
+			typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
 		if (!questionsByNode.has(nodeId)) {
 			questionsByNode.set(nodeId, []);
 		}
 		questionsByNode.get(nodeId)!.push(q);
 	}
 
-	// Build parent_urn -> children lookup
 	const childrenByUrn = new Map<string, RequirementNode[]>();
 	for (const node of nodes) {
 		if (node.parent_urn) {
@@ -152,31 +203,17 @@ function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSect
 		children.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
 	}
 
-	// Recursively collect all descendant nodes that have questions or are assessable
-	function collectRequirements(parentUrn: string): BuilderRequirement[] {
+	function buildRequirements(parentUrn: string, depth: number): BuilderRequirement[] {
 		const children = childrenByUrn.get(parentUrn) ?? [];
-		const result: BuilderRequirement[] = [];
-
-		for (const child of children) {
+		return children.map((child) => {
 			const nodeQuestions = (questionsByNode.get(child.id) ?? [])
 				.sort((a, b) => a.order - b.order)
 				.map((q) => ({ question: q }));
-
-			// If this node has questions or is assessable, show it as a requirement
-			if (nodeQuestions.length > 0 || child.assessable) {
-				result.push({ node: child, questions: nodeQuestions });
-			}
-
-			// Also collect from deeper descendants
-			if (child.urn) {
-				result.push(...collectRequirements(child.urn));
-			}
-		}
-
-		return result;
+			const nested = child.urn ? buildRequirements(child.urn, depth + 1) : [];
+			return { node: child, questions: nodeQuestions, children: nested, depth };
+		});
 	}
 
-	// Top-level sections: non-assessable with no parent, or assessable with no parent
 	const sectionNodes = nodes
 		.filter((n) => !n.parent_urn)
 		.sort((a, b) => (a.order_id ?? 0) - (b.order_id ?? 0));
@@ -188,18 +225,15 @@ function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSect
 				.map((q) => ({ question: q }));
 			return {
 				node: sectionNode,
-				requirements: [{ node: sectionNode, questions: directQuestions }],
+				requirements: [
+					{ node: sectionNode, questions: directQuestions, children: [], depth: 0 }
+				],
 				collapsed: false
 			};
 		}
 
-		const requirements = sectionNode.urn ? collectRequirements(sectionNode.urn) : [];
-
-		return {
-			node: sectionNode,
-			requirements,
-			collapsed: false
-		};
+		const requirements = sectionNode.urn ? buildRequirements(sectionNode.urn, 0) : [];
+		return { node: sectionNode, requirements, collapsed: false };
 	});
 }
 
@@ -232,17 +266,41 @@ export function createBuilderState(
 		});
 	}
 
-	// Helper to read current store value synchronously
 	function get<T>(store: Writable<T>): T {
 		let value: T;
 		store.subscribe((v) => (value = v))();
 		return value!;
 	}
 
+	/** Map all requirements in all sections recursively */
+	function updateAllRequirements(
+		fn: (req: BuilderRequirement) => BuilderRequirement
+	) {
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: mapRequirements(sec.requirements, fn)
+			}))
+		);
+	}
+
+	/** Find a requirement across all sections */
+	function findReqGlobal(nodeId: string): BuilderRequirement | null {
+		for (const sec of get(sections)) {
+			const found = findRequirement(sec.requirements, nodeId);
+			if (found) return found;
+		}
+		return null;
+	}
+
+	// --- Section CRUD ---
+
 	async function addSection(afterIndex?: number) {
 		const currentSections = get(sections);
 		const order =
-			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
+			afterIndex !== undefined
+				? (afterIndex + 1) * 100 + 50
+				: currentSections.length * 100;
 
 		try {
 			saving.set(true);
@@ -282,11 +340,18 @@ export function createBuilderState(
 		}
 	}
 
-	async function addRequirement(sectionIndex: number, afterIndex?: number) {
-		const section = get(sections)[sectionIndex];
-		if (!section) return;
-		const reqs = section.requirements;
-		const order = afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : reqs.length * 100;
+	// --- Requirement CRUD (node ID-based) ---
+
+	async function addRequirement(parentNodeId: string, parentUrn: string) {
+		const parentReq = findReqGlobal(parentNodeId);
+		const siblings = parentReq ? parentReq.children : (() => {
+			for (const sec of get(sections)) {
+				if (sec.node.id === parentNodeId) return sec.requirements;
+			}
+			return [];
+		})();
+		const parentDepth = parentReq ? parentReq.depth : -1;
+		const order = siblings.length * 100;
 
 		try {
 			saving.set(true);
@@ -295,20 +360,35 @@ export function createBuilderState(
 				name: 'New Requirement',
 				assessable: true,
 				order_id: order,
-				parent_urn: section.node.urn,
+				parent_urn: parentUrn,
 				framework: frameworkId,
 				folder: folderId
 			});
-			const newReq: BuilderRequirement = { node: created, questions: [] };
-			const idx = afterIndex !== undefined ? afterIndex + 1 : reqs.length;
-			sections.update((s) => {
-				const copy = [...s];
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: [...reqs.slice(0, idx), newReq, ...reqs.slice(idx)]
-				};
-				return copy;
-			});
+			const newReq: BuilderRequirement = {
+				node: created,
+				questions: [],
+				children: [],
+				depth: parentDepth + 1
+			};
+
+			if (parentReq) {
+				// Adding as child of a requirement
+				sections.update((s) =>
+					s.map((sec) => ({
+						...sec,
+						requirements: addChildToRequirement(sec.requirements, parentNodeId, newReq)
+					}))
+				);
+			} else {
+				// Adding as direct child of a section
+				sections.update((s) =>
+					s.map((sec) =>
+						sec.node.id === parentNodeId
+							? { ...sec, requirements: [...sec.requirements, newReq] }
+							: sec
+					)
+				);
+			}
 		} catch (e) {
 			setError('add-requirement', (e as Error).message);
 		} finally {
@@ -316,35 +396,31 @@ export function createBuilderState(
 		}
 	}
 
-	async function deleteRequirement(sectionIndex: number, reqIndex: number) {
-		const section = get(sections)[sectionIndex];
-		const req = section?.requirements[reqIndex];
-		if (!req) return;
+	async function deleteRequirement(nodeId: string) {
 		try {
 			saving.set(true);
-			await apiDelete('requirement-nodes', req.node.id);
-			sections.update((s) => {
-				const copy = [...s];
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: copy[sectionIndex].requirements.filter((_, i) => i !== reqIndex)
-				};
-				return copy;
-			});
+			await apiDelete('requirement-nodes', nodeId);
+			sections.update((s) =>
+				s.map((sec) => ({
+					...sec,
+					requirements: removeRequirement(sec.requirements, nodeId)
+				}))
+			);
 		} catch (e) {
-			setError(`delete-req-${req.node.id}`, (e as Error).message);
+			setError(`delete-req-${nodeId}`, (e as Error).message);
 		} finally {
 			saving.set(false);
 		}
 	}
 
+	// --- Node update ---
+
 	async function updateNode(nodeId: string, patch: Record<string, unknown>) {
-		// Optimistic local update
 		sections.update((s) =>
 			s.map((sec) => ({
 				...sec,
 				node: sec.node.id === nodeId ? { ...sec.node, ...patch } : sec.node,
-				requirements: sec.requirements.map((req) => ({
+				requirements: mapRequirements(sec.requirements, (req) => ({
 					...req,
 					node: req.node.id === nodeId ? { ...req.node, ...patch } : req.node
 				}))
@@ -362,13 +438,10 @@ export function createBuilderState(
 		}
 	}
 
-	async function addQuestion(
-		sectionIndex: number,
-		reqIndex: number,
-		type: Question['type'] = 'text'
-	) {
-		const section = get(sections)[sectionIndex];
-		const req = section?.requirements[reqIndex];
+	// --- Question CRUD (node ID-based) ---
+
+	async function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
+		const req = findReqGlobal(reqNodeId);
 		if (!req) return;
 		const order = req.questions.length * 100;
 		const urn = `urn:intuitem:risk:question:${crypto.randomUUID()}`;
@@ -381,22 +454,19 @@ export function createBuilderState(
 				type,
 				order,
 				weight: 1,
-				requirement_node: req.node.id,
+				requirement_node: reqNodeId,
 				folder: folderId
 			});
 			created.choices = created.choices ?? [];
-			sections.update((s) => {
-				const copy = [...s];
-				const reqCopy = { ...copy[sectionIndex].requirements[reqIndex] };
-				reqCopy.questions = [...reqCopy.questions, { question: created }];
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: copy[sectionIndex].requirements.map((r, i) =>
-						i === reqIndex ? reqCopy : r
-					)
-				};
-				return copy;
-			});
+			sections.update((s) =>
+				s.map((sec) => ({
+					...sec,
+					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+						...r,
+						questions: [...r.questions, { question: created }]
+					}))
+				}))
+			);
 		} catch (e) {
 			setError('add-question', (e as Error).message);
 		} finally {
@@ -405,19 +475,14 @@ export function createBuilderState(
 	}
 
 	async function updateQuestion(questionId: string, patch: Record<string, unknown>) {
-		// Optimistic local update
-		sections.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				requirements: sec.requirements.map((req) => ({
-					...req,
-					questions: req.questions.map((q) => ({
-						...q,
-						question: q.question.id === questionId ? { ...q.question, ...patch } : q.question
-					}))
-				}))
+		updateAllRequirements((req) => ({
+			...req,
+			questions: req.questions.map((q) => ({
+				...q,
+				question:
+					q.question.id === questionId ? { ...q.question, ...patch } : q.question
 			}))
-		);
+		}));
 		try {
 			saving.set(true);
 			await apiUpdate('questions', questionId, patch);
@@ -430,25 +495,22 @@ export function createBuilderState(
 		}
 	}
 
-	async function deleteQuestion(sectionIndex: number, reqIndex: number, qIndex: number) {
-		const section = get(sections)[sectionIndex];
-		const q = section?.requirements[reqIndex]?.questions[qIndex];
+	async function deleteQuestion(reqNodeId: string, qIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const q = req?.questions[qIndex];
 		if (!q) return;
 		try {
 			saving.set(true);
 			await apiDelete('questions', q.question.id);
-			sections.update((s) => {
-				const copy = [...s];
-				const reqCopy = { ...copy[sectionIndex].requirements[reqIndex] };
-				reqCopy.questions = reqCopy.questions.filter((_, i) => i !== qIndex);
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: copy[sectionIndex].requirements.map((r, i) =>
-						i === reqIndex ? reqCopy : r
-					)
-				};
-				return copy;
-			});
+			sections.update((s) =>
+				s.map((sec) => ({
+					...sec,
+					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+						...r,
+						questions: r.questions.filter((_, i) => i !== qIndex)
+					}))
+				}))
+			);
 		} catch (e) {
 			setError(`delete-question-${q.question.id}`, (e as Error).message);
 		} finally {
@@ -456,9 +518,11 @@ export function createBuilderState(
 		}
 	}
 
-	async function addChoice(sectionIndex: number, reqIndex: number, qIndex: number) {
-		const section = get(sections)[sectionIndex];
-		const q = section?.requirements[reqIndex]?.questions[qIndex];
+	// --- Choice CRUD (node ID-based) ---
+
+	async function addChoice(reqNodeId: string, qIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const q = req?.questions[qIndex];
 		if (!q) return;
 		const order = q.question.choices.length * 100;
 
@@ -470,23 +534,25 @@ export function createBuilderState(
 				question: q.question.id,
 				folder: folderId
 			});
-			sections.update((s) => {
-				const copy = [...s];
-				const reqCopy = { ...copy[sectionIndex].requirements[reqIndex] };
-				const qCopy = { ...reqCopy.questions[qIndex] };
-				qCopy.question = {
-					...qCopy.question,
-					choices: [...qCopy.question.choices, created]
-				};
-				reqCopy.questions = reqCopy.questions.map((qq, i) => (i === qIndex ? qCopy : qq));
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: copy[sectionIndex].requirements.map((r, i) =>
-						i === reqIndex ? reqCopy : r
-					)
-				};
-				return copy;
-			});
+			sections.update((s) =>
+				s.map((sec) => ({
+					...sec,
+					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+						...r,
+						questions: r.questions.map((qq, i) =>
+							i === qIndex
+								? {
+										...qq,
+										question: {
+											...qq.question,
+											choices: [...qq.question.choices, created]
+										}
+									}
+								: qq
+						)
+					}))
+				}))
+			);
 		} catch (e) {
 			setError('add-choice', (e as Error).message);
 		} finally {
@@ -495,22 +561,18 @@ export function createBuilderState(
 	}
 
 	async function updateChoice(choiceId: string, patch: Record<string, unknown>) {
-		// Optimistic local update
-		sections.update((s) =>
-			s.map((sec) => ({
-				...sec,
-				requirements: sec.requirements.map((req) => ({
-					...req,
-					questions: req.questions.map((q) => ({
-						...q,
-						question: {
-							...q.question,
-							choices: q.question.choices.map((c) => (c.id === choiceId ? { ...c, ...patch } : c))
-						}
-					}))
-				}))
+		updateAllRequirements((req) => ({
+			...req,
+			questions: req.questions.map((q) => ({
+				...q,
+				question: {
+					...q.question,
+					choices: q.question.choices.map((c) =>
+						c.id === choiceId ? { ...c, ...patch } : c
+					)
+				}
 			}))
-		);
+		}));
 		try {
 			saving.set(true);
 			await apiUpdate('question-choices', choiceId, patch);
@@ -523,42 +585,42 @@ export function createBuilderState(
 		}
 	}
 
-	async function deleteChoice(
-		sectionIndex: number,
-		reqIndex: number,
-		qIndex: number,
-		choiceIndex: number
-	) {
-		const section = get(sections)[sectionIndex];
-		const choice =
-			section?.requirements[reqIndex]?.questions[qIndex]?.question.choices[choiceIndex];
+	async function deleteChoice(reqNodeId: string, qIndex: number, choiceIndex: number) {
+		const req = findReqGlobal(reqNodeId);
+		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
 		try {
 			saving.set(true);
 			await apiDelete('question-choices', choice.id);
-			sections.update((s) => {
-				const copy = [...s];
-				const reqCopy = { ...copy[sectionIndex].requirements[reqIndex] };
-				const qCopy = { ...reqCopy.questions[qIndex] };
-				qCopy.question = {
-					...qCopy.question,
-					choices: qCopy.question.choices.filter((_, i) => i !== choiceIndex)
-				};
-				reqCopy.questions = reqCopy.questions.map((qq, i) => (i === qIndex ? qCopy : qq));
-				copy[sectionIndex] = {
-					...copy[sectionIndex],
-					requirements: copy[sectionIndex].requirements.map((r, i) =>
-						i === reqIndex ? reqCopy : r
-					)
-				};
-				return copy;
-			});
+			sections.update((s) =>
+				s.map((sec) => ({
+					...sec,
+					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+						...r,
+						questions: r.questions.map((qq, i) =>
+							i === qIndex
+								? {
+										...qq,
+										question: {
+											...qq.question,
+											choices: qq.question.choices.filter(
+												(_, ci) => ci !== choiceIndex
+											)
+										}
+									}
+								: qq
+						)
+					}))
+				}))
+			);
 		} catch (e) {
 			setError(`delete-choice-${choice.id}`, (e as Error).message);
 		} finally {
 			saving.set(false);
 		}
 	}
+
+	// --- Reorder ---
 
 	async function reorderSections(fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
@@ -572,7 +634,9 @@ export function createBuilderState(
 			saving.set(true);
 			const current = get(sections);
 			await Promise.all(
-				current.map((s, i) => apiUpdate('requirement-nodes', s.node.id, { order_id: i * 100 }))
+				current.map((s, i) =>
+					apiUpdate('requirement-nodes', s.node.id, { order_id: i * 100 })
+				)
 			);
 		} catch (e) {
 			setError('reorder-sections', (e as Error).message);
@@ -581,21 +645,45 @@ export function createBuilderState(
 		}
 	}
 
-	async function reorderRequirements(sectionIndex: number, fromIndex: number, toIndex: number) {
+	async function reorderRequirements(
+		parentNodeId: string,
+		fromIndex: number,
+		toIndex: number
+	) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) => {
-			const copy = [...s];
-			const reqs = [...copy[sectionIndex].requirements];
-			const [moved] = reqs.splice(fromIndex, 1);
-			reqs.splice(toIndex, 0, moved);
-			copy[sectionIndex] = { ...copy[sectionIndex], requirements: reqs };
-			return copy;
-		});
+
+		// Reorder could be at section level or inside a requirement
+		sections.update((s) =>
+			s.map((sec) => {
+				if (sec.node.id === parentNodeId) {
+					const reqs = [...sec.requirements];
+					const [moved] = reqs.splice(fromIndex, 1);
+					reqs.splice(toIndex, 0, moved);
+					return { ...sec, requirements: reqs };
+				}
+				return {
+					...sec,
+					requirements: updateRequirementById(sec.requirements, parentNodeId, (r) => {
+						const kids = [...r.children];
+						const [moved] = kids.splice(fromIndex, 1);
+						kids.splice(toIndex, 0, moved);
+						return { ...r, children: kids };
+					})
+				};
+			})
+		);
+
 		try {
 			saving.set(true);
-			const reqs = get(sections)[sectionIndex].requirements;
+			// Find the reordered list to persist order_ids
+			const parentReq = findReqGlobal(parentNodeId);
+			const reorderedList = parentReq
+				? parentReq.children
+				: get(sections).find((s) => s.node.id === parentNodeId)?.requirements ?? [];
 			await Promise.all(
-				reqs.map((r, i) => apiUpdate('requirement-nodes', r.node.id, { order_id: i * 100 }))
+				reorderedList.map((r, i) =>
+					apiUpdate('requirement-nodes', r.node.id, { order_id: i * 100 })
+				)
 			);
 		} catch (e) {
 			setError('reorder-requirements', (e as Error).message);
@@ -604,32 +692,29 @@ export function createBuilderState(
 		}
 	}
 
-	async function reorderQuestions(
-		sectionIndex: number,
-		reqIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) {
+	async function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) => {
-			const copy = [...s];
-			const req = { ...copy[sectionIndex].requirements[reqIndex] };
-			const qs = [...req.questions];
-			const [moved] = qs.splice(fromIndex, 1);
-			qs.splice(toIndex, 0, moved);
-			req.questions = qs;
-			copy[sectionIndex] = {
-				...copy[sectionIndex],
-				requirements: copy[sectionIndex].requirements.map((r, i) => (i === reqIndex ? req : r))
-			};
-			return copy;
-		});
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => {
+					const qs = [...r.questions];
+					const [moved] = qs.splice(fromIndex, 1);
+					qs.splice(toIndex, 0, moved);
+					return { ...r, questions: qs };
+				})
+			}))
+		);
 		try {
 			saving.set(true);
-			const qs = get(sections)[sectionIndex].requirements[reqIndex].questions;
-			await Promise.all(
-				qs.map((q, i) => apiUpdate('questions', q.question.id, { order: i * 100 }))
-			);
+			const req = findReqGlobal(reqNodeId);
+			if (req) {
+				await Promise.all(
+					req.questions.map((q, i) =>
+						apiUpdate('questions', q.question.id, { order: i * 100 })
+					)
+				);
+			}
 		} catch (e) {
 			setError('reorder-questions', (e as Error).message);
 		} finally {
@@ -638,35 +723,38 @@ export function createBuilderState(
 	}
 
 	async function reorderChoices(
-		sectionIndex: number,
-		reqIndex: number,
+		reqNodeId: string,
 		qIndex: number,
 		fromIndex: number,
 		toIndex: number
 	) {
 		if (fromIndex === toIndex) return;
-		sections.update((s) => {
-			const copy = [...s];
-			const req = { ...copy[sectionIndex].requirements[reqIndex] };
-			const qItem = { ...req.questions[qIndex] };
-			const choices = [...qItem.question.choices];
-			const [moved] = choices.splice(fromIndex, 1);
-			choices.splice(toIndex, 0, moved);
-			qItem.question = { ...qItem.question, choices };
-			req.questions = req.questions.map((q, i) => (i === qIndex ? qItem : q));
-			copy[sectionIndex] = {
-				...copy[sectionIndex],
-				requirements: copy[sectionIndex].requirements.map((r, i) => (i === reqIndex ? req : r))
-			};
-			return copy;
-		});
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) => {
+						if (i !== qIndex) return qq;
+						const choices = [...qq.question.choices];
+						const [moved] = choices.splice(fromIndex, 1);
+						choices.splice(toIndex, 0, moved);
+						return { ...qq, question: { ...qq.question, choices } };
+					})
+				}))
+			}))
+		);
 		try {
 			saving.set(true);
-			const choices =
-				get(sections)[sectionIndex].requirements[reqIndex].questions[qIndex].question.choices;
-			await Promise.all(
-				choices.map((c, i) => apiUpdate('question-choices', c.id, { order: i * 100 }))
-			);
+			const req = findReqGlobal(reqNodeId);
+			const choices = req?.questions[qIndex]?.question.choices;
+			if (choices) {
+				await Promise.all(
+					choices.map((c, i) =>
+						apiUpdate('question-choices', c.id, { order: i * 100 })
+					)
+				);
+			}
 		} catch (e) {
 			setError('reorder-choices', (e as Error).message);
 		} finally {

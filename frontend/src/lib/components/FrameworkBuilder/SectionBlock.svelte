@@ -33,7 +33,7 @@
 	function handleReqDrop(e: DragEvent, dropIndex: number) {
 		e.preventDefault();
 		if (draggedReqIndex === null || draggedReqIndex === dropIndex) return;
-		builder.reorderRequirements(sectionIndex, draggedReqIndex, dropIndex);
+		builder.reorderRequirements(section.node.id, draggedReqIndex, dropIndex);
 		draggedReqIndex = null;
 	}
 
@@ -47,12 +47,6 @@
 	<div class="flex items-center gap-3 group mb-3">
 		<span class="cursor-grab text-gray-300 group-hover:text-gray-400">
 			<i class="fa-solid fa-grip-vertical text-sm"></i>
-		</span>
-
-		<span
-			class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm font-semibold flex items-center justify-center shrink-0"
-		>
-			{sectionIndex + 1}
 		</span>
 
 		<input
@@ -128,14 +122,14 @@
 					ondragend={handleReqDragEnd}
 					role="listitem"
 				>
-					<RequirementBlock requirement={req} {sectionIndex} {reqIndex} />
+					<RequirementBlock requirement={req} />
 				</div>
 			{/each}
 
 			<button
 				type="button"
 				class="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-				onclick={() => builder.addRequirement(sectionIndex)}
+				onclick={() => builder.addRequirement(section.node.id, section.node.urn ?? '')}
 			>
 				<i class="fa-solid fa-plus mr-1"></i>Add requirement
 			</button>
