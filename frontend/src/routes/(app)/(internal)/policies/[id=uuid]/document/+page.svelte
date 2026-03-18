@@ -36,6 +36,7 @@
 	let saved = $state(false);
 	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 	let showPreview = $state(false);
+	let previewContent = $state('');
 	let showDiff = $state(false);
 	let diffResult = $state('');
 	let diffRevisionA = $state('');
@@ -46,6 +47,7 @@
 	let showEditHistory = $state(false);
 	let loadingEditHistory = $state(false);
 	let lockedBy: any = $state(null);
+	let hasLock = $state(false);
 	let lastLoadedAt = $state(currentRevision?.updated_at || '');
 
 	const statusStyles: Record<string, { bg: string; text: string; icon: string }> = {
@@ -117,8 +119,9 @@
 	async function switchLocale(locale: string) {
 		if (locale === currentLocale) return;
 		// Release lock on current revision
-		if (currentRevision?.id && canEdit) {
+		if (currentRevision?.id && hasLock) {
 			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			hasLock = false;
 			stopHeartbeat();
 		}
 		// Fetch the document for the target locale
@@ -130,6 +133,9 @@
 		if (docData) {
 			document = docData;
 			currentLocale = locale;
+			previewContent = '';
+			showPreview = false;
+			showDiff = false;
 			await refreshData();
 			// Acquire lock if editable
 			if (isDraft || isChangeRequested) {
@@ -336,9 +342,10 @@
 
 	async function loadRevision(revisionId: string) {
 		// Release lock on previous revision
-		if (currentRevision?.id && (isDraft || isChangeRequested)) {
+		if (hasLock && currentRevision?.id) {
 			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
 		}
+		hasLock = false;
 		const res = await proxyGet({ _action: 'revision', revision_id: revisionId });
 		if (res.ok) {
 			currentRevision = await res.json();
@@ -367,9 +374,11 @@
 			const data = await res.json();
 			if (data.locked) {
 				lockedBy = data.editing_user;
+				hasLock = false;
 				stopHeartbeat();
 			} else {
 				lockedBy = null;
+				hasLock = true;
 				startHeartbeat();
 				// If we were previously locked out, reload to get latest content
 				if (wasLocked) {
@@ -409,6 +418,7 @@
 		});
 		if (res.ok) {
 			lockedBy = null;
+			hasLock = true;
 			startHeartbeat();
 			await refreshData();
 		}
@@ -416,7 +426,7 @@
 
 	// Release lock when leaving the page
 	function releaseLock() {
-		if (currentRevision?.id && canEdit) {
+		if (currentRevision?.id && hasLock) {
 			// Use sendBeacon for beforeunload (fire-and-forget), fetch for normal nav
 			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
 		}
@@ -428,7 +438,7 @@
 		stopHeartbeat();
 		heartbeatInterval = setInterval(
 			async () => {
-				if (canEdit) {
+				if (hasLock && currentRevision) {
 					const res = await proxyPost({
 						_action: 'start-editing',
 						revision_id: currentRevision.id
@@ -438,6 +448,7 @@
 						if (data.locked) {
 							// Someone else took over — we've been evicted
 							lockedBy = data.editing_user;
+							hasLock = false;
 							stopHeartbeat();
 						}
 					}
@@ -501,7 +512,7 @@
 		});
 		if (res.ok) {
 			const snapshot = await res.json();
-			content = snapshot.content;
+			previewContent = snapshot.content;
 			showPreview = true;
 			showDiff = false;
 		}
@@ -509,7 +520,7 @@
 
 	let isDraft = $derived(currentRevision?.status === 'draft');
 	let isChangeRequested = $derived(currentRevision?.status === 'change_requested');
-	let canEdit = $derived((isDraft || isChangeRequested) && !lockedBy);
+	let canEdit = $derived((isDraft || isChangeRequested) && hasLock);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
 
@@ -968,6 +979,7 @@
 							onclick={() => {
 								showPreview = false;
 								showDiff = false;
+								previewContent = '';
 							}}
 						>
 							<i class="fa-solid fa-pen mr-1.5 text-xs"></i>{m.editTab()}
@@ -1137,7 +1149,7 @@
 					<DiffViewer diff={editDiffResult || diffResult} />
 				{:else if showPreview}
 					<div class="card border border-surface-200 p-6 overflow-auto flex-1 min-h-[500px]">
-						<MarkdownRenderer {content} />
+						<MarkdownRenderer content={previewContent || content} />
 					</div>
 				{:else}
 					<textarea
@@ -1169,11 +1181,17 @@
 							{#each revisions as revision}
 								{@const isActive = currentRevision?.id === revision.id}
 								{@const style = getStatusStyle(revision.status)}
-								<button
-									class="w-full text-left px-3 py-2.5 rounded-lg transition-colors {isActive
+								<!-- svelte-ignore a11y_no_static_element_interactions -->
+								<div
+									class="w-full text-left px-3 py-2.5 rounded-lg transition-colors cursor-pointer {isActive
 										? 'bg-primary-50 ring-1 ring-primary-200'
 										: 'hover:bg-surface-50'}"
 									onclick={() => loadRevision(revision.id)}
+									onkeydown={(e) => {
+										if (e.key === 'Enter' || e.key === ' ') loadRevision(revision.id);
+									}}
+									role="button"
+									tabindex="0"
 								>
 									<div class="flex items-center justify-between mb-1">
 										<span class="text-sm font-semibold {isActive ? 'text-primary-700' : ''}">
@@ -1218,7 +1236,7 @@
 											</button>
 										{/if}
 									</div>
-								</button>
+								</div>
 							{/each}
 
 							{#if revisions.length === 0}

@@ -2,8 +2,16 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
+function assertFeatureEnabled(locals: App.Locals) {
+	if (!locals.featureflags?.policy_documents) {
+		error(403, { message: 'Policy documents feature is disabled' });
+	}
+}
+
 // Create a policy document or upload image
-export const POST: RequestHandler = async ({ fetch, request, url }) => {
+export const POST: RequestHandler = async ({ fetch, request, url, locals }) => {
+	assertFeatureEnabled(locals);
+
 	// Handle image uploads — read file into memory and forward as multipart
 	if (url.searchParams.get('_action') === 'upload-image') {
 		const documentId = url.searchParams.get('document_id');
@@ -93,7 +101,9 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 };
 
 // Proxy GET requests for revisions, diffs, PDF export
-export const GET: RequestHandler = async ({ fetch, url, params }) => {
+export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
+	assertFeatureEnabled(locals);
+
 	const action = url.searchParams.get('_action');
 
 	let endpoint: string;
@@ -193,7 +203,9 @@ export const GET: RequestHandler = async ({ fetch, url, params }) => {
 };
 
 // Delete a document or revision
-export const DELETE: RequestHandler = async ({ fetch, url }) => {
+export const DELETE: RequestHandler = async ({ fetch, url, locals }) => {
+	assertFeatureEnabled(locals);
+
 	const type = url.searchParams.get('_type');
 	const id = url.searchParams.get('id');
 

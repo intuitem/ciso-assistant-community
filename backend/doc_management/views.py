@@ -21,6 +21,7 @@ from rest_framework.parsers import (
     MultiPartParser,
 )
 from rest_framework.response import Response
+import weasyprint
 from weasyprint import HTML
 
 from core.views import BaseModelViewSet
@@ -101,11 +102,17 @@ class ManagedDocumentViewSet(BaseModelViewSet):
                 {"error": "No file provided."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        # Validate image content type
-        content_type = uploaded_file.content_type or ""
-        if not content_type.startswith("image/"):
+        # Only allow safe raster image formats (no SVG/HTML which could be XSS vectors)
+        ALLOWED_IMAGE_TYPES = {
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+        }
+        content_type = (uploaded_file.content_type or "").lower()
+        if content_type not in ALLOWED_IMAGE_TYPES:
             return Response(
-                {"error": "Only image files are allowed."},
+                {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         attachment = DocumentAttachment(
@@ -197,9 +204,17 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
             attachment.file.name
         ):
             return Response(status=status.HTTP_404_NOT_FOUND)
-        content_type = (
+        SAFE_INLINE_TYPES = {"image/png", "image/jpeg", "image/gif", "image/webp"}
+        guessed_type = (
             mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
         )
+        # Only serve safe raster images inline; force download for anything else
+        if guessed_type in SAFE_INLINE_TYPES:
+            content_type = guessed_type
+            disposition = "inline"
+        else:
+            content_type = "application/octet-stream"
+            disposition = "attachment"
         filename = slugify(attachment.file.name.split("/")[-1].rsplit(".", 1)[0])
         extension = (
             attachment.file.name.rsplit(".", 1)[-1]
@@ -210,7 +225,9 @@ class DocumentAttachmentViewSet(BaseModelViewSet):
         return HttpResponse(
             attachment.file,
             content_type=content_type,
-            headers={"Content-Disposition": f'inline; filename="{safe_filename}"'},
+            headers={
+                "Content-Disposition": f'{disposition}; filename="{safe_filename}"'
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -265,26 +282,39 @@ class DocumentRevisionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):
-        """Mark the current user as editing this revision."""
-        revision = self.get_object()
-        if revision.editing_user and revision.editing_user != request.user:
-            if revision.editing_since:
-                elapsed = (timezone.now() - revision.editing_since).total_seconds()
-                if elapsed < 600:  # 10 minutes
-                    return Response(
-                        {
-                            "locked": True,
-                            "editing_user": {
-                                "email": revision.editing_user.email,
-                                "first_name": revision.editing_user.first_name,
-                                "last_name": revision.editing_user.last_name,
-                            },
-                            "editing_since": revision.editing_since.isoformat(),
-                        }
-                    )
-        revision.editing_user = request.user
-        revision.editing_since = timezone.now()
-        revision.save(update_fields=["editing_user", "editing_since"])
+        """Mark the current user as editing this revision.
+
+        Uses select_for_update to prevent two concurrent requests from both
+        believing they acquired the lock (race in the read-check-write path).
+        """
+        from django.db import transaction
+
+        revision_id = self.get_object().pk
+        now = timezone.now()
+
+        with transaction.atomic():
+            revision = DocumentRevision.objects.select_for_update().get(pk=revision_id)
+            # Check if someone else holds the lock and it hasn't expired
+            if (
+                revision.editing_user_id
+                and revision.editing_user_id != request.user.pk
+                and revision.editing_since
+                and (now - revision.editing_since).total_seconds() < 600
+            ):
+                return Response(
+                    {
+                        "locked": True,
+                        "editing_user": {
+                            "email": revision.editing_user.email,
+                            "first_name": revision.editing_user.first_name,
+                            "last_name": revision.editing_user.last_name,
+                        },
+                        "editing_since": revision.editing_since.isoformat(),
+                    }
+                )
+            revision.editing_user = request.user
+            revision.editing_since = now
+            revision.save(update_fields=["editing_user", "editing_since"])
         return Response({"locked": False})
 
     @action(detail=True, methods=["post"], url_path="take-over-editing")
@@ -610,7 +640,22 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         html_string = render_to_string(
             "doc_management/policy_document_pdf.html", context
         )
-        return HTML(string=html_string).write_pdf()
+
+        def _safe_url_fetcher(url, timeout=10, ssl_context=None):
+            """Allow data URIs and public HTTPS images, block everything else.
+
+            Prevents SSRF via file://, internal network URLs, or non-HTTPS schemes
+            while still allowing users to embed external logos/images.
+            """
+            if url.startswith("data:"):
+                return weasyprint.default_url_fetcher(url)
+            if url.startswith("https://"):
+                return weasyprint.default_url_fetcher(
+                    url, timeout=timeout, ssl_context=ssl_context
+                )
+            raise ValueError(f"Blocked resource loading for URL scheme: {url}")
+
+        return HTML(string=html_string, url_fetcher=_safe_url_fetcher).write_pdf()
 
     def _generate_pdf_snapshot(self, revision):
         """Generate and save a PDF snapshot for a revision."""
