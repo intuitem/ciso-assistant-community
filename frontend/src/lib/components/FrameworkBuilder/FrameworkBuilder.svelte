@@ -10,6 +10,7 @@
 	import { initBuilderApi } from './builder-api';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import SectionBlock from './SectionBlock.svelte';
+	import OutcomesEditor from './OutcomesEditor.svelte';
 
 	interface Props {
 		framework: Framework;
@@ -102,6 +103,12 @@
 				<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
 			{/if}
 		</div>
+
+		<!-- Outcome rules -->
+		<OutcomesEditor
+			outcomes={$frameworkStore.outcomes_definition ?? []}
+			onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+		/>
 
 		<!-- Sections -->
 		{#each $sectionsStore as section, sectionIndex (section.node.id)}

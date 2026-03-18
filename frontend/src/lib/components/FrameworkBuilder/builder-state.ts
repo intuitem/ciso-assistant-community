@@ -54,6 +54,13 @@ export interface RequirementNode {
 	folder: { id: string; str: string } | string;
 }
 
+export interface OutcomeRule {
+	ref_id: string;
+	annotation: string;
+	color: string | null;
+	expression: string;
+}
+
 export interface Framework {
 	id: string;
 	name: string;
@@ -64,6 +71,7 @@ export interface Framework {
 	max_score: number;
 	scores_definition: Record<string, unknown>[] | null;
 	implementation_groups_definition: Record<string, unknown>[] | null;
+	outcomes_definition: OutcomeRule[] | null;
 	urn: string | null;
 }
 
