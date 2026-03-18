@@ -13,9 +13,9 @@ class ManagedDocument(AbstractBaseModel, FolderMixin, I18nObjectMixin):
     class DocumentType(models.TextChoices):
         POLICY = "policy", _("Policy")
         PROCEDURE = "procedure", _("Procedure")
-        SOP = "sop", _("Standard Operating Procedure")
-        PLAYBOOK = "playbook", _("Playbook")
-        GUIDELINE = "guideline", _("Guideline")
+        CHARTER = "charter", _("Charter")
+        RECORD = "record", _("Record")
+        OTHER = "other", _("Other")
 
     document_type = models.CharField(
         max_length=20,
