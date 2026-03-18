@@ -735,6 +735,7 @@
 	"maturity": "Érettség",
 	"progress": "Előrehaladás",
 	"back": "Vissza",
+	"backToWorkshop": "Vissza a műhelyphez",
 	"duplicate": "Duplikálás",
 	"duplicateRiskAssessment": "Kockázatértékelés duplikálása",
 	"duplicateAppliedControl": "Alkalmazott kontroll duplikálása",

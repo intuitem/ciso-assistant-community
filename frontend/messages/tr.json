@@ -780,6 +780,7 @@
 	"maturity": "Olgunluk",
 	"progress": "İlerleme",
 	"back": "Geri",
+	"backToWorkshop": "Çalıştaya geri dön",
 	"duplicate": "Çoğalt",
 	"duplicateRiskAssessment": "Risk değerlendirmesini çoğalt",
 	"duplicateAppliedControl": "Uygulanan kontrolü çoğalt",

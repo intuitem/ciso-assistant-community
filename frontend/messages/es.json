@@ -1350,6 +1350,7 @@
 	"backToBaseAudit": "Volver a la Auditoría Base",
 	"backToStudy": "Volver al Estudio",
 	"backToTable": "Volver a la tabla",
+	"backToWorkshop": "Volver al taller",
 	"backupVersionError": "No se puede cargar la copia de seguridad, la versión de la copia de seguridad no es válida",
 	"baseAudit": "Auditoría Base",
 	"beneficiaryEntity": "Beneficiario",
