@@ -479,6 +479,21 @@ class AssetRecordConsumer(RecordConsumer[None]):
                 asset_type.lower().strip(), asset_type.upper()
             )
 
+        is_business_function = record.get("is_business_function", False)
+        ibf_to_import = False
+        if isinstance(is_business_function, str):
+            ibf_to_import = is_business_function.strip().lower() in [
+                "lower",
+                "yes",
+                "1",
+                "y",
+                "t",
+            ]
+        elif isinstance(is_business_function, bool):
+            ibf_to_import = is_business_function
+        else:
+            ibf_to_import = False
+
         data = {
             "ref_id": record.get("ref_id", ""),
             "name": name,
@@ -489,8 +504,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "reference_link": record.get("reference_link", "")
             or record.get("link", ""),
             "observation": record.get("observation", ""),
-            "is_business_function": record.get("is_business_function", "").lower()
-            == "true",
+            "is_business_function": ibf_to_import,
         }
 
         filtering_labels = _resolve_filtering_labels(record.get("filtering_labels"))
