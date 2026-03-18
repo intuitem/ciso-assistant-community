@@ -175,9 +175,9 @@
 
 	let saveConflict = $state('');
 
-	async function saveContent() {
-		if (!currentRevision || currentRevision.status !== 'draft') return;
-		if (lockedBy) return;
+	async function saveContent(): Promise<boolean> {
+		if (!currentRevision || currentRevision.status !== 'draft') return false;
+		if (lockedBy) return false;
 		saving = true;
 		saved = false;
 		saveConflict = '';
@@ -195,6 +195,7 @@
 				lastLoadedAt = currentRevision.updated_at || '';
 				saved = true;
 				saveTimeout = setTimeout(() => (saved = false), 3000);
+				return true;
 			} else {
 				const errData = await res.json().catch(() => null);
 				if (res.status === 400 && errData) {
@@ -204,6 +205,7 @@
 							: errData.non_field_errors?.[0] || errData.detail || JSON.stringify(errData);
 					saveConflict = msg;
 				}
+				return false;
 			}
 		} finally {
 			saving = false;
@@ -212,7 +214,8 @@
 
 	async function submitForReview() {
 		if (!currentRevision) return;
-		await saveContent();
+		const saveOk = await saveContent();
+		if (!saveOk) return;
 		const res = await proxyPost({
 			_action: 'submit-for-review',
 			revision_id: currentRevision.id

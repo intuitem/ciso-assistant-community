@@ -1207,10 +1207,6 @@ THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
-    # document management (view only — respondents can read published policies)
-    "view_manageddocument",
-    "view_documentrevision",
-    "view_documentattachment",
     "view_folder",
 ]
 

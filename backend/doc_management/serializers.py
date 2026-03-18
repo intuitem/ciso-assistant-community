@@ -52,8 +52,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         else:
             validated_data.setdefault("default_locale", True)
 
-        document = super().create(validated_data)
-        # Auto-create an initial draft revision
+        # Auto-create an initial draft revision atomically with the document
         author = request.user if request else None
         content = ""
         if template_name := validated_data.get("template_used"):
@@ -69,14 +68,16 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
                         content = raw
                 else:
                     content = raw
-        revision = DocumentRevision.objects.create(
-            document=document,
-            version_number=1,
-            content=content,
-            author=author,
-        )
-        document.current_revision = revision
-        document.save()
+        with transaction.atomic():
+            document = super().create(validated_data)
+            revision = DocumentRevision.objects.create(
+                document=document,
+                version_number=1,
+                content=content,
+                author=author,
+            )
+            document.current_revision = revision
+            document.save()
         return document
 
 

@@ -458,10 +458,10 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         url_path="diff/(?P<other_id>[^/.]+)",
     )
     def diff(self, request, pk=None, other_id=None):
-        """Compute unified diff between this revision and another."""
+        """Compute unified diff between this revision and another of the same document."""
         revision = self.get_object()
         try:
-            other = DocumentRevision.objects.get(pk=other_id)
+            other = revision.document.revisions.get(pk=other_id)
         except DocumentRevision.DoesNotExist:
             return Response(
                 {"error": "Other revision not found."},
