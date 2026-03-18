@@ -1,9 +1,13 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
-	const { fetch, params, cookies } = event;
+	const { fetch, params, cookies, locals } = event;
+
+	if (!locals.featureflags?.policy_documents) {
+		redirect(302, `/policies/${params.id}`);
+	}
 
 	// Load the policy — this is required, fail if unavailable
 	const policyRes = await fetch(`${BASE_API_URL}/policies/${params.id}/`);

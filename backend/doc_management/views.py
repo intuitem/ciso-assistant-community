@@ -429,23 +429,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         revision.save()
         return Response({"status": "in_review"})
 
-    @action(detail=True, methods=["post"], url_path="revert-to-draft")
-    def revert_to_draft_action(self, request, pk=None):
-        """Revert an in_review or change_requested revision back to draft."""
-        revision = self.get_object()
-        if revision.status not in (
-            DocumentRevision.Status.IN_REVIEW,
-            DocumentRevision.Status.CHANGE_REQUESTED,
-        ):
-            return Response(
-                {
-                    "error": "Only in-review or change-requested revisions can be reverted to draft."
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        revision.revert_to_draft()
-        return Response({"status": "draft"})
-
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
         """Approve a revision: set published, deprecate previous, generate PDF."""

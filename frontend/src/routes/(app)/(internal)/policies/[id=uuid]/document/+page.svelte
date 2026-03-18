@@ -225,6 +225,7 @@
 			revision_id: currentRevision.id
 		});
 		if (res.ok) {
+			changeSummary = '';
 			await refreshData();
 		}
 	}
@@ -439,18 +440,28 @@
 		heartbeatInterval = setInterval(
 			async () => {
 				if (hasLock && currentRevision) {
-					const res = await proxyPost({
-						_action: 'start-editing',
-						revision_id: currentRevision.id
-					});
-					if (res.ok) {
-						const data = await res.json();
-						if (data.locked) {
-							// Someone else took over — we've been evicted
-							lockedBy = data.editing_user;
+					try {
+						const res = await proxyPost({
+							_action: 'start-editing',
+							revision_id: currentRevision.id
+						});
+						if (res.ok) {
+							const data = await res.json();
+							if (data.locked) {
+								// Someone else took over — we've been evicted
+								lockedBy = data.editing_user;
+								hasLock = false;
+								stopHeartbeat();
+							}
+						} else {
+							// Server rejected the heartbeat — assume lock is lost
 							hasLock = false;
 							stopHeartbeat();
 						}
+					} catch {
+						// Network failure — assume lock is lost
+						hasLock = false;
+						stopHeartbeat();
 					}
 				}
 			},
@@ -475,6 +486,7 @@
 	});
 
 	onDestroy(() => {
+		if (saveTimeout) clearTimeout(saveTimeout);
 		stopHeartbeat();
 		releaseLock();
 		if (typeof window !== 'undefined') {

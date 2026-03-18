@@ -153,13 +153,6 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         self.reviewer_comments = comments
         self.save()
 
-    def revert_to_draft(self):
-        """Revert this revision back to draft status."""
-        self.status = self.Status.DRAFT
-        self.reviewer = None
-        self.reviewer_comments = None
-        self.save()
-
     def __str__(self):
         return f"{self.document.display_name} v{self.version_number}"
 
