@@ -53,6 +53,7 @@
 						folder_name?: string;
 						folder_id?: string;
 						create_objects?: boolean;
+						apply_feature_flags?: boolean;
 					}) => {
 						try {
 							const response = await fetch(`/presets/apply`, {

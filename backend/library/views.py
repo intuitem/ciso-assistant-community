@@ -306,12 +306,25 @@ class StoredLibraryViewSet(BaseModelViewSet):
         folder_name = request.data.get("folder_name")
         folder_id = request.data.get("folder_id")
         create_objects = request.data.get("create_objects", True)
+        apply_feature_flags = request.data.get("apply_feature_flags", True)
+
+        # Only apply feature flags if user has permission to change global settings
+        if apply_feature_flags:
+            can_change_settings = RoleAssignment.is_access_allowed(
+                user=request.user,
+                perm=Permission.objects.get(codename="change_globalsettings"),
+                folder=Folder.get_root_folder(),
+            )
+            if not can_change_settings:
+                apply_feature_flags = False
+
         try:
             executor = PresetExecutor(library, request.user, request)
             journey = executor.apply(
                 folder_name=folder_name,
                 folder_id=folder_id,
                 create_objects=create_objects,
+                apply_feature_flags=apply_feature_flags,
             )
             return Response(
                 {"journey_id": str(journey.id)},

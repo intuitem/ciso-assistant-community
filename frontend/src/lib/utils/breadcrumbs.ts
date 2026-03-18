@@ -10,7 +10,13 @@ export interface Breadcrumb {
 
 const BREADCRUMBS_MAX_DEPTH = 5;
 
-const homeCrumb: Breadcrumb = { label: m.home(), href: '/', icon: 'fa-regular fa-compass' };
+const homeCrumb: Breadcrumb = {
+	get label() {
+		return m.home();
+	},
+	href: '/',
+	icon: 'fa-regular fa-compass'
+};
 
 const createBreadcrumbs = (initialValue: Breadcrumb[]) => {
 	const breadcrumbs = writable<Breadcrumb[]>(initialValue);

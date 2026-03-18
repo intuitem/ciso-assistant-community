@@ -2,6 +2,7 @@
 	import type { SuperForm } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import { m } from '$paraglide/messages';
 	import TextArea from '../TextArea.svelte';
 	import Checkbox from '../Checkbox.svelte';
@@ -103,7 +104,7 @@
 	});
 </script>
 
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
 	cacheLock={cacheLocks['folder']}

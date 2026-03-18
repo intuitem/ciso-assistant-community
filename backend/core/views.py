@@ -948,6 +948,7 @@ class BaseModelViewSet(viewsets.ModelViewSet):
 
     def update(self, request: Request, *args, **kwargs) -> Response:
         # Experimental: process evidences on TaskTemplate update
+
         if request.data.get("evidences") and self.model == TaskTemplate:
             folder = Folder.objects.get(id=request.data.get("folder"))
             request.data["evidences"] = self._process_evidences(
@@ -968,16 +969,6 @@ class BaseModelViewSet(viewsets.ModelViewSet):
                     if hasattr(request.data, "_mutable"):
                         request.data._mutable = True
                     request.data["filtering_labels"] = self._process_labels(labels)
-            else:
-                # Field is missing entirely - add empty list to clear labels
-                # Make request.data mutable if needed (e.g., for multipart/form-data)
-                if hasattr(request.data, "_mutable"):
-                    request.data._mutable = True
-                # Use setlist() for QueryDict to properly set an empty list
-                if hasattr(request.data, "setlist"):
-                    request.data.setlist("filtering_labels", [])
-                else:
-                    request.data["filtering_labels"] = []
 
         return super().update(request, *args, **kwargs)
 
@@ -1689,7 +1680,7 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
 
     model = Asset
     filterset_class = AssetFilter
-    search_fields = ["name", "description", "ref_id"]
+    search_fields = ["name", "description", "ref_id", "folder__name"]
     ordering = ["folder__name", "name"]
 
     def get_queryset(self) -> models.query.QuerySet:
@@ -2089,6 +2080,20 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
                 "format": lambda objs: ",".join(i["str"] for i in objs),
                 "escape": True,
             },
+            "security_capabilities": {
+                "source": "get_security_capabilities_display",
+                "label": "security_capabilities",
+                "format": lambda objs: ",".join(
+                    f"{k}: {v}" for obj in objs for k, v in obj.items()
+                ),
+                "escape": True,
+            },
+            "recovery_capabilities": {
+                "source": "get_recovery_capabilities_display",
+                "label": "recovery_capabilities",
+                "format": lambda objs: ",".join(i["str"] for i in objs),
+                "escape": True,
+            },
             "link": {"source": "reference_link", "label": "link", "escape": True},
             "owners": {
                 "source": "owner",
@@ -2120,7 +2125,12 @@ class AssetViewSet(ExportMixin, BaseModelViewSet):
         "wrap_columns": ["name", "description", "observation"],
         "filename": "assets_export",
         "select_related": ["folder", "asset_class"],
-        "prefetch_related": ["owner", "parent_assets", "filtering_labels"],
+        "prefetch_related": [
+            "owner",
+            "parent_assets",
+            "overridden_children_capabilities",
+            "filtering_labels",
+        ],
     }
 
     @action(detail=False, methods=["post"], url_path="batch-create")
@@ -3596,18 +3606,25 @@ class RiskAssessmentViewSet(BaseModelViewSet):
         serializer_class=RiskAssessmentDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        serializer = RiskAssessmentDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, RiskAssessment
         )
 
         if UUID(pk) in object_ids_view:
             risk_assessment = self.get_object()
-            data = request.data
+
+            perimeter = data.get("perimeter")
+            folder = data.get("folder")
 
             duplicate_risk_assessment = RiskAssessment.objects.create(
                 name=data.get("name"),
                 description=data.get("description"),
-                perimeter=Perimeter.objects.get(id=data.get("perimeter")),
+                perimeter=perimeter,
+                folder=folder,
                 version=data.get("version"),
                 risk_matrix=risk_assessment.risk_matrix,
                 ref_id=data.get("ref_id"),
@@ -3657,7 +3674,13 @@ class RiskAssessmentViewSet(BaseModelViewSet):
                 duplicate_scenario.save()
 
             duplicate_risk_assessment.save()
-            return Response({"results": "risk assessment duplicated"})
+            return Response(
+                {
+                    "results": RiskAssessmentReadSerializer(
+                        duplicate_risk_assessment
+                    ).data
+                }
+            )
 
     @action(
         detail=True,
@@ -4743,18 +4766,21 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
         serializer_class=AppliedControlDuplicateSerializer,
     )
     def duplicate(self, request, pk):
+        serializer = AppliedControlDuplicateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
         (object_ids_view, _, _) = RoleAssignment.get_accessible_object_ids(
             Folder.get_root_folder(), request.user, AppliedControl
         )
         if UUID(pk) not in object_ids_view:
             return Response(
-                {"results": "applied control duplicated"},
+                {"results": "applied control not found"},
                 status=status.HTTP_404_NOT_FOUND,
             )
 
         applied_control = self.get_object()
-        data = request.data
-        new_folder = Folder.objects.get(id=data["folder"])
+        new_folder = data["folder"]
         duplicate_applied_control = AppliedControl.objects.create(
             reference_control=applied_control.reference_control,
             name=data["name"],
@@ -5075,6 +5101,122 @@ class ActionPlanList(generics.ListAPIView):
         return context
 
 
+class ActionPlanBudgetOverview:
+    """Mixin that computes budget aggregation over an applied controls queryset."""
+
+    @staticmethod
+    def _safe_float(value, default=0):
+        """Coerce a JSON-sourced value to float, returning default on failure."""
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def _compute_annual_cost(ctrl, daily_rate):
+        """Compute annual cost without per-control GlobalSettings lookup."""
+        if not ctrl.cost:
+            return 0
+        _f = ActionPlanBudgetOverview._safe_float
+        build_cost = ctrl.cost.get("build", {})
+        run_cost = ctrl.cost.get("run", {})
+        amortization_period = _f(ctrl.cost.get("amortization_period", 1), 1) or 1
+        annual_cost = 0
+        build_fixed = _f(build_cost.get("fixed_cost", 0))
+        build_people = _f(build_cost.get("people_days", 0))
+        if build_fixed > 0:
+            annual_cost += build_fixed / amortization_period
+        if build_people > 0:
+            annual_cost += (build_people * daily_rate) / amortization_period
+        run_fixed = _f(run_cost.get("fixed_cost", 0))
+        run_people = _f(run_cost.get("people_days", 0))
+        if run_fixed > 0:
+            annual_cost += run_fixed
+        if run_people > 0:
+            annual_cost += run_people * daily_rate
+        return annual_cost
+
+    @staticmethod
+    def compute_budget_overview(queryset):
+        from core.utils import get_global_currency, format_currency
+        from global_settings.models import GlobalSettings
+
+        # Single DB hit for daily_rate instead of N hits via ctrl.annual_cost
+        _f = ActionPlanBudgetOverview._safe_float
+        general_settings = GlobalSettings.objects.filter(name="general").first()
+        daily_rate = _f(
+            general_settings.value.get("daily_rate", 500) if general_settings else 500,
+            500,
+        )
+
+        currency = get_global_currency()
+        fmt = lambda v: format_currency(v, currency)
+
+        controls = list(queryset)
+        count = len(controls)
+        by_status: dict = {}
+        by_priority: dict = {}
+        by_category: dict = {}
+        total_annual_cost = 0.0
+        count_with_cost = 0
+
+        for ctrl in controls:
+            cost = ActionPlanBudgetOverview._compute_annual_cost(ctrl, daily_rate)
+            if cost > 0:
+                count_with_cost += 1
+            total_annual_cost += cost
+
+            # by status — use raw value as key, display value for frontend
+            s = ctrl.status or "_unset"
+            status_label = ctrl.get_status_display() if ctrl.status else "not_set"
+            bucket = by_status.setdefault(
+                s, {"status": status_label, "count": 0, "total": 0.0}
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by priority
+            p = ctrl.priority if ctrl.priority is not None else "_unset"
+            priority_label = (
+                ctrl.get_priority_display() if ctrl.priority is not None else "not_set"
+            )
+            bucket = by_priority.setdefault(
+                p,
+                {"priority": priority_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+            # by category
+            c = ctrl.category or "_unset"
+            category_label = ctrl.get_category_display() if ctrl.category else "not_set"
+            bucket = by_category.setdefault(
+                c,
+                {"category": category_label, "count": 0, "total": 0.0},
+            )
+            bucket["count"] += 1
+            bucket["total"] += cost
+
+        # Pre-format totals with proper currency position
+        for bucket in by_status.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_priority.values():
+            bucket["total_display"] = fmt(bucket["total"])
+        for bucket in by_category.values():
+            bucket["total_display"] = fmt(bucket["total"])
+
+        return {
+            "count": count,
+            "count_with_cost": count_with_cost,
+            "total_annual_cost": round(total_annual_cost, 2),
+            "total_annual_cost_display": fmt(round(total_annual_cost, 2)),
+            "currency": currency,
+            "by_status": [v for v in by_status.values() if v["count"] > 0],
+            "by_priority": [v for v in by_priority.values() if v["count"] > 0],
+            "by_category": [v for v in by_category.values() if v["count"] > 0],
+        }
+
+
 class UserRolesOnFolderList(generics.ListAPIView):
     filterset_fields = {}
     search_fields = ["email"]
@@ -5263,6 +5405,22 @@ class RiskAssessmentActionPlanList(ActionPlanList):
             AppliedControl,
         )
         return qs.filter(id__in=viewable_controls)
+
+
+class ComplianceAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, ComplianceAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))
+
+
+class RiskAssessmentActionPlanBudgetOverview(
+    ActionPlanBudgetOverview, RiskAssessmentActionPlanList
+):
+    def get(self, request, *args, **kwargs):
+        qs = self.filter_queryset(self.get_queryset())
+        return Response(self.compute_budget_overview(qs))
 
 
 class PolicyViewSet(AppliedControlViewSet):
@@ -6360,7 +6518,15 @@ class FolderViewSet(BaseModelViewSet):
                 entry.update({"children": folder_content})
             folders_list.append(entry)
 
-        return Response({"name": "Global", "children": folders_list})
+        root_folder = Folder.get_root_folder()
+        return Response(
+            {
+                "name": root_folder.name,
+                "uuid": str(root_folder.id),
+                "content_type": root_folder.content_type,
+                "children": folders_list,
+            }
+        )
 
     @action(detail=False, methods=["get"])
     def ids(self, request):
@@ -7678,7 +7844,8 @@ class UserPreferencesView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request) -> Response:
-        return Response(request.user.preferences, status=status.HTTP_200_OK)
+        prefs = request.user.get_preferences()
+        return Response(prefs, status=status.HTTP_200_OK)
 
     def patch(self, request) -> Response:
         new_language = request.data.get("lang")
@@ -7692,8 +7859,10 @@ class UserPreferencesView(APIView):
                 {"error": "This language doesn't exist."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        request.user.preferences["lang"] = new_language
-        request.user.save()
+        prefs = request.user.get_preferences()
+        prefs["lang"] = new_language
+        request.user.preferences = prefs
+        request.user.save(update_fields=["preferences"])
         return Response({}, status=status.HTTP_200_OK)
 
 
@@ -8494,8 +8663,14 @@ class PresetJourneyViewSet(BaseModelViewSet):
             return Response({"detail": "Already up to date."})
         from library.preset_executor import PresetExecutor
 
+        apply_feature_flags = RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_globalsettings"),
+            folder=Folder.get_root_folder(),
+        )
+
         executor = PresetExecutor(stored_lib, request.user, request)
-        executor.upgrade_journey(journey)
+        executor.upgrade_journey(journey, apply_feature_flags=apply_feature_flags)
         from core.serializers import PresetJourneyReadSerializer
 
         return Response(PresetJourneyReadSerializer(journey).data)
@@ -9060,14 +9235,32 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
             lang = request.user.preferences.get("lang")
             if lang not in ["fr", "en"]:
                 lang = "en"
-        template_path = (
-            Path(settings.BASE_DIR)
-            / "core"
-            / "templates"
-            / "core"
-            / f"audit_report_template_{lang}.docx"
-        )
-        doc = DocxTemplate(template_path)
+
+        # Check for custom Word template override
+        doc = None
+        try:
+            custom = CustomWordTemplate.objects.filter(
+                template_key="audit_report",
+                language=lang,
+                is_active=True,
+            ).first()
+            if custom and custom.file:
+                custom.file.open("rb")
+                doc = DocxTemplate(io.BytesIO(custom.file.read()))
+        except Exception as e:
+            logger.warning(
+                "Failed to load custom Word template, falling back to default",
+                exc_info=e,
+            )
+
+        if doc is None:
+            template_path = (
+                Path(__file__).resolve().parent
+                / "templates"
+                / "core"
+                / f"audit_report_template_{lang}.docx"
+            )
+            doc = DocxTemplate(template_path)
         _framework = self.get_object().framework
         tree = get_sorted_requirement_nodes(
             RequirementNode.objects.filter(framework=_framework).all(),
@@ -9501,10 +9694,12 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
+                        "mapping_inference",
                     ]:
-                        if field in source and source[field] is not None:
-                            setattr(req, field, source[field])
-                        requirement_assessments_to_update.append(req)
+                        value = source.get(field)
+                        if value is not None:
+                            setattr(req, field, value)
+                    requirement_assessments_to_update.append(req)
 
                 RequirementAssessment.objects.bulk_update(
                     requirement_assessments_to_update,
@@ -9515,6 +9710,7 @@ class ComplianceAssessmentViewSet(BaseModelViewSet):
                         "score",
                         "is_scored",
                         "documentation_score",
+                        "mapping_inference",
                     ],
                     batch_size=500,
                 )
@@ -13269,6 +13465,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
 
     def task_calendar(self, task_templates, start=None, end=None):
         """Generate calendar of tasks for the given templates."""
+        today = timezone.localdate()
+        task_templates = list(task_templates)
+        task_templates_by_id = {
+            str(template.id): template for template in task_templates
+        }
         tasks_list = []
         for template in task_templates:
             if not template.is_recurrent:
@@ -13277,7 +13478,7 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_list.append(_create_task_dict(template, template.task_date))
                 continue
 
-            start_date_param = start or template.task_date or datetime.now().date()
+            start_date_param = start or template.task_date or today
             end_date_param = end or template.schedule.get("end_date")
 
             if not end_date_param:
@@ -13308,17 +13509,24 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 )
                 | (
                     Q(due_date__gte=start_date, due_date__lte=end_date)
-                    & ~Q(due_date=F("scheduled_date"))
+                    & (
+                        Q(scheduled_date__isnull=True)
+                        | ~Q(due_date=F("scheduled_date"))
+                    )
                 )
             )
             generated_scheduled_dates = {t["due_date"] for t in tasks}
             for node in existing_nodes:
-                if node.scheduled_date not in generated_scheduled_dates:
-                    if (
-                        node.due_date != node.scheduled_date
-                        or node.due_date < datetime.now().date()
-                    ):
-                        # Preserve nodes manually rescheduled or in the past
+                if node.due_date != node.scheduled_date:
+                    # Always preserve user-rescheduled nodes
+                    node.to_delete = False
+                    node.save(update_fields=["to_delete"])
+                    if node.due_date and start_date <= node.due_date <= end_date:
+                        tasks_list.append(TaskNodeReadSerializer(node).data)
+                elif node.scheduled_date not in generated_scheduled_dates:
+                    effective_date = node.due_date or node.scheduled_date
+                    if effective_date and effective_date < today:
+                        # Preserve past nodes whose slot was removed
                         node.to_delete = False
                         node.save(update_fields=["to_delete"])
                         tasks_list.append(TaskNodeReadSerializer(node).data)
@@ -13335,25 +13543,14 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             key=lambda x: _parse_due_date(x["due_date"]),
         )
 
-        current_date = datetime.now().date()
-
-        # Separate past and future tasks, limit future to next 10
-        past_tasks = [
-            task
-            for task in sorted_tasks
-            if _parse_due_date(task["due_date"]) <= current_date
-        ]
-        next_tasks = [
-            task
-            for task in sorted_tasks
-            if _parse_due_date(task["due_date"]) > current_date
-        ]
-
-        # Build a set of (template_id, date) identifiers for virtual tasks to materialize
-        # Only virtual tasks (from _generate_occurrences) need to be materialized;
-        # existing TaskNodes from the DB are already persisted.
+        # Build a set of (template_id, date) identifiers for virtual tasks to materialize.
+        # Every virtual task in the calendar range gets a DB record so it is
+        # clickable/editable in the UI.
+        # NOTE: All virtual tasks in the range are materialized. Currently the
+        # calendar UI fetches one month at a time; if that changes, consider
+        # adding an upper bound here.
         tasks_to_process_ids = set()
-        for task in past_tasks + next_tasks[:10]:
+        for task in sorted_tasks:
             if not task.get("virtual"):
                 continue
             template_id = task.get("task_template")
@@ -13362,6 +13559,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                 tasks_to_process_ids.add((template_id, task_date))
 
         processed_tasks_identifiers = set()
+        materialized_node_ids = {
+            str(task["id"])
+            for task in tasks_list
+            if task and not task.get("virtual") and task.get("id")
+        }
 
         for i in range(len(tasks_list)):
             task = tasks_list[i]
@@ -13382,33 +13584,58 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
             if task_identifier in tasks_to_process_ids:
                 processed_tasks_identifiers.add(task_identifier)
 
-                task_template = self.get_queryset().get(id=task_template_id)
-                try:
-                    task_node, created = TaskNode.objects.get_or_create(
-                        task_template=task_template,
-                        scheduled_date=task_date,
-                        defaults={
-                            "due_date": task_date,
-                            "status": "pending",
-                            "folder": task_template.folder,
-                        },
-                    )
-                except IntegrityError:
-                    # Another node for this template already has this due_date
-                    # (e.g. a rescheduled occurrence). Skip materialization.
+                task_template = task_templates_by_id[str(task_template_id)]
+
+                # Check if a node already exists for this recurrence slot
+                rescheduled_node = TaskNode.objects.filter(
+                    task_template=task_template,
+                    scheduled_date=task_date,
+                ).first()
+                if rescheduled_node:
+                    if rescheduled_node.due_date != task_date:
+                        # Node was rescheduled — already preserved in
+                        # the existing_nodes loop, drop the virtual entry.
+                        tasks_list[i] = None
+                        continue
+                    task_node = rescheduled_node
+                else:
+                    try:
+                        task_node, created = TaskNode.objects.get_or_create(
+                            task_template=task_template,
+                            due_date=task_date,
+                            defaults={
+                                "scheduled_date": task_date,
+                                "status": "pending",
+                                "folder": task_template.folder,
+                            },
+                        )
+                    except IntegrityError:
+                        existing_node = TaskNode.objects.filter(
+                            task_template=task_template,
+                            due_date=task_date,
+                        ).first()
+                        if not existing_node:
+                            tasks_list[i] = None
+                            continue
+                        task_node = existing_node
+                if str(task_node.id) in materialized_node_ids:
+                    tasks_list[i] = None
                     continue
+                materialized_node_ids.add(str(task_node.id))
                 task_node.to_delete = False
                 task_node.save(update_fields=["to_delete"])
                 tasks_list[i] = TaskNodeReadSerializer(task_node).data
 
-        return tasks_list
+        return [task for task in tasks_list if task is not None]
 
     def _sync_task_nodes(self, task_template: TaskTemplate):
         if task_template.is_recurrent:
             with transaction.atomic():
+                today = timezone.localdate()
                 # Soft-delete future TaskNode instances for re-evaluation.
-                TaskNode.objects.filter(
-                    task_template=task_template, scheduled_date__gte=date.today()
+                TaskNode.objects.filter(task_template=task_template).filter(
+                    Q(scheduled_date__gte=today)
+                    | Q(scheduled_date__isnull=True, due_date__gte=today)
                 ).update(to_delete=True)
                 # Determine the end date based on the frequency
                 start_date = task_template.task_date
@@ -13426,10 +13653,11 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     if end_date_param:
                         end_date = datetime.strptime(end_date_param, "%Y-%m-%d").date()
                     else:
-                        end_date = datetime.now().date() + delta
+                        end_date = today + delta
                     # Ensure end_date is not before the calculated delta
-                    if end_date < datetime.now().date() + delta:
-                        end_date = datetime.now().date() + delta
+                    min_end_date = today + delta
+                    if end_date < min_end_date:
+                        end_date = min_end_date
                 else:
                     end_date = start_date
                 # Generate the task nodes
@@ -13439,8 +13667,23 @@ class TaskTemplateViewSet(ExportMixin, BaseModelViewSet):
                     end=end_date,
                 )
 
-                # garbage-collect
-                TaskNode.objects.filter(to_delete=True).delete()
+                # garbage-collect — only delete untouched nodes
+                TaskNode.objects.filter(
+                    to_delete=True,
+                    task_template=task_template,
+                    status="pending",
+                    due_date=F("scheduled_date"),
+                ).filter(
+                    Q(observation__isnull=True) | Q(observation=""),
+                ).exclude(
+                    evidences__isnull=False,
+                ).exclude(
+                    evidence_revisions__isnull=False,
+                ).delete()
+                # Clear to_delete on surviving nodes
+                TaskNode.objects.filter(
+                    to_delete=True, task_template=task_template
+                ).update(to_delete=False)
 
     @action(
         detail=False,
