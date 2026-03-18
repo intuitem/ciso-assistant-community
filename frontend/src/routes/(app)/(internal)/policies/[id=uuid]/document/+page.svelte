@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { m } from '$paraglide/messages';
-	import { invalidateAll } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
-	import { page } from '$app/state';
 	import DiffViewer from '$lib/components/PolicyEditor/DiffViewer.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
-	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import PromptConfirmModal from '$lib/components/Modals/PromptConfirmModal.svelte';
 	import {
 		getModalStore,
@@ -120,7 +117,7 @@
 	async function switchLocale(locale: string) {
 		if (locale === currentLocale) return;
 		// Release lock on current revision
-		if (currentRevision?.id && currentRevision.status === 'draft' && !lockedBy) {
+		if (currentRevision?.id && canEdit) {
 			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
 			stopHeartbeat();
 		}
@@ -134,8 +131,8 @@
 			document = docData;
 			currentLocale = locale;
 			await refreshData();
-			// Acquire lock if draft
-			if (currentRevision?.status === 'draft') {
+			// Acquire lock if editable
+			if (isDraft || isChangeRequested) {
 				await checkAndAcquireLock();
 			}
 		}
@@ -159,9 +156,11 @@
 		const revData = await revRes.json();
 		revisions = revData.results || [];
 
-		const draft = revisions.find((r: any) => r.status === 'draft');
-		if (draft) {
-			const fullRes = await proxyGet({ _action: 'revision', revision_id: draft.id });
+		const editable = revisions.find(
+			(r: any) => r.status === 'draft' || r.status === 'change_requested'
+		);
+		if (editable) {
+			const fullRes = await proxyGet({ _action: 'revision', revision_id: editable.id });
 			currentRevision = await fullRes.json();
 			content = currentRevision.content || '';
 			lastLoadedAt = currentRevision.updated_at || '';
@@ -176,8 +175,7 @@
 	let saveConflict = $state('');
 
 	async function saveContent(): Promise<boolean> {
-		if (!currentRevision || currentRevision.status !== 'draft') return false;
-		if (lockedBy) return false;
+		if (!canEdit) return false;
 		saving = true;
 		saved = false;
 		saveConflict = '';
@@ -222,34 +220,7 @@
 		});
 		if (res.ok) {
 			await refreshData();
-			// When validation flows are enabled, open the create validation flow modal
-			if (validationFlowsEnabled && data.validationFlowForm && data.validationFlowModel) {
-				openValidationFlowModal();
-			}
 		}
-	}
-
-	function openValidationFlowModal() {
-		const modalComponent: ModalComponent = {
-			ref: CreateModal,
-			props: {
-				form: data.validationFlowForm,
-				model: data.validationFlowModel,
-				debug: false,
-				invalidateAll: true,
-				formAction: '/validation-flows?/create',
-				onConfirm: async () => {
-					await invalidateAll();
-					await refreshData();
-				}
-			}
-		};
-		const modal: ModalSettings = {
-			type: 'component',
-			component: modalComponent,
-			title: m.requestValidation()
-		};
-		modalStore.trigger(modal);
 	}
 
 	async function approve() {
@@ -365,7 +336,7 @@
 
 	async function loadRevision(revisionId: string) {
 		// Release lock on previous revision
-		if (currentRevision?.id && currentRevision.status === 'draft') {
+		if (currentRevision?.id && (isDraft || isChangeRequested)) {
 			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
 		}
 		const res = await proxyGet({ _action: 'revision', revision_id: revisionId });
@@ -376,8 +347,8 @@
 			// Reset edit history when switching revisions
 			editHistory = [];
 			showEditHistory = false;
-			// Check editing status and try to acquire lock for drafts
-			if (currentRevision.status === 'draft') {
+			// Check editing status and try to acquire lock for editable revisions
+			if (currentRevision.status === 'draft' || currentRevision.status === 'change_requested') {
 				await checkAndAcquireLock();
 			} else {
 				lockedBy = null;
@@ -445,7 +416,7 @@
 
 	// Release lock when leaving the page
 	function releaseLock() {
-		if (currentRevision?.id && currentRevision.status === 'draft' && !lockedBy) {
+		if (currentRevision?.id && canEdit) {
 			// Use sendBeacon for beforeunload (fire-and-forget), fetch for normal nav
 			proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id }).catch(() => {});
 		}
@@ -457,7 +428,7 @@
 		stopHeartbeat();
 		heartbeatInterval = setInterval(
 			async () => {
-				if (currentRevision?.status === 'draft' && !lockedBy) {
+				if (canEdit) {
 					const res = await proxyPost({
 						_action: 'start-editing',
 						revision_id: currentRevision.id
@@ -484,7 +455,7 @@
 	}
 
 	onMount(() => {
-		if (currentRevision?.status === 'draft') {
+		if (isDraft || isChangeRequested) {
 			checkAndAcquireLock().then(() => {
 				if (!lockedBy) startHeartbeat();
 			});
@@ -537,11 +508,10 @@
 	}
 
 	let isDraft = $derived(currentRevision?.status === 'draft');
-	let canEdit = $derived(isDraft && !lockedBy);
+	let isChangeRequested = $derived(currentRevision?.status === 'change_requested');
+	let canEdit = $derived((isDraft || isChangeRequested) && !lockedBy);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
-	let validationFlowsEnabled = $derived(page.data?.featureflags?.validation_flows);
-	let activeValidationFlows = $derived(data.activeValidationFlows || []);
 
 	// Image upload state
 	let uploading = $state(false);
@@ -803,7 +773,7 @@
 				</button>
 			{/if}
 
-			{#if isInReview && !validationFlowsEnabled}
+			{#if isInReview}
 				<button class="btn btn-sm preset-filled-success-500" onclick={() => approve()}>
 					<i class="fa-solid fa-check"></i>
 					<span class="ml-1">{m.approve()}</span>
@@ -965,7 +935,7 @@
 			</div>
 		{/if}
 
-		{#if isInReview && !validationFlowsEnabled}
+		{#if isInReview}
 			<div
 				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3"
 			>
@@ -981,30 +951,6 @@
 						rows="2"
 						placeholder={m.addReviewerComments()}
 					></textarea>
-				</div>
-			</div>
-		{/if}
-
-		{#if isInReview && validationFlowsEnabled && activeValidationFlows.length > 0}
-			<div
-				class="mx-6 mt-4 flex items-start gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3"
-			>
-				<i class="fa-solid fa-clipboard-check text-indigo-400 mt-0.5"></i>
-				<div class="flex-1 min-w-0">
-					<p class="text-sm font-medium text-indigo-700 mb-1">
-						{m.pendingValidationFlow()}
-					</p>
-					{#each activeValidationFlows as flow}
-						<a
-							href="/validation-flows/{flow.id}"
-							class="text-sm text-indigo-600 hover:text-indigo-800 underline"
-						>
-							{flow.ref_id || flow.str || 'Validation flow'}
-							{#if flow.approver?.str}
-								— {m.approver()}: {flow.approver.str}
-							{/if}
-						</a>
-					{/each}
 				</div>
 			</div>
 		{/if}

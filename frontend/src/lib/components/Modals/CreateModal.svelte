@@ -39,8 +39,8 @@
 		form,
 		importFolder = false,
 		model,
-		customNameDescription = model.customNameDescription ??
-			model.info?.customNameDescription ??
+		customNameDescription = model?.customNameDescription ??
+			model?.info?.customNameDescription ??
 			false,
 		duplicate = false,
 		invalidateAll = true,

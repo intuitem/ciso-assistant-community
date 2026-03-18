@@ -383,16 +383,38 @@ class DocumentRevisionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="submit-for-review")
     def submit_for_review(self, request, pk=None):
-        """Transition from draft to in_review."""
+        """Transition from draft or change_requested to in_review."""
         revision = self.get_object()
-        if revision.status != DocumentRevision.Status.DRAFT:
+        if revision.status not in (
+            DocumentRevision.Status.DRAFT,
+            DocumentRevision.Status.CHANGE_REQUESTED,
+        ):
             return Response(
-                {"error": "Only draft revisions can be submitted for review."},
+                {
+                    "error": "Only draft or change-requested revisions can be submitted for review."
+                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
         revision.status = DocumentRevision.Status.IN_REVIEW
         revision.save()
         return Response({"status": "in_review"})
+
+    @action(detail=True, methods=["post"], url_path="revert-to-draft")
+    def revert_to_draft_action(self, request, pk=None):
+        """Revert an in_review or change_requested revision back to draft."""
+        revision = self.get_object()
+        if revision.status not in (
+            DocumentRevision.Status.IN_REVIEW,
+            DocumentRevision.Status.CHANGE_REQUESTED,
+        ):
+            return Response(
+                {
+                    "error": "Only in-review or change-requested revisions can be reverted to draft."
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision.revert_to_draft()
+        return Response({"status": "draft"})
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
@@ -401,17 +423,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         if revision.status != DocumentRevision.Status.IN_REVIEW:
             return Response(
                 {"error": "Only in-review revisions can be approved."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Soft guard: block manual approve when validation_flows flag is ON
-        # and the revision's policy has an active (submitted) ValidationFlow.
-        if self._has_active_validation_flow(revision):
-            return Response(
-                {
-                    "error": "This revision is managed by a validation flow. "
-                    "Please use the validation flow to approve it."
-                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -432,17 +443,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
         if revision.status != DocumentRevision.Status.IN_REVIEW:
             return Response(
                 {"error": "Only in-review revisions can have changes requested."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        # Soft guard: block manual request-changes when validation_flows flag is ON
-        # and the revision's policy has an active (submitted) ValidationFlow.
-        if self._has_active_validation_flow(revision):
-            return Response(
-                {
-                    "error": "This revision is managed by a validation flow. "
-                    "Please use the validation flow to request changes."
-                },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -577,22 +577,6 @@ class DocumentRevisionViewSet(BaseModelViewSet):
     @action(detail=False, name="Get status choices")
     def status(self, request):
         return Response(dict(DocumentRevision.Status.choices))
-
-    @staticmethod
-    def _has_active_validation_flow(revision):
-        """Check if this revision's policy has an active (submitted) ValidationFlow.
-
-        Returns True only when the validation_flows feature flag is ON AND there
-        is at least one submitted ValidationFlow linked to the policy.
-        """
-        from global_settings.utils import ff_is_enabled
-
-        if not ff_is_enabled("validation_flows"):
-            return False
-        policy = revision.document.policy
-        if not policy:
-            return False
-        return policy.validationflow_set.filter(status="submitted").exists()
 
     def _render_pdf_bytes(self, revision):
         """Render a revision to PDF bytes (shared by export and snapshot)."""

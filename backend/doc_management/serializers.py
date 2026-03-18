@@ -82,6 +82,7 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
 
 
 class ManagedDocumentReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
     policy = FieldsRelatedField()
     current_revision = FieldsRelatedField(
         fields=["id", "version_number", "status", "published_at", "author"],
