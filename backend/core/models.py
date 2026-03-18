@@ -3936,6 +3936,7 @@ class EvidenceRevision(AbstractBaseModel, FolderMixin):
     attachment = models.FileField(
         blank=True,
         null=True,
+        max_length=500,
         verbose_name=_("Attachment"),
         validators=[validate_file_size, validate_file_name],
     )
