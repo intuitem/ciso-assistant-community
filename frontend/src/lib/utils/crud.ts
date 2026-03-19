@@ -860,6 +860,52 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_node', urlModel: 'task-nodes' }
 		]
 	},
+	'managed-documents': {
+		name: 'manageddocument',
+		localName: 'managedDocument',
+		localNamePlural: 'managedDocuments',
+		verboseName: 'Managed document',
+		verboseNamePlural: 'Managed documents',
+		foreignKeyFields: [
+			{ field: 'policy', urlModel: 'policies' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		reverseForeignKeyFields: [{ field: 'document', urlModel: 'document-revisions' }],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'document_type' },
+			{ field: 'policy' },
+			{ field: 'folder' },
+			{ field: 'template_used' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'document-revisions': {
+		name: 'documentrevision',
+		localName: 'documentRevision',
+		localNamePlural: 'documentRevisions',
+		verboseName: 'Document revision',
+		verboseNamePlural: 'Document revisions',
+		foreignKeyFields: [
+			{ field: 'document', urlModel: 'managed-documents' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'document' },
+			{ field: 'version_number' },
+			{ field: 'status' },
+			{ field: 'author' },
+			{ field: 'reviewer' },
+			{ field: 'change_summary' },
+			{ field: 'reviewer_comments' },
+			{ field: 'published_at', type: 'datetime' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
