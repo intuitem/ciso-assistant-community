@@ -137,9 +137,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ### Template
 
-
-
-{% hint style="warning" %}
+{% hint style="info" %}
 To avoid any mixup on the expected fields and the requirements reference, you can get a  template for the expected framework by going into `Catalog/Frameworks`
 {% endhint %}
 
