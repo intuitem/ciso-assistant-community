@@ -248,6 +248,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
