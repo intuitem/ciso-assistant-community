@@ -433,7 +433,7 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
-		{#if data.urlModel === 'stakeholders'}
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm?.id}
 			<div class="mb-4 p-3">
 				<Anchor
 					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
