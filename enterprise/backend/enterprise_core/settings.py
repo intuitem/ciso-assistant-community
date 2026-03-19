@@ -17,6 +17,7 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
@@ -319,6 +320,21 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+EMAIL_FORCE_TLS12 = os.environ.get("EMAIL_FORCE_TLS12", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS12 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 

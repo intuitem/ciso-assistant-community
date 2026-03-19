@@ -818,6 +818,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         username=EMAIL_HOST_USER_RESCUE,
                         password=EMAIL_HOST_PASSWORD_RESCUE,
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
                         msg = EmailMessage(
                             subject=subject,
