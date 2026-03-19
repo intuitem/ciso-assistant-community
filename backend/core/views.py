@@ -4211,12 +4211,11 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
             .select_related(
                 "folder",
                 "folder__parent_folder",  # For get_folder_full_path() optimization
-                "reference_control",
             )
         )
         if self.action == "autocomplete":
             return qs
-        return qs.prefetch_related(
+        return qs.select_related("reference_control").prefetch_related(
             "owner",
             "filtering_labels__folder",  # FieldsRelatedField includes folder
             "findings",  # Used for findings_count
