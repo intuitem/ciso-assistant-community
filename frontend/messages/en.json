@@ -1023,6 +1023,7 @@
 	"details": "Details",
 	"checklistProgress": "Checklist",
 	"associatedObjects": "Associated objects",
+	"noAssociatedObjects": "No associated objects in this collection",
 	"accreditationStatus": "Accreditation status",
 	"accreditationCategory": "Accreditation category",
 	"entity": "Entity",
