@@ -307,8 +307,10 @@
 
 	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
+	// Only persist filters on standalone list pages, not embedded sub-tables
+	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
 	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
-	const storedFilters = $tableFilterStates[filterStoreKey] ?? {};
+	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
 	// Check if any filter-related URL params exist
 	const hasUrlFilterParams = filteredFields.some(
 		(field) => page.url.searchParams.getAll(field).length > 0
@@ -356,7 +358,9 @@
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
 		// Persist all filter values (including empty) so cleared defaults stay cleared
-		$tableFilterStates[filterStoreKey] = { ...filterValues };
+		if (isStandaloneTable) {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		}
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
