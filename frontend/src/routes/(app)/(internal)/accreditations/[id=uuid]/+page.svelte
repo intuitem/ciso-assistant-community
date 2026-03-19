@@ -86,26 +86,7 @@
 		}
 	];
 
-	// Status color mapping
-	const statusColorMap: Record<string, string> = {
-		draft: 'bg-gray-200 text-gray-700',
-		in_progress: 'bg-blue-200 text-blue-800',
-		accredited: 'bg-green-200 text-green-800',
-		not_accredited: 'bg-red-200 text-red-800',
-		obsolete: 'bg-orange-200 text-orange-800'
-	};
-
-	// Category color mapping
-	const categoryColorMap: Record<string, string> = {
-		acc_simplified: 'bg-blue-100 text-blue-700',
-		acc_elaborated: 'bg-indigo-100 text-indigo-700',
-		acc_advanced: 'bg-purple-100 text-purple-700',
-		acc_sensitive: 'bg-pink-100 text-pink-700',
-		acc_restricted: 'bg-red-100 text-red-700',
-		other: 'bg-gray-100 text-gray-700'
-	};
-
-	// Status color mapping for associated objects
+	// Status color mapping for associated objects (these use raw CharField values, not Terminology)
 	const objectStatusColorMap: Record<string, string> = {
 		planned: 'bg-gray-100 text-gray-600',
 		in_progress: 'bg-blue-100 text-blue-700',
@@ -197,11 +178,7 @@
 			<div class="flex items-center justify-between">
 				<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">{m.status()}</span
 				>
-				<span
-					class="badge text-xs font-medium px-2.5 py-0.5 rounded-full {statusColorMap[
-						accreditation.status
-					] || statusColorMap.draft}"
-				>
+				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-primary">
 					{safeTranslate(accreditation.status)}
 				</span>
 			</div>
@@ -209,11 +186,7 @@
 				<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
 					>{m.category()}</span
 				>
-				<span
-					class="badge text-xs font-medium px-2.5 py-0.5 rounded-full {categoryColorMap[
-						accreditation.category
-					] || categoryColorMap.other}"
-				>
+				<span class="badge text-xs font-medium px-2.5 py-0.5 rounded-full preset-tonal-secondary">
 					{safeTranslate(accreditation.category)}
 				</span>
 			</div>

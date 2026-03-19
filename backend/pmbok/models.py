@@ -159,15 +159,6 @@ class Accreditation(NameDescriptionFolderMixin, FilteringLabelMixin):
     )
     observation = models.TextField(verbose_name="Observation", blank=True, null=True)
 
-    def save(self, *args, **kwargs):
-        if self.commission_date and self.duration_months and not self.expiry_date:
-            from dateutil.relativedelta import relativedelta
-
-            self.expiry_date = self.commission_date + relativedelta(
-                months=self.duration_months
-            )
-        super().save(*args, **kwargs)
-
 
 common_exclude = ["created_at", "updated_at"]
 auditlog.register(

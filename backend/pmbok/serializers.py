@@ -82,3 +82,24 @@ class AccreditationWriteSerializer(BaseModelSerializer):
     class Meta:
         model = Accreditation
         fields = "__all__"
+
+    def validate(self, data):
+        from dateutil.relativedelta import relativedelta
+
+        commission_date = data.get(
+            "commission_date",
+            getattr(getattr(self, "instance", None), "commission_date", None),
+        )
+        duration_months = data.get(
+            "duration_months",
+            getattr(getattr(self, "instance", None), "duration_months", None),
+        )
+
+        # Auto-compute expiry_date when commission_date and duration_months are set
+        # and expiry_date is empty/null (cleared or never provided)
+        if commission_date and duration_months and not data.get("expiry_date"):
+            data["expiry_date"] = commission_date + relativedelta(
+                months=duration_months
+            )
+
+        return super().validate(data)
