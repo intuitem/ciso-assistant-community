@@ -236,6 +236,12 @@
 		if (!currentRevision) return;
 		const saveOk = await saveContent();
 		if (!saveOk) return;
+		// Release lock before transitioning — revision won't be editable in in_review
+		if (hasLock) {
+			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			hasLock = false;
+			stopHeartbeat();
+		}
 		const res = await proxyPost({
 			_action: 'submit-for-review',
 			revision_id: currentRevision.id
@@ -267,6 +273,7 @@
 		if (res.ok) {
 			reviewerComments = '';
 			await refreshData();
+			await checkAndAcquireLock();
 		}
 	}
 
@@ -278,6 +285,7 @@
 		});
 		if (res.ok) {
 			await refreshData();
+			await checkAndAcquireLock();
 		}
 	}
 
@@ -975,7 +983,13 @@
 			>
 				<i class="fa-solid fa-comment-dots text-red-400 mt-0.5"></i>
 				<div class="flex-1 min-w-0">
-					<p class="text-sm font-medium text-red-700 mb-1">{m.reviewerComments()}</p>
+					<p class="text-sm font-medium text-red-700 mb-1">
+						{m.reviewerComments()}
+						{#if currentRevision.reviewer}
+							— {currentRevision.reviewer.first_name || ''}
+							{currentRevision.reviewer.last_name || currentRevision.reviewer.email || ''}
+						{/if}
+					</p>
 					<p class="text-sm text-red-600 whitespace-pre-line">
 						{currentRevision.reviewer_comments}
 					</p>
