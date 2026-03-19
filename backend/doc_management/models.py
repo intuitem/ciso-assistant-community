@@ -159,6 +159,11 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         self.reviewer_comments = comments
         self.save()
 
+    def delete(self, *args, **kwargs):
+        if self.pdf_snapshot:
+            self.pdf_snapshot.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"{self.document.display_name} v{self.version_number}"
 
@@ -190,6 +195,11 @@ class DocumentAttachment(AbstractBaseModel, FolderMixin):
     def save(self, *args, **kwargs):
         self.folder = self.document.folder
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"Attachment for {self.document.display_name}"
