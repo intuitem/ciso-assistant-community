@@ -146,8 +146,14 @@
 		showLocalePicker = false;
 	}
 
-	function startAddTranslation() {
+	async function startAddTranslation() {
 		showLocalePicker = false;
+		// Release lock on current revision before switching to template selector
+		if (currentRevision?.id && hasLock) {
+			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
+			hasLock = false;
+			stopHeartbeat();
+		}
 		// Show template selector for the new locale
 		addingTranslationLocale = newTranslationLocale;
 		showTemplateSelector = true;
