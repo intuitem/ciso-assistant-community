@@ -322,7 +322,7 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
-EMAIL_FORCE_TLS12 = os.environ.get("EMAIL_FORCE_TLS12", "False").lower() in (
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
     "true",
     "1",
     "yes",
@@ -336,7 +336,7 @@ def _build_tls12_context():
     return context
 
 
-EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS12 else None
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
