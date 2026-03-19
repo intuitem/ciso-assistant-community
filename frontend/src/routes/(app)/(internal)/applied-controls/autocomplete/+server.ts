@@ -3,7 +3,7 @@ import { error, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ fetch, url }) => {
-	const endpoint = `${BASE_API_URL}/assets/autocomplete/${
+	const endpoint = `${BASE_API_URL}/applied-controls/autocomplete/${
 		url.searchParams.size ? '?' + url.searchParams.toString() : ''
 	}`;
 
