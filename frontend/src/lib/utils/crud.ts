@@ -670,7 +670,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableDelete: true,
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
 				}
 			}
 		],
@@ -1251,7 +1252,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableDelete: true,
 				addExisting: {
-					parentField: 'associated_controls'
+					parentField: 'associated_controls',
+					lazy: true
 				}
 			},
 			{
@@ -1837,7 +1839,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'applied-controls',
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
 				}
 			},
 			{
@@ -2070,7 +2073,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
 				}
 			},
 			{
@@ -2088,7 +2092,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'assets'
+					parentField: 'assets',
+					lazy: true
 				}
 			},
 			{
