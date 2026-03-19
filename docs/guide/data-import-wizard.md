@@ -139,7 +139,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 
 
-To avoid any mixup on the expected fields and the requirements reference, you can get a  template for the expected framework by going into `Catalog/Frameworks`
+> To avoid any mixup on the expected fields and the requirements reference, you can get a  template for the expected framework by going into `Catalog/Frameworks`
 
 The framework needs to be loaded and when clicking on it, you'll see a button to get the excel file.
 
