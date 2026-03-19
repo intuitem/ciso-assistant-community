@@ -14,19 +14,12 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         model = ManagedDocument
         fields = "__all__"
 
-    def _resolve_template_path(self, template_name, request):
-        """Find the template file in the user's preferred language, falling back to 'en'."""
+    def _resolve_template_path(self, template_name, locale):
+        """Find the template file for the given locale, falling back to 'en'."""
         base_dir = (
             Path(__file__).resolve().parent.parent / "library" / "policy_templates"
         )
-        lang = "en"
-        if (
-            request
-            and hasattr(request, "user")
-            and hasattr(request.user, "get_preferences")
-        ):
-            lang = request.user.get_preferences().get("lang", "en")
-        for try_lang in [lang, "en"]:
+        for try_lang in [locale, "en"]:
             path = base_dir / try_lang / f"{template_name}.md"
             if path.exists():
                 return path
@@ -49,7 +42,9 @@ class ManagedDocumentWriteSerializer(BaseModelSerializer):
         author = request.user if request else None
         content = ""
         if template_name := validated_data.get("template_used"):
-            template_path = self._resolve_template_path(template_name, request)
+            template_path = self._resolve_template_path(
+                template_name, validated_data.get("locale", "en")
+            )
             if template_path:
                 raw = template_path.read_text(encoding="utf-8")
                 # Strip YAML frontmatter

@@ -313,13 +313,22 @@
 	function deleteDocument() {
 		if (!document) return;
 		confirmAndDelete(m.deleteDocumentTitle(), m.deleteDocumentConfirmation(), async () => {
+			const deletedLocale = currentLocale;
 			const qs = new URLSearchParams({ _type: 'document', id: document.id }).toString();
 			const res = await fetch(`${proxyUrl}?${qs}`, { method: 'DELETE' });
 			if (res.ok) {
-				document = null;
-				currentRevision = null;
-				revisions = [];
-				showTemplateSelector = true;
+				// Release lock state
+				hasLock = false;
+				stopHeartbeat();
+				// Remove deleted locale from the list
+				availableLocales = availableLocales.filter((l) => l !== deletedLocale);
+				if (availableLocales.length > 0) {
+					// Switch to next available translation
+					await switchLocale(availableLocales[0]);
+				} else {
+					// No translations left — go back to the policy
+					window.location.href = `/policies/${policy.id}`;
+				}
 			}
 		});
 	}
