@@ -30,6 +30,7 @@ type SidebarBackendKeys = {
 	auditee_mode: boolean;
 	advanced_analytics: boolean;
 	journeys: boolean;
+	policy_documents: boolean;
 };
 
 type SidebarFrontendKeys = {

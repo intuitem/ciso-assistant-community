@@ -254,6 +254,9 @@ class FeatureFlagsSerializer(serializers.ModelSerializer):
     journeys = serializers.BooleanField(
         source="value.journeys", required=False, default=True
     )
+    policy_documents = serializers.BooleanField(
+        source="value.policy_documents", required=False, default=True
+    )
 
     class Meta:
         model = GlobalSettings
