@@ -307,7 +307,8 @@
 
 	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
-	const storedFilters = $tableFilterStates[page.url.pathname] ?? {};
+	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
+	const storedFilters = $tableFilterStates[filterStoreKey] ?? {};
 	// Check if any filter-related URL params exist
 	const hasUrlFilterParams = filteredFields.some(
 		(field) => page.url.searchParams.getAll(field).length > 0
@@ -355,7 +356,7 @@
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
 		// Persist filter values to localStorage
-		$tableFilterStates[page.url.pathname] = Object.fromEntries(
+		$tableFilterStates[filterStoreKey] = Object.fromEntries(
 			Object.entries(filterValues).filter(([_, val]) => val?.length > 0)
 		);
 		setTimeout(() => {
