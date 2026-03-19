@@ -57,6 +57,23 @@ class AccountAdapter(DefaultAccountAdapter):
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    @staticmethod
+    def _find_email_in_dict(data):
+        """Recursively search for an email in a dict, checking known keys at each level."""
+        if not isinstance(data, dict):
+            return None
+        # Check direct email keys at this level
+        email = data.get("email") or data.get("email_address")
+        if email:
+            return email
+        # Recurse into nested dicts (e.g. "attributes", "claims", "user")
+        for value in data.values():
+            if isinstance(value, dict):
+                email = SocialAccountAdapter._find_email_in_dict(value)
+                if email:
+                    return email
+        return None
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -84,6 +101,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 if candidate and "@" in candidate:
                     email_address = candidate
                     break
+        # Fallback: deep search in nested dicts (some IdPs nest email in sub-objects like "attributes")
+        if not email_address:
+            email_address = self._find_email_in_dict(extra)
         # Fallback: first string value containing '@'
         if not email_address:
             email_address = next(
