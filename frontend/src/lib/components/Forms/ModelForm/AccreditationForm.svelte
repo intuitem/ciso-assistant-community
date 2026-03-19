@@ -70,18 +70,6 @@
 
 <AutocompleteSelect
 	{form}
-	optionsEndpoint="compliance-assessments"
-	optionsLabelField="auto"
-	optionsExtraFields={[['folder', 'str']]}
-	field="checklist"
-	cacheLock={cacheLocks['checklist']}
-	bind:cachedValue={formDataCache['checklist']}
-	nullable={true}
-	label={m.checklist()}
-/>
-
-<AutocompleteSelect
-	{form}
 	optionsEndpoint="terminologies?field_path=accreditation.status&is_visible=true"
 	optionsLabelField="translated_name"
 	field="status"
@@ -101,6 +89,17 @@
 	label={m.linkedCollection()}
 />
 
+<AutocompleteSelect
+	{form}
+	optionsEndpoint="entities?relationship__name=accreditation_authority"
+	field="authority"
+	cacheLock={cacheLocks['authority']}
+	bind:cachedValue={formDataCache['authority']}
+	nullable={true}
+	label={m.authority()}
+	helpText={m.regulatoryAuthorityHelpText()}
+/>
+
 <TextField
 	{form}
 	field="authority_name"
@@ -113,13 +112,14 @@
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		{form}
-		optionsEndpoint="entities?relationship__name=accreditation_authority"
-		field="authority"
-		cacheLock={cacheLocks['authority']}
-		bind:cachedValue={formDataCache['authority']}
+		optionsEndpoint="compliance-assessments"
+		optionsLabelField="auto"
+		optionsExtraFields={[['folder', 'str']]}
+		field="checklist"
+		cacheLock={cacheLocks['checklist']}
+		bind:cachedValue={formDataCache['checklist']}
 		nullable={true}
-		label={m.authority()}
-		helpText={m.regulatoryAuthorityHelpText()}
+		label={m.checklist()}
 	/>
 	<TextField
 		type="date"

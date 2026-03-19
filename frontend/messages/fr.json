@@ -958,7 +958,7 @@
 	"accreditationStatus": "Statut d'homologation",
 	"accreditationCategory": "Catégorie d'homologation",
 	"accreditationAuthority": "Autorité d'homologation",
-	"authorityName": "Nom de l'autorité",
+	"authorityName": "Nom personalisé pour l'autorité",
 	"authorityNameHelpText": "Nom de l'autorité en texte libre, pour les autorités non enregistrées comme entités",
 	"commissionDate": "Date de commission",
 	"durationMonths": "Durée (mois)",

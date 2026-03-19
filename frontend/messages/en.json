@@ -2455,7 +2455,7 @@
 	"accreditationSensitive": "Sensitive",
 	"accreditationRestricted": "Restricted",
 	"accreditationAuthority": "Accreditation authority",
-	"authorityName": "Authority name",
+	"authorityName": "Custom authority name",
 	"authorityNameHelpText": "Free-text authority name, for authorities not registered as entities",
 	"commissionDate": "Commission date",
 	"durationMonths": "Duration (months)",
