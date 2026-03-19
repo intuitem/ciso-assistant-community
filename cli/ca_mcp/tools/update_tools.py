@@ -96,6 +96,7 @@ async def update_risk_scenario(
     threats: list = None,
     applied_controls: list = None,
     existing_applied_controls: list = None,
+    vulnerabilities: list = None,
 ) -> str:
     """Update risk scenario properties and ratings
 
@@ -119,6 +120,7 @@ async def update_risk_scenario(
         threats: List of threat IDs/names (replaces existing)
         applied_controls: List of planned control IDs/names (replaces existing)
         existing_applied_controls: List of existing control IDs/names (replaces existing)
+        vulnerabilities: List of vulnerability IDs/names exploited by this scenario (replaces existing)
     """
     try:
         # Resolve risk scenario name to ID if needed
@@ -203,6 +205,15 @@ async def update_risk_scenario(
                 resolved_control_id = resolve_applied_control_id(control)
                 resolved_existing_controls.append(resolved_control_id)
             payload["existing_applied_controls"] = resolved_existing_controls
+
+        # Resolve vulnerability names to IDs if provided
+        if vulnerabilities is not None:
+            from ..resolvers import resolve_vulnerability_id
+
+            resolved_vulnerabilities = []
+            for vuln in vulnerabilities:
+                resolved_vulnerabilities.append(resolve_vulnerability_id(vuln))
+            payload["vulnerabilities"] = resolved_vulnerabilities
 
         if not payload:
             return "Error: No fields provided to update"
