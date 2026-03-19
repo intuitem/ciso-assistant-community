@@ -62,8 +62,8 @@ class ManagedDocumentViewSet(BaseModelViewSet):
 
     @action(detail=False, methods=["get"])
     def templates(self, request):
-        """List available document templates in the user's preferred language."""
-        lang = _get_user_lang(request)
+        """List available document templates. Accepts optional ?lang= query parameter."""
+        lang = request.query_params.get("lang") or _get_user_lang(request)
         template_dir = _get_templates_dir(lang)
         templates = []
         if template_dir.exists():

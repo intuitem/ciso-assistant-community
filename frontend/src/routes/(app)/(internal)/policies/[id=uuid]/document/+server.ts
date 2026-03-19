@@ -109,6 +109,15 @@ export const GET: RequestHandler = async ({ fetch, url, params, locals }) => {
 	let endpoint: string;
 
 	switch (action) {
+		case 'templates': {
+			const lang = url.searchParams.get('lang') || '';
+			const templatesEndpoint = `${BASE_API_URL}/managed-documents/templates/${lang ? `?lang=${lang}` : ''}`;
+			const templatesRes = await fetch(templatesEndpoint);
+			if (!templatesRes.ok) {
+				error(templatesRes.status as NumericRange<400, 599>, await templatesRes.json());
+			}
+			return json(await templatesRes.json());
+		}
 		case 'documents-by-locale': {
 			const locale = url.searchParams.get('locale');
 			const docsEndpoint = `${BASE_API_URL}/managed-documents/?policy=${params.id}&locale=${locale}`;

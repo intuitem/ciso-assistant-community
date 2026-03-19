@@ -24,7 +24,7 @@
 	let document = $state(data.document);
 	let revisions: any[] = $state(data.revisions);
 	let currentRevision: any = $state(data.currentRevision);
-	let templates = $derived(data.templates);
+	let templates: any[] = $state(data.templates || []);
 	let availableLocales: string[] = $state(data.availableLocales || []);
 	let currentLocale = $state(data.document?.locale || data.userLocale || 'en');
 	let showLocalePicker = $state(false);
@@ -153,6 +153,15 @@
 			await proxyPost({ _action: 'stop-editing', revision_id: currentRevision.id });
 			hasLock = false;
 			stopHeartbeat();
+		}
+		// Fetch templates for the target locale (falls back to English on the backend)
+		try {
+			const res = await proxyGet({ _action: 'templates', lang: newTranslationLocale });
+			if (res.ok) {
+				templates = await res.json();
+			}
+		} catch {
+			// Keep existing templates as fallback
 		}
 		// Show template selector for the new locale
 		addingTranslationLocale = newTranslationLocale;
