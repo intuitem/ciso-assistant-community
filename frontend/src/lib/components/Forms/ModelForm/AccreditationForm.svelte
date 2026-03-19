@@ -144,6 +144,7 @@
 		cacheLock={cacheLocks['expiry_date']}
 		bind:cachedValue={formDataCache['expiry_date']}
 		label={m.expiryDate()}
+		helpText={m.accreditationExpiryHelpText()}
 	/>
 	<AutocompleteSelect
 		multiple

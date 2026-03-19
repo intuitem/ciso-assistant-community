@@ -966,6 +966,7 @@
 	"decisionEvidenceHelpText": "Documents de preuve pour la décision d'homologation (ex. procès-verbal)",
 	"regulatoryAuthority": "Autorité de régulation",
 	"regulatoryAuthorityHelpText": "Entité de type 'autorité de régulation'. Vous pouvez en créer dans le menu entités",
+	"accreditationExpiryHelpText": "Peut être saisie manuellement ou déduite de la date de commission et la durée",
 	"contractor": "Prestataire",
 	"entityRelationship": "Relation avec l'entité",
 	"entity": "Entité",
