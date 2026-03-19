@@ -69,6 +69,7 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
         DRAFT = "draft", _("Draft")
         IN_REVIEW = "in_review", _("In review")
         CHANGE_REQUESTED = "change_requested", _("Change requested")
+        VALIDATED = "validated", _("Validated")
         PUBLISHED = "published", _("Published")
         DEPRECATED = "deprecated", _("Deprecated")
 
@@ -127,13 +128,18 @@ class DocumentRevision(AbstractBaseModel, FolderMixin):
                 raise ValidationError("Only one draft revision allowed per document.")
         super().save(*args, **kwargs)
 
-    def publish(self, reviewer=None):
+    def validate(self, reviewer=None):
+        """Validate this revision: mark as approved, pending publication."""
+        self.status = self.Status.VALIDATED
+        if reviewer:
+            self.reviewer = reviewer
+        self.save()
+
+    def publish(self):
         """Publish this revision: set PUBLISHED, deprecate old, set as current."""
         with transaction.atomic():
             self.status = self.Status.PUBLISHED
             self.published_at = timezone.now()
-            if reviewer:
-                self.reviewer = reviewer
             self.save()
 
             # Deprecate previous published revisions

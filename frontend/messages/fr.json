@@ -315,6 +315,7 @@
 	"childrenAssets": "Actifs sous-jacents",
 	"approver": "Approbateur",
 	"approve": "Approuver",
+	"publish": "Publier",
 	"requester": "Demandeur",
 	"supportingAssetsHelpText": "Précisez les actifs supportant celui-là (downstream)",
 	"state": "État",

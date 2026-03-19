@@ -439,15 +439,26 @@ class DocumentRevisionViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["post"])
     def approve(self, request, pk=None):
-        """Approve a revision: set published, deprecate previous, generate PDF."""
+        """Approve a revision: transition from in_review to validated."""
         revision = self.get_object()
         if revision.status != DocumentRevision.Status.IN_REVIEW:
             return Response(
                 {"error": "Only in-review revisions can be approved."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        revision.validate(reviewer=request.user)
+        return Response({"status": "validated"})
 
-        revision.publish(reviewer=request.user)
+    @action(detail=True, methods=["post"])
+    def publish(self, request, pk=None):
+        """Publish a validated revision: deprecate previous, generate PDF."""
+        revision = self.get_object()
+        if revision.status != DocumentRevision.Status.VALIDATED:
+            return Response(
+                {"error": "Only validated revisions can be published."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        revision.publish()
 
         # Generate PDF snapshot
         try:

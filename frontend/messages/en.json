@@ -323,6 +323,7 @@
 	"childrenAssets": "Underlying dependencies",
 	"approver": "Approver",
 	"approve": "Approve",
+	"publish": "Publish",
 	"requester": "Requester",
 	"supportingAssetsHelpText": "Specifiy the assets supporting this one (downstream)",
 	"state": "State",

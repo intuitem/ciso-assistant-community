@@ -62,6 +62,11 @@
 			text: 'text-red-700',
 			icon: 'fa-rotate-left'
 		},
+		validated: {
+			bg: 'bg-teal-50 border-teal-200',
+			text: 'text-teal-700',
+			icon: 'fa-check-double'
+		},
 		published: {
 			bg: 'bg-emerald-50 border-emerald-200',
 			text: 'text-emerald-700',
@@ -178,9 +183,8 @@
 		const revData = await revRes.json();
 		revisions = revData.results || [];
 
-		const editable = revisions.find(
-			(r: any) => r.status === 'draft' || r.status === 'change_requested'
-		);
+		const activeStatuses = ['draft', 'change_requested', 'in_review', 'validated'];
+		const editable = revisions.find((r: any) => activeStatuses.includes(r.status));
 		if (editable) {
 			const fullRes = await proxyGet({ _action: 'revision', revision_id: editable.id });
 			currentRevision = await fullRes.json();
@@ -256,6 +260,17 @@
 		if (!currentRevision) return;
 		const res = await proxyPost({
 			_action: 'approve',
+			revision_id: currentRevision.id
+		});
+		if (res.ok) {
+			await refreshData();
+		}
+	}
+
+	async function publishRevision() {
+		if (!currentRevision) return;
+		const res = await proxyPost({
+			_action: 'publish',
 			revision_id: currentRevision.id
 		});
 		if (res.ok) {
@@ -568,6 +583,15 @@
 	let canEdit = $derived((isDraft || isChangeRequested) && hasLock);
 	let isInReview = $derived(currentRevision?.status === 'in_review');
 	let hasDraft = $derived(revisions.some((r: any) => r.status === 'draft'));
+	let hasActiveRevision = $derived(
+		revisions.some(
+			(r: any) =>
+				r.status === 'draft' ||
+				r.status === 'in_review' ||
+				r.status === 'change_requested' ||
+				r.status === 'validated'
+		)
+	);
 
 	// Image upload state
 	let uploading = $state(false);
@@ -840,7 +864,14 @@
 				</button>
 			{/if}
 
-			{#if !hasDraft && document}
+			{#if currentRevision?.status === 'validated'}
+				<button class="btn btn-sm preset-filled-success-500" onclick={() => publishRevision()}>
+					<i class="fa-solid fa-upload"></i>
+					<span class="ml-1">{m.publish()}</span>
+				</button>
+			{/if}
+
+			{#if !hasActiveRevision && document}
 				<button class="btn btn-sm preset-filled-primary-500" onclick={() => createNewDraft()}>
 					<i class="fa-solid fa-plus"></i>
 					<span class="ml-1 hidden lg:inline">{m.createNewDraft()}</span>
