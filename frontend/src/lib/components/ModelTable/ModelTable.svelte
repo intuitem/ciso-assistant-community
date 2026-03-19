@@ -319,8 +319,8 @@
 				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
 				if (urlValues.length > 0) return [field, urlValues];
 				// Restore persisted filters only when no URL filter params exist at all
-				if (!hasUrlFilterParams && storedFilters[field]?.length > 0) {
-					return [field, storedFilters[field]];
+				if (!hasUrlFilterParams && field in storedFilters) {
+					return [field, storedFilters[field] ?? []];
 				}
 				const defaultValue = defaultFilters[field] || [];
 				return [field, defaultValue];
@@ -355,10 +355,8 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
-		// Persist filter values to localStorage
-		$tableFilterStates[filterStoreKey] = Object.fromEntries(
-			Object.entries(filterValues).filter(([_, val]) => val?.length > 0)
-		);
+		// Persist all filter values (including empty) so cleared defaults stay cleared
+		$tableFilterStates[filterStoreKey] = { ...filterValues };
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
