@@ -964,3 +964,101 @@ async def delete_task_template(task_id: str) -> str:
             return f"Error deleting task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in delete_task_template: {str(e)}"
+
+
+async def update_vulnerability(
+    vulnerability_id: str,
+    name: str = None,
+    description: str = None,
+    ref_id: str = None,
+    status: str = None,
+    severity: int = None,
+    folder_id: str = None,
+    filtering_labels: list = None,
+    applied_controls: list = None,
+    assets: list = None,
+    security_exceptions: list = None,
+) -> str:
+    """Partially update a vulnerability (only provided fields are updated)
+
+    Args:
+        vulnerability_id: Vulnerability UUID or name
+        name: New name
+        description: New description
+        ref_id: Reference ID (e.g. CVE identifier)
+        status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
+        severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        folder_id: Folder ID/name
+        filtering_labels: List of label UUIDs
+        applied_controls: List of applied control IDs/names
+        assets: List of asset IDs/names
+        security_exceptions: List of security exception UUIDs
+    """
+    try:
+        from ..resolvers import (
+            resolve_vulnerability_id,
+            resolve_folder_id,
+            resolve_asset_id,
+            resolve_applied_control_id,
+        )
+
+        resolved_id = resolve_vulnerability_id(vulnerability_id)
+
+        payload = {}
+
+        if name is not None:
+            payload["name"] = name
+        if description is not None:
+            payload["description"] = description
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if status is not None:
+            payload["status"] = status
+        if severity is not None:
+            payload["severity"] = severity
+        if folder_id is not None:
+            payload["folder"] = resolve_folder_id(folder_id)
+        if filtering_labels is not None:
+            payload["filtering_labels"] = filtering_labels
+        if applied_controls is not None:
+            resolved_controls = [resolve_applied_control_id(c) for c in applied_controls]
+            payload["applied_controls"] = resolved_controls
+        if assets is not None:
+            resolved_assets = [resolve_asset_id(a) for a in assets]
+            payload["assets"] = resolved_assets
+        if security_exceptions is not None:
+            payload["security_exceptions"] = security_exceptions
+
+        if not payload:
+            return "Error: No fields provided to update"
+
+        res = make_patch_request(f"/vulnerabilities/{resolved_id}/", payload)
+
+        if res.status_code == 200:
+            vuln = res.json()
+            return f"Updated vulnerability: {vuln.get('name')} (ID: {vuln.get('id')})"
+        else:
+            return f"Error updating vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in update_vulnerability: {str(e)}"
+
+
+async def delete_vulnerability(vulnerability_id: str) -> str:
+    """Delete a vulnerability
+
+    Args:
+        vulnerability_id: Vulnerability UUID or name
+    """
+    try:
+        from ..resolvers import resolve_vulnerability_id
+
+        resolved_id = resolve_vulnerability_id(vulnerability_id)
+
+        res = make_delete_request(f"/vulnerabilities/{resolved_id}/")
+
+        if res.status_code == 204:
+            return f"Deleted vulnerability (ID: {resolved_id})"
+        else:
+            return f"Error deleting vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in delete_vulnerability: {str(e)}"

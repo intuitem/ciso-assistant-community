@@ -996,3 +996,78 @@ async def create_task_template(
             return f"Error creating task template: {res.status_code} - {res.text}"
     except Exception as e:
         return f"Error in create_task_template: {str(e)}"
+
+
+async def create_vulnerability(
+    name: str,
+    description: str = None,
+    ref_id: str = None,
+    status: str = "--",
+    severity: int = -1,
+    folder_id: str = None,
+    filtering_labels: list = None,
+    applied_controls: list = None,
+    assets: list = None,
+    security_exceptions: list = None,
+) -> str:
+    """Create a new vulnerability
+
+    Args:
+        name: Vulnerability name (required)
+        description: Description
+        ref_id: Reference ID (e.g. CVE identifier)
+        status: -- | potential | exploitable | mitigated | fixed | not_exploitable | unaffected
+        severity: -1 (undefined) | 0 (info) | 1 (low) | 2 (medium) | 3 (high) | 4 (critical)
+        folder_id: Folder ID/name
+        filtering_labels: List of label UUIDs
+        applied_controls: List of applied control IDs/names
+        assets: List of asset IDs/names
+        security_exceptions: List of security exception UUIDs
+    """
+    try:
+        from ..resolvers import resolve_asset_id, resolve_applied_control_id
+
+        if not folder_id and GLOBAL_FOLDER_ID:
+            folder_id = GLOBAL_FOLDER_ID
+
+        payload = {"name": name}
+
+        if description is not None:
+            payload["description"] = description
+        if ref_id is not None:
+            payload["ref_id"] = ref_id
+        if status is not None:
+            payload["status"] = status
+        if severity is not None:
+            payload["severity"] = severity
+
+        if folder_id:
+            payload["folder"] = resolve_folder_id(folder_id)
+
+        if filtering_labels:
+            payload["filtering_labels"] = filtering_labels
+
+        if applied_controls:
+            resolved_controls = []
+            for control in applied_controls:
+                resolved_controls.append(resolve_applied_control_id(control))
+            payload["applied_controls"] = resolved_controls
+
+        if assets:
+            resolved_assets = []
+            for asset in assets:
+                resolved_assets.append(resolve_asset_id(asset))
+            payload["assets"] = resolved_assets
+
+        if security_exceptions:
+            payload["security_exceptions"] = security_exceptions
+
+        res = make_post_request("/vulnerabilities/", payload)
+
+        if res.status_code == 201:
+            vuln = res.json()
+            return f"Created vulnerability: {vuln.get('name')} (ID: {vuln.get('id')})"
+        else:
+            return f"Error creating vulnerability: {res.status_code} - {res.text}"
+    except Exception as e:
+        return f"Error in create_vulnerability: {str(e)}"
