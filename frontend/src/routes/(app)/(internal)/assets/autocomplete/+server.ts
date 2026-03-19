@@ -10,11 +10,13 @@ export const GET: RequestHandler = async ({ fetch, url }) => {
 	const res = await fetch(endpoint);
 	if (!res.ok) {
 		const body = await res.text();
+		let parsed: unknown;
 		try {
-			error(res.status as NumericRange<400, 599>, JSON.parse(body));
+			parsed = JSON.parse(body);
 		} catch {
-			error(res.status as NumericRange<400, 599>, body);
+			parsed = body;
 		}
+		error(res.status as NumericRange<400, 599>, parsed as any);
 	}
 	return new Response(res.body, {
 		status: res.status,
