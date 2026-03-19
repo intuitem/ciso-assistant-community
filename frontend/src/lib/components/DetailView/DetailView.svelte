@@ -77,7 +77,8 @@
 			'reported_at',
 			'due_date',
 			'start_date',
-			'closing_date'
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
