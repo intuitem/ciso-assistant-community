@@ -42,7 +42,7 @@
 	let selectedMetricKey = $state<string>(object?.metric_key || '');
 	let availableMetrics = $state<Array<{ value: string; label: string; chart_types: string[] }>>([]);
 	let selectedChartType = $state<string>(object?.chart_type || '');
-	let selectedTimeRange = $state<string>(object?.time_range || initialData.time_range || '');
+	let selectedTimeRange = $state<string>(object?.time_range || initialData?.time_range || '');
 
 	// Initialize formDataCache from object for edit mode
 	$effect(() => {
