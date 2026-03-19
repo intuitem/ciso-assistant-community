@@ -118,7 +118,7 @@
 	"publishedAt": "Published at",
 	"contentPreview": "Preview",
 	"documentEditor": "Document editor",
-	"noDocumentCreatedYet": "No document has been created for this policy yet.",
+	"noDocumentCreatedYet": "No document has been created for this policy yet. Use the edit button below to get started.",
 	"chooseDocumentTemplate": "Choose how to start your policy document",
 	"addingTranslation": "Adding translation:",
 	"startWithBlankDocument": "Start with a blank document",

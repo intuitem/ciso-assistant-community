@@ -113,7 +113,7 @@
 	"publishedAt": "Publié le",
 	"contentPreview": "Aperçu",
 	"documentEditor": "Éditeur de document",
-	"noDocumentCreatedYet": "Aucun document n'a encore été créé pour cette politique.",
+	"noDocumentCreatedYet": "Aucun document n'a encore été créé pour cette politique. Utilisez le bouton d'édition ci-dessous pour commencer.",
 	"chooseDocumentTemplate": "Choisissez comment démarrer votre document de politique",
 	"addingTranslation": "Ajout d'une traduction :",
 	"startWithBlankDocument": "Commencer avec un document vierge",

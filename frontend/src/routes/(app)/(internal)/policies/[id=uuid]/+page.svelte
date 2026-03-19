@@ -142,14 +142,7 @@
 		{:else if page.data?.featureflags?.policy_documents && policyDocument === null}
 			<div class="card bg-white shadow rounded-lg border mt-4 p-6 text-center">
 				<i class="fa-solid fa-file-circle-plus text-4xl text-gray-300 mb-3"></i>
-				<p class="text-gray-500 mb-3">{m.noDocumentCreatedYet()}</p>
-				<a
-					href="/policies/{policy.id}/document"
-					class="btn bg-blue-500 text-white hover:bg-blue-600 inline-flex"
-				>
-					<i class="fa-solid fa-plus mr-2"></i>
-					{m.editDocument()}
-				</a>
+				<p class="text-gray-500">{m.noDocumentCreatedYet()}</p>
 			</div>
 		{/if}
 	{/snippet}
