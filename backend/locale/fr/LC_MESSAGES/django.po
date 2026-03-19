@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-17 13:51+0000\n"
+"POT-Creation-Date: 2026-03-19 14:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,47 +18,50 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: crq/models.py:27 ebios_rm/models.py:58
+#: crq/models.py:29 ebios_rm/models.py:60
 msgid "Planned"
 msgstr ""
 
-#: crq/models.py:28 ebios_rm/models.py:59
+#: crq/models.py:30 ebios_rm/models.py:61
 msgid "In progress"
 msgstr ""
 
-#: crq/models.py:29 ebios_rm/models.py:60
+#: crq/models.py:31 doc_management/models.py:70 ebios_rm/models.py:62
 msgid "In review"
 msgstr ""
 
-#: crq/models.py:30 ebios_rm/models.py:61
+#: crq/models.py:32 ebios_rm/models.py:63
 msgid "Done"
 msgstr ""
 
-#: crq/models.py:31 ebios_rm/models.py:62
+#: crq/models.py:33 doc_management/models.py:74 ebios_rm/models.py:64
+#: metrology/models.py:105
 msgid "Deprecated"
 msgstr ""
 
-#: crq/models.py:34
+#: crq/models.py:36
 msgid "Lognormal - CI 90"
 msgstr ""
 
-#: crq/models.py:41 ebios_rm/models.py:151 tprm/models.py:433
+#: crq/models.py:43 ebios_rm/models.py:153 metrology/models.py:128
+#: tprm/models.py:448
 msgid "Status"
 msgstr ""
 
-#: crq/models.py:48 ebios_rm/models.py:158
-msgid "Authors"
-msgstr ""
-
-#: crq/models.py:54 ebios_rm/models.py:164
+#: crq/models.py:50 ebios_rm/models.py:160
 msgid "Reviewers"
 msgstr ""
 
-#: crq/models.py:57 crq/models.py:432 crq/models.py:568 ebios_rm/models.py:167
+#: crq/models.py:56 ebios_rm/models.py:166
+msgid "Authors"
+msgstr ""
+
+#: crq/models.py:59 crq/models.py:489 crq/models.py:639 ebios_rm/models.py:169
+#: metrology/models.py:267
 msgid "Observation"
 msgstr ""
 
-#: crq/models.py:63
+#: crq/models.py:65
 msgid ""
 "Risk tolerance points and curve data. Expected format: {'points': {'point1': "
 "{'probability': float, 'acceptable_loss': float}, 'point2': {'probability': "
@@ -66,504 +69,590 @@ msgid ""
 "'probability_values': [...]}}"
 msgstr ""
 
-#: crq/models.py:73
+#: crq/models.py:75
 msgid "Distribution model"
 msgstr ""
 
-#: crq/models.py:80
+#: crq/models.py:82
 msgid ""
 "Cached portfolio simulation results to improve performance. Contains current "
 "and residual portfolio calculations with metadata."
 msgstr ""
 
-#: crq/models.py:360
+#: crq/models.py:417
 msgid "Quantitative Risk Study"
 msgstr ""
 
-#: crq/models.py:361
+#: crq/models.py:418
 msgid "Quantitative Risk Studies"
 msgstr ""
 
-#: crq/models.py:371 ebios_rm/models.py:115 ebios_rm/models.py:307
+#: crq/models.py:428 ebios_rm/models.py:117 ebios_rm/models.py:336
 msgid "Assets"
 msgstr ""
 
-#: crq/models.py:373
+#: crq/models.py:430
 msgid "Assets impacted by the risk scenario"
 msgstr ""
 
-#: crq/models.py:379 tprm/models.py:268 tprm/models.py:391
+#: crq/models.py:436 metrology/models.py:134 tprm/models.py:285
+#: tprm/models.py:408
 msgid "Owner"
 msgstr ""
 
-#: crq/models.py:383 tprm/models.py:384
+#: crq/models.py:440 doc_management/models.py:69 metrology/models.py:102
+#: tprm/models.py:401
 msgid "Draft"
 msgstr ""
 
-#: crq/models.py:384
+#: crq/models.py:441
 msgid "Open"
 msgstr ""
 
-#: crq/models.py:385
+#: crq/models.py:442
 msgid "Mitigate"
 msgstr ""
 
-#: crq/models.py:386
+#: crq/models.py:443
 msgid "Accept"
 msgstr ""
 
-#: crq/models.py:387
+#: crq/models.py:444
 msgid "Transfer"
 msgstr ""
 
-#: crq/models.py:391
+#: crq/models.py:448
 msgid "P1"
 msgstr ""
 
-#: crq/models.py:392
+#: crq/models.py:449
 msgid "P2"
 msgstr ""
 
-#: crq/models.py:393
+#: crq/models.py:450
 msgid "P3"
 msgstr ""
 
-#: crq/models.py:394
+#: crq/models.py:451
 msgid "P4"
 msgstr ""
 
-#: crq/models.py:401
+#: crq/models.py:458
 msgid "Priority"
 msgstr ""
 
-#: crq/models.py:407
+#: crq/models.py:464
 msgid "status"
 msgstr ""
 
-#: crq/models.py:411
+#: crq/models.py:468
 msgid "Vulnerabilities"
 msgstr ""
 
-#: crq/models.py:413
+#: crq/models.py:470
 msgid "Vulnerabities exploited by the risk scenario"
 msgstr ""
 
-#: crq/models.py:418 ebios_rm/models.py:910
+#: crq/models.py:475 ebios_rm/models.py:1027
 msgid "Threats"
 msgstr ""
 
-#: crq/models.py:435 crq/models.py:574 ebios_rm/models.py:324
-#: ebios_rm/models.py:477 ebios_rm/models.py:593 ebios_rm/models.py:711
-#: ebios_rm/models.py:922
+#: crq/models.py:492 crq/models.py:645 ebios_rm/models.py:353
+#: ebios_rm/models.py:517 ebios_rm/models.py:644 ebios_rm/models.py:795
+#: ebios_rm/models.py:1039
 msgid "Is selected"
 msgstr ""
 
-#: crq/models.py:518
+#: crq/models.py:589
 msgid "Quantitative Risk Scenario"
 msgstr ""
 
-#: crq/models.py:519
+#: crq/models.py:590
 msgid "Quantitative Risk Scenarios"
 msgstr ""
 
-#: crq/models.py:533
+#: crq/models.py:604
 msgid "Inherent"
 msgstr ""
 
-#: crq/models.py:534
+#: crq/models.py:605
 msgid "Current"
 msgstr ""
 
-#: crq/models.py:535
+#: crq/models.py:606
 msgid "Residual"
 msgstr ""
 
-#: crq/models.py:542
+#: crq/models.py:613
 msgid "Existing Applied controls"
 msgstr ""
 
-#: crq/models.py:548
+#: crq/models.py:619
 msgid "Added Applied controls"
 msgstr ""
 
-#: crq/models.py:554
+#: crq/models.py:625
 msgid "Removed Applied controls"
 msgstr ""
 
-#: crq/models.py:562
+#: crq/models.py:633
 msgid "risk stage"
 msgstr ""
 
-#: crq/models.py:571
+#: crq/models.py:642
 msgid "Is simulation fresh"
 msgstr ""
 
-#: crq/models.py:587
+#: crq/models.py:658
 msgid "Quantitative Risk Hypothesis"
 msgstr ""
 
-#: crq/models.py:588
+#: crq/models.py:659
 msgid "Quantitative Risk Hypotheses"
 msgstr ""
 
-#: ebios_rm/models.py:108
-msgid "Risk matrix"
+#: doc_management/models.py:14
+msgid "Policy"
+msgstr ""
+
+#: doc_management/models.py:15
+msgid "Procedure"
+msgstr ""
+
+#: doc_management/models.py:16
+msgid "Charter"
+msgstr ""
+
+#: doc_management/models.py:17
+msgid "Record"
+msgstr ""
+
+#: doc_management/models.py:18
+msgid "Other"
+msgstr ""
+
+#: doc_management/models.py:24
+msgid "Document type"
+msgstr ""
+
+#: doc_management/models.py:26 privacy/models.py:150 privacy/models.py:255
+#: privacy/models.py:324 privacy/models.py:383 privacy/models.py:411
+#: privacy/models.py:441
+msgid "Name"
+msgstr ""
+
+#: doc_management/models.py:27
+msgid "Description"
+msgstr ""
+
+#: doc_management/models.py:47
+msgid "Managed document"
+msgstr ""
+
+#: doc_management/models.py:48
+msgid "Managed documents"
+msgstr ""
+
+#: doc_management/models.py:71
+msgid "Change requested"
+msgstr ""
+
+#: doc_management/models.py:72
+msgid "Validated"
+msgstr ""
+
+#: doc_management/models.py:73 metrology/models.py:63
+msgid "Published"
+msgstr ""
+
+#: doc_management/models.py:118
+msgid "Document revision"
+msgstr ""
+
+#: doc_management/models.py:119
+msgid "Document revisions"
+msgstr ""
+
+#: doc_management/models.py:192
+msgid "Document attachment"
+msgstr ""
+
+#: doc_management/models.py:193
+msgid "Document attachments"
+msgstr ""
+
+#: doc_management/models.py:229
+msgid "Document edit"
+msgstr ""
+
+#: doc_management/models.py:230
+msgid "Document edits"
 msgstr ""
 
 #: ebios_rm/models.py:110
+msgid "Risk matrix"
+msgstr ""
+
+#: ebios_rm/models.py:112
 msgid "Risk matrix used as a reference for the study"
 msgstr ""
 
-#: ebios_rm/models.py:117
+#: ebios_rm/models.py:119
 msgid "Assets that are pertinent to the study"
 msgstr ""
 
-#: ebios_rm/models.py:123
+#: ebios_rm/models.py:125
 msgid "Compliance assessments"
 msgstr ""
 
-#: ebios_rm/models.py:126
+#: ebios_rm/models.py:128
 msgid ""
 "Compliance assessments established as security baseline during workshop 1.4"
 msgstr ""
 
-#: ebios_rm/models.py:132
+#: ebios_rm/models.py:134
 msgid "Reference entity"
 msgstr ""
 
-#: ebios_rm/models.py:134
+#: ebios_rm/models.py:136
 msgid "Entity that is the focus of the study"
 msgstr ""
 
-#: ebios_rm/models.py:143
+#: ebios_rm/models.py:145
 msgid "Version of the Ebios RM study (eg. 1.0, 2.0, etc.)"
 msgstr ""
 
-#: ebios_rm/models.py:144
+#: ebios_rm/models.py:146
 msgid "Version"
 msgstr ""
 
-#: ebios_rm/models.py:170
+#: ebios_rm/models.py:172
 msgid "Metadata"
 msgstr ""
 
-#: ebios_rm/models.py:178
+#: ebios_rm/models.py:180
 msgid "Quotation method"
 msgstr ""
 
-#: ebios_rm/models.py:180
+#: ebios_rm/models.py:182
 msgid ""
 "Method used to quote the study: 'manual' for manual likelihood assessment, "
 "'express' for automatic propagation from operating modes"
 msgstr ""
 
-#: ebios_rm/models.py:187
+#: ebios_rm/models.py:189
 msgid "Ebios RM Study"
 msgstr ""
 
-#: ebios_rm/models.py:188
+#: ebios_rm/models.py:190
 msgid "Ebios RM Studies"
 msgstr ""
 
-#: ebios_rm/models.py:301 ebios_rm/models.py:440 ebios_rm/models.py:520
-#: ebios_rm/models.py:657 ebios_rm/models.py:692 ebios_rm/models.py:897
+#: ebios_rm/models.py:329 ebios_rm/models.py:480 ebios_rm/models.py:571
+#: ebios_rm/models.py:719 ebios_rm/models.py:776 ebios_rm/models.py:1014
 msgid "EBIOS RM study"
 msgstr ""
 
-#: ebios_rm/models.py:309
+#: ebios_rm/models.py:338
 msgid "Assets that are affected by the feared event"
 msgstr ""
 
-#: ebios_rm/models.py:323
+#: ebios_rm/models.py:352
 msgid "Gravity"
 msgstr "Gravité"
 
-#: ebios_rm/models.py:325 ebios_rm/models.py:478 ebios_rm/models.py:594
-#: ebios_rm/models.py:712 ebios_rm/models.py:923
+#: ebios_rm/models.py:354 ebios_rm/models.py:518 ebios_rm/models.py:645
+#: ebios_rm/models.py:796 ebios_rm/models.py:1040
 msgid "Justification"
 msgstr ""
 
-#: ebios_rm/models.py:330
+#: ebios_rm/models.py:359
 msgid "Feared event"
 msgstr "Événement redouté"
 
-#: ebios_rm/models.py:331 ebios_rm/models.py:445
+#: ebios_rm/models.py:360 ebios_rm/models.py:485
 msgid "Feared events"
 msgstr "Evénements redoutés"
 
-#: ebios_rm/models.py:453
+#: ebios_rm/models.py:493
 msgid "Risk origin"
 msgstr "Source de risque"
 
-#: ebios_rm/models.py:460
+#: ebios_rm/models.py:500
 msgid "Target objective"
 msgstr "Objectif visé"
 
-#: ebios_rm/models.py:462
+#: ebios_rm/models.py:502
 msgid "Motivation"
 msgstr ""
 
-#: ebios_rm/models.py:467
+#: ebios_rm/models.py:507
 msgid "Resources"
 msgstr ""
 
-#: ebios_rm/models.py:472
+#: ebios_rm/models.py:512
 msgid "Activity"
 msgstr ""
 
-#: ebios_rm/models.py:488 ebios_rm/models.py:663
+#: ebios_rm/models.py:528 ebios_rm/models.py:725
 msgid "RO/TO couple"
 msgstr ""
 
-#: ebios_rm/models.py:489
+#: ebios_rm/models.py:529
 msgid "RO/TO couples"
 msgstr ""
 
-#: ebios_rm/models.py:521
+#: ebios_rm/models.py:572
 msgid "EBIOS RM study that the stakeholder is part of"
 msgstr ""
 
-#: ebios_rm/models.py:528 tprm/models.py:158 tprm/models.py:229
+#: ebios_rm/models.py:579 tprm/models.py:171 tprm/models.py:246
 msgid "Entity"
 msgstr ""
 
-#: ebios_rm/models.py:530
+#: ebios_rm/models.py:581
 msgid "Entity qualified by the stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:534
+#: ebios_rm/models.py:585
 msgid "Applied controls"
 msgstr ""
 
-#: ebios_rm/models.py:537
+#: ebios_rm/models.py:588
 msgid "Controls applied to lower stakeholder criticality"
 msgstr ""
 
-#: ebios_rm/models.py:543
+#: ebios_rm/models.py:594 metrology/models.py:38
 msgid "Category"
 msgstr ""
 
-#: ebios_rm/models.py:552
+#: ebios_rm/models.py:603
 msgid "Current dependency"
 msgstr ""
 
-#: ebios_rm/models.py:557
+#: ebios_rm/models.py:608
 msgid "Current penetration"
 msgstr ""
 
-#: ebios_rm/models.py:562
+#: ebios_rm/models.py:613
 msgid "Current maturity"
 msgstr ""
 
-#: ebios_rm/models.py:567
+#: ebios_rm/models.py:618
 msgid "Current trust"
 msgstr ""
 
-#: ebios_rm/models.py:573
+#: ebios_rm/models.py:624
 msgid "Residual dependency"
 msgstr ""
 
-#: ebios_rm/models.py:578
+#: ebios_rm/models.py:629
 msgid "Residual penetration"
 msgstr ""
 
-#: ebios_rm/models.py:583
+#: ebios_rm/models.py:634
 msgid "Residual maturity"
 msgstr ""
 
-#: ebios_rm/models.py:588
+#: ebios_rm/models.py:639
 msgid "Residual trust"
 msgstr ""
 
-#: ebios_rm/models.py:599
+#: ebios_rm/models.py:650
 msgid "Stakeholder"
 msgstr ""
 
-#: ebios_rm/models.py:600 ebios_rm/models.py:704
+#: ebios_rm/models.py:651 ebios_rm/models.py:788
 msgid "Stakeholders"
 msgstr ""
 
-#: ebios_rm/models.py:665
+#: ebios_rm/models.py:727
 msgid "RO/TO couple from which the attach path is derived"
 msgstr ""
 
-#: ebios_rm/models.py:672
+#: ebios_rm/models.py:732
+#, fuzzy
+#| msgid "Feared event"
+msgid "Focused feared event"
+msgstr "Événement redouté"
+
+#: ebios_rm/models.py:737
+msgid "Override gravity with this specific feared event's gravity"
+msgstr ""
+
+#: ebios_rm/models.py:743
 msgid "Strategic Scenario"
 msgstr "Scénario stratégique"
 
-#: ebios_rm/models.py:673
+#: ebios_rm/models.py:744
 msgid "Strategic Scenarios"
 msgstr ""
 
-#: ebios_rm/models.py:697
+#: ebios_rm/models.py:781
 msgid "Strategic scenario"
 msgstr ""
 
-#: ebios_rm/models.py:700
+#: ebios_rm/models.py:784
 msgid "Strategic scenario from which the attack path is derived"
 msgstr ""
 
-#: ebios_rm/models.py:706
+#: ebios_rm/models.py:790
 msgid "Stakeholders leveraged by the attack path"
 msgstr ""
 
-#: ebios_rm/models.py:717 ebios_rm/models.py:903
+#: ebios_rm/models.py:801 ebios_rm/models.py:1020
 msgid "Attack path"
 msgstr "Chemin d'attaque"
 
-#: ebios_rm/models.py:718
+#: ebios_rm/models.py:802
 msgid "Attack paths"
 msgstr ""
 
-#: ebios_rm/models.py:790
+#: ebios_rm/models.py:902
 msgid "Threat"
 msgstr ""
 
-#: ebios_rm/models.py:792
+#: ebios_rm/models.py:904
 msgid "Threat that the elementary action is derived from"
 msgstr ""
 
-#: ebios_rm/models.py:836 ebios_rm/models.py:930
+#: ebios_rm/models.py:948 ebios_rm/models.py:1047
 msgid "Operational scenario"
 msgstr ""
 
-#: ebios_rm/models.py:842
-msgid "Elementary actions"
-msgstr ""
-
-#: ebios_rm/models.py:844
-msgid "Elementary actions that are part of the operating mode"
-msgstr ""
-
-#: ebios_rm/models.py:913
+#: ebios_rm/models.py:1030
 msgid "Threats leveraged by the operational scenario"
 msgstr ""
 
-#: ebios_rm/models.py:917
+#: ebios_rm/models.py:1034
 msgid "Operating modes description"
 msgstr ""
 
-#: ebios_rm/models.py:918
+#: ebios_rm/models.py:1035
 msgid "Description of the operating modes of the operational scenario"
 msgstr ""
 
-#: ebios_rm/models.py:921
+#: ebios_rm/models.py:1038
 msgid "Likelihood"
 msgstr "Vraisemblance"
 
-#: ebios_rm/models.py:931
+#: ebios_rm/models.py:1048
 msgid "Operational scenarios"
 msgstr ""
 
-#: iam/models.py:90
+#: iam/models.py:154
 msgid "GLOBAL"
 msgstr ""
 
-#: iam/models.py:91
+#: iam/models.py:155
 msgid "DOMAIN"
 msgstr ""
 
-#: iam/models.py:92
+#: iam/models.py:156
 msgid "ENCLAVE"
 msgstr ""
 
-#: iam/models.py:102
+#: iam/models.py:166
 msgid "parent folder"
 msgstr ""
 
-#: iam/models.py:110
+#: iam/models.py:172
+msgid "Automatically provision IAM groups for domain folders."
+msgstr ""
+
+#: iam/models.py:178
 msgid "Labels"
 msgstr ""
 
-#: iam/models.py:119
+#: iam/models.py:186
 msgid "Folder"
 msgstr ""
 
-#: iam/models.py:120
+#: iam/models.py:187
 msgid "Folders"
 msgstr ""
 
-#: iam/models.py:367
+#: iam/models.py:437
 msgid "user group"
 msgstr ""
 
-#: iam/models.py:368 iam/models.py:528
+#: iam/models.py:438 iam/models.py:630
 msgid "user groups"
 msgstr ""
 
-#: iam/models.py:450
+#: iam/models.py:552
 msgid "Welcome to Ciso Assistant!"
 msgstr "Bienvenue sur CISO Assistant !"
 
-#: iam/models.py:498
+#: iam/models.py:600
 msgid "last name"
 msgstr ""
 
-#: iam/models.py:499
+#: iam/models.py:601
 msgid "first name"
 msgstr ""
 
-#: iam/models.py:506
+#: iam/models.py:608
 msgid ""
 "If True allow the user to log in using the normal login form even with SSO "
 "forced."
 msgstr ""
 
-#: iam/models.py:511
+#: iam/models.py:613
 msgid "active"
 msgstr ""
 
-#: iam/models.py:514
+#: iam/models.py:616
 msgid ""
 "Designates whether this user should be treated as active. Unselect this "
 "instead of deleting accounts."
 msgstr ""
 
-#: iam/models.py:518
+#: iam/models.py:620
 msgid "date joined"
 msgstr ""
 
-#: iam/models.py:520
+#: iam/models.py:622
 msgid "superuser status"
 msgstr ""
 
-#: iam/models.py:523
+#: iam/models.py:625
 msgid ""
 "Designates that this user has all permissions without explicitly assigning "
 "them."
 msgstr ""
 
-#: iam/models.py:531
+#: iam/models.py:633
 msgid ""
 "The user groups this user belongs to. A user will get all permissions "
 "granted to each of their user groups."
 msgstr ""
 
-#: iam/models.py:541
+#: iam/models.py:643
 msgid "Expiry date"
 msgstr ""
 
-#: iam/models.py:554
+#: iam/models.py:656
 msgid "user"
 msgstr ""
 
-#: iam/models.py:555
+#: iam/models.py:657
 msgid "users"
 msgstr ""
 
-#: iam/models.py:794
+#: iam/models.py:965
 msgid "permissions"
 msgstr ""
 
-#: iam/models.py:811
+#: iam/models.py:1021
 msgid "Domain"
 msgstr ""
 
-#: iam/models.py:817
+#: iam/models.py:1027
 msgid "Role"
 msgstr ""
 
-#: iam/models.py:818
+#: iam/models.py:1028
 msgid "sub folders are visible"
 msgstr ""
 
@@ -611,467 +700,1090 @@ msgstr ""
 msgid "Key"
 msgstr ""
 
-#: iam/views.py:282
+#: iam/views.py:294
 msgid "CISO Assistant: Password Reset"
 msgstr "CISO Assistant : réinitialisation de mot de passe"
 
-#: tprm/models.py:43 tprm/models.py:262
+#: metrology/builtin_metrics.py:31
+msgid "Progress"
+msgstr ""
+
+#: metrology/builtin_metrics.py:33
+msgid "Completion percentage of the assessment"
+msgstr ""
+
+#: metrology/builtin_metrics.py:36
+msgid "Score"
+msgstr ""
+
+#: metrology/builtin_metrics.py:38
+msgid "Global compliance score"
+msgstr ""
+
+#: metrology/builtin_metrics.py:41
+msgid "Total Requirements"
+msgstr ""
+
+#: metrology/builtin_metrics.py:43
+msgid "Total number of requirements"
+msgstr ""
+
+#: metrology/builtin_metrics.py:46 metrology/builtin_metrics.py:90
+msgid "Status Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:48
+msgid "Requirements count per status"
+msgstr ""
+
+#: metrology/builtin_metrics.py:51
+msgid "Result Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:53
+msgid "Requirements count per result"
+msgstr ""
+
+#: metrology/builtin_metrics.py:58
+#, fuzzy
+#| msgid "Strategic Scenario"
+msgid "Total Scenarios"
+msgstr "Scénario stratégique"
+
+#: metrology/builtin_metrics.py:60
+msgid "Total number of risk scenarios"
+msgstr ""
+
+#: metrology/builtin_metrics.py:63
+msgid "Treatment Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:65
+msgid "Scenarios count per treatment option"
+msgstr ""
+
+#: metrology/builtin_metrics.py:68
+msgid "Current Risk Level Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:70
+msgid "Scenarios count per current risk level"
+msgstr ""
+
+#: metrology/builtin_metrics.py:73
+msgid "Residual Risk Level Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:75
+msgid "Scenarios count per residual risk level"
+msgstr ""
+
+#: metrology/builtin_metrics.py:80
+msgid "Total Findings"
+msgstr ""
+
+#: metrology/builtin_metrics.py:82
+msgid "Total number of findings"
+msgstr ""
+
+#: metrology/builtin_metrics.py:85
+msgid "Severity Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:87
+msgid "Findings count per severity level"
+msgstr ""
+
+#: metrology/builtin_metrics.py:92
+msgid "Findings count per status"
+msgstr ""
+
+#: metrology/builtin_metrics.py:98
+msgid "Controls Status Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:100
+msgid "Applied controls count per status in this domain"
+msgstr ""
+
+#: metrology/builtin_metrics.py:103
+msgid "Controls Category Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:105
+msgid "Applied controls count per category in this domain"
+msgstr ""
+
+#: metrology/builtin_metrics.py:109
+msgid "Incidents Severity Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:111
+msgid "Incidents count per severity in this domain"
+msgstr ""
+
+#: metrology/builtin_metrics.py:114
+msgid "Incidents Status Breakdown"
+msgstr ""
+
+#: metrology/builtin_metrics.py:116
+msgid "Incidents count per status in this domain"
+msgstr ""
+
+#: metrology/builtin_metrics.py:119
+msgid "Total Controls"
+msgstr ""
+
+#: metrology/builtin_metrics.py:121
+msgid "Total applied controls in this domain"
+msgstr ""
+
+#: metrology/builtin_metrics.py:124
+msgid "Total Incidents"
+msgstr ""
+
+#: metrology/builtin_metrics.py:126
+msgid "Total incidents in this domain"
+msgstr ""
+
+#: metrology/models.py:24
+msgid "Qualitative (Level)"
+msgstr ""
+
+#: metrology/models.py:25
+msgid "Quantitative (Number)"
+msgstr ""
+
+#: metrology/models.py:45
+msgid "Unit"
+msgstr ""
+
+#: metrology/models.py:47
+msgid ""
+"Unit of measurement (e.g., count, users, bytes, percentage, score, "
+"event_per_second)"
+msgstr ""
+
+#: metrology/models.py:59
+msgid ""
+"For qualitative metrics: ordered list of options with translations. Format: "
+"[{'name': 'Low', 'description': '', 'translations': {'fr': {'name': "
+"'Faible', 'description': ''}}}]"
+msgstr ""
+
+#: metrology/models.py:66
+msgid "Higher is better"
+msgstr ""
+
+#: metrology/models.py:68
+msgid ""
+"If true, an increase in value is considered positive (e.g., compliance "
+"score). If false, a decrease is considered positive (e.g., number of "
+"vulnerabilities)."
+msgstr ""
+
+#: metrology/models.py:75
+msgid "Default target"
+msgstr ""
+
+#: metrology/models.py:77
+msgid ""
+"Default target value for metric instances. Can be overridden at instance "
+"level."
+msgstr ""
+
+#: metrology/models.py:84 metrology/models.py:119
+msgid "Metric definition"
+msgstr ""
+
+#: metrology/models.py:85
+msgid "Metric definitions"
+msgstr ""
+
+#: metrology/models.py:103 tprm/models.py:402
+msgid "Active"
+msgstr ""
+
+#: metrology/models.py:104
+msgid "Stale"
+msgstr ""
+
+#: metrology/models.py:108
+msgid "Real-time (continuous)"
+msgstr ""
+
+#: metrology/models.py:109
+msgid "Hourly"
+msgstr ""
+
+#: metrology/models.py:110
+msgid "Daily"
+msgstr ""
+
+#: metrology/models.py:111
+msgid "Weekly"
+msgstr ""
+
+#: metrology/models.py:112
+msgid "Monthly"
+msgstr ""
+
+#: metrology/models.py:113
+msgid "Quarterly"
+msgstr ""
+
+#: metrology/models.py:114
+msgid "Yearly"
+msgstr ""
+
+#: metrology/models.py:122 metrology/models.py:665
+msgid "reference id"
+msgstr ""
+
+#: metrology/models.py:140
+#, fuzzy
+#| msgid "Target objective"
+msgid "Target value"
+msgstr "Objectif visé"
+
+#: metrology/models.py:141
+msgid "Target or optimal value for this metric instance"
+msgstr ""
+
+#: metrology/models.py:148
+msgid "Collection frequency"
+msgstr ""
+
+#: metrology/models.py:149
+msgid "Expected frequency for collecting metric samples"
+msgstr ""
+
+#: metrology/models.py:162 metrology/models.py:253 metrology/models.py:743
+msgid "Metric instance"
+msgstr ""
+
+#: metrology/models.py:163
+msgid "Metric instances"
+msgstr ""
+
+#: metrology/models.py:257
+msgid "Timestamp"
+msgstr ""
+
+#: metrology/models.py:258
+msgid "When the metric sample was recorded"
+msgstr ""
+
+#: metrology/models.py:263
+msgid "Value"
+msgstr ""
+
+#: metrology/models.py:264
+msgid "The metric value (format depends on metric definition category)"
+msgstr ""
+
+#: metrology/models.py:277
+msgid "Custom metric sample"
+msgstr ""
+
+#: metrology/models.py:278
+msgid "Custom metric samples"
+msgstr ""
+
+#: metrology/models.py:396
+msgid "Content type"
+msgstr ""
+
+#: metrology/models.py:397
+msgid "The type of object this metric is computed for"
+msgstr ""
+
+#: metrology/models.py:400
+msgid "Object ID"
+msgstr ""
+
+#: metrology/models.py:401
+msgid "The ID of the object this metric is computed for"
+msgstr ""
+
+#: metrology/models.py:407
+msgid "Date"
+msgstr ""
+
+#: metrology/models.py:408
+msgid "The date this snapshot was recorded"
+msgstr ""
+
+#: metrology/models.py:413
+msgid "Metrics"
+msgstr ""
+
+#: metrology/models.py:415
+msgid ""
+"All computed metrics for this object. Format depends on object type (e.g., "
+"progress, result_breakdown, etc.)"
+msgstr ""
+
+#: metrology/models.py:421
+msgid "Builtin metric sample"
+msgstr ""
+
+#: metrology/models.py:422
+msgid "Builtin metric samples"
+msgstr ""
+
+#: metrology/models.py:672
+msgid ""
+"Global dashboard configuration. Format: {'layout': {'columns': 12, "
+"'row_height': 100}, 'global_filters': {'time_range': 'last_30_days', "
+"'refresh_interval': 300}}"
+msgstr ""
+
+#: metrology/models.py:681 metrology/models.py:735
+msgid "Dashboard"
+msgstr ""
+
+#: metrology/models.py:682
+msgid "Dashboards"
+msgstr ""
+
+#: metrology/models.py:701
+msgid "KPI Card"
+msgstr ""
+
+#: metrology/models.py:702
+msgid "Donut Chart"
+msgstr ""
+
+#: metrology/models.py:703
+msgid "Pie Chart"
+msgstr ""
+
+#: metrology/models.py:704
+msgid "Bar Chart"
+msgstr ""
+
+#: metrology/models.py:705
+msgid "Line Chart"
+msgstr ""
+
+#: metrology/models.py:706
+msgid "Area Chart"
+msgstr ""
+
+#: metrology/models.py:707
+msgid "Gauge"
+msgstr ""
+
+#: metrology/models.py:708
+msgid "Sparkline"
+msgstr ""
+
+#: metrology/models.py:709
+msgid "Table"
+msgstr ""
+
+#: metrology/models.py:710
+msgid "Text"
+msgstr ""
+
+#: metrology/models.py:713
+msgid "Last Hour"
+msgstr ""
+
+#: metrology/models.py:714
+msgid "Last 24 Hours"
+msgstr ""
+
+#: metrology/models.py:715
+msgid "Last 7 Days"
+msgstr ""
+
+#: metrology/models.py:716
+msgid "Last 30 Days"
+msgstr ""
+
+#: metrology/models.py:717
+msgid "Last 90 Days"
+msgstr ""
+
+#: metrology/models.py:718
+msgid "Last Year"
+msgstr ""
+
+#: metrology/models.py:719
+msgid "All Time"
+msgstr ""
+
+#: metrology/models.py:720
+msgid "Custom Range"
+msgstr ""
+
+#: metrology/models.py:723
+msgid "None (Raw Data)"
+msgstr ""
+
+#: metrology/models.py:724
+msgid "Average"
+msgstr ""
+
+#: metrology/models.py:725
+msgid "Sum"
+msgstr ""
+
+#: metrology/models.py:726
+msgid "Minimum"
+msgstr ""
+
+#: metrology/models.py:727
+msgid "Maximum"
+msgstr ""
+
+#: metrology/models.py:728
+msgid "Count"
+msgstr ""
+
+#: metrology/models.py:729
+msgid "Last Value"
+msgstr ""
+
+#: metrology/models.py:746
+msgid "For custom metrics: the metric instance to display"
+msgstr ""
+
+#: metrology/models.py:755
+#, fuzzy
+#| msgid "Target objective"
+msgid "Target content type"
+msgstr "Objectif visé"
+
+#: metrology/models.py:757
+msgid "For builtin metrics: the type of object (e.g., ComplianceAssessment)"
+msgstr ""
+
+#: metrology/models.py:763
+#, fuzzy
+#| msgid "Target objective"
+msgid "Target object ID"
+msgstr "Objectif visé"
+
+#: metrology/models.py:764
+msgid "For builtin metrics: the ID of the specific object"
+msgstr ""
+
+#: metrology/models.py:770
+msgid "Metric key"
+msgstr ""
+
+#: metrology/models.py:772
+msgid ""
+"For builtin metrics: which metric to display (e.g., 'progress', "
+"'result_breakdown')"
+msgstr ""
+
+#: metrology/models.py:780
+msgid "Title"
+msgstr ""
+
+#: metrology/models.py:782
+msgid ""
+"Custom title for the widget. If empty, uses metric instance name or metric "
+"key."
+msgstr ""
+
+#: metrology/models.py:790
+msgid "Text content"
+msgstr ""
+
+#: metrology/models.py:791
+msgid "Markdown content for text widgets"
+msgstr ""
+
+#: metrology/models.py:797
+msgid "Position X"
+msgstr ""
+
+#: metrology/models.py:798
+msgid "Horizontal position in grid (0-11)"
+msgstr ""
+
+#: metrology/models.py:802
+msgid "Position Y"
+msgstr ""
+
+#: metrology/models.py:803
+msgid "Vertical position in grid (row number)"
+msgstr ""
+
+#: metrology/models.py:807
+msgid "Width"
+msgstr ""
+
+#: metrology/models.py:808
+msgid "Width in grid columns (1-12)"
+msgstr ""
+
+#: metrology/models.py:812
+msgid "Height"
+msgstr ""
+
+#: metrology/models.py:813
+msgid "Height in grid rows"
+msgstr ""
+
+#: metrology/models.py:821
+msgid "Chart type"
+msgstr ""
+
+#: metrology/models.py:827
+msgid "Time range"
+msgstr ""
+
+#: metrology/models.py:833
+msgid "Aggregation"
+msgstr ""
+
+#: metrology/models.py:839
+msgid "Show target"
+msgstr ""
+
+#: metrology/models.py:840
+msgid "Display target value line if defined on metric instance"
+msgstr ""
+
+#: metrology/models.py:844
+msgid "Show title and legend"
+msgstr ""
+
+#: metrology/models.py:845
+msgid "Display widget title bar and legend (for charts)"
+msgstr ""
+
+#: metrology/models.py:853
+msgid ""
+"Additional widget configuration. Format: {'color_scheme': 'default', "
+"'threshold_colors': {...}, 'custom_options': {...}}"
+msgstr ""
+
+#: metrology/models.py:859
+msgid "Dashboard widget"
+msgstr ""
+
+#: metrology/models.py:860
+msgid "Dashboard widgets"
+msgstr ""
+
+#: metrology/models.py:881
+msgid "Untitled Widget"
+msgstr ""
+
+#: metrology/models.py:909
+msgid "Text widgets should not have a metric instance."
+msgstr ""
+
+#: metrology/models.py:917
+msgid "Text widgets should not have builtin metric fields."
+msgstr ""
+
+#: metrology/models.py:932
+msgid ""
+"A widget cannot have both a custom metric instance and builtin metric "
+"fields. Use either metric_instance OR (target_content_type + "
+"target_object_id + metric_key)."
+msgstr ""
+
+#: metrology/models.py:941
+msgid "A metric instance is required for custom metric widgets."
+msgstr ""
+
+#: metrology/models.py:952
+msgid "Target content type is required for builtin metrics"
+msgstr ""
+
+#: metrology/models.py:960
+msgid "Target object ID is required for builtin metrics"
+msgstr ""
+
+#: metrology/models.py:966
+msgid "Metric key is required for builtin metrics"
+msgstr ""
+
+#: metrology/models.py:972
+msgid "Position X must be between 0 and 11"
+msgstr ""
+
+#: metrology/models.py:975
+msgid "Width must be between 1 and 12"
+msgstr ""
+
+#: metrology/models.py:978
+msgid "Widget exceeds grid boundary (position_x + width > 12)"
+msgstr ""
+
+#: metrology/models.py:981
+msgid "Height must be at least 1"
+msgstr ""
+
+#: tprm/models.py:56 tprm/models.py:279
 msgid "Is active"
 msgstr ""
 
-#: tprm/models.py:45
+#: tprm/models.py:58
 msgid "Default dependency"
 msgstr ""
 
-#: tprm/models.py:49
+#: tprm/models.py:62
 msgid "Default dependency level for stakeholder assessment (0-4)"
 msgstr ""
 
-#: tprm/models.py:52
+#: tprm/models.py:65
 msgid "Default penetration"
 msgstr ""
 
-#: tprm/models.py:56
+#: tprm/models.py:69
 msgid "Default penetration level for stakeholder assessment (0-4)"
 msgstr ""
 
-#: tprm/models.py:59
+#: tprm/models.py:72
 msgid "Default maturity"
 msgstr ""
 
-#: tprm/models.py:63
+#: tprm/models.py:76
 msgid "Default maturity level for stakeholder assessment (1-4)"
 msgstr ""
 
-#: tprm/models.py:66
+#: tprm/models.py:79
 msgid "Default trust"
 msgstr ""
 
-#: tprm/models.py:70
+#: tprm/models.py:83
 msgid "Default trust level for stakeholder assessment (1-4)"
 msgstr ""
 
-#: tprm/models.py:78
+#: tprm/models.py:91
 msgid "Owned folders"
 msgstr ""
 
-#: tprm/models.py:87
+#: tprm/models.py:100
 msgid "Parent entity"
 msgstr ""
 
-#: tprm/models.py:88
+#: tprm/models.py:101
 msgid "Parent entity for branch/subsidiary relationships"
 msgstr ""
 
-#: tprm/models.py:98
+#: tprm/models.py:111
 msgid "Relationship"
 msgstr ""
 
-#: tprm/models.py:99
+#: tprm/models.py:112
 msgid "Type of relationship with this entity"
 msgstr ""
 
-#: tprm/models.py:104
+#: tprm/models.py:117
 msgid "Legal identifiers"
 msgstr ""
 
-#: tprm/models.py:105
+#: tprm/models.py:118
 msgid "Legal identifiers (LEI, EUID, VAT, DUNS, etc.)"
 msgstr ""
 
-#: tprm/models.py:111
+#: tprm/models.py:124
 msgid "Country"
 msgstr ""
 
-#: tprm/models.py:112
+#: tprm/models.py:125
 msgid "Country where the entity is located"
 msgstr ""
 
-#: tprm/models.py:118 tprm/models.py:462
+#: tprm/models.py:131 tprm/models.py:477
 msgid "Currency"
 msgstr ""
 
-#: tprm/models.py:119
+#: tprm/models.py:132
 msgid "Default currency for the entity"
 msgstr ""
 
-#: tprm/models.py:125
+#: tprm/models.py:138
 msgid "DORA entity type"
 msgstr ""
 
-#: tprm/models.py:126
+#: tprm/models.py:139
 msgid "DORA entity type classification"
 msgstr ""
 
-#: tprm/models.py:132
+#: tprm/models.py:145
 msgid "DORA entity hierarchy"
 msgstr ""
 
-#: tprm/models.py:133
+#: tprm/models.py:146
 msgid "DORA entity hierarchy classification"
 msgstr ""
 
-#: tprm/models.py:138
+#: tprm/models.py:151
 msgid "DORA assets value"
 msgstr ""
 
-#: tprm/models.py:139
+#: tprm/models.py:152
 msgid "Total assets value for DORA reporting"
 msgstr ""
 
-#: tprm/models.py:144
+#: tprm/models.py:157
 msgid "DORA competent authority"
 msgstr ""
 
-#: tprm/models.py:145
+#: tprm/models.py:158
 msgid "Competent authority overseeing this entity for DORA compliance"
 msgstr ""
 
-#: tprm/models.py:151
+#: tprm/models.py:164
 msgid "DORA provider person type"
 msgstr ""
 
-#: tprm/models.py:152
+#: tprm/models.py:165
 msgid "Type of person for ICT third-party service providers"
 msgstr ""
 
-#: tprm/models.py:159
+#: tprm/models.py:172
 msgid "Entities"
 msgstr ""
 
-#: tprm/models.py:173
+#: tprm/models.py:190
 msgid "Blocker"
 msgstr ""
 
-#: tprm/models.py:174
+#: tprm/models.py:191
 msgid "Warning"
 msgstr ""
 
-#: tprm/models.py:175
+#: tprm/models.py:192
 msgid "Ok"
 msgstr ""
 
-#: tprm/models.py:176
+#: tprm/models.py:193
 msgid "Not applicable"
 msgstr ""
 
-#: tprm/models.py:178 tprm/models.py:264
+#: tprm/models.py:195 tprm/models.py:281
 msgid "Criticality"
 msgstr ""
 
-#: tprm/models.py:179
+#: tprm/models.py:196
 msgid "Penetration"
 msgstr ""
 
-#: tprm/models.py:180
+#: tprm/models.py:197
 msgid "Dependency"
 msgstr ""
 
-#: tprm/models.py:181
+#: tprm/models.py:198
 msgid "Maturity"
 msgstr ""
 
-#: tprm/models.py:182
+#: tprm/models.py:199
 msgid "Trust"
 msgstr ""
 
-#: tprm/models.py:186
+#: tprm/models.py:203
 msgid "Representative"
 msgstr ""
 
-#: tprm/models.py:197 tprm/models.py:375
+#: tprm/models.py:214 tprm/models.py:392 tprm/models.py:441
 msgid "Solutions"
 msgstr ""
 
-#: tprm/models.py:208
+#: tprm/models.py:225
 msgid "Conclusion"
 msgstr ""
 
-#: tprm/models.py:214
+#: tprm/models.py:231
 msgid "Entity assessment"
 msgstr ""
 
-#: tprm/models.py:215
+#: tprm/models.py:232
 msgid "Entity assessments"
 msgstr ""
 
-#: tprm/models.py:251 tprm/models.py:401
+#: tprm/models.py:268 tprm/models.py:418
 msgid "Provider entity"
 msgstr ""
 
-#: tprm/models.py:257
+#: tprm/models.py:274
 msgid "Recipient entity"
 msgstr ""
 
-#: tprm/models.py:274
+#: tprm/models.py:291
 msgid "Related assets"
 msgstr ""
 
-#: tprm/models.py:276
+#: tprm/models.py:293
 msgid "Assets related to the solution"
 msgstr ""
 
-#: tprm/models.py:283
+#: tprm/models.py:300
 msgid "DORA ICT service type"
 msgstr ""
 
-#: tprm/models.py:284
+#: tprm/models.py:301
 msgid "DORA ICT service type classification"
 msgstr ""
 
-#: tprm/models.py:288
+#: tprm/models.py:305
 msgid "Storage of data"
 msgstr ""
 
-#: tprm/models.py:289
+#: tprm/models.py:306
 msgid "Whether data is stored by the ICT service provider"
 msgstr ""
 
-#: tprm/models.py:295
+#: tprm/models.py:312
 msgid "Location of data at rest"
 msgstr ""
 
-#: tprm/models.py:296
+#: tprm/models.py:313
 msgid "Country where data is stored"
 msgstr ""
 
-#: tprm/models.py:302
+#: tprm/models.py:319
 msgid "Location of data processing"
 msgstr ""
 
-#: tprm/models.py:303
+#: tprm/models.py:320
 msgid "Country where data is processed/managed"
 msgstr ""
 
-#: tprm/models.py:309
+#: tprm/models.py:326
 msgid "Data sensitiveness"
 msgstr ""
 
-#: tprm/models.py:310
+#: tprm/models.py:327
 msgid "Sensitiveness of the data stored"
 msgstr ""
 
-#: tprm/models.py:316
+#: tprm/models.py:333
 msgid "Level of reliance"
 msgstr ""
 
-#: tprm/models.py:317
+#: tprm/models.py:334
 msgid "Level of reliance on the ICT service"
 msgstr ""
 
-#: tprm/models.py:323
+#: tprm/models.py:340
 msgid "Substitutability"
 msgstr ""
 
-#: tprm/models.py:324
+#: tprm/models.py:341
 msgid "Substitutability of the ICT third-party service provider"
 msgstr ""
 
-#: tprm/models.py:330
+#: tprm/models.py:347
 msgid "Non-substitutability reason"
 msgstr ""
 
-#: tprm/models.py:332
+#: tprm/models.py:349
 msgid ""
 "Reason if the ICT third-party service provider is considered not "
 "substitutable or difficult to be substitutable"
 msgstr ""
 
-#: tprm/models.py:339
+#: tprm/models.py:356
 msgid "Exit plan"
 msgstr ""
 
-#: tprm/models.py:340
+#: tprm/models.py:357
 msgid "Existence of an exit plan"
 msgstr ""
 
-#: tprm/models.py:346
+#: tprm/models.py:363
 msgid "Reintegration possibility"
 msgstr ""
 
-#: tprm/models.py:347
+#: tprm/models.py:364
 msgid "Possibility of reintegration of the contracted ICT service"
 msgstr ""
 
-#: tprm/models.py:353
+#: tprm/models.py:370
 msgid "Discontinuing impact"
 msgstr ""
 
-#: tprm/models.py:354
+#: tprm/models.py:371
 msgid "Impact of discontinuing the ICT services"
 msgstr ""
 
-#: tprm/models.py:360
+#: tprm/models.py:377
 msgid "Alternative providers identified"
 msgstr ""
 
-#: tprm/models.py:362
+#: tprm/models.py:379
 msgid "Are there alternative ICT third-party service providers identified?"
 msgstr ""
 
-#: tprm/models.py:367
+#: tprm/models.py:384
 msgid "Alternative providers"
 msgstr ""
 
-#: tprm/models.py:368
+#: tprm/models.py:385
 msgid "Identification of alternative ICT third-party service providers"
 msgstr ""
 
-#: tprm/models.py:374 tprm/models.py:426
+#: tprm/models.py:391
 msgid "Solution"
 msgstr ""
 
-#: tprm/models.py:385
-msgid "Active"
-msgstr ""
-
-#: tprm/models.py:386
+#: tprm/models.py:403
 msgid "Expired"
 msgstr ""
 
-#: tprm/models.py:387
+#: tprm/models.py:404
 msgid "Terminated"
 msgstr ""
 
-#: tprm/models.py:402
+#: tprm/models.py:419
 msgid "Entity providing this contract"
 msgstr ""
 
-#: tprm/models.py:410
+#: tprm/models.py:427
 msgid "Beneficiary entity"
 msgstr ""
 
-#: tprm/models.py:411
+#: tprm/models.py:428
 msgid "Entity benefiting from/receiving this contract"
 msgstr ""
 
-#: tprm/models.py:417
+#: tprm/models.py:434
 msgid "Evidences"
 msgstr ""
 
-#: tprm/models.py:418
+#: tprm/models.py:435
 msgid "Supporting evidence for this contract"
 msgstr ""
 
-#: tprm/models.py:427
-msgid "Solution covered by this contract"
+#: tprm/models.py:442
+msgid "Solutions covered by this contract"
 msgstr ""
 
-#: tprm/models.py:438
+#: tprm/models.py:453
 msgid "Start date"
 msgstr ""
 
-#: tprm/models.py:443
+#: tprm/models.py:458
 msgid "End date"
 msgstr ""
 
-#: tprm/models.py:448
+#: tprm/models.py:463
 msgid "Reference ID"
 msgstr ""
 
-#: tprm/models.py:449
+#: tprm/models.py:464
 msgid "Contract reference number or identifier"
 msgstr ""
 
-#: tprm/models.py:455
+#: tprm/models.py:470
 msgid "DORA contractual arrangement"
 msgstr ""
 
-#: tprm/models.py:456
+#: tprm/models.py:471
 msgid "DORA contractual arrangement type"
 msgstr ""
 
-#: tprm/models.py:463
+#: tprm/models.py:478
 msgid "Currency for contract expenses"
 msgstr ""
 
-#: tprm/models.py:468
+#: tprm/models.py:483
 msgid "Annual expense"
 msgstr ""
 
-#: tprm/models.py:469
+#: tprm/models.py:484
 msgid "Annual expense amount for this contract"
 msgstr ""
 
-#: tprm/models.py:475
+#: tprm/models.py:490
 msgid "Termination reason"
 msgstr ""
 
-#: tprm/models.py:476
+#: tprm/models.py:491
 msgid "Reason for contract termination"
 msgstr ""
 
-#: tprm/models.py:480
+#: tprm/models.py:495
 msgid "Is intragroup"
 msgstr ""
 
-#: tprm/models.py:481
+#: tprm/models.py:496
 msgid "Whether this is an intragroup contract"
 msgstr ""
 
-#: tprm/models.py:489
-msgid "Overarching contract"
+#: tprm/models.py:500
+msgid "Exclude from DORA"
 msgstr ""
 
-#: tprm/models.py:490
-msgid "Parent/overarching contract if this is a subordinate arrangement"
-msgstr ""
-
-#: tprm/models.py:496
-msgid "Governing law country"
-msgstr ""
-
-#: tprm/models.py:497
-msgid "Country whose law governs this contract"
-msgstr ""
-
-#: tprm/models.py:502
-msgid "Notice period for entity (days)"
-msgstr ""
-
-#: tprm/models.py:503
-msgid "Notice period in days for the financial entity"
-msgstr ""
-
-#: tprm/models.py:508
-msgid "Notice period for provider (days)"
+#: tprm/models.py:501
+msgid "Exclude this contract from DORA RoI reporting"
 msgstr ""
 
 #: tprm/models.py:509
-msgid "Notice period in days for the ICT third-party service provider"
+msgid "Overarching contract"
+msgstr ""
+
+#: tprm/models.py:510
+msgid "Parent/overarching contract if this is a subordinate arrangement"
+msgstr ""
+
+#: tprm/models.py:516
+msgid "Governing law country"
+msgstr ""
+
+#: tprm/models.py:517
+msgid "Country whose law governs this contract"
+msgstr ""
+
+#: tprm/models.py:522
+msgid "Notice period for entity (days)"
 msgstr ""
 
 #: tprm/models.py:523
+msgid "Notice period in days for the financial entity"
+msgstr ""
+
+#: tprm/models.py:528
+msgid "Notice period for provider (days)"
+msgstr ""
+
+#: tprm/models.py:529
+msgid "Notice period in days for the ICT third-party service provider"
+msgstr ""
+
+#: tprm/models.py:543
 msgid "Contract"
 msgstr ""
 
-#: tprm/models.py:524
+#: tprm/models.py:544
 msgid "Contracts"
 msgstr ""
 
-#: tprm/serializers.py:60
+#: tprm/serializers.py:74
 msgid "leiLengthError"
 msgstr ""
 
-#: tprm/serializers.py:69
+#: tprm/serializers.py:83
 msgid "An entity cannot be set as its own parent"
 msgstr ""
 
-#: tprm/serializers.py:137
+#: tprm/serializers.py:165
 msgid "Framework required"
 msgstr ""
 
-#: tprm/serializers.py:148
+#: tprm/serializers.py:176
 msgid "An audit already exists for this assessment"
 msgstr ""
 
-#: tprm/serializers.py:355
+#: tprm/serializers.py:440
 msgid "A contract cannot be set as its own overarching contract"
 msgstr ""
 
-#: core/views.py
-msgid "operating modes"
-msgstr "modes opératoires"
+#~ msgid "operating modes"
+#~ msgstr "modes opératoires"
 
 #~ msgid "CISO Assistant: A questionnaire has been assigned to you"
 #~ msgstr "CISO Assistant: Un questionnaire vous a été assigné"
