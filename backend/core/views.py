@@ -4205,7 +4205,7 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
 
     def get_queryset(self):
         """Optimize queries by prefetching related objects used in the table view and serializer"""
-        return (
+        qs = (
             super()
             .get_queryset()
             .select_related(
@@ -4213,16 +4213,36 @@ class AppliedControlViewSet(ExportMixin, BaseModelViewSet):
                 "folder__parent_folder",  # For get_folder_full_path() optimization
                 "reference_control",
             )
-            .prefetch_related(
-                "owner",
-                "filtering_labels__folder",  # FieldsRelatedField includes folder
-                "findings",  # Used for findings_count
-                "evidences",  # Serialized as FieldsRelatedField
-                "objectives",  # ManyToManyField to OrganisationObjective
-                "assets",  # ManyToManyField used in table
-                "security_exceptions",  # Serialized as FieldsRelatedField
-            )
         )
+        if self.action == "autocomplete":
+            return qs
+        return qs.prefetch_related(
+            "owner",
+            "filtering_labels__folder",  # FieldsRelatedField includes folder
+            "findings",  # Used for findings_count
+            "evidences",  # Serialized as FieldsRelatedField
+            "objectives",  # ManyToManyField to OrganisationObjective
+            "assets",  # ManyToManyField used in table
+            "security_exceptions",  # Serialized as FieldsRelatedField
+        )
+
+    @action(detail=False, name="Lightweight autocomplete search")
+    def autocomplete(self, request):
+        """Minimal endpoint for autocomplete selects."""
+        from core.serializers import AppliedControlAutocompleteSerializer
+
+        qs = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(qs)
+        objects = page if page is not None else qs
+        serializer = AppliedControlAutocompleteSerializer(objects, many=True)
+        data = serializer.data
+        field_models = self._get_fieldsrelated_map(serializer)
+        if field_models:
+            allowed_ids = self._get_accessible_ids_map(set(field_models.values()))
+            data = self._filter_related_fields(data, field_models, allowed_ids)
+        if page is not None:
+            return self.get_paginated_response(data)
+        return Response(data)
 
     def perform_create(self, serializer):
         create_remote_object = serializer.validated_data.pop(

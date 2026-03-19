@@ -712,6 +712,19 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
         return data
 
 
+class AppliedControlAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
 class AssetImportExportSerializer(BaseModelSerializer):
     folder = HashSlugRelatedField(slug_field="pk", read_only=True)
     parent_assets = HashSlugRelatedField(slug_field="pk", read_only=True, many=True)
