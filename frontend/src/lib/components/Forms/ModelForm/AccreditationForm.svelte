@@ -101,6 +101,15 @@
 	label={m.linkedCollection()}
 />
 
+<TextField
+	{form}
+	field="authority_name"
+	cacheLock={cacheLocks['authority_name']}
+	bind:cachedValue={formDataCache['authority_name']}
+	label={m.authorityName()}
+	helpText={m.authorityNameHelpText()}
+/>
+
 <Dropdown open={false} style="hover:text-primary-700" icon="fa-solid fa-list" header={m.more()}>
 	<AutocompleteSelect
 		{form}
@@ -115,10 +124,37 @@
 	<TextField
 		type="date"
 		{form}
+		field="commission_date"
+		cacheLock={cacheLocks['commission_date']}
+		bind:cachedValue={formDataCache['commission_date']}
+		label={m.commissionDate()}
+	/>
+	<TextField
+		type="number"
+		{form}
+		field="duration_months"
+		cacheLock={cacheLocks['duration_months']}
+		bind:cachedValue={formDataCache['duration_months']}
+		label={m.durationMonths()}
+	/>
+	<TextField
+		type="date"
+		{form}
 		field="expiry_date"
 		cacheLock={cacheLocks['expiry_date']}
 		bind:cachedValue={formDataCache['expiry_date']}
 		label={m.expiryDate()}
+	/>
+	<AutocompleteSelect
+		multiple
+		{form}
+		optionsEndpoint="evidences"
+		optionsLabelField="auto"
+		field="decision_evidence"
+		cacheLock={cacheLocks['decision_evidence']}
+		bind:cachedValue={formDataCache['decision_evidence']}
+		label={m.decisionEvidence()}
+		helpText={m.decisionEvidenceHelpText()}
 	/>
 	<AutocompleteSelect
 		multiple

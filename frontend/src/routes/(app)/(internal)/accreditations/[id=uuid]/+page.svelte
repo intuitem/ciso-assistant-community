@@ -119,6 +119,63 @@
 	{/snippet}
 
 	{#snippet widgets()}
+		{#if accreditation.authority || accreditation.authority_name}
+			<div class="card bg-white p-4 shadow-sm mb-4">
+				<h4 class="text-sm font-semibold text-gray-700 mb-2">
+					<i class="fa-solid fa-building-columns mr-1"></i>
+					{m.authority()}
+				</h4>
+				{#if accreditation.authority}
+					<Anchor
+						href="/entities/{accreditation.authority.id}"
+						class="text-primary-600 hover:text-primary-800 hover:underline"
+					>
+						{accreditation.authority.str || accreditation.authority.name}
+					</Anchor>
+					{#if accreditation.authority_name}
+						<p class="text-xs text-gray-500 mt-1">{accreditation.authority_name}</p>
+					{/if}
+				{:else}
+					<p class="text-gray-900">{accreditation.authority_name}</p>
+				{/if}
+			</div>
+		{/if}
+		<div class="card bg-white p-4 shadow-sm mb-4 space-y-3">
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-semibold text-gray-700">{m.status()}</span>
+				<span class="badge text-xs {statusColorMap[accreditation.status] || statusColorMap.draft}">
+					{safeTranslate(accreditation.status)}
+				</span>
+			</div>
+			<div class="flex items-center justify-between">
+				<span class="text-sm font-semibold text-gray-700">{m.category()}</span>
+				<span
+					class="badge text-xs {categoryColorMap[accreditation.category] || categoryColorMap.other}"
+				>
+					{safeTranslate(accreditation.category)}
+				</span>
+			</div>
+		</div>
+		{#if accreditation.decision_evidence && accreditation.decision_evidence.length > 0}
+			<div class="card bg-white p-4 shadow-sm mb-4">
+				<h4 class="text-sm font-semibold text-gray-700 mb-2">
+					<i class="fa-solid fa-file-lines mr-1"></i>
+					{m.decisionEvidence()}
+				</h4>
+				<ul class="space-y-2">
+					{#each accreditation.decision_evidence as evidence}
+						<li class="text-sm">
+							<Anchor
+								href="/evidences/{evidence.id}"
+								class="text-primary-600 hover:text-primary-800 hover:underline"
+							>
+								{evidence.str || evidence.name || evidence.id}
+							</Anchor>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 		{#if page.data?.featureflags?.validation_flows && accreditation.validation_flows}
 			{#key accreditation.validation_flows}
 				<ValidationFlowsSection validationFlows={accreditation.validation_flows} />
@@ -129,21 +186,9 @@
 
 <!-- Accreditation details section -->
 <div class="card bg-white p-6 m-4 shadow-sm relative">
-	<!-- Status and Category badges in top right corner with progress bar below -->
-	<div class="absolute top-6 right-6 flex flex-col items-end gap-2">
-		<div class="flex gap-2">
-			<span
-				class="badge text-xs {categoryColorMap[accreditation.category] || categoryColorMap.other}"
-			>
-				{safeTranslate(accreditation.category)}
-			</span>
-			<span class="badge text-xs {statusColorMap[accreditation.status] || statusColorMap.draft}">
-				{safeTranslate(accreditation.status)}
-			</span>
-		</div>
-
-		<!-- Checklist Progress Bar -->
-		{#if accreditation.checklist}
+	<!-- Checklist Progress Bar in top right corner -->
+	{#if accreditation.checklist}
+		<div class="absolute top-6 right-6">
 			<a
 				href="/compliance-assessments/{accreditation.checklist.id}"
 				class="w-48 block hover:opacity-80 transition-opacity cursor-pointer"
@@ -159,11 +204,11 @@
 					</Progress.Track>
 				</Progress>
 			</a>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	<!-- Name and Ref ID as subtitle -->
-	<div class="mb-6 pr-48">
+	<div class="mb-6 {accreditation.checklist ? 'pr-48' : ''}">
 		<h2 class="text-2xl font-semibold">{accreditation.name}</h2>
 		{#if accreditation.ref_id}
 			<p class="text-sm text-gray-600 mt-1">{accreditation.ref_id}</p>
@@ -179,7 +224,7 @@
 				{#if accreditation.description}
 					<MarkdownRenderer content={accreditation.description} />
 				{:else}
-					<p class="text-gray-400 italic">No description provided</p>
+					<p class="text-gray-400 italic">{m.noDescription()}</p>
 				{/if}
 			</div>
 		</div>
@@ -191,7 +236,7 @@
 				{#if accreditation.observation}
 					<MarkdownRenderer content={accreditation.observation} />
 				{:else}
-					<p class="text-gray-400 italic">No observation provided</p>
+					<p class="text-gray-400 italic">{m.noObservation()}</p>
 				{/if}
 			</div>
 		</div>
@@ -213,13 +258,18 @@
 							</h4>
 							<ul class="space-y-2">
 								{#each items as item}
-									<li class="text-sm">
+									<li class="text-sm flex items-center justify-between">
 										<Anchor
 											href="{section.urlPattern}{item.id}"
 											class="text-primary-600 hover:text-primary-800 hover:underline"
 										>
 											{item.str || item.name || item.id}
 										</Anchor>
+										{#if item.status}
+											<span class="badge text-xs preset-tonal-secondary ml-2 shrink-0">
+												{safeTranslate(item.status)}
+											</span>
+										{/if}
 									</li>
 								{/each}
 							</ul>
