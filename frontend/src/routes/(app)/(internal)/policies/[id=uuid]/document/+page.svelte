@@ -1009,6 +1009,17 @@
 						>
 							<i class="fa-solid fa-eye mr-1.5 text-xs"></i>{m.contentPreview()}
 						</button>
+						{#if showDiff}
+							<button
+								class="px-3 py-1.5 text-sm font-medium border-l border-surface-300 bg-primary-500 text-white"
+								onclick={() => {
+									showDiff = false;
+								}}
+							>
+								<i class="fa-solid fa-code-compare mr-1.5 text-xs"></i>{m.diff ? m.diff() : 'Diff'}
+								<i class="fa-solid fa-xmark ml-1.5 text-xs"></i>
+							</button>
+						{/if}
 					</div>
 
 					{#if canEdit && !showPreview && !showDiff}
