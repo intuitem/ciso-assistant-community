@@ -53,7 +53,7 @@
 	}
 
 	// Get approver display name
-	function getApproverName(approver: ValidationFlow['approver'] | null): string {
+	function getApproverName(approver: ValidationFlow['approver']): string {
 		if (approver === null) return m.undefined();
 		if (approver.first_name || approver.last_name) {
 			return `${approver.first_name || ''} ${approver.last_name || ''}`.trim();
