@@ -36,7 +36,7 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMessage
 from django.core.validators import validate_email
 from ciso_assistant.settings import (
     CISO_ASSISTANT_URL,
@@ -788,14 +788,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def _send_email(self, subject, body, html_body=None):
         """Send an email with primary/rescue server fallback."""
         try:
-            send_mail(
-                subject=subject,
-                message=body,
-                from_email=None,
-                recipient_list=[self.email],
-                fail_silently=False,
-                html_message=html_body,
-            )
+            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+            with get_connection(ssl_context=ssl_context) as connection:
+                msg = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=None,
+                    to=[self.email],
+                    connection=connection,
+                )
+                if html_body:
+                    msg.content_subtype = "html"
+                    msg.body = html_body
+                msg.send()
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
             )
@@ -818,6 +823,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         username=EMAIL_HOST_USER_RESCUE,
                         password=EMAIL_HOST_PASSWORD_RESCUE,
                         use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
                         msg = EmailMessage(
                             subject=subject,
