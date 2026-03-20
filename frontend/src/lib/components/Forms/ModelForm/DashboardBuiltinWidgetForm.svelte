@@ -13,7 +13,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 		supportedModels?: Record<string, any>;
@@ -25,7 +24,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false,
 		supportedModels = {}
@@ -35,12 +33,14 @@
 	const { value: targetModelValue } = formFieldProxy(form, 'target_model');
 	const { value: metricKeyValue } = formFieldProxy(form, 'metric_key');
 	const { value: chartTypeValue } = formFieldProxy(form, 'chart_type');
+	const { value: timeRangeValue } = formFieldProxy(form, 'time_range');
 
 	// State for builtin metric options
 	let selectedModel = $state<string>(object?.target_content_type_display || '');
 	let selectedMetricKey = $state<string>(object?.metric_key || '');
 	let availableMetrics = $state<Array<{ value: string; label: string; chart_types: string[] }>>([]);
 	let selectedChartType = $state<string>(object?.chart_type || '');
+	let selectedTimeRange = $state<string>(object?.time_range || initialData?.time_range || '');
 
 	// Initialize formDataCache from object for edit mode
 	$effect(() => {
@@ -135,6 +135,20 @@
 		if (selectedChartType) {
 			formDataCache['chart_type'] = selectedChartType;
 			$chartTypeValue = selectedChartType;
+		}
+	});
+
+	$effect(() => {
+		if (!selectedTimeRange) {
+			selectedTimeRange =
+				formDataCache['time_range'] || object?.time_range || initialData?.time_range || 'last_30_days';
+		}
+	});
+
+	$effect(() => {
+		if (selectedTimeRange) {
+			formDataCache['time_range'] = selectedTimeRange;
+			$timeRangeValue = selectedTimeRange;
 		}
 	});
 
@@ -289,12 +303,7 @@
 	{#if model.selectOptions?.['time_range']}
 		<div>
 			<label class="text-sm font-semibold" for="time_range">{m.timeRange()}</label>
-			<select
-				id="time_range"
-				name="time_range"
-				class="select"
-				bind:value={formDataCache['time_range']}
-			>
+			<select id="time_range" name="time_range" class="select" bind:value={selectedTimeRange}>
 				{#each model.selectOptions['time_range'] as option}
 					<option value={option.value}>{option.label}</option>
 				{/each}
