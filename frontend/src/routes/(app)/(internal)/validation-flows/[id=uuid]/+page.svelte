@@ -320,7 +320,7 @@
 			<div class="space-y-2">
 				<div class="text-sm font-medium text-gray-700">{m.approver()}</div>
 				<div class="text-sm text-gray-600">
-					{#if validation_flow.approver}
+					{#if validation_flow.approver !== null}
 						{#if validation_flow.approver.first_name || validation_flow.approver.last_name}
 							{validation_flow.approver.first_name}
 							{validation_flow.approver.last_name}
