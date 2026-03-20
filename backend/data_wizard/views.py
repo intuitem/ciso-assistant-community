@@ -11,18 +11,22 @@ from .serializers import LoadFileSerializer
 from core.models import (
     Actor,
     Asset,
+    ComplianceAssessment,
     Evidence,
     Folder,
     Perimeter,
     RequirementAssessment,
     RequirementNode,
     RiskMatrix,
+    RiskAssessment,
     AppliedControl,
     FindingsAssessment,
     RiskScenario,
     Policy,
     SecurityException,
     Incident,
+    TaskNode,
+    TaskTemplate,
 )
 from core.serializers import (
     BaseModelSerializer,
@@ -43,6 +47,7 @@ from core.serializers import (
     PolicyWriteSerializer,
     SecurityExceptionWriteSerializer,
     IncidentWriteSerializer,
+    TaskTemplateWriteSerializer,
 )
 from ebios_rm.models import (
     EbiosRMStudy,
@@ -233,6 +238,14 @@ def _resolve_filtering_labels(value) -> list[UUID]:
     return label_ids
 
 
+def _split_multi_value(value: object) -> list[str]:
+    if isinstance(value, list):
+        return [str(v).strip() for v in value if str(v).strip()]
+    if isinstance(value, str):
+        return [item.strip() for item in value.split("\n") if item.strip()]
+    return []
+
+
 class RecordFileType(enum.StrEnum):
     XLSX = "Excel"
     CSV = "CSV"
@@ -276,6 +289,7 @@ class ModelType(enum.StrEnum):
     SECURITY_EXCEPTION = "SecurityException"
     INCIDENT = "Incident"
     BUSINESS_IMPACT_ANALYSIS = "BusinessImpactAnalysis"
+    TASK_NODE = "TaskNode"
 
     @staticmethod
     def from_string(model_type: str) -> Optional["ModelType"]:
@@ -1143,6 +1157,330 @@ class PolicyRecordConsumer(RecordConsumer[None]):
         return data, None
 
 
+class TaskNodeRecordConsumer(RecordConsumer[None]):
+    SERIALIZER_CLASS = TaskTemplateWriteSerializer
+    SOURCE_KEY_MAP: ClassVar[dict[str, tuple[str, ...]]] = {
+        "status": ("status", "next_occurrence_status"),
+        "task_date": ("task_date", "next_occurrence"),
+    }
+    STATUS_MAP: Final[dict[str, str]] = {
+        "pending": "pending",
+        "in_progress": "in_progress",
+        "in progress": "in_progress",
+        "completed": "completed",
+        "cancelled": "cancelled",
+        "canceled": "cancelled",
+    }
+    SCHEDULE_FREQUENCIES: Final[set[str]] = {"DAILY", "WEEKLY", "MONTHLY", "YEARLY"}
+
+    def create_context(self):
+        return None, None
+
+    @staticmethod
+    def _parse_bool(value: object, default: bool = False) -> bool:
+        if isinstance(value, bool):
+            return value
+        if value in (None, ""):
+            return default
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"true", "yes", "y", "1"}:
+                return True
+            if normalized in {"false", "no", "n", "0"}:
+                return False
+        return default
+
+    def _resolve_related_ids(
+        self, model_class, value: object, record: dict, label: str
+    ) -> tuple[list[UUID], Optional[Error]]:
+        """
+        converts imported text values into database object IDs for related fields.
+        for each item in the input, tries to find a matching object by UUID, then by ref_id, then by name, and returns the list of resolved IDs.
+        """
+        resolved_ids: list[UUID] = []
+        for entry in _split_multi_value(value):
+            instance = None
+
+            try:
+                instance = model_class.objects.filter(id=UUID(str(entry))).first()
+            except (ValueError, TypeError):
+                instance = None
+
+            if instance is None and hasattr(model_class, "ref_id"):
+                instance = model_class.objects.filter(ref_id__iexact=entry).first()
+                if instance is None and " - " in entry:
+                    instance = model_class.objects.filter(
+                        ref_id__iexact=entry.split(" - ", 1)[0].strip()
+                    ).first()
+
+            if instance is None and hasattr(model_class, "name"):
+                instance = model_class.objects.filter(name__iexact=entry).first()
+                if instance is None and " - " in entry:
+                    instance = model_class.objects.filter(
+                        name__iexact=entry.split(" - ", 1)[1].strip()
+                    ).first()
+
+            if instance is None:
+                return [], Error(record=record, error=f"Unknown {label} '{entry}'")
+
+            resolved_ids.append(instance.id)
+
+        return resolved_ids, None
+
+    def _resolve_actor_ids(
+        self, value: object, record: dict
+    ) -> tuple[list[UUID], Optional[Error]]:
+        actor_ids: list[UUID] = []
+        for entry in _split_multi_value(value):
+            actor = Actor.objects.filter(user__email__iexact=entry).first()
+            if actor is None:
+                actor = Actor.objects.filter(team__name__iexact=entry).first()
+            if actor is None:
+                return [], Error(record=record, error=f"Unknown assigned_to '{entry}'")
+            actor_ids.append(actor.id)
+        return actor_ids, None
+
+    def _parse_schedule(
+        self, record: dict, is_recurrent: bool
+    ) -> tuple[Optional[dict], Optional[Error]]:
+        if not is_recurrent:
+            return None, None
+
+        frequency = str(record.get("schedule_frequency", "")).strip().upper()
+        if frequency not in self.SCHEDULE_FREQUENCIES:
+            return None, Error(
+                record=record,
+                error="schedule_frequency is mandatory for recurrent tasks",
+            )
+
+        interval = record.get("schedule_interval", 1)
+        try:
+            interval = int(interval or 1)
+        except (TypeError, ValueError):
+            return None, Error(
+                record=record,
+                error=f"Invalid schedule_interval '{interval}'",
+            )
+
+        if interval < 1:
+            return None, Error(
+                record=record,
+                error="schedule_interval must be greater than or equal to 1",
+            )
+
+        schedule = {"frequency": frequency, "interval": interval}
+        end_date = _parse_date(record.get("schedule_end_date"))
+        if end_date:
+            schedule["end_date"] = end_date
+        return schedule, None
+
+    def find_existing(self, record_data: dict):
+        folder_id = record_data.get("folder")
+        ref_id = record_data.get("ref_id")
+        name = record_data.get("name")
+
+        queryset = TaskTemplate.objects.all()
+        if folder_id:
+            queryset = queryset.filter(folder_id=folder_id)
+
+        if ref_id:
+            existing = queryset.filter(ref_id__iexact=ref_id).first()
+            if existing is not None:
+                return existing
+
+        if name:
+            return queryset.filter(name__iexact=name).first()
+
+        return None
+
+    def prepare_create(
+        self, record: dict, context: None
+    ) -> tuple[dict, Optional[Error]]:
+        folder_value = record.get("folder") or record.get("domain")
+        folder = self.folder_id
+        if folder_value is not None:
+            folder = self.folders_map.get(str(folder_value).lower(), self.folder_id)
+
+        if not folder:
+            return {}, Error(record=record, error="Folder is mandatory")
+
+        name = record.get("name")
+        if not name:
+            return {}, Error(record=record, error="Name field is mandatory")
+
+        is_recurrent = self._parse_bool(record.get("is_recurrent"))
+        task_date = _parse_date(record.get("task_date")) or _parse_date(
+            record.get("next_occurrence")
+        )
+        if not task_date:
+            return {}, Error(record=record, error="task_date is mandatory")
+
+        schedule, error = self._parse_schedule(record, is_recurrent)
+        if error is not None:
+            return {}, error
+
+        assigned_to, error = self._resolve_actor_ids(record.get("assigned_to"), record)
+        if error is not None:
+            return {}, error
+
+        assets, error = self._resolve_related_ids(
+            Asset, record.get("assets"), record, "asset"
+        )
+        if error is not None:
+            return {}, error
+
+        applied_controls, error = self._resolve_related_ids(
+            AppliedControl, record.get("applied_controls"), record, "applied control"
+        )
+        if error is not None:
+            return {}, error
+
+        evidences, error = self._resolve_related_ids(
+            Evidence, record.get("evidences"), record, "evidence"
+        )
+        if error is not None:
+            return {}, error
+
+        compliance_assessments, error = self._resolve_related_ids(
+            ComplianceAssessment,
+            record.get("compliance_assessments"),
+            record,
+            "compliance assessment",
+        )
+        if error is not None:
+            return {}, error
+
+        risk_assessments, error = self._resolve_related_ids(
+            RiskAssessment,
+            record.get("risk_assessments"),
+            record,
+            "risk assessment",
+        )
+        if error is not None:
+            return {}, error
+
+        findings_assessment, error = self._resolve_related_ids(
+            FindingsAssessment,
+            record.get("findings_assessment"),
+            record,
+            "findings assessment",
+        )
+        if error is not None:
+            return {}, error
+
+        data = {
+            "ref_id": record.get("ref_id", ""),
+            "name": name,
+            "description": record.get("description", ""),
+            "folder": folder,
+            "is_recurrent": is_recurrent,
+            "task_date": task_date,
+            "enabled": self._parse_bool(record.get("enabled"), default=True),
+            "link": record.get("link", ""),
+            "status": self.STATUS_MAP.get(
+                str(record.get("next_occurrence_status") or "pending").strip().lower(),
+                "pending",
+            ),
+            "observation": record.get("observation", ""),
+            "assigned_to": assigned_to,
+            "assets": assets,
+            "applied_controls": applied_controls,
+            "evidences": evidences,
+            "compliance_assessments": compliance_assessments,
+            "risk_assessments": risk_assessments,
+            "findings_assessment": findings_assessment,
+        }
+
+        if schedule is not None:
+            data["schedule"] = schedule
+
+        return data, None
+
+    def process_records(self, records: list[dict]) -> Result:
+        results = Result()
+
+        context, error = self.create_context()
+        if error is not None:
+            results.add_error(error, fail_count=len(records))
+            return results
+
+        (viewable_ids, _, _) = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), self.request.user, TaskTemplate
+        )
+        viewable_ids = set(viewable_ids)
+
+        for record in records:
+            record_data, error = self.prepare_create(record, context)
+            if error is not None:
+                results.add_error(error)
+                if self.on_conflict == ConflictMode.STOP:
+                    results.stopped = True
+                    break
+                continue
+
+            existing = None
+            internal_id = record.get("internal_id")
+            if internal_id:
+                existing = TaskTemplate.objects.filter(
+                    pk=internal_id, id__in=viewable_ids
+                ).first()
+            if existing is None:
+                existing = self.find_existing(record_data)
+
+            if existing:
+                match self.on_conflict:
+                    case ConflictMode.SKIP:
+                        results.add_skipped()
+                        continue
+                    case ConflictMode.STOP:
+                        results.add_error(
+                            Error(record=record, error="Record already exists")
+                        )
+                        results.stopped = True
+                        break
+                    case ConflictMode.UPDATE:
+                        update_data = self._build_update_data(record, record_data)
+                        serializer = self.SERIALIZER_CLASS(
+                            instance=existing,
+                            data=update_data,
+                            partial=True,
+                            context={"request": self.request},
+                        )
+                        if serializer.is_valid():
+                            try:
+                                serializer.save()
+                                results.add_updated()
+                            except Exception as e:
+                                results.add_error(Error(record=record, error=str(e)))
+                        else:
+                            results.add_error(
+                                Error(record=record, error=str(serializer.errors))
+                            )
+                        continue
+
+            serializer = self.SERIALIZER_CLASS(
+                data=record_data, context={"request": self.request}
+            )
+            if serializer.is_valid():
+                try:
+                    serializer.save()
+                    results.add_created()
+                except Exception as e:
+                    results.add_error(Error(record=record, error=str(e)))
+                    if self.on_conflict == ConflictMode.STOP:
+                        results.stopped = True
+                        break
+            else:
+                results.add_error(Error(record=record, error=str(serializer.errors)))
+                if self.on_conflict == ConflictMode.STOP:
+                    results.stopped = True
+                    break
+
+        return results
+
+
 class SecurityExceptionRecordConsumer(RecordConsumer[None]):
     """
     Consumer for importing SecurityException records.
@@ -1980,6 +2318,12 @@ class LoadFileView(APIView):
                         case ModelType.POLICY:
                             res = (
                                 PolicyRecordConsumer(base_context)
+                                .process_records(records)
+                                .to_dict()
+                            )
+                        case ModelType.TASK_NODE:
+                            res = (
+                                TaskNodeRecordConsumer(base_context)
                                 .process_records(records)
                                 .to_dict()
                             )
