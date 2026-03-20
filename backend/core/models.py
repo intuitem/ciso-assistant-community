@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal, Tuple
+from typing import Self, Union, List, Optional, Literal, Tuple, Final
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -6232,25 +6232,52 @@ class ComplianceAssessment(Assessment):
             .distinct()
         )
 
-        to_update: list[RequirementAssessment] = []
+        nonconformity_values: Final[tuple[RequirementAssessment.ExtendedResult]] = [
+            RequirementAssessment.ExtendedResult.MAJOR_NONCONFORMITY,
+            RequirementAssessment.ExtendedResult.MINOR_NONCONFORMITY,
+        ]
+        applicable_results_for_nonconformity: Final[
+            tuple[RequirementAssessment.Result]
+        ] = [
+            RequirementAssessment.Result.NON_COMPLIANT,
+            RequirementAssessment.Result.PARTIALLY_COMPLIANT,
+        ]
+
+        to_update: set[RequirementAssessment] = set()
+
         for ra in requirement_assessments_with_ac:
             applied_controls = list(ra.applied_controls.all())
             new_result = infer_result(applied_controls)
             if ra.result != new_result:
-                changes[str(ra.id)] = {
+                ra_changes = {
                     "str": str(ra.requirement.safe_display_str),
-                    "current": ra.result,
-                    "new": new_result,
+                    "changes": [{"current": ra.result, "new": new_result}],
                 }
                 if not dry_run:
                     ra.result = new_result
-                    to_update.append(ra)
+                    to_update.add(ra)
+
+                if self.extended_result_enabled:
+                    if (
+                        ra.extended_result in nonconformity_values
+                        and new_result not in applicable_results_for_nonconformity
+                    ):
+                        ra_changes["changes"].append(
+                            {"current": ra.extended_result, "new": "undefined"}
+                        )
+                        if not dry_run:
+                            ra.extended_result = None
+                            to_update.add(ra)
+
+                changes[str(ra.id)] = ra_changes
 
         if dry_run or not to_update:
             return changes
 
         with transaction.atomic():
-            RequirementAssessment.objects.bulk_update(to_update, ["result"])
+            RequirementAssessment.objects.bulk_update(
+                to_update, ["result", "extended_result"]
+            )
             ComplianceAssessment.objects.filter(pk=self.pk).update(
                 updated_at=timezone.now()
             )
