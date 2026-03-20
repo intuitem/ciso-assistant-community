@@ -17,6 +17,7 @@ import logging.config
 import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
@@ -246,6 +247,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
@@ -318,6 +320,21 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
@@ -481,6 +498,11 @@ if "POSTGRES_NAME" in os.environ:
             "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
+    # Allow for SSL connections to PostgreSQL databases that require it
+    if "POSTGRES_SSL_MODE" in os.environ:
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = os.environ[
+            "POSTGRES_SSL_MODE"
+        ]
 else:
     DATABASES = {
         "default": {
@@ -558,6 +580,16 @@ SOCIALACCOUNT_PROVIDERS = {
 ROUTES["client-settings"] = {
     "viewset": "enterprise_core.views.ClientSettingsViewSet",
     "basename": "client-settings",
+}
+
+ROUTES["custom-email-templates"] = {
+    "viewset": "enterprise_core.views.CustomEmailTemplateViewSet",
+    "basename": "custom-email-templates",
+}
+
+ROUTES["custom-word-templates"] = {
+    "viewset": "enterprise_core.views.CustomWordTemplateViewSet",
+    "basename": "custom-word-templates",
 }
 
 MODULES["enterprise_core"] = {

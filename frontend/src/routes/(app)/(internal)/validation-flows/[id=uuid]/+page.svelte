@@ -103,7 +103,8 @@
 		policies: m.policies(),
 		processings: m.processings(),
 		accreditations: m.accreditations(),
-		contracts: m.contracts()
+		contracts: m.contracts(),
+		managed_documents: m.managedDocuments()
 	};
 
 	// Get URL model names for links
@@ -120,8 +121,17 @@
 		policies: 'policies',
 		processings: 'processings',
 		accreditations: 'accreditations',
-		contracts: 'contracts'
+		contracts: 'contracts',
+		managed_documents: 'managed-documents'
 	};
+
+	// Resolve the URL for an associated object
+	function getItemHref(key: string, item: any): string {
+		if (key === 'managed_documents' && item.policy?.id) {
+			return `/policies/${item.policy.id}/document`;
+		}
+		return `/${modelUrlNames[key]}/${item.id}`;
+	}
 
 	// Get status color
 	const statusColors: Record<string, string> = {
@@ -370,10 +380,7 @@
 							{#each value as item}
 								<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
 									<div class="flex items-start justify-between gap-2 mb-2">
-										<Anchor
-											href="/{modelUrlNames[key]}/{item.id}"
-											class="anchor text-sm font-medium"
-										>
+										<Anchor href={getItemHref(key, item)} class="anchor text-sm font-medium">
 											{item.str}
 										</Anchor>
 										{#if item.status}

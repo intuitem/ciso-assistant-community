@@ -18,6 +18,9 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -99,6 +102,9 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -123,6 +129,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -177,6 +186,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_accreditation",
     # integrations
     "view_syncmapping",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -409,6 +421,20 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -450,6 +476,13 @@ ANALYST_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -709,6 +742,20 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -755,6 +802,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -852,6 +906,20 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -866,6 +934,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_customemailtemplate",
+    "add_customemailtemplate",
+    "change_customemailtemplate",
+    "delete_customemailtemplate",
+    "view_customwordtemplate",
+    "add_customwordtemplate",
+    "change_customwordtemplate",
+    "delete_customwordtemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1109,6 +1185,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    "view_webhookeventtype",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [

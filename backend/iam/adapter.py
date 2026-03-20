@@ -57,8 +57,32 @@ class AccountAdapter(DefaultAccountAdapter):
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    @staticmethod
+    def _find_email_in_dict(data):
+        """Recursively search for an email in a dict, checking known keys at each level."""
+        if not isinstance(data, dict):
+            return None
+        # Check direct email keys at this level
+        email = data.get("email") or data.get("email_address")
+        if email:
+            return email
+        # Recurse into nested dicts (e.g. "attributes", "claims", "user")
+        for value in data.values():
+            if isinstance(value, dict):
+                email = SocialAccountAdapter._find_email_in_dict(value)
+                if email:
+                    return email
+        return None
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
+        logger.debug(
+            "pre_social_login: extra_data received",
+            extra_data_keys=list(extra.keys()),
+            has_userinfo="userinfo" in extra,
+            has_id_token="id_token" in extra,
+            provider=sociallogin.account.provider,
+        )
         # Primary lookup (legacy format)
         email_address = extra.get("email") or extra.get("email_address")
         # allauth 65.8.0+ stores userinfo under "userinfo" key
@@ -69,6 +93,17 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         if not email_address:
             id_token = extra.get("id_token", {})
             email_address = id_token.get("email") or id_token.get("email_address")
+        # Fallback: check preferred_username / upn (common in Entra ID / Azure AD)
+        if not email_address:
+            for source in [extra, extra.get("userinfo", {}), extra.get("id_token", {})]:
+                candidate = source.get("preferred_username") or source.get("upn")
+                # preferred_username/upn can be a non-email identifier, only accept if it contains '@'
+                if candidate and "@" in candidate:
+                    email_address = candidate
+                    break
+        # Fallback: deep search in nested dicts (some IdPs nest email in sub-objects like "attributes")
+        if not email_address:
+            email_address = self._find_email_in_dict(extra)
         # Fallback: first string value containing '@'
         if not email_address:
             email_address = next(
@@ -81,16 +116,31 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             logger.error(
                 "pre_social_login: no email found in extra_data",
                 extra_data_keys=list(extra.keys()),
+                userinfo_keys=list(extra.get("userinfo", {}).keys()),
+                id_token_keys=list(extra.get("id_token", {}).keys()),
             )
             return Response(
                 {"message": "Email not provided."}, status=HTTP_401_UNAUTHORIZED
             )
+        logger.info(
+            "pre_social_login: resolved email for user lookup",
+            email_domain=email_address.split("@")[-1]
+            if "@" in email_address
+            else "unknown",
+            provider=sociallogin.account.provider,
+        )
         try:
             user = User.objects.get(email__iexact=email_address)
             sociallogin.user = user
             sociallogin.connect(request, user)
         except User.DoesNotExist:
-            logger.error("pre_social_login: user not found")
+            logger.error(
+                "pre_social_login: user not found",
+                email_domain=email_address.split("@")[-1]
+                if "@" in email_address
+                else "unknown",
+                provider=sociallogin.account.provider,
+            )
             return Response(
                 {"message": "User not found."}, status=HTTP_401_UNAUTHORIZED
             )
