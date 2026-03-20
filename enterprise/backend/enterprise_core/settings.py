@@ -20,7 +20,6 @@ from django.core.management.utils import get_random_secret_key
 import ssl
 from ciso_assistant import meta
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 load_dotenv(BASE_DIR / ".meta")
 
