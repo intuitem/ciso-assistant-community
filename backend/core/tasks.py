@@ -15,7 +15,7 @@ from core.models import (
     ValidationFlow,
 )
 from iam.models import User
-from django.core.mail import send_mail
+from django.core.mail import get_connection, EmailMessage
 from django.conf import settings
 from django.db import models
 import logging
@@ -572,14 +572,19 @@ def send_notification_email(subject, message, owner_email, html_message=None):
             recipient=owner_email,
             has_html=html_message is not None,
         )
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[owner_email],
-            fail_silently=False,
-            html_message=html_message,
-        )
+        ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+        with get_connection(ssl_context=ssl_context) as connection:
+            msg = EmailMessage(
+                subject=subject,
+                body=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[owner_email],
+                connection=connection,
+            )
+            if html_message:
+                msg.content_subtype = "html"
+                msg.body = html_message
+            msg.send()
         logger.info(
             "Notification email sent successfully",
             recipient=owner_email,

@@ -156,6 +156,7 @@
 		{#key page.data}
 			<AutocompleteSelect
 				multiple
+				lazy
 				{form}
 				optionsEndpoint="applied-controls"
 				optionsExtraFields={[['folder', 'str']]}
