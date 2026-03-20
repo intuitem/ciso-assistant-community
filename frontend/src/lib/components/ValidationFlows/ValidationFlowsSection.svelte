@@ -4,16 +4,25 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 
+	interface Approver {
+		id: string;
+		email: string;
+		first_name?: string;
+		last_name?: string;
+	}
+
 	interface ValidationFlow {
 		id: string;
 		ref_id: string;
-		status: string;
-		approver: {
-			id: string;
-			email: string;
-			first_name?: string;
-			last_name?: string;
-		};
+		status:
+			| 'submitted'
+			| 'accepted'
+			| 'rejected'
+			| 'revoked'
+			| 'expired'
+			| 'dropped'
+			| 'change_requested';
+		approver: Approver | null;
 	}
 
 	interface Props {
