@@ -1854,7 +1854,10 @@ def duplicate_related_objects(
         """
         Check if an object with the same name already exists in the target folder.
         """
-        return model_class.objects.filter(name=obj.name, folder=target_folder).first()
+        fields_to_check = getattr(model_class, "fields_to_check", []) or ["name"]
+        query_args = {field: getattr(obj, field) for field in fields_to_check}
+
+        return model_class.objects.filter(**query_args, folder=target_folder).first()
 
     def link_existing_object(duplicate_object, existing_obj, field_name):
         """
