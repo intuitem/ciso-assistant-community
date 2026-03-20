@@ -1,5 +1,11 @@
 import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
-import { getModelInfo, urlParamModelVerboseName, type ModelMapEntry } from '$lib/utils/crud';
+import {
+	getModelInfo,
+	urlParamModelVerboseName,
+	type ModelMapEntry,
+	type SelectField,
+	type SelectFieldData
+} from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
 import { modelSchema } from '$lib/utils/schemas';
@@ -19,6 +25,27 @@ interface LoadValidationFlowFormDataParams {
 	folderId: string;
 	targetField: string;
 	targetIds: string[];
+}
+
+/**
+ * Format select field data received by the backend to valid a `SelectFieldData[]` list.
+ * The return value is meant to be assigned to `model.selectOptions[field]` inside load functions.
+ * The data will then be usable by components like `<AutoCompleteSelect {...} />` / `<Select {...} />`.
+ */
+export function formatSelectFieldData(
+	responseData: Record<string, string>,
+	selectField: SelectField
+): SelectFieldData[] {
+	const isNumber = selectField.valueType === 'number';
+
+	const fieldOptions = Object.entries(responseData).map(([key, value]) => ({
+		label: value,
+		value: isNumber ? parseInt(key) : key
+	}));
+	if (isNumber) {
+		fieldOptions.sort((a, b) => a.value - b.value);
+	}
+	return fieldOptions;
 }
 
 /**
@@ -51,11 +78,10 @@ export const loadValidationFlowFormData = async ({
 				const url = `${BASE_API_URL}/validation-flows/${selectField.field}/`;
 				const response = await event.fetch(url);
 				if (response.ok) {
-					validationFlowSelectOptions[selectField.field] = await response.json().then((data) =>
-						Object.entries(data).map(([key, value]) => ({
-							label: value,
-							value: selectField.valueType === 'number' ? parseInt(key) : key
-						}))
+					const responseData = await response.json();
+					validationFlowSelectOptions[selectField.field] = formatSelectFieldData(
+						responseData,
+						selectField
 					);
 				} else {
 					console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
@@ -209,11 +235,10 @@ export const loadDetail = async ({ event, model, id }) => {
 								}
 								const response = await event.fetch(url);
 								if (response.ok) {
-									selectOptions[selectField.field] = await response.json().then((data) =>
-										Object.entries(data).map(([key, value]) => ({
-											label: value,
-											value: selectField.valueType === 'number' ? parseInt(key) : key
-										}))
+									const responseData = await response.json();
+									selectOptions[selectField.field] = formatSelectFieldData(
+										responseData,
+										selectField
 									);
 								} else {
 									console.error(

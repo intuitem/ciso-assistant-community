@@ -1,8 +1,7 @@
 import { BASE_API_URL } from '$lib/utils/constants';
 import { tableSourceMapper } from '$lib/utils/table';
 import { getModelInfo } from '$lib/utils/crud';
-import { loadValidationFlowFormData } from '$lib/utils/load';
-
+import { loadValidationFlowFormData, formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
@@ -103,12 +102,8 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 			const url = `${BASE_API_URL}/risk-scenarios/${selectField.field}/`;
 			const response = await fetch(url);
 			if (response.ok) {
-				selectOptions[selectField.field] = await response.json().then((data) =>
-					Object.entries(data).map(([key, value]) => ({
-						label: value,
-						value: selectField.valueType === 'number' ? parseInt(key) : key
-					}))
-				);
+				const responseData = await response.json();
+				selectOptions[selectField.field] = formatSelectFieldData(responseData, selectField);
 			} else {
 				console.error(`Failed to fetch data for ${selectField.field}: ${response.statusText}`);
 			}
