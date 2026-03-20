@@ -51,15 +51,6 @@
 		}
 		return approver.email;
 	}
-
-	// Build header text with status icons
-	let headerContent = $derived.by(() => {
-		const statusIcons = validationFlows
-			.slice(0, 3)
-			.map((vf) => `<i class="fa-solid ${getStatusIcon(vf.status)} text-sm"></i>`)
-			.join(' ');
-		return `${m.validationFlows()} (${validationFlows.length}) ${statusIcons}`;
-	});
 </script>
 
 {#if validationFlows && validationFlows.length > 0}
