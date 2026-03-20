@@ -13,7 +13,6 @@
 		cacheLocks?: Record<string, CacheLock>;
 		formDataCache?: Record<string, any>;
 		initialData?: Record<string, any>;
-		data?: any;
 		object?: any;
 		debug?: boolean;
 		supportedModels?: Record<string, any>;
@@ -25,7 +24,6 @@
 		cacheLocks = {},
 		formDataCache = $bindable({}),
 		initialData = {},
-		data = {},
 		object = {},
 		debug = false,
 		supportedModels = {}
@@ -143,7 +141,7 @@
 	$effect(() => {
 		if (!selectedTimeRange) {
 			selectedTimeRange =
-				formDataCache['time_range'] || object?.time_range || initialData?.time_range || 'all_time';
+				formDataCache['time_range'] || object?.time_range || initialData?.time_range || 'last_30_days';
 		}
 	});
 
