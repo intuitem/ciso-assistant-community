@@ -2472,6 +2472,209 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
         return Response(my_map)
 
+    # --- Visual Matrix Editor actions ---
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Copy json_definition into editing_draft to begin editing."""
+        import copy
+
+        matrix = self.get_object()
+        if matrix.urn:
+            return Response(
+                {
+                    "error": "Library matrices cannot be edited directly. Use Clone instead."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if matrix.editing_draft is not None:
+            return Response(
+                {"status": "already_editing", "editing_draft": matrix.editing_draft}
+            )
+        matrix.editing_draft = copy.deepcopy(matrix.json_definition)
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response(
+            {"status": "editing_started", "editing_draft": matrix.editing_draft}
+        )
+
+    @action(detail=True, methods=["patch"], url_path="save-draft")
+    def save_draft(self, request, pk=None):
+        """Update editing_draft and metadata with the current WIP from the editor."""
+        matrix = self.get_object()
+        editing_draft = request.data.get("editing_draft")
+        if editing_draft is None:
+            return Response(
+                {"error": "editing_draft is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        matrix.editing_draft = editing_draft
+
+        # Also update metadata fields if provided
+        update_fields = ["editing_draft", "updated_at"]
+        for field in ("name", "description", "provider"):
+            if field in request.data:
+                setattr(matrix, field, request.data[field])
+                update_fields.append(field)
+
+        matrix.save(update_fields=update_fields)
+        return Response({"status": "draft_saved"})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        """Publish editing_draft → json_definition, snapshot history, bump version."""
+        import copy
+        from django.utils import timezone
+
+        matrix = self.get_object()
+        if matrix.editing_draft is None:
+            return Response(
+                {"error": "No active draft to publish."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        errors = self._validate_json_definition(matrix.editing_draft)
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Snapshot current live definition into history (only if it has real content)
+        if matrix.json_definition and matrix.json_definition.get("grid"):
+            history = list(matrix.editing_history or [])
+            history.append(
+                {
+                    "version": matrix.editing_version,
+                    "definition": copy.deepcopy(matrix.json_definition),
+                    "published_at": timezone.now().isoformat(),
+                }
+            )
+            matrix.editing_history = history
+
+        # Swap draft → live
+        matrix.json_definition = matrix.editing_draft
+        matrix.editing_draft = None
+        matrix.editing_version += 1
+        matrix.is_published = True
+        matrix.save(
+            update_fields=[
+                "json_definition",
+                "editing_draft",
+                "editing_version",
+                "editing_history",
+                "is_published",
+                "updated_at",
+            ]
+        )
+        return Response(
+            {"status": "published", "editing_version": matrix.editing_version}
+        )
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        """Discard editing_draft without affecting json_definition."""
+        matrix = self.get_object()
+        matrix.editing_draft = None
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_discarded"})
+
+    @action(detail=False, methods=["post"], url_path="create-draft")
+    def create_draft(self, request):
+        """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
+        from iam.models import Folder
+
+        name = request.data.get("name", "Untitled Matrix")
+        description = request.data.get("description", "")
+        folder_id = request.data.get("folder", str(Folder.get_root_folder().id))
+        editing_draft = request.data.get("editing_draft", {})
+
+        matrix = RiskMatrix.objects.create(
+            name=name,
+            description=description,
+            folder_id=folder_id,
+            json_definition={},
+            editing_draft=editing_draft,
+            is_published=False,
+            is_enabled=False,
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="create-draft-from")
+    def create_draft_from(self, request, pk=None):
+        """Clone an existing matrix into a new unpublished RiskMatrix with editing_draft."""
+        import copy
+
+        source = self.get_object()
+        matrix = RiskMatrix.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description,
+            folder=source.folder,
+            json_definition={},
+            editing_draft=copy.deepcopy(source.json_definition),
+            is_published=False,
+            is_enabled=False,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider or "",
+            translations=copy.deepcopy(source.translations)
+            if source.translations
+            else {},
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created_from",
+                "editing_draft": matrix.editing_draft,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def _validate_json_definition(json_def: dict) -> list[str]:
+        """Validate the matrix JSON definition before publishing."""
+        errors = []
+        probability = json_def.get("probability", [])
+        impact = json_def.get("impact", [])
+        risk = json_def.get("risk", [])
+        grid = json_def.get("grid", [])
+
+        if len(probability) < 2:
+            errors.append("At least 2 probability levels are required.")
+        if len(impact) < 2:
+            errors.append("At least 2 impact levels are required.")
+        if len(risk) < 2:
+            errors.append("At least 2 risk levels are required.")
+        if len(grid) != len(probability):
+            errors.append(
+                f"Grid has {len(grid)} rows but there are {len(probability)} probability levels."
+            )
+        for i, row in enumerate(grid):
+            if len(row) != len(impact):
+                errors.append(
+                    f"Grid row {i} has {len(row)} columns but there are {len(impact)} impact levels."
+                )
+            for j, val in enumerate(row):
+                if not isinstance(val, int) or val < 0 or val >= len(risk):
+                    errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+        for category_name, levels in [
+            ("probability", probability),
+            ("impact", impact),
+            ("risk", risk),
+        ]:
+            for k, level in enumerate(levels):
+                if not level.get("name"):
+                    errors.append(f"{category_name}[{k}] is missing a name.")
+                if not level.get("hexcolor"):
+                    errors.append(
+                        f"{category_name}[{k}] is missing a color (hexcolor)."
+                    )
+        return errors
+
 
 class VulnerabilityViewSet(BaseModelViewSet):
     """

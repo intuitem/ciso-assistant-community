@@ -25,7 +25,7 @@
 	let folders: any[] = data.folders ?? [];
 
 	// Editor state
-	let draftId: string | null = $state(null);
+	let matrixId: string | null = $state(null);
 	let matrixName = $state('');
 	let matrixDescription = $state('');
 	let provider = $state('');
@@ -92,6 +92,24 @@
 		[0, 1, 2],
 		[1, 2, 3]
 	]);
+
+	// Auto-load the most recent draft on page load
+	if (existingDrafts.length > 0) {
+		const latest = existingDrafts[0];
+		matrixId = latest.id;
+		matrixName = latest.name || '';
+		matrixDescription = latest.description || '';
+		provider = latest.provider || '';
+		locale = latest.locale || 'en';
+		selectedFolder = latest.folder?.id || latest.folder || selectedFolder;
+
+		const src = latest.editing_draft || latest.json_definition;
+		const jd = typeof src === 'string' ? JSON.parse(src) : src;
+		if (jd?.probability) probabilityLevels = jd.probability;
+		if (jd?.impact) impactLevels = jd.impact;
+		if (jd?.risk) riskLevels = jd.risk;
+		if (jd?.grid) grid = jd.grid;
+	}
 
 	// Active tab
 	let activeTab: string = $state('probability');
@@ -347,38 +365,43 @@
 		saving = true;
 		statusMessage = '';
 		try {
-			const body = {
-				name: matrixName || 'Untitled Matrix',
-				description: matrixDescription,
-				folder: selectedFolder,
-				json_definition: jsonDefinition,
-				locale,
-				provider,
-				status: 'draft'
-			};
-
-			const url = draftId
-				? `/experimental/matrix-editor/${draftId}`
-				: '/experimental/matrix-editor';
-			const method = draftId ? 'PATCH' : 'POST';
-
-			const res = await fetch(url, {
-				method,
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body)
-			});
-
-			if (!res.ok) {
-				const err = await res.json();
-				throw new Error(err.error || JSON.stringify(err));
+			if (!matrixId) {
+				// Create a new matrix with an editing_draft
+				const res = await fetch('/experimental/matrix-editor', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						name: matrixName || 'Untitled Matrix',
+						description: matrixDescription,
+						folder: selectedFolder,
+						editing_draft: jsonDefinition
+					})
+				});
+				if (!res.ok) {
+					const err = await res.json();
+					throw new Error(err.error || JSON.stringify(err));
+				}
+				const result = await res.json();
+				matrixId = result.id;
+			} else {
+				// Save editing_draft on existing matrix
+				const res = await fetch(`/experimental/matrix-editor/${matrixId}`, {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						editing_draft: jsonDefinition,
+						name: matrixName || 'Untitled Matrix',
+						description: matrixDescription,
+						provider
+					})
+				});
+				if (!res.ok) {
+					const err = await res.json();
+					throw new Error(err.error || JSON.stringify(err));
+				}
 			}
-
-			const result = await res.json();
-			draftId = result.id;
 			statusMessage = m.draftSaved();
 			statusType = 'success';
-
-			// Refresh drafts list
 			refreshDrafts();
 		} catch (e: any) {
 			statusMessage = e.message;
@@ -389,10 +412,9 @@
 	}
 
 	async function publishMatrix() {
-		if (!draftId) {
-			// Save first
+		if (!matrixId) {
 			await saveDraft();
-			if (!draftId) return;
+			if (!matrixId) return;
 		}
 
 		if (!confirm(m.publishConfirm())) return;
@@ -400,7 +422,7 @@
 		publishing = true;
 		statusMessage = '';
 		try {
-			const res = await fetch(`/experimental/matrix-editor/${draftId}/publish`, {
+			const res = await fetch(`/experimental/matrix-editor/${matrixId}?action=publish-draft`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -421,46 +443,75 @@
 		}
 	}
 
-	async function loadDraft(draft: any) {
-		draftId = draft.id;
-		matrixName = draft.name;
-		matrixDescription = draft.description || '';
-		provider = draft.provider || '';
-		locale = draft.locale || 'en';
-		selectedFolder = draft.folder?.id || draft.folder || '';
+	async function editPublishedMatrix(id: string) {
+		try {
+			// Start editing: copies json_definition → editing_draft on the same object
+			const res = await fetch(`/experimental/matrix-editor/${id}?action=start-editing`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.error || JSON.stringify(err));
+			}
+			const result = await res.json();
+			// Find the matrix in our list and load it
+			const matrix = matrices.find((m: any) => m.id === id);
+			if (matrix) {
+				matrix.editing_draft = result.editing_draft;
+				loadDraft(matrix);
+			}
+			refreshDrafts();
+		} catch (e: any) {
+			statusMessage = e.message;
+			statusType = 'error';
+		}
+	}
 
-		const jd =
-			typeof draft.json_definition === 'string'
-				? JSON.parse(draft.json_definition)
-				: draft.json_definition;
+	async function loadDraft(matrix: any) {
+		matrixId = matrix.id;
+		matrixName = matrix.name;
+		matrixDescription = matrix.description || '';
+		provider = matrix.provider || '';
+		locale = matrix.locale || 'en';
+		selectedFolder = matrix.folder?.id || matrix.folder || '';
 
-		if (jd.probability) probabilityLevels = jd.probability;
-		if (jd.impact) impactLevels = jd.impact;
-		if (jd.risk) riskLevels = jd.risk;
-		if (jd.grid) grid = jd.grid;
+		// Load from editing_draft (WIP) if available, otherwise from json_definition
+		const src = matrix.editing_draft || matrix.json_definition;
+		const jd = typeof src === 'string' ? JSON.parse(src) : src;
+
+		if (jd?.probability) probabilityLevels = jd.probability;
+		if (jd?.impact) impactLevels = jd.impact;
+		if (jd?.risk) riskLevels = jd.risk;
+		if (jd?.grid) grid = jd.grid;
 
 		statusMessage = '';
 		statusType = '';
 	}
 
-	async function cloneFromMatrix(matrixId: string) {
+	async function cloneFromMatrix(sourceMatrixId: string) {
 		try {
-			const res = await fetch('/experimental/matrix-editor/clone-from-matrix', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					source_matrix_id: matrixId,
-					folder: selectedFolder
-				})
-			});
+			// Create a new matrix by cloning the source's json_definition into editing_draft
+			const res = await fetch(
+				`/experimental/matrix-editor/${sourceMatrixId}?action=create-draft-from`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
 
 			if (!res.ok) {
 				const err = await res.json();
 				throw new Error(err.error || JSON.stringify(err));
 			}
 
-			const draft = await res.json();
-			loadDraft(draft);
+			const result = await res.json();
+			// Load the newly created clone
+			loadDraft({
+				id: result.id,
+				name: result.name,
+				editing_draft: result.editing_draft
+			});
 			refreshDrafts();
 		} catch (e: any) {
 			statusMessage = e.message;
@@ -469,7 +520,7 @@
 	}
 
 	function newMatrix() {
-		draftId = null;
+		matrixId = null;
 		matrixName = '';
 		matrixDescription = '';
 		provider = '';
@@ -558,23 +609,35 @@
 			const res = await fetch('/experimental/matrix-editor');
 			if (res.ok) {
 				const data = await res.json();
-				existingDrafts = data.results || data;
+				const allMatrices = data.results || data;
+				existingDrafts = allMatrices.filter((m: any) => m.editing_draft !== null);
 			}
 		} catch {
 			// ignore
 		}
 	}
 
-	async function deleteDraft(id: string) {
-		if (!confirm('Delete this draft?')) return;
+	async function deleteDraft(matrix: any) {
+		const isPublished = matrix.is_published;
+		const msg = isPublished
+			? 'Discard the active draft? The published matrix will remain.'
+			: 'Delete this unpublished matrix?';
+		if (!confirm(msg)) return;
 		try {
-			const res = await fetch(`/experimental/matrix-editor/${id}`, { method: 'DELETE' });
-			if (res.ok || res.status === 204) {
-				if (draftId === id) {
-					newMatrix();
-				}
-				refreshDrafts();
+			if (isPublished) {
+				// Discard draft only
+				await fetch(`/experimental/matrix-editor/${matrix.id}?action=discard-draft`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+			} else {
+				// Delete the whole matrix
+				await fetch(`/experimental/matrix-editor/${matrix.id}`, { method: 'DELETE' });
 			}
+			if (matrixId === matrix.id) {
+				newMatrix();
+			}
+			refreshDrafts();
 		} catch {
 			// ignore
 		}
@@ -613,25 +676,6 @@
 					<i class="fa-solid fa-file-export mr-1"></i>
 					Export
 				</button>
-
-				<!-- Clone from existing -->
-				{#if matrices.length > 0}
-					<div class="relative">
-						<select
-							class="select select-sm w-64"
-							onchange={(e) => {
-								const val = e.currentTarget.value;
-								if (val) cloneFromMatrix(val);
-								e.currentTarget.value = '';
-							}}
-						>
-							<option value="">{m.cloneFromExisting()}...</option>
-							{#each matrices as matrix}
-								<option value={matrix.id}>{matrix.name}</option>
-							{/each}
-						</select>
-					</div>
-				{/if}
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -682,13 +726,13 @@
 		</div>
 	</div>
 
-	<!-- Saved drafts -->
+	<!-- All matrices: published + drafts -->
 	<div class="card p-4">
 		<h3 class="text-lg font-semibold mb-3">
-			<i class="fa-solid fa-file-pen mr-1"></i>
-			{m.saveDraft()}s ({existingDrafts.length})
+			<i class="fa-solid fa-table-cells-large mr-1"></i>
+			{m.riskMatrix()}s
 		</h3>
-		{#if existingDrafts.length > 0}
+		{#if matrices.length > 0 || existingDrafts.length > 0}
 			<div class="table-container">
 				<table class="table table-compact w-full">
 					<thead>
@@ -696,44 +740,93 @@
 							<th>{m.name()}</th>
 							<th>{m.description()}</th>
 							<th>Status</th>
-							<th>{m.locale()}</th>
 							<th>{m.provider()}</th>
-							<th class="w-32"></th>
+							<th class="w-48"></th>
 						</tr>
 					</thead>
 					<tbody>
+						<!-- Matrices with active drafts (editing in progress) -->
 						{#each existingDrafts as draft}
-							<tr class={draftId === draft.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
+							<tr class={matrixId === draft.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
 								<td class="font-medium">{draft.name}</td>
 								<td class="text-sm text-gray-500 truncate max-w-48">{draft.description || '—'}</td>
 								<td>
-									<span
-										class="badge {draft.status === 'published'
-											? 'variant-filled-success'
-											: 'variant-filled-warning'} text-xs"
-									>
-										{draft.status}
+									{#if draft.is_published}
+										<span class="badge variant-filled-success text-xs">published</span>
+									{:else}
+										<span class="badge variant-filled-warning text-xs">new</span>
+									{/if}
+									<span class="badge variant-filled-primary text-xs ml-1">
+										<i class="fa-solid fa-pen-to-square mr-0.5"></i> editing
 									</span>
 								</td>
-								<td class="text-sm">{draft.locale}</td>
 								<td class="text-sm text-gray-500">{draft.provider || '—'}</td>
-								<td class="flex gap-1">
-									<button
-										type="button"
-										class="btn btn-sm variant-ghost-primary"
-										onclick={() => loadDraft(draft)}
-										title={m.resumeDraft()}
-									>
-										<i class="fa-solid fa-pen-to-square"></i>
-									</button>
-									<button
-										type="button"
-										class="btn btn-sm variant-ghost-error"
-										onclick={() => deleteDraft(draft.id)}
-										title="Delete"
-									>
-										<i class="fa-solid fa-trash"></i>
-									</button>
+								<td>
+									<div class="flex gap-1">
+										<button
+											type="button"
+											class="btn btn-sm variant-filled-primary"
+											onclick={() => loadDraft(draft)}
+											title="Continue editing"
+										>
+											<i class="fa-solid fa-pen-to-square mr-1"></i>
+											Continue
+										</button>
+										<button
+											type="button"
+											class="btn btn-sm variant-ghost-error"
+											onclick={() => deleteDraft(draft)}
+											title={draft.is_published ? 'Discard draft' : 'Delete'}
+										>
+											<i class="fa-solid fa-xmark"></i>
+										</button>
+									</div>
+								</td>
+							</tr>
+						{/each}
+						<!-- Published matrices without active drafts -->
+						{#each matrices.filter((mx) => !existingDrafts.some((d) => d.id === mx.id)) as matrix}
+							<tr class={matrixId === matrix.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
+								<td class="font-medium">{matrix.name}</td>
+								<td class="text-sm text-gray-500 truncate max-w-48">{matrix.description || '—'}</td>
+								<td>
+									<span class="badge variant-filled-success text-xs">published</span>
+									{#if matrix.urn}
+										<span
+											class="badge variant-ghost-surface text-xs ml-1"
+											title="From library — clone to create an editable copy"
+										>
+											<i class="fa-solid fa-book-open mr-0.5"></i>library
+										</span>
+									{/if}
+									{#if matrix.editing_version > 1}
+										<span class="text-xs text-gray-400 ml-1">v{matrix.editing_version}</span>
+									{/if}
+								</td>
+								<td class="text-sm text-gray-500">{matrix.provider || '—'}</td>
+								<td>
+									<div class="flex gap-1">
+										{#if !matrix.urn}
+											<button
+												type="button"
+												class="btn btn-sm variant-ghost-primary"
+												onclick={() => editPublishedMatrix(matrix.id)}
+												title="Edit this matrix (changes won't affect assessments until published)"
+											>
+												<i class="fa-solid fa-pen-to-square mr-1"></i>
+												Edit
+											</button>
+										{/if}
+										<button
+											type="button"
+											class="btn btn-sm variant-ghost-surface"
+											onclick={() => cloneFromMatrix(matrix.id)}
+											title="Create a new matrix based on this one"
+										>
+											<i class="fa-solid fa-copy mr-1"></i>
+											Clone
+										</button>
+									</div>
 								</td>
 							</tr>
 						{/each}
@@ -742,7 +835,7 @@
 			</div>
 		{:else}
 			<p class="text-sm text-gray-400 py-4 text-center">
-				No drafts yet. Create one using the editor below.
+				No matrices yet. Create one using the editor below.
 			</p>
 		{/if}
 	</div>
@@ -803,7 +896,7 @@
 				</label>
 				<select id="matrix-folder" class="select" bind:value={selectedFolder}>
 					{#each folders as folder}
-						<option value={folder.id}>{folder.str}</option>
+						<option value={folder.id}>{folder.name}</option>
 					{/each}
 				</select>
 			</div>

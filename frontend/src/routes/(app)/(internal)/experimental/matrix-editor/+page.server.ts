@@ -2,15 +2,14 @@ import { BASE_API_URL } from '$lib/utils/constants';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
-	// Load existing risk matrices for "clone from" feature
+	// Load all risk matrices (published ones for "clone from", ones with editing_draft for "resume")
 	const matricesRes = await fetch(`${BASE_API_URL}/risk-matrices/`);
 	const matricesData = await matricesRes.json();
-	const matrices = matricesData.results || matricesData;
+	const allMatrices = matricesData.results || matricesData;
 
-	// Load existing drafts
-	const draftsRes = await fetch(`${BASE_API_URL}/risk-matrix-drafts/`);
-	const draftsData = await draftsRes.json();
-	const drafts = draftsData.results || draftsData;
+	// Split: published matrices (for clone) vs matrices with active drafts
+	const matrices = allMatrices.filter((m: any) => m.is_published);
+	const drafts = allMatrices.filter((m: any) => m.editing_draft !== null);
 
 	// Load folders
 	const foldersRes = await fetch(`${BASE_API_URL}/folders/`);

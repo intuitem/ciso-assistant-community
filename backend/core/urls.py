@@ -10,7 +10,6 @@ from library.views import (
     MappingLibrariesList,
     StoredLibraryViewSet,
     LoadedLibraryViewSet,
-    RiskMatrixDraftViewSet,
 )
 import importlib
 
@@ -94,9 +93,6 @@ router.register(
 )
 router.register(r"stored-libraries", StoredLibraryViewSet, basename="stored-libraries")
 router.register(r"loaded-libraries", LoadedLibraryViewSet, basename="loaded-libraries")
-router.register(
-    r"risk-matrix-drafts", RiskMatrixDraftViewSet, basename="risk-matrix-drafts"
-)
 router.register(
     r"requirement-mapping-sets",
     RequirementMappingSetViewSet,

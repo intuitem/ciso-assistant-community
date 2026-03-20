@@ -1,34 +1,34 @@
 import { BASE_API_URL } from '$lib/utils/constants';
-import { error, type NumericRange } from '@sveltejs/kit';
+import { error, json, type NumericRange } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-const ENDPOINT = `${BASE_API_URL}/risk-matrix-drafts`;
+const ENDPOINT = `${BASE_API_URL}/risk-matrices`;
 
-export const GET: RequestHandler = async ({ fetch, url }) => {
-	const endpoint = `${ENDPOINT}/${url.searchParams ? '?' + url.searchParams.toString() : ''}`;
-	const res = await fetch(endpoint);
-	if (!res.ok) {
-		error(res.status as NumericRange<400, 599>, await res.json());
-	}
-	return new Response(JSON.stringify(await res.json()), {
-		status: res.status,
+/** Proxy helper */
+async function proxyRequest(fetchFn: typeof fetch, url: string, method: string, body?: unknown) {
+	const opts: RequestInit = {
+		method,
 		headers: { 'Content-Type': 'application/json' }
-	});
-};
-
-export const POST: RequestHandler = async ({ fetch, request }) => {
-	const body = await request.json();
-	const res = await fetch(`${ENDPOINT}/`, {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(body)
-	});
+	};
+	if (body !== undefined) {
+		opts.body = JSON.stringify(body);
+	}
+	const res = await fetchFn(url, opts);
+	if (res.status === 204) return new Response(null, { status: 204 });
 	const data = await res.json();
 	if (!res.ok) {
 		error(res.status as NumericRange<400, 599>, data);
 	}
-	return new Response(JSON.stringify(data), {
-		status: res.status,
-		headers: { 'Content-Type': 'application/json' }
-	});
+	return json(data, { status: res.status });
+}
+
+/** List all risk matrices (for refreshing drafts) */
+export const GET: RequestHandler = async ({ fetch }) => {
+	return proxyRequest(fetch, `${ENDPOINT}/`, 'GET');
+};
+
+/** Create a new draft matrix */
+export const POST: RequestHandler = async ({ fetch, request }) => {
+	const body = await request.json();
+	return proxyRequest(fetch, `${ENDPOINT}/create-draft/`, 'POST', body);
 };
