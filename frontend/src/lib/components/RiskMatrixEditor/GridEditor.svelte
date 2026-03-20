@@ -115,7 +115,7 @@
 									}}
 								>
 									<div class="relative group">
-										<span class="text-sm font-bold p-2 block">
+										<span class="text-sm font-bold py-3 px-4 block">
 											{riskLevel?.abbreviation ?? '?'}
 										</span>
 										<!-- Dropdown on hover (flips upward for bottom rows) -->

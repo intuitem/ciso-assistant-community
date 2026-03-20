@@ -114,11 +114,24 @@
 	// Active tab
 	let activeTab: string = $state('probability');
 
-	// Status messages
+	// Status messages with auto-dismiss
 	let statusMessage = $state('');
 	let statusType: 'success' | 'error' | '' = $state('');
 	let saving = $state(false);
 	let publishing = $state(false);
+	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	function setStatus(message: string, type: 'success' | 'error') {
+		statusMessage = message;
+		statusType = type;
+		if (statusTimeout) clearTimeout(statusTimeout);
+		if (type === 'success') {
+			statusTimeout = setTimeout(() => {
+				statusMessage = '';
+				statusType = '';
+			}, 3000);
+		}
+	}
 
 	// Undo/redo history
 	interface EditorSnapshot {
@@ -302,15 +315,12 @@
 					impactLevels = matrixDef.impact;
 					riskLevels = matrixDef.risk;
 					grid = matrixDef.grid;
-					statusMessage = 'Imported successfully';
-					statusType = 'success';
+					setStatus('Imported successfully', 'success');
 				} else {
-					statusMessage = 'Invalid file: no probability/impact/risk/grid found';
-					statusType = 'error';
+					setStatus('Invalid file: no probability/impact/risk/grid found', 'error');
 				}
 			} catch (err: any) {
-				statusMessage = `Import failed: ${err.message}`;
-				statusType = 'error';
+				setStatus(`Import failed: ${err.message}`, 'error');
 			}
 		};
 		input.click();
@@ -400,12 +410,10 @@
 					throw new Error(err.error || JSON.stringify(err));
 				}
 			}
-			statusMessage = m.draftSaved();
-			statusType = 'success';
+			setStatus(m.draftSaved(), 'success');
 			refreshDrafts();
 		} catch (e: any) {
-			statusMessage = e.message;
-			statusType = 'error';
+			setStatus(e.message, 'error');
 		} finally {
 			saving = false;
 		}
@@ -432,12 +440,10 @@
 				throw new Error(err.error || err.errors?.join(', ') || JSON.stringify(err));
 			}
 
-			statusMessage = m.matrixPublished();
-			statusType = 'success';
+			setStatus(m.matrixPublished(), 'success');
 			refreshDrafts();
 		} catch (e: any) {
-			statusMessage = e.message;
-			statusType = 'error';
+			setStatus(e.message, 'error');
 		} finally {
 			publishing = false;
 		}
@@ -463,8 +469,7 @@
 			}
 			refreshDrafts();
 		} catch (e: any) {
-			statusMessage = e.message;
-			statusType = 'error';
+			setStatus(e.message, 'error');
 		}
 	}
 
@@ -514,8 +519,7 @@
 			});
 			refreshDrafts();
 		} catch (e: any) {
-			statusMessage = e.message;
-			statusType = 'error';
+			setStatus(e.message, 'error');
 		}
 	}
 
@@ -664,21 +668,43 @@
 	<div class="card p-4">
 		<div class="flex flex-wrap items-center justify-between gap-4">
 			<div class="flex items-center gap-2">
-				<button type="button" class="btn variant-filled-primary btn-sm" onclick={newMatrix}>
+				<button
+					type="button"
+					class="btn btn-sm bg-primary-500 text-white hover:bg-primary-600 transition-colors"
+					onclick={newMatrix}
+				>
 					<i class="fa-solid fa-plus mr-1"></i>
 					{m.newMatrix()}
 				</button>
-				<button type="button" class="btn variant-ghost-surface btn-sm" onclick={importFromFile}>
+				<button
+					type="button"
+					class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+					onclick={importFromFile}
+				>
 					<i class="fa-solid fa-file-import mr-1"></i>
 					Import
 				</button>
-				<button type="button" class="btn variant-ghost-surface btn-sm" onclick={exportAsYaml}>
+				<button
+					type="button"
+					class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+					onclick={exportAsYaml}
+				>
 					<i class="fa-solid fa-file-export mr-1"></i>
 					Export
 				</button>
 			</div>
 
 			<div class="flex items-center gap-2">
+				<!-- Current matrix indicator -->
+				{#if matrixId}
+					<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+						<i class="fa-solid fa-pen-to-square mr-1"></i>
+						{matrixName || 'Untitled'}
+					</span>
+				{:else}
+					<span class="text-xs text-gray-400 italic">No matrix selected</span>
+				{/if}
+				<span class="border-l border-gray-300 h-6 mx-1"></span>
 				<!-- Undo/Redo -->
 				<button
 					type="button"
@@ -700,13 +726,20 @@
 				</button>
 				<span class="border-l border-gray-300 h-6 mx-1"></span>
 				{#if statusMessage}
-					<span class="text-sm {statusType === 'error' ? 'text-red-600' : 'text-green-600'}">
+					<span
+						class="text-xs px-2 py-1 rounded-full transition-opacity {statusType === 'error'
+							? 'bg-red-100 text-red-700'
+							: 'bg-green-100 text-green-700'}"
+					>
+						<i
+							class="fa-solid {statusType === 'error' ? 'fa-circle-xmark' : 'fa-circle-check'} mr-1"
+						></i>
 						{statusMessage}
 					</span>
 				{/if}
 				<button
 					type="button"
-					class="btn variant-filled-secondary btn-sm"
+					class="btn btn-sm bg-gray-600 text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
 					onclick={saveDraft}
 					disabled={saving}
 				>
@@ -715,7 +748,7 @@
 				</button>
 				<button
 					type="button"
-					class="btn variant-filled-success btn-sm"
+					class="btn btn-sm bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
 					onclick={publishMatrix}
 					disabled={publishing}
 				>
