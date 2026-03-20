@@ -139,3 +139,51 @@ class LibraryUploadSerializer(serializers.Serializer):
 
     class Meta:
         fields = ["file"]
+
+
+# --- Risk Matrix Draft Serializers ---
+
+
+class RiskMatrixDraftReadSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+    source_matrix = FieldsRelatedField(["id", "name"], required=False)
+
+    class Meta:
+        from library.models import RiskMatrixDraft
+
+        model = RiskMatrixDraft
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "json_definition",
+            "source_matrix",
+            "locale",
+            "translations",
+            "provider",
+            "version",
+            "status",
+            "created_at",
+            "updated_at",
+        ]
+
+
+class RiskMatrixDraftWriteSerializer(BaseModelSerializer):
+    class Meta:
+        from library.models import RiskMatrixDraft
+
+        model = RiskMatrixDraft
+        fields = [
+            "id",
+            "name",
+            "description",
+            "folder",
+            "json_definition",
+            "source_matrix",
+            "locale",
+            "translations",
+            "provider",
+            "version",
+            "status",
+        ]
