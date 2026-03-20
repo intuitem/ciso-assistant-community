@@ -18,10 +18,11 @@ import structlog
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 import ssl
-from ciso_assistant import meta
+from . import meta
 
-BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -31,6 +32,7 @@ SCHEMA_VERSION = meta.SCHEMA_VERSION
 LOG_LEVEL = os.environ.get("LOG_LEVEL", "INFO")
 LOG_FORMAT = os.environ.get("LOG_FORMAT", "plain")
 LOG_OUTFILE = os.environ.get("LOG_OUTFILE", "")
+DB_LOG = os.environ.get("DB_LOG", "").lower() == "true"
 
 CISO_ASSISTANT_URL = os.environ.get("CISO_ASSISTANT_URL", "http://localhost:5173")
 FORCE_CREATE_ADMIN = os.environ.get("FORCE_CREATE_ADMIN", "False").lower() == "true"
@@ -331,6 +333,7 @@ def _build_tls12_context():
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     return context
 
 
@@ -393,6 +396,15 @@ if DEBUG:
     DEBUG_TOOLBAR_CONFIG = {
         "SHOW_TOOLBAR_CALLBACK": lambda request: True,
     }
+
+    if DB_LOG:
+        LOGGING["loggers"]["django.db.backends"] = {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        }
+        MIDDLEWARE += ["querycount.middleware.QueryCountMiddleware"]
+
 
 TEMPLATES = [
     {
