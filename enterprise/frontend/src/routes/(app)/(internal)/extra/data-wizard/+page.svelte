@@ -77,6 +77,10 @@
 			id: 'EbiosRMStudyExcel',
 			label: m.ebiosRMStudyExcel(),
 			description: m.ebiosRMStudyExcelDescription()
+		},
+		{
+			id: 'TaskNode',
+			label: m.tasks(),
 		}
 	];
 
@@ -136,7 +140,8 @@
 		'Incident',
 		'TPRM',
 		'EbiosRMStudyARM',
-		'EbiosRMStudyExcel'
+		'EbiosRMStudyExcel',
+		'TaskNode'
 	];
 
 	// Determine if perimeter selection should be disabled
