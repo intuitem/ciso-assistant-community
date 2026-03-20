@@ -1321,5 +1321,9 @@
 	"serverConfigurationError": "Server configuration error",
 	"libraryLoadFailed": "Library load failed",
 	"sortAscending": "Urutkan A → Z",
-	"sortDescending": "Urutkan Z → A"
+	"sortDescending": "Urutkan Z → A",
+	"confirmModalMessagePlural": "Apakah Anda yakin? Tindakan ini akan memengaruhi objek berikut secara permanen",
+	"syncAppliedControlsMessage": "Kontrol yang diterapkan yang menggunakan kontrol referensi ini akan disinkronkan dengannya. Harap dicatat bahwa tindakan ini tidak dapat dibatalkan.",
+	"syncToAppliedControl": "Sinkronkan dengan kontrol yang diterapkan",
+	"syncToReferenceControl": "Sinkronkan dengan kontrol referensi"
 }

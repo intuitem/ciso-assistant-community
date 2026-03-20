@@ -3164,5 +3164,9 @@
 	"serverConfigurationError": "服务器配置错误",
 	"libraryLoadFailed": "库加载失败",
 	"sortAscending": "排序 A → Z",
-	"sortDescending": "排序 Z → A"
+	"sortDescending": "排序 Z → A",
+	"confirmModalMessagePlural": "确定吗？此操作将永久影响以下对象",
+	"syncAppliedControlsMessage": "使用此参考控制措施的已应用控制措施将与其同步。请注意，此操作无法撤销。",
+	"syncToAppliedControl": "同步到已实施控制措施",
+	"syncToReferenceControl": "与参考控制措施同步"
 }

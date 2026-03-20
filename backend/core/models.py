@@ -4,7 +4,7 @@ import re
 import hashlib
 from datetime import date, datetime
 from pathlib import Path
-from typing import Self, Union, List, Optional, Literal, Tuple
+from typing import Self, Union, List, Optional, Literal, Tuple, Final
 import statistics
 
 from django.contrib.contenttypes.models import ContentType
@@ -26,6 +26,7 @@ from django.core.validators import (
 from django.core.files.storage import default_storage
 from django.db import models, transaction
 from django.db.models import F, Q, OuterRef, Subquery, Prefetch, Count
+from django.db.models.query import QuerySet
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils.html import format_html
@@ -1936,6 +1937,15 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
     @property
     def frameworks(self):
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
+
+    def get_unsynced_applied_controls_queryset(self) -> QuerySet[AppliedControl]:
+        """Return a `QuerySet` selecting all `AppliedControl` objects linked to this `ReferenceControl` which are not currently synced to it."""
+
+        unsynced_applied_controls_query = self.appliedcontrol_set.exclude(
+            csf_function=self.csf_function,
+            category=self.category,
+        )
+        return unsynced_applied_controls_query
 
 
 class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
@@ -4366,7 +4376,18 @@ class AppliedControl(
 
     IMPACT = [(1, "Very Low"), (2, "Low"), (3, "Medium"), (4, "High"), (5, "Very High")]
     MAP_EFFORT = {None: -1, "XS": 1, "S": 2, "M": 3, "L": 4, "XL": 5}
-    # todo: think about a smarter model for ranking
+
+    INTEGRATION_SYNCABLE_FIELDS: Final[set[str]] = {
+        "name",
+        "description",
+        "status",
+        "priority",
+        "eta",
+        "start_date",
+        "effort",
+        "observation",
+    }
+
     reference_control = models.ForeignKey(
         ReferenceControl,
         on_delete=models.CASCADE,
@@ -4557,22 +4578,11 @@ class AppliedControl(
 
         BuiltinMetricSample.update_or_create_snapshot(self.folder)
 
-    def _get_changed_fields(self, old_instance):
+    def _get_changed_fields(self, old_instance) -> list[str]:
         """Detect which fields changed"""
         changed = []
-        # Check syncable fields only
-        syncable_fields = [
-            "name",
-            "description",
-            "status",
-            "priority",
-            "eta",
-            "start_date",
-            "effort",
-            "observation",
-        ]
 
-        for field in syncable_fields:
+        for field in self.INTEGRATION_SYNCABLE_FIELDS:
             old_val = getattr(old_instance, field)
             new_val = getattr(self, field)
             if old_val != new_val:

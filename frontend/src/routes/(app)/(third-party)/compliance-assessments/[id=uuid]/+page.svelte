@@ -360,7 +360,6 @@
 			props: {
 				_form: data.form,
 				id: id,
-				debug: false,
 				URLModel: 'compliance-assessments',
 				formAction: action,
 				bodyComponent: List,
@@ -377,9 +376,7 @@
 			component: modalComponent,
 			// Data
 			title: m.syncToAppliedControls(),
-			body: m.syncToAppliedControlsMessage({
-				count: data.compliance_assessment.framework.reference_controls.length //change this
-			}),
+			body: m.syncToAppliedControlsMessage(),
 			response: (r: boolean) => {
 				syncingToActionsIsLoading = r;
 			}

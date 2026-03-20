@@ -1302,6 +1302,7 @@
 	"selectRequirementsToAssign": "Sélectionnez les exigences à inclure dans une nouvelle affectation",
 	"makeSureActorsHavePermissions": "Assurez-vous que les personnes assignées disposent des droits sur le domaine de cet audit",
 	"selectAllAvailable": "Tout sélectionner",
+	"clearSelection": "Effacer la sélection",
 	"expandAll": "Tout déplier",
 	"collapseAll": "Tout replier",
 	"clickToSelect": "cliquer pour sélectionner",
@@ -2150,7 +2151,6 @@
 	"changeTreatment": "Changer le traitement",
 	"changeAssignee": "Changer le responsable",
 	"changeResult": "Changer le résultat",
-	"clearSelection": "Effacer la sélection",
 	"itemsSelected": "{count} élément(s) sélectionné(s)",
 	"batchActionConfirmDelete": "Êtes-vous sûr de vouloir supprimer {count} élément(s) ?",
 	"batchActionConfirmChange": "Appliquer à {count} élément(s) :",
@@ -3683,6 +3683,8 @@
 	"libraryLoadFailed": "Échec du chargement de la bibliothèque",
 	"sortAscending": "Trier A → Z",
 	"sortDescending": "Trier Z → A",
+	"confirmModalMessagePlural": "Êtes-vous sûr ? Cette action affectera définitivement les objets suivants",
+	"syncAppliedControlsMessage": "Les mesures appliquées utilisant cette mesure de référence seront synchronisées avec celle-ci. Cette opération ne pourrait pas être annulée.",
 	"assignmentStatusDraft": "Brouillon",
 	"assignmentStatusInProgress": "En cours",
 	"assignmentStatusSubmitted": "Soumis",
@@ -3780,5 +3782,7 @@
 	"commandPaletteNoResults": "Aucun résultat trouvé",
 	"commandPaletteNavigate": "naviguer",
 	"searchEllipsis": "Rechercher...",
-	"commandPaletteOpen": "ouvrir"
+	"commandPaletteOpen": "ouvrir",
+	"syncToAppliedControl": "Synchroniser avec la mesure appliquée",
+	"syncToReferenceControl": "Synchroniser avec la mesure de référence"
 }
