@@ -42,10 +42,12 @@ export const LOCALE_MAP = {
 		flag: '🇷🇴'
 	},
 	hi: {
-		name: 'hindi'
+		name: 'hindi',
+		flag: '🇮🇳'
 	},
 	ur: {
-		name: 'urdu'
+		name: 'urdu',
+		flag: '🇵🇰'
 	},
 	cs: {
 		name: 'czech',

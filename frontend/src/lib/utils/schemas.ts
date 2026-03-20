@@ -603,7 +603,8 @@ export const FeatureFlagsSchema = z.object({
 	auditee_mode: z.boolean().optional(),
 	advanced_analytics: z.boolean().optional(),
 	comments: z.boolean().optional(),
-	journeys: z.boolean().optional()
+	journeys: z.boolean().optional(),
+	policy_documents: z.boolean().optional()
 });
 
 export const SSOSettingsSchema = z.object({
@@ -1414,11 +1415,15 @@ export const AccreditationSchema = z.object({
 	ref_id: z.string().optional(),
 	category: z.string().uuid(),
 	authority: z.string().uuid().optional().nullable(),
+	authority_name: z.string().optional(),
 	status: z.string().uuid(),
 	author: z.string().uuid().optional().nullable(),
+	commission_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
+	duration_months: z.coerce.number().int().min(1).optional().nullable(),
 	expiry_date: z.union([z.literal('').transform(() => null), z.string().date()]).nullish(),
 	linked_collection: z.string().uuid().optional().nullable(),
 	checklist: z.string().uuid().optional().nullable(),
+	decision_evidence: z.array(z.string().uuid().optional()).optional(),
 	observation: z.string().optional().nullable(),
 	filtering_labels: z.array(z.string().uuid().optional()).optional()
 });
@@ -1501,6 +1506,25 @@ export const teamSchema = z.object({
 	deputies: z.array(z.string().uuid().optional()).optional()
 });
 
+export const ManagedDocumentSchema = z.object({
+	name: z.string().optional().default(''),
+	description: z.string().optional().default(''),
+	document_type: z.string().optional().default('policy'),
+	policy: z.string().uuid().optional().nullable(),
+	folder: z.string(),
+	template_used: z.string().optional().nullable()
+});
+
+export const DocumentRevisionSchema = z.object({
+	document: z.string().uuid(),
+	folder: z.string(),
+	version_number: z.number().optional(),
+	content: z.string().optional().default(''),
+	status: z.string().optional().default('draft'),
+	change_summary: z.string().optional().default(''),
+	reviewer_comments: z.string().optional().nullable()
+});
+
 const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
@@ -1578,7 +1602,9 @@ const SCHEMA_MAP: Record<string, AnyZodObject> = {
 	'dashboard-widgets': DashboardWidgetSchema,
 	'dashboard-text-widgets': DashboardWidgetSchema,
 	'dashboard-builtin-widgets': DashboardWidgetSchema,
-	teams: teamSchema
+	teams: teamSchema,
+	'managed-documents': ManagedDocumentSchema,
+	'document-revisions': DocumentRevisionSchema
 };
 
 export const modelSchema = (model: string) => {

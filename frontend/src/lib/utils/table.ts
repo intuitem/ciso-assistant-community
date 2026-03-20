@@ -1429,6 +1429,7 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
 			'category',
@@ -1443,6 +1444,7 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
 			'category',
@@ -1457,6 +1459,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1688,6 +1691,14 @@ export const listViewFields = {
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
+		body: ['name', 'document_type', 'policy', 'locale', 'folder']
 	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],

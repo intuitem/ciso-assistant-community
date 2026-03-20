@@ -151,6 +151,7 @@ urlpatterns = [
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("chat/", include("chat.urls")),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
@@ -208,12 +209,20 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/action-plan/budget-overview/",
+        ComplianceAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
         "compliance-assessments/<uuid:pk>/evidences-list/",
         ComplianceAssessmentEvidenceList.as_view(),
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/budget-overview/",
+        RiskAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
         "mapping-libraries/",

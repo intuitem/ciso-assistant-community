@@ -132,7 +132,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			redirect(302, '/login');
 		}
 
-		const user = await validateUserSession(event);
+		// Skip session validation for SSO authenticate route — the token cookie
+		// has just been set by the backend but the allauth session token hasn't
+		// been fetched yet; that happens in the page's load function.
+		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
+
+		const user = isSSOAuthenticate ? null : await validateUserSession(event);
 		if (user) {
 			event.locals.user = user;
 			applyUserLocale(event, user);
@@ -173,7 +178,11 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const currentLang =
 		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
-		request.headers.set('Content-Type', 'application/json');
+		// Default to JSON unless the request is already a multipart upload (FormData)
+		const ct = request.headers.get('Content-Type') || '';
+		if (!ct.includes('multipart')) {
+			request.headers.set('Content-Type', 'application/json');
+		}
 		request.headers.set('Accept-Language', currentLang);
 
 		const token = event.cookies.get('token');
