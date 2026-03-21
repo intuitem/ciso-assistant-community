@@ -186,9 +186,19 @@
 						<i class="fa-solid fa-magnifying-glass text-2xl mb-2"></i>
 						<span class="text-sm">{m.commandPaletteNoResults()}</span>
 						{#if searchText.trim()}
-							<span class="text-xs mt-2">
+							<button
+								class="mt-3 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer"
+								onclick={() => {
+									opened = false;
+									goto(`/search?q=${encodeURIComponent(searchText.trim())}`, {
+										label: 'search',
+										breadcrumbAction: 'replace'
+									});
+								}}
+							>
+								<i class="fa-solid fa-arrow-right text-[10px]"></i>
 								{m.commandPaletteSearchHint()}
-							</span>
+							</button>
 						{/if}
 					</div>
 				{/if}
