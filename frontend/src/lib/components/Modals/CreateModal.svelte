@@ -12,7 +12,7 @@
 
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { AnyZodObject } from '$lib/utils/schemas';
 	import { getModalStore } from './stores';
 	import { onMount, tick } from 'svelte';
 	interface Props {

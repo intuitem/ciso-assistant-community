@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ModelForm from '$lib/components/Forms/ModelForm.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { AnyZodObject } from '$lib/utils/schemas';
 	import { getModalStore, type ModalStore } from './stores';
 	import type { ModelInfo } from '$lib/utils/types';
 

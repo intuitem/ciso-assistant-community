@@ -1,6 +1,6 @@
-import { z, type AnyZodObject } from 'zod';
+import { z } from 'zod';
 
-export const activateTOTPSchema: AnyZodObject = z.object({
+export const activateTOTPSchema: z.ZodObject<any> = z.object({
 	code: z
 		.string()
 		.regex(/^\d{6}$/)

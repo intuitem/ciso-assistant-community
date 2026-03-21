@@ -2,7 +2,7 @@
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import { superForm } from 'sveltekit-superforms';
 	import SuperDebug from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { AnyZodObject } from '$lib/utils/schemas';
 	// import type { ModalStore } from '@skeletonlabs/skeleton-svelte';
 	// const modalStore: ModalStore = getModalStore();
 

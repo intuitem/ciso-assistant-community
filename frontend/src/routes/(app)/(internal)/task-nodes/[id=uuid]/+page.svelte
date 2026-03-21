@@ -4,7 +4,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import TableMarkdownField from '$lib/components/Forms/TableMarkdownField.svelte';
 	import { superValidate } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import CreateModal from '$lib/components/Modals/CreateModal.svelte';
 	import { modelSchema } from '$lib/utils/schemas';
 	import { getModelInfo } from '$lib/utils/crud';
