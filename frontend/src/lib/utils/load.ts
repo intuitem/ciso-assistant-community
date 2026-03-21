@@ -2,13 +2,13 @@ import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName, type ModelMapEntry } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
-import { modelSchema } from '$lib/utils/schemas';
+import { modelSchema, type AnyZodObject } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { z, type AnyZodObject } from 'zod';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 import { canPerformAction } from './access-control';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -161,7 +161,7 @@ export const loadDetail = async ({ event, model, id }) => {
 							currentSchema instanceof z.ZodOptional ||
 							currentSchema instanceof z.ZodNullable
 						) {
-							currentSchema = currentSchema._def.innerType;
+							currentSchema = currentSchema.unwrap();
 						}
 						isArrayField = currentSchema instanceof z.ZodArray;
 					}

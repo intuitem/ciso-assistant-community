@@ -84,11 +84,11 @@
 	import { modelSchema } from '$lib/utils/schemas';
 	import type { ModelInfo, urlModel, CacheLock } from '$lib/utils/types';
 	import { superForm, superValidate, type SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { AnyZodObject } from '$lib/utils/schemas';
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { getSecureRedirect } from '$lib/utils/helpers';
 	import { createModalCache } from '$lib/utils/stores';
 	import FilteringLabelForm from './ModelForm/FilteringLabelForm.svelte';
@@ -149,7 +149,7 @@
 			if (nextValue) goto(nextValue);
 		}
 	}
-	let shape = $derived(schema.shape || schema._def.schema.shape);
+	let shape = $derived(schema.shape || schema._def?.schema?.shape);
 	let updated_fields = new Set();
 
 	function makeCacheLock(): CacheLock {

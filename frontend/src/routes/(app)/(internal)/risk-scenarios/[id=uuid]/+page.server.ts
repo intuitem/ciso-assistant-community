@@ -5,7 +5,7 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { headData } from '$lib/utils/table';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
 import { error, redirect } from '@sveltejs/kit';

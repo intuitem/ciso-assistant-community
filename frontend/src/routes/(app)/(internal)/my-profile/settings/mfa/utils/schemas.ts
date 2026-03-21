@@ -1,4 +1,5 @@
-import { z, type AnyZodObject } from 'zod';
+import { z } from 'zod';
+import type { AnyZodObject } from '$lib/utils/schemas';
 
 export const activateTOTPSchema: AnyZodObject = z.object({
 	code: z
