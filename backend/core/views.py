@@ -14497,27 +14497,38 @@ def global_search(request):
                 }
             )
 
+    # Strip accents/diacritics for accent-insensitive matching and scoring.
+    # SQLite's LIKE is only ASCII case-insensitive, and rapidfuzz treats
+    # accented chars as distinct — normalizing levels the playing field.
+    import unicodedata
+
+    def strip_accents(s: str) -> str:
+        return "".join(
+            c
+            for c in unicodedata.normalize("NFD", s)
+            if unicodedata.category(c) != "Mn"
+        ).lower()
+
+    query_norm = strip_accents(query)
+
     # Score and rank with rapidfuzz
-    query_lower = query.lower()
     for candidate in candidates:
-        name_lower = candidate["name"].lower()
-        ref_lower = candidate["ref_id"].lower()
+        name_norm = strip_accents(candidate["name"])
+        ref_norm = strip_accents(candidate["ref_id"])
+        desc_norm = strip_accents(candidate["description"])
 
-        # Fuzzy scores
-        name_score = fuzz.WRatio(query, candidate["name"])
-        ref_score = (
-            fuzz.WRatio(query, candidate["ref_id"]) if candidate["ref_id"] else 0
-        )
-        desc_score = fuzz.partial_ratio(query, candidate["description"]) * 0.4
+        # Fuzzy scores (on normalized strings for accent-insensitive comparison)
+        name_score = fuzz.WRatio(query_norm, name_norm)
+        ref_score = fuzz.WRatio(query_norm, ref_norm) if ref_norm else 0
+        desc_score = fuzz.partial_ratio(query_norm, desc_norm) * 0.4
 
-        # Substring bonus: exact case-insensitive match in name or ref_id should
-        # rank very high. WRatio penalizes long names unfairly (e.g. "recyf" vs
-        # "RECYF : RÉFÉRENTIEL CYBER France..." scores only 24).
+        # Substring bonus: literal match in name or ref_id should rank very
+        # high. WRatio penalizes long names unfairly (e.g. "recyf" vs
+        # "RECYF : REFERENTIEL CYBER France..." scores only 24).
         substring_bonus = 0
-        if query_lower in name_lower:
-            # Boost more if it starts with the query or if it's a close length match
-            substring_bonus = 95 if name_lower.startswith(query_lower) else 90
-        if query_lower in ref_lower:
+        if query_norm in name_norm:
+            substring_bonus = 95 if name_norm.startswith(query_norm) else 90
+        if query_norm in ref_norm:
             substring_bonus = max(substring_bonus, 95)
 
         candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
