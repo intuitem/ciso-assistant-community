@@ -845,7 +845,7 @@ export const rightRequestSchema = z.object({
 		.min(1)
 		.default(() => new Date().toISOString().split('T')[0]),
 	due_date: z.string().optional(),
-	request_type: z.string(),
+	request_type: z.array(z.string()).optional().default([]),
 	status: z.string(),
 	observation: z.string().optional(),
 	processings: z.array(z.string()).optional().default([])

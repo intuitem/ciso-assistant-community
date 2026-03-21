@@ -601,7 +601,7 @@
 																{:else if val.str}
 																	{safeTranslate(val.str)}
 																{:else}
-																	{value}
+																	{safeTranslate(val ?? '-')}
 																{/if}
 															</li>
 														{/each}
