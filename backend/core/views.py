@@ -14300,3 +14300,129 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 
             decision = "reopened" if from_status == "closed" else to_status
             send_assignment_reviewed_notification(assignment.id, decision, observation)
+
+
+# ---------------------------------------------------------------------------
+# Universal Search
+# ---------------------------------------------------------------------------
+
+SEARCHABLE_MODELS = [
+    # (Model, url_slug, has_ref_id)
+    (Folder, "folders", False),
+    (Perimeter, "perimeters", False),
+    (Threat, "threats", True),
+    (RiskMatrix, "risk-matrices", True),
+    (Framework, "frameworks", True),
+    (RiskAssessment, "risk-assessments", False),
+    (ComplianceAssessment, "compliance-assessments", False),
+    (RiskScenario, "risk-scenarios", False),
+    (Asset, "assets", False),
+    (AppliedControl, "applied-controls", False),
+    (Policy, "policies", False),
+    (ReferenceControl, "reference-controls", True),
+    (Evidence, "evidences", False),
+    (RiskAcceptance, "risk-acceptances", False),
+    (SecurityException, "security-exceptions", False),
+    (Finding, "findings", False),
+    (Incident, "incidents", False),
+    (Entity, "entities", True),
+    (EbiosRMStudy, "ebios-rm", False),
+    (FearedEvent, "feared-events", False),
+    (StrategicScenario, "strategic-scenarios", False),
+    (AttackPath, "attack-paths", False),
+]
+
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def global_search(request):
+    """
+    Universal fuzzy search across all searchable models.
+
+    GET /api/search/?q=firewall+policy&type=applied-controls,assets
+    """
+    from rapidfuzz import fuzz
+
+    query = request.query_params.get("q", "").strip()
+    if not query:
+        return Response({"results": [], "query": "", "count": 0})
+
+    type_filter = request.query_params.get("type", "")
+    allowed_types = set(type_filter.split(",")) if type_filter else None
+
+    words = query.split()
+    # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
+    prefixes = {w[:3].lower() for w in words if len(w) >= 3}
+
+    MAX_PER_MODEL = 200
+    candidates = []
+
+    for model_class, url_slug, has_ref_id in SEARCHABLE_MODELS:
+        if allowed_types and url_slug not in allowed_types:
+            continue
+
+        # Permission-aware queryset
+        accessible_ids = RoleAssignment.get_accessible_object_ids(
+            Folder.get_root_folder(), request.user, model_class
+        )[0]
+        qs = model_class.objects.filter(id__in=accessible_ids)
+
+        # Build Q filter: icontains for each word on name/description/ref_id
+        q_filter = Q()
+        for word in words:
+            word_q = Q(name__icontains=word) | Q(description__icontains=word)
+            if has_ref_id:
+                word_q |= Q(ref_id__icontains=word)
+            q_filter |= word_q
+
+        # Also add prefix-based matching for typo tolerance
+        for prefix in prefixes:
+            prefix_q = Q(name__icontains=prefix)
+            if has_ref_id:
+                prefix_q |= Q(ref_id__icontains=prefix)
+            q_filter |= prefix_q
+
+        results = qs.filter(q_filter).values(
+            "id",
+            "name",
+            "description",
+            *(["ref_id"] if has_ref_id else []),
+        )[:MAX_PER_MODEL]
+
+        for row in results:
+            candidates.append(
+                {
+                    "type": url_slug,
+                    "id": str(row["id"]),
+                    "name": row["name"] or "",
+                    "ref_id": row.get("ref_id", "") or "",
+                    "description": (row.get("description") or "")[:200],
+                }
+            )
+
+    # Score and rank with rapidfuzz
+    for candidate in candidates:
+        # Score against name (highest weight), ref_id, then description
+        name_score = fuzz.WRatio(query, candidate["name"])
+        ref_score = (
+            fuzz.WRatio(query, candidate["ref_id"]) if candidate["ref_id"] else 0
+        )
+        desc_score = fuzz.partial_ratio(query, candidate["description"]) * 0.4
+        candidate["score"] = max(name_score, ref_score, desc_score)
+
+    # Sort by score descending, return top 50
+    candidates.sort(key=lambda c: c["score"], reverse=True)
+    top_results = candidates[:50]
+
+    # Add URL for each result
+    for r in top_results:
+        r["url"] = f"/{r['type']}/{r['id']}"
+
+    return Response(
+        {
+            "results": top_results,
+            "query": query,
+            "count": len(top_results),
+            "total_candidates": len(candidates),
+        }
+    )
