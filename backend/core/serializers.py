@@ -232,10 +232,14 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
+    has_editing_draft = serializers.SerializerMethodField()
+
+    def get_has_editing_draft(self, obj):
+        return obj.editing_draft is not None
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations"]
+        exclude = ["translations", "editing_draft", "editing_history"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
