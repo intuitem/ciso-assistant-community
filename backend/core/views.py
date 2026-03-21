@@ -2634,6 +2634,155 @@ class RiskMatrixViewSet(BaseModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
+        """Export a matrix as a library-compatible YAML file."""
+        import yaml
+        from django.http import HttpResponse
+
+        matrix = self.get_object()
+        # Use editing_draft if present (WIP), otherwise published json_definition
+        definition = matrix.editing_draft or matrix.json_definition
+        if not definition or not definition.get("grid"):
+            return Response(
+                {"error": "No matrix definition to export."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ref_id = (matrix.name or "untitled").lower().replace(" ", "-").replace("_", "-")
+        ref_id = "".join(c for c in ref_id if c.isalnum() or c == "-")
+
+        library_data = {
+            "urn": f"urn:custom:risk:library:risk-matrix-{ref_id}",
+            "locale": matrix.locale or "en",
+            "ref_id": ref_id,
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "version": matrix.editing_version,
+            "provider": matrix.provider or "custom",
+            "packager": "custom",
+            "objects": {
+                "risk_matrix": [
+                    {
+                        "urn": f"urn:custom:risk:matrix:{ref_id}",
+                        "ref_id": ref_id,
+                        "name": matrix.name,
+                        "description": matrix.description or "",
+                        **definition,
+                    }
+                ]
+            },
+        }
+
+        # Add translations if present
+        if matrix.translations:
+            library_data["translations"] = matrix.translations
+            library_data["objects"]["risk_matrix"][0]["translations"] = (
+                matrix.translations
+            )
+
+        yaml_content = yaml.dump(
+            library_data, allow_unicode=True, default_flow_style=False, sort_keys=False
+        )
+
+        response = HttpResponse(yaml_content, content_type="application/x-yaml")
+        response["Content-Disposition"] = (
+            f'attachment; filename="risk-matrix-{ref_id}.yaml"'
+        )
+        return response
+
+    @action(detail=False, methods=["post"], url_path="import-yaml")
+    def import_yaml(self, request):
+        """Import a library YAML file and create a new draft matrix from it."""
+        import yaml
+        from iam.models import Folder
+
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            content = uploaded_file.read()
+            library_data = yaml.safe_load(content)
+        except yaml.YAMLError as e:
+            return Response(
+                {"error": f"Invalid YAML: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(library_data, dict):
+            return Response(
+                {"error": "YAML must be a dictionary."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract matrix definition
+        matrix_def = None
+        matrix_meta = {}
+        if "objects" in library_data and "risk_matrix" in library_data["objects"]:
+            matrices = library_data["objects"]["risk_matrix"]
+            if matrices and len(matrices) > 0:
+                matrix_def = matrices[0]
+                matrix_meta = {
+                    "name": library_data.get(
+                        "name", matrix_def.get("name", "Imported Matrix")
+                    ),
+                    "description": library_data.get(
+                        "description", matrix_def.get("description", "")
+                    ),
+                    "provider": library_data.get("provider", ""),
+                    "locale": library_data.get("locale", "en"),
+                }
+        elif all(k in library_data for k in ("probability", "impact", "risk", "grid")):
+            # Direct matrix definition (not wrapped in library structure)
+            matrix_def = library_data
+            matrix_meta = {
+                "name": library_data.get("name", "Imported Matrix"),
+                "description": library_data.get("description", ""),
+                "provider": library_data.get("provider", ""),
+                "locale": library_data.get("locale", "en"),
+            }
+
+        if not matrix_def or "grid" not in matrix_def:
+            return Response(
+                {"error": "No valid matrix definition found in file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract only the matrix fields
+        editing_draft = {}
+        for key in ("probability", "impact", "risk", "grid", "strength_of_knowledge"):
+            if key in matrix_def:
+                editing_draft[key] = matrix_def[key]
+
+        folder_id = request.data.get("folder", str(Folder.get_root_folder().id))
+
+        matrix = RiskMatrix.objects.create(
+            name=matrix_meta["name"],
+            description=matrix_meta["description"],
+            provider=matrix_meta["provider"],
+            locale=matrix_meta["locale"],
+            folder_id=folder_id,
+            json_definition={},
+            editing_draft=editing_draft,
+            is_published=False,
+            is_enabled=False,
+            translations=library_data.get("translations", {}),
+        )
+
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "editing_draft": matrix.editing_draft,
+                "status": "imported",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
     @staticmethod
     def _validate_json_definition(json_def: dict) -> list[str]:
         """Validate the matrix JSON definition before publishing."""

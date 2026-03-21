@@ -16,6 +16,27 @@ async function proxyPost(fetchFn: typeof fetch, url: string, body?: unknown) {
 	return json(data, { status: res.status });
 }
 
+/** GET — export-yaml */
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
+	const action = url.searchParams.get('action');
+	if (action === 'export-yaml') {
+		const res = await fetch(`${ENDPOINT}/${params.id}/export-yaml/`);
+		if (!res.ok) {
+			const data = await res.json();
+			error(res.status as NumericRange<400, 599>, data);
+		}
+		const yamlContent = await res.text();
+		return new Response(yamlContent, {
+			status: 200,
+			headers: {
+				'Content-Type': 'application/x-yaml',
+				'Content-Disposition': res.headers.get('Content-Disposition') || 'attachment; filename="matrix.yaml"'
+			}
+		});
+	}
+	error(400, { error: 'Invalid action' });
+};
+
 /** PATCH — save editing_draft */
 export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	const body = await request.json();

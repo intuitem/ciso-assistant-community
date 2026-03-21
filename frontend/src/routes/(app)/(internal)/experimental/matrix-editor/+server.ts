@@ -28,7 +28,22 @@ export const GET: RequestHandler = async ({ fetch }) => {
 };
 
 /** Create a new draft matrix */
-export const POST: RequestHandler = async ({ fetch, request }) => {
+export const POST: RequestHandler = async ({ fetch, request, url }) => {
+	const action = url.searchParams.get('action');
+
+	if (action === 'import-yaml') {
+		// Forward file upload as-is
+		const formData = await request.formData();
+		const res = await fetch(`${ENDPOINT}/import-yaml/`, {
+			method: 'POST',
+			body: formData
+		});
+		const data = await res.json();
+		if (!res.ok) error(res.status as NumericRange<400, 599>, data);
+		return json(data, { status: res.status });
+	}
+
+	// Default: create-draft with JSON body
 	const body = await request.json();
 	return proxyRequest(fetch, `${ENDPOINT}/create-draft/`, 'POST', body);
 };

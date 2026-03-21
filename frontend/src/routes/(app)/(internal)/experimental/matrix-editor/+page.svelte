@@ -133,55 +133,6 @@
 		}
 	}
 
-	// Undo/redo history
-	interface EditorSnapshot {
-		probabilityLevels: Level[];
-		impactLevels: Level[];
-		riskLevels: Level[];
-		grid: number[][];
-	}
-
-	let undoStack: EditorSnapshot[] = $state([]);
-	let redoStack: EditorSnapshot[] = $state([]);
-	const MAX_HISTORY = 50;
-
-	function takeSnapshot(): EditorSnapshot {
-		return {
-			probabilityLevels: JSON.parse(JSON.stringify(probabilityLevels)),
-			impactLevels: JSON.parse(JSON.stringify(impactLevels)),
-			riskLevels: JSON.parse(JSON.stringify(riskLevels)),
-			grid: JSON.parse(JSON.stringify(grid))
-		};
-	}
-
-	function pushUndo() {
-		undoStack = [...undoStack.slice(-(MAX_HISTORY - 1)), takeSnapshot()];
-		redoStack = [];
-	}
-
-	function undo() {
-		if (undoStack.length === 0) return;
-		redoStack = [...redoStack, takeSnapshot()];
-		const prev = undoStack[undoStack.length - 1];
-		undoStack = undoStack.slice(0, -1);
-		applySnapshot(prev);
-	}
-
-	function redo() {
-		if (redoStack.length === 0) return;
-		undoStack = [...undoStack, takeSnapshot()];
-		const next = redoStack[redoStack.length - 1];
-		redoStack = redoStack.slice(0, -1);
-		applySnapshot(next);
-	}
-
-	function applySnapshot(snap: EditorSnapshot) {
-		probabilityLevels = snap.probabilityLevels;
-		impactLevels = snap.impactLevels;
-		riskLevels = snap.riskLevels;
-		grid = snap.grid;
-	}
-
 	// Derived: build json_definition for preview
 	let jsonDefinition = $derived({
 		probability: probabilityLevels,
@@ -248,77 +199,67 @@
 		return warnings;
 	});
 
-	// YAML export
-	function exportAsYaml() {
-		const refId = (matrixName || 'untitled')
-			.toLowerCase()
-			.replace(/\s+/g, '-')
-			.replace(/[^a-z0-9-]/g, '');
-		const libraryData = {
-			urn: `urn:custom:risk:library:risk-matrix-${refId}`,
-			locale: locale,
-			ref_id: refId,
-			name: matrixName || 'Untitled Matrix',
-			description: matrixDescription,
-			version: 1,
-			provider: provider || 'custom',
-			packager: 'custom',
-			objects: {
-				risk_matrix: [
-					{
-						urn: `urn:custom:risk:matrix:${refId}`,
-						ref_id: refId,
-						name: matrixName || 'Untitled Matrix',
-						description: matrixDescription,
-						...jsonDefinition
-					}
-				]
+	// Export as library YAML (server-side)
+	async function exportAsYaml() {
+		if (!matrixId) {
+			// Save first so there's something to export
+			await saveDraft();
+			if (!matrixId) return;
+		}
+		try {
+			const res = await fetch(`/experimental/matrix-editor/${matrixId}?action=export-yaml`);
+			if (!res.ok) {
+				const err = await res.json();
+				throw new Error(err.error || 'Export failed');
 			}
-		};
+			const blob = await res.blob();
+			const disposition = res.headers.get('Content-Disposition') || '';
+			const filenameMatch = disposition.match(/filename="?([^"]+)"?/);
+			const filename = filenameMatch?.[1] || 'risk-matrix.yaml';
 
-		// Simple YAML-like serialization (no dependency needed)
-		const yamlStr = JSON.stringify(libraryData, null, 2);
-		const blob = new Blob([yamlStr], { type: 'application/json' });
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement('a');
-		a.href = url;
-		a.download = `risk-matrix-${refId}.json`;
-		a.click();
-		URL.revokeObjectURL(url);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = filename;
+			a.click();
+			URL.revokeObjectURL(url);
+			setStatus('Exported as YAML', 'success');
+		} catch (e: any) {
+			setStatus(e.message, 'error');
+		}
 	}
 
-	// JSON import
+	// Import from library YAML file (server-side parsing)
 	function importFromFile() {
 		const input = document.createElement('input');
 		input.type = 'file';
-		input.accept = '.json,.yaml,.yml';
+		input.accept = '.yaml,.yml';
 		input.onchange = async (e) => {
 			const file = (e.target as HTMLInputElement).files?.[0];
 			if (!file) return;
 			try {
-				const text = await file.text();
-				const data = JSON.parse(text);
+				const formData = new FormData();
+				formData.append('file', file);
 
-				// Try to find the matrix definition
-				let matrixDef = data;
-				if (data.objects?.risk_matrix?.[0]) {
-					matrixDef = data.objects.risk_matrix[0];
-					matrixName = data.name || matrixDef.name || '';
-					matrixDescription = data.description || matrixDef.description || '';
-					provider = data.provider || '';
-					locale = data.locale || 'en';
+				const res = await fetch('/experimental/matrix-editor?action=import-yaml', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (!res.ok) {
+					const err = await res.json();
+					throw new Error(err.error || 'Import failed');
 				}
 
-				if (matrixDef.probability) {
-					pushUndo();
-					probabilityLevels = matrixDef.probability;
-					impactLevels = matrixDef.impact;
-					riskLevels = matrixDef.risk;
-					grid = matrixDef.grid;
-					setStatus('Imported successfully', 'success');
-				} else {
-					setStatus('Invalid file: no probability/impact/risk/grid found', 'error');
-				}
+				const result = await res.json();
+				// Load the newly created draft
+				loadDraft({
+					id: result.id,
+					name: result.name,
+					editing_draft: result.editing_draft
+				});
+				refreshDrafts();
+				setStatus('Imported successfully', 'success');
 			} catch (err: any) {
 				setStatus(`Import failed: ${err.message}`, 'error');
 			}
@@ -328,19 +269,16 @@
 
 	// Sync grid dimensions when probability/impact levels change
 	function onProbabilityChange(newLevels: Level[]) {
-		pushUndo();
 		probabilityLevels = newLevels;
 		syncGridDimensions();
 	}
 
 	function onImpactChange(newLevels: Level[]) {
-		pushUndo();
 		impactLevels = newLevels;
 		syncGridDimensions();
 	}
 
 	function onRiskChange(newLevels: Level[]) {
-		pushUndo();
 		riskLevels = newLevels;
 		// Clamp any grid values that exceed the new max risk index
 		const maxIdx = newLevels.length - 1;
@@ -348,7 +286,6 @@
 	}
 
 	function onGridChange(newGrid: number[][]) {
-		pushUndo();
 		grid = newGrid;
 	}
 
@@ -648,7 +585,6 @@
 	}
 
 	function onTranslationsChange(newProb: Level[], newImpact: Level[], newRisk: Level[]) {
-		pushUndo();
 		probabilityLevels = newProb;
 		impactLevels = newImpact;
 		riskLevels = newRisk;
@@ -705,27 +641,7 @@
 					<span class="text-xs text-gray-400 italic">No matrix selected</span>
 				{/if}
 				<span class="border-l border-gray-300 h-6 mx-1"></span>
-				<!-- Undo/Redo -->
-				<button
-					type="button"
-					class="btn btn-sm variant-ghost"
-					disabled={undoStack.length === 0}
-					onclick={undo}
-					title="Undo (Ctrl+Z)"
-				>
-					<i class="fa-solid fa-rotate-left"></i>
-				</button>
-				<button
-					type="button"
-					class="btn btn-sm variant-ghost"
-					disabled={redoStack.length === 0}
-					onclick={redo}
-					title="Redo (Ctrl+Y)"
-				>
-					<i class="fa-solid fa-rotate-right"></i>
-				</button>
-				<span class="border-l border-gray-300 h-6 mx-1"></span>
-				{#if statusMessage}
+					{#if statusMessage}
 					<span
 						class="text-xs px-2 py-1 rounded-full transition-opacity {statusType === 'error'
 							? 'bg-red-100 text-red-700'
