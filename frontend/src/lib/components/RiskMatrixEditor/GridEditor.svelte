@@ -104,7 +104,7 @@
 										? 'white'
 										: 'black'}"
 									onclick={() => cycleRiskLevel(rowIdx, colIdx)}
-									title="Click to cycle, or right-click for dropdown"
+									title={m.clickToCycle()}
 									role="button"
 									tabindex="0"
 									onkeydown={(e) => {

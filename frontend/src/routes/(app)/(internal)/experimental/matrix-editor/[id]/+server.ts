@@ -30,7 +30,8 @@ export const GET: RequestHandler = async ({ fetch, params, url }) => {
 			status: 200,
 			headers: {
 				'Content-Type': 'application/x-yaml',
-				'Content-Disposition': res.headers.get('Content-Disposition') || 'attachment; filename="matrix.yaml"'
+				'Content-Disposition':
+					res.headers.get('Content-Disposition') || 'attachment; filename="matrix.yaml"'
 			}
 		});
 	}

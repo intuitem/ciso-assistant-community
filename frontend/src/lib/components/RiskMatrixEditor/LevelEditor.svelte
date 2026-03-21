@@ -164,7 +164,7 @@
 								class="input input-sm w-full"
 								value={level.name}
 								oninput={(e) => updateLevel(i, 'name', e.currentTarget.value)}
-								placeholder="Level name..."
+								placeholder={m.levelNamePlaceholder()}
 							/>
 						</td>
 						<td>
@@ -173,7 +173,7 @@
 								class="input input-sm w-full"
 								value={level.description}
 								oninput={(e) => updateLevel(i, 'description', e.currentTarget.value)}
-								placeholder="Description..."
+								placeholder={m.descriptionPlaceholder()}
 							/>
 						</td>
 						<td>
@@ -190,7 +190,7 @@
 								class="btn btn-sm variant-ghost"
 								disabled={i === 0}
 								onclick={() => moveLevel(i, -1)}
-								title="Move up"
+								title={m.moveUp()}
 							>
 								<i class="fa-solid fa-arrow-up text-xs"></i>
 							</button>
@@ -199,7 +199,7 @@
 								class="btn btn-sm variant-ghost"
 								disabled={i === levels.length - 1}
 								onclick={() => moveLevel(i, 1)}
-								title="Move down"
+								title={m.moveDown()}
 							>
 								<i class="fa-solid fa-arrow-down text-xs"></i>
 							</button>

@@ -176,19 +176,27 @@
 	// Real-time validation warnings
 	let validationWarnings = $derived(() => {
 		const warnings: string[] = [];
-		if (probabilityLevels.length < 2) warnings.push('Need at least 2 probability levels');
-		if (impactLevels.length < 2) warnings.push('Need at least 2 impact levels');
-		if (riskLevels.length < 2) warnings.push('Need at least 2 risk levels');
+		if (probabilityLevels.length < 2)
+			warnings.push(m.needAtLeast2Levels({ category: m.probability() }));
+		if (impactLevels.length < 2) warnings.push(m.needAtLeast2Levels({ category: m.impact() }));
+		if (riskLevels.length < 2) warnings.push(m.needAtLeast2Levels({ category: m.riskLevels() }));
 
 		if (grid.length !== probabilityLevels.length) {
 			warnings.push(
-				`Grid rows (${grid.length}) don't match probability levels (${probabilityLevels.length})`
+				m.gridRowsMismatch({
+					gridRows: String(grid.length),
+					probLevels: String(probabilityLevels.length)
+				})
 			);
 		}
 		for (let r = 0; r < grid.length; r++) {
 			if (grid[r]?.length !== impactLevels.length) {
 				warnings.push(
-					`Grid row ${r} columns (${grid[r]?.length}) don't match impact levels (${impactLevels.length})`
+					m.gridColsMismatch({
+						row: String(r),
+						gridCols: String(grid[r]?.length),
+						impactLevels: String(impactLevels.length)
+					})
 				);
 				break;
 			}
@@ -199,29 +207,37 @@
 			for (let c = 0; c < (grid[r]?.length ?? 0); c++) {
 				if (grid[r][c] > maxRisk) {
 					warnings.push(
-						`Grid cell [${r}][${c}] references risk level ${grid[r][c]} but max is ${maxRisk}`
+						m.invalidGridCell({
+							row: String(r),
+							col: String(c),
+							value: String(grid[r][c]),
+							max: String(maxRisk)
+						})
 					);
 				}
 			}
 		}
 
 		for (const [cat, levels] of [
-			['Probability', probabilityLevels],
-			['Impact', impactLevels],
-			['Risk', riskLevels]
-		] as const) {
+			[m.probability(), probabilityLevels],
+			[m.impact(), impactLevels],
+			[m.riskLevels(), riskLevels]
+		] as [string, Level[]][]) {
 			const abbrs = new Set<string>();
 			for (const level of levels) {
-				if (!level.name) warnings.push(`${cat} level ${level.id} has no name`);
-				if (!level.hexcolor) warnings.push(`${cat} level ${level.id} has no color`);
+				if (!level.name) warnings.push(m.levelMissingName({ category: cat, id: String(level.id) }));
+				if (!level.hexcolor)
+					warnings.push(m.levelMissingColor({ category: cat, id: String(level.id) }));
 				if (level.abbreviation && abbrs.has(level.abbreviation)) {
-					warnings.push(`${cat} has duplicate abbreviation "${level.abbreviation}"`);
+					warnings.push(
+						m.duplicateAbbreviation({ category: cat, abbreviation: level.abbreviation })
+					);
 				}
 				abbrs.add(level.abbreviation);
 			}
 		}
 
-		if (!matrixName.trim()) warnings.push('Matrix name is empty');
+		if (!matrixName.trim()) warnings.push(m.matrixNameEmpty());
 
 		return warnings;
 	});
@@ -237,7 +253,7 @@
 			const res = await fetch(`/experimental/matrix-editor/${matrixId}?action=export-yaml`);
 			if (!res.ok) {
 				const err = await res.json();
-				throw new Error(err.error || 'Export failed');
+				throw new Error(err.error || m.exportFailed());
 			}
 			const blob = await res.blob();
 			const disposition = res.headers.get('Content-Disposition') || '';
@@ -250,7 +266,7 @@
 			a.download = filename;
 			a.click();
 			URL.revokeObjectURL(url);
-			setStatus('Exported as YAML', 'success');
+			setStatus(m.exportedAsYaml(), 'success');
 		} catch (e: any) {
 			setStatus(e.message, 'error');
 		}
@@ -275,7 +291,7 @@
 
 				if (!res.ok) {
 					const err = await res.json();
-					throw new Error(err.error || 'Import failed');
+					throw new Error(err.error || m.importFailed());
 				}
 
 				const result = await res.json();
@@ -286,9 +302,9 @@
 					editing_draft: result.editing_draft
 				});
 				refreshDrafts();
-				setStatus('Imported successfully', 'success');
+				setStatus(m.importedSuccessfully(), 'success');
 			} catch (err: any) {
-				setStatus(`Import failed: ${err.message}`, 'error');
+				setStatus(`${m.importFailed()}: ${err.message}`, 'error');
 			}
 		};
 		input.click();
@@ -418,7 +434,7 @@
 	async function discardCurrentDraft() {
 		if (!matrixId) return true;
 		if (hasUnsavedChanges) {
-			if (!confirm('You have unsaved changes on the current matrix. Discard them?')) return false;
+			if (!confirm(m.discardUnsavedConfirm())) return false;
 		}
 		// Discard the editing_draft on the current matrix
 		try {
@@ -520,20 +536,74 @@
 		provider = '';
 		locale = 'en';
 		probabilityLevels = [
-			{ id: 0, abbreviation: '1', name: 'Low', description: 'Unlikely to occur', hexcolor: '#4CAF50' },
+			{
+				id: 0,
+				abbreviation: '1',
+				name: 'Low',
+				description: 'Unlikely to occur',
+				hexcolor: '#4CAF50'
+			},
 			{ id: 1, abbreviation: '2', name: 'Medium', description: 'May occur', hexcolor: '#FF9800' },
-			{ id: 2, abbreviation: '3', name: 'High', description: 'Likely to occur', hexcolor: '#F44336' }
+			{
+				id: 2,
+				abbreviation: '3',
+				name: 'High',
+				description: 'Likely to occur',
+				hexcolor: '#F44336'
+			}
 		];
 		impactLevels = [
-			{ id: 0, abbreviation: '1', name: 'Low', description: 'Minor consequences', hexcolor: '#4CAF50' },
-			{ id: 1, abbreviation: '2', name: 'Medium', description: 'Moderate consequences', hexcolor: '#FF9800' },
-			{ id: 2, abbreviation: '3', name: 'High', description: 'Severe consequences', hexcolor: '#F44336' }
+			{
+				id: 0,
+				abbreviation: '1',
+				name: 'Low',
+				description: 'Minor consequences',
+				hexcolor: '#4CAF50'
+			},
+			{
+				id: 1,
+				abbreviation: '2',
+				name: 'Medium',
+				description: 'Moderate consequences',
+				hexcolor: '#FF9800'
+			},
+			{
+				id: 2,
+				abbreviation: '3',
+				name: 'High',
+				description: 'Severe consequences',
+				hexcolor: '#F44336'
+			}
 		];
 		riskLevels = [
-			{ id: 0, abbreviation: '1', name: 'Low', description: 'Acceptable risk', hexcolor: '#4CAF50' },
-			{ id: 1, abbreviation: '2', name: 'Medium', description: 'Moderate risk', hexcolor: '#FFEB3B' },
-			{ id: 2, abbreviation: '3', name: 'High', description: 'Significant risk', hexcolor: '#FF9800' },
-			{ id: 3, abbreviation: '4', name: 'Critical', description: 'Unacceptable risk', hexcolor: '#F44336' }
+			{
+				id: 0,
+				abbreviation: '1',
+				name: 'Low',
+				description: 'Acceptable risk',
+				hexcolor: '#4CAF50'
+			},
+			{
+				id: 1,
+				abbreviation: '2',
+				name: 'Medium',
+				description: 'Moderate risk',
+				hexcolor: '#FFEB3B'
+			},
+			{
+				id: 2,
+				abbreviation: '3',
+				name: 'High',
+				description: 'Significant risk',
+				hexcolor: '#FF9800'
+			},
+			{
+				id: 3,
+				abbreviation: '4',
+				name: 'Critical',
+				description: 'Unacceptable risk',
+				hexcolor: '#F44336'
+			}
 		];
 		grid = [
 			[0, 0, 1],
@@ -564,9 +634,7 @@
 
 	async function deleteDraft(matrix: any) {
 		const isPublished = matrix.is_published;
-		const msg = isPublished
-			? 'Discard the active draft? The published matrix will remain.'
-			: 'Delete this unpublished matrix?';
+		const msg = isPublished ? m.discardDraftConfirm() : m.deleteUnpublishedConfirm();
 		if (!confirm(msg)) return;
 		try {
 			let res;
@@ -595,13 +663,13 @@
 						setTimeout(() => markClean(), 0);
 					}
 				}
-				setStatus(isPublished ? 'Draft discarded' : 'Matrix deleted', 'success');
+				setStatus(isPublished ? m.draftDiscarded() : m.matrixDeleted(), 'success');
 			} else {
-				const err = await res.json().catch(() => ({ error: 'Delete failed' }));
-				setStatus(err.error || 'Delete failed', 'error');
+				const err = await res.json().catch(() => ({ error: m.deleteFailed() }));
+				setStatus(err.error || m.deleteFailed(), 'error');
 			}
 		} catch (e: any) {
-			setStatus(e.message || 'Delete failed', 'error');
+			setStatus(e.message || m.deleteFailed(), 'error');
 		}
 	}
 
@@ -639,7 +707,7 @@
 					onclick={importFromFile}
 				>
 					<i class="fa-solid fa-file-import mr-1"></i>
-					Import
+					{m.importYaml()}
 				</button>
 				<button
 					type="button"
@@ -647,7 +715,7 @@
 					onclick={exportAsYaml}
 				>
 					<i class="fa-solid fa-file-export mr-1"></i>
-					Export
+					{m.exportYaml()}
 				</button>
 			</div>
 
@@ -701,7 +769,7 @@
 						<tr>
 							<th>{m.name()}</th>
 							<th>{m.description()}</th>
-							<th>Status</th>
+							<th>{m.status()}</th>
 							<th>{m.provider()}</th>
 							<th class="w-48"></th>
 						</tr>
@@ -714,12 +782,13 @@
 								<td class="text-sm text-gray-500 truncate max-w-48">{draft.description || '—'}</td>
 								<td>
 									{#if draft.is_published}
-										<span class="badge variant-filled-success text-xs">published</span>
+										<span class="badge variant-filled-success text-xs">{m.published()}</span>
 									{:else}
-										<span class="badge variant-filled-warning text-xs">new</span>
+										<span class="badge variant-filled-warning text-xs">{m.new()}</span>
 									{/if}
 									<span class="badge variant-filled-primary text-xs ml-1">
-										<i class="fa-solid fa-pen-to-square mr-0.5"></i> editing
+										<i class="fa-solid fa-pen-to-square mr-0.5"></i>
+										{m.editing()}
 									</span>
 								</td>
 								<td class="text-sm text-gray-500">{draft.provider || '—'}</td>
@@ -732,16 +801,16 @@
 												if (matrixId !== draft.id && !(await discardCurrentDraft())) return;
 												loadDraft(draft);
 											}}
-											title="Continue editing"
+											title={m.continueEditing()}
 										>
 											<i class="fa-solid fa-pen-to-square mr-1"></i>
-											Continue
+											{m.continueEditing()}
 										</button>
 										<button
 											type="button"
 											class="btn btn-sm variant-ghost-error"
 											onclick={() => deleteDraft(draft)}
-											title={draft.is_published ? 'Discard draft' : 'Delete'}
+											title={draft.is_published ? m.discardDraft() : m.delete()}
 										>
 											<i class="fa-solid fa-xmark"></i>
 										</button>
@@ -755,13 +824,13 @@
 								<td class="font-medium">{matrix.name}</td>
 								<td class="text-sm text-gray-500 truncate max-w-48">{matrix.description || '—'}</td>
 								<td>
-									<span class="badge variant-filled-success text-xs">published</span>
+									<span class="badge variant-filled-success text-xs">{m.published()}</span>
 									{#if matrix.urn}
 										<span
 											class="badge variant-ghost-surface text-xs ml-1"
-											title="From library — clone to create an editable copy"
+											title={m.fromLibraryTooltip()}
 										>
-											<i class="fa-solid fa-book-open mr-0.5"></i>library
+											<i class="fa-solid fa-book-open mr-0.5"></i>{m.fromLibrary()}
 										</span>
 									{/if}
 									{#if matrix.editing_version > 1}
@@ -776,20 +845,20 @@
 												type="button"
 												class="btn btn-sm variant-ghost-primary"
 												onclick={() => editPublishedMatrix(matrix.id)}
-												title="Edit this matrix (changes won't affect assessments until published)"
+												title={m.editMatrixTooltip()}
 											>
 												<i class="fa-solid fa-pen-to-square mr-1"></i>
-												Edit
+												{m.edit()}
 											</button>
 										{/if}
 										<button
 											type="button"
 											class="btn btn-sm variant-ghost-surface"
 											onclick={() => cloneFromMatrix(matrix.id)}
-											title="Create a new matrix based on this one"
+											title={m.cloneMatrixTooltip()}
 										>
 											<i class="fa-solid fa-copy mr-1"></i>
-											Clone
+											{m.clone()}
 										</button>
 									</div>
 								</td>
@@ -800,170 +869,175 @@
 			</div>
 		{:else}
 			<p class="text-sm text-gray-400 py-4 text-center">
-				No risk matrices loaded yet. Go to <a href="/libraries" class="text-primary-500 hover:underline">Libraries</a> to import one from the CISO Assistant store, or use the toolbar to create a new one.
+				{@html m.noMatricesYet({
+					link:
+						'<a href="/libraries" class="text-primary-500 hover:underline">' +
+						m.libraries() +
+						'</a>'
+				})}
 			</p>
 		{/if}
 	</div>
 
 	{#if matrixId}
-	<!-- Metadata -->
-	<div class="card p-4">
-		<h3 class="text-lg font-semibold mb-3">{m.metadata()}</h3>
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-			<div>
-				<label class="label" for="matrix-name">
-					<span>{m.name()}</span>
-				</label>
-				<input
-					id="matrix-name"
-					type="text"
-					class="input"
-					bind:value={matrixName}
-					placeholder="Matrix name..."
-				/>
-			</div>
-			<div>
-				<label class="label" for="matrix-desc">
-					<span>{m.description()}</span>
-				</label>
-				<input
-					id="matrix-desc"
-					type="text"
-					class="input"
-					bind:value={matrixDescription}
-					placeholder="Description..."
-				/>
-			</div>
-			<div>
-				<label class="label" for="matrix-provider">
-					<span>{m.provider()}</span>
-				</label>
-				<input
-					id="matrix-provider"
-					type="text"
-					class="input"
-					bind:value={provider}
-					placeholder="Provider..."
-				/>
-			</div>
-			<div>
-				<label class="label" for="matrix-locale">
-					<span>{m.locale()}</span>
-				</label>
-				<select id="matrix-locale" class="select" bind:value={locale}>
-					{#each Object.entries(LOCALE_MAP) as [code, info]}
-						<option value={code}>{language[info.name] ?? info.name} ({code})</option>
-					{/each}
-				</select>
-			</div>
-			<div>
-				<label class="label" for="matrix-folder">
-					<span>{m.domain()}</span>
-				</label>
-				<select id="matrix-folder" class="select" bind:value={selectedFolder}>
-					{#each folders as folder}
-						<option value={folder.id}>{folder.name}</option>
-					{/each}
-				</select>
-			</div>
-		</div>
-	</div>
-
-	<!-- Editor tabs -->
-	<div class="card p-4">
-		<div class="flex border-b mb-4 gap-1">
-			{#each tabs as tab}
-				<button
-					type="button"
-					class="px-4 py-2 text-sm font-medium rounded-t transition-colors
-						{activeTab === tab.id
-						? 'bg-primary-500 text-white'
-						: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
-					onclick={() => (activeTab = tab.id)}
-				>
-					<i class="{tab.icon} mr-1"></i>
-					{typeof tab.label === 'function' ? tab.label() : tab.label()}
-				</button>
-			{/each}
-		</div>
-
-		{#if activeTab === 'probability'}
-			<LevelEditor
-				title={m.probability()}
-				bind:levels={probabilityLevels}
-				onchange={onProbabilityChange}
-			/>
-		{:else if activeTab === 'impact'}
-			<LevelEditor title={m.impact()} bind:levels={impactLevels} onchange={onImpactChange} />
-		{:else if activeTab === 'risk'}
-			<LevelEditor title={m.riskLevels()} bind:levels={riskLevels} onchange={onRiskChange} />
-		{:else if activeTab === 'grid'}
-			<GridEditor
-				bind:grid
-				{probabilityLevels}
-				{impactLevels}
-				{riskLevels}
-				onchange={onGridChange}
-			/>
-		{:else if activeTab === 'i18n'}
-			<TranslationEditor
-				bind:probabilityLevels
-				bind:impactLevels
-				bind:riskLevels
-				onchange={onTranslationsChange}
-			/>
-		{/if}
-	</div>
-
-	<!-- Validation warnings -->
-	{#if validationWarnings().length > 0}
-		<div class="card p-3 border-l-4 border-yellow-400 bg-yellow-50">
-			<div class="flex items-start gap-2">
-				<i class="fa-solid fa-triangle-exclamation text-yellow-600 mt-0.5"></i>
+		<!-- Metadata -->
+		<div class="card p-4">
+			<h3 class="text-lg font-semibold mb-3">{m.metadata()}</h3>
+			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 				<div>
-					<p class="font-semibold text-sm text-yellow-800">{m.invalidMatrix()}</p>
-					<ul class="text-xs text-yellow-700 mt-1 list-disc list-inside">
-						{#each validationWarnings() as warning}
-							<li>{warning}</li>
+					<label class="label" for="matrix-name">
+						<span>{m.name()}</span>
+					</label>
+					<input
+						id="matrix-name"
+						type="text"
+						class="input"
+						bind:value={matrixName}
+						placeholder={m.matrixNamePlaceholder()}
+					/>
+				</div>
+				<div>
+					<label class="label" for="matrix-desc">
+						<span>{m.description()}</span>
+					</label>
+					<input
+						id="matrix-desc"
+						type="text"
+						class="input"
+						bind:value={matrixDescription}
+						placeholder={m.descriptionPlaceholder()}
+					/>
+				</div>
+				<div>
+					<label class="label" for="matrix-provider">
+						<span>{m.provider()}</span>
+					</label>
+					<input
+						id="matrix-provider"
+						type="text"
+						class="input"
+						bind:value={provider}
+						placeholder={m.providerPlaceholder()}
+					/>
+				</div>
+				<div>
+					<label class="label" for="matrix-locale">
+						<span>{m.locale()}</span>
+					</label>
+					<select id="matrix-locale" class="select" bind:value={locale}>
+						{#each Object.entries(LOCALE_MAP) as [code, info]}
+							<option value={code}>{language[info.name] ?? info.name} ({code})</option>
 						{/each}
-					</ul>
+					</select>
+				</div>
+				<div>
+					<label class="label" for="matrix-folder">
+						<span>{m.domain()}</span>
+					</label>
+					<select id="matrix-folder" class="select" bind:value={selectedFolder}>
+						{#each folders as folder}
+							<option value={folder.id}>{folder.name}</option>
+						{/each}
+					</select>
 				</div>
 			</div>
 		</div>
-	{/if}
 
-	<!-- Live preview -->
-	<div class="card p-4">
-		<h3 class="text-lg font-semibold mb-3">
-			<i class="fa-solid fa-eye mr-1"></i>
-			{m.matrixPreview()}
-		</h3>
-		{#if probabilityLevels.length >= 2 && impactLevels.length >= 2 && riskLevels.length >= 2}
-			<div class="max-w-3xl mx-auto">
-				{#key JSON.stringify(jsonDefinition)}
-					<RiskMatrix
-						riskMatrix={previewRiskMatrix}
-						matrixName="editor-preview"
-						showLegend={true}
-					/>
-				{/key}
+		<!-- Editor tabs -->
+		<div class="card p-4">
+			<div class="flex border-b mb-4 gap-1">
+				{#each tabs as tab}
+					<button
+						type="button"
+						class="px-4 py-2 text-sm font-medium rounded-t transition-colors
+						{activeTab === tab.id
+							? 'bg-primary-500 text-white'
+							: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+						onclick={() => (activeTab = tab.id)}
+					>
+						<i class="{tab.icon} mr-1"></i>
+						{typeof tab.label === 'function' ? tab.label() : tab.label()}
+					</button>
+				{/each}
 			</div>
-		{:else}
-			<p class="text-gray-500 text-center py-8">
-				{m.invalidMatrix()} — need at least 2 levels for each dimension.
-			</p>
-		{/if}
-	</div>
-	{:else}
-	<!-- No matrix selected placeholder -->
-	<div class="card p-8">
-		<div class="text-center space-y-4">
-			<i class="fa-solid fa-table-cells-large text-4xl text-gray-300"></i>
-			<h3 class="text-lg font-semibold text-gray-500">No matrix selected</h3>
-			<p class="text-sm text-gray-400 max-w-md mx-auto">
-				Select a matrix from the table above to edit or clone it, or use the toolbar to create a new one or import a YAML file.
-			</p>
+
+			{#if activeTab === 'probability'}
+				<LevelEditor
+					title={m.probability()}
+					bind:levels={probabilityLevels}
+					onchange={onProbabilityChange}
+				/>
+			{:else if activeTab === 'impact'}
+				<LevelEditor title={m.impact()} bind:levels={impactLevels} onchange={onImpactChange} />
+			{:else if activeTab === 'risk'}
+				<LevelEditor title={m.riskLevels()} bind:levels={riskLevels} onchange={onRiskChange} />
+			{:else if activeTab === 'grid'}
+				<GridEditor
+					bind:grid
+					{probabilityLevels}
+					{impactLevels}
+					{riskLevels}
+					onchange={onGridChange}
+				/>
+			{:else if activeTab === 'i18n'}
+				<TranslationEditor
+					bind:probabilityLevels
+					bind:impactLevels
+					bind:riskLevels
+					onchange={onTranslationsChange}
+				/>
+			{/if}
 		</div>
-	</div>
+
+		<!-- Validation warnings -->
+		{#if validationWarnings().length > 0}
+			<div class="card p-3 border-l-4 border-yellow-400 bg-yellow-50">
+				<div class="flex items-start gap-2">
+					<i class="fa-solid fa-triangle-exclamation text-yellow-600 mt-0.5"></i>
+					<div>
+						<p class="font-semibold text-sm text-yellow-800">{m.invalidMatrix()}</p>
+						<ul class="text-xs text-yellow-700 mt-1 list-disc list-inside">
+							{#each validationWarnings() as warning}
+								<li>{warning}</li>
+							{/each}
+						</ul>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Live preview -->
+		<div class="card p-4">
+			<h3 class="text-lg font-semibold mb-3">
+				<i class="fa-solid fa-eye mr-1"></i>
+				{m.matrixPreview()}
+			</h3>
+			{#if probabilityLevels.length >= 2 && impactLevels.length >= 2 && riskLevels.length >= 2}
+				<div class="max-w-3xl mx-auto">
+					{#key JSON.stringify(jsonDefinition)}
+						<RiskMatrix
+							riskMatrix={previewRiskMatrix}
+							matrixName="editor-preview"
+							showLegend={true}
+						/>
+					{/key}
+				</div>
+			{:else}
+				<p class="text-gray-500 text-center py-8">
+					{m.invalidMatrix()} — {m.needAtLeast2PerDimension()}
+				</p>
+			{/if}
+		</div>
+	{:else}
+		<!-- No matrix selected placeholder -->
+		<div class="card p-8">
+			<div class="text-center space-y-4">
+				<i class="fa-solid fa-table-cells-large text-4xl text-gray-300"></i>
+				<h3 class="text-lg font-semibold text-gray-500">{m.noMatrixSelected()}</h3>
+				<p class="text-sm text-gray-400 max-w-md mx-auto">
+					{m.noMatrixSelectedHint()}
+				</p>
+			</div>
+		</div>
 	{/if}
 </div>

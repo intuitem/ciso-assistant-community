@@ -98,7 +98,7 @@
 				</option>
 			{/each}
 		</select>
-		<span class="text-xs text-gray-400">* = has translations</span>
+		<span class="text-xs text-gray-400">{m.hasTranslations()}</span>
 	</div>
 
 	<!-- Translation tables per category -->
