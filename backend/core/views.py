@@ -14308,53 +14308,76 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 # Universal Search
 # ---------------------------------------------------------------------------
 
+
+def _search_entry(model, slug, *, ref_id=False, limit=200, extra_search=None):
+    """Helper to build a search config entry."""
+    return {
+        "model": model,
+        "slug": slug,
+        "ref_id": ref_id,
+        "limit": limit,
+        # Additional fields to search on (icontains) beyond name/description/ref_id.
+        # These are ORM lookup paths, e.g. "framework__name" for a FK join.
+        "extra_search": extra_search or [],
+    }
+
+
 SEARCHABLE_MODELS = [
-    # (Model, url_slug, has_ref_id, max_candidates)
-    # has_ref_id: whether the model has a ref_id field to search on.
-    # max_candidates: per-model cap on broad fetch. Large tables (RequirementNode,
+    # limit: per-model cap on broad fetch. Large tables (RequirementNode,
     # ReferenceControl) get a tighter limit to avoid starving smaller models.
+    # extra_search: additional fields to query via icontains for this model.
     # --- Organization ---
-    (Folder, "folders", False, 200),
-    (Perimeter, "perimeters", True, 200),
+    _search_entry(Folder, "folders"),
+    _search_entry(Perimeter, "perimeters", ref_id=True),
     # --- Catalog ---
-    (Framework, "frameworks", True, 200),
-    (Threat, "threats", True, 100),
-    (ReferenceControl, "reference-controls", True, 100),
-    (RiskMatrix, "risk-matrices", True, 50),
-    (RequirementNode, "requirement-nodes", True, 100),
+    _search_entry(Framework, "frameworks", ref_id=True),
+    _search_entry(Threat, "threats", ref_id=True, limit=100, extra_search=["provider"]),
+    _search_entry(ReferenceControl, "reference-controls", ref_id=True, limit=100),
+    _search_entry(RiskMatrix, "risk-matrices", ref_id=True, limit=50),
+    _search_entry(RequirementNode, "requirement-nodes", ref_id=True, limit=100),
     # --- Assets ---
-    (Asset, "assets", True, 200),
-    (Vulnerability, "vulnerabilities", True, 100),
+    _search_entry(Asset, "assets", ref_id=True),
+    _search_entry(Vulnerability, "vulnerabilities", ref_id=True, limit=100),
     # --- Operations ---
-    (AppliedControl, "applied-controls", True, 200),
-    (Policy, "policies", True, 200),
-    (Incident, "incidents", True, 200),
-    (Finding, "findings", True, 200),
-    (SecurityException, "security-exceptions", True, 200),
-    (TaskTemplate, "task-templates", True, 100),
-    (Evidence, "evidences", False, 200),
+    _search_entry(AppliedControl, "applied-controls", ref_id=True),
+    _search_entry(Policy, "policies", ref_id=True),
+    _search_entry(Incident, "incidents", ref_id=True),
+    _search_entry(Finding, "findings", ref_id=True),
+    _search_entry(SecurityException, "security-exceptions", ref_id=True),
+    _search_entry(TaskTemplate, "task-templates", ref_id=True, limit=100),
+    _search_entry(Evidence, "evidences"),
     # --- Governance ---
-    (RiskAcceptance, "risk-acceptances", False, 200),
+    _search_entry(RiskAcceptance, "risk-acceptances"),
     # --- Risk ---
-    (RiskAssessment, "risk-assessments", True, 200),
-    (RiskScenario, "risk-scenarios", True, 200),
+    _search_entry(RiskAssessment, "risk-assessments", ref_id=True),
+    _search_entry(
+        RiskScenario,
+        "risk-scenarios",
+        ref_id=True,
+        extra_search=["risk_assessment__name"],
+    ),
     # --- Compliance ---
-    (ComplianceAssessment, "compliance-assessments", True, 200),
+    _search_entry(
+        ComplianceAssessment,
+        "compliance-assessments",
+        ref_id=True,
+        extra_search=["framework__name"],
+    ),
     # --- TPRM ---
-    (Entity, "entities", True, 200),
-    (Solution, "solutions", False, 200),
-    (Contract, "contracts", True, 200),
+    _search_entry(Entity, "entities", ref_id=True),
+    _search_entry(Solution, "solutions", extra_search=["provider_entity__name"]),
+    _search_entry(Contract, "contracts", ref_id=True),
     # --- EBIOS RM ---
-    (EbiosRMStudy, "ebios-rm", False, 200),
-    (FearedEvent, "feared-events", False, 200),
-    (StrategicScenario, "strategic-scenarios", False, 200),
-    (AttackPath, "attack-paths", False, 200),
+    _search_entry(EbiosRMStudy, "ebios-rm"),
+    _search_entry(FearedEvent, "feared-events"),
+    _search_entry(StrategicScenario, "strategic-scenarios"),
+    _search_entry(AttackPath, "attack-paths"),
     # --- Privacy ---
-    (Processing, "processings", True, 200),
-    (DataBreach, "data-breaches", True, 200),
-    (RightRequest, "right-requests", True, 200),
+    _search_entry(Processing, "processings", ref_id=True),
+    _search_entry(DataBreach, "data-breaches", ref_id=True),
+    _search_entry(RightRequest, "right-requests", ref_id=True),
     # --- Resilience ---
-    (BusinessImpactAnalysis, "business-impact-analysis", False, 200),
+    _search_entry(BusinessImpactAnalysis, "business-impact-analysis"),
 ]
 
 
@@ -14387,7 +14410,13 @@ def global_search(request):
 
     candidates = []
 
-    for model_class, url_slug, has_ref_id, max_per_model in SEARCHABLE_MODELS:
+    for entry in SEARCHABLE_MODELS:
+        model_class = entry["model"]
+        url_slug = entry["slug"]
+        has_ref_id = entry["ref_id"]
+        max_per_model = entry["limit"]
+        extra_search = entry["extra_search"]
+
         if allowed_types and url_slug not in allowed_types:
             continue
 
@@ -14397,28 +14426,32 @@ def global_search(request):
         )[0]
         qs = model_class.objects.filter(id__in=accessible_ids)
 
-        # Build Q filter: icontains for each word on name/description/ref_id
+        # Build Q filter: icontains for each word on searchable fields
+        searchable = ["name", "description"]
+        if has_ref_id:
+            searchable.append("ref_id")
+        searchable.extend(extra_search)
+
         q_filter = Q()
         for word in words:
-            word_q = Q(name__icontains=word) | Q(description__icontains=word)
-            if has_ref_id:
-                word_q |= Q(ref_id__icontains=word)
+            word_q = Q()
+            for field in searchable:
+                word_q |= Q(**{f"{field}__icontains": word})
             q_filter |= word_q
 
-        # Also add prefix-based matching for typo tolerance
+        # Also add prefix-based matching for typo tolerance (name + ref_id only)
         for prefix in prefixes:
             prefix_q = Q(name__icontains=prefix)
             if has_ref_id:
                 prefix_q |= Q(ref_id__icontains=prefix)
             q_filter |= prefix_q
 
-        # Detect optional fields present on this model
+        # Detect optional display fields present on this model
         extra_fields = []
         field_names = {f.name for f in model_class._meta.get_fields()}
         if has_ref_id:
             extra_fields.append("ref_id")
-        has_folder = "folder" in field_names
-        if has_folder:
+        if "folder" in field_names:
             extra_fields.append("folder__name")
         if "provider_entity" in field_names:
             extra_fields.append("provider_entity__name")
