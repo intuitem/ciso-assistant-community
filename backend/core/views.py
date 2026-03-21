@@ -2707,9 +2707,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
         try:
             content = uploaded_file.read()
             library_data = yaml.safe_load(content)
-        except yaml.YAMLError as e:
+        except yaml.YAMLError:
             return Response(
-                {"error": f"Invalid YAML: {str(e)}"},
+                {"error": "Invalid YAML file."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
