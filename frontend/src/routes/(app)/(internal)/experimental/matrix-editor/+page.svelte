@@ -33,7 +33,7 @@
 
 	// Page data from server
 	let { data } = $props();
-	let matrices: any[] = data.matrices ?? [];
+	let matrices: any[] = $state(data.matrices ?? []);
 	let existingDrafts: any[] = $state(data.drafts ?? []);
 	let folders: any[] = data.folders ?? [];
 
@@ -475,20 +475,11 @@
 		}
 	}
 
-	/** Discard the editing_draft on the currently active matrix (if any) before switching. */
-	async function discardCurrentDraft() {
+	/** Confirm before switching away from unsaved changes. Does NOT discard server-side draft. */
+	async function confirmSwitchAway(): Promise<boolean> {
 		if (!matrixId) return true;
 		if (hasUnsavedChanges) {
 			if (!confirm(m.discardUnsavedConfirm())) return false;
-		}
-		// Discard the editing_draft on the current matrix
-		try {
-			await fetch(`/experimental/matrix-editor/${matrixId}?action=discard-draft`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
-		} catch {
-			// If discard fails (e.g. unpublished matrix), ignore — we'll still switch
 		}
 		matrixId = null;
 		hasUnsavedChanges = false;
@@ -496,7 +487,7 @@
 	}
 
 	async function editPublishedMatrix(id: string) {
-		if (!(await discardCurrentDraft())) return;
+		if (!(await confirmSwitchAway())) return;
 		try {
 			// Start editing: copies json_definition → editing_draft on the same object
 			const res = await fetch(`/experimental/matrix-editor/${id}?action=start-editing`, {
@@ -570,7 +561,7 @@
 	}
 
 	async function cloneFromMatrix(sourceMatrixId: string) {
-		if (!(await discardCurrentDraft())) return;
+		if (!(await confirmSwitchAway())) return;
 		try {
 			// Create a new matrix by cloning the source's json_definition into editing_draft
 			const res = await fetch(
@@ -600,7 +591,7 @@
 	}
 
 	async function newMatrix() {
-		if (!(await discardCurrentDraft())) return;
+		if (!(await confirmSwitchAway())) return;
 		// Set template values first
 		matrixName = 'New matrix';
 		matrixDescription = '';
@@ -870,7 +861,7 @@
 											type="button"
 											class="btn btn-sm variant-filled-primary"
 											onclick={async () => {
-												if (matrixId !== draft.id && !(await discardCurrentDraft())) return;
+												if (matrixId !== draft.id && !(await confirmSwitchAway())) return;
 												loadDraft(draft);
 											}}
 											title={m.continueEditing()}

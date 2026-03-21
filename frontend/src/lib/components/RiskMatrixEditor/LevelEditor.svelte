@@ -60,7 +60,8 @@
 
 	function addLevel() {
 		const newId = levels.length;
-		const color = DEFAULT_COLORS[newId % DEFAULT_COLORS.length];
+		const palette = COLOR_PALETTES[selectedPalette] || DEFAULT_COLORS;
+		const color = palette[newId % palette.length];
 		levels = [
 			...levels,
 			{
@@ -127,6 +128,7 @@
 							: 'border-gray-300'}"
 						onclick={() => applyPalette(name)}
 						title={name}
+						aria-label="{name} color palette"
 					>
 						{#each colors.slice(0, 4) as color}
 							<span class="w-3 h-3 rounded-sm inline-block" style="background-color: {color}"
@@ -209,6 +211,7 @@
 								disabled={i === 0}
 								onclick={() => moveLevel(i, -1)}
 								title={m.moveUp()}
+								aria-label={m.moveUp()}
 							>
 								<i class="fa-solid fa-arrow-up text-xs"></i>
 							</button>
@@ -218,6 +221,7 @@
 								disabled={i === levels.length - 1}
 								onclick={() => moveLevel(i, 1)}
 								title={m.moveDown()}
+								aria-label={m.moveDown()}
 							>
 								<i class="fa-solid fa-arrow-down text-xs"></i>
 							</button>
@@ -227,6 +231,7 @@
 								disabled={levels.length <= 2}
 								onclick={() => removeLevel(i)}
 								title={m.removeLevel()}
+								aria-label={m.removeLevel()}
 							>
 								<i class="fa-solid fa-trash text-xs"></i>
 							</button>
