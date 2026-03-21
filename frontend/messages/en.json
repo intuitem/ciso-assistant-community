@@ -3820,7 +3820,6 @@
 	"commandPaletteOpen": "open",
 	"matrixEditor": "Matrix Editor",
 	"matrixEditorDescription": "Visually create and edit risk matrices with an interactive grid editor",
-	"riskLevels": "Risk levels",
 	"grid": "Grid",
 	"saveDraft": "Save draft",
 	"publishMatrix": "Publish",

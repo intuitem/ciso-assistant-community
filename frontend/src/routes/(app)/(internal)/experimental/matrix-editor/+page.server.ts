@@ -9,7 +9,7 @@ export const load = (async ({ fetch }) => {
 
 	// Split: published matrices (for clone) vs matrices with active drafts
 	const matrices = allMatrices.filter((m: any) => m.is_published);
-	const drafts = allMatrices.filter((m: any) => m.editing_draft !== null);
+	const drafts = allMatrices.filter((m: any) => m.has_editing_draft);
 
 	// Load folders
 	const foldersRes = await fetch(`${BASE_API_URL}/folders/`);

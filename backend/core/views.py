@@ -2491,7 +2491,16 @@ class RiskMatrixViewSet(BaseModelViewSet):
             return Response(
                 {"status": "already_editing", "editing_draft": matrix.editing_draft}
             )
-        matrix.editing_draft = copy.deepcopy(matrix.json_definition)
+        draft = copy.deepcopy(matrix.json_definition)
+        # Include current metadata in the draft
+        draft["_meta"] = {
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "provider": matrix.provider or "",
+            "locale": matrix.locale or "en",
+            "folder": str(matrix.folder_id),
+        }
+        matrix.editing_draft = draft
         matrix.save(update_fields=["editing_draft", "updated_at"])
         return Response(
             {"status": "editing_started", "editing_draft": matrix.editing_draft}
@@ -2499,7 +2508,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     @action(detail=True, methods=["patch"], url_path="save-draft")
     def save_draft(self, request, pk=None):
-        """Update editing_draft and metadata with the current WIP from the editor."""
+        """Update editing_draft with current WIP. Metadata stays draft-scoped until publish."""
         matrix = self.get_object()
         editing_draft = request.data.get("editing_draft")
         if editing_draft is None:
@@ -2507,16 +2516,17 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 {"error": "editing_draft is required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        matrix.editing_draft = editing_draft
 
-        # Also update metadata fields if provided
-        update_fields = ["editing_draft", "updated_at"]
-        for field in ("name", "description", "provider"):
+        # Store metadata inside editing_draft so it stays draft-scoped
+        meta = {}
+        for field in ("name", "description", "provider", "locale", "folder"):
             if field in request.data:
-                setattr(matrix, field, request.data[field])
-                update_fields.append(field)
+                meta[field] = request.data[field]
+        if meta:
+            editing_draft["_meta"] = meta
 
-        matrix.save(update_fields=update_fields)
+        matrix.editing_draft = editing_draft
+        matrix.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_saved"})
 
     @action(detail=True, methods=["post"], url_path="publish-draft")
@@ -2548,21 +2558,36 @@ class RiskMatrixViewSet(BaseModelViewSet):
             )
             matrix.editing_history = history
 
+        # Extract draft metadata and clean it from the definition
+        draft_data = copy.deepcopy(matrix.editing_draft)
+        meta = draft_data.pop("_meta", {})
+
         # Swap draft → live
-        matrix.json_definition = matrix.editing_draft
+        matrix.json_definition = draft_data
         matrix.editing_draft = None
         matrix.editing_version += 1
         matrix.is_published = True
-        matrix.save(
-            update_fields=[
-                "json_definition",
-                "editing_draft",
-                "editing_version",
-                "editing_history",
-                "is_published",
-                "updated_at",
-            ]
-        )
+        matrix.is_enabled = True
+
+        # Apply draft metadata to the model
+        update_fields = [
+            "json_definition",
+            "editing_draft",
+            "editing_version",
+            "editing_history",
+            "is_published",
+            "is_enabled",
+            "updated_at",
+        ]
+        for field in ("name", "description", "provider", "locale"):
+            if field in meta:
+                setattr(matrix, field, meta[field])
+                update_fields.append(field)
+        if "folder" in meta:
+            matrix.folder_id = meta["folder"]
+            update_fields.append("folder_id")
+
+        matrix.save(update_fields=update_fields)
         return Response(
             {"status": "published", "editing_version": matrix.editing_version}
         )
@@ -2578,22 +2603,20 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="create-draft")
     def create_draft(self, request):
         """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
-        from iam.models import Folder
-
-        name = request.data.get("name", "Untitled Matrix")
-        description = request.data.get("description", "")
-        folder_id = request.data.get("folder", str(Folder.get_root_folder().id))
-        editing_draft = request.data.get("editing_draft", {})
-
-        matrix = RiskMatrix.objects.create(
-            name=name,
-            description=description,
-            folder_id=folder_id,
-            json_definition={},
-            editing_draft=editing_draft,
-            is_published=False,
-            is_enabled=False,
-        )
+        data = {
+            "name": request.data.get("name", "Untitled Matrix"),
+            "description": request.data.get("description", ""),
+            "folder": request.data.get("folder"),
+            "json_definition": {},
+            "is_enabled": False,
+        }
+        serializer = self.get_serializer(data=data, action="create")
+        serializer.is_valid(raise_exception=True)
+        matrix = self.perform_create(serializer)
+        # Set editing fields after validated create (not part of write serializer)
+        matrix.editing_draft = request.data.get("editing_draft", {})
+        matrix.is_published = False
+        matrix.save(update_fields=["editing_draft", "is_published"])
         return Response(
             {
                 "id": str(matrix.id),
@@ -2609,20 +2632,34 @@ class RiskMatrixViewSet(BaseModelViewSet):
         import copy
 
         source = self.get_object()
-        matrix = RiskMatrix.objects.create(
-            name=f"{source.name} (copy)",
-            description=source.description,
-            folder=source.folder,
-            json_definition={},
-            editing_draft=copy.deepcopy(source.json_definition),
-            is_published=False,
-            is_enabled=False,
-            locale=source.locale,
-            default_locale=source.default_locale,
-            provider=source.provider or "",
-            translations=copy.deepcopy(source.translations)
-            if source.translations
-            else {},
+        data = {
+            "name": f"{source.name} (copy)",
+            "description": source.description or "",
+            "folder": str(source.folder_id),
+            "json_definition": {},
+            "is_enabled": False,
+        }
+        serializer = self.get_serializer(data=data, action="create")
+        serializer.is_valid(raise_exception=True)
+        matrix = self.perform_create(serializer)
+        # Set editing fields after validated create
+        matrix.editing_draft = copy.deepcopy(source.json_definition)
+        matrix.is_published = False
+        matrix.locale = source.locale
+        matrix.default_locale = source.default_locale
+        matrix.provider = source.provider or ""
+        matrix.translations = (
+            copy.deepcopy(source.translations) if source.translations else {}
+        )
+        matrix.save(
+            update_fields=[
+                "editing_draft",
+                "is_published",
+                "locale",
+                "default_locale",
+                "provider",
+                "translations",
+            ]
         )
         return Response(
             {
@@ -2722,10 +2759,11 @@ class RiskMatrixViewSet(BaseModelViewSet):
         # Extract matrix definition
         matrix_def = None
         matrix_meta = {}
-        if "objects" in library_data and "risk_matrix" in library_data["objects"]:
-            matrices = library_data["objects"]["risk_matrix"]
-            if matrices and len(matrices) > 0:
-                matrix_def = matrices[0]
+        risk_matrix_obj = library_data.get("objects", {}).get("risk_matrix")
+        if isinstance(risk_matrix_obj, list) and risk_matrix_obj:
+            first = risk_matrix_obj[0]
+            if isinstance(first, dict):
+                matrix_def = first
                 matrix_meta = {
                     "name": library_data.get(
                         "name", matrix_def.get("name", "Imported Matrix")
@@ -2746,7 +2784,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
                 "locale": library_data.get("locale", "en"),
             }
 
-        if not matrix_def or "grid" not in matrix_def:
+        if not isinstance(matrix_def, dict) or "grid" not in matrix_def:
             return Response(
                 {"error": "No valid matrix definition found in file."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -2784,13 +2822,29 @@ class RiskMatrixViewSet(BaseModelViewSet):
         )
 
     @staticmethod
-    def _validate_json_definition(json_def: dict) -> list[str]:
-        """Validate the matrix JSON definition before publishing."""
+    def _validate_json_definition(json_def) -> list[str]:
+        """Validate the matrix JSON definition before publishing.
+
+        Defensive against malformed payloads — returns errors instead of raising.
+        """
         errors = []
-        probability = json_def.get("probability", [])
-        impact = json_def.get("impact", [])
-        risk = json_def.get("risk", [])
-        grid = json_def.get("grid", [])
+
+        if not isinstance(json_def, dict):
+            return ["Matrix definition must be a JSON object."]
+
+        probability = json_def.get("probability")
+        impact = json_def.get("impact")
+        risk = json_def.get("risk")
+        grid = json_def.get("grid")
+
+        if not isinstance(probability, list):
+            return ["'probability' must be a list."]
+        if not isinstance(impact, list):
+            return ["'impact' must be a list."]
+        if not isinstance(risk, list):
+            return ["'risk' must be a list."]
+        if not isinstance(grid, list):
+            return ["'grid' must be a list."]
 
         if len(probability) < 2:
             errors.append("At least 2 probability levels are required.")
@@ -2798,11 +2852,16 @@ class RiskMatrixViewSet(BaseModelViewSet):
             errors.append("At least 2 impact levels are required.")
         if len(risk) < 2:
             errors.append("At least 2 risk levels are required.")
+
         if len(grid) != len(probability):
             errors.append(
                 f"Grid has {len(grid)} rows but there are {len(probability)} probability levels."
             )
+
         for i, row in enumerate(grid):
+            if not isinstance(row, list):
+                errors.append(f"Grid row {i} is not a list.")
+                continue
             if len(row) != len(impact):
                 errors.append(
                     f"Grid row {i} has {len(row)} columns but there are {len(impact)} impact levels."
@@ -2810,18 +2869,23 @@ class RiskMatrixViewSet(BaseModelViewSet):
             for j, val in enumerate(row):
                 if not isinstance(val, int) or val < 0 or val >= len(risk):
                     errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+
         for category_name, levels in [
             ("probability", probability),
             ("impact", impact),
             ("risk", risk),
         ]:
             for k, level in enumerate(levels):
+                if not isinstance(level, dict):
+                    errors.append(f"{category_name}[{k}] is not a valid object.")
+                    continue
                 if not level.get("name"):
                     errors.append(f"{category_name}[{k}] is missing a name.")
                 if not level.get("hexcolor"):
                     errors.append(
                         f"{category_name}[{k}] is missing a color (hexcolor)."
                     )
+
         return errors
 
 

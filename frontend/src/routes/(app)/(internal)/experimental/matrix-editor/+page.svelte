@@ -106,22 +106,26 @@
 	]);
 
 	// Auto-load the most recent draft on page load
-	if (existingDrafts.length > 0) {
-		const latest = existingDrafts[0];
-		matrixId = latest.id;
-		matrixName = latest.name || '';
-		matrixDescription = latest.description || '';
-		provider = latest.provider || '';
-		locale = latest.locale || 'en';
-		selectedFolder = latest.folder?.id || latest.folder || selectedFolder;
-
-		const src = latest.editing_draft || latest.json_definition;
-		const jd = typeof src === 'string' ? JSON.parse(src) : src;
-		if (jd?.probability) probabilityLevels = jd.probability;
-		if (jd?.impact) impactLevels = jd.impact;
-		if (jd?.risk) riskLevels = jd.risk;
-		if (jd?.grid) grid = jd.grid;
+	async function autoLoadLatestDraft() {
+		if (existingDrafts.length > 0) {
+			const latest = existingDrafts[0];
+			// Fetch the editing_draft content via start-editing (idempotent if already editing)
+			try {
+				const res = await fetch(`/experimental/matrix-editor/${latest.id}?action=start-editing`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+				if (res.ok) {
+					const result = await res.json();
+					loadDraft({ ...latest, editing_draft: result.editing_draft });
+				}
+			} catch {
+				// Fall back to loading without draft content
+				loadDraft(latest);
+			}
+		}
 	}
+	autoLoadLatestDraft();
 
 	// Active tab
 	let activeTab: string = $state('probability');
@@ -162,7 +166,14 @@
 
 	// Track dirty state — only when a matrix is actively being edited
 	let currentSnapshot = $derived(
-		JSON.stringify({ matrixName, matrixDescription, provider, ...jsonDefinition })
+		JSON.stringify({
+			matrixName,
+			matrixDescription,
+			provider,
+			locale,
+			selectedFolder,
+			...jsonDefinition
+		})
 	);
 	$effect(() => {
 		hasUnsavedChanges = matrixId !== null && currentSnapshot !== lastSavedSnapshot;
@@ -244,11 +255,9 @@
 
 	// Export as library YAML (server-side)
 	async function exportAsYaml() {
-		if (!matrixId) {
-			// Save first so there's something to export
-			await saveDraft();
-			if (!matrixId) return;
-		}
+		// Always save current state before exporting
+		await saveDraft();
+		if (!matrixId) return;
 		try {
 			const res = await fetch(`/experimental/matrix-editor/${matrixId}?action=export-yaml`);
 			if (!res.ok) {
@@ -310,22 +319,57 @@
 		input.click();
 	}
 
-	// Sync grid dimensions when probability/impact levels change
-	function onProbabilityChange(newLevels: Level[]) {
+	// Sync grid when probability/impact levels change, remapping indices if provided.
+	function onProbabilityChange(newLevels: Level[], indexMap?: Map<number, number>) {
+		if (indexMap) {
+			// Remap/remove grid rows based on old→new index mapping
+			const newGrid: number[][] = [];
+			for (let oldIdx = 0; oldIdx < grid.length; oldIdx++) {
+				const newIdx = indexMap.get(oldIdx);
+				if (newIdx !== undefined && newIdx >= 0) {
+					newGrid[newIdx] = grid[oldIdx];
+				}
+			}
+			grid = newGrid;
+		}
 		probabilityLevels = newLevels;
 		syncGridDimensions();
 	}
 
-	function onImpactChange(newLevels: Level[]) {
+	function onImpactChange(newLevels: Level[], indexMap?: Map<number, number>) {
+		if (indexMap) {
+			// Remap/remove grid columns based on old→new index mapping
+			grid = grid.map((row) => {
+				const newRow: number[] = [];
+				for (let oldIdx = 0; oldIdx < row.length; oldIdx++) {
+					const newIdx = indexMap.get(oldIdx);
+					if (newIdx !== undefined && newIdx >= 0) {
+						newRow[newIdx] = row[oldIdx];
+					}
+				}
+				return newRow;
+			});
+		}
 		impactLevels = newLevels;
 		syncGridDimensions();
 	}
 
-	function onRiskChange(newLevels: Level[]) {
+	function onRiskChange(newLevels: Level[], indexMap?: Map<number, number>) {
 		riskLevels = newLevels;
-		// Clamp any grid values that exceed the new max risk index
-		const maxIdx = newLevels.length - 1;
-		grid = grid.map((row) => row.map((val) => Math.min(val, maxIdx)));
+		if (indexMap) {
+			// Remap grid cell values based on old→new risk index mapping
+			grid = grid.map((row) =>
+				row.map((val) => {
+					const newIdx = indexMap.get(val);
+					// If old risk level was deleted, default to 0
+					return newIdx !== undefined && newIdx >= 0 ? newIdx : 0;
+				})
+			);
+		} else {
+			// Simple clamp for add operations
+			const maxIdx = newLevels.length - 1;
+			grid = grid.map((row) => row.map((val) => Math.min(val, maxIdx)));
+		}
 	}
 
 	function onGridChange(newGrid: number[][]) {
@@ -382,7 +426,9 @@
 						editing_draft: jsonDefinition,
 						name: matrixName || 'Untitled Matrix',
 						description: matrixDescription,
-						provider
+						provider,
+						locale,
+						folder: selectedFolder
 					})
 				});
 				if (!res.ok) {
@@ -401,12 +447,11 @@
 	}
 
 	async function publishMatrix() {
-		if (!matrixId) {
-			await saveDraft();
-			if (!matrixId) return;
-		}
-
 		if (!confirm(m.publishConfirm())) return;
+
+		// Always save current state before publishing
+		await saveDraft();
+		if (!matrixId) return;
 
 		publishing = true;
 		statusMessage = '';
@@ -477,15 +522,42 @@
 
 	async function loadDraft(matrix: any) {
 		matrixId = matrix.id;
-		matrixName = matrix.name;
-		matrixDescription = matrix.description || '';
-		provider = matrix.provider || '';
 		locale = matrix.locale || 'en';
 		selectedFolder = matrix.folder?.id || matrix.folder || '';
 
-		// Load from editing_draft (WIP) if available, otherwise from json_definition
-		const src = matrix.editing_draft || matrix.json_definition;
-		const jd = typeof src === 'string' ? JSON.parse(src) : src;
+		// If editing_draft content was passed directly (from action responses), use it
+		// Otherwise fetch it via start-editing
+		let src = matrix.editing_draft;
+		if (!src) {
+			try {
+				const res = await fetch(`/experimental/matrix-editor/${matrix.id}?action=start-editing`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				});
+				if (res.ok) {
+					const result = await res.json();
+					src = result.editing_draft;
+				}
+			} catch {
+				src = matrix.json_definition;
+			}
+		}
+
+		let jd;
+		try {
+			jd = typeof src === 'string' ? JSON.parse(src) : src;
+		} catch {
+			setStatus(m.importFailed(), 'error');
+			return;
+		}
+
+		// Read metadata from _meta inside draft if available, otherwise from matrix
+		const meta = jd?._meta || {};
+		matrixName = meta.name || matrix.name || '';
+		matrixDescription = meta.description ?? matrix.description ?? '';
+		provider = meta.provider ?? matrix.provider ?? '';
+		locale = meta.locale || matrix.locale || 'en';
+		selectedFolder = meta.folder || matrix.folder?.id || matrix.folder || selectedFolder;
 
 		if (jd?.probability) probabilityLevels = jd.probability;
 		if (jd?.impact) impactLevels = jd.impact;
@@ -494,7 +566,6 @@
 
 		statusMessage = '';
 		statusType = '';
-		// Use $effect.pre or defer to next tick so derived state updates first
 		setTimeout(() => markClean(), 0);
 	}
 
@@ -625,7 +696,8 @@
 			if (res.ok) {
 				const data = await res.json();
 				const allMatrices = data.results || data;
-				existingDrafts = allMatrices.filter((m: any) => m.editing_draft !== null);
+				matrices = allMatrices.filter((mx: any) => mx.is_published);
+				existingDrafts = allMatrices.filter((mx: any) => mx.has_editing_draft);
 			}
 		} catch {
 			// ignore
@@ -760,7 +832,7 @@
 	<div class="card p-4">
 		<h3 class="text-lg font-semibold mb-3">
 			<i class="fa-solid fa-table-cells-large mr-1"></i>
-			{m.riskMatrix()}s
+			{m.riskMatrices()}
 		</h3>
 		{#if matrices.length > 0 || existingDrafts.length > 0}
 			<div class="table-container">

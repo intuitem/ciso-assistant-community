@@ -10,10 +10,11 @@
 		hexcolor: string;
 	}
 
+	// indexMap: maps old index → new index (or -1 if deleted). Undefined for simple edits.
 	interface Props {
 		levels: Level[];
 		title: string;
-		onchange: (levels: Level[]) => void;
+		onchange: (levels: Level[], indexMap?: Map<number, number>) => void;
 	}
 
 	let { levels = $bindable(), title, onchange }: Props = $props();
@@ -75,8 +76,18 @@
 
 	function removeLevel(index: number) {
 		if (levels.length <= 2) return;
+		// Build old→new index map: deleted index → -1, others shift down
+		const indexMap = new Map<number, number>();
+		let newIdx = 0;
+		for (let i = 0; i < levels.length; i++) {
+			if (i === index) {
+				indexMap.set(i, -1);
+			} else {
+				indexMap.set(i, newIdx++);
+			}
+		}
 		levels = levels.filter((_, i) => i !== index).map((l, i) => ({ ...l, id: i }));
-		onchange(levels);
+		onchange(levels, indexMap);
 	}
 
 	function updateLevel(index: number, field: keyof Level, value: string) {
@@ -87,10 +98,17 @@
 	function moveLevel(index: number, direction: -1 | 1) {
 		const target = index + direction;
 		if (target < 0 || target >= levels.length) return;
+		// Build old→new index map for the swap
+		const indexMap = new Map<number, number>();
+		for (let i = 0; i < levels.length; i++) {
+			if (i === index) indexMap.set(i, target);
+			else if (i === target) indexMap.set(i, index);
+			else indexMap.set(i, i);
+		}
 		const newLevels = [...levels];
 		[newLevels[index], newLevels[target]] = [newLevels[target], newLevels[index]];
 		levels = newLevels.map((l, i) => ({ ...l, id: i }));
-		onchange(levels);
+		onchange(levels, indexMap);
 	}
 </script>
 
