@@ -14343,14 +14343,17 @@ def global_search(request):
     """
     from rapidfuzz import fuzz
 
-    query = request.query_params.get("q", "").strip()
+    # Cap query length to avoid excessive icontains processing across all models.
+    # 200 chars is far beyond any realistic search; words capped at 20 since each
+    # word generates 2-3 Q objects per model (~1000+ total at the limit).
+    query = request.query_params.get("q", "").strip()[:200]
     if not query:
         return Response({"results": [], "query": "", "count": 0})
 
     type_filter = request.query_params.get("type", "")
     allowed_types = set(type_filter.split(",")) if type_filter else None
 
-    words = query.split()
+    words = query.split()[:20]
     # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
     prefixes = {w[:3].lower() for w in words if len(w) >= 3}
 

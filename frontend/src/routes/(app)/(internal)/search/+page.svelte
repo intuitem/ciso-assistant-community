@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
@@ -126,7 +127,74 @@
 	function getScoreOpacity(score: number): number {
 		return Math.max(0.3, score / 100);
 	}
+
+	// Keyboard navigation
+	let selectedIndex = $state(-1);
+	let searchInputEl: HTMLInputElement | null = $state(null);
+
+	// Flat list of visible results for keyboard nav
+	const flatResults = $derived.by(() => {
+		const flat: SearchResult[] = [];
+		for (const [, items] of Object.entries(groupedResults)) {
+			flat.push(...items);
+		}
+		return flat;
+	});
+
+	// Reset selection when results change
+	$effect(() => {
+		if (flatResults.length) {
+			selectedIndex = -1;
+		}
+	});
+
+	// Scroll selected item into view
+	$effect(() => {
+		if (selectedIndex >= 0 && browser) {
+			const el = document.querySelector(`[data-result-index="${selectedIndex}"]`);
+			el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+		}
+	});
+
+	function handlePageKeydown(e: KeyboardEvent) {
+		if (!browser || !query) return;
+
+		const target = e.target as HTMLElement;
+		const isInInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+
+		// "/" to focus search input (only when not already in an input)
+		if (e.key === '/' && !isInInput) {
+			e.preventDefault();
+			searchInputEl?.focus();
+			searchInputEl?.select();
+			return;
+		}
+
+		// Navigation keys work regardless of focus
+		if (e.key === 'j' || (e.key === 'ArrowDown' && !isInInput)) {
+			e.preventDefault();
+			if (selectedIndex < flatResults.length - 1) {
+				selectedIndex++;
+			}
+		} else if (e.key === 'k' || (e.key === 'ArrowUp' && !isInInput)) {
+			e.preventDefault();
+			if (selectedIndex > 0) {
+				selectedIndex--;
+			} else if (selectedIndex === 0) {
+				selectedIndex = -1;
+				searchInputEl?.focus();
+			}
+		} else if (e.key === 'Enter' && !isInInput && selectedIndex >= 0) {
+			e.preventDefault();
+			const result = flatResults[selectedIndex];
+			if (result) goto(result.url);
+		} else if (e.key === 'Escape' && !isInInput) {
+			selectedIndex = -1;
+		}
+	}
 </script>
+
+<svelte:window onkeydown={handlePageKeydown} />
 
 <div class="search-page max-w-4xl mx-auto">
 	<!-- Search bar -->
@@ -144,8 +212,10 @@
 			<input
 				type="text"
 				bind:value={searchInput}
+				bind:this={searchInputEl}
 				placeholder={m.searchEllipsis()}
 				class="search-input"
+				onfocus={() => (selectedIndex = -1)}
 			/>
 			<button type="submit" class="search-submit">
 				{m.search()}
@@ -207,10 +277,14 @@
 					</div>
 					<div class="group-items">
 						{#each items as result, resultIndex}
+							{@const flatIdx = flatResults.indexOf(result)}
 							<a
 								href={result.url}
 								class="result-item"
+								class:selected={flatIdx === selectedIndex}
+								data-result-index={flatIdx}
 								style="--item-delay: {resultIndex * 30}ms; --accent: {getModelColor(result.type)}"
+								onmouseenter={() => (selectedIndex = flatIdx)}
 							>
 								<div class="result-score-bar">
 									<div
@@ -245,6 +319,21 @@
 				<span class="empty-text">{m.commandPaletteNoResults()}</span>
 			</div>
 		{/if}
+		<!-- Keyboard hints -->
+		<div class="keyboard-hints" style="--stagger: {Object.keys(groupedResults).length + 3}">
+			<span class="hint">
+				<kbd>j</kbd><kbd>k</kbd>
+				<span class="hint-label">{m.commandPaletteNavigate()}</span>
+			</span>
+			<span class="hint">
+				<kbd>↵</kbd>
+				<span class="hint-label">{m.commandPaletteOpen()}</span>
+			</span>
+			<span class="hint">
+				<kbd>/</kbd>
+				<span class="hint-label">{m.search()}</span>
+			</span>
+		</div>
 	{:else}
 		<!-- Empty state -->
 		<div class="empty-state" style="--stagger: 1">
@@ -508,7 +597,8 @@
 		animation-delay: var(--item-delay);
 	}
 
-	.result-item:hover {
+	.result-item:hover,
+	.result-item.selected {
 		border-color: color-mix(in srgb, var(--accent) 25%, transparent);
 		box-shadow:
 			0 2px 12px color-mix(in srgb, var(--accent) 8%, transparent),
@@ -557,7 +647,8 @@
 		letter-spacing: -0.01em;
 	}
 
-	.result-item:hover .result-name {
+	.result-item:hover .result-name,
+	.result-item.selected .result-name {
 		color: var(--accent);
 	}
 
@@ -595,7 +686,8 @@
 		transition: all 0.15s ease;
 	}
 
-	.result-item:hover .result-arrow {
+	.result-item:hover .result-arrow,
+	.result-item.selected .result-arrow {
 		opacity: 1;
 		transform: translateX(0);
 		color: var(--accent);
@@ -656,6 +748,45 @@
 		font-weight: 500;
 		color: #94a3b8;
 		box-shadow: 0 1px 0 #e2e8f0;
+	}
+
+	/* ---- Keyboard hints ---- */
+	.keyboard-hints {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+		padding: 16px 0 8px;
+		animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+		animation-delay: calc(var(--stagger) * 60ms + 100ms);
+	}
+
+	.hint {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.hint kbd {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 22px;
+		padding: 2px 6px;
+		border-radius: 5px;
+		background: white;
+		border: 1px solid #e2e8f0;
+		font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+		font-size: 11px;
+		font-weight: 500;
+		color: #94a3b8;
+		box-shadow: 0 1px 0 #e2e8f0;
+	}
+
+	.hint-label {
+		font-size: 11px;
+		color: #cbd5e1;
+		margin-left: 2px;
 	}
 
 	/* ---- Animations ---- */
