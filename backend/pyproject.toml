@@ -50,6 +50,10 @@ regex = "^2025.11.3"
 prometheus-client = "^0.22.1"
 jira = "^3.10.5"
 cryptography = "^46.0.5"
+qdrant-client = "^1.14.2"
+httpx = "^0.28.1"
+sentence-transformers = "^4.1.0"
+PyMuPDF = "^1.25.5"
 markdown = "^3.10.2"
 
 [tool.poetry.group.dev.dependencies]

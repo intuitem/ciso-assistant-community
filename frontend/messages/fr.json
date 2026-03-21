@@ -3780,5 +3780,8 @@
 	"commandPaletteNoResults": "Aucun résultat trouvé",
 	"commandPaletteNavigate": "naviguer",
 	"searchEllipsis": "Rechercher...",
-	"commandPaletteOpen": "ouvrir"
+	"commandPaletteOpen": "ouvrir",
+	"commandPaletteActions": "Actions",
+	"openAssistant": "Assistant IA",
+	"searchPagesAndActions": "Rechercher des pages et actions..."
 }

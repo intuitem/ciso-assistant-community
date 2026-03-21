@@ -246,6 +246,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
     "doc_management",
     "core",
     "cal",

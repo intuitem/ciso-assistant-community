@@ -65,6 +65,7 @@ LOGGING = {
     },
     "loggers": {
         "": {"handlers": ["console"], "level": LOG_LEVEL},
+        "httpx": {"handlers": ["console"], "level": "WARNING", "propagate": False},
     },
 }
 
@@ -249,6 +250,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "chat",
     "doc_management",
     "core",
     "cal",

@@ -105,6 +105,13 @@ READER_PERMISSIONS_LIST = [
     # presets
     "view_presetjourney",
     "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -189,6 +196,13 @@ APPROVER_PERMISSIONS_LIST = [
     # presets
     "view_presetjourney",
     "view_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "view_indexeddocument",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -483,6 +497,15 @@ ANALYST_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -809,6 +832,15 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -1193,6 +1225,16 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "delete_presetjourney",
     "view_presetjourneystep",
     "change_presetjourneystep",
+    # chat
+    "add_chatsession",
+    "view_chatsession",
+    "change_chatsession",
+    "delete_chatsession",
+    "view_chatmessage",
+    "add_indexeddocument",
+    "view_indexeddocument",
+    "change_indexeddocument",
+    "delete_indexeddocument",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
