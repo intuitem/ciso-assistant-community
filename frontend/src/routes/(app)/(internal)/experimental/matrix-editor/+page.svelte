@@ -11,7 +11,7 @@
 
 	$pageTitle = m.matrixEditor();
 
-	// Warn before leaving with unsaved changes
+	// Warn before leaving with unsaved changes + auto-load latest draft
 	onMount(() => {
 		const handler = (e: BeforeUnloadEvent) => {
 			if (hasUnsavedChanges) {
@@ -19,6 +19,7 @@
 			}
 		};
 		window.addEventListener('beforeunload', handler);
+		autoLoadLatestDraft();
 		return () => window.removeEventListener('beforeunload', handler);
 	});
 
@@ -125,7 +126,6 @@
 			}
 		}
 	}
-	autoLoadLatestDraft();
 
 	// Active tab
 	let activeTab: string = $state('probability');
