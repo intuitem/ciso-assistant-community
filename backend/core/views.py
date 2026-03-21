@@ -14381,6 +14381,28 @@ SEARCHABLE_MODELS = [
 ]
 
 
+_ACCENT_MAP = {
+    "a": "[aàáâãäåæ]",
+    "e": "[eèéêë]",
+    "i": "[iìíîï]",
+    "o": "[oòóôõöø]",
+    "u": "[uùúûü]",
+    "c": "[cç]",
+    "n": "[nñ]",
+    "y": "[yýÿ]",
+    "s": "[sß]",
+}
+
+
+def _accent_regex(word: str) -> str:
+    """Convert a word to a regex pattern that matches accented variants.
+
+    E.g. "referentiel" -> "r[eèéêë]f[eèéêë]r[eèéêë][nñ]t[iìíîï][eèéêë]l"
+    Works on both SQLite and PostgreSQL with __iregex.
+    """
+    return "".join(_ACCENT_MAP.get(c, re.escape(c)) for c in word.lower())
+
+
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def global_search(request):
@@ -14438,7 +14460,10 @@ def global_search(request):
                     | Q(requirement_assignments__actor__in=user_actors)
                 ).distinct()
 
-        # Build Q filter: icontains for each word on searchable fields
+        # Build Q filter for each word on searchable fields.
+        # Uses iregex with accent-folding character classes so that e.g.
+        # "referentiel" matches "RÉFÉRENTIEL" on SQLite (whose LIKE is
+        # ASCII-only and can't fold accents).
         field_names = {f.name for f in model_class._meta.get_fields()}
         searchable = ["name", "description"]
         if has_ref_id:
@@ -14451,16 +14476,18 @@ def global_search(request):
 
         q_filter = Q()
         for word in words:
+            pattern = _accent_regex(word)
             word_q = Q()
             for field in searchable:
-                word_q |= Q(**{f"{field}__icontains": word})
+                word_q |= Q(**{f"{field}__iregex": pattern})
             q_filter |= word_q
 
         # Also add prefix-based matching for typo tolerance (name + ref_id only)
         for prefix in prefixes:
-            prefix_q = Q(name__icontains=prefix)
+            prefix_pattern = _accent_regex(prefix)
+            prefix_q = Q(**{"name__iregex": prefix_pattern})
             if has_ref_id:
-                prefix_q |= Q(ref_id__icontains=prefix)
+                prefix_q |= Q(**{"ref_id__iregex": prefix_pattern})
             q_filter |= prefix_q
 
         # Detect optional display fields present on this model (reuses field_names from above)
