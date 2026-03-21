@@ -14426,6 +14426,18 @@ def global_search(request):
         )[0]
         qs = model_class.objects.filter(id__in=accessible_ids)
 
+        # ComplianceAssessment has extra auditee scoping: users with only the
+        # auditee role in a folder can only see assessments where they have a
+        # requirement assignment. Mirror the logic from ComplianceAssessmentViewSet.
+        if model_class is ComplianceAssessment:
+            auditee_folders = get_auditee_filtered_folder_ids(request.user)
+            if auditee_folders:
+                user_actors = Actor.get_all_for_user(request.user)
+                qs = qs.filter(
+                    ~Q(folder_id__in=auditee_folders)
+                    | Q(requirement_assignments__actor__in=user_actors)
+                ).distinct()
+
         # Build Q filter: icontains for each word on searchable fields
         searchable = ["name", "description"]
         if has_ref_id:
