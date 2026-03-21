@@ -4,6 +4,9 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 
+	const modifierKey =
+		browser && navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? '⌘' : 'Ctrl';
+
 	const MODEL_META: Record<string, { label: string; icon: string; color: string }> = {
 		folders: { label: 'domains', icon: 'fa-solid fa-sitemap', color: '#6366f1' },
 		perimeters: { label: 'perimeters', icon: 'fa-solid fa-cubes', color: '#8b5cf6' },
@@ -58,7 +61,28 @@
 			icon: 'fa-solid fa-chess',
 			color: '#7c3aed'
 		},
-		'attack-paths': { label: 'attackPaths', icon: 'fa-solid fa-route', color: '#e11d48' }
+		'attack-paths': { label: 'attackPaths', icon: 'fa-solid fa-route', color: '#e11d48' },
+		'requirement-nodes': {
+			label: 'requirements',
+			icon: 'fa-solid fa-list-check',
+			color: '#3b82f6'
+		},
+		vulnerabilities: {
+			label: 'vulnerabilities',
+			icon: 'fa-solid fa-triangle-exclamation',
+			color: '#f59e0b'
+		},
+		'task-templates': { label: 'tasks', icon: 'fa-solid fa-note-sticky', color: '#8b5cf6' },
+		solutions: { label: 'solutions', icon: 'fa-solid fa-cart-shopping', color: '#0ea5e9' },
+		contracts: { label: 'contracts', icon: 'fa-solid fa-file-contract', color: '#6366f1' },
+		processings: { label: 'processings', icon: 'fa-solid fa-gavel', color: '#a855f7' },
+		'data-breaches': { label: 'dataBreaches', icon: 'fa-solid fa-unlock', color: '#dc2626' },
+		'right-requests': { label: 'rightRequests', icon: 'fa-solid fa-hand', color: '#f97316' },
+		'business-impact-analysis': {
+			label: 'businessImpactAnalysis',
+			icon: 'fa-solid fa-arrows-to-eye',
+			color: '#14b8a6'
+		}
 	};
 
 	interface SearchResult {
@@ -67,6 +91,8 @@
 		name: string;
 		ref_id: string;
 		description: string;
+		folder: string;
+		provider: string;
 		score: number;
 		url: string;
 	}
@@ -157,20 +183,26 @@
 	});
 
 	function handlePageKeydown(e: KeyboardEvent) {
-		if (!browser || !query) return;
+		if (!browser) return;
 
 		const target = e.target as HTMLElement;
 		const isInInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA';
+		const hasModifier = e.metaKey || e.ctrlKey || e.altKey;
 
-		// "/" to focus search input (only when not already in an input)
-		if (e.key === '/' && !isInInput) {
+		// "/" to focus search input — works even on empty state, but not from inputs or with modifiers
+		if (e.key === '/' && !isInInput && !hasModifier) {
 			e.preventDefault();
 			searchInputEl?.focus();
 			searchInputEl?.select();
 			return;
 		}
 
-		// Navigation keys work regardless of focus
+		// Everything below requires results
+		if (!query || !flatResults.length) return;
+
+		// Skip modified shortcuts (Ctrl+J, Cmd+K, etc.)
+		if (hasModifier) return;
+
 		if (e.key === 'j' || (e.key === 'ArrowDown' && !isInInput)) {
 			e.preventDefault();
 			if (selectedIndex < flatResults.length - 1) {
@@ -214,6 +246,7 @@
 				bind:value={searchInput}
 				bind:this={searchInputEl}
 				placeholder={m.searchEllipsis()}
+				aria-label={m.search()}
 				class="search-input"
 				onfocus={() => (selectedIndex = -1)}
 			/>
@@ -228,12 +261,15 @@
 		<!-- Results header -->
 		<div class="results-header" style="--stagger: 0">
 			<div class="results-count">
-				<span class="count-number">{data.count}</span>
+				<span class="count-number">{flatResults.length}</span>
 				<span class="count-label">
-					{data.count === 1 ? m.searchResult() : m.searchResults()}
+					{flatResults.length === 1 ? m.searchResult() : m.searchResults()}
 					{m.searchFor()}
 				</span>
 				<span class="count-query">"{query}"</span>
+				{#if activeTypeFilter && flatResults.length !== data.count}
+					<span class="count-total">/ {data.count}</span>
+				{/if}
 			</div>
 		</div>
 
@@ -243,6 +279,7 @@
 				<button
 					class="filter-chip"
 					class:active={activeTypeFilter === ''}
+					aria-pressed={activeTypeFilter === ''}
 					onclick={() => (activeTypeFilter = '')}
 				>
 					<span class="chip-dot" style="background: linear-gradient(135deg, #8b5cf6, #ec4899)"
@@ -253,6 +290,7 @@
 					<button
 						class="filter-chip"
 						class:active={activeTypeFilter === type}
+						aria-pressed={activeTypeFilter === type}
 						onclick={() => toggleTypeFilter(type)}
 					>
 						<span class="chip-dot" style="background: {getModelColor(type)}"></span>
@@ -298,6 +336,18 @@
 										{#if result.ref_id}
 											<span class="result-ref">{result.ref_id}</span>
 										{/if}
+										{#if result.folder}
+											<span class="result-folder">
+												<i class="fa-solid fa-sitemap"></i>
+												{result.folder}
+											</span>
+										{/if}
+										{#if result.provider}
+											<span class="result-folder">
+												<i class="fa-solid fa-building"></i>
+												{result.provider}
+											</span>
+										{/if}
 									</div>
 									{#if result.description}
 										<p class="result-description">{result.description}</p>
@@ -342,7 +392,7 @@
 			</div>
 			<span class="empty-text">{m.searchPrompt()}</span>
 			<div class="empty-hint">
-				<kbd>{navigator?.platform?.toUpperCase().indexOf('MAC') >= 0 ? '⌘' : 'Ctrl'}</kbd>
+				<kbd>{modifierKey}</kbd>
 				<span>+</span>
 				<kbd>K</kbd>
 			</div>
@@ -391,16 +441,16 @@
 		color: #1e1b4b;
 		background: transparent;
 		border: none !important;
-		outline: none !important;
+		/* Transparent outline preserves visibility in forced-colors/high-contrast mode */
+		outline: 2px solid transparent !important;
 		box-shadow: none !important;
-		ring: none;
 		font-weight: 450;
 		letter-spacing: -0.01em;
 	}
 
 	.search-input:focus {
 		border: none !important;
-		outline: none !important;
+		outline: 2px solid transparent !important;
 		box-shadow: none !important;
 	}
 
@@ -466,6 +516,12 @@
 		font-size: 14px;
 		font-weight: 600;
 		color: #7c3aed;
+	}
+
+	.count-total {
+		font-size: 13px;
+		color: #94a3b8;
+		font-weight: 450;
 	}
 
 	/* ---- Filter chips ---- */
@@ -665,6 +721,25 @@
 		letter-spacing: 0.02em;
 	}
 
+	.result-folder {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		font-size: 10px;
+		font-weight: 500;
+		color: #94a3b8;
+		max-width: 150px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.result-folder i {
+		font-size: 8px;
+		color: #cbd5e1;
+	}
+
 	.result-description {
 		font-size: 12px;
 		color: #94a3b8;
@@ -775,17 +850,18 @@
 		padding: 2px 6px;
 		border-radius: 5px;
 		background: white;
-		border: 1px solid #e2e8f0;
+		border: 1px solid #c4b5fd;
 		font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
 		font-size: 11px;
 		font-weight: 500;
-		color: #94a3b8;
-		box-shadow: 0 1px 0 #e2e8f0;
+		color: #6d28d9;
+		box-shadow: 0 1px 0 #ddd6fe;
 	}
 
 	.hint-label {
 		font-size: 11px;
-		color: #cbd5e1;
+		color: #64748b;
+		font-weight: 450;
 		margin-left: 2px;
 	}
 

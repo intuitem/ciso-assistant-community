@@ -141,7 +141,9 @@ from ebios_rm.models import (
     AttackPath,
 )
 
-from tprm.models import Entity
+from tprm.models import Entity, Solution, Contract
+from privacy.models import Processing, DataBreach, RightRequest
+from resilience.models import BusinessImpactAnalysis
 
 from .models import *
 from .serializers import *
@@ -14307,29 +14309,52 @@ class RequirementAssignmentViewSet(BaseModelViewSet):
 # ---------------------------------------------------------------------------
 
 SEARCHABLE_MODELS = [
-    # (Model, url_slug, has_ref_id)
-    (Folder, "folders", False),
-    (Perimeter, "perimeters", False),
-    (Threat, "threats", True),
-    (RiskMatrix, "risk-matrices", True),
-    (Framework, "frameworks", True),
-    (RiskAssessment, "risk-assessments", False),
-    (ComplianceAssessment, "compliance-assessments", False),
-    (RiskScenario, "risk-scenarios", False),
-    (Asset, "assets", False),
-    (AppliedControl, "applied-controls", False),
-    (Policy, "policies", False),
-    (ReferenceControl, "reference-controls", True),
-    (Evidence, "evidences", False),
-    (RiskAcceptance, "risk-acceptances", False),
-    (SecurityException, "security-exceptions", False),
-    (Finding, "findings", False),
-    (Incident, "incidents", False),
-    (Entity, "entities", True),
-    (EbiosRMStudy, "ebios-rm", False),
-    (FearedEvent, "feared-events", False),
-    (StrategicScenario, "strategic-scenarios", False),
-    (AttackPath, "attack-paths", False),
+    # (Model, url_slug, has_ref_id, max_candidates)
+    # has_ref_id: whether the model has a ref_id field to search on.
+    # max_candidates: per-model cap on broad fetch. Large tables (RequirementNode,
+    # ReferenceControl) get a tighter limit to avoid starving smaller models.
+    # --- Organization ---
+    (Folder, "folders", False, 200),
+    (Perimeter, "perimeters", True, 200),
+    # --- Catalog ---
+    (Framework, "frameworks", True, 200),
+    (Threat, "threats", True, 100),
+    (ReferenceControl, "reference-controls", True, 100),
+    (RiskMatrix, "risk-matrices", True, 50),
+    (RequirementNode, "requirement-nodes", True, 100),
+    # --- Assets ---
+    (Asset, "assets", True, 200),
+    (Vulnerability, "vulnerabilities", True, 100),
+    # --- Operations ---
+    (AppliedControl, "applied-controls", True, 200),
+    (Policy, "policies", True, 200),
+    (Incident, "incidents", True, 200),
+    (Finding, "findings", True, 200),
+    (SecurityException, "security-exceptions", True, 200),
+    (TaskTemplate, "task-templates", True, 100),
+    (Evidence, "evidences", False, 200),
+    # --- Governance ---
+    (RiskAcceptance, "risk-acceptances", False, 200),
+    # --- Risk ---
+    (RiskAssessment, "risk-assessments", True, 200),
+    (RiskScenario, "risk-scenarios", True, 200),
+    # --- Compliance ---
+    (ComplianceAssessment, "compliance-assessments", True, 200),
+    # --- TPRM ---
+    (Entity, "entities", True, 200),
+    (Solution, "solutions", False, 200),
+    (Contract, "contracts", True, 200),
+    # --- EBIOS RM ---
+    (EbiosRMStudy, "ebios-rm", False, 200),
+    (FearedEvent, "feared-events", False, 200),
+    (StrategicScenario, "strategic-scenarios", False, 200),
+    (AttackPath, "attack-paths", False, 200),
+    # --- Privacy ---
+    (Processing, "processings", True, 200),
+    (DataBreach, "data-breaches", True, 200),
+    (RightRequest, "right-requests", True, 200),
+    # --- Resilience ---
+    (BusinessImpactAnalysis, "business-impact-analysis", False, 200),
 ]
 
 
@@ -14343,12 +14368,15 @@ def global_search(request):
     """
     from rapidfuzz import fuzz
 
+    EMPTY_RESPONSE = {"results": [], "query": "", "count": 0, "total_candidates": 0}
+
     # Cap query length to avoid excessive icontains processing across all models.
     # 200 chars is far beyond any realistic search; words capped at 20 since each
     # word generates 2-3 Q objects per model (~1000+ total at the limit).
+    # Minimum 2 chars to avoid single-character fan-out (e.g. q=a matching everything).
     query = request.query_params.get("q", "").strip()[:200]
-    if not query:
-        return Response({"results": [], "query": "", "count": 0})
+    if len(query) < 2:
+        return Response(EMPTY_RESPONSE)
 
     type_filter = request.query_params.get("type", "")
     allowed_types = set(type_filter.split(",")) if type_filter else None
@@ -14357,10 +14385,9 @@ def global_search(request):
     # Build prefix set for typo-tolerant broad fetch (first 3 chars of each word)
     prefixes = {w[:3].lower() for w in words if len(w) >= 3}
 
-    MAX_PER_MODEL = 200
     candidates = []
 
-    for model_class, url_slug, has_ref_id in SEARCHABLE_MODELS:
+    for model_class, url_slug, has_ref_id, max_per_model in SEARCHABLE_MODELS:
         if allowed_types and url_slug not in allowed_types:
             continue
 
@@ -14385,12 +14412,25 @@ def global_search(request):
                 prefix_q |= Q(ref_id__icontains=prefix)
             q_filter |= prefix_q
 
+        # Detect optional fields present on this model
+        extra_fields = []
+        field_names = {f.name for f in model_class._meta.get_fields()}
+        if has_ref_id:
+            extra_fields.append("ref_id")
+        has_folder = "folder" in field_names
+        if has_folder:
+            extra_fields.append("folder__name")
+        if "provider_entity" in field_names:
+            extra_fields.append("provider_entity__name")
+        if model_class is RequirementNode:
+            extra_fields.append("framework_id")
+
         results = qs.filter(q_filter).values(
             "id",
             "name",
             "description",
-            *(["ref_id"] if has_ref_id else []),
-        )[:MAX_PER_MODEL]
+            *extra_fields,
+        )[:max_per_model]
 
         for row in results:
             candidates.append(
@@ -14399,7 +14439,12 @@ def global_search(request):
                     "id": str(row["id"]),
                     "name": row["name"] or "",
                     "ref_id": row.get("ref_id", "") or "",
-                    "description": (row.get("description") or "")[:200],
+                    "description": row.get("description") or "",
+                    "folder": row.get("folder__name", "") or "",
+                    "provider": row.get("provider_entity__name", "") or "",
+                    "framework_id": str(row["framework_id"])
+                    if row.get("framework_id")
+                    else None,
                 }
             )
 
@@ -14417,9 +14462,14 @@ def global_search(request):
     candidates.sort(key=lambda c: c["score"], reverse=True)
     top_results = candidates[:50]
 
-    # Add URL for each result
+    # Build final response: add URLs and truncate descriptions for the wire
     for r in top_results:
-        r["url"] = f"/{r['type']}/{r['id']}"
+        if r["type"] == "requirement-nodes" and r.get("framework_id"):
+            # Link to parent framework (no standalone requirement detail page yet)
+            r["url"] = f"/frameworks/{r['framework_id']}"
+        else:
+            r["url"] = f"/{r['type']}/{r['id']}"
+        r["description"] = r["description"][:200]
 
     return Response(
         {
