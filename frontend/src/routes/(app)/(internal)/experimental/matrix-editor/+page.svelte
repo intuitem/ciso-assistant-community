@@ -7,8 +7,20 @@
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
 	import { LOCALE_MAP, language } from '$lib/utils/locales';
+	import { onMount } from 'svelte';
 
 	$pageTitle = m.matrixEditor();
+
+	// Warn before leaving with unsaved changes
+	onMount(() => {
+		const handler = (e: BeforeUnloadEvent) => {
+			if (hasUnsavedChanges) {
+				e.preventDefault();
+			}
+		};
+		window.addEventListener('beforeunload', handler);
+		return () => window.removeEventListener('beforeunload', handler);
+	});
 
 	interface Level {
 		id: number;
@@ -120,6 +132,8 @@
 	let saving = $state(false);
 	let publishing = $state(false);
 	let statusTimeout: ReturnType<typeof setTimeout> | null = null;
+	let hasUnsavedChanges = $state(false);
+	let lastSavedSnapshot = $state('');
 
 	function setStatus(message: string, type: 'success' | 'error') {
 		statusMessage = message;
@@ -145,6 +159,19 @@
 	let previewRiskMatrix = $derived({
 		json_definition: JSON.stringify(jsonDefinition)
 	});
+
+	// Track dirty state — only when a matrix is actively being edited
+	let currentSnapshot = $derived(
+		JSON.stringify({ matrixName, matrixDescription, provider, ...jsonDefinition })
+	);
+	$effect(() => {
+		hasUnsavedChanges = matrixId !== null && currentSnapshot !== lastSavedSnapshot;
+	});
+
+	function markClean() {
+		lastSavedSnapshot = currentSnapshot;
+		hasUnsavedChanges = false;
+	}
 
 	// Real-time validation warnings
 	let validationWarnings = $derived(() => {
@@ -347,6 +374,7 @@
 					throw new Error(err.error || JSON.stringify(err));
 				}
 			}
+			markClean();
 			setStatus(m.draftSaved(), 'success');
 			refreshDrafts();
 		} catch (e: any) {
@@ -386,7 +414,28 @@
 		}
 	}
 
+	/** Discard the editing_draft on the currently active matrix (if any) before switching. */
+	async function discardCurrentDraft() {
+		if (!matrixId) return true;
+		if (hasUnsavedChanges) {
+			if (!confirm('You have unsaved changes on the current matrix. Discard them?')) return false;
+		}
+		// Discard the editing_draft on the current matrix
+		try {
+			await fetch(`/experimental/matrix-editor/${matrixId}?action=discard-draft`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
+		} catch {
+			// If discard fails (e.g. unpublished matrix), ignore — we'll still switch
+		}
+		matrixId = null;
+		hasUnsavedChanges = false;
+		return true;
+	}
+
 	async function editPublishedMatrix(id: string) {
+		if (!(await discardCurrentDraft())) return;
 		try {
 			// Start editing: copies json_definition → editing_draft on the same object
 			const res = await fetch(`/experimental/matrix-editor/${id}?action=start-editing`, {
@@ -429,9 +478,12 @@
 
 		statusMessage = '';
 		statusType = '';
+		// Use $effect.pre or defer to next tick so derived state updates first
+		setTimeout(() => markClean(), 0);
 	}
 
 	async function cloneFromMatrix(sourceMatrixId: string) {
+		if (!(await discardCurrentDraft())) return;
 		try {
 			// Create a new matrix by cloning the source's json_definition into editing_draft
 			const res = await fetch(
@@ -460,89 +512,41 @@
 		}
 	}
 
-	function newMatrix() {
-		matrixId = null;
-		matrixName = '';
+	async function newMatrix() {
+		if (!(await discardCurrentDraft())) return;
+		// Set template values first
+		matrixName = 'New matrix';
 		matrixDescription = '';
 		provider = '';
 		locale = 'en';
 		probabilityLevels = [
-			{
-				id: 0,
-				abbreviation: '1',
-				name: 'Low',
-				description: 'Unlikely to occur',
-				hexcolor: '#4CAF50'
-			},
+			{ id: 0, abbreviation: '1', name: 'Low', description: 'Unlikely to occur', hexcolor: '#4CAF50' },
 			{ id: 1, abbreviation: '2', name: 'Medium', description: 'May occur', hexcolor: '#FF9800' },
-			{
-				id: 2,
-				abbreviation: '3',
-				name: 'High',
-				description: 'Likely to occur',
-				hexcolor: '#F44336'
-			}
+			{ id: 2, abbreviation: '3', name: 'High', description: 'Likely to occur', hexcolor: '#F44336' }
 		];
 		impactLevels = [
-			{
-				id: 0,
-				abbreviation: '1',
-				name: 'Low',
-				description: 'Minor consequences',
-				hexcolor: '#4CAF50'
-			},
-			{
-				id: 1,
-				abbreviation: '2',
-				name: 'Medium',
-				description: 'Moderate consequences',
-				hexcolor: '#FF9800'
-			},
-			{
-				id: 2,
-				abbreviation: '3',
-				name: 'High',
-				description: 'Severe consequences',
-				hexcolor: '#F44336'
-			}
+			{ id: 0, abbreviation: '1', name: 'Low', description: 'Minor consequences', hexcolor: '#4CAF50' },
+			{ id: 1, abbreviation: '2', name: 'Medium', description: 'Moderate consequences', hexcolor: '#FF9800' },
+			{ id: 2, abbreviation: '3', name: 'High', description: 'Severe consequences', hexcolor: '#F44336' }
 		];
 		riskLevels = [
-			{
-				id: 0,
-				abbreviation: '1',
-				name: 'Low',
-				description: 'Acceptable risk',
-				hexcolor: '#4CAF50'
-			},
-			{
-				id: 1,
-				abbreviation: '2',
-				name: 'Medium',
-				description: 'Moderate risk',
-				hexcolor: '#FFEB3B'
-			},
-			{
-				id: 2,
-				abbreviation: '3',
-				name: 'High',
-				description: 'Significant risk',
-				hexcolor: '#FF9800'
-			},
-			{
-				id: 3,
-				abbreviation: '4',
-				name: 'Critical',
-				description: 'Unacceptable risk',
-				hexcolor: '#F44336'
-			}
+			{ id: 0, abbreviation: '1', name: 'Low', description: 'Acceptable risk', hexcolor: '#4CAF50' },
+			{ id: 1, abbreviation: '2', name: 'Medium', description: 'Moderate risk', hexcolor: '#FFEB3B' },
+			{ id: 2, abbreviation: '3', name: 'High', description: 'Significant risk', hexcolor: '#FF9800' },
+			{ id: 3, abbreviation: '4', name: 'Critical', description: 'Unacceptable risk', hexcolor: '#F44336' }
 		];
 		grid = [
 			[0, 0, 1],
 			[0, 1, 2],
 			[1, 2, 3]
 		];
+		// Clear matrixId so saveDraft creates a new one, then auto-save
+		matrixId = null;
 		statusMessage = '';
 		statusType = '';
+		// Wait a tick so derived jsonDefinition updates before saveDraft reads it
+		await new Promise((r) => setTimeout(r, 0));
+		await saveDraft();
 	}
 
 	async function refreshDrafts() {
@@ -565,22 +569,39 @@
 			: 'Delete this unpublished matrix?';
 		if (!confirm(msg)) return;
 		try {
+			let res;
 			if (isPublished) {
 				// Discard draft only
-				await fetch(`/experimental/matrix-editor/${matrix.id}?action=discard-draft`, {
+				res = await fetch(`/experimental/matrix-editor/${matrix.id}?action=discard-draft`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' }
 				});
 			} else {
 				// Delete the whole matrix
-				await fetch(`/experimental/matrix-editor/${matrix.id}`, { method: 'DELETE' });
+				res = await fetch(`/experimental/matrix-editor/${matrix.id}`, { method: 'DELETE' });
 			}
-			if (matrixId === matrix.id) {
-				newMatrix();
+			if (res.ok || res.status === 204) {
+				const wasActive = matrixId === matrix.id;
+				await refreshDrafts();
+				if (wasActive) {
+					// Switch to latest available draft, or clear editor
+					if (existingDrafts.length > 0) {
+						loadDraft(existingDrafts[0]);
+					} else {
+						matrixId = null;
+						matrixName = '';
+						matrixDescription = '';
+						hasUnsavedChanges = false;
+						setTimeout(() => markClean(), 0);
+					}
+				}
+				setStatus(isPublished ? 'Draft discarded' : 'Matrix deleted', 'success');
+			} else {
+				const err = await res.json().catch(() => ({ error: 'Delete failed' }));
+				setStatus(err.error || 'Delete failed', 'error');
 			}
-			refreshDrafts();
-		} catch {
-			// ignore
+		} catch (e: any) {
+			setStatus(e.message || 'Delete failed', 'error');
 		}
 	}
 
@@ -631,17 +652,7 @@
 			</div>
 
 			<div class="flex items-center gap-2">
-				<!-- Current matrix indicator -->
-				{#if matrixId}
-					<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-						<i class="fa-solid fa-pen-to-square mr-1"></i>
-						{matrixName || 'Untitled'}
-					</span>
-				{:else}
-					<span class="text-xs text-gray-400 italic">No matrix selected</span>
-				{/if}
-				<span class="border-l border-gray-300 h-6 mx-1"></span>
-					{#if statusMessage}
+				{#if statusMessage}
 					<span
 						class="text-xs px-2 py-1 rounded-full transition-opacity {statusType === 'error'
 							? 'bg-red-100 text-red-700'
@@ -653,24 +664,26 @@
 						{statusMessage}
 					</span>
 				{/if}
-				<button
-					type="button"
-					class="btn btn-sm bg-gray-600 text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
-					onclick={saveDraft}
-					disabled={saving}
-				>
-					<i class="fa-solid fa-floppy-disk mr-1"></i>
-					{saving ? '...' : m.saveDraft()}
-				</button>
-				<button
-					type="button"
-					class="btn btn-sm bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
-					onclick={publishMatrix}
-					disabled={publishing}
-				>
-					<i class="fa-solid fa-rocket mr-1"></i>
-					{publishing ? '...' : m.publishMatrix()}
-				</button>
+				{#if matrixId}
+					<button
+						type="button"
+						class="btn btn-sm bg-gray-600 text-white hover:bg-gray-700 transition-colors disabled:opacity-50"
+						onclick={saveDraft}
+						disabled={saving}
+					>
+						<i class="fa-solid fa-floppy-disk mr-1"></i>
+						{saving ? '...' : m.saveDraft()}
+					</button>
+					<button
+						type="button"
+						class="btn btn-sm bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+						onclick={publishMatrix}
+						disabled={publishing}
+					>
+						<i class="fa-solid fa-rocket mr-1"></i>
+						{publishing ? '...' : m.publishMatrix()}
+					</button>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -715,7 +728,10 @@
 										<button
 											type="button"
 											class="btn btn-sm variant-filled-primary"
-											onclick={() => loadDraft(draft)}
+											onclick={async () => {
+												if (matrixId !== draft.id && !(await discardCurrentDraft())) return;
+												loadDraft(draft);
+											}}
 											title="Continue editing"
 										>
 											<i class="fa-solid fa-pen-to-square mr-1"></i>
@@ -784,11 +800,12 @@
 			</div>
 		{:else}
 			<p class="text-sm text-gray-400 py-4 text-center">
-				No matrices yet. Create one using the editor below.
+				No risk matrices loaded yet. Go to <a href="/libraries" class="text-primary-500 hover:underline">Libraries</a> to import one from the CISO Assistant store, or use the toolbar to create a new one.
 			</p>
 		{/if}
 	</div>
 
+	{#if matrixId}
 	<!-- Metadata -->
 	<div class="card p-4">
 		<h3 class="text-lg font-semibold mb-3">{m.metadata()}</h3>
@@ -937,4 +954,16 @@
 			</p>
 		{/if}
 	</div>
+	{:else}
+	<!-- No matrix selected placeholder -->
+	<div class="card p-8">
+		<div class="text-center space-y-4">
+			<i class="fa-solid fa-table-cells-large text-4xl text-gray-300"></i>
+			<h3 class="text-lg font-semibold text-gray-500">No matrix selected</h3>
+			<p class="text-sm text-gray-400 max-w-md mx-auto">
+				Select a matrix from the table above to edit or clone it, or use the toolbar to create a new one or import a YAML file.
+			</p>
+		</div>
+	</div>
+	{/if}
 </div>
