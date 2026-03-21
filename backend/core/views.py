@@ -14439,9 +14439,14 @@ def global_search(request):
                 ).distinct()
 
         # Build Q filter: icontains for each word on searchable fields
+        field_names = {f.name for f in model_class._meta.get_fields()}
         searchable = ["name", "description"]
         if has_ref_id:
             searchable.append("ref_id")
+        # Models with i18n translations store localized names/descriptions in a
+        # JSONField. Searching it catches all translated variants at once.
+        if "translations" in field_names:
+            searchable.append("translations")
         searchable.extend(extra_search)
 
         q_filter = Q()
@@ -14458,9 +14463,8 @@ def global_search(request):
                 prefix_q |= Q(ref_id__icontains=prefix)
             q_filter |= prefix_q
 
-        # Detect optional display fields present on this model
+        # Detect optional display fields present on this model (reuses field_names from above)
         extra_fields = []
-        field_names = {f.name for f in model_class._meta.get_fields()}
         if has_ref_id:
             extra_fields.append("ref_id")
         if "folder" in field_names:
@@ -14494,14 +14498,29 @@ def global_search(request):
             )
 
     # Score and rank with rapidfuzz
+    query_lower = query.lower()
     for candidate in candidates:
-        # Score against name (highest weight), ref_id, then description
+        name_lower = candidate["name"].lower()
+        ref_lower = candidate["ref_id"].lower()
+
+        # Fuzzy scores
         name_score = fuzz.WRatio(query, candidate["name"])
         ref_score = (
             fuzz.WRatio(query, candidate["ref_id"]) if candidate["ref_id"] else 0
         )
         desc_score = fuzz.partial_ratio(query, candidate["description"]) * 0.4
-        candidate["score"] = max(name_score, ref_score, desc_score)
+
+        # Substring bonus: exact case-insensitive match in name or ref_id should
+        # rank very high. WRatio penalizes long names unfairly (e.g. "recyf" vs
+        # "RECYF : RÉFÉRENTIEL CYBER France..." scores only 24).
+        substring_bonus = 0
+        if query_lower in name_lower:
+            # Boost more if it starts with the query or if it's a close length match
+            substring_bonus = 95 if name_lower.startswith(query_lower) else 90
+        if query_lower in ref_lower:
+            substring_bonus = max(substring_bonus, 95)
+
+        candidate["score"] = max(name_score, ref_score, desc_score, substring_bonus)
 
     # Sort by score descending, return top 50
     candidates.sort(key=lambda c: c["score"], reverse=True)
