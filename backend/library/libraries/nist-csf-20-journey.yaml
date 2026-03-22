@@ -1,0 +1,360 @@
+urn: urn:intuitem:risk:preset:nist-csf-2.0-journey
+locale: en
+ref_id: preset-nist-csf-2.0-journey
+name: "NIST CSF 2.0 — Full Organisational Journey"
+description: "End-to-end cybersecurity programme journey aligned to the NIST Cybersecurity Framework 2.0. Covers all six Functions (Govern, Identify, Protect, Detect, Respond, Recover) with structured risk assessment, asset inventory, compliance assessment, and control implementation — from initial scoping through to continuous improvement."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "NIST CSF 2.0 — Parcours organisationnel complet"
+    description: "Parcours de programme de cybersécurité de bout en bout aligné sur le NIST Cybersecurity Framework 2.0. Couvre les six fonctions (Gouverner, Identifier, Protéger, Détecter, Répondre, Récupérer) avec évaluation des risques structurée, inventaire des actifs, évaluation de conformité et mise en œuvre des contrôles."
+
+dependencies:
+  - urn:intuitem:risk:library:nist-csf-2.0
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso-27005
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+        - enterprise
+      industry:
+        - general
+        - critical-infrastructure
+        - financial
+        - healthcare
+        - government
+      region:
+        - global
+      goal: security-programme
+
+    feature_flags:
+      enable:
+        - compliance
+        - risk_management
+        - business_continuity
+
+    scaffolded_objects:
+
+      # ---------------------------------------------------------------
+      # Risk Assessment
+      # ---------------------------------------------------------------
+      - type: risk_assessment
+        name: "NIST CSF 2.0 — Enterprise Risk Assessment"
+        description: "Structured risk assessment aligned to NIST CSF 2.0 Govern and Identify functions. Evaluates likelihood and impact across the organisation's key asset categories and threat scenarios."
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-mult
+        ref: main_ra
+        translations:
+          fr:
+            name: "NIST CSF 2.0 — Évaluation des risques d'entreprise"
+            description: "Évaluation des risques structurée alignée sur les fonctions Gouverner et Identifier du NIST CSF 2.0."
+
+      # ---------------------------------------------------------------
+      # Compliance Assessment
+      # ---------------------------------------------------------------
+      - type: compliance_assessment
+        name: "NIST CSF 2.0 — Full Framework Assessment"
+        description: "Assessment across all six CSF 2.0 Functions and associated Categories and Subcategories. Produces a maturity baseline and gap analysis for each function."
+        framework: urn:intuitem:risk:library:nist-csf-2.0
+        create_suggested_controls: true
+        ref: csf_audit
+        translations:
+          fr:
+            name: "NIST CSF 2.0 — Évaluation complète du cadre"
+            description: "Évaluation couvrant les six fonctions du CSF 2.0 et leurs catégories et sous-catégories associées."
+
+      # ---------------------------------------------------------------
+      # Assets
+      # ---------------------------------------------------------------
+      - type: asset
+        name: "IT Infrastructure"
+        description: "Servers, network equipment, firewalls, switches, and cloud infrastructure supporting business operations."
+        asset_type: SP
+        ref: asset_infra
+        translations:
+          fr:
+            name: "Infrastructure informatique"
+            description: "Serveurs, équipements réseau, pare-feux, commutateurs et infrastructure cloud."
+
+      - type: asset
+        name: "Endpoints and User Devices"
+        description: "Laptops, desktops, tablets, and smartphones used by employees and contractors."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          fr:
+            name: "Postes de travail et appareils utilisateurs"
+            description: "Ordinateurs portables, fixes, tablettes et smartphones utilisés par les employés et prestataires."
+
+      - type: asset
+        name: "Identity and Access Management Systems"
+        description: "Directory services, SSO platforms, MFA systems, and privileged access management tooling."
+        asset_type: SP
+        ref: asset_iam
+        translations:
+          fr:
+            name: "Systèmes de gestion des identités et des accès"
+            description: "Services d'annuaire, SSO, MFA et outils de gestion des accès privilégiés."
+
+      - type: asset
+        name: "Business Applications"
+        description: "ERP, CRM, finance, HR, and other core business applications — whether on-premises or SaaS."
+        asset_type: SP
+        ref: asset_apps
+        translations:
+          fr:
+            name: "Applications métier"
+            description: "ERP, CRM, finance, RH et autres applications métier essentielles, sur site ou SaaS."
+
+      - type: asset
+        name: "Email and Collaboration Platforms"
+        description: "Email services, messaging, file sharing, and video conferencing platforms (e.g. Microsoft 365, Google Workspace)."
+        asset_type: SP
+        ref: asset_collab
+        translations:
+          fr:
+            name: "Messagerie et plateformes collaboratives"
+            description: "Messagerie, fichiers partagés et visioconférence (ex. Microsoft 365, Google Workspace)."
+
+      - type: asset
+        name: "Sensitive and Regulated Data"
+        description: "Personally identifiable information (PII), financial records, intellectual property, regulated data, and other critical information assets."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          fr:
+            name: "Données sensibles et réglementées"
+            description: "Données personnelles, financières, propriété intellectuelle, données réglementées et autres actifs informationnels critiques."
+
+      - type: asset
+        name: "Operational Technology and IoT"
+        description: "Industrial control systems, building management systems, and Internet of Things devices where applicable."
+        asset_type: SP
+        ref: asset_ot_iot
+        translations:
+          fr:
+            name: "Technologies opérationnelles et IoT"
+            description: "Systèmes de contrôle industriel, gestion technique du bâtiment et objets connectés le cas échéant."
+
+      - type: asset
+        name: "Third-Party and Supply Chain Connections"
+        description: "Vendor integrations, managed service providers, API connections, and supply chain dependencies."
+        asset_type: SP
+        ref: asset_supplychain
+        translations:
+          fr:
+            name: "Tiers et chaîne d'approvisionnement"
+            description: "Intégrations fournisseurs, prestataires de services managés, connexions API et dépendances de la chaîne d'approvisionnement."
+
+      # ---------------------------------------------------------------
+      # Risk Scenarios — mapped to CSF 2.0 Functions
+      # ---------------------------------------------------------------
+
+      # GOVERN
+      - type: risk_scenario
+        name: "Inadequate cybersecurity governance and accountability"
+        description: "Absence of defined cybersecurity roles, policies, or executive accountability results in uncoordinated security decisions and unmanaged organisational risk."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_infra, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-govern]
+        translations:
+          fr:
+            name: "Gouvernance cybersécurité insuffisante"
+            description: "L'absence de rôles, politiques ou responsabilités exécutives définis entraîne des décisions de sécurité non coordonnées."
+
+      # IDENTIFY
+      - type: risk_scenario
+        name: "Unknown or unmanaged assets exploited"
+        description: "Attackers target shadow IT, unmanaged devices, or undocumented systems that fall outside the organisation's visibility and patch management processes."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_infra]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-identify]
+        translations:
+          fr:
+            name: "Actifs inconnus ou non gérés exploités"
+            description: "Des attaquants ciblent le shadow IT, les appareils non gérés ou les systèmes non documentés hors de la visibilité de l'organisation."
+
+      # PROTECT — Phishing / Credential Theft
+      - type: risk_scenario
+        name: "Credential theft via phishing or social engineering"
+        description: "An employee is deceived into disclosing credentials through a phishing email or social engineering attack, granting unauthorised access to business systems."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_collab, asset_iam, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-phishing]
+        translations:
+          fr:
+            name: "Vol d'identifiants par hameçonnage ou ingénierie sociale"
+            description: "Un employé divulgue ses identifiants via un email d'hameçonnage ou une attaque d'ingénierie sociale."
+
+      # PROTECT — Unpatched Systems
+      - type: risk_scenario
+        name: "Exploitation of unpatched software or systems"
+        description: "Attackers exploit publicly known vulnerabilities in unpatched operating systems, applications, or network devices to achieve initial access or privilege escalation."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_infra, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-vuln]
+        translations:
+          fr:
+            name: "Exploitation de logiciels ou systèmes non mis à jour"
+            description: "Des attaquants exploitent des vulnérabilités connues dans des systèmes, applications ou équipements réseau non corrigés."
+
+      # PROTECT — Supply Chain
+      - type: risk_scenario
+        name: "Supply chain or third-party compromise"
+        description: "A trusted vendor or managed service provider is compromised, providing attackers with a trusted pathway into the organisation's systems or data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_supplychain, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-protect-supplychain]
+        translations:
+          fr:
+            name: "Compromission de la chaîne d'approvisionnement ou d'un tiers"
+            description: "Un fournisseur ou prestataire de confiance est compromis, offrant aux attaquants un accès aux systèmes ou données de l'organisation."
+
+      # DETECT
+      - type: risk_scenario
+        name: "Undetected intrusion and lateral movement"
+        description: "An attacker maintains persistent access and moves laterally across systems for an extended period without triggering detection, escalating privilege and exfiltrating data."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_infra, asset_data, asset_iam]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-detect-lateral]
+        translations:
+          fr:
+            name: "Intrusion non détectée et mouvement latéral"
+            description: "Un attaquant maintient un accès persistant et se déplace latéralement sans déclencher de détection, exfiltrant des données."
+
+      # RESPOND
+      - type: risk_scenario
+        name: "Ransomware deployment and business disruption"
+        description: "Ransomware is deployed across endpoints and shared storage, encrypting critical business data and causing significant operational disruption and potential data loss."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_endpoints, asset_data, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-respond-ransomware]
+        translations:
+          fr:
+            name: "Déploiement de rançongiciel et perturbation de l'activité"
+            description: "Un rançongiciel est déployé sur les postes et le stockage partagé, chiffrant les données critiques et provoquant une perturbation opérationnelle majeure."
+
+      # RECOVER
+      - type: risk_scenario
+        name: "Failure to recover from a significant cyber incident"
+        description: "Inadequate backup, recovery procedures, or tested business continuity plans result in extended downtime and permanent data loss following a significant cyber incident."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_data, asset_infra, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:nist-csf-2.0:t-recover-bcdr]
+        translations:
+          fr:
+            name: "Incapacité à se remettre d'un incident cyber majeur"
+            description: "Des sauvegardes, procédures de reprise ou plans de continuité inadéquats entraînent une indisponibilité prolongée et une perte permanente de données."
+
+    # ---------------------------------------------------------------
+    # Journey Steps — Full CSF 2.0 Lifecycle
+    # ---------------------------------------------------------------
+    journey:
+      steps:
+
+        - key: governance_setup
+          title: "Establish Cybersecurity Governance (GV)"
+          description: "Define the organisational context for cybersecurity. Establish cybersecurity roles and responsibilities, document executive accountability, and set the organisational risk tolerance and cybersecurity policy. This underpins all subsequent CSF functions."
+          target_model: policies
+          translations:
+            fr:
+              title: "Établir la gouvernance cybersécurité (GV)"
+              description: "Définissez le contexte organisationnel de la cybersécurité : rôles, responsabilités, tolérance au risque et politique de sécurité."
+
+        - key: assets
+          title: "Inventory and Classify Assets (ID.AM)"
+          description: "Review, complete, and classify the pre-created asset inventory. Identify hardware, software, data, and third-party dependencies. Assign business criticality ratings to inform risk prioritisation across subsequent steps."
+          target_model: assets
+          translations:
+            fr:
+              title: "Inventorier et classifier les actifs (ID.AM)"
+              description: "Examinez, complétez et classifiez l'inventaire des actifs : matériel, logiciels, données et dépendances tierces. Attribuez des niveaux de criticité métier."
+
+        - key: risk_assessment
+          title: "Conduct the Enterprise Risk Assessment (ID.RA)"
+          description: "Work through the pre-created risk scenarios covering all six CSF 2.0 functions. Adjust likelihood and impact ratings to reflect your organisational context, add any sector-specific scenarios, and document risk owners for each scenario."
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener l'évaluation des risques d'entreprise (ID.RA)"
+              description: "Parcourez les scénarios de risque pré-créés couvrant les six fonctions du CSF 2.0. Ajustez les niveaux de vraisemblance et d'impact, ajoutez des scénarios sectoriels spécifiques."
+
+        - key: csf_assessment
+          title: "Assess Current Cybersecurity Posture (All Functions)"
+          description: "Complete the NIST CSF 2.0 compliance assessment across all six functions — Govern, Identify, Protect, Detect, Respond, and Recover. Rate each subcategory against your current implementation tier to establish a gap analysis and maturity baseline."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "Évaluer la posture cybersécurité actuelle (toutes fonctions)"
+              description: "Complétez l'évaluation de conformité NIST CSF 2.0 sur les six fonctions. Évaluez chaque sous-catégorie pour établir une analyse des écarts et une base de maturité."
+
+        - key: target_profile
+          title: "Define Your Target Profile"
+          description: "Using the gap analysis from the compliance assessment, define your Target Profile — the desired implementation tier or maturity level for each CSF subcategory. Prioritise gaps based on risk assessment findings and business objectives."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "Définir votre profil cible"
+              description: "En utilisant l'analyse des écarts, définissez votre profil cible — le niveau d'implémentation souhaité pour chaque sous-catégorie. Priorisez les écarts en fonction de l'évaluation des risques."
+
+        - key: controls
+          title: "Implement and Track Security Controls (PR, DE, RS, RC)"
+          description: "Review the auto-created controls derived from CSF 2.0 reference controls. Assign owners, set target completion dates, and begin implementing the highest-priority controls — focusing first on Protect and Detect function gaps identified in the assessment."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité (PR, DE, RS, RC)"
+              description: "Examinez les contrôles créés automatiquement, assignez des responsables, fixez des dates cibles et commencez par les contrôles prioritaires des fonctions Protéger et Détecter."
+
+        - key: supply_chain
+          title: "Assess Third-Party and Supply Chain Risk (GV.SC / ID.SC)"
+          description: "Identify and assess your critical suppliers, managed service providers, and technology vendors. Document supply chain dependencies, review vendor security assurances, and apply appropriate controls to third-party risk scenarios."
+          target_model: assets
+          translations:
+            fr:
+              title: "Évaluer les risques tiers et chaîne d'approvisionnement (GV.SC / ID.SC)"
+              description: "Identifiez vos fournisseurs critiques et prestataires. Documentez les dépendances, examinez les garanties de sécurité des fournisseurs et appliquez des contrôles aux scénarios de risque tiers."
+
+        - key: detection_response
+          title: "Validate Detection and Response Capabilities (DE / RS)"
+          description: "Review and test detection controls — logging, alerting, and SIEM/MDR coverage. Validate or create an Incident Response Plan. Ensure escalation paths, communication procedures, and containment playbooks are documented and assigned."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Valider les capacités de détection et de réponse (DE / RS)"
+              description: "Révisez et testez les contrôles de détection. Validez ou créez un Plan de Réponse aux Incidents avec des procédures d'escalade, de communication et des playbooks de confinement."
+
+        - key: recovery_bcdr
+          title: "Validate Recovery and Business Continuity (RC)"
+          description: "Review and test backup and recovery procedures for all critical assets. Validate Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO). Ensure Business Continuity and Disaster Recovery plans are documented, assigned, and tested."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Valider la reprise et la continuité d'activité (RC)"
+              description: "Révisez et testez les procédures de sauvegarde et de reprise pour tous les actifs critiques. Validez les RTO/RPO et assurez-vous que les plans de continuité sont documentés et testés."
+
+        - key: awareness_training
+          title: "Implement Security Awareness and Training (PR.AT)"
+          description: "Establish or review a security awareness programme for all staff. Ensure role-based training for privileged users and security practitioners. Document completion and test awareness via phishing simulations or tabletop exercises."
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Mettre en œuvre la sensibilisation et la formation (PR.AT)"
+              description: "Établissez un programme de sensibilisation à la sécurité pour tout le personnel. Assurez une formation adaptée aux rôles pour les utilisateurs privilégiés. Documentez les achèvements."
+
+        - key: continuous_improvement
+          title: "Establish Continuous Improvement and Review Cycle (GV.OC)"
+          description: "Schedule periodic reviews of the risk assessment, compliance assessment scores, and control effectiveness. Define a cadence for reassessment (e.g. annually or after significant changes). Track progress against your Target Profile over time."
+          target_model: compliance-assessments
+          target_ref: csf_audit
+          translations:
+            fr:
+              title: "Établir un cycle d'amélioration continue (GV.OC)"
+              description: "Planifiez des révisions périodiques de l'évaluation des risques, des scores de conformité et de l'efficacité des contrôles. Suivez les progrès par rapport à votre profil cible dans le temps."
