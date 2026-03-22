@@ -899,10 +899,12 @@ def aggregate_risks_per_field(
         if inherent
         else "current_level"
     )
+    base_scenarios = RiskScenario.objects.filter(id__in=object_ids_view)
+    if risk_assessments is not None:
+        base_scenarios = base_scenarios.filter(risk_assessment__in=risk_assessments)
     for matrix_id, m in parsed_matrices:
         # Scope scenario counting to scenarios belonging to this specific matrix
-        matrix_scenarios = RiskScenario.objects.filter(
-            id__in=object_ids_view,
+        matrix_scenarios = base_scenarios.filter(
             risk_assessment__risk_matrix_id=matrix_id,
         )
         for i in range(len(m["risk"])):
