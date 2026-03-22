@@ -4,7 +4,7 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { onMount } from 'svelte';
 	import { formFieldProxy, type SuperForm } from 'sveltekit-superforms';
-	import type { AnyZodObject } from '$lib/utils/schemas';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import * as m from '$paraglide/messages.js';
 	import { toCamelCase } from '$lib/utils/locales';
 
@@ -31,7 +31,7 @@
 		disableDoubleDash?: boolean;
 		cacheLock?: CacheLock;
 		color_map?: any;
-		form: SuperForm<AnyZodObject>;
+		form: SuperForm<FormDataShape>;
 		options?: Option[];
 		[key: string]: any;
 		translateOptions?: boolean;

@@ -2,7 +2,7 @@ import { BASE_API_URL, UUID_REGEX } from '$lib/utils/constants';
 import { getModelInfo, urlParamModelVerboseName, type ModelMapEntry } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
-import { modelSchema, type AnyZodObject } from '$lib/utils/schemas';
+import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
@@ -94,8 +94,8 @@ export const loadDetail = async ({ event, model, id }) => {
 		urlModel: urlModel;
 		info: ModelMapEntry;
 		table: TableSource;
-		deleteForm: SuperValidated<AnyZodObject>;
-		createForm: SuperValidated<AnyZodObject>;
+		deleteForm: SuperValidated<FormDataShape>;
+		createForm: SuperValidated<FormDataShape>;
 		foreignKeys: Record<string, any>;
 		selectOptions: Record<string, any>;
 		count?: number;
@@ -275,7 +275,7 @@ export const loadDetail = async ({ event, model, id }) => {
 	}
 
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
-	let updateForm: SuperValidated<AnyZodObject> | undefined;
+	let updateForm: SuperValidated<FormDataShape> | undefined;
 	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
 	if (hasAddExisting) {
 		const parentEndpointUrl = model.endpointUrl ?? model.urlModel;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { AnyZodObject } from '$lib/utils/schemas';
+import type { ZodSchema } from '$lib/utils/schemas';
 
-export const activateTOTPSchema: AnyZodObject = z.object({
+export const activateTOTPSchema: ZodSchema = z.object({
 	code: z
 		.string()
 		.regex(/^\d{6}$/)

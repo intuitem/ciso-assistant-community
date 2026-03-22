@@ -1,10 +1,12 @@
 // schema for the validation of forms
 import { z } from 'zod';
 
-// Zod v4 removed AnyZodObject — provide a permissive type alias
-// that is compatible with both superforms' SuperValidated<T> and v4 ZodObject
+// Zod v4 removed AnyZodObject — split into two purpose-specific types:
+// FormDataShape: for SuperValidated<T> consumers (form data records)
+// ZodSchema: for actual Zod schema instances (SCHEMA_MAP, typed schema exports)
+export type FormDataShape = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AnyZodObject = any;
+export type ZodSchema = z.ZodObject<any>;
 import * as m from '$paraglide/messages';
 
 const toArrayPreprocessor = (value: unknown) => {
@@ -1521,7 +1523,7 @@ export const DocumentRevisionSchema = z.object({
 	reviewer_comments: z.string().optional().nullable()
 });
 
-const SCHEMA_MAP: Record<string, AnyZodObject> = {
+const SCHEMA_MAP: Record<string, ZodSchema> = {
 	folders: FolderSchema,
 	'folders-import': FolderImportSchema,
 	perimeters: PerimeterSchema,

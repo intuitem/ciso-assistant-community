@@ -34,7 +34,7 @@
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
 	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
-	import type { AnyZodObject } from '$lib/utils/schemas';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -83,7 +83,7 @@
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
-		deleteForm?: SuperValidated<AnyZodObject>;
+		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
