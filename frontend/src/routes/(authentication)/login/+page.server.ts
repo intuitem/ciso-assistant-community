@@ -5,7 +5,7 @@ import { loginSchema } from '$lib/utils/schemas';
 import type { LoginRequestBody } from '$lib/utils/types';
 import { fail, redirect, type Actions } from '@sveltejs/kit';
 import { setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad } from './$types';
 import { mfaAuthenticateSchema } from './mfa/utils/schemas';
 

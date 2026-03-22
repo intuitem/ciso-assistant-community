@@ -5,7 +5,7 @@
 	import type { ModelMapEntry } from '$lib/utils/crud';
 	import type { urlModel } from '$lib/utils/types';
 	import type { SuperValidated } from 'sveltekit-superforms';
-	import type { AnyZodObject } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
@@ -26,7 +26,7 @@
 		editURL?: string;
 		disableEdit?: boolean;
 		disableView?: boolean;
-		deleteForm?: SuperValidated<AnyZodObject> | null;
+		deleteForm?: SuperValidated<FormDataShape> | null;
 		URLModel?: urlModel | string;
 		identifierField?: string;
 		preventDelete?: boolean;

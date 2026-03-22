@@ -7,7 +7,7 @@
 
 	import { page } from '$app/state';
 	import { redirectToProvider } from '$lib/allauth.js';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import MfaAuthenticateModal from './mfa/components/MFAAuthenticateModal.svelte';
 	import { m } from '$paraglide/messages';
 	import {
