@@ -2605,20 +2605,40 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="create-draft")
     def create_draft(self, request):
         """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
-        data = {
-            "name": request.data.get("name", "Untitled Matrix"),
-            "description": request.data.get("description", ""),
-            "folder": request.data.get("folder"),
-            "json_definition": {},
-            "is_enabled": False,
-        }
-        serializer = self.get_serializer(data=data, action="create")
-        serializer.is_valid(raise_exception=True)
-        matrix = self.perform_create(serializer)
-        # Set editing fields after validated create (not part of write serializer)
-        matrix.editing_draft = request.data.get("editing_draft", {})
-        matrix.is_published = False
-        matrix.save(update_fields=["editing_draft", "is_published"])
+        from iam.models import Folder
+
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=request.data.get("name", "Untitled Matrix"),
+            description=request.data.get("description", ""),
+            folder=folder,
+            json_definition={},
+            editing_draft=request.data.get("editing_draft", {}),
+            is_published=False,
+            is_enabled=False,
+        )
         return Response(
             {
                 "id": str(matrix.id),
@@ -2634,34 +2654,31 @@ class RiskMatrixViewSet(BaseModelViewSet):
         import copy
 
         source = self.get_object()
-        data = {
-            "name": f"{source.name} (copy)",
-            "description": source.description or "",
-            "folder": str(source.folder_id),
-            "json_definition": {},
-            "is_enabled": False,
-        }
-        serializer = self.get_serializer(data=data, action="create")
-        serializer.is_valid(raise_exception=True)
-        matrix = self.perform_create(serializer)
-        # Set editing fields after validated create
-        matrix.editing_draft = copy.deepcopy(source.json_definition)
-        matrix.is_published = False
-        matrix.locale = source.locale
-        matrix.default_locale = source.default_locale
-        matrix.provider = source.provider or ""
-        matrix.translations = (
-            copy.deepcopy(source.translations) if source.translations else {}
-        )
-        matrix.save(
-            update_fields=[
-                "editing_draft",
-                "is_published",
-                "locale",
-                "default_locale",
-                "provider",
-                "translations",
-            ]
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=source.folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description or "",
+            folder=source.folder,
+            json_definition={},
+            editing_draft=copy.deepcopy(source.json_definition),
+            is_published=False,
+            is_enabled=False,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider or "",
+            translations=copy.deepcopy(source.translations)
+            if source.translations
+            else {},
         )
         return Response(
             {
@@ -2798,14 +2815,35 @@ class RiskMatrixViewSet(BaseModelViewSet):
             if key in matrix_def:
                 editing_draft[key] = matrix_def[key]
 
-        folder_id = request.data.get("folder", str(Folder.get_root_folder().id))
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         matrix = RiskMatrix.objects.create(
             name=matrix_meta["name"],
             description=matrix_meta["description"],
             provider=matrix_meta["provider"],
             locale=matrix_meta["locale"],
-            folder_id=folder_id,
+            folder=folder,
             json_definition={},
             editing_draft=editing_draft,
             is_published=False,
