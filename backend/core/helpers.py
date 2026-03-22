@@ -406,20 +406,22 @@ def get_parsed_matrices(
         _,
         _,
     ) = RoleAssignment.get_accessible_object_ids(scoped_folder, user, RiskScenario)
-    if risk_assessments is None:
-        risk_matrices = list(
-            RiskScenario.objects.filter(id__in=object_ids_view)
-            .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
-            .distinct()
-        )
-    else:
-        risk_matrices = list(
-            RiskScenario.objects.filter(id__in=object_ids_view)
-            .filter(risk_assessment__in=risk_assessments)
-            .values_list("risk_assessment__risk_matrix__json_definition", flat=True)
-            .distinct()
-        )
-    return sorted(risk_matrices, key=lambda m: len(m["risk"]), reverse=True)
+    queryset = RiskScenario.objects.filter(id__in=object_ids_view)
+    if risk_assessments is not None:
+        queryset = queryset.filter(risk_assessment__in=risk_assessments)
+    # Return tuples of (matrix_id, json_definition) so callers can scope queries per matrix
+    matrix_rows = queryset.values_list(
+        "risk_assessment__risk_matrix__id",
+        "risk_assessment__risk_matrix__json_definition",
+    ).distinct()
+    # Deduplicate by matrix id
+    seen = set()
+    matrices = []
+    for matrix_id, json_def in matrix_rows:
+        if matrix_id not in seen:
+            seen.add(matrix_id)
+            matrices.append((matrix_id, json_def))
+    return sorted(matrices, key=lambda m: len(m[1]["risk"]), reverse=True)
 
 
 def get_risk_field(user: User, field: str):
@@ -427,7 +429,9 @@ def get_risk_field(user: User, field: str):
     Returns a list of the field values of all risks in all matrices
     """
     parsed_matrices = get_parsed_matrices(user)
-    return [m["risk"][i][field] for m in parsed_matrices for i in range(len(m["risk"]))]
+    return [
+        m["risk"][i][field] for _, m in parsed_matrices for i in range(len(m["risk"]))
+    ]
 
 
 def get_risk_color_map(user: User):
@@ -455,7 +459,7 @@ def get_risk_color_ordered_list(user: User, risk_assessments_list: list | None =
     risk_colors = list()
     encountered_risks = set()
     parsed_matrices = get_parsed_matrices(user, risk_assessments_list)
-    for m in parsed_matrices:
+    for _, m in parsed_matrices:
         for i in range(len(m["risk"])):
             if m["risk"][i]["name"] in encountered_risks:
                 continue
@@ -888,30 +892,25 @@ def aggregate_risks_per_field(
         user=user, risk_assessments=risk_assessments, folder_id=folder_id
     )
     values = dict()
-    for m in parsed_matrices:
+    level_field = (
+        "residual_level"
+        if residual
+        else "inherent_level"
+        if inherent
+        else "current_level"
+    )
+    for matrix_id, m in parsed_matrices:
+        # Scope scenario counting to scenarios belonging to this specific matrix
+        matrix_scenarios = RiskScenario.objects.filter(
+            id__in=object_ids_view,
+            risk_assessment__risk_matrix_id=matrix_id,
+        )
         for i in range(len(m["risk"])):
             k = get_referential_translation(m["risk"][i], field)
             if k not in values:
                 values[k] = dict()
 
-            if residual:
-                count = (
-                    RiskScenario.objects.filter(id__in=object_ids_view)
-                    .filter(residual_level=i)
-                    .count()
-                )
-            elif inherent:
-                count = (
-                    RiskScenario.objects.filter(id__in=object_ids_view)
-                    .filter(inherent_level=i)
-                    .count()
-                )
-            else:
-                count = (
-                    RiskScenario.objects.filter(id__in=object_ids_view)
-                    .filter(current_level=i)
-                    .count()
-                )
+            count = matrix_scenarios.filter(**{level_field: i}).count()
 
             if "count" not in values[k]:
                 values[k]["count"] = count
