@@ -3817,5 +3817,13 @@
 	"commandPaletteNoResults": "No results found",
 	"commandPaletteNavigate": "navigate",
 	"searchEllipsis": "Search...",
-	"commandPaletteOpen": "open"
+	"commandPaletteOpen": "open",
+	"commandPaletteSearchHint": "Press Enter to search across all objects",
+	"searchPagesAndObjects": "Search pages and objects...",
+	"search": "Search",
+	"searchResult": "result",
+	"searchResults": "results",
+	"searchFor": "for",
+	"searchPrompt": "Type a query to search across all objects",
+	"all": "All"
 }
