@@ -24,7 +24,7 @@
 	import Question from '$lib/components/Forms/Question.svelte';
 	import List from '$lib/components/List/List.svelte';
 	import ConfirmModal from '$lib/components/Modals/ConfirmModal.svelte';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';
 	import { superForm } from 'sveltekit-superforms';
 	import {

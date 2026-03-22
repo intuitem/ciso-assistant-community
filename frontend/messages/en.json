@@ -3839,5 +3839,13 @@
 	"commandPaletteOpen": "open",
 	"commandPaletteActions": "Actions",
 	"openAssistant": "AI Assistant",
-	"searchPagesAndActions": "Search pages and actions..."
+	"searchPagesAndActions": "Search pages and actions...",
+	"commandPaletteSearchHint": "Press Enter to search across all objects",
+	"searchPagesAndObjects": "Search pages and objects...",
+	"search": "Search",
+	"searchResult": "result",
+	"searchResults": "results",
+	"searchFor": "for",
+	"searchPrompt": "Type a query to search across all objects",
+	"all": "All"
 }

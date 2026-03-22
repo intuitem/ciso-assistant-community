@@ -55,6 +55,7 @@ httpx = "^0.28.1"
 sentence-transformers = "^4.1.0"
 PyMuPDF = "^1.25.5"
 markdown = "^3.10.2"
+rapidfuzz = "^3.14.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest-django = "4.11.1"

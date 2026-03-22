@@ -3783,5 +3783,13 @@
 	"commandPaletteOpen": "ouvrir",
 	"commandPaletteActions": "Actions",
 	"openAssistant": "Assistant IA",
-	"searchPagesAndActions": "Rechercher des pages et actions..."
+	"searchPagesAndActions": "Rechercher des pages et actions...",
+	"commandPaletteSearchHint": "Appuyez sur Entrée pour rechercher dans tous les objets",
+	"searchPagesAndObjects": "Rechercher des pages et objets...",
+	"search": "Rechercher",
+	"searchResult": "résultat",
+	"searchResults": "résultats",
+	"searchFor": "pour",
+	"searchPrompt": "Saisissez une requête pour rechercher dans tous les objets",
+	"all": "Tous"
 }

@@ -233,6 +233,7 @@ urlpatterns = [
         UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
+    path("search/", global_search, name="global-search"),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(

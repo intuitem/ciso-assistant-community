@@ -21,7 +21,6 @@ import ssl
 from ciso_assistant import meta
 
 BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent))
-
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -332,6 +331,7 @@ def _build_tls12_context():
     context = ssl.create_default_context()
     context.minimum_version = ssl.TLSVersion.TLSv1_2
     context.maximum_version = ssl.TLSVersion.TLSv1_2
+    context.set_ciphers("ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256")
     return context
 
 

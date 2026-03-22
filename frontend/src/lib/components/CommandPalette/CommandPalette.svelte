@@ -118,6 +118,17 @@
 		} else if (e.key === 'Enter') {
 			const selectedCmd = allFilteredCommands[selected];
 			if (selectedCmd) selectedCmd.onSelect();
+			const selectedLink = filteredNavigationCommands[selected];
+			if (selectedLink) {
+				selectedLink.onSelect();
+			} else if (searchText.trim()) {
+				// No nav match — launch universal search
+				opened = false;
+				goto(`/search?q=${encodeURIComponent(searchText.trim())}`, {
+					label: 'search',
+					breadcrumbAction: 'replace'
+				});
+			}
 		}
 	}
 </script>
@@ -146,7 +157,7 @@
 					type="text"
 					bind:value={searchText}
 					bind:this={searchInput}
-					placeholder={m.searchPagesAndActions()}
+					placeholder={m.searchPagesAndObjects()}
 				/>
 				<button
 					onclick={() => (opened = false)}
@@ -228,6 +239,21 @@
 					<div class="flex flex-col items-center justify-center py-10 text-gray-400">
 						<i class="fa-solid fa-magnifying-glass text-2xl mb-2"></i>
 						<span class="text-sm">{m.commandPaletteNoResults()}</span>
+						{#if searchText.trim()}
+							<button
+								class="mt-3 flex items-center gap-2 rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-100 transition-colors cursor-pointer"
+								onclick={() => {
+									opened = false;
+									goto(`/search?q=${encodeURIComponent(searchText.trim())}`, {
+										label: 'search',
+										breadcrumbAction: 'replace'
+									});
+								}}
+							>
+								<i class="fa-solid fa-arrow-right text-[10px]"></i>
+								{m.commandPaletteSearchHint()}
+							</button>
+						{/if}
 					</div>
 				{/if}
 			</div>
