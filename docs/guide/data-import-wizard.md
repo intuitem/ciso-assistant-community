@@ -74,7 +74,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 
 ### Template
 
-{% file src="../.gitbook/assets/sample002 (1).xlsx" %}
+{% file src="../.gitbook/assets/applied_controls_sample.xlsx" %}
 
 ### Supported fields
 
@@ -103,6 +103,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
   * `detect`
   * `respond`
   * `recover`
+* owner
 
 ### Special considerations
 
