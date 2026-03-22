@@ -3840,5 +3840,13 @@
 	"descriptionPlaceholder": "Description...",
 	"providerPlaceholder": "Fournisseur...",
 	"levelNamePlaceholder": "Nom du niveau...",
-	"needAtLeast2PerDimension": "Au moins 2 niveaux sont requis pour chaque dimension."
+	"needAtLeast2PerDimension": "Au moins 2 niveaux sont requis pour chaque dimension.",
+	"commandPaletteSearchHint": "Appuyez sur Entrée pour rechercher dans tous les objets",
+	"searchPagesAndObjects": "Rechercher des pages et objets...",
+	"search": "Rechercher",
+	"searchResult": "résultat",
+	"searchResults": "résultats",
+	"searchFor": "pour",
+	"searchPrompt": "Saisissez une requête pour rechercher dans tous les objets",
+	"all": "Tous"
 }

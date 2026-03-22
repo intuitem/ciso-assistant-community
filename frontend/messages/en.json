@@ -3877,5 +3877,13 @@
 	"descriptionPlaceholder": "Description...",
 	"providerPlaceholder": "Provider...",
 	"levelNamePlaceholder": "Level name...",
-	"needAtLeast2PerDimension": "Need at least 2 levels for each dimension."
+	"needAtLeast2PerDimension": "Need at least 2 levels for each dimension.",
+	"commandPaletteSearchHint": "Press Enter to search across all objects",
+	"searchPagesAndObjects": "Search pages and objects...",
+	"search": "Search",
+	"searchResult": "result",
+	"searchResults": "results",
+	"searchFor": "for",
+	"searchPrompt": "Type a query to search across all objects",
+	"all": "All"
 }
