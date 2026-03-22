@@ -10,7 +10,7 @@
 	import { type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton-svelte';
 	import { onMount } from 'svelte';
 	import { getModelInfo } from '$lib/utils/crud';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { invalidateAll } from '$app/navigation';
 	import { AppliedControlSchema } from '$lib/utils/schemas';
