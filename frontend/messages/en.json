@@ -3886,5 +3886,8 @@
 	"searchFor": "for",
 	"searchPrompt": "Type a query to search across all objects",
 	"all": "All",
-	"addLanguage": "Add language"
+	"addLanguage": "Add language",
+	"untitledMatrix": "Untitled Matrix",
+	"closeEditor": "Close editor",
+	"close": "Close"
 }

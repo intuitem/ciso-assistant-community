@@ -3849,5 +3849,8 @@
 	"searchFor": "pour",
 	"searchPrompt": "Saisissez une requête pour rechercher dans tous les objets",
 	"all": "Tous",
-	"addLanguage": "Ajouter une langue"
+	"addLanguage": "Ajouter une langue",
+	"untitledMatrix": "Matrice sans titre",
+	"closeEditor": "Fermer l'éditeur",
+	"close": "Fermer"
 }

@@ -97,7 +97,7 @@
 							{#each impactLevels as _, colIdx}
 								{@const riskLevel = getRiskLevel(grid[rowIdx]?.[colIdx] ?? 0)}
 								<td
-									class="border border-gray-300 text-center p-0 cursor-pointer hover:opacity-80 transition-opacity"
+									class="border border-gray-300 text-center p-0 cursor-pointer hover:opacity-80 transition-opacity focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1"
 									style="background-color: {riskLevel?.hexcolor ?? '#ccc'}; color: {isDark(
 										riskLevel?.hexcolor ?? '#ccc'
 									)

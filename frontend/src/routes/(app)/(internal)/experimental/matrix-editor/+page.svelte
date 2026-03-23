@@ -400,7 +400,7 @@
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						name: matrixName || 'Untitled Matrix',
+						name: matrixName || m.untitledMatrix(),
 						description: matrixDescription,
 						editing_draft: jsonDefinition
 					})
@@ -415,7 +415,7 @@
 				// Save editing_draft on existing matrix
 				const payload = {
 					editing_draft: jsonDefinition,
-					name: matrixName || 'Untitled Matrix',
+					name: matrixName || m.untitledMatrix(),
 					description: matrixDescription,
 					metaTranslations: Object.keys(metaTranslations).length > 0 ? metaTranslations : undefined
 				};
@@ -827,8 +827,12 @@
 						onclick={saveDraft}
 						disabled={saving}
 					>
-						<i class="fa-solid fa-floppy-disk mr-1"></i>
-						{saving ? '...' : m.saveDraft()}
+						{#if saving}
+							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+						{:else}
+							<i class="fa-solid fa-floppy-disk mr-1"></i>
+						{/if}
+						{m.saveDraft()}
 					</button>
 					<button
 						type="button"
@@ -836,8 +840,12 @@
 						onclick={publishMatrix}
 						disabled={publishing}
 					>
-						<i class="fa-solid fa-rocket mr-1"></i>
-						{publishing ? '...' : m.publishMatrix()}
+						{#if publishing}
+							<i class="fa-solid fa-spinner fa-spin mr-1"></i>
+						{:else}
+							<i class="fa-solid fa-rocket mr-1"></i>
+						{/if}
+						{m.publishMatrix()}
 					</button>
 				{/if}
 			</div>
@@ -891,11 +899,11 @@
 													matrixId = null;
 													hasUnsavedChanges = false;
 												}}
-												title="Close editor"
-												aria-label="Close editor"
+												title={m.closeEditor()}
+												aria-label={m.closeEditor()}
 											>
 												<i class="fa-solid fa-xmark mr-1"></i>
-												Close
+												{m.close()}
 											</button>
 										{:else}
 											<!-- Not editing — show continue button -->
