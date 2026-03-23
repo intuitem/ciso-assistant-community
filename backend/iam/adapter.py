@@ -58,20 +58,33 @@ class AccountAdapter(DefaultAccountAdapter):
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     @staticmethod
-    def _find_email_in_dict(data):
-        """Recursively search for an email in a dict, checking known keys at each level."""
-        if not isinstance(data, dict):
+    def _find_email_in_dict(data, _depth=0, _max_depth=5):
+        """Recursively search for an email in a dict or list, checking known keys at each level."""
+        if _depth >= _max_depth:
             return None
-        # Check direct email keys at this level
-        email = data.get("email") or data.get("email_address")
-        if email:
-            return email
-        # Recurse into nested dicts (e.g. "attributes", "claims", "user")
-        for value in data.values():
-            if isinstance(value, dict):
-                email = SocialAccountAdapter._find_email_in_dict(value)
-                if email:
-                    return email
+        if isinstance(data, dict):
+            email = data.get("email") or data.get("email_address")
+            if isinstance(email, str) and email:
+                return email
+            if isinstance(email, list):
+                candidate = next((e for e in email if isinstance(e, str) and e), None)
+                if candidate:
+                    return candidate
+            for value in data.values():
+                if isinstance(value, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        value, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
+        elif isinstance(data, list):
+            for item in data:
+                if isinstance(item, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        item, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
         return None
 
     def pre_social_login(self, request, sociallogin):
