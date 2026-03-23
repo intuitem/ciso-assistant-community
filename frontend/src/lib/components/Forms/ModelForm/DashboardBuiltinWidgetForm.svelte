@@ -141,7 +141,10 @@
 	$effect(() => {
 		if (!selectedTimeRange) {
 			selectedTimeRange =
-				formDataCache['time_range'] || object?.time_range || initialData?.time_range || 'last_30_days';
+				formDataCache['time_range'] ||
+				object?.time_range ||
+				initialData?.time_range ||
+				'last_30_days';
 		}
 	});
 
