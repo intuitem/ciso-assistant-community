@@ -23,7 +23,13 @@
 		await builder.updateNode(section.node.id, { [field]: value });
 	}
 
-	function handleReqDragStart(index: number) {
+	function handleReqDragStart(e: DragEvent, index: number) {
+		// Only allow drag if initiated from the grip handle
+		const target = e.target as HTMLElement;
+		if (!target.closest('[data-drag-handle]')) {
+			e.preventDefault();
+			return;
+		}
 		draggedReqIndex = index;
 	}
 
@@ -46,7 +52,7 @@
 <div data-section-id={section.node.id} class="scroll-mt-32">
 	<!-- Section header -->
 	<div class="flex items-center gap-3 group mb-3">
-		<span class="cursor-grab text-gray-300 group-hover:text-gray-400">
+		<span class="cursor-grab text-gray-300 group-hover:text-gray-400" data-drag-handle>
 			<i class="fa-solid fa-grip-vertical text-sm"></i>
 		</span>
 
@@ -117,7 +123,7 @@
 				<div
 					class:opacity-50={draggedReqIndex === reqIndex}
 					draggable="true"
-					ondragstart={() => handleReqDragStart(reqIndex)}
+					ondragstart={(e) => handleReqDragStart(e, reqIndex)}
 					ondragover={handleReqDragOver}
 					ondrop={(e) => handleReqDrop(e, reqIndex)}
 					ondragend={handleReqDragEnd}

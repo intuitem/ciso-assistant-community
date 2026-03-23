@@ -37,7 +37,12 @@
 	// Drag state for sections
 	let draggedSectionIndex: number | null = $state(null);
 
-	function handleSectionDragStart(index: number) {
+	function handleSectionDragStart(e: DragEvent, index: number) {
+		const target = e.target as HTMLElement;
+		if (!target.closest('[data-drag-handle]')) {
+			e.preventDefault();
+			return;
+		}
 		draggedSectionIndex = index;
 	}
 
@@ -146,7 +151,7 @@
 			<div
 				class:opacity-50={draggedSectionIndex === sectionIndex}
 				draggable="true"
-				ondragstart={() => handleSectionDragStart(sectionIndex)}
+				ondragstart={(e) => handleSectionDragStart(e, sectionIndex)}
 				ondragover={handleSectionDragOver}
 				ondrop={(e) => handleSectionDrop(e, sectionIndex)}
 				ondragend={handleSectionDragEnd}

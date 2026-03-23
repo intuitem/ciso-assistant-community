@@ -30,7 +30,12 @@
 	// Drag state for children
 	let draggedChildIndex: number | null = $state(null);
 
-	function handleChildDragStart(index: number) {
+	function handleChildDragStart(e: DragEvent, index: number) {
+		const target = e.target as HTMLElement;
+		if (!target.closest('[data-drag-handle]')) {
+			e.preventDefault();
+			return;
+		}
 		draggedChildIndex = index;
 	}
 	function handleChildDragOver(e: DragEvent) {
@@ -62,7 +67,7 @@
 
 	<!-- Header -->
 	<div class="px-4 py-3 border-b border-gray-100 flex items-start gap-3 group">
-		<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1">
+		<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1" data-drag-handle>
 			<i class="fa-solid fa-grip-vertical text-xs"></i>
 		</span>
 		<div class="flex-1 min-w-0 space-y-1">
@@ -212,7 +217,7 @@
 			<div
 				class:opacity-50={draggedChildIndex === childIndex}
 				draggable="true"
-				ondragstart={() => handleChildDragStart(childIndex)}
+				ondragstart={(e) => handleChildDragStart(e, childIndex)}
 				ondragover={handleChildDragOver}
 				ondrop={(e) => handleChildDrop(e, childIndex)}
 				ondragend={handleChildDragEnd}

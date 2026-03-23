@@ -40,7 +40,7 @@
 			);
 			if (res.ok) {
 				const data = await res.json();
-				const imageUrl = `?_action=serve-image&node_id=${requirement.node.id}&attachment_id=${data.id}`;
+				const imageUrl = `/api/requirement-nodes/${requirement.node.id}/serve-image/${data.id}/`;
 				insertAtCursor(`![image](${imageUrl})`);
 				await saveDescription();
 			}
@@ -127,7 +127,7 @@
 >
 	<!-- Header -->
 	<div class="px-4 py-3 border-b border-purple-100 flex items-start gap-3 group">
-		<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1">
+		<span class="cursor-grab text-gray-300 group-hover:text-gray-400 mt-1" data-drag-handle>
 			<i class="fa-solid fa-grip-vertical text-xs"></i>
 		</span>
 		<div class="flex-1 min-w-0 space-y-1">
