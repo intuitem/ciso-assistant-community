@@ -537,6 +537,7 @@ export function createBuilderState(
 		try {
 			saving.set(true);
 			const created = await apiCreate('question-choices', {
+				urn: `urn:intuitem:risk:question_choice:${crypto.randomUUID()}`,
 				value: '',
 				order,
 				question: q.question.id,
