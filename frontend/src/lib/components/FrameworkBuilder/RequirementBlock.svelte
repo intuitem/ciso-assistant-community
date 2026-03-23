@@ -11,6 +11,7 @@
 	const builder = getBuilderContext();
 	const { framework: frameworkStore, errors: errorsStore } = builder;
 	let confirmDelete = $state(false);
+	let urnCopied = $state(false);
 
 	const depthColors = [
 		'border-l-blue-400',
@@ -84,6 +85,24 @@
 					onblur={(e) => saveField('name', e.currentTarget.value || null)}
 				/>
 			</div>
+			{#if requirement.node.urn}
+				<button
+					type="button"
+					class="inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+					onclick={() => {
+						navigator.clipboard.writeText(requirement.node.urn ?? '');
+						urnCopied = true;
+						setTimeout(() => (urnCopied = false), 1500);
+					}}
+				>
+					<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
+					{#if urnCopied}
+						<span class="text-green-500">Copied!</span>
+					{:else}
+						{requirement.node.urn}
+					{/if}
+				</button>
+			{/if}
 			<textarea
 				value={requirement.node.description ?? ''}
 				placeholder="Description (optional)"

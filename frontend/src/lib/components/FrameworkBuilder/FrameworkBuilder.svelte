@@ -32,6 +32,8 @@
 		saving: savingStore
 	} = builder;
 
+	let urnCopied = $state(false);
+
 	// Drag state for sections
 	let draggedSectionIndex: number | null = $state(null);
 
@@ -99,6 +101,24 @@
 					builder.updateFramework({ description: e.currentTarget.value || null });
 				}}
 			></textarea>
+			{#if $frameworkStore.urn}
+				<button
+					type="button"
+					class="inline-flex items-center gap-1 text-xs font-mono text-gray-300 hover:text-gray-500 transition-colors truncate max-w-full text-left group/urn"
+					onclick={() => {
+						navigator.clipboard.writeText($frameworkStore.urn ?? '');
+						urnCopied = true;
+						setTimeout(() => (urnCopied = false), 1500);
+					}}
+				>
+					<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
+					{#if urnCopied}
+						<span class="text-green-500">Copied!</span>
+					{:else}
+						{$frameworkStore.urn}
+					{/if}
+				</button>
+			{/if}
 			{#if $errorsStore.has('framework')}
 				<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
 			{/if}
