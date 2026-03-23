@@ -3852,5 +3852,6 @@
 	"addLanguage": "Ajouter une langue",
 	"untitledMatrix": "Matrice sans titre",
 	"closeEditor": "Fermer l'éditeur",
-	"close": "Fermer"
+	"close": "Fermer",
+	"removeLanguageConfirm": "Supprimer les traductions {lang} ?"
 }

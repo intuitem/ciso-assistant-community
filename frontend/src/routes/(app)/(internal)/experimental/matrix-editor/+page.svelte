@@ -591,7 +591,7 @@
 	async function newMatrix() {
 		if (!(await confirmSwitchAway())) return;
 		// Set template values first
-		matrixName = 'New matrix';
+		matrixName = m.newMatrix();
 		matrixDescription = '';
 		provider = 'custom';
 		locale = 'en';
@@ -1091,11 +1091,15 @@
 							class="pr-2 pl-0 py-1 opacity-50 hover:opacity-100 transition-opacity"
 							onclick={(e) => {
 								e.stopPropagation();
-								if (confirm(`Remove ${language[LOCALE_MAP[lang]?.name] ?? lang} translations?`)) {
+								if (
+									confirm(
+										m.removeLanguageConfirm({ lang: language[LOCALE_MAP[lang]?.name] ?? lang })
+									)
+								) {
 									removeLanguage(lang);
 								}
 							}}
-							aria-label="Remove {lang}"
+							aria-label="{m.removeLevel()} ({lang})"
 						>
 							<i class="fa-solid fa-xmark text-xs"></i>
 						</button>

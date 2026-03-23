@@ -3889,5 +3889,6 @@
 	"addLanguage": "Add language",
 	"untitledMatrix": "Untitled Matrix",
 	"closeEditor": "Close editor",
-	"close": "Close"
+	"close": "Close",
+	"removeLanguageConfirm": "Remove {lang} translations?"
 }
