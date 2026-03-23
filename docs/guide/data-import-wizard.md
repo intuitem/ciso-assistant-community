@@ -57,7 +57,11 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * type
   * `PR` : primary
   * `SP` : supporting
-* reference\_link (or link)
+*
+* reference\_link - URL reference; also accepted as `link`
+* observation&#x20;
+* filtering\_labels - pipe- or comma-separated label names (created if missing)
+* parent\_assets -comma- or pipe-separated list of parent asset `ref_id` values; parent links are resolved after all assets in the file are created, so forward references are supported
 * security\_objectives
   * confidentiality: 3,integrity: 2,availability: 1,...
 * disaster\_recovery\_objectives
@@ -104,12 +108,28 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
   * `detect`
   * `respond`
   * `recover`
-* owner
+* effort — size estimate
+  * `XS`
+  * `S`
+  * `M`
+  * `L`
+  * `XL`
+  * full names also accepted, e.g. `Extra Small`
+* control\_impact - integer 1–5; also accepted as `impact`
+* start\_date - date (YYYY-MM-DD)
+* eta - estimated completion date (YYYY-MM-DD)
+* expiry\_date - expiry date (YYYY-MM-DD)
+* link - URL
+* observation - free-text observation
+* filtering\_labels - pipe- or comma-separated label names (created if missing)
+* reference\_control - lookup by `ref_id`; also accepted as `reference_control_ref_id`
+* owner&#x20;
 
 ### Special considerations
 
 * status will default to `to_do`
 * csf\_function will default to `govern`
+* The `owner` field resolves against existing users (by email) and teams (by name). Ensure any referenced users and teams are created before importing. Unresolved entries are skipped with a warning and will not block the import.
 
 
 
@@ -207,6 +227,10 @@ The framework needs to be loaded and when clicking on it, you'll see a button to
   * `deprecated`
 * filtering\_labels\
   you can add multiple labels for one finding separating them with `|` ( e.g. interna&#x6C;**|**&#x70;entes&#x74;**|**...)
+* `priority` -integer 1–4
+* `eta` - estimated resolution date (YYYY-MM-DD)
+* `due_date` - due date (YYYY-MM-DD)
+* `observation`&#x20;
 
 
 
@@ -526,6 +550,23 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * domain
 * status
 * link
+* `csf_function` - defaults to `govern`
+  * `govern`
+  * `identify`
+  * `protect`
+  * `detect`
+  * `respond`
+  * `recover`
+* `priority`&#x20;
+  * integer 1–4
+* `effort`&#x20;
+  * size estimate: `XS`, `S`, `M`, `L`, `XL`
+* `eta`&#x20;
+  * estimated completion date (YYYY-MM-DD)
+* `expiry_date`&#x20;
+  * expiry date (YYYY-MM-DD)
+* `filtering_labels`&#x20;
+  * pipe- or comma-separated label names (created if missing
 
 ## Exceptions
 
@@ -563,6 +604,10 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
   * internal/internally\_detected, external/externally\_detected
 * reported\_at
   * DateTime
+* `link`&#x20;
+  * URL reference
+* `filtering_labels`&#x20;
+  * pipe- or comma-separated label names (created if missing)
 
 
 
@@ -593,6 +638,103 @@ The file has to be divided into 3 sheets namely "Entities", "Solutions" and "Con
 * assets (newline-separated list of the name of the assets)
 * applied\_controls (newline-separated of the names)
 * security\_exceptions (newline-separated of the names)
+
+
+
+## 📁 Folders
+
+Folders (domains) are the top-level organisational units in CISO Assistant. Importing them lets you pre-populate a domain hierarchy before importing other objects.
+
+#### Supported fields
+
+* `name`\*
+* `description`
+* `domain` - name of the parent folder, must match exactly one existing folder name (case-insensitive)
+
+### Template
+
+{% file src="../.gitbook/assets/sample_folders.xlsx" %}
+
+#### Special considerations
+
+* Conflict detection is performed by `name` + parent folder.
+* When `domain` is left blank the folder is attached to the root of the tenant.
+* An error is returned if `domain` matches more than one folder name.
+
+***
+
+## ✅ Tasks (incoming)
+
+Tasks in CISO Assistant are modelled as **TaskTemplates** (definitions) with **TaskNodes** (individual occurrences). A non-recurrent task has one node; recurrent tasks generate one node per scheduled occurrence.
+
+The wizard imports both in a single multi-sheet Excel file: a **Summary** sheet for the templates, plus one sheet per template that contains its past occurrences. A flat CSV upload is also accepted and imports templates only.
+
+#### Template
+
+{% file src="../.gitbook/assets/sample_task-templates.xlsx" %}
+
+#### Supported fields — Summary sheet
+
+* `ref_id` — reference identifier; used as the primary conflict-detection key when present
+* `name`\*
+* `description`
+* `folder` — folder name; falls back to the domain selected in the wizard
+* `is_recurrent`
+  * `true` / `yes` / `1`
+  * `false` / `no` / `0`
+* `enabled`
+  * `true` / `yes` / `1` (default)
+  * `false` / `no` / `0`
+* `link` - URL
+* `task_date`  (YYYY-MM-DD)
+* `assigned_to` - comma-separated list of user emails and/or team names
+* `assets` - comma-separated asset names or ref\_ids
+* `applied_controls` - comma-separated control names or ref\_ids
+* `evidences` - comma-separated evidence names
+* `compliance_assessments` - comma-separated assessment names; the `name - version` format produced by the export is accepted
+* `risk_assessments` - comma-separated assessment names; the `name - version` format produced by the export is accepted
+* `findings_assessment` - comma-separated findings assessment names
+* `status` - non-recurrent only; sets the status of the single task node
+  * `pending`
+  * `in_progress`
+  * `completed`
+  * `cancelled`
+* `observation` - free-text; non-recurrent only
+* `schedule_frequency` - recurrent only
+  * `DAILY`
+  * `WEEKLY`
+  * `MONTHLY`
+  * `YEARLY`
+* `schedule_interval` - integer; repeat every N periods (recurrent only)
+* `schedule_days_of_week` - comma-separated integers 1–7 (Mon=1, Sun=7), WEEKLY only
+* `schedule_weeks_of_month` - comma-separated integers -1–4 (1=first, -1=last)
+* `schedule_months_of_year` - comma-separated integers 1–12, YEARLY only
+* `schedule_end_date` - date (YYYY-MM-DD)
+* `schedule_occurrences` - integer; stop after N occurrences
+* `schedule_overdue_behavior`
+  * `DELAY_NEXT`
+  * `NO_IMPACT`
+
+#### Supported fields - per-template node sheets
+
+Each sheet is named `N-template name` (truncated to 31 characters) and contains one row per past occurrence.
+
+* `due_date`\* - date (YYYY-MM-DD); rows with a future date are skipped automatically
+* `scheduled_date` - date (YYYY-MM-DD); defaults to `due_date` when blank
+* `status`
+  * `pending`
+  * `in_progress`
+  * `completed`
+  * `cancelled`
+* `observation`&#x20;
+
+#### Special considerations
+
+* **Folder is a fallback.** Each row's `folder` column is resolved first; the domain selected in the wizard is only used when a row has no folder.
+* **Future nodes are skipped.** Rows whose `due_date` is after today are ignored - those occurrences will be regenerated automatically from the schedule.
+* **Round-trip safe.** Exporting then re-importing with **Update** mode overwrites existing task nodes and templates without creating duplicates. With **Skip** mode, existing records are left unchanged.
+* **Clearing relationships.** In **Update** mode, leaving a relation column (e.g. `assigned_to`, `assets`) blank in the file clears the existing links on the template.
+* **CSV upload.** A CSV file is accepted and imports the Summary sheet fields only; no task nodes are processed.
 
 
 
