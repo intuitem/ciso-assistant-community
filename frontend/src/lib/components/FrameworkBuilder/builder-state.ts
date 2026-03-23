@@ -50,6 +50,7 @@ export interface RequirementNode {
 	typical_evidence: string | null;
 	weight: number;
 	importance: string;
+	display_mode: 'default' | 'splash';
 	framework: string | { id: string };
 	folder: { id: string; str: string } | string;
 }
@@ -167,6 +168,7 @@ export interface BuilderStore {
 	addSection: (afterIndex?: number) => Promise<void>;
 	deleteSection: (sectionIndex: number) => Promise<void>;
 	addRequirement: (parentNodeId: string, parentUrn: string) => Promise<void>;
+	addSplashScreen: (parentNodeId: string, parentUrn: string) => Promise<void>;
 	deleteRequirement: (nodeId: string) => Promise<void>;
 	updateNode: (nodeId: string, patch: Record<string, unknown>) => Promise<void>;
 	addQuestion: (reqNodeId: string, type?: Question['type']) => Promise<void>;
@@ -349,6 +351,47 @@ export function createBuilderState(
 	}
 
 	// --- Requirement CRUD (node ID-based) ---
+
+	async function addSplashScreen(parentNodeId: string, parentUrn: string) {
+		const siblings = (() => {
+			for (const sec of get(sections)) {
+				if (sec.node.id === parentNodeId) return sec.requirements;
+			}
+			return [];
+		})();
+		const order = siblings.length * 100;
+
+		try {
+			saving.set(true);
+			const created = await apiCreate('requirement-nodes', {
+				urn: `urn:intuitem:risk:req_node:${crypto.randomUUID()}`,
+				name: 'New Splash Screen',
+				assessable: false,
+				display_mode: 'splash',
+				order_id: order,
+				parent_urn: parentUrn,
+				framework: frameworkId,
+				folder: folderId
+			});
+			const newReq: BuilderRequirement = {
+				node: created,
+				questions: [],
+				children: [],
+				depth: 0
+			};
+			sections.update((s) =>
+				s.map((sec) =>
+					sec.node.id === parentNodeId
+						? { ...sec, requirements: [...sec.requirements, newReq] }
+						: sec
+				)
+			);
+		} catch (e) {
+			setError('add-splash-screen', (e as Error).message);
+		} finally {
+			saving.set(false);
+		}
+	}
 
 	async function addRequirement(parentNodeId: string, parentUrn: string) {
 		const parentReq = findReqGlobal(parentNodeId);
@@ -794,6 +837,7 @@ export function createBuilderState(
 		addSection,
 		deleteSection,
 		addRequirement,
+		addSplashScreen,
 		deleteRequirement,
 		updateNode,
 		addQuestion,

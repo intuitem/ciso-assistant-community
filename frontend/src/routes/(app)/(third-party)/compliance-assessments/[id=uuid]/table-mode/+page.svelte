@@ -407,6 +407,29 @@
 		<ul data-testid="requirement-assessments">
 			{#each requirementAssessments as requirementAssessment, i}
 				<li class="list-none">
+					{#if requirementAssessment.display_mode === 'splash' || requirementAssessment.requirement?.display_mode === 'splash'}
+						<!-- Splash screen node: full-width markdown block -->
+						<div class="my-4">
+							<div
+								class="border-l-4 border-purple-400 rounded-xl shadow-sm bg-white overflow-hidden"
+								id="requirement-{requirementAssessment.id}"
+							>
+								{#if requirementAssessment.name || requirementAssessment.requirement?.name}
+									<div class="px-6 py-4 border-b border-purple-100 flex items-center gap-2">
+										<i class="fa-solid fa-display text-purple-400"></i>
+										<span class="text-lg font-semibold text-gray-800">
+											{requirementAssessment.name ?? requirementAssessment.requirement?.name}
+										</span>
+									</div>
+								{/if}
+								<div class="px-6 py-5">
+									<MarkdownRenderer
+										content={requirementAssessment.description ?? requirementAssessment.requirement?.description}
+									/>
+								</div>
+							</div>
+						</div>
+					{:else}
 					<span
 						class="relative flex justify-center py-4"
 						id="requirement-{requirementAssessment.id}"
@@ -998,6 +1021,7 @@
 								</form>
 							{/if}
 						</div>
+					{/if}
 					{/if}
 				</li>
 			{/each}

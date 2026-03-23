@@ -2,6 +2,7 @@
 	import { slide } from 'svelte/transition';
 	import { getBuilderContext, type BuilderSection } from './builder-state';
 	import RequirementBlock from './RequirementBlock.svelte';
+	import SplashScreenBlock from './SplashScreenBlock.svelte';
 
 	interface Props {
 		section: BuilderSection;
@@ -122,17 +123,30 @@
 					ondragend={handleReqDragEnd}
 					role="listitem"
 				>
+					{#if req.node.display_mode === 'splash'}
+					<SplashScreenBlock requirement={req} />
+				{:else}
 					<RequirementBlock requirement={req} />
+				{/if}
 				</div>
 			{/each}
 
-			<button
-				type="button"
-				class="w-full py-3 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
-				onclick={() => builder.addRequirement(section.node.id, section.node.urn ?? '')}
-			>
-				<i class="fa-solid fa-plus mr-1"></i>Add requirement
-			</button>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					class="flex-1 py-3 border-2 border-dashed border-gray-200 rounded-lg text-sm text-gray-400 hover:text-gray-600 hover:border-gray-300 transition-colors"
+					onclick={() => builder.addRequirement(section.node.id, section.node.urn ?? '')}
+				>
+					<i class="fa-solid fa-plus mr-1"></i>Add requirement
+				</button>
+				<button
+					type="button"
+					class="flex-1 py-3 border-2 border-dashed border-purple-200 rounded-lg text-sm text-purple-300 hover:text-purple-500 hover:border-purple-300 transition-colors"
+					onclick={() => builder.addSplashScreen(section.node.id, section.node.urn ?? '')}
+				>
+					<i class="fa-solid fa-display mr-1"></i>Add splash screen
+				</button>
+			</div>
 		</div>
 	{/if}
 </div>

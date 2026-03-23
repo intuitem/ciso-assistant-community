@@ -23,41 +23,87 @@
 		{ id: 'not_applicable', label: m.notApplicable() }
 	];
 
-	const requirementAssessments = data.requirement_assessments.filter(
-		(requirement) => requirement.name || requirement.description
-	);
-	let currentIndex = $state(0);
-	let currentRequirementAssessment = $derived(requirementAssessments[currentIndex]);
-
-	let color = $derived(complianceResultTailwindColorMap[currentRequirementAssessment.result]);
-
 	const requirementHashmap = Object.fromEntries(
-		data.requirements.map((requirement) => [requirement.id, requirement])
+		data.requirements.map((requirement: Record<string, any>) => [requirement.id, requirement])
 	);
-	let requirement = $derived(requirementHashmap[currentRequirementAssessment.requirement.id]);
-	let parent = $derived(data.requirements.find((req) => req.urn === requirement.parent_urn));
+
+	// Build unified navigation: assessable items + splash nodes, ordered by order_id
+	type NavItem =
+		| { type: 'assessment'; data: (typeof data.requirement_assessments)[0] }
+		| { type: 'splash'; data: Record<string, any> };
+
+	const assessmentItems: NavItem[] = data.requirement_assessments
+		.filter((ra: Record<string, any>) => ra.name || ra.description)
+		.map((ra: Record<string, any>) => ({ type: 'assessment' as const, data: ra }));
+
+	const splashItems: NavItem[] = data.requirements
+		.filter((r: Record<string, any>) => r.display_mode === 'splash')
+		.map((r: Record<string, any>) => ({ type: 'splash' as const, data: r }));
+
+	// Merge and sort by order_id
+	const navItems: NavItem[] = [...assessmentItems, ...splashItems].sort((a, b) => {
+		const orderA =
+			a.type === 'assessment'
+				? (requirementHashmap[a.data.requirement?.id]?.order_id ?? 0)
+				: (a.data.order_id ?? 0);
+		const orderB =
+			b.type === 'assessment'
+				? (requirementHashmap[b.data.requirement?.id]?.order_id ?? 0)
+				: (b.data.order_id ?? 0);
+		return orderA - orderB;
+	});
+
+	// Only assessable items count for progress
+	const assessableItems = navItems.filter((item) => item.type === 'assessment');
+
+	let currentIndex = $state(0);
+	let currentNavItem = $derived(navItems[currentIndex]);
+	let currentRequirementAssessment = $derived(
+		currentNavItem?.type === 'assessment' ? currentNavItem.data : null
+	);
+	let currentSplashNode = $derived(
+		currentNavItem?.type === 'splash' ? currentNavItem.data : null
+	);
+
+	let color = $derived(
+		currentRequirementAssessment
+			? complianceResultTailwindColorMap[currentRequirementAssessment.result]
+			: undefined
+	);
+
+	let requirement = $derived(
+		currentRequirementAssessment
+			? requirementHashmap[currentRequirementAssessment.requirement?.id]
+			: currentSplashNode
+	);
+	let parent = $derived(
+		requirement ? data.requirements.find((req: Record<string, any>) => req.urn === requirement.parent_urn) : null
+	);
 
 	let title = $derived(
-		requirement.display_short
+		requirement?.display_short
 			? requirement.display_short
-			: parent.display_short
+			: parent?.display_short
 				? parent.display_short
-				: parent.description
+				: parent?.description ?? ''
 	);
 
-	// Progress tracking
+	// Progress tracking (only assessable items count)
 	let assessedCount = $derived(
-		requirementAssessments.filter((ra) => ra.result && ra.result !== 'not_assessed').length
+		assessableItems.filter(
+			(item) =>
+				item.type === 'assessment' &&
+				item.data.result &&
+				item.data.result !== 'not_assessed'
+		).length
 	);
 	let progressPercent = $derived(
-		requirementAssessments.length > 0
-			? Math.round((assessedCount / requirementAssessments.length) * 100)
+		assessableItems.length > 0
+			? Math.round((assessedCount / assessableItems.length) * 100)
 			: 0
 	);
 	let currentProgressPercent = $derived(
-		requirementAssessments.length > 0
-			? ((currentIndex + 1) / requirementAssessments.length) * 100
-			: 0
+		navItems.length > 0 ? ((currentIndex + 1) / navItems.length) * 100 : 0
 	);
 
 	// Slide direction for transitions
@@ -67,7 +113,7 @@
 	function nextItem() {
 		flushObservation();
 		slideDirection = 'next';
-		if (currentIndex < requirementAssessments.length - 1) {
+		if (currentIndex < navItems.length - 1) {
 			currentIndex += 1;
 		} else {
 			currentIndex = 0;
@@ -81,18 +127,18 @@
 		if (currentIndex > 0) {
 			currentIndex -= 1;
 		} else {
-			currentIndex = requirementAssessments.length - 1;
+			currentIndex = navItems.length - 1;
 		}
 		transitionKey++;
 	}
 
 	// svelte-ignore state_referenced_locally
-	let result = $state(currentRequirementAssessment.result);
+	let result = $state(currentRequirementAssessment?.result ?? null);
 	// svelte-ignore state_referenced_locally
-	let observation = $state(currentRequirementAssessment.observation ?? '');
+	let observation = $state(currentRequirementAssessment?.observation ?? '');
 	$effect(() => {
-		result = currentRequirementAssessment.result;
-		observation = currentRequirementAssessment.observation ?? '';
+		result = currentRequirementAssessment?.result ?? null;
+		observation = currentRequirementAssessment?.observation ?? '';
 	});
 
 	// Debounce timer for observation saves
@@ -145,7 +191,7 @@
 
 	function jumpToItem(index: number) {
 		flushObservation();
-		if (index >= 0 && index < requirementAssessments.length) {
+		if (index >= 0 && index < navItems.length) {
 			slideDirection = index > currentIndex ? 'next' : 'prev';
 			currentIndex = index;
 			showNavigation = false;
@@ -198,7 +244,9 @@
 		not_applicable: '#1e293b'
 	};
 	let accentColor = $derived(
-		resultAccentColorMap[currentRequirementAssessment.result] ?? '#d1d5db'
+		currentSplashNode
+			? '#a855f7'
+			: (resultAccentColorMap[currentRequirementAssessment?.result ?? ''] ?? '#d1d5db')
 	);
 </script>
 
@@ -206,7 +254,7 @@
 
 <div class="flash-mode-container">
 	<div class="flash-card" style="--accent: {accentColor}">
-		{#if currentRequirementAssessment}
+		{#if currentNavItem}
 			<!-- Top bar: back link + progress -->
 			<div class="flash-header">
 				<a href="/compliance-assessments/{data.compliance_assessment.id}" class="back-link">
@@ -217,7 +265,7 @@
 				<div class="header-right">
 					<span class="progress-stat">
 						<i class="fa-solid fa-check text-green-400 text-[10px]"></i>
-						{assessedCount}/{requirementAssessments.length}
+						{assessedCount}/{assessableItems.length}
 					</span>
 					<div class="relative">
 						<button
@@ -227,7 +275,7 @@
 						>
 							<span class="counter-current">{currentIndex + 1}</span>
 							<span class="counter-sep">/</span>
-							<span class="counter-total">{requirementAssessments.length}</span>
+							<span class="counter-total">{navItems.length}</span>
 							<kbd>G</kbd>
 						</button>
 
@@ -243,7 +291,7 @@
 											bind:value={jumpToInput}
 											type="number"
 											min="1"
-											max={requirementAssessments.length}
+											max={navItems.length}
 											placeholder="#"
 											class="jump-input"
 											onkeydown={(e) => {
@@ -293,19 +341,32 @@
 						class:slide-in-right={slideDirection === 'next'}
 						class:slide-in-left={slideDirection === 'prev'}
 					>
-						<div class="content-section-label">{title}</div>
-
-						{#if currentRequirementAssessment.description}
+						{#if currentSplashNode}
+							<!-- Splash screen: full-page markdown -->
+							{#if currentSplashNode.name}
+								<div class="content-section-label flex items-center gap-2">
+									<i class="fa-solid fa-display text-purple-400 text-sm"></i>
+									{currentSplashNode.name}
+								</div>
+							{/if}
 							<div class="content-description">
-								<MarkdownRenderer content={currentRequirementAssessment.description} />
+								<MarkdownRenderer content={currentSplashNode.description} />
 							</div>
-						{/if}
+						{:else if currentRequirementAssessment}
+							<div class="content-section-label">{title}</div>
 
-						{#if requirement.annotation}
-							<div class="content-annotation">
-								<div class="annotation-bar"></div>
-								<MarkdownRenderer content={requirement.annotation} />
-							</div>
+							{#if currentRequirementAssessment.description}
+								<div class="content-description">
+									<MarkdownRenderer content={currentRequirementAssessment.description} />
+								</div>
+							{/if}
+
+							{#if requirement?.annotation}
+								<div class="content-annotation">
+									<div class="annotation-bar"></div>
+									<MarkdownRenderer content={requirement.annotation} />
+								</div>
+							{/if}
 						{/if}
 					</div>
 				{/key}
@@ -313,31 +374,33 @@
 
 			<!-- Controls -->
 			<div class="flash-controls">
-				<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
-					<RadioGroup
-						possibleOptions={possible_options}
-						initialValue={currentRequirementAssessment.result}
-						classes="w-full"
-						colorMap={complianceResultTailwindColorMap}
-						disabled={isReadOnly}
-						field="result"
-						onChange={(newValue) => {
-							const newResult = result === newValue ? 'not_assessed' : newValue;
-							updateResult(newResult);
-						}}
-						key="id"
-						labelKey="label"
-					/>
-				</form>
+				{#if currentRequirementAssessment}
+					<form id="flashModeForm" action="?/updateRequirementAssessment" method="post">
+						<RadioGroup
+							possibleOptions={possible_options}
+							initialValue={currentRequirementAssessment.result}
+							classes="w-full"
+							colorMap={complianceResultTailwindColorMap}
+							disabled={isReadOnly}
+							field="result"
+							onChange={(newValue) => {
+								const newResult = result === newValue ? 'not_assessed' : newValue;
+								updateResult(newResult);
+							}}
+							key="id"
+							labelKey="label"
+						/>
+					</form>
 
-				<textarea
-					class="observation-textarea"
-					rows="2"
-					placeholder="{m.observation()}..."
-					value={observation}
-					disabled={isReadOnly}
-					oninput={(e) => handleObservationInput(e.currentTarget.value)}
-				></textarea>
+					<textarea
+						class="observation-textarea"
+						rows="2"
+						placeholder="{m.observation()}..."
+						value={observation}
+						disabled={isReadOnly}
+						oninput={(e) => handleObservationInput(e.currentTarget.value)}
+					></textarea>
+				{/if}
 
 				<div class="nav-row">
 					<button class="nav-btn nav-btn-prev" onclick={previousItem}>
