@@ -63,6 +63,7 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
 * disaster\_recovery\_objectives
   * rto: 1h01m01s,rpo: 2h01m01s,mtd: 3h
 * labels
+* is\_business\_function (either true/yes or false/no)
 
 ### Special considerations
 
