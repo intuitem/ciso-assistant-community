@@ -20,7 +20,7 @@
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { superForm } from 'sveltekit-superforms/client';
 	import {
 		getModalStore,
@@ -199,6 +199,7 @@
 					multiple
 					form={_form}
 					optionsEndpoint="assets"
+					lazy
 					optionsLabelField="auto"
 					optionsExtraFields={[['folder', 'str']]}
 					optionsInfoFields={{

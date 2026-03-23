@@ -7,7 +7,7 @@ import { m } from '$paraglide/messages';
 import { fail, type Actions } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import {
 	nestedDeleteFormAction,
@@ -135,8 +135,20 @@ export const actions: Actions = {
 			setFlash({ type: 'success', message: m.dueDateUpdatedSuccessfully() }, cookies);
 			return { success: true };
 		} else {
-			const error = await response.json();
-			return fail(400, { error });
+			try {
+				const error = await response.json();
+				const rawMessage = error.due_date
+					? Array.isArray(error.due_date)
+						? error.due_date[0]
+						: error.due_date
+					: error.error || error.detail || m.anErrorOccurred();
+				const errorMessage = safeTranslate(rawMessage);
+				setFlash({ type: 'error', message: errorMessage }, cookies);
+				return fail(400, { error });
+			} catch {
+				setFlash({ type: 'error', message: m.anErrorOccurred() }, cookies);
+				return fail(400, { error: m.anErrorOccurred() });
+			}
 		}
 	}
 };

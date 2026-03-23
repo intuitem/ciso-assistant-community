@@ -2,7 +2,7 @@
 	import { copy } from '@svelte-put/copy';
 	import SuperForm from '$lib/components/Forms/Form.svelte';
 	import { superForm } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import type { ActionData, PageData } from './$types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
 	import Checkbox from '$lib/components/Forms/Checkbox.svelte';

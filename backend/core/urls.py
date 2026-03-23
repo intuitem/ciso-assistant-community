@@ -119,9 +119,16 @@ router.register(
 router.register(r"findings", FindingViewSet, basename="findings")
 router.register(r"incidents", IncidentViewSet, basename="incidents")
 router.register(r"timeline-entries", TimelineEntryViewSet, basename="timeline-entries")
+router.register(r"comments", CommentViewSet, basename="comments")
 router.register(r"task-templates", TaskTemplateViewSet, basename="task-templates")
 router.register(r"task-nodes", TaskNodeViewSet, basename="task-nodes")
 router.register(r"terminologies", TerminologyViewSet, basename="terminologies")
+router.register(r"preset-journeys", PresetJourneyViewSet, basename="preset-journeys")
+router.register(
+    r"preset-journey-steps",
+    PresetJourneyStepViewSet,
+    basename="preset-journey-steps",
+)
 
 ROUTES = settings.ROUTES
 MODULES = settings.MODULES.values()
@@ -143,6 +150,7 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
@@ -200,12 +208,20 @@ urlpatterns = [
         ComplianceAssessmentActionPlanList.as_view(),
     ),
     path(
+        "compliance-assessments/<uuid:pk>/action-plan/budget-overview/",
+        ComplianceAssessmentActionPlanBudgetOverview.as_view(),
+    ),
+    path(
         "compliance-assessments/<uuid:pk>/evidences-list/",
         ComplianceAssessmentEvidenceList.as_view(),
     ),
     path(
         "risk-assessments/<uuid:pk>/action-plan/",
         RiskAssessmentActionPlanList.as_view(),
+    ),
+    path(
+        "risk-assessments/<uuid:pk>/action-plan/budget-overview/",
+        RiskAssessmentActionPlanBudgetOverview.as_view(),
     ),
     path(
         "mapping-libraries/",
@@ -216,6 +232,7 @@ urlpatterns = [
         UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
+    path("search/", global_search, name="global-search"),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(

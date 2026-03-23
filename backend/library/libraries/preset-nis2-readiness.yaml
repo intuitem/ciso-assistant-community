@@ -1,0 +1,255 @@
+urn: urn:intuitem:risk:preset:nis2-readiness
+locale: en
+ref_id: preset-nis2-readiness
+name: "NIS2 Readiness"
+description: "Structured preparation programme for the EU NIS2 directive. Loads the NIS2 implementing regulation (2024/2690) with technical guidance, enables third-party risk management, and creates a step-by-step compliance journey."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "Préparation NIS2"
+    description: "Programme structuré de préparation à la directive européenne NIS2. Charge le règlement d'exécution (2024/2690) avec les orientations techniques, active la gestion des tiers et crée un parcours de conformité étape par étape."
+
+dependencies:
+  - urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - general
+        - critical-infrastructure
+      region:
+        - eu
+      goal: nis2-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - tprm
+        - incidents
+        - follow_up
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "NIS2 Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques NIS2"
+      - type: compliance_assessment
+        name: "NIS2 Implementing Regulation (2024/2690)"
+        framework: urn:intuitem:risk:library:annex-technical-and-methodological-requirements-nis2
+        create_suggested_controls: true
+        ref: nis2_audit
+        translations:
+          fr:
+            name: "Règlement d'exécution NIS2 (2024/2690)"
+
+      # --- Entities (typical supply chain for NIS2) ---
+      - type: entity
+        name: "Cloud / hosting provider"
+        description: "Provider of cloud infrastructure or hosting services for critical systems."
+        translations:
+          fr:
+            name: "Fournisseur cloud / hébergeur"
+            description: "Fournisseur d'infrastructure cloud ou de services d'hébergement pour les systèmes critiques."
+      - type: entity
+        name: "Managed security services provider (MSSP)"
+        description: "External provider of security monitoring, incident detection, or SOC services."
+        translations:
+          fr:
+            name: "Prestataire de services de sécurité managés (MSSP)"
+            description: "Prestataire externe de surveillance de sécurité, détection d'incidents ou services SOC."
+      - type: entity
+        name: "Network equipment supplier"
+        description: "Supplier of networking hardware, firewalls, or telecommunications equipment."
+        translations:
+          fr:
+            name: "Fournisseur d'équipements réseau"
+            description: "Fournisseur de matériel réseau, pare-feu ou équipements de télécommunication."
+      - type: entity
+        name: "Business software vendor"
+        description: "Vendor of critical business applications (ERP, SCADA, operational technology)."
+        translations:
+          fr:
+            name: "Éditeur de logiciels métier"
+            description: "Éditeur d'applications métier critiques (ERP, SCADA, technologies opérationnelles)."
+
+      # --- Assets ---
+      - type: asset
+        name: "Network and information systems"
+        description: "Core network infrastructure, firewalls, DNS, directory services, and connectivity used to deliver essential services."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          fr:
+            name: "Réseaux et systèmes d'information"
+            description: "Infrastructure réseau principale, pare-feu, DNS, annuaires et connectivité utilisés pour fournir les services essentiels."
+      - type: asset
+        name: "Critical business applications"
+        description: "Applications and operational technology systems essential to the delivery of services (ERP, SCADA, industrial control systems)."
+        asset_type: SP
+        ref: asset_apps
+        translations:
+          fr:
+            name: "Applications métier critiques"
+            description: "Applications et systèmes de technologie opérationnelle essentiels à la fourniture des services (ERP, SCADA, systèmes de contrôle industriel)."
+      - type: asset
+        name: "Identity and access management"
+        description: "Directory services, SSO, MFA, and privileged access management systems."
+        asset_type: SP
+        ref: asset_iam
+        translations:
+          fr:
+            name: "Gestion des identités et des accès"
+            description: "Services d'annuaire, SSO, MFA et systèmes de gestion des accès à privilèges."
+      - type: asset
+        name: "Endpoints and user devices"
+        description: "Workstations, laptops, mobile devices, and any user-facing equipment."
+        asset_type: SP
+        ref: asset_endpoints
+        translations:
+          fr:
+            name: "Terminaux et équipements utilisateurs"
+            description: "Postes de travail, ordinateurs portables, appareils mobiles et tout équipement utilisateur."
+      - type: asset
+        name: "Essential service data"
+        description: "Data critical to the delivery of essential or important services — customer data, operational data, configuration data."
+        asset_type: PR
+        ref: asset_data
+        translations:
+          fr:
+            name: "Données des services essentiels"
+            description: "Données critiques pour la fourniture des services essentiels ou importants — données clients, données opérationnelles, données de configuration."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "Supply chain compromise affecting essential services"
+        description: "A critical supplier (cloud, network, software) is compromised, giving attackers indirect access to the organisation's network and information systems."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-003]
+        translations:
+          fr:
+            name: "Compromission de la chaîne d'approvisionnement impactant les services essentiels"
+            description: "Un fournisseur critique (cloud, réseau, logiciel) est compromis, donnant aux attaquants un accès indirect aux réseaux et systèmes d'information de l'organisation."
+      - type: risk_scenario
+        name: "Ransomware disrupting operations"
+        description: "Ransomware encrypts critical systems and data, causing prolonged service disruption and triggering NIS2 incident notification obligations."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_apps, asset_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
+        translations:
+          fr:
+            name: "Rançongiciel perturbant les opérations"
+            description: "Un rançongiciel chiffre les systèmes et données critiques, provoquant une interruption prolongée des services et déclenchant les obligations de notification d'incident NIS2."
+      - type: risk_scenario
+        name: "Credential compromise and lateral movement"
+        description: "Attackers obtain valid credentials through phishing or password attacks, then move laterally across network and information systems."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_iam, asset_network]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-002]
+        translations:
+          fr:
+            name: "Compromission d'identifiants et mouvement latéral"
+            description: "Des attaquants obtiennent des identifiants valides par hameçonnage ou attaques par mot de passe, puis se déplacent latéralement dans les réseaux et systèmes d'information."
+      - type: risk_scenario
+        name: "DDoS on essential services"
+        description: "A denial-of-service attack makes essential services unavailable, triggering NIS2 incident reporting obligations."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-007]
+        translations:
+          fr:
+            name: "DDoS sur les services essentiels"
+            description: "Une attaque par déni de service rend les services essentiels indisponibles, déclenchant les obligations de signalement d'incident NIS2."
+      - type: risk_scenario
+        name: "Data breach of essential service data"
+        description: "Exfiltration of critical data following a system compromise, requiring notification to competent authorities under NIS2."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_data, asset_apps]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-019]
+        translations:
+          fr:
+            name: "Fuite de données des services essentiels"
+            description: "Exfiltration de données critiques suite à une compromission de système, nécessitant une notification aux autorités compétentes au titre de NIS2."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "Vulnerability Scan Findings"
+        category: audit
+        ref: vuln_findings
+        translations:
+          fr:
+            name: "Résultats des scans de vulnérabilités"
+
+    journey:
+      steps:
+        - key: assets
+          title: "Identify critical assets and services"
+          description: "Map the network and information systems, applications, and data that support your essential or important services"
+          target_model: assets
+          translations:
+            fr:
+              title: "Identifier les actifs et services critiques"
+              description: "Cartographiez les réseaux et systèmes d'information, applications et données qui soutiennent vos services essentiels ou importants"
+        - key: nis2_assessment
+          title: "Assess NIS2 compliance"
+          description: "Go through the implementing regulation (2024/2690) requirements and evaluate your current posture against each technical and methodological requirement"
+          target_model: compliance-assessments
+          target_ref: nis2_audit
+          translations:
+            fr:
+              title: "Évaluer la conformité NIS2"
+              description: "Parcourez les exigences du règlement d'exécution (2024/2690) et évaluez votre posture actuelle par rapport à chaque exigence technique et méthodologique"
+        - key: risk_assessment
+          title: "Conduct a risk assessment"
+          description: "Review the pre-created risk scenarios, assess likelihood and impact, and identify additional risks specific to your essential services"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener une analyse de risque"
+              description: "Examinez les scénarios de risque pré-créés, évaluez la vraisemblance et l'impact, et identifiez les risques spécifiques à vos services essentiels"
+        - key: controls
+          title: "Implement and track security controls"
+          description: "Review the suggested controls from the NIS2 assessment, assign owners, and track implementation progress"
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Examinez les mesures suggérées par l'évaluation NIS2, assignez des responsables et suivez l'avancement de la mise en œuvre"
+        - key: vendors
+          title: "Manage your supply chain"
+          description: "Review the pre-created vendor entities, add any missing critical suppliers, and create assessments to evaluate each vendor's security posture"
+          target_model: entities
+          translations:
+            fr:
+              title: "Gérer votre chaîne d'approvisionnement"
+              description: "Examinez les entités fournisseurs pré-créées, ajoutez les fournisseurs critiques manquants et créez des évaluations pour évaluer la posture sécurité de chaque fournisseur"
+        - key: incident_readiness
+          title: "Prepare incident management"
+          description: "Define your incident response process — NIS2 requires early warning within 24 hours and full notification within 72 hours of a significant incident"
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Préparer la gestion des incidents"
+              description: "Définissez votre processus de réponse aux incidents — NIS2 exige une alerte précoce sous 24 heures et une notification complète sous 72 heures pour un incident significatif"
+        - key: findings
+          title: "Track vulnerability and audit findings"
+          description: "Import or create findings from vulnerability scans and audits, assign owners, and track remediation"
+          target_model: findings-assessments
+          target_ref: vuln_findings
+          translations:
+            fr:
+              title: "Suivre les résultats de vulnérabilités et d'audits"
+              description: "Importez ou créez des résultats de scans de vulnérabilités et d'audits, assignez des responsables et suivez la remédiation"

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Select from '../Select.svelte';
 	import AutocompleteSelect from '../AutocompleteSelect.svelte';
+	import FolderTreeSelect from '../FolderTreeSelect.svelte';
 	import type { SuperValidated } from 'sveltekit-superforms';
 	import type { ModelInfo, CacheLock } from '$lib/utils/types';
 	import TextField from '$lib/components/Forms/TextField.svelte';
@@ -55,11 +56,9 @@
 	cacheLock={cacheLocks['detection']}
 	bind:cachedValue={formDataCache['detection']}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
-	optionsEndpoint="folders?content_type=DO&content_type=GL"
 	field="folder"
-	pathField="path"
 	cacheLock={cacheLocks['folder']}
 	bind:cachedValue={formDataCache['folder']}
 	label={m.domain()}
@@ -108,6 +107,7 @@
 	/>
 	<AutocompleteSelect
 		multiple
+		lazy
 		{form}
 		optionsEndpoint="assets"
 		optionsLabelField="auto"

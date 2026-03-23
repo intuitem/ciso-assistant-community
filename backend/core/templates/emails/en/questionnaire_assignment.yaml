@@ -1,0 +1,17 @@
+subject: "CISO Assistant: A questionnaire has been assigned to you"
+body: |
+  <img src="https://intuitem.com/ciso-assistant.png" alt="CISO Assistant" width="200">
+
+  **Your all-in-one GRC Management Platform**
+
+  Hello,
+
+  You have been assigned to a questionnaire. Click below to proceed:
+
+  [Go to the Questionnaire](${questionnaire_url})
+
+  If you have trouble with the link, copy and paste the following URL in your browser:
+  ${questionnaire_url}
+
+  Sincerely,
+  CISO Assistant Team

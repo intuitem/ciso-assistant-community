@@ -8,6 +8,8 @@
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { m } from '$paraglide/messages';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
+	import OperatingModeGraph from './graph/OperatingModeGraph.svelte';
+	import { invalidateAll } from '$app/navigation';
 
 	import { Tabs } from '@skeletonlabs/skeleton-svelte';
 
@@ -18,6 +20,10 @@
 		type ModalSettings,
 		type ModalStore
 	} from '$lib/components/Modals/stores';
+	import { superValidate } from 'sveltekit-superforms';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { modelSchema } from '$lib/utils/schemas';
+	import { createModalCache } from '$lib/utils/stores';
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -28,6 +34,7 @@
 	let { data }: Props = $props();
 
 	let group = $state(Object.keys(data.relatedModels)[0]);
+	let editMode = $state(false);
 
 	function modalCreateForm(model: Record<string, any>): void {
 		let modalComponent: ModalComponent = {
@@ -41,27 +48,61 @@
 		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
 			title: safeTranslate('add-' + model.info.localName)
 		};
 		modalStore.trigger(modal);
 	}
 
-	function modalUpdateForm(): void {
+	function handleSaved() {
+		invalidateAll();
+	}
+
+	function handleCreateEA() {
+		if (data.eaModel) {
+			modalCreateForm(data.eaModel);
+		}
+	}
+
+	function getStageNumber(attackStage: string | number): number {
+		if (typeof attackStage === 'number') return attackStage;
+		if (attackStage.includes('Reconnaissance') || attackStage === 'ebiosReconnaissance') return 0;
+		if (attackStage.includes('Initial') || attackStage === 'ebiosInitialAccess') return 1;
+		if (attackStage.includes('Discovery') || attackStage === 'ebiosDiscovery') return 2;
+		if (attackStage.includes('Exploitation') || attackStage === 'ebiosExploitation') return 3;
+		return 0;
+	}
+
+	async function modalUpdateForm(eaId: string): void {
+		const ea = data.elementaryActions.find((a: any) => a.id === eaId);
+		if (!ea) return;
+
+		delete createModalCache.data['elementary-actions'];
+
+		const eaData = {
+			...ea,
+			folder: ea.folder?.id ?? ea.folder ?? data.data.folder,
+			attack_stage: getStageNumber(ea.attack_stage),
+			icon: ea.icon?.toLowerCase(),
+			threat: ea.threat?.id ?? ea.threat ?? null
+		};
+
+		const eaSchema = modelSchema('elementary-actions');
+		const updateForm = await superValidate(eaData, zod(eaSchema), { errors: false });
+
 		let modalComponent: ModalComponent = {
 			ref: UpdateModal,
 			props: {
-				form: data.updateForm,
-				model: data.model,
-				object: data.object,
-				context: 'selectElementaryActions'
+				form: updateForm,
+				model: data.eaModel,
+				object: eaData,
+				customNameDescription: false,
+				formAction: `?/update&id=${ea.id}`
 			}
 		};
 		let modal: ModalSettings = {
 			type: 'component',
 			component: modalComponent,
-			// Data
-			title: m.selectElementaryActions()
+			title: m.edit() + ' ' + ea.name
 		};
 		modalStore.trigger(modal);
 	}
@@ -86,18 +127,7 @@
 	<i class="fa-solid fa-arrow-left"></i>
 	<p>{m.goBackToEbiosRmStudy()}</p>
 </Anchor>
-<DetailView {data} displayModelTable={false}>
-	{#snippet actions()}
-		<div class="flex flex-col space-y-2">
-			<Anchor
-				href={`${page.url.pathname}/graph`}
-				class="btn preset-filled-primary-500 h-fit"
-				breadcrumbAction="push"
-				><i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}</Anchor
-			>
-		</div>
-	{/snippet}
-</DetailView>
+<DetailView {data} displayModelTable={false} />
 {#if Object.keys(data.relatedModels).length > 0}
 	<div class="card shadow-lg mt-8 bg-white w-full">
 		<Tabs
@@ -132,21 +162,6 @@
 							baseEndpoint="/{urlmodel}?{field.field}={page.params.id}"
 							disableDelete={field?.disableDelete ?? false}
 						>
-							{#snippet selectButton()}
-								{#if urlmodel === 'elementary-actions'}
-									<div>
-										<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
-											<button
-												class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
-												data-testid="select-button"
-												title={m.selectElementaryActions()}
-												onclick={(_) => modalUpdateForm()}
-												><i class="fa-solid fa-hand-pointer"></i>
-											</button>
-										</span>
-									</div>
-								{/if}
-							{/snippet}
 							{#snippet addButton()}
 								<div>
 									<span class="inline-flex overflow-hidden rounded-md border bg-white shadow-xs">
@@ -167,3 +182,37 @@
 		</Tabs>
 	</div>
 {/if}
+
+<div class="card shadow-lg mt-8 bg-surface-50 w-full p-4">
+	<div class="flex justify-between items-center mb-4">
+		<h3 class="text-lg font-semibold text-surface-800">
+			<i class="fa-solid fa-diagram-project mr-2"></i>{m.moGraph()}
+		</h3>
+		{#if canEditObject}
+			<button
+				class="btn text-sm {editMode ? 'preset-tonal-primary' : 'preset-filled-primary-500'}"
+				onclick={() => (editMode = !editMode)}
+			>
+				{#if editMode}
+					<i class="fa-solid fa-eye"></i>
+					{m.viewGraph()}
+				{:else}
+					<i class="fa-solid fa-pen"></i>
+					{m.editGraph()}
+				{/if}
+			</button>
+		{/if}
+	</div>
+	<div class="h-[80vh]">
+		<OperatingModeGraph
+			elementaryActions={data.elementaryActions}
+			killChainSteps={data.killChainSteps}
+			operatingModeId={data.operatingModeId}
+			graphColumns={data.data.graph_columns ?? {}}
+			readonly={!editMode}
+			onSaved={handleSaved}
+			onCreateAction={canEditObject ? handleCreateEA : undefined}
+			onEditAction={canEditObject ? modalUpdateForm : undefined}
+		/>
+	</div>
+</div>

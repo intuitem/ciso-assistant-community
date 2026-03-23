@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AutocompleteSelect from '$lib/components/Forms/AutocompleteSelect.svelte';
+	import FolderTreeSelect from '$lib/components/Forms/FolderTreeSelect.svelte';
 	import type { CacheLock, ModelInfo } from '$lib/utils/types';
 	import { m } from '$paraglide/messages';
 	import type { SuperForm } from 'sveltekit-superforms';
@@ -38,7 +39,7 @@
 	label={m.strategicScenario()}
 	hidden={initialData['strategic_scenario']}
 />
-<AutocompleteSelect
+<FolderTreeSelect
 	{form}
 	field="folder"
 	cacheLock={cacheLocks['folder']}

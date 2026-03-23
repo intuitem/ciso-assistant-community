@@ -6,7 +6,6 @@ body: |
 
   ${validation_list}
 
-  Please review and take action before the deadline:
-  ${ciso_assistant_url}
+  Please review and take action before the deadline: [Go to CISO Assistant](${ciso_assistant_url})
 
   Thank you.
