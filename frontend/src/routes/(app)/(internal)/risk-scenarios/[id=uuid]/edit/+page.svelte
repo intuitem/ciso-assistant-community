@@ -534,7 +534,7 @@
 							<div>
 								<RiskLevel
 									form={_form}
-									field="current_risk_level"
+									field="residual_risk_level"
 									label={m.residualRiskLevel()}
 									riskMatrix={data.riskMatrix}
 									probabilityField="residual_proba"
