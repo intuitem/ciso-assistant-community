@@ -19,6 +19,13 @@
 
 	let description = $state(requirement.node.description ?? '');
 
+	// Resolve the framework ID for building absolute proxy URLs
+	const frameworkId =
+		typeof requirement.node.framework === 'string'
+			? requirement.node.framework
+			: requirement.node.framework?.id ?? '';
+	const proxyUrl = `/frameworks/${frameworkId}/builder`;
+
 	async function saveField(field: string, value: unknown) {
 		await builder.updateNode(requirement.node.id, { [field]: value });
 	}
@@ -35,12 +42,12 @@
 			const formData = new FormData();
 			formData.append('file', file);
 			const res = await fetch(
-				`?_action=upload-image&node_id=${requirement.node.id}`,
+				`${proxyUrl}?_action=upload-image&node_id=${requirement.node.id}`,
 				{ method: 'POST', body: formData }
 			);
 			if (res.ok) {
 				const data = await res.json();
-				const imageUrl = `/api/requirement-nodes/${requirement.node.id}/serve-image/${data.id}/`;
+				const imageUrl = `${proxyUrl}?_action=serve-image&node_id=${requirement.node.id}&attachment_id=${data.id}`;
 				insertAtCursor(`![image](${imageUrl})`);
 				await saveDescription();
 			}
