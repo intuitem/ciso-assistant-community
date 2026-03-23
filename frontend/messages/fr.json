@@ -3831,7 +3831,7 @@
 	"levelMissingColor": "Le niveau {id} de {category} n'a pas de couleur",
 	"duplicateAbbreviation": "{category} a une abréviation en double \"{abbreviation}\"",
 	"matrixNameEmpty": "Le nom de la matrice est vide",
-	"clickToCycle": "Cliquez pour changer le niveau de risque",
+	"clickToCycle": "Cliquez sur une cellule pour changer le niveau de risque",
 	"moveUp": "Monter",
 	"moveDown": "Descendre",
 	"hasTranslations": "* = a des traductions",

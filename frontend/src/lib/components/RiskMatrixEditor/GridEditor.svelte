@@ -152,4 +152,7 @@
 	<div class="flex justify-center text-sm font-semibold text-gray-500 mt-1">
 		{m.impact()} →
 	</div>
+	<p class="text-xs text-gray-400 text-center mt-2">
+		<i class="fa-solid fa-circle-info mr-1"></i>{m.clickToCycle()}
+	</p>
 </div>

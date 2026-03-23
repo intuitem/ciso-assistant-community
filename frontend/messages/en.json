@@ -3868,7 +3868,7 @@
 	"levelMissingColor": "{category} level {id} has no color",
 	"duplicateAbbreviation": "{category} has duplicate abbreviation \"{abbreviation}\"",
 	"matrixNameEmpty": "Matrix name is empty",
-	"clickToCycle": "Click to cycle through risk levels",
+	"clickToCycle": "Click on a cell to cycle through risk levels",
 	"moveUp": "Move up",
 	"moveDown": "Move down",
 	"hasTranslations": "* = has translations",
