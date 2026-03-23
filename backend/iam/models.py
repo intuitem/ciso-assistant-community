@@ -565,7 +565,9 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool((not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)),
+            mailing=bool(
+                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
+            ),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -810,7 +812,9 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         port=settings.EMAIL_PORT_RESCUE,
                         username=settings.EMAIL_HOST_USER_RESCUE,
                         password=settings.EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=settings.EMAIL_USE_TLS_RESCUE if settings.EMAIL_USE_TLS_RESCUE else False,
+                        use_tls=settings.EMAIL_USE_TLS_RESCUE
+                        if settings.EMAIL_USE_TLS_RESCUE
+                        else False,
                         ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
                         msg = EmailMessage(

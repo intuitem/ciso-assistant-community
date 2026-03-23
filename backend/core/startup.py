@@ -1488,7 +1488,9 @@ def startup(sender: AppConfig, **kwargs):
         # if superuser defined and does not exist, then create it
         if (
             settings.CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+            and not User.objects.filter(
+                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            ).exists()
         ):
             try:
                 User.objects.create_superuser(
