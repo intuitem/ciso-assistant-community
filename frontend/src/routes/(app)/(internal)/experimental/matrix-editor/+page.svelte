@@ -2,7 +2,6 @@
 	import { page } from '$app/state';
 	import LevelEditor from '$lib/components/RiskMatrixEditor/LevelEditor.svelte';
 	import GridEditor from '$lib/components/RiskMatrixEditor/GridEditor.svelte';
-	import TranslationEditor from '$lib/components/RiskMatrixEditor/TranslationEditor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
 	import { pageTitle } from '$lib/utils/stores';
 	import { m } from '$paraglide/messages';
@@ -29,21 +28,19 @@
 		name: string;
 		description: string;
 		hexcolor: string;
+		translations?: Record<string, { name?: string; description?: string }>;
 	}
 
 	// Page data from server
 	let { data } = $props();
 	let matrices: any[] = $state(data.matrices ?? []);
 	let existingDrafts: any[] = $state(data.drafts ?? []);
-	let folders: any[] = data.folders ?? [];
-
 	// Editor state
 	let matrixId: string | null = $state(null);
 	let matrixName = $state('');
 	let matrixDescription = $state('');
-	let provider = $state('');
+	let provider = $state('custom');
 	let locale = $state('en');
-	let selectedFolder = $state(folders[0]?.id ?? '');
 
 	let probabilityLevels: Level[] = $state([
 		{
@@ -169,9 +166,7 @@
 		JSON.stringify({
 			matrixName,
 			matrixDescription,
-			provider,
-			locale,
-			selectedFolder,
+			metaTranslations,
 			...jsonDefinition
 		})
 	);
@@ -407,7 +402,6 @@
 					body: JSON.stringify({
 						name: matrixName || 'Untitled Matrix',
 						description: matrixDescription,
-						folder: selectedFolder,
 						editing_draft: jsonDefinition
 					})
 				});
@@ -419,17 +413,16 @@
 				matrixId = result.id;
 			} else {
 				// Save editing_draft on existing matrix
+				const payload = {
+					editing_draft: jsonDefinition,
+					name: matrixName || 'Untitled Matrix',
+					description: matrixDescription,
+					metaTranslations: Object.keys(metaTranslations).length > 0 ? metaTranslations : undefined
+				};
 				const res = await fetch(`/experimental/matrix-editor/${matrixId}`, {
 					method: 'PATCH',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						editing_draft: jsonDefinition,
-						name: matrixName || 'Untitled Matrix',
-						description: matrixDescription,
-						provider,
-						locale,
-						folder: selectedFolder
-					})
+					body: JSON.stringify(payload)
 				});
 				if (!res.ok) {
 					const err = await res.json();
@@ -514,7 +507,6 @@
 	async function loadDraft(matrix: any) {
 		matrixId = matrix.id;
 		locale = matrix.locale || 'en';
-		selectedFolder = matrix.folder?.id || matrix.folder || '';
 
 		// If editing_draft content was passed directly (from action responses), use it
 		// Otherwise fetch it via start-editing
@@ -528,9 +520,13 @@
 				if (res.ok) {
 					const result = await res.json();
 					src = result.editing_draft;
+				} else {
+					setStatus(m.importFailed(), 'error');
+					return;
 				}
 			} catch {
-				src = matrix.json_definition;
+				setStatus(m.importFailed(), 'error');
+				return;
 			}
 		}
 
@@ -548,7 +544,8 @@
 		matrixDescription = meta.description ?? matrix.description ?? '';
 		provider = meta.provider ?? matrix.provider ?? '';
 		locale = meta.locale || matrix.locale || 'en';
-		selectedFolder = meta.folder || matrix.folder?.id || matrix.folder || selectedFolder;
+		activeLang = locale;
+		metaTranslations = meta.translations || {};
 
 		if (jd?.probability) probabilityLevels = jd.probability;
 		if (jd?.impact) impactLevels = jd.impact;
@@ -595,7 +592,7 @@
 		// Set template values first
 		matrixName = 'New matrix';
 		matrixDescription = '';
-		provider = '';
+		provider = 'custom';
 		locale = 'en';
 		probabilityLevels = [
 			{
@@ -736,18 +733,46 @@
 		}
 	}
 
-	function onTranslationsChange(newProb: Level[], newImpact: Level[], newRisk: Level[]) {
-		probabilityLevels = newProb;
-		impactLevels = newImpact;
-		riskLevels = newRisk;
+	// Language switcher state
+	let activeLang = $state(locale);
+	let addedLanguages: string[] = $state([]);
+	// Metadata translations: { fr: { name: "...", description: "..." }, de: { ... } }
+	let metaTranslations: Record<string, { name?: string; description?: string }> = $state({});
+	let isTranslatingMeta = $derived(activeLang !== locale);
+
+	// Collect languages that have translations across all levels
+	let usedLanguages = $derived(() => {
+		const langs = new Set<string>();
+		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+			for (const level of levels) {
+				if (level.translations) {
+					for (const lang of Object.keys(level.translations)) {
+						langs.add(lang);
+					}
+				}
+			}
+		}
+		for (const lang of addedLanguages) langs.add(lang);
+		for (const lang of Object.keys(metaTranslations)) langs.add(lang);
+		return langs;
+	});
+
+	let availableToAdd = $derived(
+		Object.entries(LOCALE_MAP)
+			.filter(([code]) => code !== locale && !usedLanguages().has(code))
+			.map(([code, info]) => ({ code, name: language[info.name] ?? info.name }))
+	);
+
+	function addLanguage(code: string) {
+		addedLanguages = [...addedLanguages, code];
+		activeLang = code;
 	}
 
 	const tabs = [
 		{ id: 'probability', label: m.probability, icon: 'fa-solid fa-arrow-up' },
 		{ id: 'impact', label: m.impact, icon: 'fa-solid fa-arrow-right' },
 		{ id: 'risk', label: () => m.riskLevels(), icon: 'fa-solid fa-exclamation-triangle' },
-		{ id: 'grid', label: m.grid, icon: 'fa-solid fa-table-cells' },
-		{ id: 'i18n', label: m.translations, icon: 'fa-solid fa-language' }
+		{ id: 'grid', label: m.grid, icon: 'fa-solid fa-table-cells' }
 	];
 </script>
 
@@ -857,26 +882,59 @@
 								<td class="text-sm text-gray-500">{draft.provider || '—'}</td>
 								<td>
 									<div class="flex gap-1">
-										<button
-											type="button"
-											class="btn btn-sm variant-filled-primary"
-											onclick={async () => {
-												if (matrixId !== draft.id && !(await confirmSwitchAway())) return;
-												loadDraft(draft);
-											}}
-											title={m.continueEditing()}
-										>
-											<i class="fa-solid fa-pen-to-square mr-1"></i>
-											{m.continueEditing()}
-										</button>
-										<button
-											type="button"
-											class="btn btn-sm variant-ghost-error"
-											onclick={() => deleteDraft(draft)}
-											title={draft.is_published ? m.discardDraft() : m.delete()}
-										>
-											<i class="fa-solid fa-xmark"></i>
-										</button>
+										{#if matrixId === draft.id}
+											<!-- Currently editing this one — show close button -->
+											<button
+												type="button"
+												class="btn btn-sm bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+												onclick={() => {
+													matrixId = null;
+													hasUnsavedChanges = false;
+												}}
+												title="Close editor"
+												aria-label="Close editor"
+											>
+												<i class="fa-solid fa-xmark mr-1"></i>
+												Close
+											</button>
+										{:else}
+											<!-- Not editing — show continue button -->
+											<button
+												type="button"
+												class="btn btn-sm variant-filled-primary"
+												onclick={async () => {
+													if (!(await confirmSwitchAway())) return;
+													loadDraft(draft);
+												}}
+												title={m.continueEditing()}
+											>
+												<i class="fa-solid fa-pen-to-square mr-1"></i>
+												{m.continueEditing()}
+											</button>
+										{/if}
+										{#if draft.is_published}
+											<button
+												type="button"
+												class="btn btn-sm variant-ghost-error text-xs"
+												onclick={() => deleteDraft(draft)}
+												title={m.discardDraft()}
+												aria-label={m.discardDraft()}
+											>
+												<i class="fa-solid fa-rotate-left mr-1"></i>
+												{m.discardDraft()}
+											</button>
+										{:else}
+											<button
+												type="button"
+												class="btn btn-sm variant-ghost-error text-xs"
+												onclick={() => deleteDraft(draft)}
+												title={m.delete()}
+												aria-label={m.delete()}
+											>
+												<i class="fa-solid fa-trash mr-1"></i>
+												{m.delete()}
+											</button>
+										{/if}
 									</div>
 								</td>
 							</tr>
@@ -943,113 +1001,182 @@
 	</div>
 
 	{#if matrixId}
-		<!-- Metadata -->
+		<!-- Language switcher + editor container -->
 		<div class="card p-4">
-			<h3 class="text-lg font-semibold mb-3">{m.metadata()}</h3>
-			<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-				<div>
-					<label class="label" for="matrix-name">
-						<span>{m.name()}</span>
-					</label>
-					<input
-						id="matrix-name"
-						type="text"
-						class="input"
-						bind:value={matrixName}
-						placeholder={m.matrixNamePlaceholder()}
-					/>
-				</div>
-				<div>
-					<label class="label" for="matrix-desc">
-						<span>{m.description()}</span>
-					</label>
-					<input
-						id="matrix-desc"
-						type="text"
-						class="input"
-						bind:value={matrixDescription}
-						placeholder={m.descriptionPlaceholder()}
-					/>
-				</div>
-				<div>
-					<label class="label" for="matrix-provider">
-						<span>{m.provider()}</span>
-					</label>
-					<input
-						id="matrix-provider"
-						type="text"
-						class="input"
-						bind:value={provider}
-						placeholder={m.providerPlaceholder()}
-					/>
-				</div>
-				<div>
-					<label class="label" for="matrix-locale">
-						<span>{m.locale()}</span>
-					</label>
-					<select id="matrix-locale" class="select" bind:value={locale}>
-						{#each Object.entries(LOCALE_MAP) as [code, info]}
-							<option value={code}>{language[info.name] ?? info.name} ({code})</option>
-						{/each}
-					</select>
-				</div>
-				<div>
-					<label class="label" for="matrix-folder">
-						<span>{m.domain()}</span>
-					</label>
-					<select id="matrix-folder" class="select" bind:value={selectedFolder}>
-						{#each folders as folder}
-							<option value={folder.id}>{folder.name}</option>
-						{/each}
-					</select>
-				</div>
-			</div>
-		</div>
-
-		<!-- Editor tabs -->
-		<div class="card p-4">
-			<div class="flex border-b mb-4 gap-1">
-				{#each tabs as tab}
+			<!-- Language switcher -->
+			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-gray-200">
+				<i class="fa-solid fa-language text-gray-400"></i>
+				<!-- Base language -->
+				<button
+					type="button"
+					class="px-3 py-1 rounded-full text-sm transition-colors {activeLang === locale
+						? 'bg-primary-500 text-white'
+						: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+					onclick={() => (activeLang = locale)}
+				>
+					{language[LOCALE_MAP[locale]?.name] ?? locale}
+					<span class="text-xs opacity-70">({locale})</span>
+				</button>
+				<!-- Translation languages -->
+				{#each [...usedLanguages()].filter((l) => l !== locale) as lang}
 					<button
 						type="button"
-						class="px-4 py-2 text-sm font-medium rounded-t transition-colors
-						{activeTab === tab.id
+						class="px-3 py-1 rounded-full text-sm transition-colors {activeLang === lang
 							? 'bg-primary-500 text-white'
 							: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
-						onclick={() => (activeTab = tab.id)}
+						onclick={() => (activeLang = lang)}
 					>
-						<i class="{tab.icon} mr-1"></i>
-						{typeof tab.label === 'function' ? tab.label() : tab.label()}
+						{language[LOCALE_MAP[lang]?.name] ?? lang}
+						<span class="text-xs opacity-70">({lang})</span>
 					</button>
 				{/each}
+				<!-- Add language -->
+				{#if availableToAdd.length > 0}
+					<select
+						class="select select-sm w-32 text-xs"
+						onchange={(e) => {
+							const val = e.currentTarget.value;
+							if (val) addLanguage(val);
+							e.currentTarget.value = '';
+						}}
+					>
+						<option value="">+ {m.addLanguage()}</option>
+						{#each availableToAdd as lang}
+							<option value={lang.code}>{lang.name}</option>
+						{/each}
+					</select>
+				{/if}
 			</div>
 
-			{#if activeTab === 'probability'}
-				<LevelEditor
-					title={m.probability()}
-					bind:levels={probabilityLevels}
-					onchange={onProbabilityChange}
-				/>
-			{:else if activeTab === 'impact'}
-				<LevelEditor title={m.impact()} bind:levels={impactLevels} onchange={onImpactChange} />
-			{:else if activeTab === 'risk'}
-				<LevelEditor title={m.riskLevels()} bind:levels={riskLevels} onchange={onRiskChange} />
-			{:else if activeTab === 'grid'}
-				<GridEditor
-					bind:grid
-					{probabilityLevels}
-					{impactLevels}
-					{riskLevels}
-					onchange={onGridChange}
-				/>
-			{:else if activeTab === 'i18n'}
-				<TranslationEditor
-					bind:probabilityLevels
-					bind:impactLevels
-					bind:riskLevels
-					onchange={onTranslationsChange}
-				/>
-			{/if}
+			<!-- Metadata -->
+			<div class="mb-4">
+				<h3 class="text-sm font-semibold text-gray-500 mb-2">{m.metadata()}</h3>
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<div>
+						<label class="label" for="matrix-name">
+							<span
+								>{m.name()}{#if isTranslatingMeta}
+									<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</span
+							>
+						</label>
+						{#if isTranslatingMeta}
+							<input
+								id="matrix-name"
+								type="text"
+								class="input"
+								value={metaTranslations[activeLang]?.name ?? ''}
+								oninput={(e) => {
+									if (!metaTranslations[activeLang]) metaTranslations[activeLang] = {};
+									metaTranslations[activeLang].name = e.currentTarget.value;
+									metaTranslations = { ...metaTranslations };
+								}}
+								placeholder={matrixName || m.matrixNamePlaceholder()}
+							/>
+							{#if matrixName}
+								<span class="text-xs text-gray-400 block mt-0.5 truncate" title={matrixName}>
+									↳ {locale}: {matrixName}
+								</span>
+							{/if}
+						{:else}
+							<input
+								id="matrix-name"
+								type="text"
+								class="input"
+								bind:value={matrixName}
+								placeholder={m.matrixNamePlaceholder()}
+							/>
+						{/if}
+					</div>
+					<div>
+						<label class="label" for="matrix-desc">
+							<span
+								>{m.description()}{#if isTranslatingMeta}
+									<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</span
+							>
+						</label>
+						{#if isTranslatingMeta}
+							<input
+								id="matrix-desc"
+								type="text"
+								class="input"
+								value={metaTranslations[activeLang]?.description ?? ''}
+								oninput={(e) => {
+									if (!metaTranslations[activeLang]) metaTranslations[activeLang] = {};
+									metaTranslations[activeLang].description = e.currentTarget.value;
+									metaTranslations = { ...metaTranslations };
+								}}
+								placeholder={matrixDescription || m.descriptionPlaceholder()}
+							/>
+							{#if matrixDescription}
+								<span class="text-xs text-gray-400 block mt-0.5 truncate" title={matrixDescription}>
+									↳ {locale}: {matrixDescription}
+								</span>
+							{/if}
+						{:else}
+							<input
+								id="matrix-desc"
+								type="text"
+								class="input"
+								bind:value={matrixDescription}
+								placeholder={m.descriptionPlaceholder()}
+							/>
+						{/if}
+					</div>
+				</div>
+			</div>
+
+			<!-- Editor tabs -->
+			<div>
+				<div class="flex border-b mb-4 gap-1">
+					{#each tabs as tab}
+						<button
+							type="button"
+							class="px-4 py-2 text-sm font-medium rounded-t transition-colors
+						{activeTab === tab.id
+								? 'bg-primary-500 text-white'
+								: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
+							onclick={() => (activeTab = tab.id)}
+						>
+							<i class="{tab.icon} mr-1"></i>
+							{typeof tab.label === 'function' ? tab.label() : tab.label()}
+						</button>
+					{/each}
+				</div>
+
+				{#if activeTab === 'probability'}
+					<LevelEditor
+						title={m.probability()}
+						bind:levels={probabilityLevels}
+						onchange={onProbabilityChange}
+						{activeLang}
+						baseLang={locale}
+					/>
+				{:else if activeTab === 'impact'}
+					<LevelEditor
+						title={m.impact()}
+						bind:levels={impactLevels}
+						onchange={onImpactChange}
+						{activeLang}
+						baseLang={locale}
+					/>
+				{:else if activeTab === 'risk'}
+					<LevelEditor
+						title={m.riskLevels()}
+						bind:levels={riskLevels}
+						onchange={onRiskChange}
+						{activeLang}
+						baseLang={locale}
+					/>
+				{:else if activeTab === 'grid'}
+					<GridEditor
+						bind:grid
+						{probabilityLevels}
+						{impactLevels}
+						{riskLevels}
+						onchange={onGridChange}
+					/>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Validation warnings -->

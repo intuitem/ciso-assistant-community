@@ -2495,13 +2495,16 @@ class RiskMatrixViewSet(BaseModelViewSet):
             )
         draft = copy.deepcopy(matrix.json_definition)
         # Include current metadata in the draft
-        draft["_meta"] = {
+        meta = {
             "name": matrix.name,
             "description": matrix.description or "",
             "provider": matrix.provider or "",
             "locale": matrix.locale or "en",
             "folder": str(matrix.folder_id),
         }
+        if matrix.translations:
+            meta["translations"] = copy.deepcopy(matrix.translations)
+        draft["_meta"] = meta
         matrix.editing_draft = draft
         matrix.save(update_fields=["editing_draft", "updated_at"])
         return Response(
@@ -2524,6 +2527,8 @@ class RiskMatrixViewSet(BaseModelViewSet):
         for field in ("name", "description", "provider", "locale", "folder"):
             if field in request.data:
                 meta[field] = request.data[field]
+        if request.data.get("metaTranslations"):
+            meta["translations"] = request.data["metaTranslations"]
         if meta:
             editing_draft["_meta"] = meta
 
@@ -2588,6 +2593,9 @@ class RiskMatrixViewSet(BaseModelViewSet):
         if "folder" in meta:
             matrix.folder_id = meta["folder"]
             update_fields.append("folder_id")
+        if "translations" in meta:
+            matrix.translations = meta["translations"]
+            update_fields.append("translations")
 
         matrix.save(update_fields=update_fields)
         return Response(

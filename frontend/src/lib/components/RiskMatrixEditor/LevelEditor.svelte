@@ -8,6 +8,7 @@
 		name: string;
 		description: string;
 		hexcolor: string;
+		translations?: Record<string, { name?: string; description?: string }>;
 	}
 
 	// indexMap: maps old index → new index (or -1 if deleted). Undefined for simple edits.
@@ -15,9 +16,13 @@
 		levels: Level[];
 		title: string;
 		onchange: (levels: Level[], indexMap?: Map<number, number>) => void;
+		activeLang: string;
+		baseLang: string;
 	}
 
-	let { levels = $bindable(), title, onchange }: Props = $props();
+	let { levels = $bindable(), title, onchange, activeLang, baseLang }: Props = $props();
+
+	let isTranslating = $derived(activeLang !== baseLang);
 
 	const COLOR_PALETTES: Record<string, string[]> = {
 		classic: [
@@ -92,8 +97,30 @@
 	}
 
 	function updateLevel(index: number, field: keyof Level, value: string) {
-		levels = levels.map((l, i) => (i === index ? { ...l, [field]: value } : l));
+		if (isTranslating && (field === 'name' || field === 'description')) {
+			// Store in translations instead of the base field
+			levels = levels.map((l, i) => {
+				if (i !== index) return l;
+				const translations = { ...l.translations };
+				if (!translations[activeLang]) translations[activeLang] = {};
+				translations[activeLang] = { ...translations[activeLang], [field]: value };
+				return { ...l, translations };
+			});
+		} else {
+			levels = levels.map((l, i) => (i === index ? { ...l, [field]: value } : l));
+		}
 		onchange(levels);
+	}
+
+	function getDisplayValue(level: Level, field: 'name' | 'description'): string {
+		if (isTranslating) {
+			return level.translations?.[activeLang]?.[field] ?? '';
+		}
+		return level[field];
+	}
+
+	function getBaseHint(level: Level, field: 'name' | 'description'): string {
+		return level[field] || '';
 	}
 
 	function moveLevel(index: number, direction: -1 | 1) {
@@ -150,8 +177,14 @@
 				<tr>
 					<th class="w-12">#</th>
 					<th class="w-24">{m.abbreviation()}</th>
-					<th>{m.name()}</th>
-					<th>{m.description()}</th>
+					<th
+						>{m.name()}{#if isTranslating}
+							<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</th
+					>
+					<th
+						>{m.description()}{#if isTranslating}
+							<span class="text-xs font-normal text-gray-400">({activeLang})</span>{/if}</th
+					>
 					<th class="w-20">{m.hexcolor()}</th>
 					<th class="w-28"></th>
 				</tr>
@@ -182,19 +215,39 @@
 							<input
 								type="text"
 								class="input input-sm w-full"
-								value={level.name}
+								value={getDisplayValue(level, 'name')}
 								oninput={(e) => updateLevel(i, 'name', e.currentTarget.value)}
-								placeholder={m.levelNamePlaceholder()}
+								placeholder={isTranslating
+									? getBaseHint(level, 'name') || m.levelNamePlaceholder()
+									: m.levelNamePlaceholder()}
 							/>
+							{#if isTranslating && getBaseHint(level, 'name')}
+								<span
+									class="text-xs text-gray-400 block mt-0.5 truncate"
+									title={getBaseHint(level, 'name')}
+								>
+									↳ {baseLang}: {getBaseHint(level, 'name')}
+								</span>
+							{/if}
 						</td>
 						<td>
 							<input
 								type="text"
 								class="input input-sm w-full"
-								value={level.description}
+								value={getDisplayValue(level, 'description')}
 								oninput={(e) => updateLevel(i, 'description', e.currentTarget.value)}
-								placeholder={m.descriptionPlaceholder()}
+								placeholder={isTranslating
+									? getBaseHint(level, 'description') || m.descriptionPlaceholder()
+									: m.descriptionPlaceholder()}
 							/>
+							{#if isTranslating && getBaseHint(level, 'description')}
+								<span
+									class="text-xs text-gray-400 block mt-0.5 truncate"
+									title={getBaseHint(level, 'description')}
+								>
+									↳ {baseLang}: {getBaseHint(level, 'description')}
+								</span>
+							{/if}
 						</td>
 						<td>
 							<input

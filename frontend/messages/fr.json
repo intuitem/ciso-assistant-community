@@ -3835,7 +3835,7 @@
 	"moveUp": "Monter",
 	"moveDown": "Descendre",
 	"hasTranslations": "* = a des traductions",
-	"discardDraft": "Abandonner le brouillon",
+	"discardDraft": "Annuler le brouillon",
 	"matrixNamePlaceholder": "Nom de la matrice...",
 	"descriptionPlaceholder": "Description...",
 	"providerPlaceholder": "Fournisseur...",
@@ -3848,5 +3848,6 @@
 	"searchResults": "résultats",
 	"searchFor": "pour",
 	"searchPrompt": "Saisissez une requête pour rechercher dans tous les objets",
-	"all": "Tous"
+	"all": "Tous",
+	"addLanguage": "Ajouter une langue"
 }

@@ -11,10 +11,5 @@ export const load = (async ({ fetch }) => {
 	const matrices = allMatrices.filter((m: any) => m.is_published);
 	const drafts = allMatrices.filter((m: any) => m.has_editing_draft);
 
-	// Load folders
-	const foldersRes = await fetch(`${BASE_API_URL}/folders/`);
-	const foldersData = await foldersRes.json();
-	const folders = foldersData.results || foldersData;
-
-	return { matrices, drafts, folders };
+	return { matrices, drafts };
 }) satisfies PageServerLoad;

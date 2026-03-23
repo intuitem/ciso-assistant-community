@@ -3872,7 +3872,7 @@
 	"moveUp": "Move up",
 	"moveDown": "Move down",
 	"hasTranslations": "* = has translations",
-	"discardDraft": "Discard draft",
+	"discardDraft": "Drop draft",
 	"matrixNamePlaceholder": "Matrix name...",
 	"descriptionPlaceholder": "Description...",
 	"providerPlaceholder": "Provider...",
@@ -3885,5 +3885,6 @@
 	"searchResults": "results",
 	"searchFor": "for",
 	"searchPrompt": "Type a query to search across all objects",
-	"all": "All"
+	"all": "All",
+	"addLanguage": "Add language"
 }
