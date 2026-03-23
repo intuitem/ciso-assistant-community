@@ -15,7 +15,7 @@ You can start with lower specs of course for testing.
 
 1. **Software Requirements:**
    1. Ubuntu/Debian, CentOS, RHEL: LTS versions recommended when applicable\*
-   2. Docker 27 or up, with Docker compose, **or** Kubernetes Cluster 1.29 or up
+   2. Docker 27 or up, with Docker compose, **or** Kubernetes Cluster 1.31 or up
    3. Postgres 16 or up if you are choosing this variant
    4. Any SMTP compatible Mailer
 
