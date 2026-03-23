@@ -2,10 +2,12 @@ from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
+import copy
 import csv
 import json
 import mimetypes
 import re
+import yaml
 from django_filters.filterset import filterset_factory
 from django_filters.utils import try_dbfield
 import regex
@@ -2479,7 +2481,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):
         """Copy json_definition into editing_draft to begin editing."""
-        import copy
 
         matrix = self.get_object()
         if matrix.urn:
@@ -2539,8 +2540,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="publish-draft")
     def publish_draft(self, request, pk=None):
         """Publish editing_draft → json_definition, snapshot history, bump version."""
-        import copy
-        from django.utils import timezone
 
         matrix = self.get_object()
         if matrix.editing_draft is None:
@@ -2613,8 +2612,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="create-draft")
     def create_draft(self, request):
         """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
-        from iam.models import Folder
-
         folder_id = request.data.get("folder")
         try:
             folder = (
@@ -2659,7 +2656,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="create-draft-from")
     def create_draft_from(self, request, pk=None):
         """Clone an existing matrix into a new unpublished RiskMatrix with editing_draft."""
-        import copy
 
         source = self.get_object()
 
@@ -2701,9 +2697,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=True, methods=["get"], url_path="export-yaml")
     def export_yaml(self, request, pk=None):
         """Export a matrix as a library-compatible YAML file."""
-        import yaml
-        from django.http import HttpResponse
-
         matrix = self.get_object()
         # Use editing_draft if present (WIP), otherwise published json_definition
         definition = matrix.editing_draft or matrix.json_definition
@@ -2758,9 +2751,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=False, methods=["post"], url_path="import-yaml")
     def import_yaml(self, request):
         """Import a library YAML file and create a new draft matrix from it."""
-        import yaml
-        from iam.models import Folder
-
         uploaded_file = request.FILES.get("file")
         if not uploaded_file:
             return Response(

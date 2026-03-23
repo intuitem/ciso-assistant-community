@@ -233,9 +233,34 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
     has_editing_draft = serializers.SerializerMethodField()
+    editing_languages = serializers.SerializerMethodField()
 
     def get_has_editing_draft(self, obj):
         return obj.editing_draft is not None
+
+    def get_editing_languages(self, obj):
+        """Return list of language codes available in the draft or published translations."""
+        langs = set()
+        # Base locale
+        if obj.locale:
+            langs.add(obj.locale)
+        # From model translations (published)
+        if obj.translations and isinstance(obj.translations, dict):
+            langs.update(obj.translations.keys())
+        # From editing_draft level translations + _meta
+        if obj.editing_draft and isinstance(obj.editing_draft, dict):
+            meta = obj.editing_draft.get("_meta", {})
+            if isinstance(meta.get("translations"), dict):
+                langs.update(meta["translations"].keys())
+            for category in ("probability", "impact", "risk"):
+                levels = obj.editing_draft.get(category, [])
+                if isinstance(levels, list):
+                    for level in levels:
+                        if isinstance(level, dict) and isinstance(
+                            level.get("translations"), dict
+                        ):
+                            langs.update(level["translations"].keys())
+        return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix

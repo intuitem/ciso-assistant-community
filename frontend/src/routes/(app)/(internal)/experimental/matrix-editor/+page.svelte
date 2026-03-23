@@ -545,6 +545,7 @@
 		provider = meta.provider ?? matrix.provider ?? '';
 		locale = meta.locale || matrix.locale || 'en';
 		activeLang = locale;
+		addedLanguages = [];
 		metaTranslations = meta.translations || {};
 
 		if (jd?.probability) probabilityLevels = jd.probability;
@@ -594,6 +595,9 @@
 		matrixDescription = '';
 		provider = 'custom';
 		locale = 'en';
+		activeLang = 'en';
+		addedLanguages = [];
+		metaTranslations = {};
 		probabilityLevels = [
 			{
 				id: 0,
@@ -822,14 +826,16 @@
 					<i class="fa-solid fa-file-import mr-1"></i>
 					{m.importYaml()}
 				</button>
-				<button
-					type="button"
-					class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-					onclick={exportAsYaml}
-				>
-					<i class="fa-solid fa-file-export mr-1"></i>
-					{m.exportYaml()}
-				</button>
+				{#if matrixId}
+					<button
+						type="button"
+						class="btn btn-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+						onclick={exportAsYaml}
+					>
+						<i class="fa-solid fa-file-export mr-1"></i>
+						{m.exportYaml()}
+					</button>
+				{/if}
 			</div>
 
 			<div class="flex items-center gap-2">
@@ -891,16 +897,22 @@
 							<th>{m.name()}</th>
 							<th>{m.description()}</th>
 							<th>{m.status()}</th>
-							<th>{m.provider()}</th>
+							<th>{m.locale()}</th>
 							<th class="w-48"></th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- Matrices with active drafts (editing in progress) -->
 						{#each existingDrafts as draft}
-							<tr class={matrixId === draft.id ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
-								<td class="font-medium">{draft.name}</td>
-								<td class="text-sm text-gray-500 truncate max-w-48">{draft.description || '—'}</td>
+							{@const isActive = matrixId === draft.id}
+							{@const draftLangs = isActive
+								? [locale, ...[...usedLanguages()].filter((l) => l !== locale)]
+								: draft.editing_languages || []}
+							<tr class={isActive ? 'bg-primary-50 ring-1 ring-primary-200' : ''}>
+								<td class="font-medium">{isActive ? matrixName : draft.name}</td>
+								<td class="text-sm text-gray-500 max-w-48">
+									{isActive ? matrixDescription : draft.description || '—'}
+								</td>
 								<td>
 									{#if draft.is_published}
 										<span class="badge variant-filled-success text-xs">{m.published()}</span>
@@ -912,7 +924,13 @@
 										{m.editing()}
 									</span>
 								</td>
-								<td class="text-sm text-gray-500">{draft.provider || '—'}</td>
+								<td class="flex gap-1 flex-wrap">
+									{#each draftLangs as lang}
+										<span class="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+											{lang}
+										</span>
+									{/each}
+								</td>
 								<td>
 									<div class="flex gap-1">
 										{#if matrixId === draft.id}
@@ -991,7 +1009,13 @@
 										<span class="text-xs text-gray-400 ml-1">v{matrix.editing_version}</span>
 									{/if}
 								</td>
-								<td class="text-sm text-gray-500">{matrix.provider || '—'}</td>
+								<td class="flex gap-1 flex-wrap">
+									{#each matrix.editing_languages || [matrix.locale || 'en'] as lang}
+										<span class="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded"
+											>{lang}</span
+										>
+									{/each}
+								</td>
 								<td>
 									<div class="flex gap-1">
 										{#if !matrix.urn}
@@ -1090,6 +1114,24 @@
 						<option value="">+ {m.addLanguage()}</option>
 						{#each availableToAdd as lang}
 							<option value={lang.code}>{lang.name}</option>
+						{/each}
+					</select>
+				{/if}
+				<!-- Default locale selector -->
+				{#if usedLanguages().size > 0}
+					<span class="border-l border-gray-300 h-5 mx-1"></span>
+					<select
+						class="select select-sm text-xs w-auto"
+						value={locale}
+						onchange={(e) => {
+							locale = e.currentTarget.value;
+							activeLang = locale;
+						}}
+					>
+						{#each [locale, ...usedLanguages()].filter((l, i, a) => a.indexOf(l) === i) as code}
+							<option value={code}>
+								{m.locale()}: {language[LOCALE_MAP[code]?.name] ?? code}
+							</option>
 						{/each}
 					</select>
 				{/if}
