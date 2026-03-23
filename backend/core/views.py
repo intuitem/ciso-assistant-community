@@ -2,10 +2,12 @@ from django.db.utils import IntegrityError, OperationalError, ProgrammingError
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
+import copy
 import csv
 import json
 import mimetypes
 import re
+import yaml
 from django_filters.filterset import filterset_factory
 from django_filters.utils import try_dbfield
 import regex
@@ -2473,6 +2475,462 @@ class RiskMatrixViewSet(BaseModelViewSet):
             my_map[item.folder.name].update({item.name: item.id})
 
         return Response(my_map)
+
+    # --- Visual Matrix Editor actions ---
+
+    def _check_change_permission(self, request, matrix):
+        """Check that the user has change_riskmatrix permission on the matrix's folder."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_riskmatrix"),
+            folder=matrix.folder,
+        ):
+            raise PermissionDenied({"error": "Permission denied."})
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Copy json_definition into editing_draft to begin editing."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        if matrix.urn:
+            return Response(
+                {
+                    "error": "Library matrices cannot be edited directly. Use Clone instead."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if matrix.editing_draft is not None:
+            return Response(
+                {"status": "already_editing", "editing_draft": matrix.editing_draft}
+            )
+        draft = copy.deepcopy(matrix.json_definition)
+        # Include current metadata in the draft
+        meta = {
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "provider": matrix.provider or "",
+            "locale": matrix.locale or "en",
+            "folder": str(matrix.folder_id),
+        }
+        if matrix.translations:
+            meta["translations"] = copy.deepcopy(matrix.translations)
+        draft["_meta"] = meta
+        matrix.editing_draft = draft
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response(
+            {"status": "editing_started", "editing_draft": matrix.editing_draft}
+        )
+
+    @action(detail=True, methods=["patch"], url_path="save-draft")
+    def save_draft(self, request, pk=None):
+        """Update editing_draft with current WIP. Metadata stays draft-scoped until publish."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        editing_draft = request.data.get("editing_draft")
+        if editing_draft is None:
+            return Response(
+                {"error": "editing_draft is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Store metadata inside editing_draft so it stays draft-scoped
+        meta = {}
+        for field in ("name", "description", "provider", "locale", "folder"):
+            if field in request.data:
+                meta[field] = request.data[field]
+        if request.data.get("metaTranslations"):
+            meta["translations"] = request.data["metaTranslations"]
+        if meta:
+            editing_draft["_meta"] = meta
+
+        matrix.editing_draft = editing_draft
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_saved"})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        """Publish editing_draft → json_definition, snapshot history, bump version."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        if matrix.editing_draft is None:
+            return Response(
+                {"error": "No active draft to publish."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        errors = self._validate_json_definition(matrix.editing_draft)
+        if errors:
+            return Response({"errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Snapshot current live definition into history (only if it has real content)
+        if matrix.json_definition and matrix.json_definition.get("grid"):
+            history = list(matrix.editing_history or [])
+            history.append(
+                {
+                    "version": matrix.editing_version,
+                    "definition": copy.deepcopy(matrix.json_definition),
+                    "published_at": timezone.now().isoformat(),
+                }
+            )
+            matrix.editing_history = history
+
+        # Extract draft metadata and clean it from the definition
+        draft_data = copy.deepcopy(matrix.editing_draft)
+        meta = draft_data.pop("_meta", {})
+
+        # Swap draft → live
+        matrix.json_definition = draft_data
+        matrix.editing_draft = None
+        matrix.editing_version += 1
+        matrix.is_enabled = True
+
+        # Apply draft metadata to the model
+        update_fields = [
+            "json_definition",
+            "editing_draft",
+            "editing_version",
+            "editing_history",
+            "is_enabled",
+            "updated_at",
+        ]
+        for field in ("name", "description", "provider", "locale"):
+            if field in meta:
+                setattr(matrix, field, meta[field])
+                update_fields.append(field)
+        if "folder" in meta:
+            matrix.folder_id = meta["folder"]
+            update_fields.append("folder_id")
+        if "translations" in meta:
+            matrix.translations = meta["translations"]
+            update_fields.append("translations")
+
+        matrix.save(update_fields=update_fields)
+        return Response(
+            {"status": "published", "editing_version": matrix.editing_version}
+        )
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        """Discard editing_draft without affecting json_definition."""
+        matrix = self.get_object()
+        self._check_change_permission(request, matrix)
+        matrix.editing_draft = None
+        matrix.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_discarded"})
+
+    @action(detail=False, methods=["post"], url_path="create-draft")
+    def create_draft(self, request):
+        """Create a new unpublished RiskMatrix with an editing_draft for the visual editor."""
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=request.data.get("name", "Untitled Matrix"),
+            description=request.data.get("description", ""),
+            folder=folder,
+            json_definition={},
+            editing_draft=request.data.get("editing_draft", {}),
+            is_enabled=False,
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["post"], url_path="create-draft-from")
+    def create_draft_from(self, request, pk=None):
+        """Clone an existing matrix into a new unpublished RiskMatrix with editing_draft."""
+
+        source = self.get_object()
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=source.folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=f"{source.name} (copy)",
+            description=source.description or "",
+            folder=source.folder,
+            json_definition={},
+            editing_draft=copy.deepcopy(source.json_definition),
+            is_enabled=False,
+            locale=source.locale,
+            default_locale=source.default_locale,
+            provider=source.provider or "",
+            translations=copy.deepcopy(source.translations)
+            if source.translations
+            else {},
+        )
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "status": "draft_created_from",
+                "editing_draft": matrix.editing_draft,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=True, methods=["get"], url_path="export-yaml")
+    def export_yaml(self, request, pk=None):
+        """Export a matrix as a library-compatible YAML file."""
+        matrix = self.get_object()
+        # Use editing_draft if present (WIP), otherwise published json_definition
+        definition = matrix.editing_draft or matrix.json_definition
+        if not definition or not definition.get("grid"):
+            return Response(
+                {"error": "No matrix definition to export."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        ref_id = (matrix.name or "untitled").lower().replace(" ", "-").replace("_", "-")
+        ref_id = "".join(c for c in ref_id if c.isalnum() or c == "-")
+
+        library_data = {
+            "urn": f"urn:custom:risk:library:risk-matrix-{ref_id}",
+            "locale": matrix.locale or "en",
+            "ref_id": ref_id,
+            "name": matrix.name,
+            "description": matrix.description or "",
+            "version": matrix.editing_version,
+            "provider": matrix.provider or "custom",
+            "packager": "custom",
+            "objects": {
+                "risk_matrix": [
+                    {
+                        "urn": f"urn:custom:risk:matrix:{ref_id}",
+                        "ref_id": ref_id,
+                        "name": matrix.name,
+                        "description": matrix.description or "",
+                        **definition,
+                    }
+                ]
+            },
+        }
+
+        # Add translations if present
+        if matrix.translations:
+            library_data["translations"] = matrix.translations
+            library_data["objects"]["risk_matrix"][0]["translations"] = (
+                matrix.translations
+            )
+
+        yaml_content = yaml.dump(
+            library_data, allow_unicode=True, default_flow_style=False, sort_keys=False
+        )
+
+        response = HttpResponse(yaml_content, content_type="application/x-yaml")
+        response["Content-Disposition"] = (
+            f'attachment; filename="risk-matrix-{ref_id}.yaml"'
+        )
+        return response
+
+    @action(detail=False, methods=["post"], url_path="import-yaml")
+    def import_yaml(self, request):
+        """Import a library YAML file and create a new draft matrix from it."""
+        uploaded_file = request.FILES.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            content = uploaded_file.read()
+            library_data = yaml.safe_load(content)
+        except yaml.YAMLError:
+            return Response(
+                {"error": "Invalid YAML file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not isinstance(library_data, dict):
+            return Response(
+                {"error": "YAML must be a dictionary."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract matrix definition
+        matrix_def = None
+        matrix_meta = {}
+        risk_matrix_obj = library_data.get("objects", {}).get("risk_matrix")
+        if isinstance(risk_matrix_obj, list) and risk_matrix_obj:
+            first = risk_matrix_obj[0]
+            if isinstance(first, dict):
+                matrix_def = first
+                matrix_meta = {
+                    "name": library_data.get(
+                        "name", matrix_def.get("name", "Imported Matrix")
+                    ),
+                    "description": library_data.get(
+                        "description", matrix_def.get("description", "")
+                    ),
+                    "provider": library_data.get("provider", ""),
+                    "locale": library_data.get("locale", "en"),
+                }
+        elif all(k in library_data for k in ("probability", "impact", "risk", "grid")):
+            # Direct matrix definition (not wrapped in library structure)
+            matrix_def = library_data
+            matrix_meta = {
+                "name": library_data.get("name", "Imported Matrix"),
+                "description": library_data.get("description", ""),
+                "provider": library_data.get("provider", ""),
+                "locale": library_data.get("locale", "en"),
+            }
+
+        if not isinstance(matrix_def, dict) or "grid" not in matrix_def:
+            return Response(
+                {"error": "No valid matrix definition found in file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Extract only the matrix fields
+        editing_draft = {}
+        for key in ("probability", "impact", "risk", "grid", "strength_of_knowledge"):
+            if key in matrix_def:
+                editing_draft[key] = matrix_def[key]
+
+        folder_id = request.data.get("folder")
+        try:
+            folder = (
+                Folder.objects.get(id=folder_id)
+                if folder_id
+                else Folder.get_root_folder()
+            )
+        except Folder.DoesNotExist:
+            return Response(
+                {"error": "Invalid folder."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="add_riskmatrix"),
+            folder=folder,
+        ):
+            return Response(
+                {"error": "Permission denied for this folder."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        matrix = RiskMatrix.objects.create(
+            name=matrix_meta["name"],
+            description=matrix_meta["description"],
+            provider=matrix_meta["provider"],
+            locale=matrix_meta["locale"],
+            folder=folder,
+            json_definition={},
+            editing_draft=editing_draft,
+            is_enabled=False,
+            translations=library_data.get("translations", {}),
+        )
+
+        return Response(
+            {
+                "id": str(matrix.id),
+                "name": matrix.name,
+                "editing_draft": matrix.editing_draft,
+                "status": "imported",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @staticmethod
+    def _validate_json_definition(json_def) -> list[str]:
+        """Validate the matrix JSON definition before publishing.
+
+        Defensive against malformed payloads — returns errors instead of raising.
+        """
+        errors = []
+
+        if not isinstance(json_def, dict):
+            return ["Matrix definition must be a JSON object."]
+
+        probability = json_def.get("probability")
+        impact = json_def.get("impact")
+        risk = json_def.get("risk")
+        grid = json_def.get("grid")
+
+        if not isinstance(probability, list):
+            return ["'probability' must be a list."]
+        if not isinstance(impact, list):
+            return ["'impact' must be a list."]
+        if not isinstance(risk, list):
+            return ["'risk' must be a list."]
+        if not isinstance(grid, list):
+            return ["'grid' must be a list."]
+
+        if len(probability) < 2:
+            errors.append("At least 2 probability levels are required.")
+        if len(impact) < 2:
+            errors.append("At least 2 impact levels are required.")
+        if len(risk) < 2:
+            errors.append("At least 2 risk levels are required.")
+
+        if len(grid) != len(probability):
+            errors.append(
+                f"Grid has {len(grid)} rows but there are {len(probability)} probability levels."
+            )
+
+        for i, row in enumerate(grid):
+            if not isinstance(row, list):
+                errors.append(f"Grid row {i} is not a list.")
+                continue
+            if len(row) != len(impact):
+                errors.append(
+                    f"Grid row {i} has {len(row)} columns but there are {len(impact)} impact levels."
+                )
+            for j, val in enumerate(row):
+                if not isinstance(val, int) or val < 0 or val >= len(risk):
+                    errors.append(f"Grid cell [{i}][{j}] has invalid risk index {val}.")
+
+        for category_name, levels in [
+            ("probability", probability),
+            ("impact", impact),
+            ("risk", risk),
+        ]:
+            for k, level in enumerate(levels):
+                if not isinstance(level, dict):
+                    errors.append(f"{category_name}[{k}] is not a valid object.")
+                    continue
+                if not level.get("name"):
+                    errors.append(f"{category_name}[{k}] is missing a name.")
+                if not level.get("hexcolor"):
+                    errors.append(
+                        f"{category_name}[{k}] is missing a color (hexcolor)."
+                    )
+
+        return errors
 
 
 class VulnerabilityViewSet(BaseModelViewSet):
