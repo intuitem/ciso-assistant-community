@@ -101,6 +101,8 @@ from rest_framework.decorators import (
 )
 from rest_framework.parsers import (
     FileUploadParser,
+    FormParser,
+    MultiPartParser,
 )
 from rest_framework.renderers import JSONRenderer
 from rest_framework.request import Request
@@ -8335,6 +8337,85 @@ class RequirementNodeViewSet(BaseModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-image",
+        parser_classes=[MultiPartParser, FormParser, FileUploadParser],
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image file and attach it to this requirement node."""
+        requirement_node = self.get_object()
+        uploaded_file = request.FILES.get("file") or request.data.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ALLOWED_IMAGE_TYPES = {
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+        }
+        content_type = (uploaded_file.content_type or "").lower()
+        if content_type not in ALLOWED_IMAGE_TYPES:
+            return Response(
+                {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attachment = RequirementNodeAttachment(
+            requirement_node=requirement_node,
+            file=uploaded_file,
+            uploaded_by=request.user,
+        )
+        try:
+            attachment.full_clean()
+        except ValidationError as e:
+            messages = []
+            if hasattr(e, "message_dict"):
+                for field_messages in e.message_dict.values():
+                    messages.extend(field_messages)
+            elif hasattr(e, "messages"):
+                messages = e.messages
+            else:
+                messages = [str(e.message)]
+            return Response(
+                {"error": " ".join(messages)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attachment.save()
+        return Response(
+            {
+                "id": str(attachment.id),
+                "url": f"/requirement-node-attachments/{attachment.id}/file/",
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"serve-image/(?P<attachment_id>[0-9a-f-]+)",
+    )
+    def serve_image(self, request, pk=None, attachment_id=None):
+        """Serve an image attachment belonging to this requirement node."""
+        requirement_node = self.get_object()
+        try:
+            attachment = RequirementNodeAttachment.objects.get(
+                pk=attachment_id,
+                requirement_node=requirement_node,
+            )
+        except RequirementNodeAttachment.DoesNotExist:
+            return Response(
+                {"error": "Attachment not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        content_type = mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        response = HttpResponse(attachment.file.read(), content_type=content_type)
+        response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
+        return response
 
 
 class RequirementViewSet(BaseModelViewSet):

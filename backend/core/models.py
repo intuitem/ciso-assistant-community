@@ -2351,6 +2351,10 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         NICE_TO_HAVE = "nice_to_have", _("Nice to have")
         UNDEFINED = "undefined", _("Undefined")
 
+    class DisplayMode(models.TextChoices):
+        DEFAULT = "default", _("Default")
+        SPLASH = "splash", _("Splash screen")
+
     threats = models.ManyToManyField(
         "Threat",
         blank=True,
@@ -2388,6 +2392,12 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
         choices=Importance.choices,
         default=Importance.UNDEFINED,
         verbose_name=_("Importance"),
+    )
+    display_mode = models.CharField(
+        max_length=20,
+        choices=DisplayMode.choices,
+        default=DisplayMode.DEFAULT,
+        verbose_name=_("Display mode"),
     )
 
     @property
@@ -2491,6 +2501,47 @@ class RequirementNode(ReferentialObjectMixin, I18nObjectMixin):
     class Meta:
         verbose_name = _("RequirementNode")
         verbose_name_plural = _("RequirementNodes")
+
+
+class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
+    """Image or file attached to a requirement node, for embedding in markdown splash screens."""
+
+    requirement_node = models.ForeignKey(
+        RequirementNode,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+        verbose_name=_("Requirement node"),
+    )
+    file = models.FileField(
+        validators=[validate_file_size, validate_file_name],
+        verbose_name=_("File"),
+    )
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="requirement_node_attachments",
+        verbose_name=_("Uploaded by"),
+    )
+    fields_to_check = []
+
+    class Meta:
+        verbose_name = _("Requirement node attachment")
+        verbose_name_plural = _("Requirement node attachments")
+
+    def save(self, *args, **kwargs):
+        if not self.folder_id and self.requirement_node_id:
+            self.folder = self.requirement_node.folder
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        if self.file:
+            self.file.delete(save=False)
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        return f"Attachment for {self.requirement_node}"
 
 
 class Question(AbstractBaseModel, FolderMixin):
