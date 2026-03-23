@@ -126,8 +126,11 @@
 		lazy = false,
 		lazyLimit = 10,
 		lazyThreshold = 50,
-		maxVisibleChips = 3
+		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
+
+	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
+	const maxVisibleChips = Math.max(1, Math.min(5, _maxVisibleChips));
 
 	if (translateOptions) {
 		options = options.map((option) => {
