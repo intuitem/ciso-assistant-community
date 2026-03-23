@@ -75,6 +75,7 @@
 		lazy?: boolean;
 		lazyLimit?: number;
 		lazyThreshold?: number;
+		maxVisibleChips?: number;
 	}
 
 	let {
@@ -124,7 +125,8 @@
 		placeholder = '',
 		lazy = false,
 		lazyLimit = 10,
-		lazyThreshold = 50
+		lazyThreshold = 50,
+		maxVisibleChips = 3
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -160,7 +162,6 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
 	};
@@ -172,6 +173,7 @@
 	let lazyInputEl = $state<HTMLInputElement | null>(null);
 	let effectiveLazy = $state(lazy);
 	const LAZY_HINT_VALUE = '__lazy_hint__';
+	let multiSelectOpen = $state(false);
 	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
@@ -536,6 +538,47 @@
 
 	const searchTargetMap = $derived(new Map(options.map((opt) => [opt, getSearchTarget(opt)])));
 
+	// Chip overflow: hide chips beyond max when dropdown is closed (multi-select only)
+	const overflowCount = $derived(
+		multiple && maxVisibleChips > 0 && !multiSelectOpen
+			? Math.max(0, selected.length - maxVisibleChips)
+			: 0
+	);
+
+	// Svelte action: restyle a chip's <li> as a "+N" badge (hide × button, muted background)
+	function styleAsBadge(node: HTMLElement) {
+		const li = node.closest('li');
+		if (!li) return;
+		li.style.cssText =
+			'background: rgba(128,128,128,0.15) !important; cursor: pointer !important;';
+		const removeBtn = li.querySelector('button');
+		if (removeBtn) (removeBtn as HTMLElement).style.display = 'none';
+		return {
+			destroy() {
+				li.style.cssText = '';
+				if (removeBtn) (removeBtn as HTMLElement).style.display = '';
+			}
+		};
+	}
+
+	// CSS class added to outerDiv to hide overflow chips via :nth-child
+	const overflowCssClass = $derived(overflowCount > 0 ? `chip-max-${maxVisibleChips}` : '');
+
+	// Inject CSS rule via JS — Tailwind v4 strips plain CSS from app.css during build
+	$effect(() => {
+		if (!overflowCssClass) return;
+		const n = maxVisibleChips + 2; // 1-based: chips 1..maxVisibleChips + badge chip
+		const id = `chip-overflow-css-${maxVisibleChips}`;
+		// Reuse existing style element if another instance already created it
+		let styleEl = document.getElementById(id) as HTMLStyleElement | null;
+		if (!styleEl) {
+			styleEl = document.createElement('style');
+			styleEl.id = id;
+			styleEl.textContent = `.chip-max-${maxVisibleChips} ul.selected > li:nth-child(n+${n}) { position: absolute !important; width: 0 !important; height: 0 !important; padding: 0 !important; margin: 0 !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; }`;
+			document.head.appendChild(styleEl);
+		}
+	});
+
 	const fastFilter = (opt: Option, searchText: string) => {
 		if (!searchText) {
 			return true;
@@ -580,6 +623,7 @@
 	<div
 		class="control overflow-x-clip flex items-center space-x-2"
 		data-testid="{fieldContext}-{field.replaceAll('_', '-')}"
+		data-overflow-class={overflowCssClass || 'none'}
 	>
 		{#if Array.isArray($value)}
 			{#each $value as val}
@@ -591,98 +635,105 @@
 
 		<MultiSelect
 			bind:selected
+			bind:open={multiSelectOpen}
 			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
 				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
 				: options}
 			{...multiSelectOptions}
+			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
-			allowEmpty={true}
-			{allowUserOptions}
-			duplicates={false}
-			key={JSON.stringify}
-			filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
-			noMatchingOptionsMsg={effectiveLazy
-				? isLoading || lazySearchPending
-					? m.searching()
-					: m.typeToSearch()
-				: undefined}
-			placeholder={placeholder || (effectiveLazy ? m.typeToSearch() : '')}
-			bind:input={lazyInputEl}
-		>
-			{#snippet option({ option })}
-				{#if option.value === LAZY_HINT_VALUE}
-					<span class="text-sm italic text-surface-500">{option.label}</span>
-				{:else if optionSnippet}
-					{@render optionSnippet?.(option)}
-				{:else}
-					{#if option.infoString?.position === 'prefix'}
-						<span class="text-xs {option.infoString.classes}">
-							{option.infoString.string}
-						</span>
-					{/if}
-					{#if option.path}
-						<span>
-							{#each option.path as item}
-								<span class="text-surface-500 font-light">
-									{item} /&nbsp;
-								</span>
-							{/each}
-						</span>
-					{/if}
-					{#if translateOptions && option}
-						{#if field === 'ro_to_couple'}
-							{@const [firstPart, ...restParts] = option.label.split(' - ')}
-							{safeTranslate(firstPart)} - {restParts.join(' - ')}
-						{:else}
-							{option.translatedLabel}
-						{/if}
+				allowEmpty={true}
+				{allowUserOptions}
+				duplicates={false}
+				key={JSON.stringify}
+				filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
+				noMatchingOptionsMsg={effectiveLazy
+					? isLoading || lazySearchPending
+						? m.searching()
+						: m.typeToSearch()
+					: undefined}
+				placeholder={placeholder || (effectiveLazy ? m.typeToSearch() : '')}
+				bind:input={lazyInputEl}
+			>
+				{#snippet option({ option })}
+					{#if option.value === LAZY_HINT_VALUE}
+						<span class="text-sm italic text-surface-500">{option.label}</span>
+					{:else if optionSnippet}
+						{@render optionSnippet?.(option)}
 					{:else}
-						{option.label || option}
-					{/if}
-					{#if option.infoString?.position === 'suffix'}
-						<span class="text-xs {option.infoString.classes}">
-							{option.infoString.string}
-						</span>
-					{/if}
-					{#if option.suggested}
-						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-					{/if}
-				{/if}
-			{/snippet}
-			{#snippet selectedItem({ option })}
-				{#if option.infoString?.position === 'prefix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
-				{#if option.path}
-					<span>
-						{#each option.path as item, idx}
-							<span class="text-xs font-light">
-								{item}
-								{#if idx < option.path.length - 1}
-									&nbsp;/
-								{/if}&nbsp;
+						{#if option.infoString?.position === 'prefix'}
+							<span class="text-xs {option.infoString.classes}">
+								{option.infoString.string}
 							</span>
-						{/each}
-					</span>
-				{/if}
-				{#if translateOptions && option}
-					{#if field === 'ro_to_couple'}
-						{@const [firstPart, ...restParts] = option.label.split(' - ')}
-						{safeTranslate(firstPart)} - {restParts.join(' - ')}
-					{:else}
-						{option.translatedLabel}
+						{/if}
+						{#if option.path}
+							<span>
+								{#each option.path as item}
+									<span class="text-surface-500 font-light">
+										{item} /&nbsp;
+									</span>
+								{/each}
+							</span>
+						{/if}
+						{#if translateOptions && option}
+							{#if field === 'ro_to_couple'}
+								{@const [firstPart, ...restParts] = option.label.split(' - ')}
+								{safeTranslate(firstPart)} - {restParts.join(' - ')}
+							{:else}
+								{option.translatedLabel}
+							{/if}
+						{:else}
+							{option.label || option}
+						{/if}
+						{#if option.infoString?.position === 'suffix'}
+							<span class="text-xs {option.infoString.classes}">
+								{option.infoString.string}
+							</span>
+						{/if}
+						{#if option.suggested}
+							<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						{/if}
 					{/if}
-				{:else}
-					{option.label || option}
-				{/if}
-				{#if option.infoString?.position === 'suffix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
-				{#if option.suggested}
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
-				{/if}
-			{/snippet}
-		</MultiSelect>
+				{/snippet}
+				{#snippet selectedItem({ option })}
+					{@const chipIdx = selected.findIndex((s) => s.value === option.value)}
+					{#if overflowCount > 0 && chipIdx === maxVisibleChips}
+						<span use:styleAsBadge>+{overflowCount}</span>
+					{:else}
+						{#if option.infoString?.position === 'prefix'}
+							<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						{/if}
+						{#if option.path}
+							<span>
+								{#each option.path as item, idx}
+									<span class="text-xs font-light">
+										{item}
+										{#if idx < option.path.length - 1}
+											&nbsp;/
+										{/if}&nbsp;
+									</span>
+								{/each}
+							</span>
+						{/if}
+						{#if translateOptions && option}
+							{#if field === 'ro_to_couple'}
+								{@const [firstPart, ...restParts] = option.label.split(' - ')}
+								{safeTranslate(firstPart)} - {restParts.join(' - ')}
+							{:else}
+								{option.translatedLabel}
+							{/if}
+						{:else}
+							{option.label || option}
+						{/if}
+						{#if option.infoString?.position === 'suffix'}
+							<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+						{/if}
+						{#if option.suggested}
+							<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+						{/if}
+					{/if}
+				{/snippet}
+			</MultiSelect>
 		{#if isLoading}
 			<svg
 				class="animate-spin h-5 w-5 text-primary-500 loading-spinner"
@@ -703,5 +754,8 @@
 	</div>
 	{#if helpText}
 		<p class="text-sm text-gray-500 whitespace-pre-line">{helpText}</p>
+	{/if}
+	{#if multiple}
+		<p class="text-xs text-red-500">DEBUG: selected={selected.length} overflow={overflowCount} class="{overflowCssClass}" open={multiSelectOpen}</p>
 	{/if}
 </div>
