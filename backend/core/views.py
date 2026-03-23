@@ -8338,6 +8338,19 @@ class RequirementNodeViewSet(BaseModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+
+class RequirementViewSet(BaseModelViewSet):
+    """
+    API endpoint that allows requirements to be viewed or edited.
+    """
+
+    model = RequirementNode
+    filterset_fields = ["framework", "urn"]
+    search_fields = ["name"]
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     @action(
         detail=True,
         methods=["post"],
@@ -8416,19 +8429,6 @@ class RequirementNodeViewSet(BaseModelViewSet):
         response = HttpResponse(attachment.file.read(), content_type=content_type)
         response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
         return response
-
-
-class RequirementViewSet(BaseModelViewSet):
-    """
-    API endpoint that allows requirements to be viewed or edited.
-    """
-
-    model = RequirementNode
-    filterset_fields = ["framework", "urn"]
-    search_fields = ["name"]
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
 
     @action(detail=True, methods=["get"], name="Inspect specific requirements")
     def inspect_requirement(self, request, pk):
