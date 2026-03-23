@@ -1519,10 +1519,10 @@ def startup(sender: AppConfig, **kwargs):
         "enforce_mfa": False,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(
+        global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}
         )
-        current_value = settings.value or {}
+        current_value = global_settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
 
@@ -1535,8 +1535,8 @@ def startup(sender: AppConfig, **kwargs):
             # Finally force-reset the invalid ebios_radar_max to default
             updated_value = {**default_settings, **current_value}
             updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
-            settings.value = updated_value
-            settings.save()
+            global_settings.value = updated_value
+            global_settings.save()
             logger.info(
                 "Global settings have been reset to defaults due to invalid ebios_radar_max."
             )
