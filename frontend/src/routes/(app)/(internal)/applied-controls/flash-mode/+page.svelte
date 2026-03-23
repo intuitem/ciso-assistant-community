@@ -35,7 +35,7 @@
 		{ id: 'Small', label: m.small(), dbValue: 'S' },
 		{ id: 'Medium', label: m.medium(), dbValue: 'M' },
 		{ id: 'Large', label: m.large(), dbValue: 'L' },
-		{ id: 'Extra Large', label: 'Extra Large', dbValue: 'XL' }
+		{ id: 'Extra Large', label: m.extraLarge(), dbValue: 'XL' }
 	];
 
 	const priorityOptions = [
@@ -43,7 +43,7 @@
 		{ id: 'P1', label: m.p1(), dbValue: 1 },
 		{ id: 'P2', label: m.p2(), dbValue: 2 },
 		{ id: 'P3', label: m.p3(), dbValue: 3 },
-		{ id: 'P4', label: 'P4', dbValue: 4 }
+		{ id: 'P4', label: m.p4(), dbValue: 4 }
 	];
 
 	const impactOptions = [
@@ -57,12 +57,12 @@
 
 	const csfFunctionOptions = [
 		{ id: '--', label: '--', dbValue: null },
-		{ id: 'Govern', label: 'Govern', dbValue: 'govern' },
-		{ id: 'Identify', label: 'Identify', dbValue: 'identify' },
-		{ id: 'Protect', label: 'Protect', dbValue: 'protect' },
-		{ id: 'Detect', label: 'Detect', dbValue: 'detect' },
-		{ id: 'Respond', label: 'Respond', dbValue: 'respond' },
-		{ id: 'Recover', label: 'Recover', dbValue: 'recover' }
+		{ id: 'Govern', label: m.govern(), dbValue: 'govern' },
+		{ id: 'Identify', label: m.identify(), dbValue: 'identify' },
+		{ id: 'Protect', label: m.protect(), dbValue: 'protect' },
+		{ id: 'Detect', label: m.detect(), dbValue: 'detect' },
+		{ id: 'Respond', label: m.respond(), dbValue: 'respond' },
+		{ id: 'Recover', label: m.recover(), dbValue: 'recover' }
 	];
 
 	// Helper to map server values to display IDs for select value binding
