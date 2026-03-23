@@ -3,7 +3,7 @@ import { redirect } from '@sveltejs/kit';
 import { loadFlash } from 'sveltekit-flash-message/server';
 
 export const load = loadFlash(async ({ locals, url }) => {
-	if (locals.user.is_third_party && !url.pathname.startsWith('/my-profile')) {
+	if (locals.user.is_third_party) {
 		redirect(302, `/compliance-assessments`);
 	}
 	return { user: locals.user };
