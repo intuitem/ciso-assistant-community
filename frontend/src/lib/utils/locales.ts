@@ -92,6 +92,10 @@ export const LOCALE_MAP = {
 	lt: {
 		name: 'lithuanian',
 		flag: '🇱🇹'
+	},
+	ko: {
+		name: 'korean',
+		flag: '🇰🇷'
 	}
 };
 
@@ -118,7 +122,8 @@ export const language: any = {
 	turkish: m.turkish(),
 	croatian: m.croatian(),
 	chinese: m.chinese(),
-	lithuanian: m.lithuanian()
+	lithuanian: m.lithuanian(),
+	korean: m.korean()
 };
 
 export const defaultLangLabels = {
@@ -144,7 +149,8 @@ export const defaultLangLabels = {
 	tr: 'Türkçe',
 	hr: 'Hrvatski',
 	zh: '简体中文',
-	lt: 'Lietuvių'
+	lt: 'Lietuvių',
+	ko: '한국어'
 };
 
 export function toCamelCase(str: string) {
