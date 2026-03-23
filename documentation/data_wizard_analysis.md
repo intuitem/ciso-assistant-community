@@ -50,6 +50,7 @@ The Data Wizard defines the following `ModelType` enum for supported imports:
 | `observation` | No | Free text |
 | `parent_assets` | No | Comma/pipe-separated ref_ids (linked in second pass) |
 | `filtering_labels` | No | Pipe- or comma-separated label names (created if missing) |
+| `is_business_function`| No | DORA specific field. Either `true`/`yes` or `false`/`no` |
 
 **Missing Fields from Model:**
 | Field | Type | Priority |

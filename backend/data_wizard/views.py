@@ -572,11 +572,8 @@ class AssetRecordConsumer(RecordConsumer[None]):
         is_business_function = False
         if isinstance(record_is_business_function, str):
             is_business_function = record_is_business_function.strip().lower() in [
-                "lower",
+                "true",
                 "yes",
-                "1",
-                "y",
-                "t",
             ]
         elif isinstance(record_is_business_function, bool):
             is_business_function = record_is_business_function
