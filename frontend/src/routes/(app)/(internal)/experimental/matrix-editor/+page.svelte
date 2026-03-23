@@ -768,6 +768,31 @@
 		activeLang = code;
 	}
 
+	function removeLanguage(code: string) {
+		if (code === locale) return; // Can't remove base language
+		// Remove translations from all levels
+		for (const levels of [probabilityLevels, impactLevels, riskLevels]) {
+			for (const level of levels) {
+				if (level.translations?.[code]) {
+					delete level.translations[code];
+				}
+			}
+		}
+		// Trigger reactivity
+		probabilityLevels = [...probabilityLevels];
+		impactLevels = [...impactLevels];
+		riskLevels = [...riskLevels];
+		// Remove from meta translations
+		if (metaTranslations[code]) {
+			const { [code]: _, ...rest } = metaTranslations;
+			metaTranslations = rest;
+		}
+		// Remove from added languages
+		addedLanguages = addedLanguages.filter((l) => l !== code);
+		// Switch back to base if we were on the removed language
+		if (activeLang === code) activeLang = locale;
+	}
+
 	const tabs = [
 		{ id: 'probability', label: m.probability, icon: 'fa-solid fa-arrow-up' },
 		{ id: 'impact', label: m.impact, icon: 'fa-solid fa-arrow-right' },
@@ -1012,7 +1037,7 @@
 		<!-- Language switcher + editor container -->
 		<div class="card p-4">
 			<!-- Language switcher -->
-			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-gray-200">
+			<div class="flex items-center gap-2 flex-wrap pb-3 mb-4 border-b border-gray-200 justify-end">
 				<i class="fa-solid fa-language text-gray-400"></i>
 				<!-- Base language -->
 				<button
@@ -1027,16 +1052,30 @@
 				</button>
 				<!-- Translation languages -->
 				{#each [...usedLanguages()].filter((l) => l !== locale) as lang}
-					<button
-						type="button"
-						class="px-3 py-1 rounded-full text-sm transition-colors {activeLang === lang
+					<span
+						class="inline-flex items-center rounded-full text-sm transition-colors {activeLang ===
+						lang
 							? 'bg-primary-500 text-white'
 							: 'bg-gray-100 text-gray-600 hover:bg-gray-200'}"
-						onclick={() => (activeLang = lang)}
 					>
-						{language[LOCALE_MAP[lang]?.name] ?? lang}
-						<span class="text-xs opacity-70">({lang})</span>
-					</button>
+						<button type="button" class="px-3 py-1" onclick={() => (activeLang = lang)}>
+							{language[LOCALE_MAP[lang]?.name] ?? lang}
+							<span class="text-xs opacity-70">({lang})</span>
+						</button>
+						<button
+							type="button"
+							class="pr-2 pl-0 py-1 opacity-50 hover:opacity-100 transition-opacity"
+							onclick={(e) => {
+								e.stopPropagation();
+								if (confirm(`Remove ${language[LOCALE_MAP[lang]?.name] ?? lang} translations?`)) {
+									removeLanguage(lang);
+								}
+							}}
+							aria-label="Remove {lang}"
+						>
+							<i class="fa-solid fa-xmark text-xs"></i>
+						</button>
+					</span>
 				{/each}
 				<!-- Add language -->
 				{#if availableToAdd.length > 0}
