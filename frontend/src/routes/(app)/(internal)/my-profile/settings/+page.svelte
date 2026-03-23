@@ -9,7 +9,7 @@
 	import { m } from '$paraglide/messages';
 	import { getLocale } from '$paraglide/runtime';
 	import { defaults } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { z } from 'zod';
 	import ListRecoveryCodesModal from './mfa/components/ListRecoveryCodesModal.svelte';
 	import { recoveryCodes } from './mfa/utils/stores';

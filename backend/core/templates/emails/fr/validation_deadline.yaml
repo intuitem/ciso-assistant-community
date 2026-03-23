@@ -6,7 +6,6 @@ body: |
 
   ${validation_list}
 
-  Veuillez examiner et traiter ces demandes avant l'échéance :
-  ${ciso_assistant_url}
+  Veuillez examiner et traiter ces demandes avant l'échéance : [Accéder à CISO Assistant](${ciso_assistant_url})
 
   Merci.

@@ -5,7 +5,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { BASE_API_URL } from '$lib/utils/constants';
 import { m } from '$paraglide/messages';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 export const load: PageServerLoad = async (event) => {
 	const form = await superValidate(event.request, zod(ChangePasswordSchema));

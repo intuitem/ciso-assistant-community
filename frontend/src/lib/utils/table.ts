@@ -1338,6 +1338,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1351,6 +1352,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1365,6 +1367,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
@@ -1429,8 +1432,10 @@ export const listViewFields = {
 		head: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
@@ -1443,8 +1448,10 @@ export const listViewFields = {
 		body: [
 			'ref_id',
 			'name',
+			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',
@@ -1457,6 +1464,7 @@ export const listViewFields = {
 		filters: {
 			folder: DOMAIN_FILTER,
 			status: APPLIED_CONTROL_STATUS_FILTER,
+			assets: ASSET_FILTER,
 			category: APPLIED_CONTROL_CATEGORY_FILTER,
 			csf_function: APPLIED_CONTROL_CSF_FUNCTION_FILTER,
 			priority: PRIORITY_FILTER,
@@ -1688,6 +1696,14 @@ export const listViewFields = {
 		filters: {
 			filtering_labels: LABELS_FILTER
 		}
+	},
+	'document-revisions': {
+		head: ['versionNumber', 'status', 'author', 'changeSummary', 'createdAt'],
+		body: ['version_number', 'status_display', 'author', 'change_summary', 'created_at']
+	},
+	'managed-documents': {
+		head: ['name', 'documentType', 'policy', 'locale', 'domain'],
+		body: ['name', 'document_type', 'policy', 'locale', 'folder']
 	},
 	requirements: {
 		head: ['ref_id', 'name', 'description', 'framework'],

@@ -1,4 +1,5 @@
 import hashlib
+from decimal import Decimal
 from enum import Enum
 
 import json
@@ -21,6 +22,77 @@ logger = structlog.get_logger(__name__)
 def is_compute_result_truthy(compute_result: str | None) -> bool:
     """Return True if a QuestionChoice.compute_result value is truthy."""
     return compute_result is not None and compute_result not in ("false", "0", "")
+
+
+# Currency formatting conventions: (position, space)
+# position: "before" or "after" the amount
+# space: whether to include a space between symbol and amount
+_CURRENCY_FORMAT = {
+    # Symbol before, no space: $100
+    "$": ("before", False),
+    "£": ("before", False),
+    "¥": ("before", False),
+    "CN¥": ("before", False),
+    "₹": ("before", False),
+    "₩": ("before", False),
+    "A$": ("before", False),
+    "NZ$": ("before", False),
+    "S$": ("before", False),
+    "₺": ("before", False),
+    "NT$": ("before", False),
+    "฿": ("before", False),
+    "MYR": ("before", False),
+    # Symbol before, with space: CHF 100
+    "C$": ("before", True),
+    "CHF": ("before", True),
+    "HK$": ("before", True),
+    "R$": ("before", True),
+    "MX$": ("before", True),
+    "ZAR": ("before", True),
+    # Symbol after, with space: 100 €
+    "€": ("after", True),
+    "SEK": ("after", True),
+    "NOK": ("after", True),
+    "DKK": ("after", True),
+    "PLN": ("after", True),
+}
+
+
+def get_global_currency() -> str:
+    """Get the currency from global settings, defaulting to €."""
+    from global_settings.models import GlobalSettings
+
+    general_settings = GlobalSettings.objects.filter(name="general").first()
+    return general_settings.value.get("currency", "€") if general_settings else "€"
+
+
+def format_currency(value, currency: str) -> str:
+    """Format a numeric value with its currency symbol in the correct position.
+
+    Respects per-currency conventions for symbol position (before/after)
+    and spacing. For large values, uses abbreviated forms (K, M, B).
+    """
+    if not currency:
+        return f"{value} *"
+
+    if isinstance(value, (int, float, Decimal)):
+        if value >= 1_000_000_000:
+            formatted = f"{value / 1_000_000_000:.1f}B"
+        elif value >= 1_000_000:
+            formatted = f"{value / 1_000_000:.1f}M"
+        elif value >= 1_000:
+            formatted = f"{value / 1_000:.0f}K"
+        else:
+            formatted = f"{value:,.0f}"
+    else:
+        formatted = str(value)
+
+    position, space = _CURRENCY_FORMAT.get(currency, ("before", True))
+    sep = " " if space else ""
+
+    if position == "after":
+        return f"{formatted}{sep}{currency}"
+    return f"{currency}{sep}{formatted}"
 
 
 def sizeof_json(obj) -> int:
