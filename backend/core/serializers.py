@@ -6,7 +6,7 @@ from django.db import models, transaction
 from django.db.models import F
 from django.utils import timezone
 
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import *
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -1551,7 +1551,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return email
 
     def create(self, validated_data):
-        send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(

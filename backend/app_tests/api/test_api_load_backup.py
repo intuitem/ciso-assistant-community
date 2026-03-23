@@ -10,7 +10,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from django.db.utils import IntegrityError
 
-from ciso_assistant.settings import SCHEMA_VERSION, VERSION
+from django.conf import settings
 from iam.models import Folder, Role, User, UserGroup
 from knox.models import AuthToken
 
@@ -49,8 +49,8 @@ def create_mock_backup_data(
     include_core_models=True,
     include_role_with_enterprise_perms=False,
 ):
-    media_version = VERSION if media_version is None else media_version
-    schema_version = SCHEMA_VERSION if schema_version is None else schema_version
+    media_version = settings.VERSION if media_version is None else media_version
+    schema_version = settings.SCHEMA_VERSION if schema_version is None else schema_version
 
     meta = {
         "meta": [{"media_version": media_version, "schema_version": schema_version}]
@@ -247,7 +247,7 @@ class TestBackupRestorePermissions:
 class TestBackupRestoreEdgeCases:
     def test_accepts_empty_objects_list(self, authenticated_client):
         backup = [
-            {"meta": [{"media_version": VERSION, "schema_version": SCHEMA_VERSION}]},
+            {"meta": [{"media_version": settings.VERSION, "schema_version": settings.SCHEMA_VERSION}]},
             [],
         ]
         resp = send_backup_to_api(authenticated_client, backup)
