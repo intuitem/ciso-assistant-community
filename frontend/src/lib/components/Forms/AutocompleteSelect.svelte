@@ -75,6 +75,7 @@
 		lazy?: boolean;
 		lazyLimit?: number;
 		lazyThreshold?: number;
+		maxVisibleChips?: number;
 	}
 
 	let {
@@ -124,8 +125,12 @@
 		placeholder = '',
 		lazy = false,
 		lazyLimit = 10,
-		lazyThreshold = 50
+		lazyThreshold = 50,
+		maxVisibleChips: _maxVisibleChips = 3
 	}: Props = $props();
+
+	// Clamp to supported CSS range (chip-max-1 through chip-max-5 in app.css)
+	const maxVisibleChips = Math.max(1, Math.min(5, _maxVisibleChips));
 
 	if (translateOptions) {
 		options = options.map((option) => {
@@ -160,7 +165,6 @@
 		maxSelect: multiple ? undefined : 1,
 		liSelectedClass: multiple ? '!chip !preset-filled' : '!bg-transparent',
 		inputClass: 'focus:ring-0! focus:outline-hidden!',
-		outerDivClass: '!input !bg-surface-100 !px-2 !flex',
 		closeDropdownOnSelect: !multiple,
 		...additionalMultiselectOptions
 	};
@@ -172,6 +176,7 @@
 	let lazyInputEl = $state<HTMLInputElement | null>(null);
 	let effectiveLazy = $state(lazy);
 	const LAZY_HINT_VALUE = '__lazy_hint__';
+	let multiSelectOpen = $state(false);
 	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
 
@@ -536,6 +541,32 @@
 
 	const searchTargetMap = $derived(new Map(options.map((opt) => [opt, getSearchTarget(opt)])));
 
+	// Chip overflow: hide chips beyond max when dropdown is closed (multi-select only)
+	const overflowCount = $derived(
+		multiple && maxVisibleChips > 0 && !multiSelectOpen
+			? Math.max(0, selected.length - maxVisibleChips)
+			: 0
+	);
+
+	// Svelte action: restyle a chip's <li> as a "+N" badge (hide × button, muted background)
+	function styleAsBadge(node: HTMLElement) {
+		const li = node.closest('li');
+		if (!li) return;
+		li.style.cssText =
+			'background: var(--color-surface-300, #d1d5db) !important; cursor: pointer !important; color: var(--color-surface-700, #374151) !important;';
+		const removeBtn = li.querySelector('button');
+		if (removeBtn) (removeBtn as HTMLElement).style.display = 'none';
+		return {
+			destroy() {
+				li.style.cssText = '';
+				if (removeBtn) (removeBtn as HTMLElement).style.display = '';
+			}
+		};
+	}
+
+	// CSS class added to outerDiv — matching rules in app.css hide overflow chips via :nth-child
+	const overflowCssClass = $derived(overflowCount > 0 ? `chip-max-${maxVisibleChips}` : '');
+
 	const fastFilter = (opt: Option, searchText: string) => {
 		if (!searchText) {
 			return true;
@@ -591,10 +622,12 @@
 
 		<MultiSelect
 			bind:selected
+			bind:open={multiSelectOpen}
 			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
 				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
 				: options}
 			{...multiSelectOptions}
+			outerDivClass="!input !bg-surface-100 !px-2 !flex {overflowCssClass}"
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
@@ -650,36 +683,41 @@
 				{/if}
 			{/snippet}
 			{#snippet selectedItem({ option })}
-				{#if option.infoString?.position === 'prefix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
-				{#if option.path}
-					<span>
-						{#each option.path as item, idx}
-							<span class="text-xs font-light">
-								{item}
-								{#if idx < option.path.length - 1}
-									&nbsp;/
-								{/if}&nbsp;
-							</span>
-						{/each}
-					</span>
-				{/if}
-				{#if translateOptions && option}
-					{#if field === 'ro_to_couple'}
-						{@const [firstPart, ...restParts] = option.label.split(' - ')}
-						{safeTranslate(firstPart)} - {restParts.join(' - ')}
-					{:else}
-						{option.translatedLabel}
-					{/if}
+				{@const chipIdx = selected.findIndex((s) => s.value === option.value)}
+				{#if overflowCount > 0 && chipIdx === maxVisibleChips}
+					<span use:styleAsBadge>+{overflowCount}</span>
 				{:else}
-					{option.label || option}
-				{/if}
-				{#if option.infoString?.position === 'suffix'}
-					<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
-				{/if}
-				{#if option.suggested}
-					<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+					{#if option.infoString?.position === 'prefix'}
+						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+					{/if}
+					{#if option.path}
+						<span>
+							{#each option.path as item, idx}
+								<span class="text-xs font-light">
+									{item}
+									{#if idx < option.path.length - 1}
+										&nbsp;/
+									{/if}&nbsp;
+								</span>
+							{/each}
+						</span>
+					{/if}
+					{#if translateOptions && option}
+						{#if field === 'ro_to_couple'}
+							{@const [firstPart, ...restParts] = option.label.split(' - ')}
+							{safeTranslate(firstPart)} - {restParts.join(' - ')}
+						{:else}
+							{option.translatedLabel}
+						{/if}
+					{:else}
+						{option.label || option}
+					{/if}
+					{#if option.infoString?.position === 'suffix'}
+						<span class="text-xs text-surface-500">&nbsp;{option.infoString.string}</span>
+					{/if}
+					{#if option.suggested}
+						<span class="text-sm text-surface-500"> {m.suggestedParentheses()}</span>
+					{/if}
 				{/if}
 			{/snippet}
 		</MultiSelect>
