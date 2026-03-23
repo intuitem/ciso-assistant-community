@@ -141,7 +141,10 @@ export const URL_MODEL = [
 	'dashboards',
 	'dashboard-widgets',
 	'dashboard-text-widgets',
-	'dashboard-builtin-widgets'
+	'dashboard-builtin-widgets',
+	// policy documents
+	'managed-documents',
+	'document-revisions'
 ] as const;
 
 export const THIRD_PARTY_URL_MODEL = [

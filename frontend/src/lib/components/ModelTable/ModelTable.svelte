@@ -23,6 +23,7 @@
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
 	import { isDark } from '$lib/utils/helpers';
 	import { contextMenuActions, listViewFields, getBatchActions } from '$lib/utils/table';
+	import { tableFilterStates } from '$lib/utils/stores';
 	import BatchActionBar from './BatchActionBar.svelte';
 	import type { urlModel } from '$lib/utils/types.js';
 	import { countMasked, isMaskedPlaceholder } from '$lib/utils/related-visibility';
@@ -31,8 +32,9 @@
 	import type { SvelteEvent } from '@skeletonlabs/skeleton-svelte';
 	import { DataHandler, type State } from '@vincjo/datatables/remote';
 	import { defaults, superForm, type SuperValidated } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
-	import { z, type AnyZodObject } from 'zod';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
+	import { z } from 'zod';
+	import type { FormDataShape } from '$lib/utils/schemas';
 	import { loadTableData } from './handler';
 	import Pagination from './Pagination.svelte';
 	import RowCount from './RowCount.svelte';
@@ -81,7 +83,7 @@
 		disableDelete?: boolean;
 		disableView?: boolean;
 		identifierField?: string;
-		deleteForm?: SuperValidated<AnyZodObject>;
+		deleteForm?: SuperValidated<FormDataShape>;
 		URLModel?: urlModel;
 		baseEndpoint?: string;
 		detailQueryParameter?: string;
@@ -306,12 +308,25 @@
 
 	const filters = source?.filters ?? tableFilters;
 	const filteredFields = Object.keys(filters);
+	// Only persist filters on standalone list pages, not embedded sub-tables
+	const isStandaloneTable = baseEndpoint === `/${URLModel}`;
+	const filterStoreKey = `${page.url.pathname}::${baseEndpoint}`;
+	const storedFilters = isStandaloneTable ? ($tableFilterStates[filterStoreKey] ?? {}) : {};
+	// Check if any filter-related URL params exist
+	const hasUrlFilterParams = filteredFields.some(
+		(field) => page.url.searchParams.getAll(field).length > 0
+	);
 	const filterValues: { [key: string]: any } = $state(
 		Object.fromEntries(
 			filteredFields.map((field: string) => {
 				const urlValues = page.url.searchParams.getAll(field).map((value) => ({ value }));
+				if (urlValues.length > 0) return [field, urlValues];
+				// Restore persisted filters only when no URL filter params exist at all
+				if (!hasUrlFilterParams && field in storedFilters) {
+					return [field, storedFilters[field] ?? []];
+				}
 				const defaultValue = defaultFilters[field] || [];
-				return [field, urlValues.length > 0 ? urlValues : defaultValue];
+				return [field, defaultValue];
 			})
 		)
 	);
@@ -343,6 +358,10 @@
 			}
 		}
 		history.replaceState(history.state, '', page.url.pathname + page.url.search);
+		// Persist all filter values (including empty) so cleared defaults stay cleared
+		if (isStandaloneTable) {
+			$tableFilterStates[filterStoreKey] = { ...filterValues };
+		}
 		setTimeout(() => {
 			handler.invalidate();
 		}, 10);
