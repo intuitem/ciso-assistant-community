@@ -150,6 +150,7 @@ DORA_REINTEGRATION_POSSIBILITY_CHOICES = [
     ("eba_ZZ:x798", "Easy"),
     ("eba_ZZ:x966", "Difficult"),
     ("eba_ZZ:x967", "Highly complex"),
+    ("eba_ZZ:x0", "Not applicable"),
 ]
 
 DORA_LICENSED_ACTIVITY_CHOICES = [
@@ -405,6 +406,9 @@ DORA_LICENSED_ACTIVITY_CHOICES = [
         "investment advice concerning one or more of the instruments listed in Annex I, Section C to Directive 2004/39/EC",
     ),
     ("eba_TA:x275", "Ancillary services"),
+    ("eba_TA:x276", "supporting function"),
+    ("eba_TA:qx277", "Non-life reinsurance activities"),
+    ("eba_TA:qx278", "Life-reinsurance activities"),
     ("eba_TA:x104", "Foreign exchange services"),
     ("eba_TA:x133", "Reception and transmission of orders"),
     ("eba_TA:x134", "Execution of orders on behalf of clients"),

@@ -6,6 +6,55 @@ import { setFlash } from 'sveltekit-flash-message/server';
 
 import { loadFeatureFlags } from '$lib/feature-flags';
 import { paraglideMiddleware } from '$paraglide/server';
+import { defineCustomServerStrategy } from '$paraglide/runtime';
+
+const fallbackLocaleStore = new WeakMap<Request, string>();
+
+defineCustomServerStrategy('custom-fallback', {
+	getLocale: (request) => fallbackLocaleStore.get(request) ?? DEFAULT_LANGUAGE
+});
+
+async function fetchDefaultLanguage(): Promise<string> {
+	try {
+		const response = await fetch(`${BASE_API_URL}/settings/general/default-language/`, {
+			headers: { 'content-type': 'application/json' }
+		});
+		if (response.ok) {
+			const data = await response.json();
+			const language = data?.default_language;
+			if (typeof language === 'string' && language.length > 0) return language;
+		}
+	} catch (error) {
+		console.error('Unable to fetch default language', error);
+	}
+	return DEFAULT_LANGUAGE;
+}
+
+async function ensureDefaultLocale(event: RequestEvent): Promise<string> {
+	const existingLocale = event.cookies.get('LOCALE');
+	if (existingLocale) return existingLocale;
+
+	const locale = await fetchDefaultLanguage();
+	setLocaleCookie(event, locale);
+	return locale;
+}
+
+function setLocaleCookie(event: RequestEvent, locale: string) {
+	event.cookies.set('LOCALE', locale, {
+		httpOnly: false,
+		sameSite: 'lax',
+		path: '/',
+		secure: true
+	});
+}
+
+function applyUserLocale(event: RequestEvent, user: User | undefined) {
+	const preferredLanguage = user?.preferences?.lang;
+	if (typeof preferredLanguage !== 'string' || preferredLanguage.length === 0) return;
+
+	setLocaleCookie(event, preferredLanguage);
+	fallbackLocaleStore.set(event.request, preferredLanguage);
+}
 
 async function ensureCsrfToken(event: RequestEvent): Promise<string> {
 	let csrfToken = event.cookies.get('csrftoken') || '';
@@ -57,20 +106,25 @@ async function validateUserSession(event: RequestEvent): Promise<User | null> {
 	return res.json();
 }
 
-export const handle: Handle = async ({ event, resolve }) =>
-	paraglideMiddleware(event.request, async ({ request: localizedRequest, locale }) => {
+export const handle: Handle = async ({ event, resolve }) => {
+	const localeForRequest = await ensureDefaultLocale(event);
+	fallbackLocaleStore.set(event.request, localeForRequest);
+
+	return paraglideMiddleware(event.request, async ({ request: localizedRequest, locale }) => {
 		event.request = localizedRequest;
 
 		event.locals.featureFlags = loadFeatureFlags();
 
 		await ensureCsrfToken(event);
 
-		if (event.locals.user)
+		if (event.locals.user) {
+			applyUserLocale(event, event.locals.user);
 			return await resolve(event, {
 				transformPageChunk: ({ html }) => {
 					return html.replace('%lang%', locale);
 				}
 			});
+		}
 
 		const errorId = new URL(event.request.url).searchParams.get('error');
 		if (errorId) {
@@ -78,9 +132,15 @@ export const handle: Handle = async ({ event, resolve }) =>
 			redirect(302, '/login');
 		}
 
-		const user = await validateUserSession(event);
+		// Skip session validation for SSO authenticate route — the token cookie
+		// has just been set by the backend but the allauth session token hasn't
+		// been fetched yet; that happens in the page's load function.
+		const isSSOAuthenticate = event.url.pathname.endsWith('/sso/authenticate');
+
+		const user = isSSOAuthenticate ? null : await validateUserSession(event);
 		if (user) {
 			event.locals.user = user;
+			applyUserLocale(event, user);
 			const generalSettings = await fetch(`${BASE_API_URL}/settings/general/object/`, {
 				credentials: 'include',
 				headers: {
@@ -111,12 +171,18 @@ export const handle: Handle = async ({ event, resolve }) =>
 			}
 		});
 	});
+};
 
 export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 	const unsafeMethods = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-	const currentLang = event.locals.user?.preferences?.lang || DEFAULT_LANGUAGE;
+	const currentLang =
+		event.locals.user?.preferences?.lang || event.cookies.get('LOCALE') || DEFAULT_LANGUAGE;
 	if (request.url.startsWith(BASE_API_URL)) {
-		request.headers.set('Content-Type', 'application/json');
+		// Default to JSON unless the request is already a multipart upload (FormData)
+		const ct = request.headers.get('Content-Type') || '';
+		if (!ct.includes('multipart')) {
+			request.headers.set('Content-Type', 'application/json');
+		}
 		request.headers.set('Accept-Language', currentLang);
 
 		const token = event.cookies.get('token');
@@ -149,7 +215,12 @@ export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
 		// Session is invalid
 		if (clonedResponse.status === 410) logoutUser(event);
 
-		if (clonedResponse.status === 401 && request.method !== 'DELETE') {
+		// Skip 401 interception for auth endpoints (/auth/login, /auth/2fa/authenticate, etc.)
+		// because 401 is an expected response during login/MFA flows (e.g. "MFA required").
+		// Only intercept 401 on account management endpoints (/account/...).
+		const isAuthEndpoint = request.url.includes('/_allauth/app/v1/auth/');
+
+		if (clonedResponse.status === 401 && request.method !== 'DELETE' && !isAuthEndpoint) {
 			try {
 				const data = await clonedResponse.json();
 				const reauthenticationFlows = ['reauthenticate', 'mfa_reauthenticate'];

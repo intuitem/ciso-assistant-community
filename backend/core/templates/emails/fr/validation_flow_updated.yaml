@@ -9,7 +9,6 @@ body: |
   - Domaine : ${folder_name}
   - Notes : ${event_notes}
 
-  Consultez la demande de validation :
-  ${validation_url}
+  Consultez la demande de validation : [Voir le flux de validation](${validation_url})
 
   Merci.

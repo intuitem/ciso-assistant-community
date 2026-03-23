@@ -86,6 +86,11 @@
 					field: 'validation_flows',
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
+				},
+				{
+					field: 'policy_documents',
+					label: m.policyDocumentsFlag(),
+					description: m.policyDocumentsFlagDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -147,6 +152,11 @@
 					field: 'auditee_mode',
 					label: m.auditeeMode(),
 					description: m.auditeeModeDescription()
+				},
+				{
+					field: 'advanced_analytics',
+					label: m.advancedAnalytics(),
+					description: m.advancedAnalyticsDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -199,6 +209,16 @@
 					field: 'outgoing_webhooks',
 					label: m.webhooks(),
 					description: m.webhooksDescription()
+				},
+				{
+					field: 'comments',
+					label: m.comments(),
+					description: m.commentsDescription()
+				},
+				{
+					field: 'journeys',
+					label: m.journeys(),
+					description: m.journeysDescription()
 				},
 				{
 					field: 'experimental',

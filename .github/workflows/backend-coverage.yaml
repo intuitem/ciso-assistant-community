@@ -73,10 +73,21 @@ jobs:
       - name: Run coverage
         working-directory: ${{ env.backend-directory }}
         env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: poetry run coverage run -m pytest --ignore-glob="**/test_api*" --ignore="**/venv/**"
+          PG_PORT: ${{ job.services.postgres.ports[5432] }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATABASE_URL="postgres://postgres:postgres@localhost:${PG_PORT}/postgres"
+          export DATABASE_URL
+          poetry run coverage run -m pytest --ignore-glob="**/test_api*" --ignore="**/venv/**"
+
       - name: Display coverage report
         working-directory: ${{ env.backend-directory }}
         env:
-          DATABASE_URL: "postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres"
-        run: poetry run coverage report
+          PG_PORT: ${{ job.services.postgres.ports[5432] }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          DATABASE_URL="postgres://postgres:postgres@localhost:${PG_PORT}/postgres"
+          export DATABASE_URL
+          poetry run coverage report

@@ -15,7 +15,9 @@ from dotenv import load_dotenv
 from datetime import timedelta
 import logging.config
 import structlog
+from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
+import ssl
 from . import meta
 
 
@@ -142,7 +144,7 @@ LOCAL_STORAGE_DIRECTORY = os.environ.get(
 )
 ATTACHMENT_MAX_SIZE_MB = os.environ.get("ATTACHMENT_MAX_SIZE_MB", 25)
 
-USE_S3 = os.getenv("USE_S3", "False") == "True"
+USE_S3 = os.getenv("USE_S3", "False").lower() in ("true", "1", "yes")
 
 if USE_S3:
     STORAGES = {
@@ -160,19 +162,65 @@ if USE_S3:
         "AWS_STORAGE_BUCKET_NAME", "ciso-assistant-bucket"
     )
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
 
-    if not AWS_ACCESS_KEY_ID:
-        logger.error("AWS_ACCESS_KEY_ID must be set")
-    if not AWS_SECRET_ACCESS_KEY:
-        logger.error("AWS_SECRET_ACCESS_KEY must be set")
-    if not AWS_S3_ENDPOINT_URL:
-        logger.error("AWS_S3_ENDPOINT_URL must be set")
-    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY or not AWS_S3_ENDPOINT_URL:
-        exit(1)
+    # Support for AWS IRSA (IAM Roles for Service Accounts) via web identity token
+    AWS_WEB_IDENTITY_TOKEN_FILE = os.getenv("AWS_WEB_IDENTITY_TOKEN_FILE")
+    AWS_ROLE_ARN = os.getenv("AWS_ROLE_ARN")
+
+    # Check if using explicit credentials (access key) or IRSA (web identity token)
+    using_access_key = AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    using_irsa = AWS_WEB_IDENTITY_TOKEN_FILE and AWS_ROLE_ARN
+
+    if using_access_key and using_irsa:
+        raise ImproperlyConfigured(
+            "Ambiguous AWS credentials configuration. Both static access keys "
+            "(AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY) and IRSA credentials "
+            "(AWS_WEB_IDENTITY_TOKEN_FILE/AWS_ROLE_ARN) are set. "
+            "Please configure only one authentication method."
+        )
+
+    if AWS_ACCESS_KEY_ID and not AWS_SECRET_ACCESS_KEY:
+        raise ImproperlyConfigured(
+            "AWS_ACCESS_KEY_ID is set but AWS_SECRET_ACCESS_KEY is missing."
+        )
+    if AWS_SECRET_ACCESS_KEY and not AWS_ACCESS_KEY_ID:
+        raise ImproperlyConfigured(
+            "AWS_SECRET_ACCESS_KEY is set but AWS_ACCESS_KEY_ID is missing."
+        )
+    if AWS_WEB_IDENTITY_TOKEN_FILE and not AWS_ROLE_ARN:
+        raise ImproperlyConfigured(
+            "AWS_WEB_IDENTITY_TOKEN_FILE is set but AWS_ROLE_ARN is missing."
+        )
+    if AWS_ROLE_ARN and not AWS_WEB_IDENTITY_TOKEN_FILE:
+        raise ImproperlyConfigured(
+            "AWS_ROLE_ARN is set but AWS_WEB_IDENTITY_TOKEN_FILE is missing."
+        )
+
+    if not using_access_key and not using_irsa:
+        raise ImproperlyConfigured(
+            "AWS credentials not configured. Either set AWS_ACCESS_KEY_ID and "
+            "AWS_SECRET_ACCESS_KEY for explicit credentials, or AWS_WEB_IDENTITY_TOKEN_FILE "
+            "and AWS_ROLE_ARN for IRSA (IAM Roles for Service Accounts)."
+        )
+
+    if using_irsa:
+        logger.info("Using AWS IRSA (Web Identity Token) for S3 authentication")
+        logger.info("AWS_ROLE_ARN: %s", AWS_ROLE_ARN)
+        # Setting to None so django-storages passes None to boto3, which then
+        # falls through to the credential chain and picks up IRSA web identity.
+        AWS_ACCESS_KEY_ID = None
+        AWS_SECRET_ACCESS_KEY = None
+    else:
+        logger.info("Using AWS Access Key for S3 authentication")
 
     logger.info("AWS_STORAGE_BUCKET_NAME: %s", AWS_STORAGE_BUCKET_NAME)
-    logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_ENDPOINT_URL:
+        logger.info("AWS_S3_ENDPOINT_URL: %s", AWS_S3_ENDPOINT_URL)
+    if AWS_S3_REGION_NAME:
+        logger.info("AWS_S3_REGION_NAME: %s", AWS_S3_REGION_NAME)
 
+    AWS_LOCATION = os.getenv("AWS_LOCATION", "")
     AWS_S3_FILE_OVERWRITE = False
 
 else:
@@ -201,6 +249,7 @@ INSTALLED_APPS = [
     "resilience",
     "crq",
     "metrology",
+    "doc_management",
     "core",
     "cal",
     "django_filters",
@@ -273,6 +322,21 @@ EMAIL_USE_TLS_RESCUE = os.environ.get("EMAIL_USE_TLS_RESCUE", "False").lower() i
     "1",
     "yes",
 )
+EMAIL_FORCE_TLS_1_2 = os.environ.get("EMAIL_FORCE_TLS_1_2", "False").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+
+
+def _build_tls12_context():
+    context = ssl.create_default_context()
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.maximum_version = ssl.TLSVersion.TLSv1_2
+    return context
+
+
+EMAIL_SSL_CONTEXT = _build_tls12_context() if EMAIL_FORCE_TLS_1_2 else None
 
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", default="5"))  # seconds
 
@@ -413,6 +477,7 @@ LANGUAGES = [
     ("hr", "Croatian"),
     ("zh", "Chinese (Simplified)"),
     ("lt", "Lithuanian"),
+    ("ko", "Korean"),
 ]
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -444,6 +509,11 @@ if "POSTGRES_NAME" in os.environ:
             "CONN_MAX_AGE": os.environ.get("CONN_MAX_AGE", 300),
         }
     }
+    # Allow for SSL connections to PostgreSQL databases that require it
+    if "POSTGRES_SSL_MODE" in os.environ:
+        DATABASES["default"].setdefault("OPTIONS", {})["sslmode"] = os.environ[
+            "POSTGRES_SSL_MODE"
+        ]
 else:
     DATABASES = {
         "default": {

@@ -90,6 +90,7 @@ class LoadBackupView(APIView):
                 verbosity=0,
                 exclude=[
                     "contenttypes",
+                    "auth.permission",
                     "sessions.session",
                     "iam.ssosettings",
                     "knox.authtoken",
@@ -155,6 +156,13 @@ class LoadBackupView(APIView):
                     "-",
                     format="json",
                     verbosity=0,
+                    exclude=[
+                        "contenttypes",
+                        "auth.permission",
+                        "sessions.session",
+                        "iam.ssosettings",
+                        "knox.authtoken",
+                    ],
                 )
             except Exception as restore_error:
                 logger.error("Error restoring original backup", exc_info=restore_error)
@@ -191,6 +199,13 @@ class LoadBackupView(APIView):
                         "-",
                         format="json",
                         verbosity=0,
+                        exclude=[
+                            "contenttypes",
+                            "auth.permission",
+                            "sessions.session",
+                            "iam.ssosettings",
+                            "knox.authtoken",
+                        ],
                     )
                 except Exception as restore_error:
                     logger.error(
@@ -536,7 +551,10 @@ class FullRestoreView(APIView):
 
                         revision.attachment = saved_path
                         revision.attachment_hash = actual_hash
-                        revision.save(update_fields=["attachment", "attachment_hash"])
+                        with disable_auditlog():
+                            revision.save(
+                                update_fields=["attachment", "attachment_hash"]
+                            )
 
                         stats["restored"] += 1
 
@@ -980,7 +998,8 @@ class BatchUploadAttachmentsView(APIView):
 
                     revision.attachment = saved_path
                     revision.attachment_hash = actual_hash
-                    revision.save(update_fields=["attachment", "attachment_hash"])
+                    with disable_auditlog():
+                        revision.save(update_fields=["attachment", "attachment_hash"])
 
                     stats["restored"] += 1
 

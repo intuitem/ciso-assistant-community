@@ -4,14 +4,31 @@ import { getModelInfo } from '$lib/utils/crud';
 import { modelSchema } from '$lib/utils/schemas';
 import { error, type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { ModelInfo } from '$lib/utils/types';
 import type { PageServerLoad } from './$types';
 
 export const load = (async ({ fetch, params }) => {
+	// params.id is the assignment ID
+	const assignmentId = params.id;
+
+	// Fetch the assignment
+	const assignmentRes = await fetch(`${BASE_API_URL}/requirement-assignments/${assignmentId}/`);
+	if (!assignmentRes.ok) {
+		throw error(assignmentRes.status, assignmentRes.statusText);
+	}
+	const assignmentResult = await assignmentRes.json();
+	const assignment = {
+		id: assignmentResult.id,
+		status: assignmentResult.status,
+		events: assignmentResult.events ?? []
+	};
+
+	// Derive the compliance assessment from the assignment
+	const caId = assignmentResult.compliance_assessment.id;
 	const URLModel = 'compliance-assessments';
-	const endpoint = `${BASE_API_URL}/${URLModel}/${params.id}/`;
+	const endpoint = `${BASE_API_URL}/${URLModel}/${caId}/`;
 
 	const res = await fetch(endpoint);
 	if (!res.ok) {
@@ -19,11 +36,13 @@ export const load = (async ({ fetch, params }) => {
 	}
 	const compliance_assessment = await res.json();
 
-	const [tableMode, scores] = await Promise.all(
-		[`${endpoint}requirements_list/`, `${endpoint}global_score/`].map((endpoint) =>
-			fetch(endpoint).then((res) => res.json())
-		)
+	const tableModeRes = await fetch(
+		`${BASE_API_URL}/requirement-assignments/${assignmentId}/requirements_list/`
 	);
+	if (!tableModeRes.ok) {
+		throw error(tableModeRes.status, tableModeRes.statusText);
+	}
+	const tableMode = await tableModeRes.json();
 
 	const frameworkEndpoint = `${BASE_API_URL}/frameworks/${compliance_assessment.framework.id}/`;
 	const framework = await fetch(frameworkEndpoint).then((res) => res.json());
@@ -111,11 +130,11 @@ export const load = (async ({ fetch, params }) => {
 	return {
 		URLModel,
 		compliance_assessment,
-		scores,
 		requirement_assessments,
 		requirements,
 		measureModel,
 		evidenceModel,
+		assignment,
 		title: compliance_assessment.name
 	};
 }) satisfies PageServerLoad;
@@ -144,5 +163,20 @@ export const actions: Actions = {
 	},
 	update: async (event) => {
 		return nestedWriteFormAction({ event, action: 'edit' });
+	},
+	submitAssignment: async (event) => {
+		const endpoint = `${BASE_API_URL}/requirement-assignments/${event.params.id}/set_status/`;
+		const res = await event.fetch(endpoint, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ status: 'submitted' })
+		});
+		let body;
+		try {
+			body = await res.json();
+		} catch {
+			body = { error: res.statusText };
+		}
+		return { submitStatus: res.status, submitBody: body };
 	}
 };

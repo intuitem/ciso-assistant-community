@@ -72,6 +72,9 @@
 		mount?: (value: any) => void;
 		optionSnippet?: import('svelte').Snippet<[Record<string, any>]>;
 		placeholder?: string;
+		lazy?: boolean;
+		lazyLimit?: number;
+		lazyThreshold?: number;
 	}
 
 	let {
@@ -118,7 +121,10 @@
 		cachedOptions = $bindable(),
 		mount = () => null,
 		optionSnippet = undefined,
-		placeholder = ''
+		placeholder = '',
+		lazy = false,
+		lazyLimit = 10,
+		lazyThreshold = 50
 	}: Props = $props();
 
 	if (translateOptions) {
@@ -160,41 +166,95 @@
 	};
 
 	let isLoading = $state(false);
+	let lazySearchPending = $state(false);
+	let lazyHasSearched = $state(false);
+	let lazyDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+	let lazyInputEl = $state<HTMLInputElement | null>(null);
+	let effectiveLazy = $state(lazy);
+	const LAZY_HINT_VALUE = '__lazy_hint__';
+	const passthroughFilter = () => true;
 	const updateMissingConstraint = getContext<Function>('updateMissingConstraint');
+
+	function buildEndpoint(extra?: Record<string, string>, baseOverride?: string) {
+		let endpoint = `/${baseOverride ?? optionsEndpoint}`;
+		const urlParams = new URLSearchParams();
+
+		if (Array.isArray(optionsDetailedUrlParameters)) {
+			for (const [param, value] of optionsDetailedUrlParameters) {
+				if (param && value) {
+					urlParams.append(encodeURIComponent(param), encodeURIComponent(value));
+				}
+			}
+		}
+
+		if (extra) {
+			for (const [k, v] of Object.entries(extra)) {
+				urlParams.set(k, v);
+			}
+		}
+
+		const queryString = urlParams.toString();
+		if (queryString) {
+			endpoint += endpoint.includes('?') ? '&' : '?';
+			endpoint += queryString;
+		}
+		return endpoint;
+	}
+
 	async function fetchOptions() {
 		isLoading = true;
 		try {
 			if (optionsEndpoint) {
-				let endpoint = `/${optionsEndpoint}`;
-				const urlParams = new URLSearchParams();
-
-				if (Array.isArray(optionsDetailedUrlParameters)) {
-					for (const [param, value] of optionsDetailedUrlParameters) {
-						if (param && value) {
-							urlParams.append(encodeURIComponent(param), encodeURIComponent(value));
+				if (lazy) {
+					// Probe with a capped fetch to decide lazy vs eager
+					const probeEndpoint = buildEndpoint({
+						limit: String(lazyThreshold + 1)
+					});
+					const probeResponse = await fetch(probeEndpoint, { cache: browserCache });
+					if (probeResponse.ok) {
+						const probeData = await probeResponse.json();
+						const items = probeData?.results ?? probeData;
+						const totalCount = probeData?.count ?? (Array.isArray(items) ? items.length : 0);
+						const returnedCount = Array.isArray(items) ? items.length : 0;
+						if (totalCount <= lazyThreshold && returnedCount >= totalCount) {
+							// Small dataset with complete response — use eager mode
+							effectiveLazy = false;
+							if (returnedCount > 0) {
+								options = processOptions(items);
+							}
+							const isRequired = mandatory || $constraints?.required;
+							const hasNoOptions = options.length === 0;
+							const isMissing = isRequired && hasNoOptions;
+							if (updateMissingConstraint) {
+								updateMissingConstraint(field, isMissing);
+							}
+						} else {
+							// Large dataset — stay in lazy mode, only fetch selected items
+							effectiveLazy = true;
+							await fetchSelectedItems();
+						}
+					} else {
+						// Probe failed — fall back to lazy mode
+						effectiveLazy = true;
+						await fetchSelectedItems();
+					}
+				} else {
+					const endpoint = buildEndpoint();
+					const response = await fetch(endpoint, { cache: browserCache });
+					if (response.ok) {
+						const data = await response.json().then((res) => res?.results ?? res);
+						if (data.length > 0) {
+							options = processOptions(data);
+						}
+						const isRequired = mandatory || $constraints?.required;
+						const hasNoOptions = options.length === 0;
+						const isMissing = isRequired && hasNoOptions;
+						if (updateMissingConstraint) {
+							updateMissingConstraint(field, isMissing);
 						}
 					}
 				}
-
-				const queryString = urlParams.toString();
-				if (queryString) {
-					endpoint += endpoint.includes('?') ? '&' : '?';
-					endpoint += queryString;
-				}
-				const response = await fetch(endpoint, { cache: browserCache });
-				if (response.ok) {
-					const data = await response.json().then((res) => res?.results ?? res);
-					if (data.length > 0) {
-						options = processOptions(data);
-					}
-					const isRequired = mandatory || $constraints?.required;
-					const hasNoOptions = options.length === 0;
-					const isMissing = isRequired && hasNoOptions;
-					if (updateMissingConstraint) {
-						updateMissingConstraint(field, isMissing);
-					}
-					optionsLoaded = true;
-				}
+				optionsLoaded = true;
 			}
 			// After options are loaded, set initial selection using stored initial value
 			if (initialValue) {
@@ -208,6 +268,63 @@
 			}
 		} catch (error) {
 			console.error(`Error fetching ${optionsEndpoint}:`, error);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function fetchSelectedItems() {
+		if (!initialValue) return;
+		const ids = Array.isArray(initialValue) ? initialValue : [initialValue];
+		if (ids.length === 0) return;
+
+		const lazyBase = effectiveLazy ? `${optionsEndpoint}/autocomplete` : undefined;
+		const endpoint = buildEndpoint({ id: ids.join(',') }, lazyBase);
+		const response = await fetch(endpoint, { cache: browserCache });
+		if (response.ok) {
+			const data = await response.json().then((res) => res?.results ?? res);
+			if (data.length > 0) {
+				options = processOptions(data);
+			}
+		}
+	}
+
+	async function lazySearch(searchTerm: string) {
+		if (!effectiveLazy || !optionsEndpoint) return;
+		if (!searchTerm || searchTerm.length < 2) {
+			// Keep only already-selected options visible
+			options = selected.length > 0 ? [...selected] : [];
+			lazyHasSearched = false;
+			return;
+		}
+
+		isLoading = true;
+		lazyHasSearched = true;
+		try {
+			const lazyBase = `${optionsEndpoint}/autocomplete`;
+			const endpoint = buildEndpoint(
+				{
+					search: searchTerm,
+					limit: String(lazyLimit)
+				},
+				lazyBase
+			);
+			const response = await fetch(endpoint, { cache: 'no-store' });
+			if (response.ok) {
+				const data = await response.json().then((res) => res?.results ?? res);
+				const searchResults = data.length > 0 ? processOptions(data) : [];
+				// Merge with currently selected items so they remain visible
+				const selectedSet = new Set(selected.map((s) => s.value));
+				const merged = [...selected];
+				for (const opt of searchResults) {
+					if (!selectedSet.has(opt.value)) {
+						merged.push(opt);
+					}
+				}
+				options = merged;
+			}
+		} catch (error) {
+			console.error(`Error searching ${optionsEndpoint}:`, error);
 		} finally {
 			isLoading = false;
 		}
@@ -385,10 +502,33 @@
 
 	run(() => {
 		_disabled =
-			disabled || Boolean(selected.length && options.length === 1 && $constraints?.required);
+			disabled ||
+			(Boolean(selected.length && options.length === 1 && $constraints?.required) &&
+				!effectiveLazy);
+	});
+
+	$effect(() => {
+		if (!effectiveLazy || !lazyInputEl) return;
+		const el = lazyInputEl;
+		const handler = () => {
+			const text = el.value;
+			if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
+			if (text.length >= 2) {
+				lazySearchPending = true;
+			} else {
+				lazySearchPending = false;
+			}
+			lazyDebounceTimer = setTimeout(() => {
+				lazySearchPending = false;
+				lazySearch(text);
+			}, 300);
+		};
+		el.addEventListener('input', handler);
+		return () => el.removeEventListener('input', handler);
 	});
 
 	onDestroy(() => {
+		if (lazyDebounceTimer) clearTimeout(lazyDebounceTimer);
 		if (updateMissingConstraint) {
 			updateMissingConstraint(field, false);
 		}
@@ -451,18 +591,28 @@
 
 		<MultiSelect
 			bind:selected
-			{options}
+			options={effectiveLazy && selected.length > 0 && !lazyHasSearched
+				? [...options, { label: m.typeToSearch(), value: LAZY_HINT_VALUE, disabled: true }]
+				: options}
 			{...multiSelectOptions}
 			disabled={_disabled}
 			allowEmpty={true}
 			{allowUserOptions}
 			duplicates={false}
 			key={JSON.stringify}
-			filterFunc={fastFilter}
-			{placeholder}
+			filterFunc={effectiveLazy ? passthroughFilter : fastFilter}
+			noMatchingOptionsMsg={effectiveLazy
+				? isLoading || lazySearchPending
+					? m.searching()
+					: m.typeToSearch()
+				: undefined}
+			placeholder={placeholder || (effectiveLazy ? m.typeToSearch() : '')}
+			bind:input={lazyInputEl}
 		>
 			{#snippet option({ option })}
-				{#if optionSnippet}
+				{#if option.value === LAZY_HINT_VALUE}
+					<span class="text-sm italic text-surface-500">{option.label}</span>
+				{:else if optionSnippet}
 					{@render optionSnippet?.(option)}
 				{:else}
 					{#if option.infoString?.position === 'prefix'}

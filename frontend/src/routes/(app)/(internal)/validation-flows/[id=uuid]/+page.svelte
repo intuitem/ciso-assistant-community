@@ -100,7 +100,11 @@
 		findings_assessments: m.findingsAssessments(),
 		evidences: m.evidences(),
 		security_exceptions: m.securityExceptions(),
-		policies: m.policies()
+		policies: m.policies(),
+		processings: m.processings(),
+		accreditations: m.accreditations(),
+		contracts: m.contracts(),
+		managed_documents: m.managedDocuments()
 	};
 
 	// Get URL model names for links
@@ -114,8 +118,20 @@
 		findings_assessments: 'findings-assessments',
 		evidences: 'evidences',
 		security_exceptions: 'security-exceptions',
-		policies: 'policies'
+		policies: 'policies',
+		processings: 'processings',
+		accreditations: 'accreditations',
+		contracts: 'contracts',
+		managed_documents: 'managed-documents'
 	};
+
+	// Resolve the URL for an associated object
+	function getItemHref(key: string, item: any): string {
+		if (key === 'managed_documents' && item.policy?.id) {
+			return `/policies/${item.policy.id}/document`;
+		}
+		return `/${modelUrlNames[key]}/${item.id}`;
+	}
 
 	// Get status color
 	const statusColors: Record<string, string> = {
@@ -304,7 +320,7 @@
 			<div class="space-y-2">
 				<div class="text-sm font-medium text-gray-700">{m.approver()}</div>
 				<div class="text-sm text-gray-600">
-					{#if validation_flow.approver}
+					{#if validation_flow.approver !== null}
 						{#if validation_flow.approver.first_name || validation_flow.approver.last_name}
 							{validation_flow.approver.first_name}
 							{validation_flow.approver.last_name}
@@ -364,10 +380,7 @@
 							{#each value as item}
 								<div class="border rounded-lg p-3 bg-gray-50 hover:bg-gray-100 transition">
 									<div class="flex items-start justify-between gap-2 mb-2">
-										<Anchor
-											href="/{modelUrlNames[key]}/{item.id}"
-											class="anchor text-sm font-medium"
-										>
+										<Anchor href={getItemHref(key, item)} class="anchor text-sm font-medium">
 											{item.str}
 										</Anchor>
 										{#if item.status}
