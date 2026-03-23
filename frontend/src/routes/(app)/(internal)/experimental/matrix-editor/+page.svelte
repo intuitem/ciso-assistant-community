@@ -688,7 +688,7 @@
 			if (res.ok) {
 				const data = await res.json();
 				const allMatrices = data.results || data;
-				matrices = allMatrices.filter((mx: any) => mx.is_published);
+				matrices = allMatrices.filter((mx: any) => mx.is_enabled);
 				existingDrafts = allMatrices.filter((mx: any) => mx.has_editing_draft);
 			}
 		} catch {
@@ -697,7 +697,7 @@
 	}
 
 	async function deleteDraft(matrix: any) {
-		const isPublished = matrix.is_published;
+		const isPublished = matrix.is_enabled;
 		const msg = isPublished ? m.discardDraftConfirm() : m.deleteUnpublishedConfirm();
 		if (!confirm(msg)) return;
 		try {
@@ -914,7 +914,7 @@
 									{isActive ? matrixDescription : draft.description || '—'}
 								</td>
 								<td>
-									{#if draft.is_published}
+									{#if draft.is_enabled}
 										<span class="badge variant-filled-success text-xs">{m.published()}</span>
 									{:else}
 										<span class="badge variant-filled-warning text-xs">{m.new()}</span>
@@ -963,7 +963,7 @@
 												{m.continueEditing()}
 											</button>
 										{/if}
-										{#if draft.is_published}
+										{#if draft.is_enabled}
 											<button
 												type="button"
 												class="btn btn-sm variant-ghost-error text-xs"

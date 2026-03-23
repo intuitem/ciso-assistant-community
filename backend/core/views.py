@@ -2478,11 +2478,20 @@ class RiskMatrixViewSet(BaseModelViewSet):
 
     # --- Visual Matrix Editor actions ---
 
+    def _check_change_permission(self, request, matrix):
+        """Check that the user has change_riskmatrix permission on the matrix's folder."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_riskmatrix"),
+            folder=matrix.folder,
+        ):
+            raise PermissionDenied({"error": "Permission denied."})
+
     @action(detail=True, methods=["post"], url_path="start-editing")
     def start_editing(self, request, pk=None):
         """Copy json_definition into editing_draft to begin editing."""
-
         matrix = self.get_object()
+        self._check_change_permission(request, matrix)
         if matrix.urn:
             return Response(
                 {
@@ -2516,6 +2525,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def save_draft(self, request, pk=None):
         """Update editing_draft with current WIP. Metadata stays draft-scoped until publish."""
         matrix = self.get_object()
+        self._check_change_permission(request, matrix)
         editing_draft = request.data.get("editing_draft")
         if editing_draft is None:
             return Response(
@@ -2540,8 +2550,8 @@ class RiskMatrixViewSet(BaseModelViewSet):
     @action(detail=True, methods=["post"], url_path="publish-draft")
     def publish_draft(self, request, pk=None):
         """Publish editing_draft → json_definition, snapshot history, bump version."""
-
         matrix = self.get_object()
+        self._check_change_permission(request, matrix)
         if matrix.editing_draft is None:
             return Response(
                 {"error": "No active draft to publish."},
@@ -2572,7 +2582,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
         matrix.json_definition = draft_data
         matrix.editing_draft = None
         matrix.editing_version += 1
-        matrix.is_published = True
         matrix.is_enabled = True
 
         # Apply draft metadata to the model
@@ -2581,7 +2590,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
             "editing_draft",
             "editing_version",
             "editing_history",
-            "is_published",
             "is_enabled",
             "updated_at",
         ]
@@ -2605,6 +2613,7 @@ class RiskMatrixViewSet(BaseModelViewSet):
     def discard_draft(self, request, pk=None):
         """Discard editing_draft without affecting json_definition."""
         matrix = self.get_object()
+        self._check_change_permission(request, matrix)
         matrix.editing_draft = None
         matrix.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_discarded"})
@@ -2641,7 +2650,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
             folder=folder,
             json_definition={},
             editing_draft=request.data.get("editing_draft", {}),
-            is_published=False,
             is_enabled=False,
         )
         return Response(
@@ -2675,7 +2683,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
             folder=source.folder,
             json_definition={},
             editing_draft=copy.deepcopy(source.json_definition),
-            is_published=False,
             is_enabled=False,
             locale=source.locale,
             default_locale=source.default_locale,
@@ -2844,7 +2851,6 @@ class RiskMatrixViewSet(BaseModelViewSet):
             folder=folder,
             json_definition={},
             editing_draft=editing_draft,
-            is_published=False,
             is_enabled=False,
             translations=library_data.get("translations", {}),
         )

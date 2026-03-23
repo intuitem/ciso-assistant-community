@@ -7,8 +7,8 @@ export const load = (async ({ fetch }) => {
 	const matricesData = await matricesRes.json();
 	const allMatrices = matricesData.results || matricesData;
 
-	// Split: published matrices (for clone) vs matrices with active drafts
-	const matrices = allMatrices.filter((m: any) => m.is_published);
+	// Split: released matrices (for clone/edit) vs matrices with active drafts
+	const matrices = allMatrices.filter((m: any) => m.is_enabled);
 	const drafts = allMatrices.filter((m: any) => m.has_editing_draft);
 
 	return { matrices, drafts };
