@@ -49,7 +49,7 @@ objects:
         name: "Regulatory and legal compliance obligations"
         description: "Applicable laws, regulations, and contractual obligations imposing cybersecurity requirements on the organisation (e.g. Privacy Act, NZISM, sector-specific regulations, contractual SLAs)."
         category: legal
-        origin: external
+        origin: internal
         status: active
         translations:
           fr:
@@ -60,7 +60,7 @@ objects:
         name: "Evolving cyber threat landscape"
         description: "External threat environment including ransomware groups, nation-state actors, phishing campaigns, supply chain attacks, and emerging threats relevant to the organisation's sector and geography."
         category: technology
-        origin: external
+        origin: internal
         status: active
         translations:
           fr:
@@ -71,7 +71,7 @@ objects:
         name: "Third-party and supply chain dependencies"
         description: "Reliance on vendors, managed service providers, cloud platforms, and supply chain partners that introduce cybersecurity risk through trusted access, shared systems, and data processing relationships."
         category: technology
-        origin: external
+        origin: internal
         status: active
         translations:
           fr:
