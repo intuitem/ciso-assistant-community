@@ -446,6 +446,41 @@
 									<MarkdownRenderer content={requirementAssessment.requirement.description} />
 								</div>
 							{/if}
+							<!-- Show annotation for non assessable requirements -->
+							{#if requirementAssessment.requirement.annotation && !requirementAssessment.assessable}
+								<div
+									class="card p-4 preset-tonal-secondary text-sm flex flex-col justify-evenly cursor-auto w-full"
+								>
+									<h2 class="font-semibold text-base flex flex-row justify-between">
+										<div>
+											<i class="fa-solid fa-circle-info mr-2"></i>{m.additionalInformation()}
+										</div>
+										<button onclick={() => toggleSuggestion(requirementAssessment.id)}>
+											{#if !hideSuggestionHashmap[requirementAssessment.id]}
+												<i class="fa-solid fa-eye"></i>
+											{:else}
+												<i class="fa-solid fa-eye-slash"></i>
+											{/if}
+										</button>
+									</h2>
+									{#if !hideSuggestionHashmap[requirementAssessment.id]}
+										{#if requirementAssessment.requirement.annotation}
+											<div class="my-2">
+												<p class="font-medium">
+													<i class="fa-solid fa-pencil"></i>
+													{m.annotation()}
+												</p>
+												<div class="py-1">
+													<MarkdownRenderer
+														content={requirementAssessment.requirement.annotation}
+													/>
+												</div>
+											</div>
+										{/if}
+									{/if}
+								</div>
+							{/if}
+
 							{#if requirementAssessment.assessable}
 								{#if requirementAssessment.requirement.annotation || requirementAssessment.requirement.typical_evidence || requirementAssessment.mapping_inference?.result}
 									<div
