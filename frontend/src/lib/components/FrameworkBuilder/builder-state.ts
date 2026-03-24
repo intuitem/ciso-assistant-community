@@ -1,6 +1,12 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import { apiSaveDraft, apiPublishDraft, apiDiscardDraft, type DraftJSON } from './builder-api';
+import {
+	apiSaveDraft,
+	apiPublishDraft,
+	apiDiscardDraft,
+	apiStartEditing,
+	type DraftJSON
+} from './builder-api';
 
 // --- Types ---
 
@@ -363,6 +369,7 @@ export interface BuilderStore {
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
 	hasPendingFlush: Writable<boolean>;
+	dirty: Writable<boolean>;
 	addSection: (afterIndex?: number) => void;
 	deleteSection: (sectionIndex: number) => void;
 	addRequirement: (parentNodeId: string, parentUrn: string) => void;
@@ -475,6 +482,11 @@ export function createBuilderState(
 	const errors = writable<Map<string, string>>(new Map());
 	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
+	const dirty = writable(false);
+
+	function markDirty() {
+		dirty.set(true);
+	}
 
 	function setError(key: string, message: string) {
 		errors.update((m) => new Map(m).set(key, message));
@@ -520,6 +532,7 @@ export function createBuilderState(
 	let savePending = false;
 
 	function scheduleDraftSave() {
+		markDirty();
 		hasPendingFlush.set(true);
 		if (saveTimeout) clearTimeout(saveTimeout);
 		saveTimeout = setTimeout(() => flushDraft(), 500);
@@ -566,7 +579,18 @@ export function createBuilderState(
 
 	async function discard() {
 		try {
+			// Clear the draft on the server
 			await apiDiscardDraft(frameworkId);
+			// Re-create a fresh draft from live relational data
+			const freshDraft = await apiStartEditing(frameworkId);
+			// Re-hydrate stores from the fresh draft
+			const hydrated = hydrateDraft(freshDraft, frameworkId);
+			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
+			const freshSections = buildTree(hydrated.nodes, hydrated.questions);
+			framework.set(freshFramework);
+			sections.set(freshSections);
+			activeSection.set(freshSections[0]?.node.id ?? '');
+			dirty.set(false);
 			clearError('discard');
 		} catch (e) {
 			setError('discard', (e as Error).message);
@@ -1013,6 +1037,7 @@ export function createBuilderState(
 		errors,
 		activeSection,
 		hasPendingFlush,
+		dirty,
 		addSection,
 		deleteSection,
 		addRequirement,

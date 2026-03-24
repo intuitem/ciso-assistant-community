@@ -13,7 +13,8 @@
 		sections: sectionsStore,
 		activeSection: activeSectionStore,
 		saving: savingStore,
-		errors: errorsStore
+		errors: errorsStore,
+		dirty: dirtyStore
 	} = builder;
 
 	let topOffset = $state(0);
@@ -44,9 +45,8 @@
 			await builder.publish();
 			publishSuccess = true;
 			confirmPublish = false;
-			setTimeout(() => {
-				window.location.href = `/frameworks/${frameworkId}`;
-			}, 1000);
+			builder.dirty.set(false);
+			setTimeout(() => (publishSuccess = false), 3000);
 		} catch {
 			// Error is already in the errors store
 		} finally {
@@ -59,7 +59,6 @@
 		try {
 			await builder.discard();
 			confirmDiscard = false;
-			window.location.href = `/frameworks/${frameworkId}`;
 		} catch {
 			// Error is already in the errors store
 		} finally {
@@ -82,10 +81,12 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Draft badge -->
-		<span class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
-			Draft
-		</span>
+		<!-- Draft badge (only when changes have been made) -->
+		{#if $dirtyStore}
+			<span class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+				Draft
+			</span>
+		{/if}
 
 		{#each $sectionsStore as section (section.node.id)}
 			<button
@@ -130,8 +131,10 @@
 			</span>
 		{/if}
 
-		<!-- Discard button -->
-		{#if confirmDiscard}
+		<!-- Discard/Publish buttons (only when changes have been made) -->
+		{#if !$dirtyStore}
+			<!-- No changes — nothing to discard or publish -->
+		{:else if confirmDiscard}
 			<span class="shrink-0 text-xs text-red-600 font-medium">Discard all changes?</span>
 			<button
 				type="button"
@@ -162,6 +165,7 @@
 			</button>
 		{/if}
 
+		{#if $dirtyStore}
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
 		<!-- Publish button -->
@@ -196,6 +200,7 @@
 				<i class="fa-solid fa-rocket text-[10px]"></i>
 				Publish
 			</button>
+		{/if}
 		{/if}
 	</div>
 </div>

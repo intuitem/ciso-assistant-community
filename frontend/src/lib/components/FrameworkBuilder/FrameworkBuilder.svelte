@@ -30,7 +30,8 @@
 		sections: sectionsStore,
 		errors: errorsStore,
 		saving: savingStore,
-		hasPendingFlush: hasPendingFlushStore
+		hasPendingFlush: hasPendingFlushStore,
+		dirty: dirtyStore
 	} = builder;
 
 	let urnCopied = $state(false);
@@ -73,10 +74,11 @@
 		}
 	}
 
-	// Warn on SvelteKit navigation about unpublished draft
+	// Warn on SvelteKit navigation about unpublished draft (only if changes were made)
 	beforeNavigate((navigation) => {
-		// Only warn on actual page navigation, not internal state changes
-		if (navigation.to?.route?.id !== navigation.from?.route?.id) {
+		let isDirty = false;
+		dirtyStore.subscribe((v) => (isDirty = v))();
+		if (isDirty && navigation.to?.route?.id !== navigation.from?.route?.id) {
 			if (
 				!confirm(
 					'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
