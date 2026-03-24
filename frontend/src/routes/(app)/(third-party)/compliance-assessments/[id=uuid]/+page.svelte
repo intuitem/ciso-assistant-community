@@ -367,9 +367,9 @@
 				bodyProps: {
 					items: Object.values(requirementAssessmentsSync.changes).map(
 						({ str, changes }) =>
-							`${str}, ${changes
-								.map((change) => `${safeTranslate(change.current)} -> ${safeTranslate(change.new)}`)
-								.join(', ')}`
+							`${str}: ${changes
+								.map((change) => `${safeTranslate(change.current)} 🠲 ${safeTranslate(change.new)}`)
+								.join(' | ')}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
