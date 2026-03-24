@@ -20,7 +20,9 @@ from django.core.management.utils import get_random_secret_key
 import ssl
 from ciso_assistant import meta
 
-BASE_DIR = Path(os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent.parent))
+BASE_DIR = Path(
+    os.getenv("DJANGO_BASE_DIR", Path(__file__).resolve().parent.parent.parent)
+)
 load_dotenv(BASE_DIR / ".meta")
 
 VERSION = os.getenv("CISO_ASSISTANT_VERSION", "unset")
@@ -642,7 +644,7 @@ if MAIL_DEBUG:
 
 ## Huey settings
 HUEY_FILE_PATH = os.environ.get("HUEY_FILE_PATH", BASE_DIR / "db" / "huey.db")
-
+print("coucou", HUEY_FILE_PATH)
 HUEY = {
     "huey_class": "huey.SqliteHuey",
     "name": "ciso_assistant",
