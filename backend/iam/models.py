@@ -36,20 +36,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMessage
 from django.core.validators import validate_email
-from ciso_assistant.settings import (
-    CISO_ASSISTANT_URL,
-    EMAIL_HOST,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_USER_RESCUE,
-    EMAIL_HOST_PASSWORD_RESCUE,
-    EMAIL_HOST_RESCUE,
-    EMAIL_PORT,
-    EMAIL_PORT_RESCUE,
-    EMAIL_USE_TLS,
-    EMAIL_USE_TLS_RESCUE,
-)
 from django.conf import settings
 
 import structlog
@@ -563,7 +551,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
@@ -577,7 +565,9 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool((not password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)),
+            mailing=bool(
+                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
+            ),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -739,11 +729,11 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
 
         # Build context for the YAML template system
         context = {
-            "set_password_url": f"{CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
-            "reset_password_url": f"{CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
-            "questionnaire_url": f"{CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
+            "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
+            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
             if object
-            else CISO_ASSISTANT_URL,
+            else settings.CISO_ASSISTANT_URL,
         }
 
         # Try YAML template system (supports custom overrides and Markdown)
@@ -770,7 +760,7 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         # Fallback to legacy Django HTML templates
         header = {
             "email": self.email,
-            "root_url": CISO_ASSISTANT_URL,
+            "root_url": settings.CISO_ASSISTANT_URL,
             "uid": uid,
             "user": self,
             "token": token,
@@ -788,14 +778,19 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
     def _send_email(self, subject, body, html_body=None):
         """Send an email with primary/rescue server fallback."""
         try:
-            send_mail(
-                subject=subject,
-                message=body,
-                from_email=None,
-                recipient_list=[self.email],
-                fail_silently=False,
-                html_message=html_body,
-            )
+            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+            with get_connection(ssl_context=ssl_context) as connection:
+                msg = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=None,
+                    to=[self.email],
+                    connection=connection,
+                )
+                if html_body:
+                    msg.content_subtype = "html"
+                    msg.body = html_body
+                msg.send()
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
             )
@@ -805,19 +800,21 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 recipient=self.email,
                 subject=subject,
                 error=str(primary_exception),
-                email_host=EMAIL_HOST,
-                email_port=EMAIL_PORT,
-                email_host_user=EMAIL_HOST_USER,
-                email_use_tls=EMAIL_USE_TLS,
+                email_host=settings.EMAIL_HOST,
+                email_port=settings.EMAIL_PORT,
+                email_host_user=settings.EMAIL_HOST_USER,
+                email_use_tls=settings.EMAIL_USE_TLS,
             )
-            if EMAIL_HOST_RESCUE:
+            if settings.EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
-                        host=EMAIL_HOST_RESCUE,
-                        port=EMAIL_PORT_RESCUE,
-                        username=EMAIL_HOST_USER_RESCUE,
-                        password=EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        host=settings.EMAIL_HOST_RESCUE,
+                        port=settings.EMAIL_PORT_RESCUE,
+                        username=settings.EMAIL_HOST_USER_RESCUE,
+                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
+                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
+                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
                         msg = EmailMessage(
                             subject=subject,
@@ -841,10 +838,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         recipient=self.email,
                         subject=subject,
                         error=str(rescue_exception),
-                        email_host=EMAIL_HOST_RESCUE,
-                        email_port=EMAIL_PORT_RESCUE,
-                        email_username=EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                        email_host=settings.EMAIL_HOST_RESCUE,
+                        email_port=settings.EMAIL_PORT_RESCUE,
+                        email_username=settings.EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
                     )
                     raise rescue_exception
             else:

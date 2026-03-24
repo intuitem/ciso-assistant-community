@@ -25,6 +25,20 @@
 	let { data, form }: Props = $props();
 	let URLModel = $derived(data.URLModel);
 	let exportPopupOpen = $state(false);
+	let currentFilterSearch = $state(page.url.search);
+
+	function handleFilterChange(filters: Record<string, any>) {
+		const params = new URLSearchParams();
+		for (const [field, values] of Object.entries(filters)) {
+			if (Array.isArray(values)) {
+				for (const v of values) {
+					if (v?.value) params.append(field, v.value);
+				}
+			}
+		}
+		const search = params.toString();
+		currentFilterSearch = search ? `?${search}` : '';
+	}
 
 	const modalStore: ModalStore = getModalStore();
 
@@ -119,6 +133,7 @@
 				{URLModel}
 				disableEdit={['user-groups', 'validation-flows'].includes(URLModel)}
 				disableDelete={['user-groups'].includes(URLModel)}
+				onFilterChange={handleFilterChange}
 			>
 				{#snippet addButton()}
 					<div class="relative">
@@ -145,14 +160,14 @@
 								{/if}
 								{#if URLModel === 'applied-controls'}
 									<a
-										href="{URLModel}/flash-mode/{page.url.search}"
+										href="{URLModel}/flash-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-secondary w-12 focus:relative"
 										title={m.flashMode()}
 										aria-label={m.flashMode()}
 										data-testid="flash-mode-button"><i class="fa-solid fa-bolt mr-2"></i></a
 									>
 									<a
-										href="{URLModel}/kanban-mode/{page.url.search}"
+										href="{URLModel}/kanban-mode/{currentFilterSearch}"
 										class="inline-block p-3 btn-mini-quaternary w-12 focus:relative"
 										title={m.kanbanMode()}
 										aria-label={m.kanbanMode()}

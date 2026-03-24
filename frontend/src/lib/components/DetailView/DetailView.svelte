@@ -77,7 +77,8 @@
 			'reported_at',
 			'due_date',
 			'start_date',
-			'closing_date'
+			'closing_date',
+			'commission_date'
 		],
 		widgets,
 		actions,
@@ -380,7 +381,7 @@
 				{m.riskAcceptanceNotYetSubmittedMessage()}
 			</div>
 		</div>
-	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver.id}
+	{:else if data.data.state === 'Submitted' && page.data.user.id === data.data.approver?.id}
 		<div
 			class="flex flex-row space-x-4 items-center bg-yellow-100 rounded-container shadow-sm px-6 py-2 justify-between"
 		>
@@ -415,7 +416,7 @@
 			<div class="text-green-900">
 				{m.riskAcceptanceValidatedMessage()}
 			</div>
-			{#if page.data.user.id === data.data.approver.id}
+			{#if page.data.user.id === data.data.approver?.id}
 				<div class="ml-auto whitespace-nowrap">
 					<button
 						onclick={(_) => {

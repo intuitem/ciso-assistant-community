@@ -11,10 +11,10 @@
 	import { page } from '$app/state';
 	import DeleteConfirmModal from '$lib/components/Modals/DeleteConfirmModal.svelte';
 	import { defaults } from 'sveltekit-superforms';
-	import { zod } from 'sveltekit-superforms/adapters';
+	import { zod4 as zod } from 'sveltekit-superforms/adapters';
 	import { modelEventsMap } from '$lib/utils/webhooks';
 	import { safeTranslate } from '$lib/utils/i18n';
-	import z from 'zod';
+	import { z } from 'zod';
 
 	const modalStore: ModalStore = getModalStore();
 

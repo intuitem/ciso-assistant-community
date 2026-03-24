@@ -17,7 +17,6 @@ import importlib
 from django.urls import include, path
 from rest_framework import routers
 
-from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
 router = routers.DefaultRouter()
@@ -150,6 +149,7 @@ urlpatterns = [
     path("settings/", include("global_settings.urls")),
     path("user-preferences/", UserPreferencesView.as_view(), name="user-preferences"),
     path("ebios-rm/", include("ebios_rm.urls")),
+    path("", include("doc_management.urls")),
     path("privacy/", include("privacy.urls")),
     path("resilience/", include("resilience.urls")),
     path("crq/", include("crq.urls")),
@@ -231,6 +231,7 @@ urlpatterns = [
         UserRolesOnFolderList.as_view(),
         name="user-perms-on-folder-list",
     ),
+    path("search/", global_search, name="global-search"),
     path("quick-start/", QuickStartView.as_view(), name="quick-start"),
     path("content-types/", ContentTypeListView.as_view(), name="content-types-list"),
     path(
@@ -243,7 +244,7 @@ urlpatterns = [
 for index, module in enumerate(MODULES):
     urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
-if DEBUG:
+if settings.DEBUG:
     # Browsable API is only available in DEBUG mode
     urlpatterns += [
         path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

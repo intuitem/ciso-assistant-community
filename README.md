@@ -402,7 +402,8 @@ export EMAIL_HOST_PASSWORD=''
 export DEFAULT_FROM_EMAIL=ciso-assistant@ciso-assistantcloud.com
 export EMAIL_HOST=localhost
 export EMAIL_PORT=1025
-export EMAIL_USE_TLS=True
+export EMAIL_USE_TLS=True  # true for STARTTLS
+export EMAIL_USE_SSL=False # true for SMTPS
 ```
 
 **Other variables**
@@ -441,6 +442,7 @@ export EMAIL_PORT_RESCUE=587
 export EMAIL_HOST_USER_RESCUE=<XXX>
 export EMAIL_HOST_PASSWORD_RESCUE=<XXX>
 export EMAIL_USE_TLS_RESCUE=True
+export EMAIL_USE_SSL_RESCUE=False
 
 # You can define the email of the first superuser, useful for automation. A mail is sent to the superuser for password initialization
 export CISO_SUPERUSER_EMAIL=<XXX>
