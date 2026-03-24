@@ -8,13 +8,13 @@ import {
 } from '$lib/utils/crud';
 import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 
-import { modelSchema } from '$lib/utils/schemas';
+import { modelSchema, type FormDataShape } from '$lib/utils/schemas';
 import { listViewFields } from '$lib/utils/table';
 import type { urlModel } from '$lib/utils/types';
 import type { SuperValidated } from 'sveltekit-superforms';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { z, type AnyZodObject } from 'zod';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 import { canPerformAction } from './access-control';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -120,8 +120,8 @@ export const loadDetail = async ({ event, model, id }) => {
 		urlModel: urlModel;
 		info: ModelMapEntry;
 		table: TableSource;
-		deleteForm: SuperValidated<AnyZodObject>;
-		createForm: SuperValidated<AnyZodObject>;
+		deleteForm: SuperValidated<FormDataShape>;
+		createForm: SuperValidated<FormDataShape>;
 		foreignKeys: Record<string, any>;
 		selectOptions: Record<string, any>;
 		count?: number;
@@ -187,7 +187,7 @@ export const loadDetail = async ({ event, model, id }) => {
 							currentSchema instanceof z.ZodOptional ||
 							currentSchema instanceof z.ZodNullable
 						) {
-							currentSchema = currentSchema._def.innerType;
+							currentSchema = currentSchema.unwrap();
 						}
 						isArrayField = currentSchema instanceof z.ZodArray;
 					}
@@ -300,7 +300,7 @@ export const loadDetail = async ({ event, model, id }) => {
 	}
 
 	// If any reverseForeignKeyField has addExisting, load the parent's updateForm
-	let updateForm: SuperValidated<AnyZodObject> | undefined;
+	let updateForm: SuperValidated<FormDataShape> | undefined;
 	const hasAddExisting = model.reverseForeignKeyFields?.some((f) => f.addExisting);
 	if (hasAddExisting) {
 		const parentEndpointUrl = model.endpointUrl ?? model.urlModel;

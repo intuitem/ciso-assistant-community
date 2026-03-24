@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
+from django.conf import settings
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -18,6 +18,9 @@ READER_PERMISSIONS_LIST = [
     "view_entityassessment",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_folder",
     "view_framework",
     "view_loadedlibrary",
@@ -99,6 +102,9 @@ READER_PERMISSIONS_LIST = [
     # integrations
     "view_syncmapping",
     "view_filteringlabel",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 APPROVER_PERMISSIONS_LIST = [
@@ -123,6 +129,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_requirementnode",
     "view_evidence",
     "view_evidencerevision",
+    "view_manageddocument",
+    "view_documentrevision",
+    "view_documentattachment",
     "view_framework",
     "view_storedlibrary",
     "view_loadedlibrary",
@@ -177,6 +186,9 @@ APPROVER_PERMISSIONS_LIST = [
     "view_accreditation",
     # integrations
     "view_syncmapping",
+    # presets
+    "view_presetjourney",
+    "view_presetjourneystep",
 ]
 
 ANALYST_PERMISSIONS_LIST = [
@@ -409,6 +421,20 @@ ANALYST_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -450,6 +476,13 @@ ANALYST_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 DOMAIN_MANAGER_PERMISSIONS_LIST = [
@@ -709,6 +742,20 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_rightrequest",
     "change_rightrequest",
     "view_rightrequest",
@@ -755,6 +802,13 @@ DOMAIN_MANAGER_PERMISSIONS_LIST = [
     "view_syncmapping",
     "change_syncmapping",
     "delete_syncmapping",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 ADMINISTRATOR_PERMISSIONS_LIST = [
@@ -852,6 +906,20 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_evidencerevision",
     "change_evidencerevision",
     "delete_evidencerevision",
+    # document management
+    "add_manageddocument",
+    "view_manageddocument",
+    "change_manageddocument",
+    "delete_manageddocument",
+    "add_documentrevision",
+    "view_documentrevision",
+    "change_documentrevision",
+    "delete_documentrevision",
+    "view_documentedit",
+    "add_documentattachment",
+    "view_documentattachment",
+    "change_documentattachment",
+    "delete_documentattachment",
     "add_framework",
     "view_framework",
     "delete_framework",
@@ -866,6 +934,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "restore",
     "view_globalsettings",
     "change_globalsettings",
+    "view_customemailtemplate",
+    "add_customemailtemplate",
+    "change_customemailtemplate",
+    "delete_customemailtemplate",
+    "view_customwordtemplate",
+    "add_customwordtemplate",
+    "change_customwordtemplate",
+    "delete_customwordtemplate",
     "view_ssosettings",
     "change_ssosettings",
     "view_requirementmappingset",
@@ -1109,6 +1185,14 @@ ADMINISTRATOR_PERMISSIONS_LIST = [
     "view_webhookendpoint",
     "change_webhookendpoint",
     "delete_webhookendpoint",
+    "view_webhookeventtype",
+    # presets
+    "view_presetjourney",
+    "add_presetjourney",
+    "change_presetjourney",
+    "delete_presetjourney",
+    "view_presetjourneystep",
+    "change_presetjourneystep",
 ]
 
 THIRD_PARTY_RESPONDENT_PERMISSIONS_LIST = [
@@ -1399,16 +1483,18 @@ def startup(sender: AppConfig, **kwargs):
     )
     if (
         User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or FORCE_CREATE_ADMIN
+        or settings.FORCE_CREATE_ADMIN
     ):
         # if superuser defined and does not exist, then create it
         if (
-            CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(
+                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            ).exists()
         ):
             try:
                 User.objects.create_superuser(
-                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
                 )
             except Exception as e:
                 logger.error("Error creating superuser", exc_info=True)
@@ -1433,10 +1519,10 @@ def startup(sender: AppConfig, **kwargs):
         "enforce_mfa": False,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(
+        global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}
         )
-        current_value = settings.value or {}
+        current_value = global_settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
 
@@ -1449,8 +1535,8 @@ def startup(sender: AppConfig, **kwargs):
             # Finally force-reset the invalid ebios_radar_max to default
             updated_value = {**default_settings, **current_value}
             updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
-            settings.value = updated_value
-            settings.save()
+            global_settings.value = updated_value
+            global_settings.save()
             logger.info(
                 "Global settings have been reset to defaults due to invalid ebios_radar_max."
             )

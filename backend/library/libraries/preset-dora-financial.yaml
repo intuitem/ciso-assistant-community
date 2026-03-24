@@ -1,0 +1,263 @@
+urn: urn:intuitem:risk:preset:dora-financial
+locale: en
+ref_id: preset-dora-financial
+name: "DORA — Digital Operational Resilience"
+description: "Compliance programme for the EU Digital Operational Resilience Act (DORA). Loads the NOREA DORA-in-Control framework, enables third-party risk management, incident reporting, and creates a structured journey covering ICT risk management, third-party oversight, and resilience testing."
+version: 1
+provider: intuitem
+packager: intuitem
+translations:
+  fr:
+    name: "DORA — Résilience opérationnelle numérique"
+    description: "Programme de conformité au règlement européen DORA sur la résilience opérationnelle numérique. Charge le référentiel NOREA DORA-in-Control, active la gestion des tiers, le signalement des incidents et crée un parcours structuré couvrant la gestion des risques ICT, la surveillance des tiers et les tests de résilience."
+
+dependencies:
+  - urn:intuitem:risk:library:norea-dora-in-control
+  - urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+  - urn:intuitem:risk:library:vendor-due-diligence
+  - urn:intuitem:risk:library:intuitem-common-catalog
+
+objects:
+  preset:
+    profile:
+      company_size:
+        - sme
+        - large
+      industry:
+        - financial-services
+      region:
+        - eu
+      goal: dora-compliance
+
+    feature_flags:
+      enable:
+        - compliance
+        - tprm
+        - incidents
+        - reports
+        - contracts
+        - follow_up
+
+    scaffolded_objects:
+      - type: risk_assessment
+        name: "ICT Risk Assessment"
+        risk_matrix: urn:intuitem:risk:library:risk-matrix-5x5-iso27005
+        ref: main_ra
+        translations:
+          fr:
+            name: "Analyse de risques ICT"
+      - type: compliance_assessment
+        name: "NOREA DORA-in-Control Assessment"
+        framework: urn:intuitem:risk:library:norea-dora-in-control
+        create_suggested_controls: true
+        ref: dora_audit
+        translations:
+          fr:
+            name: "Évaluation NOREA DORA-in-Control"
+
+      # --- ICT third-party service providers ---
+      - type: entity
+        name: "Core banking / trading platform provider"
+        description: "Vendor of the primary financial system (core banking, trading platform, payment processing)."
+        translations:
+          fr:
+            name: "Fournisseur de plateforme bancaire / trading"
+            description: "Éditeur du système financier principal (cœur bancaire, plateforme de trading, traitement des paiements)."
+      - type: entity
+        name: "Cloud infrastructure provider"
+        description: "Provider of cloud hosting and infrastructure services for critical ICT systems."
+        translations:
+          fr:
+            name: "Fournisseur d'infrastructure cloud"
+            description: "Fournisseur de services d'hébergement cloud et d'infrastructure pour les systèmes ICT critiques."
+      - type: entity
+        name: "Market data provider"
+        description: "External provider of market data feeds, pricing data, or reference data services."
+        translations:
+          fr:
+            name: "Fournisseur de données de marché"
+            description: "Fournisseur externe de flux de données de marché, données de prix ou services de données de référence."
+      - type: entity
+        name: "IT outsourcing partner"
+        description: "Managed services provider handling ICT operations, infrastructure management, or application support."
+        translations:
+          fr:
+            name: "Partenaire d'externalisation IT"
+            description: "Prestataire de services managés gérant les opérations ICT, l'infrastructure ou le support applicatif."
+      - type: entity
+        name: "SWIFT / payment network provider"
+        description: "Provider of payment messaging, clearing, or settlement network services."
+        translations:
+          fr:
+            name: "Fournisseur de réseau de paiement / SWIFT"
+            description: "Fournisseur de services de messagerie de paiement, de compensation ou de règlement."
+
+      # --- Assets ---
+      - type: asset
+        name: "Core financial system"
+        description: "Primary banking, trading, or payment processing platform and its databases."
+        asset_type: SP
+        ref: asset_core_system
+        translations:
+          fr:
+            name: "Système financier central"
+            description: "Plateforme bancaire, de trading ou de traitement des paiements principale et ses bases de données."
+      - type: asset
+        name: "ICT network infrastructure"
+        description: "Network infrastructure including firewalls, switches, VPN, and segmentation supporting financial operations."
+        asset_type: SP
+        ref: asset_network
+        translations:
+          fr:
+            name: "Infrastructure réseau ICT"
+            description: "Infrastructure réseau incluant pare-feu, commutateurs, VPN et segmentation supportant les opérations financières."
+      - type: asset
+        name: "Identity and access management"
+        description: "Directory services, privileged access management, and authentication systems."
+        asset_type: SP
+        ref: asset_iam
+        translations:
+          fr:
+            name: "Gestion des identités et des accès"
+            description: "Services d'annuaire, gestion des accès à privilèges et systèmes d'authentification."
+      - type: asset
+        name: "Client and transaction data"
+        description: "Financial transaction records, client personal data, account information, and regulatory reporting data."
+        asset_type: PR
+        ref: asset_client_data
+        translations:
+          fr:
+            name: "Données clients et transactionnelles"
+            description: "Enregistrements de transactions financières, données personnelles des clients, informations de compte et données de reporting réglementaire."
+      - type: asset
+        name: "Backup and recovery systems"
+        description: "Backup infrastructure, disaster recovery sites, and business continuity systems."
+        asset_type: SP
+        ref: asset_backup
+        translations:
+          fr:
+            name: "Systèmes de sauvegarde et de reprise"
+            description: "Infrastructure de sauvegarde, sites de reprise après sinistre et systèmes de continuité d'activité."
+
+      # --- Risk scenarios ---
+      - type: risk_scenario
+        name: "ICT third-party provider failure"
+        description: "A critical ICT third-party provider suffers an outage or breach, disrupting financial services and triggering DORA incident notification obligations."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_core_system, asset_network]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-003]
+        translations:
+          fr:
+            name: "Défaillance d'un prestataire ICT tiers"
+            description: "Un prestataire ICT tiers critique subit une panne ou une brèche, perturbant les services financiers et déclenchant les obligations de notification d'incident DORA."
+      - type: risk_scenario
+        name: "Ransomware on core financial system"
+        description: "Ransomware encrypts the core banking or trading platform, halting financial operations."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_core_system, asset_client_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-001]
+        translations:
+          fr:
+            name: "Rançongiciel sur le système financier central"
+            description: "Un rançongiciel chiffre la plateforme bancaire ou de trading, interrompant les opérations financières."
+      - type: risk_scenario
+        name: "Unauthorised access to client data"
+        description: "Attackers gain access to client and transaction data through compromised credentials or insider threat, requiring regulatory disclosure."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_iam, asset_client_data]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-005]
+        translations:
+          fr:
+            name: "Accès non autorisé aux données clients"
+            description: "Des attaquants accèdent aux données clients et transactionnelles via des identifiants compromis ou une menace interne, nécessitant une déclaration réglementaire."
+      - type: risk_scenario
+        name: "Backup and recovery failure"
+        description: "Backup systems fail or recovery time exceeds acceptable limits, preventing timely restoration of critical financial services."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_backup, asset_core_system]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-022]
+        translations:
+          fr:
+            name: "Défaillance des sauvegardes et de la reprise"
+            description: "Les systèmes de sauvegarde échouent ou le temps de reprise dépasse les limites acceptables, empêchant la restauration rapide des services financiers critiques."
+      - type: risk_scenario
+        name: "DDoS on financial services"
+        description: "A denial-of-service attack disrupts online banking, trading platforms, or payment services."
+        risk_assessment_ref: main_ra
+        asset_refs: [asset_network, asset_core_system]
+        threat_urns: [urn:intuitem:risk:threat:intuitem-common-catalog:ict-007]
+        translations:
+          fr:
+            name: "DDoS sur les services financiers"
+            description: "Une attaque par déni de service perturbe les services bancaires en ligne, les plateformes de trading ou les services de paiement."
+
+      # --- Findings assessment ---
+      - type: findings_assessment
+        name: "TLPT / Resilience Test Findings"
+        category: pentest
+        ref: tlpt_findings
+        translations:
+          fr:
+            name: "Résultats TLPT / tests de résilience"
+
+    journey:
+      steps:
+        - key: assets
+          title: "Map ICT assets and critical functions"
+          description: "Identify and classify all ICT assets supporting critical or important financial functions"
+          target_model: assets
+          translations:
+            fr:
+              title: "Cartographier les actifs ICT et fonctions critiques"
+              description: "Identifiez et classifiez tous les actifs ICT supportant les fonctions financières critiques ou importantes"
+        - key: dora_assessment
+          title: "Assess DORA compliance"
+          description: "Go through the NOREA DORA-in-Control framework and evaluate your current posture against each requirement"
+          target_model: compliance-assessments
+          target_ref: dora_audit
+          translations:
+            fr:
+              title: "Évaluer la conformité DORA"
+              description: "Parcourez le référentiel NOREA DORA-in-Control et évaluez votre posture actuelle par rapport à chaque exigence"
+        - key: risk_assessment
+          title: "Conduct a risk assessment"
+          description: "Review the ICT risk scenarios, assess likelihood and impact, and identify additional risks for your critical functions"
+          target_model: risk-assessments
+          target_ref: main_ra
+          translations:
+            fr:
+              title: "Mener une analyse de risque"
+              description: "Examinez les scénarios de risque ICT, évaluez la vraisemblance et l'impact, et identifiez les risques supplémentaires pour vos fonctions critiques"
+        - key: controls
+          title: "Implement and track security controls"
+          description: "Review the suggested controls, assign owners, and track implementation — focus on ICT risk management measures required by DORA"
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Implémenter et suivre les mesures de sécurité"
+              description: "Examinez les mesures suggérées, assignez des responsables et suivez la mise en œuvre — concentrez-vous sur les mesures de gestion des risques ICT exigées par DORA"
+        - key: vendors
+          title: "Manage ICT third-party providers"
+          description: "Review the pre-created ICT third-party entities, add missing providers, create assessments, and maintain the register of contractual arrangements"
+          target_model: entities
+          translations:
+            fr:
+              title: "Gérer les prestataires ICT tiers"
+              description: "Examinez les entités tierces ICT pré-créées, ajoutez les prestataires manquants, créez des évaluations et maintenez le registre des arrangements contractuels"
+        - key: incident_reporting
+          title: "Set up incident classification and reporting"
+          description: "Define your ICT incident classification criteria and reporting process — DORA requires initial notification within 4 hours for major incidents"
+          target_model: applied-controls
+          translations:
+            fr:
+              title: "Mettre en place la classification et le signalement des incidents"
+              description: "Définissez vos critères de classification des incidents ICT et votre processus de signalement — DORA exige une notification initiale sous 4 heures pour les incidents majeurs"
+        - key: resilience_testing
+          title: "Plan resilience testing"
+          description: "Define your digital operational resilience testing programme, including threat-led penetration testing (TLPT) if applicable"
+          target_model: findings-assessments
+          target_ref: tlpt_findings
+          translations:
+            fr:
+              title: "Planifier les tests de résilience"
+              description: "Définissez votre programme de tests de résilience opérationnelle numérique, y compris les tests de pénétration fondés sur la menace (TLPT) le cas échéant"

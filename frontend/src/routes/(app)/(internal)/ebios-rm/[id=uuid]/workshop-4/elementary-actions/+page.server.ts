@@ -10,7 +10,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo, urlModel } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { m } from '$paraglide/messages';
 import type { PageServerLoad } from './$types';

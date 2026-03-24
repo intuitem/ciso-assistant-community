@@ -3,7 +3,7 @@ import { getModelInfo } from '$lib/utils/crud';
 import { formatSelectFieldData } from '$lib/utils/load';
 import { modelSchema } from '$lib/utils/schemas';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import type { PageServerLoad, Actions } from '../$types';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { m } from '$paraglide/messages';

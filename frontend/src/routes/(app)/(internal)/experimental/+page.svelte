@@ -31,4 +31,10 @@
 		link="/experimental/yearly-tasks-review"
 		tags={['tasks', 'planning', 'review', 'PRO']}
 	/>
+	<Article
+		title={m.matrixEditor()}
+		desc={m.matrixEditorDescription()}
+		link="/experimental/matrix-editor"
+		tags={['risk', 'matrix', 'editor']}
+	/>
 </div>

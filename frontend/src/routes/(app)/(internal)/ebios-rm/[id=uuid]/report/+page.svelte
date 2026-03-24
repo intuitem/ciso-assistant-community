@@ -3,6 +3,7 @@
 	import { m } from '$paraglide/messages';
 	import { safeTranslate } from '$lib/utils/i18n';
 	import { formatDateOrDateTime } from '$lib/utils/datetime';
+	import { isDark } from '$lib/utils/helpers';
 	import { getLocale } from '$paraglide/runtime';
 	import Anchor from '$lib/components/Anchor/Anchor.svelte';
 	import RiskMatrix from '$lib/components/RiskMatrix/RiskMatrix.svelte';
@@ -83,7 +84,7 @@
 <div class="bg-white shadow-sm p-4 px-8 max-w-5xl mx-auto relative">
 	<!-- Workshop Navigation Pad -->
 	<div
-		class="fixed top-24 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
+		class="fixed top-36 right-8 z-10 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-3 no-print"
 	>
 		<div class="text-xs font-semibold text-gray-600 mb-2 text-center">{m.workshops()}</div>
 		<div class="flex flex-col gap-2 items-center">
@@ -249,7 +250,9 @@
 							<div>
 								<span class="font-semibold text-gray-700">{m.gravity()}:</span>
 								<span
-									class="ml-2 px-2 py-1 rounded"
+									class="ml-2 px-2 py-1 rounded {isDark(event.gravity.hexcolor)
+										? 'text-white'
+										: ''}"
 									style="background-color: {event.gravity.hexcolor}"
 								>
 									{safeTranslate(event.gravity.name)}
@@ -610,7 +613,9 @@
 								<div>
 									<span class="font-semibold text-gray-700">{m.gravity()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded"
+										class="ml-2 px-2 py-1 rounded {isDark(scenario.gravity.hexcolor)
+											? 'text-white'
+											: ''}"
 										style="background-color: {scenario.gravity.hexcolor}"
 									>
 										{safeTranslate(scenario.gravity.name)}
@@ -709,7 +714,11 @@
 								<div>
 									<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.likelihood.hexcolor
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.likelihood.hexcolor}"
 									>
 										{safeTranslate(opScenario.likelihood.name)}
@@ -718,7 +727,11 @@
 								<div>
 									<span class="font-semibold text-gray-700">{m.gravity()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.gravity.hexcolor
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.gravity.hexcolor}"
 									>
 										{safeTranslate(opScenario.gravity.name)}
@@ -727,7 +740,11 @@
 								<div>
 									<span class="font-semibold text-gray-700">{m.riskLevel()}:</span>
 									<span
-										class="ml-2 px-2 py-1 rounded text-xs font-medium"
+										class="ml-2 px-2 py-1 rounded text-xs font-medium {isDark(
+											opScenario.risk_level.hexcolor || '#808080'
+										)
+											? 'text-white'
+											: ''}"
 										style="background-color: {opScenario.risk_level.hexcolor || '#gray'}"
 									>
 										{safeTranslate(opScenario.risk_level.name)}
@@ -802,7 +819,9 @@
 												<div class="text-xs">
 													<span class="font-semibold text-gray-700">{m.likelihood()}:</span>
 													<span
-														class="ml-1 px-2 py-0.5 rounded"
+														class="ml-1 px-2 py-0.5 rounded {isDark(mode.likelihood.hexcolor)
+															? 'text-white'
+															: ''}"
 														style="background-color: {mode.likelihood.hexcolor}"
 													>
 														{safeTranslate(mode.likelihood.name)}
@@ -927,7 +946,11 @@
 										<td class="px-4 py-3 text-sm border-r">
 											{#if scenario.inherent_level}
 												<span
-													class="px-2 py-1 rounded text-xs font-medium"
+													class="px-2 py-1 rounded text-xs font-medium {isDark(
+														scenario.inherent_level.hexcolor
+													)
+														? 'text-white'
+														: ''}"
 													style="background-color: {scenario.inherent_level.hexcolor}"
 												>
 													{safeTranslate(scenario.inherent_level.name)}
@@ -940,7 +963,11 @@
 									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.current_level}
 											<span
-												class="px-2 py-1 rounded text-xs font-medium"
+												class="px-2 py-1 rounded text-xs font-medium {isDark(
+													scenario.current_level.hexcolor
+												)
+													? 'text-white'
+													: ''}"
 												style="background-color: {scenario.current_level.hexcolor}"
 											>
 												{safeTranslate(scenario.current_level.name)}
@@ -952,7 +979,11 @@
 									<td class="px-4 py-3 text-sm border-r">
 										{#if scenario.residual_level}
 											<span
-												class="px-2 py-1 rounded text-xs font-medium"
+												class="px-2 py-1 rounded text-xs font-medium {isDark(
+													scenario.residual_level.hexcolor
+												)
+													? 'text-white'
+													: ''}"
 												style="background-color: {scenario.residual_level.hexcolor}"
 											>
 												{safeTranslate(scenario.residual_level.name)}

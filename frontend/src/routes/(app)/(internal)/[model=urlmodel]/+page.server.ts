@@ -10,7 +10,7 @@ import { modelSchema } from '$lib/utils/schemas';
 import type { ModelInfo } from '$lib/utils/types';
 import { type Actions } from '@sveltejs/kit';
 import { fail, superValidate, withFiles, setError, message } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import type { PageServerLoad } from './$types';
 import { setFlash } from 'sveltekit-flash-message/server';
@@ -62,7 +62,8 @@ export const actions: Actions = {
 			event.params.model === 'entity-assessments' ||
 				event.params.model === 'quantitative-risk-hypotheses' ||
 				event.params.model === 'quantitative-risk-studies' ||
-				event.params.model === 'quantitative-risk-scenarios'
+				event.params.model === 'quantitative-risk-scenarios' ||
+				event.params.model === 'risk-assessments'
 		);
 		return defaultWriteFormAction({
 			event,

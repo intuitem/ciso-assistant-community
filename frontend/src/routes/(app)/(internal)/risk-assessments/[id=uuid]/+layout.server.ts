@@ -7,7 +7,7 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { error, redirect } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
@@ -117,7 +117,9 @@ export const load: LayoutServerLoad = async ({ fetch, params, cookies, locals })
 	const initialDataDuplicate = {
 		name: risk_assessment.name,
 		description: risk_assessment.description,
-		version: risk_assessment.version
+		version: risk_assessment.version,
+		folder: risk_assessment.folder.id,
+		perimeter: risk_assessment.perimeter?.id
 	};
 
 	const riskAssessmentDuplicateForm = await superValidate(

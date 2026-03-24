@@ -8,7 +8,7 @@ import type { urlModel } from '$lib/utils/types';
 import { superValidate } from 'sveltekit-superforms';
 import { z } from 'zod';
 import type { LayoutServerLoad } from './$types';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 
 export const load: LayoutServerLoad = async ({ fetch, params }) => {
 	const URLModel: urlModel = 'risk-matrices';

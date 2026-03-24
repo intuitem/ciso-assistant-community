@@ -193,6 +193,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder', urlModel: 'entities' },
 			{ field: 'folder', urlModel: 'assets' },
 			{ field: 'folder', urlModel: 'applied-controls' },
+			{ field: 'folder', urlModel: 'task-templates' },
 			{ field: 'folder', urlModel: 'processings' },
 			{
 				field: 'folder',
@@ -674,7 +675,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableDelete: true,
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
 				}
 			}
 		],
@@ -863,6 +865,52 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'task_node', urlModel: 'task-nodes' }
 		]
 	},
+	'managed-documents': {
+		name: 'manageddocument',
+		localName: 'managedDocument',
+		localNamePlural: 'managedDocuments',
+		verboseName: 'Managed document',
+		verboseNamePlural: 'Managed documents',
+		foreignKeyFields: [
+			{ field: 'policy', urlModel: 'policies' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		reverseForeignKeyFields: [{ field: 'document', urlModel: 'document-revisions' }],
+		selectFields: [{ field: 'document_type' }],
+		detailViewFields: [
+			{ field: 'name' },
+			{ field: 'document_type' },
+			{ field: 'policy' },
+			{ field: 'folder' },
+			{ field: 'template_used' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
+	'document-revisions': {
+		name: 'documentrevision',
+		localName: 'documentRevision',
+		localNamePlural: 'documentRevisions',
+		verboseName: 'Document revision',
+		verboseNamePlural: 'Document revisions',
+		foreignKeyFields: [
+			{ field: 'document', urlModel: 'managed-documents' },
+			{ field: 'folder', urlModel: 'folders', urlParams: 'content_type=DO&content_type=GL' }
+		],
+		selectFields: [{ field: 'status' }],
+		detailViewFields: [
+			{ field: 'document' },
+			{ field: 'version_number' },
+			{ field: 'status' },
+			{ field: 'author' },
+			{ field: 'reviewer' },
+			{ field: 'change_summary' },
+			{ field: 'reviewer_comments' },
+			{ field: 'published_at', type: 'datetime' },
+			{ field: 'created_at', type: 'datetime' },
+			{ field: 'updated_at', type: 'datetime' }
+		]
+	},
 	'compliance-assessments': {
 		name: 'complianceassessment',
 		localName: 'complianceAssessment',
@@ -934,7 +982,7 @@ export const URL_MODEL_MAP: ModelMap = {
 		localNamePlural: 'generalSettings',
 		verboseName: 'General settings',
 		verboseNamePlural: 'General settings',
-		selectFields: [{ field: 'security_objective_scale' }]
+		selectFields: [{ field: 'security_objective_scale' }, { field: 'default_language' }]
 	},
 	'feature-flags': {
 		name: 'featureFlags',
@@ -1255,7 +1303,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				urlModel: 'applied-controls',
 				disableDelete: true,
 				addExisting: {
-					parentField: 'associated_controls'
+					parentField: 'associated_controls',
+					lazy: true
 				}
 			},
 			{
@@ -1841,7 +1890,8 @@ export const URL_MODEL_MAP: ModelMap = {
 				field: 'findings',
 				urlModel: 'applied-controls',
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
 				}
 			},
 			{
@@ -1989,6 +2039,7 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'findings_assessment' },
 			{ field: 'created_at' },
 			{ field: 'updated_at' },
+			{ field: 'scheduled_date' },
 			{ field: 'due_date' },
 			{ field: 'status' },
 			{ field: 'observation' }
@@ -2057,13 +2108,14 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'status' },
 			{ field: 'health' },
+			{ field: 'is_active' },
+			{ field: 'start_date', type: 'date' },
 			{ field: 'eta', type: 'date' },
 			{ field: 'due_date', type: 'date' },
+			{ field: 'closing_date', type: 'date' },
 			{ field: 'observation' },
 			{ field: 'assigned_to' },
-			{ field: 'issues' },
-			{ field: 'assets' },
-			{ field: 'tasks' }
+			{ field: 'issues' }
 		],
 		reverseForeignKeyFields: [
 			{
@@ -2072,7 +2124,27 @@ export const URL_MODEL_MAP: ModelMap = {
 				disableCreate: false,
 				disableDelete: true,
 				addExisting: {
-					parentField: 'applied_controls'
+					parentField: 'applied_controls',
+					lazy: true
+				}
+			},
+			{
+				field: 'objectives',
+				urlModel: 'task-templates',
+				disableCreate: false,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'tasks'
+				}
+			},
+			{
+				field: 'organisation_objectives',
+				urlModel: 'assets',
+				disableCreate: false,
+				disableDelete: true,
+				addExisting: {
+					parentField: 'assets',
+					lazy: true
 				}
 			},
 			{
@@ -2329,18 +2401,18 @@ export const URL_MODEL_MAP: ModelMap = {
 			{ field: 'folder' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
-			{ field: 'category' },
-			{ field: 'status' },
-			{ field: 'authority' },
-			{ field: 'updated_at', type: 'datetime' },
-			{ field: 'expiry_date', type: 'date' }
+			{ field: 'commission_date', type: 'date' },
+			{ field: 'duration_months' },
+			{ field: 'expiry_date', type: 'date' },
+			{ field: 'updated_at', type: 'datetime' }
 		],
 		foreignKeyFields: [
 			{ field: 'folder', urlModel: 'folders' },
 			{ field: 'author', urlModel: 'actors' },
 			{ field: 'checklist', urlModel: 'compliance-assessments' },
 			{ field: 'linked_collection', urlModel: 'generic-collections' },
-			{ field: 'authority', urlModel: 'entities' }
+			{ field: 'authority', urlModel: 'entities' },
+			{ field: 'decision_evidence', urlModel: 'evidences' }
 		],
 		selectFields: [
 			{ field: 'folder' },

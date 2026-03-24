@@ -11,7 +11,7 @@ import { type TableSource } from '@skeletonlabs/skeleton-svelte';
 import { fail, type Actions } from '@sveltejs/kit';
 import { setFlash } from 'sveltekit-flash-message/server';
 import { m } from '$paraglide/messages';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { defaultWriteFormAction } from '$lib/utils/actions';
 import { safeTranslate } from '$lib/utils/i18n';
 

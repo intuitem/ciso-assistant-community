@@ -4,8 +4,9 @@ from typing import Any
 import structlog
 from django.db import models, transaction
 from django.db.models import F
+from django.utils import timezone
 
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import *
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -231,10 +232,39 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
+    has_editing_draft = serializers.SerializerMethodField()
+    editing_languages = serializers.SerializerMethodField()
+
+    def get_has_editing_draft(self, obj):
+        return obj.editing_draft is not None
+
+    def get_editing_languages(self, obj):
+        """Return list of language codes available in the draft or published translations."""
+        langs = set()
+        # Base locale
+        if obj.locale:
+            langs.add(obj.locale)
+        # From model translations (published)
+        if obj.translations and isinstance(obj.translations, dict):
+            langs.update(obj.translations.keys())
+        # From editing_draft level translations + _meta
+        if obj.editing_draft and isinstance(obj.editing_draft, dict):
+            meta = obj.editing_draft.get("_meta", {})
+            if isinstance(meta.get("translations"), dict):
+                langs.update(meta["translations"].keys())
+            for category in ("probability", "impact", "risk"):
+                levels = obj.editing_draft.get(category, [])
+                if isinstance(levels, list):
+                    for level in levels:
+                        if isinstance(level, dict) and isinstance(
+                            level.get("translations"), dict
+                        ):
+                            langs.update(level["translations"].keys())
+        return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations"]
+        exclude = ["translations", "editing_draft", "editing_history"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -420,7 +450,7 @@ class RiskAssessmentWriteSerializer(BaseModelSerializer):
 class RiskAssessmentDuplicateSerializer(BaseModelSerializer):
     class Meta:
         model = RiskAssessment
-        fields = ["name", "version", "perimeter", "description"]
+        fields = ["name", "version", "perimeter", "description", "folder"]
 
 
 class RiskAssessmentReadSerializer(AssessmentReadSerializer):
@@ -527,6 +557,11 @@ class AssetWriteSerializer(BaseModelSerializer):
     incidents = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Incident.objects.all(),
+        required=False,
+    )
+    organisation_objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
         required=False,
     )
 
@@ -699,6 +734,19 @@ class AssetAutocompleteSerializer(BaseModelSerializer):
     class Meta:
         model = Asset
         fields = ["id", "name", "ref_id", "type", "folder"]
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data["str"] = str(instance)
+        return data
+
+
+class AppliedControlAutocompleteSerializer(BaseModelSerializer):
+    folder = FieldsRelatedField()
+
+    class Meta:
+        model = AppliedControl
+        fields = ["id", "name", "ref_id", "folder"]
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1210,7 +1258,7 @@ class AppliedControlReadSerializer(AppliedControlWriteSerializer):
         if annual_cost == 0:
             return ""
         currency = self.get_currency(obj)
-        return f"{annual_cost:,.2f} {currency}"
+        return AppliedControl._stringify_cost(f"{annual_cost:,.2f}", currency)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -1362,9 +1410,11 @@ class RiskAssessmentActionPlanSerializer(ActionPlanSerializer):
 
 
 class AppliedControlDuplicateSerializer(BaseModelSerializer):
+    duplicate_evidences = serializers.BooleanField(default=False)
+
     class Meta:
         model = AppliedControl
-        fields = ["name", "description", "folder"]
+        fields = ["name", "description", "folder", "duplicate_evidences"]
 
 
 class AppliedControlImportExportSerializer(BaseModelSerializer):
@@ -1530,7 +1580,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return email
 
     def create(self, validated_data):
-        send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(
@@ -2031,6 +2081,12 @@ class OrganisationObjectiveWriteSerializer(BaseModelSerializer):
         if applied_controls is not None:
             instance.applied_controls.set(applied_controls)
         return instance
+
+
+class OrganisationObjectiveDuplicateSerializer(BaseModelSerializer):
+    class Meta:
+        model = OrganisationObjective
+        fields = ["name", "description", "folder"]
 
 
 class OrganisationIssueReadSerializer(BaseModelSerializer):
@@ -2946,6 +3002,75 @@ class FindingReadSerializer(FindingWriteSerializer):
         fields = "__all__"
 
 
+class PresetJourneyStepReadSerializer(BaseModelSerializer):
+    title = serializers.CharField(source="get_title_translated")
+    description = serializers.CharField(
+        source="get_description_translated", allow_blank=True
+    )
+
+    class Meta:
+        model = PresetJourneyStep
+        exclude = ["translations"]
+
+
+class PresetJourneyStepWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourneyStep
+        fields = ["status", "notes", "target_ref"]
+
+    def update(self, instance, validated_data):
+        if "status" in validated_data:
+            new_status = validated_data["status"]
+            if new_status in (
+                PresetJourneyStep.Status.DONE,
+                PresetJourneyStep.Status.SKIPPED,
+            ):
+                validated_data["completed_at"] = timezone.now()
+                validated_data["completed_by"] = self.context["request"].user
+            elif new_status == PresetJourneyStep.Status.NOT_STARTED:
+                validated_data["completed_at"] = None
+                validated_data["completed_by"] = None
+
+        with transaction.atomic():
+            # Sync target_ref change to parent journey's object_refs
+            if "target_ref" in validated_data:
+                new_ref = validated_data["target_ref"]
+                journey = instance.journey
+                object_refs = dict(journey.object_refs or {})
+                if new_ref:
+                    object_refs[instance.key] = new_ref
+                else:
+                    object_refs.pop(instance.key, None)
+                journey.object_refs = object_refs
+                journey.save(update_fields=["object_refs"])
+
+            return super().update(instance, validated_data)
+
+
+class PresetJourneyReadSerializer(BaseModelSerializer):
+    steps = PresetJourneyStepReadSerializer(many=True, read_only=True)
+    folder = FieldsRelatedField()
+    latest_version = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PresetJourney
+        fields = "__all__"
+
+    def get_latest_version(self, obj):
+        return (
+            StoredLibrary.objects.filter(urn=obj.urn)
+            .order_by("-version")
+            .values_list("version", flat=True)
+            .first()
+        )
+
+
+class PresetJourneyWriteSerializer(BaseModelSerializer):
+    class Meta:
+        model = PresetJourney
+        fields = ["name", "description"]
+
+
 class QuickStartSerializer(serializers.Serializer):
     folder = serializers.UUIDField(required=False)
     audit_name = serializers.CharField()
@@ -3210,6 +3335,11 @@ class TaskTemplateWriteSerializer(BaseModelSerializer):
     status = serializers.CharField(required=False)
     observation = serializers.CharField(
         required=False, allow_blank=True, allow_null=True
+    )
+    objectives = serializers.PrimaryKeyRelatedField(
+        queryset=OrganisationObjective.objects.all(),
+        many=True,
+        required=False,
     )
 
     class Meta:
