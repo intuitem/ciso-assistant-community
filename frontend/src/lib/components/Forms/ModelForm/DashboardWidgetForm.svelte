@@ -105,12 +105,12 @@
 		cacheLock={cacheLocks['time_range']}
 		bind:cachedValue={formDataCache['time_range']}
 		label={m.timeRange()}
+		disableDoubleDash={true}
 	/>
 </div>
 
 <!-- Aggregation hidden for now -->
 <input type="hidden" name="aggregation" value={formDataCache['aggregation'] || 'none'} />
-
 <Checkbox
 	{form}
 	field="show_target"
