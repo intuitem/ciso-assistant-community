@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { complianceResultTailwindColorMap } from '$lib/utils/constants';
 	import RadioGroup from '$lib/components/Forms/RadioGroup.svelte';
+	import Question from '$lib/components/Forms/Question.svelte';
 	import { m } from '$paraglide/messages';
 	import type { PageData } from './$types';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -170,6 +171,29 @@
 		if (observationTimer) clearTimeout(observationTimer);
 		observationTimer = setTimeout(() => saveObservation(value), 500);
 	}
+
+	function saveAnswer(urn: string, newAnswer: any) {
+		if (!currentRequirementAssessment) return;
+		if (!currentRequirementAssessment.answers) currentRequirementAssessment.answers = {};
+		currentRequirementAssessment.answers[urn] = newAnswer;
+		const form = document.getElementById('flashModeForm');
+		fetch(form!.action, {
+			method: 'POST',
+			body: JSON.stringify({
+				id: currentRequirementAssessment.id,
+				answers: { [urn]: newAnswer }
+			})
+		});
+	}
+
+	let currentQuestions = $derived(
+		currentRequirementAssessment
+			? (requirementHashmap[currentRequirementAssessment.requirement?.id]?.questions ?? null)
+			: null
+	);
+	let hasQuestions = $derived(
+		currentQuestions != null && Object.keys(currentQuestions).length > 0
+	);
 
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;
@@ -365,6 +389,18 @@
 								<div class="content-annotation">
 									<div class="annotation-bar"></div>
 									<MarkdownRenderer content={requirement.annotation} />
+								</div>
+							{/if}
+
+							{#if hasQuestions}
+								<div class="mt-4">
+									<Question
+										questions={currentQuestions}
+										initialValue={currentRequirementAssessment.answers ?? {}}
+										field="answers"
+										disabled={isReadOnly}
+										onChange={saveAnswer}
+									/>
 								</div>
 							{/if}
 						{/if}
