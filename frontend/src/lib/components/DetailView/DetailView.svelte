@@ -434,6 +434,17 @@
 
 	<!-- Main content area - modified to use conditional flex layout -->
 	<div class="card shadow-lg bg-white p-4">
+		{#if data.urlModel === 'stakeholders' && data.data?.ebios_rm_study?.id}
+			<div class="mb-4 p-3">
+				<Anchor
+					href={'/ebios-rm/' + data.data.ebios_rm_study.id + '/workshop-3/ecosystem'}
+					class="anchor text-sm"
+				>
+					<i class="fa-solid fa-arrow-left"></i>
+					{m.backToWorkshop()} : {m.ebiosWs3_1()}
+				</Anchor>
+			</div>
+		{/if}
 		{#each data.data?.sync_mappings as syncMapping}
 			<div class="mb-4 p-4 bg-secondary-50 border-l-4 border-secondary-400">
 				<h3 class="font-semibold text-secondary-800 mb-2">
