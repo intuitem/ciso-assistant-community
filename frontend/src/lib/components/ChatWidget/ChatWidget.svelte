@@ -345,9 +345,7 @@
 											{#if pc.status === 'selected'}
 												<div
 													class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs
-														{pc.selectedId === item.id
-														? 'bg-violet-50 text-violet-900'
-														: 'text-gray-400'}"
+														{pc.selectedId === item.id ? 'bg-violet-50 text-violet-900' : 'text-gray-400'}"
 												>
 													{#if pc.selectedId === item.id}
 														<i class="fa-solid fa-check-circle text-violet-500 text-[10px]"></i>

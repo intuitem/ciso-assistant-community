@@ -18,6 +18,29 @@ from .providers import get_llm, is_ollama_available
 
 logger = structlog.get_logger(__name__)
 
+_LANG_MAP = {
+    "fr": "French",
+    "en": "English",
+    "de": "German",
+    "es": "Spanish",
+    "it": "Italian",
+    "nl": "Dutch",
+    "pt": "Portuguese",
+    "ar": "Arabic",
+    "pl": "Polish",
+    "ro": "Romanian",
+    "sv": "Swedish",
+    "da": "Danish",
+    "cs": "Czech",
+    "uk": "Ukrainian",
+    "el": "Greek",
+    "tr": "Turkish",
+    "hr": "Croatian",
+    "zh": "Chinese",
+    "lt": "Lithuanian",
+    "ko": "Korean",
+}
+
 
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "chat.serializers"
@@ -118,9 +141,11 @@ class ChatSessionViewSet(BaseModelViewSet):
             # Inject previous query metadata so the LLM can handle follow-ups
             # like "give me more", "next page", "show me page 3"
             last_query_meta = _get_last_query_meta(session)
-            tool_prompt = user_content
+            user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
+            lang_name = _LANG_MAP.get(user_lang, "English")
+            tool_prompt = f"LANGUAGE: Generate all names and descriptions in {lang_name}.\n\n{user_content}"
             if page_context_prefix or last_query_meta:
-                tool_prompt = page_context_prefix
+                tool_prompt = f"LANGUAGE: Generate all names and descriptions in {lang_name}.\n\n{page_context_prefix}"
                 if last_query_meta:
                     tool_prompt += (
                         f"Previous query context: model={last_query_meta.get('model')}, "
@@ -176,6 +201,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     accessible_folder_ids=accessible_folders,
                     llm=llm,
                     history=wf_history,
+                    user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
                 )
 
                 def stream_workflow():
@@ -456,6 +482,12 @@ class ChatSessionViewSet(BaseModelViewSet):
             enrichment = _enrich_context(parsed_context, accessible_folders)
             if enrichment:
                 context += "\n\n" + enrichment
+
+        # Inject explicit language instruction based on the user's locale
+        # This is more reliable than the system prompt for small models
+        user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
+        lang_name = _LANG_MAP.get(user_lang, "English")
+        context = f"LANGUAGE: You MUST respond in {lang_name}.\n\n" + context
 
         # Prepend page context to the LLM context so it knows where the user is
         if page_context_prefix and not query_result:

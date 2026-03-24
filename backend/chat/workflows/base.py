@@ -16,11 +16,34 @@ from chat.page_context import ParsedContext
 
 logger = structlog.get_logger(__name__)
 
-# Appended to all workflow LLM prompts
-LANGUAGE_INSTRUCTION = (
-    "\n\nRespond in the same language the user writes in. "
-    "If the input mixes languages, respond in English."
-)
+# Language code → explicit name for LLM instructions
+_LANG_MAP = {
+    "fr": "French",
+    "en": "English",
+    "de": "German",
+    "es": "Spanish",
+    "it": "Italian",
+    "nl": "Dutch",
+    "pt": "Portuguese",
+    "ar": "Arabic",
+    "pl": "Polish",
+    "ro": "Romanian",
+    "sv": "Swedish",
+    "da": "Danish",
+    "cs": "Czech",
+    "uk": "Ukrainian",
+    "el": "Greek",
+    "tr": "Turkish",
+    "hr": "Croatian",
+    "zh": "Chinese",
+    "lt": "Lithuanian",
+    "ko": "Korean",
+}
+
+
+def _language_instruction(lang_code: str = "en") -> str:
+    lang_name = _LANG_MAP.get(lang_code[:2], "English")
+    return f"\n\nYou MUST respond in {lang_name}."
 
 
 @dataclass
@@ -50,6 +73,7 @@ class WorkflowContext:
     accessible_folder_ids: list[str]
     llm: object  # LLM provider instance
     history: list[dict] = field(default_factory=list)
+    user_lang: str = "en"  # ISO language code from Accept-Language
 
 
 class Workflow:
@@ -194,7 +218,7 @@ class Workflow:
         Returns the full response text via a mutable list (last element).
         """
         if not skip_language_hint:
-            prompt = prompt + LANGUAGE_INSTRUCTION
+            prompt = prompt + _language_instruction(ctx.user_lang)
         t0 = time.time()
         full_response = []
         for token_type, token in ctx.llm.stream(prompt, context, history=ctx.history):
