@@ -178,7 +178,7 @@
 						<span class="text-xs text-gray-500">CEL Expression</span>
 						<textarea
 							value={rule.expression}
-							placeholder="e.g. assessment.score_sum >= 150 or "true" for catch-all"
+							placeholder={'e.g. assessment.score_sum >= 150 or "true" for catch-all'}
 							rows="2"
 							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 							onblur={(e) => {
