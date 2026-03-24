@@ -304,6 +304,18 @@ async function streamResponse(userMessage: string) {
 							needsFlush = true;
 							scheduleFlush();
 						}
+					} else if (data.type === 'pending_choice') {
+						const msg = messages.find((m) => m.id === assistantMessageId);
+						if (msg) {
+							msg.pendingChoice = {
+								id: generateId(),
+								field: data.field,
+								label: data.label,
+								items: data.items,
+								status: 'pending'
+							};
+							messages = [...messages];
+						}
 					} else if (data.type === 'pending_action') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
@@ -616,6 +628,23 @@ export function rejectAction(messageId: string) {
 	msg.pendingAction.status = 'rejected';
 	messages = [...messages];
 	saveState();
+}
+
+export function selectChoice(messageId: string, itemId: string) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingChoice || msg.pendingChoice.status !== 'pending') return;
+
+	const item = msg.pendingChoice.items.find((i) => i.id === itemId);
+	if (!item) return;
+
+	// Mark the choice as selected
+	msg.pendingChoice.status = 'selected';
+	msg.pendingChoice.selectedId = itemId;
+	messages = [...messages];
+	saveState();
+
+	// Send the selection as a user message so the workflow can pick it up
+	sendMessage(item.name);
 }
 
 export function startNewSession() {

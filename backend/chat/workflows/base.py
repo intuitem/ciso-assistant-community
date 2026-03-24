@@ -27,7 +27,9 @@ LANGUAGE_INSTRUCTION = (
 class SSEEvent:
     """A single Server-Sent Event to stream to the frontend."""
 
-    type: str  # "token", "thinking", "pending_action", "done", "error"
+    type: (
+        str  # "token", "thinking", "pending_action", "pending_choice", "done", "error"
+    )
     content: str | dict = ""
 
     def encode(self) -> str:
@@ -105,6 +107,17 @@ class Workflow:
     def _pending_action(self, action_data: dict) -> SSEEvent:
         """Emit a pending action (shown as confirmation cards)."""
         return SSEEvent(type="pending_action", content=action_data)
+
+    def _pending_choice(self, field: str, label: str, items: list[dict]) -> SSEEvent:
+        """
+        Emit a single-select choice card.
+        items: list of {id, name, description?}
+        When the user picks one, their next message will contain the selection.
+        """
+        return SSEEvent(
+            type="pending_choice",
+            content={"field": field, "label": label, "items": items},
+        )
 
     def _error(self, message: str) -> SSEEvent:
         """Emit an error event."""

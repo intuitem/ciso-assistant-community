@@ -996,6 +996,47 @@ _WORKFLOW_ROUTES: list[tuple[str, set[str], str]] = [
         },
         "evidence_guidance",
     ),
+    (
+        "ebios_rm_study",
+        {
+            # EN
+            "conduct",
+            "assist",
+            "help",
+            "study",
+            "workshop",
+            "generate",
+            "fill",
+            "draft",
+            # FR
+            "mener",
+            "conduire",
+            "assister",
+            "aider",
+            "étude",
+            "atelier",
+            "générer",
+            "remplir",
+            "ébauche",
+        },
+        "ebios_rm_assist",
+    ),
+    (
+        "folder",
+        {
+            # EN
+            "ebios",
+            "ebios rm",
+            "study",
+            "risk study",
+            # FR
+            "étude",
+            "etude",
+            "analyse de risque",
+            "analyse des risques",
+        },
+        "ebios_rm_assist",
+    ),
 ]
 
 
@@ -1004,15 +1045,20 @@ def _match_workflow(user_message: str, parsed_context) -> "Workflow | None":
     Match a workflow based on page context + message keywords.
     Returns the workflow instance if matched, None otherwise.
     """
-    if not parsed_context or not parsed_context.object_id:
-        return None
-
     msg_lower = user_message.lower()
 
-    for model_key, keywords, workflow_name in _WORKFLOW_ROUTES:
-        if parsed_context.model_key != model_key:
-            continue
-        if any(kw in msg_lower for kw in keywords):
-            from .workflows import get_workflow_by_tool_name
+    # Context-specific routes (require being on a matching detail page)
+    if parsed_context and parsed_context.object_id:
+        for model_key, keywords, workflow_name in _WORKFLOW_ROUTES:
+            if parsed_context.model_key != model_key:
+                continue
+            if any(kw in msg_lower for kw in keywords):
+                from .workflows import get_workflow_by_tool_name
 
-            return get_workflow_by_tool_name(f"workflow_{workflow_name}")
+                return get_workflow_by_tool_name(f"workflow_{workflow_name}")
+
+    # Global routes — match from ANY page when keywords are strong enough
+    if any(kw in msg_lower for kw in ("ebios", "ebios rm")):
+        from .workflows import get_workflow_by_tool_name
+
+        return get_workflow_by_tool_name("workflow_ebios_rm_assist")

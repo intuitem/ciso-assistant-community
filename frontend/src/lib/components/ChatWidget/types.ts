@@ -17,6 +17,15 @@ export interface PendingAction {
 	m2mField?: string;
 }
 
+export interface PendingChoice {
+	id: string;
+	field: string;
+	label: string;
+	items: { id: string; name: string; description?: string }[];
+	status: 'pending' | 'selected';
+	selectedId?: string;
+}
+
 export interface ChatMessage {
 	id: string;
 	role: 'user' | 'assistant';
@@ -25,6 +34,7 @@ export interface ChatMessage {
 	timestamp: Date;
 	contextRefs?: ContextRef[];
 	pendingAction?: PendingAction;
+	pendingChoice?: PendingChoice;
 }
 
 export interface ContextRef {

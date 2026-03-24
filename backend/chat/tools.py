@@ -450,6 +450,14 @@ def _build_tools() -> tuple[list[dict], dict]:
                                     "type": "string",
                                     "description": "Optional description",
                                 },
+                                "type": {
+                                    "type": "string",
+                                    "description": (
+                                        "Object type when applicable. "
+                                        "For assets: 'PR' (primary/business) or 'SP' (supporting/technical). "
+                                        "Always classify assets correctly."
+                                    ),
+                                },
                             },
                             "required": ["name"],
                         },
@@ -693,6 +701,14 @@ def _build_create_proposal(
     parent_fk_field = None
     parent_id = None
 
+    # If the user is on a folder/domain page, use that folder directly
+    if (
+        parsed_context
+        and parsed_context.object_id
+        and parsed_context.model_key == "folder"
+    ):
+        folder_id = parsed_context.object_id
+
     # Check if creating a child of the current page's object
     if parsed_context and parsed_context.object_id:
         for child_key, fk_field in PARENT_CHILD_MAP.get(parsed_context.model_key, []):
@@ -700,15 +716,20 @@ def _build_create_proposal(
                 parent_fk_field = fk_field
                 parent_id = parsed_context.object_id
                 # Inherit folder from parent object
-                parent_info = MODEL_MAP.get(parsed_context.model_key)
-                if parent_info:
-                    try:
-                        parent_model = apps.get_model(parent_info[0], parent_info[1])
-                        parent_obj = parent_model.objects.filter(id=parent_id).first()
-                        if parent_obj and hasattr(parent_obj, "folder_id"):
-                            folder_id = str(parent_obj.folder_id)
-                    except Exception:
-                        pass
+                if not folder_id:
+                    parent_info = MODEL_MAP.get(parsed_context.model_key)
+                    if parent_info:
+                        try:
+                            parent_model = apps.get_model(
+                                parent_info[0], parent_info[1]
+                            )
+                            parent_obj = parent_model.objects.filter(
+                                id=parent_id
+                            ).first()
+                            if parent_obj and hasattr(parent_obj, "folder_id"):
+                                folder_id = str(parent_obj.folder_id)
+                        except Exception:
+                            pass
                 break
 
     if not folder_id:
@@ -723,7 +744,24 @@ def _build_create_proposal(
     if not folder_id and accessible_folder_ids:
         folder_id = accessible_folder_ids[0]
 
-    # Build proposal items — each gets name, description, folder, and parent FK
+    # Build proposal items — each gets name, description, folder, parent FK,
+    # and any extra fields the LLM provided that match the model's actual fields.
+    model_class = apps.get_model(app_label, model_name)
+    model_field_names = {f.name for f in model_class._meta.get_fields()}
+    # Fields that are managed internally — never accept from LLM
+    _INTERNAL_FIELDS = {
+        "id",
+        "created_at",
+        "updated_at",
+        "folder",
+        "is_published",
+        "urn",
+        "ref_id",
+        "locale",
+        "default_locale",
+        "provider",
+    }
+
     proposal_items = []
     for item in items:
         if isinstance(item, str):
@@ -733,6 +771,14 @@ def _build_create_proposal(
         entry = {"name": item["name"].strip()}
         if item.get("description"):
             entry["description"] = item["description"].strip()
+        # Pass through extra fields that exist on the model (e.g., type, category)
+        for key, value in item.items():
+            if key in ("name", "description"):
+                continue
+            if key in _INTERNAL_FIELDS:
+                continue
+            if key in model_field_names and value is not None:
+                entry[key] = value
         if folder_id:
             entry["folder"] = folder_id
         if parent_fk_field and parent_id:
@@ -742,11 +788,12 @@ def _build_create_proposal(
         if model_key == "ebios_rm_study" and "risk_matrix" not in entry:
             try:
                 RiskMatrix = apps.get_model("core", "RiskMatrix")
-                matrix = (
-                    RiskMatrix.objects.filter(folder_id__in=accessible_folder_ids)
-                    .order_by("-created_at")
-                    .first()
-                )
+                matrix = RiskMatrix.objects.filter(
+                    is_enabled=True,
+                    folder_id__in=accessible_folder_ids,
+                ).first()
+                if not matrix:
+                    matrix = RiskMatrix.objects.filter(is_enabled=True).first()
                 if matrix:
                     entry["risk_matrix"] = str(matrix.id)
             except Exception:

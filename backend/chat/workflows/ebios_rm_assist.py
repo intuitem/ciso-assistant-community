@@ -33,12 +33,252 @@ class EbiosRMAssistWorkflow(Workflow):
         "risk origin / target objective couples, strategic scenarios, attack paths, "
         "and operational scenarios based on the study context. Use this when the "
         "user asks to help with the EBIOS RM study, conduct the analysis, "
-        "fill in the workshops, or get started. Works in any language."
+        "fill in the workshops, or get started. Works in any language. "
+        "Can also be triggered from a domain/folder page to create a full study "
+        "from scratch using existing domain assets."
     )
-    context_models = ["ebios_rm_study"]
+    context_models = []  # Available on ALL pages (folder, study, or general)
 
     def run(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
-        # Step 1: Read study state
+        model_key = ctx.parsed_context.model_key if ctx.parsed_context else None
+
+        if model_key == "folder":
+            yield from self._run_from_folder(ctx)
+        elif model_key == "ebios_rm_study":
+            yield from self._run_from_study(ctx)
+        else:
+            # General page — ask user to pick a domain first
+            yield from self._run_from_general(ctx)
+
+    # ── Entry point: from a general page (no specific context) ────────
+
+    def _run_from_general(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
+        """User asked for EBIOS RM from a general page — ask which domain."""
+        from iam.models import Folder
+
+        folders = list(
+            Folder.objects.filter(
+                id__in=ctx.accessible_folder_ids,
+                content_type=Folder.ContentType.DOMAIN,
+            ).order_by("name")[:20]
+        )
+
+        if not folders:
+            yield self._token("No domains are available. Please create a domain first.")
+            return
+
+        if len(folders) == 1:
+            # Only one domain — use it directly by faking a folder context
+            ctx.parsed_context = (
+                type(ctx.parsed_context)(
+                    model_key="folder",
+                    object_id=str(folders[0].id),
+                    page_type="detail",
+                )
+                if ctx.parsed_context
+                else None
+            )
+            if not ctx.parsed_context:
+                from ..page_context import ParsedContext
+
+                ctx.parsed_context = ParsedContext(
+                    model_key="folder",
+                    object_id=str(folders[0].id),
+                    page_type="detail",
+                )
+            yield from self._run_from_folder(ctx)
+            return
+
+        # Check if user already picked a domain (from history)
+        picked = self._read_choice_from_history(ctx, "domain", folders)
+        if picked:
+            from ..page_context import ParsedContext
+
+            ctx.parsed_context = ParsedContext(
+                model_key="folder",
+                object_id=str(picked.id),
+                page_type="detail",
+            )
+            yield from self._run_from_folder(ctx)
+            return
+
+        # Multiple domains — ask user to pick
+        yield self._token(
+            "I can help you conduct an EBIOS RM study. "
+            "Which domain should the study be created in?"
+        )
+        yield self._pending_choice(
+            field="domain",
+            label="Select a domain",
+            items=[
+                {"id": str(f.id), "name": f.name, "description": f.description or ""}
+                for f in folders
+            ],
+        )
+
+    # ── Entry point: from a folder/domain page ───────────────────────
+
+    def _run_from_folder(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
+        """Drive a full EBIOS RM study from a domain page."""
+        from iam.models import Folder
+
+        yield self._thinking("Looking up domain and existing assets...")
+
+        folder_id = ctx.parsed_context.object_id
+        try:
+            folder = Folder.objects.get(id=folder_id)
+        except Folder.DoesNotExist:
+            yield self._token("I couldn't find this domain.")
+            return
+
+        # Check for existing assets in this domain
+        Asset = apps.get_model("core", "Asset")
+        domain_assets = list(
+            Asset.objects.filter(
+                folder_id=folder_id,
+            ).values("id", "name", "type", "description")[:30]
+        )
+
+        # Find available risk matrices
+        RiskMatrix = apps.get_model("core", "RiskMatrix")
+        available_matrices = list(
+            RiskMatrix.objects.filter(
+                is_enabled=True,
+                folder_id__in=ctx.accessible_folder_ids,
+            ).order_by("name")[:20]
+        )
+        if not available_matrices:
+            # Try any enabled matrix (e.g., root folder)
+            available_matrices = list(
+                RiskMatrix.objects.filter(is_enabled=True).order_by("name")[:20]
+            )
+
+        if not available_matrices:
+            yield self._token(
+                "No risk matrix is available. Please load a risk matrix "
+                "library first before creating an EBIOS RM study."
+            )
+            return
+
+        # If multiple matrices, ask the user to pick one
+        risk_matrix = None
+        if len(available_matrices) == 1:
+            risk_matrix = available_matrices[0]
+        else:
+            # Check if user already picked one (from history)
+            picked = self._read_choice_from_history(
+                ctx, "risk_matrix", available_matrices
+            )
+            if picked:
+                risk_matrix = picked
+            else:
+                yield self._token(
+                    f"I'll create an EBIOS RM study for **{folder.name}**. "
+                    f"First, which risk matrix should I use?"
+                )
+                yield self._pending_choice(
+                    field="risk_matrix",
+                    label="Select a risk matrix",
+                    items=[
+                        {"id": str(m.id), "name": m.name} for m in available_matrices
+                    ],
+                )
+                return
+
+        yield self._thinking(
+            f"Domain: {folder.name}\n"
+            f"Assets found: {len(domain_assets)}\n"
+            f"Risk matrix: {risk_matrix.name}"
+        )
+
+        # If no assets and no framing context, ask for input
+        if not domain_assets and not self._has_framing_context(
+            {"description": "", "name": folder.name}, ctx
+        ):
+            yield self._token(
+                f"I'll create an EBIOS RM study for the domain **{folder.name}**.\n\n"
+                f"I found no existing assets in this domain. "
+                f"To generate a relevant study, I need some context:\n\n"
+                f"1. **What is the scope** of this study? "
+                f"(e.g., patient data management, e-commerce platform)\n"
+                f"2. **What are the critical assets/systems** involved?\n"
+                f"3. **What sector/industry** are you in?\n"
+                f"4. **Who are the main third parties** involved?\n\n"
+                f"A few sentences are enough — I'll generate the full study."
+            )
+            return
+
+        # Create the EBIOS RM study
+        yield self._thinking("Creating EBIOS RM study...")
+        EbiosRMStudy = apps.get_model("ebios_rm", "EbiosRMStudy")
+
+        # Build a study name from context
+        study_name = self._generate_study_name(ctx, folder.name)
+
+        study_obj = EbiosRMStudy.objects.create(
+            name=study_name,
+            description=ctx.user_message,
+            folder=folder,
+            risk_matrix=risk_matrix,
+        )
+
+        study = {
+            "id": str(study_obj.id),
+            "name": study_obj.name,
+            "description": study_obj.description or "",
+            "folder_id": str(study_obj.folder_id),
+            "risk_matrix_id": str(study_obj.risk_matrix_id),
+            "obj": study_obj,
+        }
+
+        yield self._thinking(f"Created study: {study_name}")
+
+        # Link existing domain assets to the study
+        created = {
+            "assets": [],
+            "feared_events": [],
+            "rotos": [],
+            "strategic_scenarios": [],
+            "attack_paths": [],
+            "operational_scenarios": [],
+        }
+
+        if domain_assets:
+            for a in domain_assets:
+                study_obj.assets.add(a["id"])
+            created["assets"] = [
+                {"id": str(a["id"]), "name": a["name"]} for a in domain_assets
+            ]
+            yield self._thinking(
+                f"Linked {len(domain_assets)} existing assets to the study."
+            )
+        else:
+            # Generate assets if none exist
+            yield self._thinking("Workshop 1: Generating assets...")
+            assets = self._generate_assets(ctx, study)
+            if assets:
+                created["assets"] = self._create_assets(study, assets)
+                yield self._thinking(f"Created {len(created['assets'])} assets.")
+
+        # Now run W1 (feared events) through W4 using the standard pipeline
+        yield from self._run_workshops(ctx, study, created, start_from="feared_events")
+
+    def _generate_study_name(self, ctx: WorkflowContext, folder_name: str) -> str:
+        """Generate a concise study name from context."""
+        prompt = (
+            f"Generate a concise EBIOS RM study name (max 60 chars) for this context:\n"
+            f"Domain: {folder_name}\n"
+            f"User request: {ctx.user_message}\n\n"
+            f"Return ONLY the study name, nothing else. "
+            f"Use the same language as the user request."
+        )
+        name = self._call_llm(ctx, prompt).strip().strip("\"'")
+        return name[:100] if name else f"EBIOS RM — {folder_name}"
+
+    # ── Entry point: from an existing study page ─────────────────────
+
+    def _run_from_study(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
+        """Original flow: assist an existing EBIOS RM study."""
         yield self._thinking("Reading study state...")
 
         study = self._fetch_study(ctx)
@@ -60,13 +300,13 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Operational scenarios: {state['operational_scenario_count']}"
         )
 
-        # Step 2: Check if we have enough context to generate
+        # Check if we have enough context to generate
         has_framing = self._has_framing_context(study, ctx)
         if not has_framing:
             yield from self._ask_framing_questions(study)
             return
 
-        # Step 3: Generate objects for missing workshops
+        # Generate objects for missing workshops
         created = {
             "assets": [],
             "feared_events": [],
@@ -84,82 +324,130 @@ class EbiosRMAssistWorkflow(Workflow):
                 created["assets"] = self._create_assets(study, assets)
                 yield self._thinking(f"Created {len(created['assets'])} assets.")
 
-        # Refresh asset list (existing + newly created)
+        # Run remaining workshops
+        start = "feared_events" if state["feared_event_count"] == 0 else None
+        if start is None and state["roto_count"] == 0:
+            start = "rotos"
+        if start is None and state["strategic_scenario_count"] == 0:
+            start = "strategic_scenarios"
+        if start is None and state["attack_path_count"] == 0:
+            start = "attack_paths"
+        if start is None and state["operational_scenario_count"] == 0:
+            start = "operational_scenarios"
+
+        if start:
+            yield from self._run_workshops(ctx, study, created, start_from=start)
+        else:
+            yield from self._stream_summary(ctx, study, created)
+
+    # ── Shared workshop pipeline ─────────────────────────────────────
+
+    def _run_workshops(
+        self,
+        ctx: WorkflowContext,
+        study: dict,
+        created: dict,
+        start_from: str = "feared_events",
+    ) -> Iterator[SSEEvent]:
+        """Run workshops from a given starting point through W4."""
+        steps = [
+            "feared_events",
+            "rotos",
+            "strategic_scenarios",
+            "attack_paths",
+            "operational_scenarios",
+        ]
+        start_idx = steps.index(start_from) if start_from in steps else 0
+
         all_assets = self._get_all_assets(study)
 
         # W1: Feared events
-        if state["feared_event_count"] == 0 and all_assets:
-            yield self._thinking("Workshop 1: Generating feared events...")
-            feared_events = self._generate_feared_events(ctx, study, all_assets)
-            if feared_events:
-                created["feared_events"] = self._create_feared_events(
-                    study, feared_events, all_assets
-                )
-                yield self._thinking(
-                    f"Created {len(created['feared_events'])} feared events."
-                )
+        if start_idx <= 0:
+            all_feared_events = self._get_all_feared_events(study)
+            if not all_feared_events and all_assets:
+                yield self._thinking("Workshop 1: Generating feared events...")
+                feared_events = self._generate_feared_events(ctx, study, all_assets)
+                if feared_events:
+                    created["feared_events"] = self._create_feared_events(
+                        study, feared_events, all_assets
+                    )
+                    yield self._thinking(
+                        f"Created {len(created['feared_events'])} feared events."
+                    )
 
-        # Refresh feared events list
         all_feared_events = self._get_all_feared_events(study)
 
         # W2: RoTo couples
-        if state["roto_count"] == 0 and all_feared_events:
-            yield self._thinking(
-                "Workshop 2: Generating risk origin / target objective couples..."
-            )
-            rotos = self._generate_rotos(ctx, study, all_feared_events)
-            if rotos:
-                created["rotos"] = self._create_rotos(study, rotos, all_feared_events)
-                yield self._thinking(f"Created {len(created['rotos'])} RoTo couples.")
+        if start_idx <= 1:
+            all_rotos = self._get_all_rotos(study)
+            if not all_rotos and all_feared_events:
+                yield self._thinking(
+                    "Workshop 2: Generating risk origin / target objective couples..."
+                )
+                rotos = self._generate_rotos(ctx, study, all_feared_events)
+                if rotos:
+                    created["rotos"] = self._create_rotos(
+                        study, rotos, all_feared_events
+                    )
+                    yield self._thinking(
+                        f"Created {len(created['rotos'])} RoTo couples."
+                    )
 
-        # Refresh RoTo list
         all_rotos = self._get_all_rotos(study)
 
         # W3: Strategic scenarios
-        if state["strategic_scenario_count"] == 0 and all_rotos:
-            yield self._thinking("Workshop 3: Generating strategic scenarios...")
-            scenarios = self._generate_strategic_scenarios(
-                ctx, study, all_rotos, all_feared_events
-            )
-            if scenarios:
-                created["strategic_scenarios"] = self._create_strategic_scenarios(
-                    study, scenarios, all_rotos, all_feared_events
+        if start_idx <= 2:
+            all_strategic_scenarios = self._get_all_strategic_scenarios(study)
+            if not all_strategic_scenarios and all_rotos:
+                yield self._thinking("Workshop 3: Generating strategic scenarios...")
+                scenarios = self._generate_strategic_scenarios(
+                    ctx, study, all_rotos, all_feared_events
                 )
-                yield self._thinking(
-                    f"Created {len(created['strategic_scenarios'])} strategic scenarios."
-                )
+                if scenarios:
+                    created["strategic_scenarios"] = self._create_strategic_scenarios(
+                        study, scenarios, all_rotos, all_feared_events
+                    )
+                    yield self._thinking(
+                        f"Created {len(created['strategic_scenarios'])} strategic scenarios."
+                    )
 
-        # Refresh strategic scenarios
         all_strategic_scenarios = self._get_all_strategic_scenarios(study)
 
         # W3: Attack paths
-        if state["attack_path_count"] == 0 and all_strategic_scenarios:
-            yield self._thinking("Workshop 3: Generating attack paths...")
-            attack_paths = self._generate_attack_paths(
-                ctx, study, all_strategic_scenarios
-            )
-            if attack_paths:
-                created["attack_paths"] = self._create_attack_paths(
-                    study, attack_paths, all_strategic_scenarios
+        if start_idx <= 3:
+            all_attack_paths = self._get_all_attack_paths(study)
+            if not all_attack_paths and all_strategic_scenarios:
+                yield self._thinking("Workshop 3: Generating attack paths...")
+                attack_paths = self._generate_attack_paths(
+                    ctx, study, all_strategic_scenarios
                 )
-                yield self._thinking(
-                    f"Created {len(created['attack_paths'])} attack paths."
-                )
+                if attack_paths:
+                    created["attack_paths"] = self._create_attack_paths(
+                        study, attack_paths, all_strategic_scenarios
+                    )
+                    yield self._thinking(
+                        f"Created {len(created['attack_paths'])} attack paths."
+                    )
 
-        # Refresh attack paths
         all_attack_paths = self._get_all_attack_paths(study)
 
-        # W4/W5: Operational scenarios
-        if state["operational_scenario_count"] == 0 and all_attack_paths:
-            yield self._thinking("Workshop 4: Generating operational scenarios...")
-            created["operational_scenarios"] = self._create_operational_scenarios(
-                study, all_attack_paths
+        # W4: Operational scenarios
+        if start_idx <= 4:
+            existing_ops = (
+                apps.get_model("ebios_rm", "OperationalScenario")
+                .objects.filter(ebios_rm_study=study["obj"])
+                .exists()
             )
-            yield self._thinking(
-                f"Created {len(created['operational_scenarios'])} operational scenarios."
-            )
+            if not existing_ops and all_attack_paths:
+                yield self._thinking("Workshop 4: Generating operational scenarios...")
+                created["operational_scenarios"] = self._create_operational_scenarios(
+                    study, all_attack_paths
+                )
+                yield self._thinking(
+                    f"Created {len(created['operational_scenarios'])} operational scenarios."
+                )
 
-        # Step 4: Stream summary
+        # Summary
         yield from self._stream_summary(ctx, study, created)
 
     # ── Framing ──────────────────────────────────────────────────────
@@ -659,6 +947,30 @@ class EbiosRMAssistWorkflow(Workflow):
         yield from self._stream_llm(ctx, prompt)
 
     # ── Helpers ──────────────────────────────────────────────────────
+
+    def _read_choice_from_history(
+        self, ctx: WorkflowContext, field: str, options: list
+    ):
+        """
+        Check if the user has already answered a pending_choice by looking at
+        the last user message in history. Match it against the option names.
+        """
+        if not ctx.history:
+            return None
+        # The last user message should be the choice (sent by selectChoice)
+        last_user = None
+        for msg in reversed(ctx.history):
+            if msg.get("role") == "user":
+                last_user = msg.get("content", "").strip()
+                break
+        if not last_user:
+            return None
+        # Match against option names (case-insensitive)
+        for option in options:
+            name = getattr(option, "name", "") or str(option)
+            if last_user.lower() == name.lower():
+                return option
+        return None
 
     def _parse_json_array(self, text: str) -> list[dict]:
         """Extract a JSON array from LLM output."""

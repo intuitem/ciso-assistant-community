@@ -25,6 +25,7 @@
 		rejectAction,
 		toggleItemSelection,
 		toggleAllSelection,
+		selectChoice,
 		getSuggestedActions
 	} from './chatStore.svelte';
 
@@ -330,6 +331,41 @@
 											{selectedCount} item{selectedCount !== 1 ? 's' : ''} successfully
 										</div>
 									{/if}
+								</div>
+							{/if}
+							{#if message.pendingChoice}
+								{@const pc = message.pendingChoice}
+								<div class="mt-2 rounded-xl border border-gray-200 bg-white p-2.5 shadow-sm">
+									<div class="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-gray-600">
+										<i class="fa-solid fa-hand-pointer text-violet-500"></i>
+										{pc.label}
+									</div>
+									<div class="space-y-0.5">
+										{#each pc.items as item}
+											{#if pc.status === 'selected'}
+												<div
+													class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs
+														{pc.selectedId === item.id
+														? 'bg-violet-50 text-violet-900'
+														: 'text-gray-400'}"
+												>
+													{#if pc.selectedId === item.id}
+														<i class="fa-solid fa-check-circle text-violet-500 text-[10px]"></i>
+													{/if}
+													<span>{item.name}</span>
+												</div>
+											{:else}
+												<button
+													onclick={() => selectChoice(message.id, item.id)}
+													class="w-full flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-left
+														text-gray-700 hover:bg-violet-50 hover:text-violet-900 transition-colors cursor-pointer"
+												>
+													<i class="fa-regular fa-circle text-gray-400 text-[10px]"></i>
+													<span>{item.name}</span>
+												</button>
+											{/if}
+										{/each}
+									</div>
 								</div>
 							{/if}
 							<div class="mt-1 flex items-center gap-1 px-1">
@@ -700,6 +736,48 @@
 												{selectedCount} item{selectedCount !== 1 ? 's' : ''} successfully
 											</div>
 										{/if}
+									</div>
+								{/if}
+								{#if message.pendingChoice}
+									{@const pc = message.pendingChoice}
+									<div class="mt-2 rounded-xl border border-gray-200 bg-white p-3.5 shadow-sm">
+										<div class="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
+											<i class="fa-solid fa-hand-pointer text-violet-500"></i>
+											{pc.label}
+										</div>
+										<div class="space-y-1">
+											{#each pc.items as item}
+												{#if pc.status === 'selected'}
+													<div
+														class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm
+															{pc.selectedId === item.id
+															? 'bg-violet-50 text-violet-900 border border-violet-200'
+															: 'text-gray-400'}"
+													>
+														{#if pc.selectedId === item.id}
+															<i class="fa-solid fa-check-circle text-violet-500 text-xs"></i>
+														{:else}
+															<i class="fa-solid fa-circle text-gray-300 text-xs"></i>
+														{/if}
+														<span>{item.name}</span>
+													</div>
+												{:else}
+													<button
+														onclick={() => selectChoice(message.id, item.id)}
+														class="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-left
+															text-gray-700 hover:bg-violet-50 hover:text-violet-900 transition-colors cursor-pointer"
+													>
+														<i class="fa-regular fa-circle text-gray-400 text-xs"></i>
+														<div>
+															<span>{item.name}</span>
+															{#if item.description}
+																<span class="block text-xs text-gray-400">{item.description}</span>
+															{/if}
+														</div>
+													</button>
+												{/if}
+											{/each}
+										</div>
 									</div>
 								{/if}
 								<div class="mt-1 flex items-center gap-1.5 px-1">
