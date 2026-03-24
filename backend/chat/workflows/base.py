@@ -74,6 +74,7 @@ class WorkflowContext:
     llm: object  # LLM provider instance
     history: list[dict] = field(default_factory=list)
     user_lang: str = "en"  # ISO language code from Accept-Language
+    session: object = None  # ChatSession instance for state persistence
 
 
 class Workflow:
@@ -146,6 +147,42 @@ class Workflow:
     def _error(self, message: str) -> SSEEvent:
         """Emit an error event."""
         return SSEEvent(type="error", content=message)
+
+    # ── State persistence ────────────────────────────────────────────
+
+    def _save_state(self, ctx: WorkflowContext, step: str, data: dict) -> None:
+        """
+        Save workflow checkpoint to the session.
+        Call this before yielding a pending_choice or returning early.
+        """
+        if not ctx.session:
+            return
+        ctx.session.workflow_state = {
+            "workflow": self.name,
+            "step": step,
+            "data": data,
+        }
+        ctx.session.save(update_fields=["workflow_state"])
+
+    def _load_state(self, ctx: WorkflowContext) -> dict | None:
+        """
+        Load a previously saved checkpoint.
+        Returns the state dict if the workflow name matches, None otherwise.
+        """
+        if not ctx.session:
+            return None
+        state = ctx.session.workflow_state
+        if not state or state.get("workflow") != self.name:
+            return None
+        return state
+
+    def _clear_state(self, ctx: WorkflowContext) -> None:
+        """Clear the workflow checkpoint (call on completion)."""
+        if not ctx.session:
+            return
+        if ctx.session.workflow_state:
+            ctx.session.workflow_state = {}
+            ctx.session.save(update_fields=["workflow_state"])
 
     def _parse_recommended_indices(
         self, llm_response: str, candidates: list[dict]

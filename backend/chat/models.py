@@ -22,6 +22,15 @@ class ChatSession(AbstractBaseModel, FolderMixin):
     title = models.CharField(
         max_length=200, blank=True, default="", verbose_name=_("Title")
     )
+    workflow_state = models.JSONField(
+        default=dict,
+        blank=True,
+        verbose_name=_("Workflow state"),
+        help_text=_(
+            "Persisted checkpoint for multi-step workflows. "
+            "Cleared when the workflow completes or the session is reset."
+        ),
+    )
 
     class Meta:
         verbose_name = _("Chat session")

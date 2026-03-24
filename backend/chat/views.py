@@ -202,6 +202,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                     llm=llm,
                     history=wf_history,
                     user_lang=request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2],
+                    session=session,
                 )
 
                 def stream_workflow():

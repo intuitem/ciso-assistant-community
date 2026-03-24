@@ -40,21 +40,92 @@ class EbiosRMAssistWorkflow(Workflow):
     context_models = []  # Available on ALL pages (folder, study, or general)
 
     def run(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
-        model_key = ctx.parsed_context.model_key if ctx.parsed_context else None
+        # Check for a saved checkpoint first
+        state = self._load_state(ctx)
+        if state:
+            step = state.get("step", "")
+            data = state.get("data", {})
+            if step == "awaiting_domain":
+                yield from self._resume_domain_choice(ctx)
+                return
+            if step == "awaiting_matrix":
+                yield from self._resume_matrix_choice(ctx, data)
+                return
+            if step == "awaiting_framing":
+                yield from self._resume_framing(ctx, data)
+                return
 
+        # No checkpoint — route based on page context
+        model_key = ctx.parsed_context.model_key if ctx.parsed_context else None
         if model_key == "folder":
             yield from self._run_from_folder(ctx)
         elif model_key == "ebios_rm_study":
             yield from self._run_from_study(ctx)
         else:
-            # General page — ask user to pick a domain first
             yield from self._run_from_general(ctx)
 
-    # ── Entry point: from a general page (no specific context) ────────
+    # ── Resume from checkpoints ──────────────────────────────────────
+
+    def _resume_domain_choice(self, ctx) -> Iterator[SSEEvent]:
+        from iam.models import Folder
+        from ..page_context import ParsedContext
+
+        folders = list(
+            Folder.objects.filter(
+                id__in=ctx.accessible_folder_ids,
+                content_type=Folder.ContentType.DOMAIN,
+            )
+        )
+        picked = self._match_choice(ctx.user_message, folders)
+        if not picked:
+            self._clear_state(ctx)
+            yield self._token("I didn't recognize that domain. Please try again.")
+            return
+        ctx.parsed_context = ParsedContext(
+            model_key="folder", object_id=str(picked.id), page_type="detail"
+        )
+        self._clear_state(ctx)
+        yield from self._run_from_folder(ctx)
+
+    def _resume_matrix_choice(self, ctx, data) -> Iterator[SSEEvent]:
+        from ..page_context import ParsedContext
+
+        RiskMatrix = apps.get_model("core", "RiskMatrix")
+        matrices = list(RiskMatrix.objects.filter(is_enabled=True))
+        picked = self._match_choice(ctx.user_message, matrices)
+        if not picked:
+            self._clear_state(ctx)
+            yield self._token("I didn't recognize that matrix. Please try again.")
+            return
+        ctx.parsed_context = ParsedContext(
+            model_key="folder", object_id=data.get("folder_id"), page_type="detail"
+        )
+        self._clear_state(ctx)
+        yield from self._run_from_folder(ctx, forced_matrix=picked)
+
+    def _resume_framing(self, ctx, data) -> Iterator[SSEEvent]:
+        from ..page_context import ParsedContext
+
+        RiskMatrix = apps.get_model("core", "RiskMatrix")
+        matrix = RiskMatrix.objects.filter(id=data.get("risk_matrix_id")).first()
+        ctx.parsed_context = ParsedContext(
+            model_key="folder", object_id=data.get("folder_id"), page_type="detail"
+        )
+        self._clear_state(ctx)
+        yield from self._run_from_folder(ctx, forced_matrix=matrix)
+
+    def _match_choice(self, user_message: str, options: list):
+        msg = user_message.strip().lower()
+        for option in options:
+            if msg == (getattr(option, "name", "") or str(option)).lower():
+                return option
+        return None
+
+    # ── Entry point: from a general page ─────────────────────────────
 
     def _run_from_general(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
-        """User asked for EBIOS RM from a general page — ask which domain."""
         from iam.models import Folder
+        from ..page_context import ParsedContext
 
         folders = list(
             Folder.objects.filter(
@@ -62,47 +133,18 @@ class EbiosRMAssistWorkflow(Workflow):
                 content_type=Folder.ContentType.DOMAIN,
             ).order_by("name")[:20]
         )
-
         if not folders:
             yield self._token("No domains are available. Please create a domain first.")
             return
-
         if len(folders) == 1:
-            # Only one domain — use it directly by faking a folder context
-            ctx.parsed_context = (
-                type(ctx.parsed_context)(
-                    model_key="folder",
-                    object_id=str(folders[0].id),
-                    page_type="detail",
-                )
-                if ctx.parsed_context
-                else None
-            )
-            if not ctx.parsed_context:
-                from ..page_context import ParsedContext
-
-                ctx.parsed_context = ParsedContext(
-                    model_key="folder",
-                    object_id=str(folders[0].id),
-                    page_type="detail",
-                )
-            yield from self._run_from_folder(ctx)
-            return
-
-        # Check if user already picked a domain (from history)
-        picked = self._read_choice_from_history(ctx, "domain", folders)
-        if picked:
-            from ..page_context import ParsedContext
-
             ctx.parsed_context = ParsedContext(
-                model_key="folder",
-                object_id=str(picked.id),
-                page_type="detail",
+                model_key="folder", object_id=str(folders[0].id), page_type="detail"
             )
             yield from self._run_from_folder(ctx)
             return
 
-        # Multiple domains — ask user to pick
+        # Multiple domains — save checkpoint and ask
+        self._save_state(ctx, "awaiting_domain", {})
         yield self._token(
             "I can help you conduct an EBIOS RM study. "
             "Which domain should the study be created in?"
@@ -118,7 +160,9 @@ class EbiosRMAssistWorkflow(Workflow):
 
     # ── Entry point: from a folder/domain page ───────────────────────
 
-    def _run_from_folder(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
+    def _run_from_folder(
+        self, ctx: WorkflowContext, forced_matrix=None
+    ) -> Iterator[SSEEvent]:
         """Drive a full EBIOS RM study from a domain page."""
         from iam.models import Folder
 
@@ -139,39 +183,31 @@ class EbiosRMAssistWorkflow(Workflow):
             ).values("id", "name", "type", "description")[:30]
         )
 
-        # Find available risk matrices
-        RiskMatrix = apps.get_model("core", "RiskMatrix")
-        available_matrices = list(
-            RiskMatrix.objects.filter(
-                is_enabled=True,
-                folder_id__in=ctx.accessible_folder_ids,
-            ).order_by("name")[:20]
-        )
-        if not available_matrices:
-            # Try any enabled matrix (e.g., root folder)
+        # Resolve risk matrix
+        risk_matrix = forced_matrix
+        if not risk_matrix:
+            RiskMatrix = apps.get_model("core", "RiskMatrix")
             available_matrices = list(
-                RiskMatrix.objects.filter(is_enabled=True).order_by("name")[:20]
+                RiskMatrix.objects.filter(
+                    is_enabled=True,
+                    folder_id__in=ctx.accessible_folder_ids,
+                ).order_by("name")[:20]
             )
-
-        if not available_matrices:
-            yield self._token(
-                "No risk matrix is available. Please load a risk matrix "
-                "library first before creating an EBIOS RM study."
-            )
-            return
-
-        # If multiple matrices, ask the user to pick one
-        risk_matrix = None
-        if len(available_matrices) == 1:
-            risk_matrix = available_matrices[0]
-        else:
-            # Check if user already picked one (from history)
-            picked = self._read_choice_from_history(
-                ctx, "risk_matrix", available_matrices
-            )
-            if picked:
-                risk_matrix = picked
+            if not available_matrices:
+                available_matrices = list(
+                    RiskMatrix.objects.filter(is_enabled=True).order_by("name")[:20]
+                )
+            if not available_matrices:
+                yield self._token(
+                    "No risk matrix is available. Please load a risk matrix "
+                    "library first before creating an EBIOS RM study."
+                )
+                return
+            if len(available_matrices) == 1:
+                risk_matrix = available_matrices[0]
             else:
+                # Save checkpoint and ask
+                self._save_state(ctx, "awaiting_matrix", {"folder_id": str(folder_id)})
                 yield self._token(
                     f"I'll create an EBIOS RM study for **{folder.name}**. "
                     f"First, which risk matrix should I use?"
@@ -195,6 +231,11 @@ class EbiosRMAssistWorkflow(Workflow):
         if not domain_assets and not self._has_framing_context(
             {"description": "", "name": folder.name}, ctx
         ):
+            self._save_state(
+                ctx,
+                "awaiting_framing",
+                {"folder_id": str(folder_id), "risk_matrix_id": str(risk_matrix.id)},
+            )
             yield self._token(
                 f"I'll create an EBIOS RM study for the domain **{folder.name}**.\n\n"
                 f"I found no existing assets in this domain. "
@@ -945,6 +986,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Mention that they can navigate to each workshop to adjust the results."
         )
         yield from self._stream_llm(ctx, prompt)
+        self._clear_state(ctx)
 
     # ── Helpers ──────────────────────────────────────────────────────
 
