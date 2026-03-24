@@ -37,10 +37,10 @@
 
 	// Drag state for sections
 	let draggedSectionIndex: number | null = $state(null);
+	let lastMousedownTarget: EventTarget | null = null;
 
 	function handleSectionDragStart(e: DragEvent, index: number) {
-		const target = e.target as HTMLElement;
-		if (!target.closest('[data-drag-handle]')) {
+		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
 			e.preventDefault();
 			return;
 		}
@@ -74,13 +74,16 @@
 	}
 
 	// Warn on SvelteKit navigation about unpublished draft
-	beforeNavigate(({ cancel }) => {
-		if (
-			!confirm(
-				'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
-			)
-		) {
-			cancel();
+	beforeNavigate((navigation) => {
+		// Only warn on actual page navigation, not internal state changes
+		if (navigation.to?.route?.id !== navigation.from?.route?.id) {
+			if (
+				!confirm(
+					'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
+				)
+			) {
+				navigation.cancel();
+			}
 		}
 	});
 
@@ -193,6 +196,7 @@
 			<div
 				class:opacity-50={draggedSectionIndex === sectionIndex}
 				draggable="true"
+				onmousedown={(e) => (lastMousedownTarget = e.target)}
 				ondragstart={(e) => handleSectionDragStart(e, sectionIndex)}
 				ondragover={handleSectionDragOver}
 				ondrop={(e) => handleSectionDrop(e, sectionIndex)}

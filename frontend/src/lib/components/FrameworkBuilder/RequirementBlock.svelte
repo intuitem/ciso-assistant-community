@@ -29,10 +29,10 @@
 
 	// Drag state for children
 	let draggedChildIndex: number | null = $state(null);
+	let lastMousedownTarget: EventTarget | null = null;
 
 	function handleChildDragStart(e: DragEvent, index: number) {
-		const target = e.target as HTMLElement;
-		if (!target.closest('[data-drag-handle]')) {
+		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
 			e.preventDefault();
 			return;
 		}
@@ -221,6 +221,7 @@
 				<div
 					class:opacity-50={draggedChildIndex === childIndex}
 					draggable="true"
+					onmousedown={(e) => (lastMousedownTarget = e.target)}
 					ondragstart={(e) => handleChildDragStart(e, childIndex)}
 					ondragover={handleChildDragOver}
 					ondrop={(e) => handleChildDrop(e, childIndex)}

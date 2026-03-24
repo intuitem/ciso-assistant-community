@@ -18,15 +18,14 @@
 
 	// Drag state for requirements within this section
 	let draggedReqIndex: number | null = $state(null);
+	let lastMousedownTarget: EventTarget | null = null;
 
 	async function saveField(field: string, value: unknown) {
 		await builder.updateNode(section.node.id, { [field]: value });
 	}
 
 	function handleReqDragStart(e: DragEvent, index: number) {
-		// Only allow drag if initiated from the grip handle
-		const target = e.target as HTMLElement;
-		if (!target.closest('[data-drag-handle]')) {
+		if (!(lastMousedownTarget as HTMLElement)?.closest('[data-drag-handle]')) {
 			e.preventDefault();
 			return;
 		}
@@ -123,6 +122,7 @@
 				<div
 					class:opacity-50={draggedReqIndex === reqIndex}
 					draggable="true"
+					onmousedown={(e) => (lastMousedownTarget = e.target)}
 					ondragstart={(e) => handleReqDragStart(e, reqIndex)}
 					ondragover={handleReqDragOver}
 					ondrop={(e) => handleReqDrop(e, reqIndex)}
