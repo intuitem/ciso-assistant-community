@@ -209,7 +209,7 @@ def _reverse_scale_value(display_val: str, scale: list) -> int | None:
     return None
 
 
-def _parse_security_objectives(raw: str) -> dict:
+def _parse_security_objectives(raw: str, scale: list | None = None) -> dict:
     """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}.
 
     Values in the input are *display* values (scale-mapped).  They are
@@ -219,7 +219,8 @@ def _parse_security_objectives(raw: str) -> dict:
     result = {}
     if not raw:
         return result
-    scale = _get_security_objective_scale()
+    if scale is None:
+        scale = _get_security_objective_scale()
     for part in str(raw).split(","):
         part = part.strip()
         if ":" not in part:
@@ -567,7 +568,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer[list]):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -586,10 +587,10 @@ class AssetRecordConsumer(RecordConsumer[None]):
     }
 
     def create_context(self):
-        return None, None
+        return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -637,7 +638,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "recovery_capabilities", ""
         )
 
-        sec_objectives = _parse_security_objectives(raw_sec)
+        sec_objectives = _parse_security_objectives(raw_sec, scale=context)
         rec_objectives = _parse_recovery_objectives(raw_rec)
 
         parse_warning_msgs = []
