@@ -32,10 +32,40 @@ async function proxyRequest(
 	});
 }
 
-export const POST: RequestHandler = async ({ fetch, request, url }) => {
-	const action = url.searchParams.get('_action');
+/** Proxy a draft action (start-editing, publish-draft, discard-draft, save-draft) */
+async function proxyDraftAction(
+	fetch: typeof globalThis.fetch,
+	frameworkId: string,
+	action: string,
+	method: string,
+	payload?: unknown
+) {
+	const url = `${BASE_API_URL}/frameworks/${frameworkId}/${action}/`;
+	const res = await fetch(url, {
+		method,
+		headers: { 'Content-Type': 'application/json' },
+		...(payload !== undefined ? { body: JSON.stringify(payload) } : {})
+	});
 
-	if (action === 'upload-image') {
+	if (!res.ok) {
+		error(res.status as NumericRange<400, 599>, await res.json());
+	}
+
+	if (res.status === 204) {
+		return new Response(null, { status: 204 });
+	}
+
+	const data = await res.json();
+	return new Response(JSON.stringify(data), {
+		status: res.status,
+		headers: { 'Content-Type': 'application/json' }
+	});
+}
+
+export const POST: RequestHandler = async ({ fetch, request, url, params }) => {
+	const urlAction = url.searchParams.get('_action');
+
+	if (urlAction === 'upload-image') {
 		const nodeId = url.searchParams.get('node_id');
 		if (!nodeId) {
 			return new Response(JSON.stringify({ error: 'node_id required' }), { status: 400 });
@@ -56,12 +86,36 @@ export const POST: RequestHandler = async ({ fetch, request, url }) => {
 		});
 	}
 
-	const { endpoint, payload } = await request.json();
+	const body = await request.json();
+
+	// Draft workflow actions (sent via _action in body)
+	if (body._action === 'start-editing') {
+		return proxyDraftAction(fetch, params.id, 'start-editing', 'POST');
+	}
+	if (body._action === 'publish-draft') {
+		return proxyDraftAction(fetch, params.id, 'publish-draft', 'POST');
+	}
+	if (body._action === 'discard-draft') {
+		return proxyDraftAction(fetch, params.id, 'discard-draft', 'POST');
+	}
+
+	// Legacy: generic entity creation
+	const { endpoint, payload } = body;
 	return proxyRequest(fetch, 'POST', endpoint, undefined, payload);
 };
 
-export const PATCH: RequestHandler = async ({ fetch, request }) => {
-	const { endpoint, id, payload } = await request.json();
+export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
+	const body = await request.json();
+
+	// Draft workflow: save-draft
+	if (body._action === 'save-draft') {
+		return proxyDraftAction(fetch, params.id, 'save-draft', 'PATCH', {
+			editing_draft: body.editing_draft
+		});
+	}
+
+	// Legacy: generic entity update
+	const { endpoint, id, payload } = body;
 	return proxyRequest(fetch, 'PATCH', endpoint, id, payload);
 };
 

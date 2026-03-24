@@ -1,6 +1,6 @@
 import { getContext, setContext } from 'svelte';
 import { writable, type Writable } from 'svelte/store';
-import { apiCreate, apiUpdate, apiDelete } from './builder-api';
+import { apiSaveDraft, apiPublishDraft, apiDiscardDraft, type DraftJSON } from './builder-api';
 
 // --- Types ---
 
@@ -155,6 +155,206 @@ function updateRequirementById(
 	});
 }
 
+// --- Serialization / Hydration helpers ---
+
+/** Extract a plain folder_id string from a folder that may be an object or string */
+function extractFolderId(folder: { id: string; str: string } | string): string {
+	return typeof folder === 'string' ? folder : folder.id;
+}
+
+/** Extract a plain requirement_node ID string */
+function extractRequirementNodeId(rn: string | { id: string }): string {
+	return typeof rn === 'string' ? rn : rn.id;
+}
+
+/**
+ * Serialize the current builder state into a flat DraftJSON for persistence.
+ */
+function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
+	const nodes: Record<string, unknown>[] = [];
+	const questions: Record<string, unknown>[] = [];
+	const choices: Record<string, unknown>[] = [];
+
+	function collectFromRequirements(reqs: BuilderRequirement[]) {
+		for (const req of reqs) {
+			const n = req.node;
+			nodes.push({
+				id: n.id,
+				urn: n.urn,
+				ref_id: n.ref_id,
+				name: n.name,
+				description: n.description,
+				annotation: n.annotation,
+				parent_urn: n.parent_urn,
+				order_id: n.order_id,
+				assessable: n.assessable,
+				implementation_groups: n.implementation_groups,
+				typical_evidence: n.typical_evidence,
+				weight: n.weight,
+				importance: n.importance,
+				display_mode: n.display_mode,
+				folder_id: extractFolderId(n.folder)
+			});
+			for (const bq of req.questions) {
+				const q = bq.question;
+				questions.push({
+					id: q.id,
+					urn: q.urn,
+					ref_id: q.ref_id,
+					text: q.text,
+					annotation: q.annotation,
+					type: q.type,
+					config: q.config,
+					depends_on: q.depends_on,
+					order: q.order,
+					weight: q.weight,
+					requirement_node_id: extractRequirementNodeId(q.requirement_node),
+					folder_id: extractFolderId(q.folder)
+				});
+				for (const c of q.choices) {
+					choices.push({
+						id: c.id,
+						urn: c.urn,
+						ref_id: c.ref_id,
+						value: c.value,
+						annotation: c.annotation,
+						add_score: c.add_score,
+						compute_result: c.compute_result,
+						order: c.order,
+						description: c.description,
+						color: c.color,
+						select_implementation_groups: c.select_implementation_groups,
+						question_id: typeof c.question === 'string' ? c.question : c.question,
+						folder_id: extractFolderId(c.folder)
+					});
+				}
+			}
+			collectFromRequirements(req.children);
+		}
+	}
+
+	for (const sec of sections) {
+		const n = sec.node;
+		nodes.push({
+			id: n.id,
+			urn: n.urn,
+			ref_id: n.ref_id,
+			name: n.name,
+			description: n.description,
+			annotation: n.annotation,
+			parent_urn: n.parent_urn,
+			order_id: n.order_id,
+			assessable: n.assessable,
+			implementation_groups: n.implementation_groups,
+			typical_evidence: n.typical_evidence,
+			weight: n.weight,
+			importance: n.importance,
+			display_mode: n.display_mode,
+			folder_id: extractFolderId(n.folder)
+		});
+		collectFromRequirements(sec.requirements);
+	}
+
+	return {
+		framework_meta: {
+			name: fw.name,
+			description: fw.description,
+			min_score: fw.min_score,
+			max_score: fw.max_score,
+			scores_definition: fw.scores_definition,
+			implementation_groups_definition: fw.implementation_groups_definition,
+			outcomes_definition: fw.outcomes_definition as Record<string, unknown>[] | null
+		},
+		nodes,
+		questions,
+		choices
+	};
+}
+
+/**
+ * Hydrate draft JSON (flat arrays with _id suffixed FK fields) into
+ * the RequirementNode[] and Question[] format expected by buildTree.
+ */
+function hydrateDraft(draft: DraftJSON): {
+	frameworkPatch: Partial<Framework>;
+	nodes: RequirementNode[];
+	questions: Question[];
+} {
+	const meta = draft.framework_meta;
+	const frameworkPatch: Partial<Framework> = {
+		name: meta.name,
+		description: meta.description,
+		min_score: meta.min_score,
+		max_score: meta.max_score,
+		scores_definition: meta.scores_definition,
+		implementation_groups_definition: meta.implementation_groups_definition,
+		outcomes_definition: meta.outcomes_definition as OutcomeRule[] | null
+	};
+
+	// Build a lookup from question_id to choices
+	const choicesByQuestion = new Map<string, QuestionChoice[]>();
+	for (const c of draft.choices) {
+		const qId = (c.question_id ?? c.question) as string;
+		if (!choicesByQuestion.has(qId)) choicesByQuestion.set(qId, []);
+		choicesByQuestion.get(qId)!.push({
+			id: c.id as string,
+			urn: (c.urn ?? null) as string | null,
+			ref_id: (c.ref_id ?? null) as string | null,
+			value: (c.value ?? null) as string | null,
+			annotation: (c.annotation ?? null) as string | null,
+			add_score: (c.add_score ?? null) as number | null,
+			compute_result: (c.compute_result ?? null) as string | null,
+			order: (c.order ?? 0) as number,
+			description: (c.description ?? null) as string | null,
+			color: (c.color ?? null) as string | null,
+			select_implementation_groups: (c.select_implementation_groups ?? null) as string[] | null,
+			folder: (c.folder_id ?? c.folder ?? '') as string,
+			question: qId
+		});
+	}
+
+	const questions: Question[] = draft.questions.map((q) => {
+		const nodeId = (q.requirement_node_id ?? q.requirement_node) as string;
+		const qId = q.id as string;
+		return {
+			id: qId,
+			urn: (q.urn ?? '') as string,
+			ref_id: (q.ref_id ?? null) as string | null,
+			text: (q.text ?? null) as string | null,
+			annotation: (q.annotation ?? null) as string | null,
+			type: (q.type ?? 'text') as Question['type'],
+			config: (q.config ?? null) as Record<string, unknown> | null,
+			depends_on: (q.depends_on ?? null) as Record<string, unknown> | null,
+			order: (q.order ?? 0) as number,
+			weight: (q.weight ?? 1) as number,
+			folder: (q.folder_id ?? q.folder ?? '') as string,
+			requirement_node: nodeId,
+			choices: (choicesByQuestion.get(qId) ?? []).sort((a, b) => a.order - b.order)
+		};
+	});
+
+	const nodes: RequirementNode[] = draft.nodes.map((n) => ({
+		id: n.id as string,
+		urn: (n.urn ?? null) as string | null,
+		ref_id: (n.ref_id ?? null) as string | null,
+		name: (n.name ?? null) as string | null,
+		description: (n.description ?? null) as string | null,
+		annotation: (n.annotation ?? null) as string | null,
+		parent_urn: (n.parent_urn ?? null) as string | null,
+		order_id: (n.order_id ?? null) as number | null,
+		assessable: (n.assessable ?? false) as boolean,
+		implementation_groups: (n.implementation_groups ?? null) as string[] | null,
+		typical_evidence: (n.typical_evidence ?? null) as string | null,
+		weight: (n.weight ?? 1) as number,
+		importance: (n.importance ?? '') as string,
+		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
+		framework: (n.framework ?? '') as string,
+		folder: (n.folder_id ?? n.folder ?? '') as string
+	}));
+
+	return { frameworkPatch, nodes, questions };
+}
+
 // --- State ---
 
 const CONTEXT_KEY = 'framework-builder';
@@ -165,28 +365,33 @@ export interface BuilderStore {
 	saving: Writable<boolean>;
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
-	addSection: (afterIndex?: number) => Promise<void>;
-	deleteSection: (sectionIndex: number) => Promise<void>;
-	addRequirement: (parentNodeId: string, parentUrn: string) => Promise<void>;
-	addSplashScreen: (parentNodeId: string, parentUrn: string) => Promise<void>;
-	deleteRequirement: (nodeId: string) => Promise<void>;
-	updateNode: (nodeId: string, patch: Record<string, unknown>) => Promise<void>;
-	addQuestion: (reqNodeId: string, type?: Question['type']) => Promise<void>;
-	updateQuestion: (questionId: string, patch: Record<string, unknown>) => Promise<void>;
-	deleteQuestion: (reqNodeId: string, qIndex: number) => Promise<void>;
-	addChoice: (reqNodeId: string, qIndex: number) => Promise<void>;
-	updateChoice: (choiceId: string, patch: Record<string, unknown>) => Promise<void>;
-	deleteChoice: (reqNodeId: string, qIndex: number, choiceIndex: number) => Promise<void>;
-	reorderSections: (fromIndex: number, toIndex: number) => Promise<void>;
-	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => Promise<void>;
-	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => Promise<void>;
+	hasPendingFlush: Writable<boolean>;
+	addSection: (afterIndex?: number) => void;
+	deleteSection: (sectionIndex: number) => void;
+	addRequirement: (parentNodeId: string, parentUrn: string) => void;
+	addSplashScreen: (parentNodeId: string, parentUrn: string) => void;
+	deleteRequirement: (nodeId: string) => void;
+	updateNode: (nodeId: string, patch: Record<string, unknown>) => void;
+	addQuestion: (reqNodeId: string, type?: Question['type']) => void;
+	updateQuestion: (questionId: string, patch: Record<string, unknown>) => void;
+	deleteQuestion: (reqNodeId: string, qIndex: number) => void;
+	addChoice: (reqNodeId: string, qIndex: number) => void;
+	updateChoice: (choiceId: string, patch: Record<string, unknown>) => void;
+	deleteChoice: (reqNodeId: string, qIndex: number, choiceIndex: number) => void;
+	reorderSections: (fromIndex: number, toIndex: number) => void;
+	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => void;
+	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => void;
 	reorderChoices: (
 		reqNodeId: string,
 		qIndex: number,
 		fromIndex: number,
 		toIndex: number
-	) => Promise<void>;
-	updateFramework: (patch: Record<string, unknown>) => Promise<void>;
+	) => void;
+	updateFramework: (patch: Record<string, unknown>) => void;
+	flushDraft: () => Promise<void>;
+	publish: () => Promise<void>;
+	discard: () => Promise<void>;
+	destroy: () => void;
 }
 
 function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
@@ -247,25 +452,43 @@ function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSect
 	});
 }
 
+/**
+ * Create the builder state. Accepts either:
+ * 1. Draft JSON (from editing_draft) -- hydrates from flat arrays
+ * 2. Relational data (frameworkData, nodes, questions) -- builds tree directly
+ */
 export function createBuilderState(
 	frameworkData: Framework,
 	nodes: RequirementNode[],
-	questions: Question[]
+	questions: Question[],
+	editingDraft?: DraftJSON | null
 ): BuilderStore {
 	const folderId =
 		typeof frameworkData.folder === 'string' ? frameworkData.folder : frameworkData.folder.id;
 	const frameworkId = frameworkData.id;
 
-	const framework = writable<Framework>(frameworkData);
-	const initialSections = buildTree(nodes, questions);
+	// If we have a draft, hydrate from it; otherwise use relational data
+	let initialNodes = nodes;
+	let initialQuestions = questions;
+	let initialFrameworkData = frameworkData;
+
+	if (editingDraft) {
+		const hydrated = hydrateDraft(editingDraft);
+		initialNodes = hydrated.nodes;
+		initialQuestions = hydrated.questions;
+		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
+	}
+
+	const framework = writable<Framework>(initialFrameworkData);
+	const initialSections = buildTree(initialNodes, initialQuestions);
 	const sections = writable<BuilderSection[]>(initialSections);
 	const saving = writable(false);
 	const errors = writable<Map<string, string>>(new Map());
 	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
+	const hasPendingFlush = writable(false);
 
 	function setError(key: string, message: string) {
 		errors.update((m) => new Map(m).set(key, message));
-		setTimeout(() => clearError(key), 5000);
 	}
 
 	function clearError(key: string) {
@@ -303,56 +526,120 @@ export function createBuilderState(
 		return null;
 	}
 
+	// --- Draft save debounce + in-flight lock ---
+
+	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
+	let saveInFlight = false;
+	let savePending = false;
+
+	function scheduleDraftSave() {
+		hasPendingFlush.set(true);
+		if (saveTimeout) clearTimeout(saveTimeout);
+		saveTimeout = setTimeout(() => flushDraft(), 500);
+	}
+
+	async function flushDraft() {
+		if (saveTimeout) {
+			clearTimeout(saveTimeout);
+			saveTimeout = null;
+		}
+		if (saveInFlight) {
+			savePending = true;
+			return;
+		}
+		saveInFlight = true;
+		saving.set(true);
+		try {
+			const draft = serializeDraft(get(framework), get(sections));
+			await apiSaveDraft(draft);
+			clearError('save-draft');
+		} catch (e) {
+			setError('save-draft', (e as Error).message);
+		} finally {
+			saving.set(false);
+			saveInFlight = false;
+			hasPendingFlush.set(false);
+			if (savePending) {
+				savePending = false;
+				flushDraft();
+			}
+		}
+	}
+
+	async function publish() {
+		await flushDraft();
+		try {
+			await apiPublishDraft();
+			clearError('publish');
+		} catch (e) {
+			setError('publish', (e as Error).message);
+			throw e;
+		}
+	}
+
+	async function discard() {
+		try {
+			await apiDiscardDraft();
+			clearError('discard');
+		} catch (e) {
+			setError('discard', (e as Error).message);
+			throw e;
+		}
+	}
+
+	function destroy() {
+		if (saveTimeout) clearTimeout(saveTimeout);
+	}
+
 	// --- Section CRUD ---
 
-	async function addSection(afterIndex?: number) {
+	function addSection(afterIndex?: number) {
 		const currentSections = get(sections);
 		const order =
 			afterIndex !== undefined
 				? (afterIndex + 1) * 100 + 50
 				: currentSections.length * 100;
 
-		try {
-			saving.set(true);
-			const created = await apiCreate('requirement-nodes', {
-				urn: `urn:intuitem:risk:req_node:${crypto.randomUUID()}`,
-				name: 'New Section',
-				assessable: false,
-				order_id: order,
-				framework: frameworkId,
-				folder: folderId
-			});
-			const newSection: BuilderSection = {
-				node: created,
-				requirements: [],
-				collapsed: false
-			};
-			const idx = afterIndex !== undefined ? afterIndex + 1 : currentSections.length;
-			sections.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
-		} catch (e) {
-			setError('add-section', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		const newId = crypto.randomUUID();
+		const newUrn = `urn:intuitem:risk:req_node:${newId}`;
+		const newNode: RequirementNode = {
+			id: newId,
+			urn: newUrn,
+			ref_id: null,
+			name: 'New Section',
+			description: null,
+			annotation: null,
+			parent_urn: null,
+			order_id: order,
+			assessable: false,
+			implementation_groups: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: frameworkId,
+			folder: folderId
+		};
+		const newSection: BuilderSection = {
+			node: newNode,
+			requirements: [],
+			collapsed: false
+		};
+		const idx = afterIndex !== undefined ? afterIndex + 1 : currentSections.length;
+		sections.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
+		scheduleDraftSave();
 	}
 
-	async function deleteSection(sectionIndex: number) {
+	function deleteSection(sectionIndex: number) {
 		const section = get(sections)[sectionIndex];
 		if (!section) return;
-		try {
-			saving.set(true);
-			await apiDelete('requirement-nodes', section.node.id);
-			sections.update((s) => s.filter((_, i) => i !== sectionIndex));
-		} catch (e) {
-			setError(`delete-section-${section.node.id}`, (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		sections.update((s) => s.filter((_, i) => i !== sectionIndex));
+		scheduleDraftSave();
 	}
 
 	// --- Requirement CRUD (node ID-based) ---
 
-	async function addSplashScreen(parentNodeId: string, parentUrn: string) {
+	function addSplashScreen(parentNodeId: string, parentUrn: string) {
 		const siblings = (() => {
 			for (const sec of get(sections)) {
 				if (sec.node.id === parentNodeId) return sec.requirements;
@@ -361,39 +648,42 @@ export function createBuilderState(
 		})();
 		const order = siblings.length * 100;
 
-		try {
-			saving.set(true);
-			const created = await apiCreate('requirement-nodes', {
-				urn: `urn:intuitem:risk:req_node:${crypto.randomUUID()}`,
-				name: 'New Splash Screen',
-				assessable: false,
-				display_mode: 'splash',
-				order_id: order,
-				parent_urn: parentUrn,
-				framework: frameworkId,
-				folder: folderId
-			});
-			const newReq: BuilderRequirement = {
-				node: created,
-				questions: [],
-				children: [],
-				depth: 0
-			};
-			sections.update((s) =>
-				s.map((sec) =>
-					sec.node.id === parentNodeId
-						? { ...sec, requirements: [...sec.requirements, newReq] }
-						: sec
-				)
-			);
-		} catch (e) {
-			setError('add-splash-screen', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		const newId = crypto.randomUUID();
+		const newNode: RequirementNode = {
+			id: newId,
+			urn: `urn:intuitem:risk:req_node:${newId}`,
+			ref_id: null,
+			name: 'New Splash Screen',
+			description: null,
+			annotation: null,
+			parent_urn: parentUrn,
+			order_id: order,
+			assessable: false,
+			implementation_groups: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'splash',
+			framework: frameworkId,
+			folder: folderId
+		};
+		const newReq: BuilderRequirement = {
+			node: newNode,
+			questions: [],
+			children: [],
+			depth: 0
+		};
+		sections.update((s) =>
+			s.map((sec) =>
+				sec.node.id === parentNodeId
+					? { ...sec, requirements: [...sec.requirements, newReq] }
+					: sec
+			)
+		);
+		scheduleDraftSave();
 	}
 
-	async function addRequirement(parentNodeId: string, parentUrn: string) {
+	function addRequirement(parentNodeId: string, parentUrn: string) {
 		const parentReq = findReqGlobal(parentNodeId);
 		const siblings = parentReq ? parentReq.children : (() => {
 			for (const sec of get(sections)) {
@@ -404,69 +694,64 @@ export function createBuilderState(
 		const parentDepth = parentReq ? parentReq.depth : -1;
 		const order = siblings.length * 100;
 
-		try {
-			saving.set(true);
-			const created = await apiCreate('requirement-nodes', {
-				urn: `urn:intuitem:risk:req_node:${crypto.randomUUID()}`,
-				name: 'New Requirement',
-				assessable: true,
-				order_id: order,
-				parent_urn: parentUrn,
-				framework: frameworkId,
-				folder: folderId
-			});
-			const newReq: BuilderRequirement = {
-				node: created,
-				questions: [],
-				children: [],
-				depth: parentDepth + 1
-			};
+		const newId = crypto.randomUUID();
+		const newNode: RequirementNode = {
+			id: newId,
+			urn: `urn:intuitem:risk:req_node:${newId}`,
+			ref_id: null,
+			name: 'New Requirement',
+			description: null,
+			annotation: null,
+			parent_urn: parentUrn,
+			order_id: order,
+			assessable: true,
+			implementation_groups: null,
+			typical_evidence: null,
+			weight: 1,
+			importance: '',
+			display_mode: 'default',
+			framework: frameworkId,
+			folder: folderId
+		};
+		const newReq: BuilderRequirement = {
+			node: newNode,
+			questions: [],
+			children: [],
+			depth: parentDepth + 1
+		};
 
-			if (parentReq) {
-				// Adding as child of a requirement
-				sections.update((s) =>
-					s.map((sec) => ({
-						...sec,
-						requirements: addChildToRequirement(sec.requirements, parentNodeId, newReq)
-					}))
-				);
-			} else {
-				// Adding as direct child of a section
-				sections.update((s) =>
-					s.map((sec) =>
-						sec.node.id === parentNodeId
-							? { ...sec, requirements: [...sec.requirements, newReq] }
-							: sec
-					)
-				);
-			}
-		} catch (e) {
-			setError('add-requirement', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
-	}
-
-	async function deleteRequirement(nodeId: string) {
-		try {
-			saving.set(true);
-			await apiDelete('requirement-nodes', nodeId);
+		if (parentReq) {
 			sections.update((s) =>
 				s.map((sec) => ({
 					...sec,
-					requirements: removeRequirement(sec.requirements, nodeId)
+					requirements: addChildToRequirement(sec.requirements, parentNodeId, newReq)
 				}))
 			);
-		} catch (e) {
-			setError(`delete-req-${nodeId}`, (e as Error).message);
-		} finally {
-			saving.set(false);
+		} else {
+			sections.update((s) =>
+				s.map((sec) =>
+					sec.node.id === parentNodeId
+						? { ...sec, requirements: [...sec.requirements, newReq] }
+						: sec
+				)
+			);
 		}
+		scheduleDraftSave();
+	}
+
+	function deleteRequirement(nodeId: string) {
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: removeRequirement(sec.requirements, nodeId)
+			}))
+		);
+		scheduleDraftSave();
 	}
 
 	// --- Node update ---
 
-	async function updateNode(nodeId: string, patch: Record<string, unknown>) {
+	function updateNode(nodeId: string, patch: Record<string, unknown>) {
 		sections.update((s) =>
 			s.map((sec) => ({
 				...sec,
@@ -477,55 +762,46 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		try {
-			saving.set(true);
-			await apiUpdate('requirement-nodes', nodeId, patch);
-			clearError(`node-${nodeId}`);
-		} catch (e) {
-			setError(`node-${nodeId}`, (e as Error).message);
-			throw e;
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
 	// --- Question CRUD (node ID-based) ---
 
-	async function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
+	function addQuestion(reqNodeId: string, type: Question['type'] = 'text') {
 		const req = findReqGlobal(reqNodeId);
 		if (!req) return;
 		const order = req.questions.length * 100;
-		const urn = `urn:intuitem:risk:question:${crypto.randomUUID()}`;
+		const newId = crypto.randomUUID();
+		const urn = `urn:intuitem:risk:question:${newId}`;
 
-		try {
-			saving.set(true);
-			const created = await apiCreate('questions', {
-				urn,
-				text: '',
-				type,
-				order,
-				weight: 1,
-				requirement_node: reqNodeId,
-				folder: folderId
-			});
-			created.choices = created.choices ?? [];
-			sections.update((s) =>
-				s.map((sec) => ({
-					...sec,
-					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
-						...r,
-						questions: [...r.questions, { question: created }]
-					}))
+		const newQuestion: Question = {
+			id: newId,
+			urn,
+			ref_id: null,
+			text: '',
+			annotation: null,
+			type,
+			config: null,
+			depends_on: null,
+			order,
+			weight: 1,
+			folder: folderId,
+			requirement_node: reqNodeId,
+			choices: []
+		};
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+					...r,
+					questions: [...r.questions, { question: newQuestion }]
 				}))
-			);
-		} catch (e) {
-			setError('add-question', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+			}))
+		);
+		scheduleDraftSave();
 	}
 
-	async function updateQuestion(questionId: string, patch: Record<string, unknown>) {
+	function updateQuestion(questionId: string, patch: Record<string, unknown>) {
 		updateAllRequirements((req) => ({
 			...req,
 			questions: req.questions.map((q) => ({
@@ -534,85 +810,72 @@ export function createBuilderState(
 					q.question.id === questionId ? { ...q.question, ...patch } : q.question
 			}))
 		}));
-		try {
-			saving.set(true);
-			await apiUpdate('questions', questionId, patch);
-			clearError(`question-${questionId}`);
-		} catch (e) {
-			setError(`question-${questionId}`, (e as Error).message);
-			throw e;
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function deleteQuestion(reqNodeId: string, qIndex: number) {
+	function deleteQuestion(reqNodeId: string, qIndex: number) {
 		const req = findReqGlobal(reqNodeId);
 		const q = req?.questions[qIndex];
 		if (!q) return;
-		try {
-			saving.set(true);
-			await apiDelete('questions', q.question.id);
-			sections.update((s) =>
-				s.map((sec) => ({
-					...sec,
-					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
-						...r,
-						questions: r.questions.filter((_, i) => i !== qIndex)
-					}))
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.filter((_, i) => i !== qIndex)
 				}))
-			);
-		} catch (e) {
-			setError(`delete-question-${q.question.id}`, (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+			}))
+		);
+		scheduleDraftSave();
 	}
 
 	// --- Choice CRUD (node ID-based) ---
 
-	async function addChoice(reqNodeId: string, qIndex: number) {
+	function addChoice(reqNodeId: string, qIndex: number) {
 		const req = findReqGlobal(reqNodeId);
 		const q = req?.questions[qIndex];
 		if (!q) return;
 		const order = q.question.choices.length * 100;
+		const newId = crypto.randomUUID();
 
-		try {
-			saving.set(true);
-			const created = await apiCreate('question-choices', {
-				urn: `urn:intuitem:risk:question_choice:${crypto.randomUUID()}`,
-				value: '',
-				order,
-				question: q.question.id,
-				folder: folderId
-			});
-			sections.update((s) =>
-				s.map((sec) => ({
-					...sec,
-					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
-						...r,
-						questions: r.questions.map((qq, i) =>
-							i === qIndex
-								? {
-										...qq,
-										question: {
-											...qq.question,
-											choices: [...qq.question.choices, created]
-										}
+		const newChoice: QuestionChoice = {
+			id: newId,
+			urn: `urn:intuitem:risk:question_choice:${newId}`,
+			ref_id: null,
+			value: '',
+			annotation: null,
+			add_score: null,
+			compute_result: null,
+			order,
+			description: null,
+			color: null,
+			select_implementation_groups: null,
+			folder: folderId,
+			question: q.question.id
+		};
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) =>
+						i === qIndex
+							? {
+									...qq,
+									question: {
+										...qq.question,
+										choices: [...qq.question.choices, newChoice]
 									}
-								: qq
-						)
-					}))
+								}
+							: qq
+					)
 				}))
-			);
-		} catch (e) {
-			setError('add-choice', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+			}))
+		);
+		scheduleDraftSave();
 	}
 
-	async function updateChoice(choiceId: string, patch: Record<string, unknown>) {
+	function updateChoice(choiceId: string, patch: Record<string, unknown>) {
 		updateAllRequirements((req) => ({
 			...req,
 			questions: req.questions.map((q) => ({
@@ -625,93 +888,74 @@ export function createBuilderState(
 				}
 			}))
 		}));
-		try {
-			saving.set(true);
-			await apiUpdate('question-choices', choiceId, patch);
-			clearError(`choice-${choiceId}`);
-		} catch (e) {
-			setError(`choice-${choiceId}`, (e as Error).message);
-			throw e;
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function deleteChoice(reqNodeId: string, qIndex: number, choiceIndex: number) {
+	function deleteChoice(reqNodeId: string, qIndex: number, choiceIndex: number) {
 		const req = findReqGlobal(reqNodeId);
 		const choice = req?.questions[qIndex]?.question.choices[choiceIndex];
 		if (!choice) return;
-		try {
-			saving.set(true);
-			await apiDelete('question-choices', choice.id);
-			sections.update((s) =>
-				s.map((sec) => ({
-					...sec,
-					requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
-						...r,
-						questions: r.questions.map((qq, i) =>
-							i === qIndex
-								? {
-										...qq,
-										question: {
-											...qq.question,
-											choices: qq.question.choices.filter(
-												(_, ci) => ci !== choiceIndex
-											)
-										}
+		sections.update((s) =>
+			s.map((sec) => ({
+				...sec,
+				requirements: updateRequirementById(sec.requirements, reqNodeId, (r) => ({
+					...r,
+					questions: r.questions.map((qq, i) =>
+						i === qIndex
+							? {
+									...qq,
+									question: {
+										...qq.question,
+										choices: qq.question.choices.filter(
+											(_, ci) => ci !== choiceIndex
+										)
 									}
-								: qq
-						)
-					}))
+								}
+							: qq
+					)
 				}))
-			);
-		} catch (e) {
-			setError(`delete-choice-${choice.id}`, (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+			}))
+		);
+		scheduleDraftSave();
 	}
 
 	// --- Reorder ---
 
-	async function reorderSections(fromIndex: number, toIndex: number) {
+	function reorderSections(fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		sections.update((s) => {
 			const copy = [...s];
 			const [moved] = copy.splice(fromIndex, 1);
 			copy.splice(toIndex, 0, moved);
-			return copy;
+			// Update order_id on all sections
+			return copy.map((sec, i) => ({
+				...sec,
+				node: { ...sec.node, order_id: i * 100 }
+			}));
 		});
-		try {
-			saving.set(true);
-			const current = get(sections);
-			await Promise.all(
-				current.map((s, i) =>
-					apiUpdate('requirement-nodes', s.node.id, { order_id: i * 100 })
-				)
-			);
-		} catch (e) {
-			setError('reorder-sections', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function reorderRequirements(
+	function reorderRequirements(
 		parentNodeId: string,
 		fromIndex: number,
 		toIndex: number
 	) {
 		if (fromIndex === toIndex) return;
 
-		// Reorder could be at section level or inside a requirement
 		sections.update((s) =>
 			s.map((sec) => {
 				if (sec.node.id === parentNodeId) {
 					const reqs = [...sec.requirements];
 					const [moved] = reqs.splice(fromIndex, 1);
 					reqs.splice(toIndex, 0, moved);
-					return { ...sec, requirements: reqs };
+					return {
+						...sec,
+						requirements: reqs.map((r, i) => ({
+							...r,
+							node: { ...r.node, order_id: i * 100 }
+						}))
+					};
 				}
 				return {
 					...sec,
@@ -719,32 +963,21 @@ export function createBuilderState(
 						const kids = [...r.children];
 						const [moved] = kids.splice(fromIndex, 1);
 						kids.splice(toIndex, 0, moved);
-						return { ...r, children: kids };
+						return {
+							...r,
+							children: kids.map((k, i) => ({
+								...k,
+								node: { ...k.node, order_id: i * 100 }
+							}))
+						};
 					})
 				};
 			})
 		);
-
-		try {
-			saving.set(true);
-			// Find the reordered list to persist order_ids
-			const parentReq = findReqGlobal(parentNodeId);
-			const reorderedList = parentReq
-				? parentReq.children
-				: get(sections).find((s) => s.node.id === parentNodeId)?.requirements ?? [];
-			await Promise.all(
-				reorderedList.map((r, i) =>
-					apiUpdate('requirement-nodes', r.node.id, { order_id: i * 100 })
-				)
-			);
-		} catch (e) {
-			setError('reorder-requirements', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
+	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		sections.update((s) =>
 			s.map((sec) => ({
@@ -753,28 +986,20 @@ export function createBuilderState(
 					const qs = [...r.questions];
 					const [moved] = qs.splice(fromIndex, 1);
 					qs.splice(toIndex, 0, moved);
-					return { ...r, questions: qs };
+					return {
+						...r,
+						questions: qs.map((q, i) => ({
+							...q,
+							question: { ...q.question, order: i * 100 }
+						}))
+					};
 				})
 			}))
 		);
-		try {
-			saving.set(true);
-			const req = findReqGlobal(reqNodeId);
-			if (req) {
-				await Promise.all(
-					req.questions.map((q, i) =>
-						apiUpdate('questions', q.question.id, { order: i * 100 })
-					)
-				);
-			}
-		} catch (e) {
-			setError('reorder-questions', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function reorderChoices(
+	function reorderChoices(
 		reqNodeId: string,
 		qIndex: number,
 		fromIndex: number,
@@ -791,41 +1016,23 @@ export function createBuilderState(
 						const choices = [...qq.question.choices];
 						const [moved] = choices.splice(fromIndex, 1);
 						choices.splice(toIndex, 0, moved);
-						return { ...qq, question: { ...qq.question, choices } };
+						return {
+							...qq,
+							question: {
+								...qq.question,
+								choices: choices.map((c, ci) => ({ ...c, order: ci * 100 }))
+							}
+						};
 					})
 				}))
 			}))
 		);
-		try {
-			saving.set(true);
-			const req = findReqGlobal(reqNodeId);
-			const choices = req?.questions[qIndex]?.question.choices;
-			if (choices) {
-				await Promise.all(
-					choices.map((c, i) =>
-						apiUpdate('question-choices', c.id, { order: i * 100 })
-					)
-				);
-			}
-		} catch (e) {
-			setError('reorder-choices', (e as Error).message);
-		} finally {
-			saving.set(false);
-		}
+		scheduleDraftSave();
 	}
 
-	async function doUpdateFramework(patch: Record<string, unknown>) {
-		try {
-			saving.set(true);
-			await apiUpdate('frameworks', frameworkId, patch);
-			framework.update((f) => ({ ...f, ...patch }) as Framework);
-			clearError('framework');
-		} catch (e) {
-			setError('framework', (e as Error).message);
-			throw e;
-		} finally {
-			saving.set(false);
-		}
+	function doUpdateFramework(patch: Record<string, unknown>) {
+		framework.update((f) => ({ ...f, ...patch }) as Framework);
+		scheduleDraftSave();
 	}
 
 	return {
@@ -834,6 +1041,7 @@ export function createBuilderState(
 		saving,
 		errors,
 		activeSection,
+		hasPendingFlush,
 		addSection,
 		deleteSection,
 		addRequirement,
@@ -850,7 +1058,11 @@ export function createBuilderState(
 		reorderRequirements,
 		reorderQuestions,
 		reorderChoices,
-		updateFramework: doUpdateFramework
+		updateFramework: doUpdateFramework,
+		flushDraft,
+		publish,
+		discard,
+		destroy
 	};
 }
 

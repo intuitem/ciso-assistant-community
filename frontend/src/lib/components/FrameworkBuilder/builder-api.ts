@@ -1,6 +1,6 @@
 /**
- * Thin fetch wrapper for builder CRUD calls to the +server.ts proxy.
- * All calls go to /frameworks/{frameworkId}/builder/ which proxies to Django.
+ * API functions for the framework builder draft workflow.
+ * All calls go to /frameworks/{frameworkId}/builder which proxies to Django.
  */
 
 type BuilderFetch = typeof globalThis.fetch;
@@ -17,40 +17,67 @@ function baseUrl() {
 	return `/frameworks/${_frameworkId}/builder`;
 }
 
-export async function apiCreate(endpoint: string, payload: Record<string, unknown>) {
+export interface DraftJSON {
+	framework_meta: {
+		name: string;
+		description: string | null;
+		min_score: number;
+		max_score: number;
+		scores_definition: Record<string, unknown>[] | null;
+		implementation_groups_definition: Record<string, unknown>[] | null;
+		outcomes_definition: Record<string, unknown>[] | null;
+	};
+	nodes: Record<string, unknown>[];
+	questions: Record<string, unknown>[];
+	choices: Record<string, unknown>[];
+}
+
+async function handleResponse(res: Response): Promise<unknown> {
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({ detail: 'Request failed' }));
+		throw new Error(err.detail ?? err.error ?? JSON.stringify(err));
+	}
+	if (res.status === 204) return null;
+	return res.json();
+}
+
+/** Start editing: POST to create/return the editing_draft */
+export async function apiStartEditing(): Promise<DraftJSON> {
 	const res = await _fetch(baseUrl(), {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endpoint, payload })
+		body: JSON.stringify({ _action: 'start-editing' })
 	});
-	if (!res.ok) {
-		const err = await res.json().catch(() => ({ detail: 'Request failed' }));
-		throw new Error(err.detail ?? JSON.stringify(err));
-	}
-	return res.json();
+	const data = (await handleResponse(res)) as { editing_draft: DraftJSON };
+	return data.editing_draft;
 }
 
-export async function apiUpdate(endpoint: string, id: string, payload: Record<string, unknown>) {
+/** Save draft: PATCH to persist the current draft state */
+export async function apiSaveDraft(draft: DraftJSON): Promise<void> {
 	const res = await _fetch(baseUrl(), {
 		method: 'PATCH',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endpoint, id, payload })
+		body: JSON.stringify({ _action: 'save-draft', editing_draft: draft })
 	});
-	if (!res.ok) {
-		const err = await res.json().catch(() => ({ detail: 'Request failed' }));
-		throw new Error(err.detail ?? JSON.stringify(err));
-	}
-	return res.json();
+	await handleResponse(res);
 }
 
-export async function apiDelete(endpoint: string, id: string) {
+/** Publish draft: POST to reconcile draft into relational DB */
+export async function apiPublishDraft(): Promise<void> {
 	const res = await _fetch(baseUrl(), {
-		method: 'DELETE',
+		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify({ endpoint, id })
+		body: JSON.stringify({ _action: 'publish-draft' })
 	});
-	if (!res.ok && res.status !== 204) {
-		const err = await res.json().catch(() => ({ detail: 'Request failed' }));
-		throw new Error(err.detail ?? JSON.stringify(err));
-	}
+	await handleResponse(res);
+}
+
+/** Discard draft: POST to throw away the draft */
+export async function apiDiscardDraft(): Promise<void> {
+	const res = await _fetch(baseUrl(), {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ _action: 'discard-draft' })
+	});
+	await handleResponse(res);
 }

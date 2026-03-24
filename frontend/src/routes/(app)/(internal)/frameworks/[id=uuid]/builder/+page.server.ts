@@ -19,6 +19,7 @@ export const load = (async ({ fetch, params }) => {
 		requirementNodes: nodesData.results ?? nodesData,
 		questions: questionsData.results ?? questionsData,
 		isImported: !!frameworkData.library,
+		hasEditingDraft: !!frameworkData.has_editing_draft,
 		title: `Builder - ${frameworkData.name}`
 	};
 }) satisfies PageServerLoad;

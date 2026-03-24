@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { beforeNavigate } from '$app/navigation';
 	import {
 		createBuilderState,
 		setBuilderContext,
@@ -7,7 +8,7 @@
 		type RequirementNode,
 		type Question
 	} from './builder-state';
-	import { initBuilderApi } from './builder-api';
+	import { initBuilderApi, type DraftJSON } from './builder-api';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import SectionBlock from './SectionBlock.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
@@ -16,20 +17,22 @@
 		framework: Framework;
 		requirementNodes: RequirementNode[];
 		questions: Question[];
+		editingDraft?: DraftJSON | null;
 	}
 
-	let { framework, requirementNodes, questions }: Props = $props();
+	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
 
 	initBuilderApi(fetch, framework.id);
 
-	const builder = createBuilderState(framework, requirementNodes, questions);
+	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);
 
 	const {
 		framework: frameworkStore,
 		sections: sectionsStore,
 		errors: errorsStore,
-		saving: savingStore
+		saving: savingStore,
+		hasPendingFlush: hasPendingFlushStore
 	} = builder;
 
 	let urnCopied = $state(false);
@@ -61,8 +64,37 @@
 		draggedSectionIndex = null;
 	}
 
+	// --- Navigation guards ---
+
+	// Warn on browser close/refresh if there are unsaved local changes
+	function handleBeforeUnload(e: BeforeUnloadEvent) {
+		let pending = false;
+		hasPendingFlushStore.subscribe((v) => (pending = v))();
+		if (pending) {
+			e.preventDefault();
+		}
+	}
+
+	// Warn on SvelteKit navigation about unpublished draft
+	beforeNavigate(({ cancel }) => {
+		if (!confirm('You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?')) {
+			cancel();
+		}
+	});
+
+	// Ctrl+S / Cmd+S keyboard shortcut
+	function handleKeydown(e: KeyboardEvent) {
+		if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+			e.preventDefault();
+			builder.flushDraft();
+		}
+	}
+
 	// IntersectionObserver for minimap active section
 	onMount(() => {
+		window.addEventListener('beforeunload', handleBeforeUnload);
+		window.addEventListener('keydown', handleKeydown);
+
 		const observer = new IntersectionObserver(
 			(entries) => {
 				for (const entry of entries) {
@@ -79,6 +111,14 @@
 		elements.forEach((el) => observer.observe(el));
 
 		return () => observer.disconnect();
+	});
+
+	onDestroy(() => {
+		if (typeof window !== 'undefined') {
+			window.removeEventListener('beforeunload', handleBeforeUnload);
+			window.removeEventListener('keydown', handleKeydown);
+		}
+		builder.destroy();
 	});
 </script>
 
@@ -192,7 +232,7 @@
 
 		<!-- Global errors -->
 		{#each [...$errorsStore.entries()] as [key, message] (key)}
-			{#if key.startsWith('add-') || key.startsWith('reorder-')}
+			{#if key.startsWith('add-') || key.startsWith('reorder-') || key === 'save-draft' || key === 'publish' || key === 'discard'}
 				<div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
 					{message}
 				</div>
