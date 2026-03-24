@@ -8862,9 +8862,9 @@ class FrameworkViewSet(BaseModelViewSet):
             RequirementNode.objects.filter(framework=framework).values(*node_fields)
         )
         questions = list(
-            Question.objects.filter(
-                requirement_node__framework=framework
-            ).values(*question_fields)
+            Question.objects.filter(requirement_node__framework=framework).values(
+                *question_fields
+            )
         )
         choices = list(
             QuestionChoice.objects.filter(
@@ -9348,7 +9348,9 @@ class RequirementViewSet(BaseModelViewSet):
                 {"error": "Attachment not found."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        content_type = mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        content_type = (
+            mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
+        )
         response = HttpResponse(attachment.file.read(), content_type=content_type)
         response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
         return response
@@ -15598,7 +15600,6 @@ class AnswerViewSet(BaseModelViewSet):
         if ca_id:
             qs = qs.filter(requirement_assessment__compliance_assessment_id=ca_id)
         return qs
-
 
 
 # ---------------------------------------------------------------------------
