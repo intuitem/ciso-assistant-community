@@ -17,7 +17,6 @@ import importlib
 from django.urls import include, path
 from rest_framework import routers
 
-from ciso_assistant.settings import DEBUG
 from django.conf import settings
 
 router = routers.DefaultRouter()
@@ -248,7 +247,7 @@ urlpatterns = [
 for index, module in enumerate(MODULES):
     urlpatterns.insert(index, (path(module["path"], include(module["module"]))))
 
-if DEBUG:
+if settings.DEBUG:
     # Browsable API is only available in DEBUG mode
     urlpatterns += [
         path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),

@@ -50,6 +50,7 @@ from .base_models import (
     AbstractBaseModel,
     ActorSyncManager,
     ActorSyncMixin,
+    EditableMixin,
     ETADueDateMixin,
     NameDescriptionMixin,
 )
@@ -2146,7 +2147,7 @@ class ReferenceControl(ReferentialObjectMixin, I18nObjectMixin, FilteringLabelMi
         return Framework.objects.filter(requirement__reference_controls=self).distinct()
 
 
-class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin):
+class RiskMatrix(ReferentialObjectMixin, I18nObjectMixin, EditableMixin):
     library = models.ForeignKey(
         LoadedLibrary,
         on_delete=models.CASCADE,

@@ -8,7 +8,7 @@ from datetime import datetime
 from django.db.models import F
 from django.utils import timezone
 
-from ciso_assistant.settings import EMAIL_HOST, EMAIL_HOST_RESCUE
+from django.conf import settings
 from core.models import *
 from core.serializer_fields import (
     FieldsRelatedField,
@@ -234,10 +234,39 @@ class RiskMatrixReadSerializer(ReferentialSerializer):
     folder = FieldsRelatedField()
     json_definition = serializers.JSONField(source="get_json_translated")
     library = FieldsRelatedField(["name", "id"])
+    has_editing_draft = serializers.SerializerMethodField()
+    editing_languages = serializers.SerializerMethodField()
+
+    def get_has_editing_draft(self, obj):
+        return obj.editing_draft is not None
+
+    def get_editing_languages(self, obj):
+        """Return list of language codes available in the draft or published translations."""
+        langs = set()
+        # Base locale
+        if obj.locale:
+            langs.add(obj.locale)
+        # From model translations (published)
+        if obj.translations and isinstance(obj.translations, dict):
+            langs.update(obj.translations.keys())
+        # From editing_draft level translations + _meta
+        if obj.editing_draft and isinstance(obj.editing_draft, dict):
+            meta = obj.editing_draft.get("_meta", {})
+            if isinstance(meta.get("translations"), dict):
+                langs.update(meta["translations"].keys())
+            for category in ("probability", "impact", "risk"):
+                levels = obj.editing_draft.get(category, [])
+                if isinstance(levels, list):
+                    for level in levels:
+                        if isinstance(level, dict) and isinstance(
+                            level.get("translations"), dict
+                        ):
+                            langs.update(level["translations"].keys())
+        return sorted(langs) if langs else [obj.locale or "en"]
 
     class Meta:
         model = RiskMatrix
-        exclude = ["translations"]
+        exclude = ["translations", "editing_draft", "editing_history"]
 
 
 class RiskMatrixWriteSerializer(RiskMatrixReadSerializer):
@@ -1553,7 +1582,7 @@ class UserWriteSerializer(BaseModelSerializer):
         return email
 
     def create(self, validated_data):
-        send_mail = EMAIL_HOST or EMAIL_HOST_RESCUE
+        send_mail = settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE
         if not RoleAssignment.is_access_allowed(
             user=self.context["request"].user,
             perm=Permission.objects.get(

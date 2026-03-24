@@ -5,7 +5,7 @@ from django.core.management import call_command
 from django.db.models.signals import post_migrate
 from structlog import get_logger
 
-from ciso_assistant.settings import CISO_ASSISTANT_SUPERUSER_EMAIL, FORCE_CREATE_ADMIN
+from django.conf import settings
 from core.utils import RoleCodename, UserGroupCodename
 
 logger = get_logger(__name__)
@@ -1536,16 +1536,18 @@ def startup(sender: AppConfig, **kwargs):
     )
     if (
         User.objects.filter(user_groups=administrators).distinct().count() == 0
-        or FORCE_CREATE_ADMIN
+        or settings.FORCE_CREATE_ADMIN
     ):
         # if superuser defined and does not exist, then create it
         if (
-            CISO_ASSISTANT_SUPERUSER_EMAIL
-            and not User.objects.filter(email=CISO_ASSISTANT_SUPERUSER_EMAIL).exists()
+            settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            and not User.objects.filter(
+                email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL
+            ).exists()
         ):
             try:
                 User.objects.create_superuser(
-                    email=CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
+                    email=settings.CISO_ASSISTANT_SUPERUSER_EMAIL, is_superuser=True
                 )
             except Exception as e:
                 logger.error("Error creating superuser", exc_info=True)
@@ -1570,10 +1572,10 @@ def startup(sender: AppConfig, **kwargs):
         "enforce_mfa": False,
     }
     try:
-        settings, _ = GlobalSettings.objects.get_or_create(
+        global_settings, _ = GlobalSettings.objects.get_or_create(
             name="general", defaults={"value": default_settings}
         )
-        current_value = settings.value or {}
+        current_value = global_settings.value or {}
 
         ebios_radar_max = current_value.get("ebios_radar_max")
 
@@ -1586,8 +1588,8 @@ def startup(sender: AppConfig, **kwargs):
             # Finally force-reset the invalid ebios_radar_max to default
             updated_value = {**default_settings, **current_value}
             updated_value["ebios_radar_max"] = default_settings["ebios_radar_max"]
-            settings.value = updated_value
-            settings.save()
+            global_settings.value = updated_value
+            global_settings.save()
             logger.info(
                 "Global settings have been reset to defaults due to invalid ebios_radar_max."
             )
