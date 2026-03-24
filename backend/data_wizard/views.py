@@ -175,23 +175,63 @@ def _parse_time_to_seconds(s: str) -> int | None:
     return h * 3600 + mn * 60 + sc
 
 
-def _parse_security_objectives(raw: str) -> dict:
-    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}."""
+def _get_security_objective_scale() -> list:
+    """Return the active security-objective scale from GlobalSettings."""
+    from global_settings.models import GlobalSettings
+
+    settings = GlobalSettings.objects.filter(name="general").first()
+    scale_key = (
+        settings.value.get("security_objective_scale", "1-4") if settings else "1-4"
+    )
+    return Asset.SECURITY_OBJECTIVES_SCALES[scale_key]
+
+
+def _reverse_scale_value(display_val: str, scale: list) -> int | None:
+    """Map a display value back to its raw 0-based index.
+
+    The scale list maps raw index → display value.  We need the reverse:
+    find the *first* index whose display value matches.
+    Supports both numeric scales (1-4, 0-3, …) and string scales (FIPS-199).
+    """
+    # Try numeric comparison first
+    try:
+        numeric = int(display_val)
+        for idx, sv in enumerate(scale):
+            if isinstance(sv, (int, float)) and int(sv) == numeric:
+                return idx
+    except (ValueError, TypeError):
+        pass
+
+    # Fall back to case-insensitive string comparison (e.g. FIPS-199)
+    display_lower = display_val.strip().lower()
+    for idx, sv in enumerate(scale):
+        if str(sv).lower() == display_lower:
+            return idx
+
+    return None
+
+
+def _parse_security_objectives(raw: str, scale: list | None = None) -> dict:
+    """Parse 'confidentiality: 3,integrity: 2' → {key: {"value": int, "is_enabled": True}}.
+
+    Values in the input are *display* values (scale-mapped).  They are
+    reverse-mapped back to the raw 0-based index before storage so that
+    an export → import round-trip is lossless.
+    """
     result = {}
     if not raw:
         return result
+    if scale is None:
+        scale = _get_security_objective_scale()
     for part in str(raw).split(","):
         part = part.strip()
         if ":" not in part:
             continue
         key, _, val = part.partition(":")
         key = key.strip()
-        try:
-            v = int(val.strip())
-            if 0 <= v <= 4:
-                result[key] = {"value": v, "is_enabled": True}
-        except (ValueError, TypeError):
-            pass
+        v = _reverse_scale_value(val.strip(), scale)
+        if v is not None and 0 <= v <= 4:
+            result[key] = {"value": v, "is_enabled": True}
     return result
 
 
@@ -531,7 +571,7 @@ class RecordConsumer[Context](ABC):
         return results
 
 
-class AssetRecordConsumer(RecordConsumer[None]):
+class AssetRecordConsumer(RecordConsumer[list]):
     """
     Consumer for importing Asset records.
     Supports parent_assets linking via ref_id in a second pass.
@@ -550,10 +590,10 @@ class AssetRecordConsumer(RecordConsumer[None]):
     }
 
     def create_context(self):
-        return None, None
+        return _get_security_objective_scale(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: list
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -601,7 +641,7 @@ class AssetRecordConsumer(RecordConsumer[None]):
             "recovery_capabilities", ""
         )
 
-        sec_objectives = _parse_security_objectives(raw_sec)
+        sec_objectives = _parse_security_objectives(raw_sec, scale=context)
         rec_objectives = _parse_recovery_objectives(raw_rec)
 
         parse_warning_msgs = []
