@@ -8779,6 +8779,475 @@ class FrameworkViewSet(BaseModelViewSet):
 
         return response
 
+    # --- Framework Builder Draft actions ---
+
+    def _check_change_permission(self, request, framework):
+        """Check that the user has change_framework permission on the framework's folder."""
+        if not RoleAssignment.is_access_allowed(
+            user=request.user,
+            perm=Permission.objects.get(codename="change_framework"),
+            folder=framework.folder,
+        ):
+            raise PermissionDenied({"error": "Permission denied."})
+
+    @action(detail=True, methods=["post"], url_path="start-editing")
+    def start_editing(self, request, pk=None):
+        """Serialize the framework tree into editing_draft to begin editing."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.urn:
+            return Response(
+                {
+                    "error": "Library frameworks cannot be edited directly. Use Duplicate instead."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        if framework.editing_draft is not None:
+            return Response(
+                {
+                    "status": "already_editing",
+                    "editing_draft": framework.editing_draft,
+                }
+            )
+
+        # Serialize current tree to plain dicts
+        node_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "name",
+            "description",
+            "annotation",
+            "parent_urn",
+            "order_id",
+            "assessable",
+            "implementation_groups",
+            "typical_evidence",
+            "weight",
+            "importance",
+            "display_mode",
+            "folder_id",
+        ]
+        question_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "text",
+            "annotation",
+            "type",
+            "config",
+            "depends_on",
+            "order",
+            "weight",
+            "requirement_node_id",
+            "folder_id",
+        ]
+        choice_fields = [
+            "id",
+            "urn",
+            "ref_id",
+            "value",
+            "annotation",
+            "add_score",
+            "compute_result",
+            "order",
+            "description",
+            "color",
+            "select_implementation_groups",
+            "question_id",
+            "folder_id",
+        ]
+
+        nodes = list(
+            RequirementNode.objects.filter(framework=framework).values(*node_fields)
+        )
+        questions = list(
+            Question.objects.filter(
+                requirement_node__framework=framework
+            ).values(*question_fields)
+        )
+        choices = list(
+            QuestionChoice.objects.filter(
+                question__requirement_node__framework=framework
+            ).values(*choice_fields)
+        )
+
+        # Convert UUID fields to strings for JSON serialization
+        def stringify_uuids(records):
+            for record in records:
+                for key, value in record.items():
+                    if isinstance(value, uuid.UUID):
+                        record[key] = str(value)
+            return records
+
+        stringify_uuids(nodes)
+        stringify_uuids(questions)
+        stringify_uuids(choices)
+
+        draft = {
+            "framework_meta": {
+                "name": framework.name,
+                "description": framework.description or "",
+                "min_score": framework.min_score,
+                "max_score": framework.max_score,
+                "scores_definition": framework.scores_definition,
+                "implementation_groups_definition": framework.implementation_groups_definition,
+                "outcomes_definition": framework.outcomes_definition,
+            },
+            "nodes": nodes,
+            "questions": questions,
+            "choices": choices,
+        }
+
+        framework.editing_draft = draft
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response(
+            {"status": "editing_started", "editing_draft": framework.editing_draft}
+        )
+
+    @action(detail=True, methods=["patch"], url_path="save-draft")
+    def save_draft(self, request, pk=None):
+        """Update editing_draft with the current WIP from the frontend."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        editing_draft = request.data.get("editing_draft")
+        if editing_draft is None:
+            return Response(
+                {"error": "editing_draft is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        framework.editing_draft = editing_draft
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_saved"})
+
+    @action(detail=True, methods=["post"], url_path="publish-draft")
+    def publish_draft(self, request, pk=None):
+        """Publish editing_draft → relational DB, snapshot history, bump version."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        if framework.editing_draft is None:
+            return Response(
+                {"error": "No active draft to publish."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        draft = framework.editing_draft
+        try:
+            self._reconcile_draft(framework, draft)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to publish draft: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response({"status": "draft_published"})
+
+    def _reconcile_draft(self, framework, draft):
+        """Reconcile the draft JSON into the relational DB within a transaction."""
+        with transaction.atomic():
+            # --- 1. Collect existing DB IDs ---
+            db_node_ids = set(
+                RequirementNode.objects.filter(framework=framework).values_list(
+                    "id", flat=True
+                )
+            )
+            db_question_ids = set(
+                Question.objects.filter(
+                    requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+            db_choice_ids = set(
+                QuestionChoice.objects.filter(
+                    question__requirement_node__framework=framework
+                ).values_list("id", flat=True)
+            )
+
+            # --- 2. Collect draft IDs ---
+            draft_nodes = draft.get("nodes", [])
+            draft_questions = draft.get("questions", [])
+            draft_choices = draft.get("choices", [])
+
+            draft_node_ids = {uuid.UUID(n["id"]) for n in draft_nodes}
+            draft_question_ids = {uuid.UUID(q["id"]) for q in draft_questions}
+            draft_choice_ids = {uuid.UUID(c["id"]) for c in draft_choices}
+
+            # --- 3. DELETE (choices → questions → nodes for FK safety) ---
+            choices_to_delete = db_choice_ids - draft_choice_ids
+            if choices_to_delete:
+                QuestionChoice.objects.filter(id__in=choices_to_delete).delete()
+
+            questions_to_delete = db_question_ids - draft_question_ids
+            if questions_to_delete:
+                Question.objects.filter(id__in=questions_to_delete).delete()
+
+            nodes_to_delete = db_node_ids - draft_node_ids
+            if nodes_to_delete:
+                RequirementNode.objects.filter(id__in=nodes_to_delete).delete()
+
+            # --- 4. UPDATE existing entities (bulk_update with ALL fields) ---
+            existing_node_ids = db_node_ids & draft_node_ids
+            existing_question_ids = db_question_ids & draft_question_ids
+            existing_choice_ids = db_choice_ids & draft_choice_ids
+
+            # Build lookup dicts from draft data
+            draft_node_map = {n["id"]: n for n in draft_nodes}
+            draft_question_map = {q["id"]: q for q in draft_questions}
+            draft_choice_map = {c["id"]: c for c in draft_choices}
+
+            # Update nodes
+            if existing_node_ids:
+                nodes_to_update = []
+                for node_id in existing_node_ids:
+                    data = draft_node_map[str(node_id)]
+                    node = RequirementNode(
+                        id=node_id,
+                        framework=framework,
+                        urn=data.get("urn") or None,
+                        ref_id=data.get("ref_id") or None,
+                        name=data.get("name") or None,
+                        description=data.get("description") or None,
+                        annotation=data.get("annotation") or None,
+                        parent_urn=data.get("parent_urn") or None,
+                        order_id=data.get("order_id"),
+                        assessable=data.get("assessable", False),
+                        implementation_groups=data.get("implementation_groups"),
+                        typical_evidence=data.get("typical_evidence") or None,
+                        weight=data.get("weight", 1),
+                        importance=data.get("importance", "undefined"),
+                        display_mode=data.get("display_mode", "default"),
+                        folder_id=data.get("folder_id") or framework.folder_id,
+                    )
+                    nodes_to_update.append(node)
+                RequirementNode.objects.bulk_update(
+                    nodes_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "name",
+                        "description",
+                        "annotation",
+                        "parent_urn",
+                        "order_id",
+                        "assessable",
+                        "implementation_groups",
+                        "typical_evidence",
+                        "weight",
+                        "importance",
+                        "display_mode",
+                        "folder_id",
+                    ],
+                )
+
+            # Update questions
+            if existing_question_ids:
+                questions_to_update = []
+                for question_id in existing_question_ids:
+                    data = draft_question_map[str(question_id)]
+                    question = Question(
+                        id=question_id,
+                        urn=data.get("urn"),
+                        ref_id=data.get("ref_id") or None,
+                        text=data.get("text") or None,
+                        annotation=data.get("annotation") or None,
+                        type=data.get("type", "text"),
+                        config=data.get("config"),
+                        depends_on=data.get("depends_on"),
+                        order=data.get("order", 0),
+                        weight=data.get("weight", 1),
+                        requirement_node_id=uuid.UUID(data["requirement_node_id"]),
+                        folder_id=data.get("folder_id") or framework.folder_id,
+                    )
+                    questions_to_update.append(question)
+                Question.objects.bulk_update(
+                    questions_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "text",
+                        "annotation",
+                        "type",
+                        "config",
+                        "depends_on",
+                        "order",
+                        "weight",
+                        "requirement_node_id",
+                        "folder_id",
+                    ],
+                )
+
+            # Update choices
+            if existing_choice_ids:
+                choices_to_update = []
+                for choice_id in existing_choice_ids:
+                    data = draft_choice_map[str(choice_id)]
+                    choice = QuestionChoice(
+                        id=choice_id,
+                        urn=data.get("urn") or None,
+                        ref_id=data.get("ref_id") or None,
+                        value=data.get("value") or None,
+                        annotation=data.get("annotation") or None,
+                        add_score=data.get("add_score"),
+                        compute_result=data.get("compute_result") or None,
+                        order=data.get("order", 0),
+                        description=data.get("description") or None,
+                        color=data.get("color") or None,
+                        select_implementation_groups=data.get(
+                            "select_implementation_groups"
+                        ),
+                        question_id=uuid.UUID(data["question_id"]),
+                        folder_id=data.get("folder_id") or framework.folder_id,
+                    )
+                    choices_to_update.append(choice)
+                QuestionChoice.objects.bulk_update(
+                    choices_to_update,
+                    [
+                        "urn",
+                        "ref_id",
+                        "value",
+                        "annotation",
+                        "add_score",
+                        "compute_result",
+                        "order",
+                        "description",
+                        "color",
+                        "select_implementation_groups",
+                        "question_id",
+                        "folder_id",
+                    ],
+                )
+
+            # --- 5. CREATE new entities (nodes → questions → choices for FK safety) ---
+            new_node_ids = draft_node_ids - db_node_ids
+            if new_node_ids:
+                new_nodes = []
+                for node_id in new_node_ids:
+                    data = draft_node_map[str(node_id)]
+                    new_nodes.append(
+                        RequirementNode(
+                            id=node_id,
+                            framework=framework,
+                            urn=data.get("urn") or None,
+                            ref_id=data.get("ref_id") or None,
+                            name=data.get("name") or None,
+                            description=data.get("description") or None,
+                            annotation=data.get("annotation") or None,
+                            parent_urn=data.get("parent_urn") or None,
+                            order_id=data.get("order_id"),
+                            assessable=data.get("assessable", False),
+                            implementation_groups=data.get("implementation_groups"),
+                            typical_evidence=data.get("typical_evidence") or None,
+                            weight=data.get("weight", 1),
+                            importance=data.get("importance", "undefined"),
+                            display_mode=data.get("display_mode", "default"),
+                            folder_id=data.get("folder_id") or framework.folder_id,
+                        )
+                    )
+                RequirementNode.objects.bulk_create(new_nodes)
+
+            new_question_ids = draft_question_ids - db_question_ids
+            if new_question_ids:
+                new_questions = []
+                for question_id in new_question_ids:
+                    data = draft_question_map[str(question_id)]
+                    new_questions.append(
+                        Question(
+                            id=question_id,
+                            urn=data.get("urn"),
+                            ref_id=data.get("ref_id") or None,
+                            text=data.get("text") or None,
+                            annotation=data.get("annotation") or None,
+                            type=data.get("type", "text"),
+                            config=data.get("config"),
+                            depends_on=data.get("depends_on"),
+                            order=data.get("order", 0),
+                            weight=data.get("weight", 1),
+                            requirement_node_id=uuid.UUID(data["requirement_node_id"]),
+                            folder_id=data.get("folder_id") or framework.folder_id,
+                        )
+                    )
+                Question.objects.bulk_create(new_questions)
+
+            new_choice_ids = draft_choice_ids - db_choice_ids
+            if new_choice_ids:
+                new_choices = []
+                for choice_id in new_choice_ids:
+                    data = draft_choice_map[str(choice_id)]
+                    new_choices.append(
+                        QuestionChoice(
+                            id=choice_id,
+                            urn=data.get("urn") or None,
+                            ref_id=data.get("ref_id") or None,
+                            value=data.get("value") or None,
+                            annotation=data.get("annotation") or None,
+                            add_score=data.get("add_score"),
+                            compute_result=data.get("compute_result") or None,
+                            order=data.get("order", 0),
+                            description=data.get("description") or None,
+                            color=data.get("color") or None,
+                            select_implementation_groups=data.get(
+                                "select_implementation_groups"
+                            ),
+                            question_id=uuid.UUID(data["question_id"]),
+                            folder_id=data.get("folder_id") or framework.folder_id,
+                        )
+                    )
+                QuestionChoice.objects.bulk_create(new_choices)
+
+            # --- 6. Update framework metadata from draft ---
+            meta = draft.get("framework_meta", {})
+            if meta:
+                framework.name = meta.get("name", framework.name)
+                framework.description = meta.get("description", framework.description)
+                framework.min_score = meta.get("min_score", framework.min_score)
+                framework.max_score = meta.get("max_score", framework.max_score)
+                framework.scores_definition = meta.get(
+                    "scores_definition", framework.scores_definition
+                )
+                framework.implementation_groups_definition = meta.get(
+                    "implementation_groups_definition",
+                    framework.implementation_groups_definition,
+                )
+                framework.outcomes_definition = meta.get(
+                    "outcomes_definition", framework.outcomes_definition
+                )
+
+            # --- 7. Snapshot history, bump version, clear draft ---
+            history = list(framework.editing_history or [])
+            history.append(
+                {
+                    "version": framework.editing_version,
+                    "published_at": timezone.now().isoformat(),
+                }
+            )
+            framework.editing_history = history
+            framework.editing_version = framework.editing_version + 1
+            framework.editing_draft = None
+            framework.save(
+                update_fields=[
+                    "name",
+                    "description",
+                    "min_score",
+                    "max_score",
+                    "scores_definition",
+                    "implementation_groups_definition",
+                    "outcomes_definition",
+                    "editing_draft",
+                    "editing_version",
+                    "editing_history",
+                    "updated_at",
+                ]
+            )
+
+    @action(detail=True, methods=["post"], url_path="discard-draft")
+    def discard_draft(self, request, pk=None):
+        """Discard editing_draft without affecting relational data."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        framework.editing_draft = None
+        framework.save(update_fields=["editing_draft", "updated_at"])
+        return Response({"status": "draft_discarded"})
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """
