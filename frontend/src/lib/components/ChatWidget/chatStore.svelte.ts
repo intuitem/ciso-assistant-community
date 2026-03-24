@@ -1,16 +1,18 @@
 import type { ChatMessage, ChatView, PendingAction, SuggestedAction } from './types';
 import { browser } from '$app/environment';
+import { m } from '$paraglide/messages';
 
 const CHAT_API = '/fe-api/chat';
 const STORAGE_KEY = 'ciso-chat-state';
 
-const WELCOME_MESSAGE: ChatMessage = {
-	id: 'welcome',
-	role: 'assistant',
-	content:
-		"Hello! I'm your CISO Assistant. I can help you search for controls, navigate frameworks, explain risk scenarios, and more. How can I help you today?",
-	timestamp: new Date()
-};
+function getWelcomeMessage(): ChatMessage {
+	return {
+		id: 'welcome',
+		role: 'assistant',
+		content: m.chatWelcomeMessage(),
+		timestamp: new Date()
+	};
+}
 
 // --- Session storage persistence ---
 
@@ -75,79 +77,83 @@ const restored = loadPersistedState();
 let currentPageContext = $state<{ path: string; model?: string; title?: string } | null>(null);
 
 let view = $state<ChatView>(restored?.view ?? 'closed');
-let messages = $state<ChatMessage[]>(restored?.messages ?? [WELCOME_MESSAGE]);
+let messages = $state<ChatMessage[]>(restored?.messages ?? [getWelcomeMessage()]);
 let inputText = $state('');
 let isTyping = $state(false);
 let isStreaming = $state(false);
 let sessionId = $state<string | null>(restored?.sessionId ?? null);
 let abortController = $state<AbortController | null>(null);
 
-const defaultActions: SuggestedAction[] = [
-	{
-		label: 'Overdue controls',
-		prompt: 'Show me the controls that have missed their ETA',
-		icon: 'fa-solid fa-clock'
-	},
-	{
-		label: 'Risk overview',
-		prompt: 'Give me a summary of my risk scenarios',
-		icon: 'fa-solid fa-shield-halved'
-	},
-	{
-		label: 'Controls without evidence',
-		prompt: 'List the controls that have no evidence attached',
-		icon: 'fa-solid fa-triangle-exclamation'
-	},
-	{
-		label: 'My domains',
-		prompt: 'What are the domains I have access to?',
-		icon: 'fa-solid fa-folder-tree'
-	}
-];
-
-// Contextual actions based on the current page
-const contextualActions: Record<string, SuggestedAction[]> = {
-	'requirement-assessments': [
+function getDefaultActions(): SuggestedAction[] {
+	return [
 		{
-			label: 'Suggest controls',
-			prompt: 'What controls should I implement to comply with this requirement?',
-			icon: 'fa-solid fa-lightbulb'
+			label: m.chatActionOverdueControls(),
+			prompt: m.chatActionOverdueControlsPrompt(),
+			icon: 'fa-solid fa-clock'
 		},
 		{
-			label: 'Suggest evidence',
-			prompt: 'What evidence should I collect for this requirement?',
-			icon: 'fa-solid fa-file-circle-check'
-		}
-	],
-	'risk-scenarios': [
-		{
-			label: 'Suggest treatment',
-			prompt: 'How should I treat this risk scenario?',
+			label: m.chatActionRiskOverview(),
+			prompt: m.chatActionRiskOverviewPrompt(),
 			icon: 'fa-solid fa-shield-halved'
-		}
-	],
-	'compliance-assessments': [
+		},
 		{
-			label: 'Compliance overview',
-			prompt: 'Give me an overview of this audit compliance status',
-			icon: 'fa-solid fa-chart-pie'
-		}
-	],
-	'risk-assessments': [
-		{
-			label: 'Risk overview',
-			prompt: 'Summarize the risk scenarios in this assessment',
+			label: m.chatActionControlsNoEvidence(),
+			prompt: m.chatActionControlsNoEvidencePrompt(),
 			icon: 'fa-solid fa-triangle-exclamation'
-		}
-	],
-	'ebios-rm': [
+		},
 		{
-			label: 'Assist study',
-			prompt: 'Help me conduct this EBIOS RM study',
-			icon: 'fa-solid fa-wand-magic-sparkles'
+			label: m.chatActionMyDomains(),
+			prompt: m.chatActionMyDomainsPrompt(),
+			icon: 'fa-solid fa-folder-tree'
 		}
-	]
-};
+	];
+}
+
+// Contextual actions based on the current page
+function getContextualActions(): Record<string, SuggestedAction[]> {
+	return {
+		'requirement-assessments': [
+			{
+				label: m.chatActionSuggestControls(),
+				prompt: m.chatActionSuggestControlsPrompt(),
+				icon: 'fa-solid fa-lightbulb'
+			},
+			{
+				label: m.chatActionSuggestEvidence(),
+				prompt: m.chatActionSuggestEvidencePrompt(),
+				icon: 'fa-solid fa-file-circle-check'
+			}
+		],
+		'risk-scenarios': [
+			{
+				label: m.chatActionSuggestTreatment(),
+				prompt: m.chatActionSuggestTreatmentPrompt(),
+				icon: 'fa-solid fa-shield-halved'
+			}
+		],
+		'compliance-assessments': [
+			{
+				label: m.chatActionComplianceOverview(),
+				prompt: m.chatActionComplianceOverviewPrompt(),
+				icon: 'fa-solid fa-chart-pie'
+			}
+		],
+		'risk-assessments': [
+			{
+				label: m.chatActionRiskAssessmentOverview(),
+				prompt: m.chatActionRiskAssessmentOverviewPrompt(),
+				icon: 'fa-solid fa-triangle-exclamation'
+			}
+		],
+		'ebios-rm': [
+			{
+				label: m.chatActionAssistStudy(),
+				prompt: m.chatActionAssistStudyPrompt(),
+				icon: 'fa-solid fa-wand-magic-sparkles'
+			}
+		]
+	};
+}
 
 /**
  * Detect the URL slug from the current page path.
@@ -172,10 +178,12 @@ function isDetailPage(): boolean {
 
 export function getSuggestedActions(): SuggestedAction[] {
 	const slug = getPageSlug();
-	if (slug && isDetailPage() && contextualActions[slug]) {
-		return [...contextualActions[slug], ...defaultActions];
+	const contextual = getContextualActions();
+	const defaults = getDefaultActions();
+	if (slug && isDetailPage() && contextual[slug]) {
+		return [...contextual[slug], ...defaults];
 	}
-	return defaultActions;
+	return defaults;
 }
 
 function generateId(): string {
@@ -251,6 +259,22 @@ async function streamResponse(userMessage: string) {
 		}
 
 		let buffer = '';
+		let needsFlush = false;
+		let flushTimer: ReturnType<typeof setTimeout> | null = null;
+
+		// Batch reactivity updates — flush at most every 30ms to avoid
+		// creating a new array copy on every single token
+		function scheduleFlush() {
+			if (!needsFlush) return;
+			if (flushTimer) return;
+			flushTimer = setTimeout(() => {
+				flushTimer = null;
+				if (needsFlush) {
+					messages = [...messages];
+					needsFlush = false;
+				}
+			}, 30);
+		}
 
 		while (true) {
 			const { done, value } = await reader.read();
@@ -270,13 +294,15 @@ async function streamResponse(userMessage: string) {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
 							msg.content += data.content;
-							messages = [...messages];
+							needsFlush = true;
+							scheduleFlush();
 						}
 					} else if (data.type === 'thinking') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
 						if (msg) {
 							msg.thinking = (msg.thinking || '') + data.content;
-							messages = [...messages];
+							needsFlush = true;
+							scheduleFlush();
 						}
 					} else if (data.type === 'pending_action') {
 						const msg = messages.find((m) => m.id === assistantMessageId);
@@ -328,6 +354,9 @@ async function streamResponse(userMessage: string) {
 				}
 			}
 		}
+		// Final flush for any pending batched updates
+		if (flushTimer) clearTimeout(flushTimer);
+		if (needsFlush) messages = [...messages];
 		isStreaming = false;
 		abortController = null;
 		saveState();
@@ -601,6 +630,6 @@ export function startNewSession() {
 	sessionId = null;
 
 	// Reset messages to welcome state
-	messages = [WELCOME_MESSAGE];
+	messages = [getWelcomeMessage()];
 	saveState();
 }

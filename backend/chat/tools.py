@@ -78,23 +78,28 @@ MODEL_MAP = {
         "ebios_rm",
         "EbiosRMStudy",
         "EBIOS RM Studies",
-        "ebios-rm-studies",
+        "ebios-rm/studies",
     ),
-    "feared_event": ("ebios_rm", "FearedEvent", "Feared Events", "feared-events"),
-    "ro_to": ("ebios_rm", "RoTo", "RoTo Couples", "ro-to"),
-    "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders", "stakeholders"),
+    "feared_event": (
+        "ebios_rm",
+        "FearedEvent",
+        "Feared Events",
+        "ebios-rm/feared-events",
+    ),
+    "ro_to": ("ebios_rm", "RoTo", "RoTo Couples", "ebios-rm/ro-to"),
+    "stakeholder": ("ebios_rm", "Stakeholder", "Stakeholders", "ebios-rm/stakeholders"),
     "strategic_scenario": (
         "ebios_rm",
         "StrategicScenario",
         "Strategic Scenarios",
-        "strategic-scenarios",
+        "ebios-rm/strategic-scenarios",
     ),
-    "attack_path": ("ebios_rm", "AttackPath", "Attack Paths", "attack-paths"),
+    "attack_path": ("ebios_rm", "AttackPath", "Attack Paths", "ebios-rm/attack-paths"),
     "operational_scenario": (
         "ebios_rm",
         "OperationalScenario",
         "Operational Scenarios",
-        "operational-scenarios",
+        "ebios-rm/operational-scenarios",
     ),
     "folder": ("iam", "Folder", "Domains", "folders"),
 }
@@ -877,6 +882,7 @@ def dispatch_tool_call(
     arguments: dict,
     accessible_folder_ids: list[str],
     parsed_context=None,
+    user_message: str = "",
 ) -> dict | None:
     """
     Execute a tool call from the LLM.
@@ -885,7 +891,7 @@ def dispatch_tool_call(
     """
     # search_library has its own parameter space — skip query_objects sanitization
     if tool_name == "search_library":
-        return _dispatch_search_library(arguments)
+        return _dispatch_search_library(arguments, user_message=user_message)
 
     cleaned = _sanitize_arguments(arguments)
 
@@ -904,7 +910,7 @@ def dispatch_tool_call(
     return None
 
 
-def _dispatch_search_library(arguments: dict) -> dict | None:
+def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | None:
     """Dispatch a search_library tool call to the knowledge graph."""
     from .knowledge_graph import (
         find_frameworks,
@@ -922,6 +928,27 @@ def _dispatch_search_library(arguments: dict) -> dict | None:
     framework_b = arguments.get("framework_b", "")
     provider = arguments.get("provider", "")
     locale = arguments.get("locale", "")
+
+    # Auto-upgrade to compare_frameworks when 2+ frameworks are detected
+    # in the user message, regardless of what action the LLM picked.
+    # The LLM is unreliable at choosing compare_frameworks vs get_framework_detail
+    # vs find_frameworks — the graph detection is deterministic.
+    if action != "compare_frameworks":
+        detected = _detect_framework_names(user_message or query)
+        logger.info(
+            "framework_detection",
+            user_message=user_message[:100] if user_message else "",
+            detected=detected,
+        )
+        if len(detected) >= 2:
+            logger.info(
+                "auto_upgrade_to_compare",
+                original_action=action,
+                detected_frameworks=detected,
+            )
+            action = "compare_frameworks"
+            framework = detected[0]
+            framework_b = detected[1]
 
     if action == "find_frameworks":
         data = find_frameworks(query=query, provider=provider, locale=locale)
@@ -952,3 +979,42 @@ def _dispatch_search_library(arguments: dict) -> dict | None:
         return {"type": "search_library", "text": f"Unknown action: {action}"}
 
     return {"type": "search_library", "text": format_graph_result(data)}
+
+
+def _detect_framework_names(text: str) -> list[str]:
+    """
+    Detect framework names in text by resolving tokens against the knowledge
+    graph's actual framework nodes. No hardcoded keywords — the graph is the
+    source of truth.
+    Returns up to 2 matched framework URNs.
+    """
+    from .knowledge_graph import get_graph, _resolve_framework
+
+    if not text:
+        return []
+
+    G = get_graph()
+    # Tokenize: split on whitespace and punctuation boundaries
+    tokens = text.replace("?", " ").replace("!", " ").replace(",", " ").split()
+    tokens = [t.strip("'\".:;()") for t in tokens if len(t.strip("'\".:;()")) >= 3]
+
+    found = []
+    skip_until = 0
+    for i, token in enumerate(tokens):
+        if i < skip_until:
+            continue
+        # Try progressively longer phrases (up to 4 tokens) for multi-word names
+        # e.g. "NIST CSF 2.0", "ISO 27001"
+        for length in range(min(4, len(tokens) - i), 0, -1):
+            phrase = " ".join(tokens[i : i + length])
+            urn = _resolve_framework(G, phrase)
+            if urn and urn not in found:
+                logger.info("framework_token_match", phrase=phrase, urn=urn)
+                found.append(urn)
+                skip_until = i + length
+                break
+        if len(found) >= 2:
+            break
+
+    logger.info("framework_detection_tokens", tokens=tokens, found=found)
+    return found

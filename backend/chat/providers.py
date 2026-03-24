@@ -378,7 +378,7 @@ class OpenAICompatibleLLM:
 
     def _raw_stream(
         self, prompt: str, context: str, history: list[dict] | None = None
-    ) -> Iterator[str]:
+    ) -> Iterator[tuple[str, str]]:
         import httpx
 
         messages = _build_messages(self.system_prompt, prompt, context, history)
@@ -401,15 +401,30 @@ class OpenAICompatibleLLM:
                 try:
                     data = json.loads(payload)
                     delta = data["choices"][0].get("delta", {})
+                    # Log first delta to see what fields the server sends
+                    if not hasattr(self, "_logged_first_delta"):
+                        self._logged_first_delta = True
+                        logger.info(
+                            "first_stream_delta",
+                            delta_keys=list(delta.keys()),
+                            delta=delta,
+                        )
+                    # Servers put thinking in different fields:
+                    # - "reasoning_content" (DeepSeek API)
+                    # - "reasoning" (LM Studio)
+                    if reasoning := (
+                        delta.get("reasoning") or delta.get("reasoning_content")
+                    ):
+                        yield ("thinking", reasoning)
                     if content := delta.get("content"):
-                        yield content
+                        yield ("raw", content)
                 except (json.JSONDecodeError, KeyError, IndexError):
                     continue
 
     def stream(
         self, prompt: str, context: str, history: list[dict] | None = None
     ) -> Iterator[tuple[str, str]]:
-        return filter_thinking_tokens(self._raw_stream(prompt, context, history))
+        return _merge_thinking_stream(self._raw_stream(prompt, context, history))
 
     def tool_call(
         self,
@@ -469,6 +484,60 @@ class OpenAICompatibleLLM:
         return None
 
 
+def _merge_thinking_stream(
+    raw_tokens: Iterator[tuple[str, str]],
+) -> Iterator[tuple[str, str]]:
+    """
+    Merge thinking tokens from two sources:
+    1. Explicit "thinking" tuples (from reasoning_content field)
+    2. <think> tags inside "raw" content (parsed by filter_thinking_tokens)
+
+    Streams a content-only iterator through filter_thinking_tokens so that
+    tokens are yielded progressively (not buffered until stream end).
+    """
+    has_explicit_thinking = False
+
+    def content_tokens():
+        nonlocal has_explicit_thinking
+        for token_type, token in raw_tokens:
+            if token_type == "thinking":
+                has_explicit_thinking = True
+                # Can't yield thinking from inside this generator since
+                # filter_thinking_tokens owns the iteration. Instead, we
+                # signal it by yielding a sentinel that won't match <think>.
+                # We handle explicit thinking in the outer loop.
+            else:
+                yield token
+
+    # When the server uses a separate reasoning field, content won't
+    # contain <think> tags — but we still run through the filter for
+    # servers that embed tags in content (Ollama with DeepSeek, etc.)
+    #
+    # To handle both paths, we interleave: peek at each raw token,
+    # yield thinking directly, and feed content through the tag parser.
+    raw_iter = iter(raw_tokens)
+    # Small state machine: accumulate content tokens for the tag parser
+    inside_thinking = True  # assume thinking comes first
+
+    for token_type, token in raw_iter:
+        if token_type == "thinking":
+            yield ("thinking", token)
+        else:
+            # First content token — switch to streaming content
+            # Feed this and all subsequent content through filter_thinking_tokens
+            def remaining_content():
+                yield token
+                for tt, tk in raw_iter:
+                    if tt == "thinking":
+                        # Shouldn't happen after content starts, but handle gracefully
+                        yield f"<think>{tk}</think>"
+                    else:
+                        yield tk
+
+            yield from filter_thinking_tokens(remaining_content())
+            return  # filter_thinking_tokens consumed the rest of the iterator
+
+
 class StubLLM:
     """Fallback when no LLM is available — returns retrieval results only."""
 
@@ -479,8 +548,8 @@ class StubLLM:
 
     def stream(
         self, prompt: str, context: str, history: list[dict] | None = None
-    ) -> Iterator[str]:
-        yield self.generate(prompt, context)
+    ) -> Iterator[tuple[str, str]]:
+        yield ("token", self.generate(prompt, context))
 
     def tool_call(
         self,

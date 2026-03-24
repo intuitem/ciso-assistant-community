@@ -662,21 +662,33 @@ def _resolve_framework(G: DiGraph, identifier: str) -> str | None:
         if name == identifier_lower:
             return node_id
 
-        # Partial match scoring
+        # Partial match scoring — take the best of all matches
         score = 0.0
+        if identifier_lower in ref_id:
+            score = max(score, len(identifier_lower) / max(len(ref_id), 1))
         if identifier_lower in name:
-            score = len(identifier_lower) / max(len(name), 1)
-        elif identifier_lower in ref_id:
-            score = len(identifier_lower) / max(len(ref_id), 1)
-        elif name and name in identifier_lower:
-            score = len(name) / max(len(identifier_lower), 1) * 0.8
-        elif ref_id and ref_id in identifier_lower:
-            score = len(ref_id) / max(len(identifier_lower), 1) * 0.8
+            score = max(score, len(identifier_lower) / max(len(name), 1))
+        if ref_id and ref_id in identifier_lower:
+            score = max(score, len(ref_id) / max(len(identifier_lower), 1) * 0.8)
+        if name and name in identifier_lower:
+            score = max(score, len(name) / max(len(identifier_lower), 1) * 0.8)
 
         if score > best_score:
             best_score = score
             best_match = node_id
 
+    # Require a minimum match quality to avoid false positives.
+    # Threshold is low (0.25) because short abbreviations like "3CF"
+    # score 0.3 against "3CF-ed1-v1". Callers filter tokens < 3 chars
+    # to prevent common words from matching.
+    logger.info(
+        "resolve_framework_result",
+        identifier=identifier,
+        best_score=round(best_score, 3),
+        best_match=best_match,
+    )
+    if best_score < 0.25:
+        return None
     return best_match
 
 

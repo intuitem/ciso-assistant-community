@@ -1585,6 +1585,14 @@ def startup(sender: AppConfig, **kwargs):
     except Exception as e:
         logger.error(f"Failed to reset global settings: {e}")
 
+    # Pre-warm the chat knowledge graph (reads YAML files, no DB needed)
+    try:
+        from chat.knowledge_graph import get_graph
+
+        get_graph()
+    except Exception:
+        pass  # non-critical — will build on first query instead
+
 
 class CoreConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"

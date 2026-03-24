@@ -509,12 +509,20 @@ def _format_object_lines(objects: list[dict], url_slug: str = "") -> list[str]:
         ):
             if obj.get(key):
                 extras.append(f"{key}={obj[key]}")
+        if obj.get("current_risk_level") is not None:
+            extras.append(f"current_risk={obj['current_risk_level']}")
+        if obj.get("residual_risk_level") is not None:
+            extras.append(f"residual_risk={obj['residual_risk_level']}")
+        if obj.get("eta"):
+            extras.append(f"eta={obj['eta']}")
         if obj.get("folder"):
             extras.append(f"domain={obj['folder']}")
 
         line = f"  - {name_part}"
         if extras:
             line += f" ({', '.join(extras)})"
+        if obj.get("description"):
+            line += f"\n    {obj['description']}"
         lines.append(line)
     return lines
 

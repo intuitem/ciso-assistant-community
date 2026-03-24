@@ -96,6 +96,12 @@ class ChatSessionViewSet(BaseModelViewSet):
         from .workflows.base import WorkflowContext
 
         llm = get_llm()
+        logger.info(
+            "llm_provider_selected",
+            provider=type(llm).__name__,
+            page_context=page_context,
+            parsed_context=str(parsed_context) if parsed_context else None,
+        )
 
         # Step 1a: Deterministic pre-routing for workflows.
         # Small LLMs are unreliable at tool selection with 5+ tools,
@@ -251,6 +257,7 @@ class ChatSessionViewSet(BaseModelViewSet):
                 tool_response.get("arguments", {}),
                 accessible_folders,
                 parsed_context,
+                user_message=user_content,
             )
             logger.info("tool_dispatch_complete", duration=round(time.time() - t1, 2))
 
@@ -441,9 +448,34 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Keep only the last 20 messages to stay within context limits
         history_messages = history_messages[-20:]
 
+        # Enrich context with domain objects when on a detail page.
+        # This gives the LLM visibility into related objects (e.g., assets
+        # in the domain) so it can reason about suggestions like "what other
+        # risks should I consider based on my assets?"
+        if parsed_context and parsed_context.object_id:
+            enrichment = _enrich_context(parsed_context, accessible_folders)
+            if enrichment:
+                context += "\n\n" + enrichment
+
         # Prepend page context to the LLM context so it knows where the user is
         if page_context_prefix and not query_result:
             context = page_context_prefix + context
+
+        logger.info(
+            "llm_context_size",
+            system_prompt_chars=len(llm.system_prompt)
+            if hasattr(llm, "system_prompt")
+            else 0,
+            context_chars=len(context),
+            history_messages=len(history_messages),
+            history_chars=sum(len(m.get("content", "")) for m in history_messages),
+            total_prompt_chars=(
+                (len(llm.system_prompt) if hasattr(llm, "system_prompt") else 0)
+                + len(context)
+                + len(user_content)
+                + sum(len(m.get("content", "")) for m in history_messages)
+            ),
+        )
 
         def stream_response():
             """Generator for SSE streaming."""
@@ -484,16 +516,46 @@ class ChatSessionViewSet(BaseModelViewSet):
                     yield f"data: {action_data}\n\n"
 
                 t_stream = time.time()
+                t_first_token = None
+                t_first_content = None
+                thinking_count = 0
+                token_count = 0
                 for token_type, token in llm.stream(
                     user_content, context, history=history_messages
                 ):
+                    if t_first_token is None:
+                        t_first_token = time.time()
                     if token_type == "token":
+                        if t_first_content is None:
+                            t_first_content = time.time()
                         full_response += token
+                        token_count += 1
+                    else:
+                        thinking_count += 1
                     # SSE format — "thinking" tokens go to a collapsible block in the UI
                     data = json.dumps({"type": token_type, "content": token})
                     yield f"data: {data}\n\n"
+                t_end = time.time()
+                ttft = round(t_first_token - t_stream, 2) if t_first_token else None
+                thinking_duration = (
+                    round(t_first_content - t_first_token, 2)
+                    if t_first_content and t_first_token
+                    else None
+                )
+                content_elapsed = t_end - (t_first_content or t_end)
+                tps = (
+                    round(token_count / content_elapsed, 1)
+                    if content_elapsed > 0
+                    else None
+                )
                 logger.info(
-                    "llm_stream_complete", duration=round(time.time() - t_stream, 2)
+                    "llm_stream_complete",
+                    duration=round(t_end - t_stream, 2),
+                    ttft_s=ttft,
+                    thinking_s=thinking_duration,
+                    thinking_tokens=thinking_count,
+                    tokens=token_count,
+                    tokens_per_s=tps,
                 )
 
                 # Save assistant message
@@ -668,7 +730,11 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     if not info_parts:
         return ""
 
-    parts.append(f"The user is currently viewing: {', '.join(info_parts)}.")
+    parts.append(
+        f"The user is currently viewing: {', '.join(info_parts)}.\n"
+        "NOTE: The page title above is for context only — do NOT use it as a search filter. "
+        "When querying child objects of this page, rely on the automatic parent scoping (no search needed)."
+    )
 
     # Add contextual action hints when on a detail/edit page
     if parsed_context and parsed_context.object_id:
@@ -710,6 +776,74 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
     )
 
     return "\n".join(parts) + "\n"
+
+
+def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
+    """
+    Enrich the LLM context with domain objects relevant to the current page.
+    For example, when on a risk assessment page, include the domain's assets
+    so the LLM can reason about additional risks.
+    """
+    from django.apps import apps
+
+    from .tools import MODEL_MAP
+
+    # Determine the parent object's folder
+    parent_info = MODEL_MAP.get(parsed_context.model_key)
+    if not parent_info:
+        return ""
+
+    try:
+        parent_model = apps.get_model(parent_info[0], parent_info[1])
+        parent_obj = parent_model.objects.filter(id=parsed_context.object_id).first()
+        if not parent_obj or not hasattr(parent_obj, "folder_id"):
+            return ""
+        folder_id = str(parent_obj.folder_id)
+    except Exception:
+        return ""
+
+    parts = []
+
+    # For risk assessments: include assets from the same domain
+    if parsed_context.model_key == "risk_assessment":
+        Asset = apps.get_model("core", "Asset")
+        assets = Asset.objects.filter(
+            folder_id=folder_id,
+            folder_id__in=accessible_folder_ids,
+        )[:30]
+        if assets:
+            parts.append("ASSETS IN THIS DOMAIN:")
+            for asset in assets:
+                line = f"  - {asset.name}"
+                extras = []
+                if hasattr(asset, "type") and asset.type:
+                    extras.append(
+                        asset.get_type_display()
+                        if hasattr(asset, "get_type_display")
+                        else asset.type
+                    )
+                if hasattr(asset, "business_value") and asset.business_value:
+                    extras.append(f"business_value={asset.business_value}")
+                if extras:
+                    line += f" ({', '.join(extras)})"
+                if asset.description:
+                    line += f" — {asset.description[:150]}"
+                parts.append(line)
+
+        # Also include existing risk scenarios for awareness
+        RiskScenario = apps.get_model("core", "RiskScenario")
+        scenarios = RiskScenario.objects.filter(
+            risk_assessment_id=parsed_context.object_id,
+        )[:20]
+        if scenarios:
+            parts.append("\nEXISTING RISK SCENARIOS (already identified):")
+            for s in scenarios:
+                line = f"  - {s.name}"
+                if hasattr(s, "treatment") and s.treatment:
+                    line += f" (treatment={s.get_treatment_display()})"
+                parts.append(line)
+
+    return "\n".join(parts)
 
 
 def _get_graph_context(user_message: str) -> str:
