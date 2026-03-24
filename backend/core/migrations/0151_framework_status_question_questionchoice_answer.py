@@ -16,7 +16,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0149_alter_evidencerevision_attachment"),
+        ("core", "0150_add_editable_mixin_to_riskmatrix"),
         ("iam", "0021_fix_auditee_iam_groups"),
     ]
 
