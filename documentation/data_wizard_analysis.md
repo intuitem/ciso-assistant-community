@@ -569,7 +569,7 @@ Policy is a proxy model of AppliedControl with `category='policy'`.
 | `description` | string | No  ||
 | `status`      | string | No  | The list of the possible statuses below |
 | `severity`    | string | No  | The list of the possible severities below |
-| `filtering_labels` | list | No | List of labels, newline-separated |
+| `filtering_labels` | list | No | List of labels, pipe or comma-separated |
 | `assets`      | list   | No | List of the names of the related assets, newline-separated |
 | `applied_controls` | list | No | List of the names of the related applied controls, newline-separated |
 | `security_exceptions`| list | No | List of the names of the related security exceptions, newline-separated |
