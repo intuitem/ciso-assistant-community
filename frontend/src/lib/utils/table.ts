@@ -1263,14 +1263,22 @@ export const listViewFields = {
 		body: ['label']
 	},
 	'risk-matrices': {
-		head: ['name', 'description', 'provider', 'domain'],
-		body: ['name', 'description', 'provider', 'folder'],
+		head: ['name', 'description', 'provider', 'domain', 'isEnabled'],
+		body: ['name', 'description', 'provider', 'folder', 'is_enabled'],
 		meta: ['id', 'urn'],
 		filters: {
 			folder: DOMAIN_FILTER,
 			provider: {
 				...PROVIDER_FILTER,
 				props: { ...PROVIDER_FILTER.props, optionsEndpoint: 'risk-matrices/provider' }
+			},
+			is_enabled: {
+				component: AutocompleteSelect,
+				props: {
+					label: 'isEnabled',
+					options: YES_NO_OPTIONS,
+					multiple: false
+				}
 			}
 		}
 	},
@@ -1338,6 +1346,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherentLevel',
 			'existingAppliedControls',
 			'currentLevel',
@@ -1351,6 +1360,7 @@ export const listViewFields = {
 			'ref_id',
 			'threats',
 			'name',
+			'owner',
 			'inherent_level',
 			'existing_applied_controls',
 			'current_level',
@@ -1365,6 +1375,7 @@ export const listViewFields = {
 			perimeter: PERIMETER_FILTER,
 			treatment: TREATMENT_FILTER,
 			risk_assessment: RISK_ASSESSMENT_FILTER,
+			owner: OWNER_FILTER,
 			threats: THREAT_FILTER,
 			assets: ASSET_FILTER,
 			current_level: CURRENT_RISK_LEVEL_FILTER,
@@ -1432,6 +1443,7 @@ export const listViewFields = {
 			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csfFunction',
 			'eta',
@@ -1447,6 +1459,7 @@ export const listViewFields = {
 			'assets',
 			'priority',
 			'status',
+			'owner',
 			'category',
 			'csf_function',
 			'eta',

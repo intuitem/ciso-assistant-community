@@ -3,7 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { activateTOTPSchema } from '../(internal)/my-profile/settings/mfa/utils/schemas';
 import { setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 as zod } from 'sveltekit-superforms/adapters';
 import { safeTranslate } from '$lib/utils/i18n';
 import { m } from '$paraglide/messages';
 import { setFlash } from 'sveltekit-flash-message/server';
