@@ -86,6 +86,11 @@
 					field: 'validation_flows',
 					label: m.validationFlows(),
 					description: m.validationFlowsDescription()
+				},
+				{
+					field: 'policy_documents',
+					label: m.policyDocumentsFlag(),
+					description: m.policyDocumentsFlagDescription()
 				}
 			].filter(({ field }) => Object.keys(page.data.featureFlagSettings).includes(field))
 		},
@@ -209,6 +214,11 @@
 					field: 'comments',
 					label: m.comments(),
 					description: m.commentsDescription()
+				},
+				{
+					field: 'journeys',
+					label: m.journeys(),
+					description: m.journeysDescription()
 				},
 				{
 					field: 'experimental',

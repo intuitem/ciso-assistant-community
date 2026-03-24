@@ -1,14 +1,13 @@
-import { m } from '$paraglide/messages';
 import { navData } from '../SideBar/navData';
 
 export interface NavigationLink {
 	label: string;
 	href: string;
+	icon?: string;
 }
-const flattenNavData = (navData) => {
-	const result = [];
+const flattenNavData = (navData: typeof import('../SideBar/navData').navData) => {
+	const result: NavigationLink[] = [];
 
-	// Handle potentially incomplete/malformed data
 	if (!navData?.items) return result;
 
 	for (const section of navData.items) {
@@ -18,7 +17,8 @@ const flattenNavData = (navData) => {
 			if (item.name && item.href) {
 				result.push({
 					label: item.name,
-					href: item.href
+					href: item.href,
+					icon: item.fa_icon
 				});
 			}
 		}
@@ -29,7 +29,8 @@ const flattenNavData = (navData) => {
 export let navigationLinks: NavigationLink[] = flattenNavData(navData);
 navigationLinks.push({
 	label: 'myProfile',
-	href: '/my-profile'
+	href: '/my-profile',
+	icon: 'fa-solid fa-user'
 });
 
-// wre can use the same trick later on for dynamic actions
+// we can use the same trick later on for dynamic actions
