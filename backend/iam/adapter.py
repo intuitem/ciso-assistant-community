@@ -57,6 +57,36 @@ class AccountAdapter(DefaultAccountAdapter):
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
+    @staticmethod
+    def _find_email_in_dict(data, _depth=0, _max_depth=5):
+        """Recursively search for an email in a dict or list, checking known keys at each level."""
+        if _depth >= _max_depth:
+            return None
+        if isinstance(data, dict):
+            email = data.get("email") or data.get("email_address")
+            if isinstance(email, str) and email:
+                return email
+            if isinstance(email, list):
+                candidate = next((e for e in email if isinstance(e, str) and e), None)
+                if candidate:
+                    return candidate
+            for value in data.values():
+                if isinstance(value, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        value, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
+        elif isinstance(data, list):
+            for item in data:
+                if isinstance(item, (dict, list)):
+                    email = SocialAccountAdapter._find_email_in_dict(
+                        item, _depth=_depth + 1, _max_depth=_max_depth
+                    )
+                    if email:
+                        return email
+        return None
+
     def pre_social_login(self, request, sociallogin):
         extra = sociallogin.account.extra_data
         logger.debug(
@@ -84,6 +114,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
                 if candidate and "@" in candidate:
                     email_address = candidate
                     break
+        # Fallback: deep search in nested dicts (some IdPs nest email in sub-objects like "attributes")
+        if not email_address:
+            email_address = self._find_email_in_dict(extra)
         # Fallback: first string value containing '@'
         if not email_address:
             email_address = next(

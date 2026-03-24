@@ -36,20 +36,8 @@ from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
-from django.core.mail import send_mail, get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMessage
 from django.core.validators import validate_email
-from ciso_assistant.settings import (
-    CISO_ASSISTANT_URL,
-    EMAIL_HOST,
-    EMAIL_HOST_USER,
-    EMAIL_HOST_USER_RESCUE,
-    EMAIL_HOST_PASSWORD_RESCUE,
-    EMAIL_HOST_RESCUE,
-    EMAIL_PORT,
-    EMAIL_PORT_RESCUE,
-    EMAIL_USE_TLS,
-    EMAIL_USE_TLS_RESCUE,
-)
 from django.conf import settings
 
 import structlog
@@ -87,6 +75,7 @@ ALLOWED_PERMISSION_APPS = (
     "crq",
     "pmbok",
     "iam",
+    "global_settings",
 )
 
 IGNORED_PERMISSION_MODELS = (
@@ -562,7 +551,7 @@ class UserManager(BaseUserManager):
         return self._create_user(
             email=email,
             password=password,
-            mailing=bool(EMAIL_HOST or EMAIL_HOST_RESCUE),
+            mailing=bool(settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE),
             initial_group=None,
             **extra_fields,
         )
@@ -576,7 +565,9 @@ class UserManager(BaseUserManager):
         superuser = self._create_user(
             email=email,
             password=password,
-            mailing=bool((not password) and (EMAIL_HOST or EMAIL_HOST_RESCUE)),
+            mailing=bool(
+                (not password) and (settings.EMAIL_HOST or settings.EMAIL_HOST_RESCUE)
+            ),
             initial_group=UserGroup.objects.get(name="BI-UG-ADM"),
             keep_local_login=True,
             **extra_fields,
@@ -718,19 +709,61 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
             prefs["lang"] = default_lang
         return prefs
 
+    # Maps Django HTML template names to YAML template keys
+    _TEMPLATE_KEY_MAP = {
+        "registration/first_connexion_email.html": "welcome",
+        "registration/first_connexion_email_sso.html": "welcome_sso",
+        "registration/password_reset_email.html": "password_reset",
+        "tprm/third_party_email.html": "questionnaire_assignment",
+    }
+
     def mailing(self, email_template_name, subject, object="", object_id="", pk=False):
         """
-        Sending a mail to a user for password resetting or creation
+        Sending a mail to a user for password resetting or creation.
+        Tries the YAML-based template system first (supports custom overrides),
+        falls back to the legacy Django HTML templates.
         """
-        # Resolve user's preferred language for email rendering
         user_lang = self.get_preferences().get("lang", "en")
+        uid = urlsafe_base64_encode(force_bytes(self.pk))
+        token = default_token_generator.make_token(self)
 
+        # Build context for the YAML template system
+        context = {
+            "set_password_url": f"{settings.CISO_ASSISTANT_URL}/first-connexion?uidb64={uid}&token={token}",
+            "reset_password_url": f"{settings.CISO_ASSISTANT_URL}/password-reset/confirm?uidb64={uid}&token={token}",
+            "questionnaire_url": f"{settings.CISO_ASSISTANT_URL}/{object}/{object_id}/table-mode"
+            if object
+            else settings.CISO_ASSISTANT_URL,
+        }
+
+        # Try YAML template system (supports custom overrides and Markdown)
+        template_key = self._TEMPLATE_KEY_MAP.get(email_template_name)
+        if template_key:
+            try:
+                from core.email_utils import render_email_template
+
+                rendered = render_email_template(
+                    template_key, context, locale=user_lang
+                )
+                if rendered:
+                    subject = rendered["subject"]
+                    body = rendered["body"]
+                    html_body = rendered.get("html_body")
+                    return self._send_email(subject, body, html_body)
+            except Exception as e:
+                logger.warning(
+                    "YAML template rendering failed, falling back to Django template",
+                    template_key=template_key,
+                    exc_info=e,
+                )
+
+        # Fallback to legacy Django HTML templates
         header = {
             "email": self.email,
-            "root_url": CISO_ASSISTANT_URL,
-            "uid": urlsafe_base64_encode(force_bytes(self.pk)),
+            "root_url": settings.CISO_ASSISTANT_URL,
+            "uid": uid,
             "user": self,
-            "token": default_token_generator.make_token(self),
+            "token": token,
             "protocol": "https",
             "pk": str(pk) if pk else None,
             "object": object,
@@ -739,15 +772,25 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
         with translation_override(user_lang):
             email = render_to_string(email_template_name, header)
             subject = str(subject)
+
+        self._send_email(subject, email, email)
+
+    def _send_email(self, subject, body, html_body=None):
+        """Send an email with primary/rescue server fallback."""
         try:
-            send_mail(
-                subject=subject,
-                message=email,
-                from_email=None,
-                recipient_list=[self.email],
-                fail_silently=False,
-                html_message=email,
-            )
+            ssl_context = getattr(settings, "EMAIL_SSL_CONTEXT", None)
+            with get_connection(ssl_context=ssl_context) as connection:
+                msg = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=None,
+                    to=[self.email],
+                    connection=connection,
+                )
+                if html_body:
+                    msg.content_subtype = "html"
+                    msg.body = html_body
+                msg.send()
             logger.info(
                 "Email sent successfully", recipient=self.email, subject=subject
             )
@@ -757,27 +800,33 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                 recipient=self.email,
                 subject=subject,
                 error=str(primary_exception),
-                email_host=EMAIL_HOST,
-                email_port=EMAIL_PORT,
-                email_host_user=EMAIL_HOST_USER,
-                email_use_tls=EMAIL_USE_TLS,
+                email_host=settings.EMAIL_HOST,
+                email_port=settings.EMAIL_PORT,
+                email_host_user=settings.EMAIL_HOST_USER,
+                email_use_tls=settings.EMAIL_USE_TLS,
             )
-            if EMAIL_HOST_RESCUE:
+            if settings.EMAIL_HOST_RESCUE:
                 try:
                     with get_connection(
-                        host=EMAIL_HOST_RESCUE,
-                        port=EMAIL_PORT_RESCUE,
-                        username=EMAIL_HOST_USER_RESCUE,
-                        password=EMAIL_HOST_PASSWORD_RESCUE,
-                        use_tls=EMAIL_USE_TLS_RESCUE if EMAIL_USE_TLS_RESCUE else False,
+                        host=settings.EMAIL_HOST_RESCUE,
+                        port=settings.EMAIL_PORT_RESCUE,
+                        username=settings.EMAIL_HOST_USER_RESCUE,
+                        password=settings.EMAIL_HOST_PASSWORD_RESCUE,
+                        use_tls=settings.EMAIL_USE_TLS_RESCUE,
+                        use_ssl=settings.EMAIL_USE_SSL_RESCUE,
+                        ssl_context=getattr(settings, "EMAIL_SSL_CONTEXT", None),
                     ) as new_connection:
-                        EmailMessage(
+                        msg = EmailMessage(
                             subject=subject,
-                            body=email,
+                            body=body,
                             from_email=None,
                             to=[self.email],
                             connection=new_connection,
-                        ).send()
+                        )
+                        if html_body:
+                            msg.content_subtype = "html"
+                            msg.body = html_body
+                        msg.send()
                     logger.info(
                         "Email sent via rescue server",
                         recipient=self.email,
@@ -789,10 +838,10 @@ class User(ActorSyncMixin, AbstractBaseUser, AbstractBaseModel, FolderMixin):
                         recipient=self.email,
                         subject=subject,
                         error=str(rescue_exception),
-                        email_host=EMAIL_HOST_RESCUE,
-                        email_port=EMAIL_PORT_RESCUE,
-                        email_username=EMAIL_HOST_USER_RESCUE,
-                        email_use_tls=EMAIL_USE_TLS_RESCUE,
+                        email_host=settings.EMAIL_HOST_RESCUE,
+                        email_port=settings.EMAIL_PORT_RESCUE,
+                        email_username=settings.EMAIL_HOST_USER_RESCUE,
+                        email_use_tls=settings.EMAIL_USE_TLS_RESCUE,
                     )
                     raise rescue_exception
             else:

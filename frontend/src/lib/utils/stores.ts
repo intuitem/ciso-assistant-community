@@ -92,6 +92,10 @@ export const tableHandlers = writable<Record<string, DataHandler>>({});
 export const tableStates: Persisted<Record<string, { pageNumber: number; rowsPerPage: number }>> =
 	persisted('tableStates', {});
 
+// Persisted table filters per model path (e.g. "/applied-controls" -> { folder: [{value: "uuid"}], status: [{value: "active"}] })
+export const tableFilterStates: Persisted<Record<string, Record<string, { value: string }[]>>> =
+	persisted('tableFilterStates', {});
+
 function createPersistedAuditFilters() {
 	const stored = browser ? localStorage.getItem('auditFilters') : null;
 	const initial = stored ? JSON.parse(stored) : {};
