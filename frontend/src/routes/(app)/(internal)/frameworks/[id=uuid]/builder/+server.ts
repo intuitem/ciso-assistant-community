@@ -115,7 +115,7 @@ export const PATCH: RequestHandler = async ({ fetch, request, params }) => {
 	return proxyRequest(fetch, 'PATCH', endpoint, id, payload);
 };
 
-export const GET: RequestHandler = async ({ fetch, url }) => {
+export const GET: RequestHandler = async ({ fetch, url, params }) => {
 	const action = url.searchParams.get('_action');
 
 	if (action === 'serve-image') {

@@ -9298,8 +9298,8 @@ class FrameworkViewSet(BaseModelViewSet):
         framework = self.get_object()
         try:
             attachment = RequirementNodeAttachment.objects.get(
+                Q(framework=framework) | Q(requirement_node__framework=framework),
                 pk=attachment_id,
-                framework=framework,
             )
         except RequirementNodeAttachment.DoesNotExist:
             return Response(
@@ -9307,13 +9307,10 @@ class FrameworkViewSet(BaseModelViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
         content_type = (
-            mimetypes.guess_type(attachment.file.name)[0]
-            or "application/octet-stream"
+            mimetypes.guess_type(attachment.file.name)[0] or "application/octet-stream"
         )
         response = HttpResponse(attachment.file.read(), content_type=content_type)
-        response["Content-Disposition"] = (
-            f'inline; filename="{attachment.file.name}"'
-        )
+        response["Content-Disposition"] = f'inline; filename="{attachment.file.name}"'
         return response
 
 

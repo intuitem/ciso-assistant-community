@@ -269,7 +269,10 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
  * Hydrate draft JSON (flat arrays with _id suffixed FK fields) into
  * the RequirementNode[] and Question[] format expected by buildTree.
  */
-function hydrateDraft(draft: DraftJSON, frameworkId: string): {
+function hydrateDraft(
+	draft: DraftJSON,
+	frameworkId: string
+): {
 	frameworkPatch: Partial<Framework>;
 	nodes: RequirementNode[];
 	questions: Question[];
