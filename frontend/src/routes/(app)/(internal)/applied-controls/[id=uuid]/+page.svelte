@@ -34,7 +34,7 @@
 				bodyComponent: List,
 				bodyProps: {
 					items: dryRunData.map(
-						([oldValue, newValue]) => `${safeTranslate(oldValue)} -> ${safeTranslate(newValue)}`
+						([oldValue, newValue]) => `${safeTranslate(oldValue)} 🠲 ${safeTranslate(newValue)}`
 					),
 					message: m.theFollowingChangesWillBeApplied()
 				}
