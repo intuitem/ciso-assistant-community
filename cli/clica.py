@@ -449,6 +449,16 @@ DATA_WIZARD_COMMANDS = [
         "show_perimeter_option": True,
         "show_matrix_option": True,
     },
+    {
+        "command": "import_tasks",
+        "model_type": "TaskTemplate",
+        "help": "Import task templates and past task node occurrences (multi-sheet Excel or CSV) using the Data Wizard backend.",
+        "requires_folder": False,
+        "requires_perimeter": False,
+        "requires_framework": False,
+        "requires_matrix": False,
+        "show_folder_option": True,
+    },
 ]
 
 
