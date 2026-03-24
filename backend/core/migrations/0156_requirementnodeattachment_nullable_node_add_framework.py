@@ -5,20 +5,33 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0155_add_editable_mixin_to_framework'),
+        ("core", "0155_add_editable_mixin_to_framework"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='requirementnodeattachment',
-            name='framework',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='image_attachments', to='core.framework', verbose_name='Framework'),
+            model_name="requirementnodeattachment",
+            name="framework",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="image_attachments",
+                to="core.framework",
+                verbose_name="Framework",
+            ),
         ),
         migrations.AlterField(
-            model_name='requirementnodeattachment',
-            name='requirement_node',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='attachments', to='core.requirementnode', verbose_name='Requirement node'),
+            model_name="requirementnodeattachment",
+            name="requirement_node",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attachments",
+                to="core.requirementnode",
+                verbose_name="Requirement node",
+            ),
         ),
     ]
