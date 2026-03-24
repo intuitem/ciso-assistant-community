@@ -49,34 +49,34 @@ objects:
         name: "Regulatory and legal compliance obligations"
         description: "Applicable laws, regulations, and contractual obligations imposing cybersecurity requirements on the organisation (e.g. Privacy Act, NZISM, sector-specific regulations, contractual SLAs)."
         category: legal
-        origin: internal
+        origin: external
         status: active
         translations:
           fr:
-            name: "Obligations r\u00e9glementaires et l\u00e9gales"
-            description: "Lois, r\u00e9glementations et obligations contractuelles imposant des exigences de cybers\u00e9curit\u00e9 \u00e0 l\u2019organisation."
+            name: "Obligations réglementaires et légales"
+            description: "Lois, réglementations et obligations contractuelles imposant des exigences de cybersécurité à l'organisation."
 
       - type: organisation_issue
         name: "Evolving cyber threat landscape"
         description: "External threat environment including ransomware groups, nation-state actors, phishing campaigns, supply chain attacks, and emerging threats relevant to the organisation's sector and geography."
         category: technology
-        origin: internal
+        origin: external
         status: active
         translations:
           fr:
-            name: "Paysage des cybermenaces en \u00e9volution"
-            description: "Environnement de menaces externes incluant les ran\u00e7ongiciels, acteurs \u00e9tatiques, hame\u00e7onnage, attaques de la cha\u00eene d\u2019approvisionnement et menaces \u00e9mergentes pertinentes pour le secteur."
+            name: "Paysage des cybermenaces en évolution"
+            description: "Environnement de menaces externes incluant les rançongiciels, acteurs étatiques, hameçonnage, attaques de la chaîne d'approvisionnement et menaces émergentes pertinentes pour le secteur."
 
       - type: organisation_issue
         name: "Third-party and supply chain dependencies"
         description: "Reliance on vendors, managed service providers, cloud platforms, and supply chain partners that introduce cybersecurity risk through trusted access, shared systems, and data processing relationships."
         category: technology
-        origin: internal
+        origin: external
         status: active
         translations:
           fr:
-            name: "D\u00e9pendances tierces et cha\u00eene d\u2019approvisionnement"
-            description: "D\u00e9pendance envers des fournisseurs, prestataires de services manag\u00e9s, plateformes cloud et partenaires qui introduisent des risques cybers\u00e9curit\u00e9."
+            name: "Dépendances tierces et chaîne d'approvisionnement"
+            description: "Dépendance envers des fournisseurs, prestataires de services managés, plateformes cloud et partenaires qui introduisent des risques cybersécurité."
 
       - type: organisation_issue
         name: "Current cybersecurity maturity and capability gaps"
