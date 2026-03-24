@@ -1809,10 +1809,14 @@ class FrameworkReadSerializer(ReferentialSerializer):
     reference_controls = FieldsRelatedField(many=True)
     is_dynamic = serializers.BooleanField(read_only=True)
     has_update = serializers.BooleanField(read_only=True)
+    has_editing_draft = serializers.SerializerMethodField()
+
+    def get_has_editing_draft(self, obj):
+        return obj.editing_draft is not None
 
     class Meta:
         model = Framework
-        exclude = ["translations"]
+        exclude = ["translations", "editing_draft", "editing_history"]
 
 
 class FrameworkWriteSerializer(FrameworkReadSerializer):
