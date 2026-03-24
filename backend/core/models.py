@@ -2512,6 +2512,8 @@ class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
         on_delete=models.CASCADE,
         related_name="attachments",
         verbose_name=_("Requirement node"),
+        null=True,
+        blank=True,
     )
     file = models.FileField(
         validators=[validate_file_size, validate_file_name],
@@ -2531,9 +2533,20 @@ class RequirementNodeAttachment(AbstractBaseModel, FolderMixin):
         verbose_name = _("Requirement node attachment")
         verbose_name_plural = _("Requirement node attachments")
 
+    framework = models.ForeignKey(
+        "Framework",
+        on_delete=models.CASCADE,
+        related_name="image_attachments",
+        verbose_name=_("Framework"),
+        null=True,
+        blank=True,
+    )
+
     def save(self, *args, **kwargs):
         if not self.folder_id and self.requirement_node_id:
             self.folder = self.requirement_node.folder
+        if not self.folder_id and self.framework_id:
+            self.folder = self.framework.folder
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

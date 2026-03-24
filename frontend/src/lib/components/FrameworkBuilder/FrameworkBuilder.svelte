@@ -8,7 +8,7 @@
 		type RequirementNode,
 		type Question
 	} from './builder-state';
-	import { initBuilderApi, type DraftJSON } from './builder-api';
+	import type { DraftJSON } from './builder-api';
 	import BuilderMinimap from './BuilderMinimap.svelte';
 	import SectionBlock from './SectionBlock.svelte';
 	import OutcomesEditor from './OutcomesEditor.svelte';
@@ -21,8 +21,6 @@
 	}
 
 	let { framework, requirementNodes, questions, editingDraft = null }: Props = $props();
-
-	initBuilderApi(fetch, framework.id);
 
 	const builder = createBuilderState(framework, requirementNodes, questions, editingDraft);
 	setBuilderContext(builder);

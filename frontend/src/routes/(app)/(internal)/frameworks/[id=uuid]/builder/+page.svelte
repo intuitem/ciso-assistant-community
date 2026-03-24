@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import FrameworkBuilder from '$lib/components/FrameworkBuilder/FrameworkBuilder.svelte';
-	import { initBuilderApi, apiStartEditing } from '$lib/components/FrameworkBuilder/builder-api';
+	import { apiStartEditing } from '$lib/components/FrameworkBuilder/builder-api';
 	import type { DraftJSON } from '$lib/components/FrameworkBuilder/builder-api';
 	import type { PageData } from './$types';
 
@@ -17,9 +17,6 @@
 	let draftError = $state<string | null>(null);
 	let draftReady = $state(false);
 
-	// Initialize the API layer early so apiStartEditing works
-	initBuilderApi(fetch, data.framework.id);
-
 	onMount(async () => {
 		if (data.isImported) return;
 
@@ -27,7 +24,7 @@
 		// or returns the existing one (idempotent)
 		draftLoading = true;
 		try {
-			editingDraft = await apiStartEditing();
+			editingDraft = await apiStartEditing(data.framework.id);
 			draftReady = true;
 		} catch (e) {
 			draftError = (e as Error).message;

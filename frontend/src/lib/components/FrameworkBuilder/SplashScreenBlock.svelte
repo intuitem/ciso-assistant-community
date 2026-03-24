@@ -41,13 +41,13 @@
 		try {
 			const formData = new FormData();
 			formData.append('file', file);
-			const res = await fetch(`${proxyUrl}?_action=upload-image&node_id=${requirement.node.id}`, {
+			const res = await fetch(`${proxyUrl}?_action=upload-image`, {
 				method: 'POST',
 				body: formData
 			});
 			if (res.ok) {
 				const data = await res.json();
-				const imageUrl = `${proxyUrl}?_action=serve-image&node_id=${requirement.node.id}&attachment_id=${data.id}`;
+				const imageUrl = `${proxyUrl}?_action=serve-image&attachment_id=${data.id}`;
 				insertAtCursor(`![image](${imageUrl})`);
 				await saveDescription();
 			}

@@ -9248,6 +9248,74 @@ class FrameworkViewSet(BaseModelViewSet):
         framework.save(update_fields=["editing_draft", "updated_at"])
         return Response({"status": "draft_discarded"})
 
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="upload-image",
+        parser_classes=[MultiPartParser, FormParser, FileUploadParser],
+    )
+    def upload_image(self, request, pk=None):
+        """Upload an image to this framework (for splash screen markdown in draft mode)."""
+        framework = self.get_object()
+        self._check_change_permission(request, framework)
+        uploaded_file = request.FILES.get("file") or request.data.get("file")
+        if not uploaded_file:
+            return Response(
+                {"error": "No file provided."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        ALLOWED_IMAGE_TYPES = {
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+        }
+        content_type = (uploaded_file.content_type or "").lower()
+        if content_type not in ALLOWED_IMAGE_TYPES:
+            return Response(
+                {"error": "Only PNG, JPEG, GIF, and WebP images are allowed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        attachment = RequirementNodeAttachment(
+            framework=framework,
+            file=uploaded_file,
+            uploaded_by=request.user,
+            folder=framework.folder,
+        )
+        attachment.save()
+        return Response(
+            {"id": str(attachment.id)},
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path=r"serve-image/(?P<attachment_id>[0-9a-f-]+)",
+    )
+    def serve_image(self, request, pk=None, attachment_id=None):
+        """Serve an image attachment belonging to this framework."""
+        framework = self.get_object()
+        try:
+            attachment = RequirementNodeAttachment.objects.get(
+                pk=attachment_id,
+                framework=framework,
+            )
+        except RequirementNodeAttachment.DoesNotExist:
+            return Response(
+                {"error": "Attachment not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        content_type = (
+            mimetypes.guess_type(attachment.file.name)[0]
+            or "application/octet-stream"
+        )
+        response = HttpResponse(attachment.file.read(), content_type=content_type)
+        response["Content-Disposition"] = (
+            f'inline; filename="{attachment.file.name}"'
+        )
+        return response
+
 
 class RequirementNodeViewSet(BaseModelViewSet):
     """

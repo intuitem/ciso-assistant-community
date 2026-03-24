@@ -269,7 +269,7 @@ function serializeDraft(fw: Framework, sections: BuilderSection[]): DraftJSON {
  * Hydrate draft JSON (flat arrays with _id suffixed FK fields) into
  * the RequirementNode[] and Question[] format expected by buildTree.
  */
-function hydrateDraft(draft: DraftJSON): {
+function hydrateDraft(draft: DraftJSON, frameworkId: string): {
 	frameworkPatch: Partial<Framework>;
 	nodes: RequirementNode[];
 	questions: Question[];
@@ -342,7 +342,7 @@ function hydrateDraft(draft: DraftJSON): {
 		weight: (n.weight ?? 1) as number,
 		importance: (n.importance ?? '') as string,
 		display_mode: (n.display_mode ?? 'default') as 'default' | 'splash',
-		framework: (n.framework ?? '') as string,
+		framework: (n.framework ?? frameworkId) as string,
 		folder: (n.folder_id ?? n.folder ?? '') as string
 	}));
 
@@ -459,7 +459,7 @@ export function createBuilderState(
 	let initialFrameworkData = frameworkData;
 
 	if (editingDraft) {
-		const hydrated = hydrateDraft(editingDraft);
+		const hydrated = hydrateDraft(editingDraft, frameworkId);
 		initialNodes = hydrated.nodes;
 		initialQuestions = hydrated.questions;
 		initialFrameworkData = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;
@@ -535,7 +535,7 @@ export function createBuilderState(
 		saving.set(true);
 		try {
 			const draft = serializeDraft(get(framework), get(sections));
-			await apiSaveDraft(draft);
+			await apiSaveDraft(frameworkId, draft);
 			clearError('save-draft');
 		} catch (e) {
 			setError('save-draft', (e as Error).message);
@@ -553,7 +553,7 @@ export function createBuilderState(
 	async function publish() {
 		await flushDraft();
 		try {
-			await apiPublishDraft();
+			await apiPublishDraft(frameworkId);
 			clearError('publish');
 		} catch (e) {
 			setError('publish', (e as Error).message);
@@ -563,7 +563,7 @@ export function createBuilderState(
 
 	async function discard() {
 		try {
-			await apiDiscardDraft();
+			await apiDiscardDraft(frameworkId);
 			clearError('discard');
 		} catch (e) {
 			setError('discard', (e as Error).message);
