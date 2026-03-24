@@ -24,10 +24,7 @@
 	}
 
 	function addRule() {
-		rules = [
-			...rules,
-			{ ref_id: '', annotation: '', color: null, expression: '' }
-		];
+		rules = [...rules, { ref_id: '', annotation: '', color: null, expression: '' }];
 		expandedIndex = rules.length - 1;
 		persist();
 	}
@@ -181,7 +178,7 @@
 						<span class="text-xs text-gray-500">CEL Expression</span>
 						<textarea
 							value={rule.expression}
-							placeholder='e.g. assessment.score_sum >= 150 or "true" for catch-all'
+							placeholder="e.g. assessment.score_sum >= 150 or "true" for catch-all"
 							rows="2"
 							class="w-full text-sm font-mono border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 resize-none"
 							onblur={(e) => {
@@ -227,7 +224,9 @@
 	{/if}
 
 	<p class="text-xs text-gray-400">
-		Rules are evaluated in order. First matching rule wins. Use <code class="font-mono bg-gray-100 px-1 rounded">true</code> as a catch-all.
+		Rules are evaluated in order. First matching rule wins. Use <code
+			class="font-mono bg-gray-100 px-1 rounded">true</code
+		> as a catch-all.
 	</p>
 
 	<button
@@ -239,15 +238,29 @@
 		CEL context reference
 	</button>
 	{#if showCelRef}
-		<div class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-1">
+		<div
+			class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg p-3 font-mono space-y-1"
+		>
 			<div><span class="text-gray-700">assessment.score_sum</span> — total points scored</div>
 			<div><span class="text-gray-700">assessment.score_max</span> — total possible points</div>
-			<div><span class="text-gray-700">assessment.answered_count</span> — answered requirements</div>
-			<div><span class="text-gray-700">assessment.total_count</span> — total assessable requirements</div>
-			<div><span class="text-gray-700">requirements["urn:..."].score</span> — requirement score</div>
-			<div><span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score</div>
-			<div><span class="text-gray-700">requirements["urn:..."].result</span> — requirement result</div>
-			<div><span class="text-gray-700">requirements["urn:..."].status</span> — requirement status</div>
+			<div>
+				<span class="text-gray-700">assessment.answered_count</span> — answered requirements
+			</div>
+			<div>
+				<span class="text-gray-700">assessment.total_count</span> — total assessable requirements
+			</div>
+			<div>
+				<span class="text-gray-700">requirements["urn:..."].score</span> — requirement score
+			</div>
+			<div>
+				<span class="text-gray-700">requirements["urn:..."].max_score</span> — requirement max score
+			</div>
+			<div>
+				<span class="text-gray-700">requirements["urn:..."].result</span> — requirement result
+			</div>
+			<div>
+				<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
+			</div>
 		</div>
 	{/if}
 </div>

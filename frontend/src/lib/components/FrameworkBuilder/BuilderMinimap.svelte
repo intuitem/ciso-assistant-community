@@ -115,7 +115,10 @@
 
 		<!-- Save error -->
 		{#if $errorsStore.has('save-draft')}
-			<span class="shrink-0 text-xs text-red-600 flex items-center gap-1" title={$errorsStore.get('save-draft')}>
+			<span
+				class="shrink-0 text-xs text-red-600 flex items-center gap-1"
+				title={$errorsStore.get('save-draft')}
+			>
 				<i class="fa-solid fa-triangle-exclamation text-xs"></i> Save failed
 			</span>
 		{/if}

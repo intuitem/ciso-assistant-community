@@ -130,10 +130,10 @@
 					role="listitem"
 				>
 					{#if req.node.display_mode === 'splash'}
-					<SplashScreenBlock requirement={req} />
-				{:else}
-					<RequirementBlock requirement={req} />
-				{/if}
+						<SplashScreenBlock requirement={req} />
+					{:else}
+						<RequirementBlock requirement={req} />
+					{/if}
 				</div>
 			{/each}
 

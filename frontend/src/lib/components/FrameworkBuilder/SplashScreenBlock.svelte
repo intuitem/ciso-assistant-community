@@ -23,7 +23,7 @@
 	const frameworkId =
 		typeof requirement.node.framework === 'string'
 			? requirement.node.framework
-			: requirement.node.framework?.id ?? '';
+			: (requirement.node.framework?.id ?? '');
 	const proxyUrl = `/frameworks/${frameworkId}/builder`;
 
 	async function saveField(field: string, value: unknown) {
@@ -41,10 +41,10 @@
 		try {
 			const formData = new FormData();
 			formData.append('file', file);
-			const res = await fetch(
-				`${proxyUrl}?_action=upload-image&node_id=${requirement.node.id}`,
-				{ method: 'POST', body: formData }
-			);
+			const res = await fetch(`${proxyUrl}?_action=upload-image&node_id=${requirement.node.id}`, {
+				method: 'POST',
+				body: formData
+			});
 			if (res.ok) {
 				const data = await res.json();
 				const imageUrl = `${proxyUrl}?_action=serve-image&node_id=${requirement.node.id}&attachment_id=${data.id}`;
@@ -167,9 +167,7 @@
 						setTimeout(() => (urnCopied = false), 1500);
 					}}
 				>
-					<i
-						class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"
-					></i>
+					<i class="fa-solid {urnCopied ? 'fa-check text-green-500' : 'fa-copy'} text-[9px]"></i>
 					{#if urnCopied}
 						<span class="text-green-500">Copied!</span>
 					{:else}
@@ -327,7 +325,9 @@
 				{#if description.trim()}
 					<MarkdownRenderer content={description} />
 				{:else}
-					<p class="text-sm text-gray-400 italic">No content yet. Switch to Edit to add markdown.</p>
+					<p class="text-sm text-gray-400 italic">
+						No content yet. Switch to Edit to add markdown.
+					</p>
 				{/if}
 			</div>
 		{/if}

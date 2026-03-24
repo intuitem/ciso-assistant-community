@@ -107,10 +107,7 @@ function mapRequirements(
 }
 
 /** Find a requirement by node ID in a recursive tree */
-function findRequirement(
-	reqs: BuilderRequirement[],
-	nodeId: string
-): BuilderRequirement | null {
+function findRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderRequirement | null {
 	for (const req of reqs) {
 		if (req.node.id === nodeId) return req;
 		const found = findRequirement(req.children, nodeId);
@@ -120,10 +117,7 @@ function findRequirement(
 }
 
 /** Remove a requirement by node ID from a recursive tree */
-function removeRequirement(
-	reqs: BuilderRequirement[],
-	nodeId: string
-): BuilderRequirement[] {
+function removeRequirement(reqs: BuilderRequirement[], nodeId: string): BuilderRequirement[] {
 	return reqs
 		.filter((req) => req.node.id !== nodeId)
 		.map((req) => ({ ...req, children: removeRequirement(req.children, nodeId) }));
@@ -381,12 +375,7 @@ export interface BuilderStore {
 	reorderSections: (fromIndex: number, toIndex: number) => void;
 	reorderRequirements: (parentNodeId: string, fromIndex: number, toIndex: number) => void;
 	reorderQuestions: (reqNodeId: string, fromIndex: number, toIndex: number) => void;
-	reorderChoices: (
-		reqNodeId: string,
-		qIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) => void;
+	reorderChoices: (reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) => void;
 	updateFramework: (patch: Record<string, unknown>) => void;
 	flushDraft: () => Promise<void>;
 	publish: () => Promise<void>;
@@ -397,8 +386,7 @@ export interface BuilderStore {
 function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSection[] {
 	const questionsByNode = new Map<string, Question[]>();
 	for (const q of questions) {
-		const nodeId =
-			typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
+		const nodeId = typeof q.requirement_node === 'string' ? q.requirement_node : q.requirement_node;
 		if (!questionsByNode.has(nodeId)) {
 			questionsByNode.set(nodeId, []);
 		}
@@ -440,9 +428,7 @@ function buildTree(nodes: RequirementNode[], questions: Question[]): BuilderSect
 				.map((q) => ({ question: q }));
 			return {
 				node: sectionNode,
-				requirements: [
-					{ node: sectionNode, questions: directQuestions, children: [], depth: 0 }
-				],
+				requirements: [{ node: sectionNode, questions: directQuestions, children: [], depth: 0 }],
 				collapsed: false
 			};
 		}
@@ -506,9 +492,7 @@ export function createBuilderState(
 	}
 
 	/** Map all requirements in all sections recursively */
-	function updateAllRequirements(
-		fn: (req: BuilderRequirement) => BuilderRequirement
-	) {
+	function updateAllRequirements(fn: (req: BuilderRequirement) => BuilderRequirement) {
 		sections.update((s) =>
 			s.map((sec) => ({
 				...sec,
@@ -596,9 +580,7 @@ export function createBuilderState(
 	function addSection(afterIndex?: number) {
 		const currentSections = get(sections);
 		const order =
-			afterIndex !== undefined
-				? (afterIndex + 1) * 100 + 50
-				: currentSections.length * 100;
+			afterIndex !== undefined ? (afterIndex + 1) * 100 + 50 : currentSections.length * 100;
 
 		const newId = crypto.randomUUID();
 		const newUrn = `urn:intuitem:risk:req_node:${newId}`;
@@ -675,9 +657,7 @@ export function createBuilderState(
 		};
 		sections.update((s) =>
 			s.map((sec) =>
-				sec.node.id === parentNodeId
-					? { ...sec, requirements: [...sec.requirements, newReq] }
-					: sec
+				sec.node.id === parentNodeId ? { ...sec, requirements: [...sec.requirements, newReq] } : sec
 			)
 		);
 		scheduleDraftSave();
@@ -685,12 +665,14 @@ export function createBuilderState(
 
 	function addRequirement(parentNodeId: string, parentUrn: string) {
 		const parentReq = findReqGlobal(parentNodeId);
-		const siblings = parentReq ? parentReq.children : (() => {
-			for (const sec of get(sections)) {
-				if (sec.node.id === parentNodeId) return sec.requirements;
-			}
-			return [];
-		})();
+		const siblings = parentReq
+			? parentReq.children
+			: (() => {
+					for (const sec of get(sections)) {
+						if (sec.node.id === parentNodeId) return sec.requirements;
+					}
+					return [];
+				})();
 		const parentDepth = parentReq ? parentReq.depth : -1;
 		const order = siblings.length * 100;
 
@@ -806,8 +788,7 @@ export function createBuilderState(
 			...req,
 			questions: req.questions.map((q) => ({
 				...q,
-				question:
-					q.question.id === questionId ? { ...q.question, ...patch } : q.question
+				question: q.question.id === questionId ? { ...q.question, ...patch } : q.question
 			}))
 		}));
 		scheduleDraftSave();
@@ -882,9 +863,7 @@ export function createBuilderState(
 				...q,
 				question: {
 					...q.question,
-					choices: q.question.choices.map((c) =>
-						c.id === choiceId ? { ...c, ...patch } : c
-					)
+					choices: q.question.choices.map((c) => (c.id === choiceId ? { ...c, ...patch } : c))
 				}
 			}))
 		}));
@@ -906,9 +885,7 @@ export function createBuilderState(
 									...qq,
 									question: {
 										...qq.question,
-										choices: qq.question.choices.filter(
-											(_, ci) => ci !== choiceIndex
-										)
+										choices: qq.question.choices.filter((_, ci) => ci !== choiceIndex)
 									}
 								}
 							: qq
@@ -936,11 +913,7 @@ export function createBuilderState(
 		scheduleDraftSave();
 	}
 
-	function reorderRequirements(
-		parentNodeId: string,
-		fromIndex: number,
-		toIndex: number
-	) {
+	function reorderRequirements(parentNodeId: string, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 
 		sections.update((s) =>
@@ -999,12 +972,7 @@ export function createBuilderState(
 		scheduleDraftSave();
 	}
 
-	function reorderChoices(
-		reqNodeId: string,
-		qIndex: number,
-		fromIndex: number,
-		toIndex: number
-	) {
+	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
 		if (fromIndex === toIndex) return;
 		sections.update((s) =>
 			s.map((sec) => ({

@@ -106,17 +106,12 @@
 		</div>
 	{:else if draftError}
 		<div class="max-w-lg mx-auto mt-16 text-center">
-			<div
-				class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center"
-			>
+			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
 				<i class="fa-solid fa-triangle-exclamation text-2xl text-red-600"></i>
 			</div>
 			<h2 class="text-xl font-semibold text-gray-800 mb-2">Failed to start editor</h2>
 			<p class="text-sm text-red-600 mb-6">{draftError}</p>
-			<a
-				href="/frameworks/{data.framework.id}"
-				class="btn preset-filled-primary-500 px-6"
-			>
+			<a href="/frameworks/{data.framework.id}" class="btn preset-filled-primary-500 px-6">
 				Back to framework
 			</a>
 		</div>

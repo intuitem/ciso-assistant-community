@@ -77,7 +77,11 @@
 
 	// Warn on SvelteKit navigation about unpublished draft
 	beforeNavigate(({ cancel }) => {
-		if (!confirm('You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?')) {
+		if (
+			!confirm(
+				'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
+			)
+		) {
 			cancel();
 		}
 	});

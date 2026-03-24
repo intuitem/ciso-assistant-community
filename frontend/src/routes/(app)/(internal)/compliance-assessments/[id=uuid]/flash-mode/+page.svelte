@@ -62,9 +62,7 @@
 	let currentRequirementAssessment = $derived(
 		currentNavItem?.type === 'assessment' ? currentNavItem.data : null
 	);
-	let currentSplashNode = $derived(
-		currentNavItem?.type === 'splash' ? currentNavItem.data : null
-	);
+	let currentSplashNode = $derived(currentNavItem?.type === 'splash' ? currentNavItem.data : null);
 
 	let color = $derived(
 		currentRequirementAssessment
@@ -78,7 +76,9 @@
 			: currentSplashNode
 	);
 	let parent = $derived(
-		requirement ? data.requirements.find((req: Record<string, any>) => req.urn === requirement.parent_urn) : null
+		requirement
+			? data.requirements.find((req: Record<string, any>) => req.urn === requirement.parent_urn)
+			: null
 	);
 
 	let title = $derived(
@@ -86,22 +86,18 @@
 			? requirement.display_short
 			: parent?.display_short
 				? parent.display_short
-				: parent?.description ?? ''
+				: (parent?.description ?? '')
 	);
 
 	// Progress tracking (only assessable items count)
 	let assessedCount = $derived(
 		assessableItems.filter(
 			(item) =>
-				item.type === 'assessment' &&
-				item.data.result &&
-				item.data.result !== 'not_assessed'
+				item.type === 'assessment' && item.data.result && item.data.result !== 'not_assessed'
 		).length
 	);
 	let progressPercent = $derived(
-		assessableItems.length > 0
-			? Math.round((assessedCount / assessableItems.length) * 100)
-			: 0
+		assessableItems.length > 0 ? Math.round((assessedCount / assessableItems.length) * 100) : 0
 	);
 	let currentProgressPercent = $derived(
 		navItems.length > 0 ? ((currentIndex + 1) / navItems.length) * 100 : 0
@@ -191,9 +187,7 @@
 			? (requirementHashmap[currentRequirementAssessment.requirement?.id]?.questions ?? null)
 			: null
 	);
-	let hasQuestions = $derived(
-		currentQuestions != null && Object.keys(currentQuestions).length > 0
-	);
+	let hasQuestions = $derived(currentQuestions != null && Object.keys(currentQuestions).length > 0);
 
 	function updateResult(newResult: string | null) {
 		currentRequirementAssessment.result = newResult;

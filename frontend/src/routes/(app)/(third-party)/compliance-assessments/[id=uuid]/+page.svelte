@@ -507,14 +507,25 @@
 	{/if}
 
 	{#if compliance_assessment.computed_outcome}
-		<div class="flex items-center gap-2 px-4 py-3 rounded-lg border" style="background-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}10; border-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}30">
+		<div
+			class="flex items-center gap-2 px-4 py-3 rounded-lg border"
+			style="background-color: {compliance_assessment.computed_outcome.color ??
+				'#6b7280'}10; border-color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}30"
+		>
 			{#if compliance_assessment.computed_outcome.color}
 				<span
 					class="w-3 h-3 rounded-full shrink-0"
 					style="background-color: {compliance_assessment.computed_outcome.color}"
 				></span>
 			{/if}
-			<span class="text-sm font-semibold" style="color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}">{compliance_assessment.computed_outcome.annotation ?? compliance_assessment.computed_outcome.label ?? compliance_assessment.computed_outcome.ref_id ?? compliance_assessment.computed_outcome.result}</span>
+			<span
+				class="text-sm font-semibold"
+				style="color: {compliance_assessment.computed_outcome.color ?? '#6b7280'}"
+				>{compliance_assessment.computed_outcome.annotation ??
+					compliance_assessment.computed_outcome.label ??
+					compliance_assessment.computed_outcome.ref_id ??
+					compliance_assessment.computed_outcome.result}</span
+			>
 		</div>
 	{/if}
 
