@@ -333,7 +333,8 @@ objects:
       parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:iv.3
       ref_id: IV.3.h
       description: "Il est recommand\xE9 que le prestataire mette en \u0153uvre la\
-        \ d\xE9marche d\xE9crite dans le guide pour homologuer son d\u2019information."
+        \ d\xE9marche d\xE9crite dans le guide pour homologuer son syst\xE8me d\u2019\
+        information."
       implementation_groups:
       - S
       - E
@@ -437,7 +438,7 @@ objects:
       ref_id: V.1.a
       description: "Les auditeurs et responsables d\u2019\xE9quipe doivent ma\xEE\
         triser les bonnes pratiques et la m\xE9thodologie d\u2019audit d\xE9crites\
-        \ dans la norme  ISO/IEC 1901."
+        \ dans la norme  ISO 1901."
       implementation_groups:
       - S
       - E
@@ -448,7 +449,7 @@ objects:
       ref_id: V.1.b
       description: "Les auditeurs doivent poss\xE9der les qualit\xE9s personnelles\
         \ d\xE9crites au chapitre \xAB 7.2.2 Comportements personnels \xBB de la norme\
-        \  ISO/IEC 1901."
+        \  ISO 1901."
       implementation_groups:
       - S
       - E
@@ -772,15 +773,15 @@ objects:
       - E
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3
       assessable: false
-      depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
       ref_id: VI.2.3
       name: "Responsabilit\xE9s"
       description: La convention de service doit
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.a
       assessable: true
       depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3
       ref_id: VI.2.3.a
       description: "pr\xE9ciser que le commanditaire dispose de l\u2019ensemble des\
         \ droits de propri\xE9t\xE9 et d\u2019acc\xE8s sur le p\xE9rim\xE8tre de la\
@@ -793,7 +794,7 @@ objects:
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.b
       assessable: true
       depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3
       ref_id: VI.2.3.b
       description: "pr\xE9ciser que le prestataire informe le commanditaire par \xE9\
         crit et sans d\xE9lai en cas de manquement \xE0 la convention de service"
@@ -803,7 +804,7 @@ objects:
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3.c
       assessable: true
       depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.2
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.3
       ref_id: VI.2.3.c
       description: "d\xE9crire les principaux risques relatifs \xE0 la prestation,\
         \ en particulier ceux concernant les atteintes \xE0 la disponibilit\xE9 du\
@@ -868,21 +869,21 @@ objects:
       - E
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.5
       assessable: false
-      depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      depth: 3
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2
       ref_id: VI.2.5
       name: Experts
       description: La convention de service doit
     - urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.5.a
       assessable: true
       depth: 4
-      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.4
+      parent_urn: urn:cintamaya:risk:req_node:passi-framework-2.2:vi.2.5
       ref_id: VI.2.5.a
       description: "pr\xE9ciser que le prestataire peut incorporer dans l\u2019\xE9\
         quipe d\u2019audit un ou plusieurs experts pour participer \xE0 la r\xE9alisation\
         \ de certaines activit\xE9s d\u2019audit lorsque ces derni\xE8res requi\xE8\
         rent des connaissances ou des comp\xE9tences sp\xE9cifiques dont les auditeurs\
-        \ ne disposent pas sous r\xE9serve que : \ni. il existe une un cadre contractuel\
+        \ ne disposent pas sous r\xE9serve que : \ni. il existe un cadre contractuel\
         \ entre le prestataire et les experts ;\nii. le recours aux experts est accept\xE9\
         \ par le commanditaire ;\niii. les experts sont d\xFBment encadr\xE9s par\
         \ le responsable d\u2019\xE9quipe."
