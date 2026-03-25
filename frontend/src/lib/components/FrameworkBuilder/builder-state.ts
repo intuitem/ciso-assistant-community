@@ -369,7 +369,8 @@ export interface BuilderStore {
 	errors: Writable<Map<string, string>>;
 	activeSection: Writable<string>;
 	hasPendingFlush: Writable<boolean>;
-	dirty: Writable<boolean>;
+	unsaved: Writable<boolean>;
+	unpublished: Writable<boolean>;
 	addSection: (afterIndex?: number) => void;
 	deleteSection: (sectionIndex: number) => void;
 	addRequirement: (parentNodeId: string, parentUrn: string) => void;
@@ -482,10 +483,12 @@ export function createBuilderState(
 	const errors = writable<Map<string, string>>(new Map());
 	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
-	const dirty = writable(false);
+	const unsaved = writable(false);  // local edits not yet saved to draft
+	const unpublished = writable(false);  // draft differs from live DB
 
 	function markDirty() {
-		dirty.set(true);
+		unsaved.set(true);
+		unpublished.set(true);
 	}
 
 	function setError(key: string, message: string) {
@@ -525,44 +528,24 @@ export function createBuilderState(
 		return null;
 	}
 
-	// --- Draft save debounce + in-flight lock ---
+	// --- Draft save (explicit, triggered by Save button) ---
 
-	let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 	let saveInFlight = false;
-	let savePending = false;
-
-	function scheduleDraftSave() {
-		markDirty();
-		hasPendingFlush.set(true);
-		if (saveTimeout) clearTimeout(saveTimeout);
-		saveTimeout = setTimeout(() => flushDraft(), 500);
-	}
 
 	async function flushDraft() {
-		if (saveTimeout) {
-			clearTimeout(saveTimeout);
-			saveTimeout = null;
-		}
-		if (saveInFlight) {
-			savePending = true;
-			return;
-		}
+		if (saveInFlight) return;
 		saveInFlight = true;
 		saving.set(true);
 		try {
 			const draft = serializeDraft(get(framework), get(sections));
 			await apiSaveDraft(frameworkId, draft);
+			unsaved.set(false);  // saved to draft, but still unpublished
 			clearError('save-draft');
 		} catch (e) {
 			setError('save-draft', (e as Error).message);
 		} finally {
 			saving.set(false);
 			saveInFlight = false;
-			hasPendingFlush.set(false);
-			if (savePending) {
-				savePending = false;
-				flushDraft();
-			}
 		}
 	}
 
@@ -590,7 +573,8 @@ export function createBuilderState(
 			framework.set(freshFramework);
 			sections.set(freshSections);
 			activeSection.set(freshSections[0]?.node.id ?? '');
-			dirty.set(false);
+			unsaved.set(false);
+			unpublished.set(false);
 			clearError('discard');
 		} catch (e) {
 			setError('discard', (e as Error).message);
@@ -599,7 +583,7 @@ export function createBuilderState(
 	}
 
 	function destroy() {
-		if (saveTimeout) clearTimeout(saveTimeout);
+		// No cleanup needed — saves are now explicit
 	}
 
 	// --- Section CRUD ---
@@ -636,14 +620,14 @@ export function createBuilderState(
 		};
 		const idx = afterIndex !== undefined ? afterIndex + 1 : currentSections.length;
 		sections.update((s) => [...s.slice(0, idx), newSection, ...s.slice(idx)]);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function deleteSection(sectionIndex: number) {
 		const section = get(sections)[sectionIndex];
 		if (!section) return;
 		sections.update((s) => s.filter((_, i) => i !== sectionIndex));
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	// --- Requirement CRUD (node ID-based) ---
@@ -687,7 +671,7 @@ export function createBuilderState(
 				sec.node.id === parentNodeId ? { ...sec, requirements: [...sec.requirements, newReq] } : sec
 			)
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function addRequirement(parentNodeId: string, parentUrn: string) {
@@ -745,7 +729,7 @@ export function createBuilderState(
 				)
 			);
 		}
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function deleteRequirement(nodeId: string) {
@@ -755,7 +739,7 @@ export function createBuilderState(
 				requirements: removeRequirement(sec.requirements, nodeId)
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	// --- Node update ---
@@ -771,7 +755,7 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	// --- Question CRUD (node ID-based) ---
@@ -807,7 +791,7 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function updateQuestion(questionId: string, patch: Record<string, unknown>) {
@@ -818,7 +802,7 @@ export function createBuilderState(
 				question: q.question.id === questionId ? { ...q.question, ...patch } : q.question
 			}))
 		}));
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function deleteQuestion(reqNodeId: string, qIndex: number) {
@@ -834,7 +818,7 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	// --- Choice CRUD (node ID-based) ---
@@ -880,7 +864,7 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function updateChoice(choiceId: string, patch: Record<string, unknown>) {
@@ -894,7 +878,7 @@ export function createBuilderState(
 				}
 			}))
 		}));
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function deleteChoice(reqNodeId: string, qIndex: number, choiceIndex: number) {
@@ -920,7 +904,7 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	// --- Reorder ---
@@ -937,7 +921,7 @@ export function createBuilderState(
 				node: { ...sec.node, order_id: i * 100 }
 			}));
 		});
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function reorderRequirements(parentNodeId: string, fromIndex: number, toIndex: number) {
@@ -974,7 +958,7 @@ export function createBuilderState(
 				};
 			})
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function reorderQuestions(reqNodeId: string, fromIndex: number, toIndex: number) {
@@ -996,7 +980,7 @@ export function createBuilderState(
 				})
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function reorderChoices(reqNodeId: string, qIndex: number, fromIndex: number, toIndex: number) {
@@ -1022,12 +1006,12 @@ export function createBuilderState(
 				}))
 			}))
 		);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	function doUpdateFramework(patch: Record<string, unknown>) {
 		framework.update((f) => ({ ...f, ...patch }) as Framework);
-		scheduleDraftSave();
+		markDirty();
 	}
 
 	return {
@@ -1037,7 +1021,8 @@ export function createBuilderState(
 		errors,
 		activeSection,
 		hasPendingFlush,
-		dirty,
+		unsaved,
+		unpublished,
 		addSection,
 		deleteSection,
 		addRequirement,

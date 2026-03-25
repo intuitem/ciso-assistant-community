@@ -14,7 +14,8 @@
 		activeSection: activeSectionStore,
 		saving: savingStore,
 		errors: errorsStore,
-		dirty: dirtyStore
+		unsaved: unsavedStore,
+		unpublished: unpublishedStore
 	} = builder;
 
 	let topOffset = $state(0);
@@ -45,7 +46,8 @@
 			await builder.publish();
 			publishSuccess = true;
 			confirmPublish = false;
-			builder.dirty.set(false);
+			builder.unsaved.set(false);
+			builder.unpublished.set(false);
 			setTimeout(() => (publishSuccess = false), 3000);
 		} catch {
 			// Error is already in the errors store
@@ -81,8 +83,8 @@
 
 		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Draft badge (only when changes have been made) -->
-		{#if $dirtyStore}
+		<!-- Draft badge (visible when draft differs from published state) -->
+		{#if $unpublishedStore}
 			<span
 				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
 			>
@@ -109,11 +111,26 @@
 		<!-- Spacer -->
 		<div class="ml-auto"></div>
 
-		<!-- Saving indicator -->
-		{#if $savingStore}
-			<span class="shrink-0 text-xs text-gray-400 flex items-center gap-1">
-				<i class="fa-solid fa-circle-notch fa-spin text-xs"></i> Saving draft...
-			</span>
+		<!-- Save button (visible when local edits not yet saved to draft) -->
+		{#if $unsavedStore}
+			<button
+				type="button"
+				class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5
+					{$savingStore
+					? 'bg-gray-400 text-white cursor-wait'
+					: 'bg-gray-600 text-white hover:bg-gray-700'}"
+				disabled={$savingStore}
+				onclick={() => builder.flushDraft()}
+				title="Save draft (Ctrl+S)"
+			>
+				{#if $savingStore}
+					<i class="fa-solid fa-circle-notch fa-spin text-[10px]"></i>
+					Saving...
+				{:else}
+					<i class="fa-solid fa-floppy-disk text-[10px]"></i>
+					Save
+				{/if}
+			</button>
 		{/if}
 
 		<!-- Save error -->
@@ -129,12 +146,12 @@
 		<!-- Publish success -->
 		{#if publishSuccess}
 			<span class="shrink-0 text-xs text-green-600 flex items-center gap-1">
-				<i class="fa-solid fa-check text-xs"></i> Published! Redirecting...
+				<i class="fa-solid fa-check text-xs"></i> Published!
 			</span>
 		{/if}
 
-		<!-- Discard/Publish buttons (only when changes have been made) -->
-		{#if !$dirtyStore}
+		<!-- Discard/Publish buttons (visible when draft differs from published state) -->
+		{#if !$unpublishedStore}
 			<!-- No changes — nothing to discard or publish -->
 		{:else if confirmDiscard}
 			<span class="shrink-0 text-xs text-red-600 font-medium">Discard all changes?</span>
@@ -167,7 +184,7 @@
 			</button>
 		{/if}
 
-		{#if $dirtyStore}
+		{#if $unpublishedStore}
 			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
 			<!-- Publish button -->

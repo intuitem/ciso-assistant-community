@@ -30,8 +30,8 @@
 		sections: sectionsStore,
 		errors: errorsStore,
 		saving: savingStore,
-		hasPendingFlush: hasPendingFlushStore,
-		dirty: dirtyStore
+		unsaved: unsavedStore,
+		unpublished: unpublishedStore
 	} = builder;
 
 	let urnCopied = $state(false);
@@ -90,18 +90,25 @@
 
 	// Warn on browser close/refresh if there are unsaved local changes
 	function handleBeforeUnload(e: BeforeUnloadEvent) {
-		let pending = false;
-		hasPendingFlushStore.subscribe((v) => (pending = v))();
-		if (pending) {
+		let hasUnsaved = false;
+		unsavedStore.subscribe((v) => (hasUnsaved = v))();
+		if (hasUnsaved) {
 			e.preventDefault();
 		}
 	}
 
-	// Warn on SvelteKit navigation about unpublished draft (only if changes were made)
+	// Warn on SvelteKit navigation — different message depending on save state
 	beforeNavigate((navigation) => {
-		let isDirty = false;
-		dirtyStore.subscribe((v) => (isDirty = v))();
-		if (isDirty && navigation.to?.route?.id !== navigation.from?.route?.id) {
+		if (navigation.to?.route?.id === navigation.from?.route?.id) return;
+		let hasUnsaved = false;
+		let hasUnpublished = false;
+		unsavedStore.subscribe((v) => (hasUnsaved = v))();
+		unpublishedStore.subscribe((v) => (hasUnpublished = v))();
+		if (hasUnsaved) {
+			if (!confirm('You have unsaved changes that will be lost. Leave anyway?')) {
+				navigation.cancel();
+			}
+		} else if (hasUnpublished) {
 			if (
 				!confirm(
 					'You have unpublished changes. Your draft is saved and you can resume later. Leave anyway?'
