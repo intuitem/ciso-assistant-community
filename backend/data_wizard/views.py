@@ -86,6 +86,7 @@ from privacy.models import Processing, ProcessingNature
 from privacy.serializers import ProcessingWriteSerializer
 from iam.models import RoleAssignment, User
 from core.models import FilteringLabel
+from core.utils import get_global_currency
 from uuid import UUID
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpRequest
@@ -716,7 +717,12 @@ class AssetRecordConsumer(RecordConsumer[list]):
         return results
 
 
-class AppliedControlRecordConsumer(RecordConsumer[None]):
+@dataclass(frozen=True)
+class AppliedControlContext:
+    currency: str = field(default_factory=get_global_currency)
+
+
+class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
     """
     Consumer for importing AppliedControl records.
     Supports reference_control linking via ref_id and owner resolution
@@ -760,11 +766,11 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         }
     )
 
-    def create_context(self):
-        return None, None
+    def create_context(self) -> tuple[AppliedControlContext, Optional[Error]]:
+        return AppliedControlContext(), None
 
     def prepare_create(
-        self, record: dict, context: None
+        self, record: dict, context: AppliedControlContext
     ) -> tuple[dict, Optional[Error]]:
         domain = self.folder_id
         domain_name = record.get("domain")
@@ -849,7 +855,7 @@ class AppliedControlRecordConsumer(RecordConsumer[None]):
         has_cost_related_key = any(key in self.COST_KEYS for key in record.keys())
         if has_cost_related_key:
             cost = {
-                "currency": "€",
+                "currency": context.currency,
                 "amortization_period": record.get("amortization_period", 1),
                 "build": {
                     "fixed_cost": record.get("build_fixed_cost", 0),
