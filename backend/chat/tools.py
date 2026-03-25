@@ -807,6 +807,25 @@ def _build_create_proposal(
     if not proposal_items:
         return None
 
+    # Resolve folder name and available folders for the UI
+    from iam.models import Folder
+
+    folder_name = ""
+    if folder_id:
+        f = Folder.objects.filter(id=folder_id).values("name").first()
+        if f:
+            folder_name = f["name"]
+
+    # Build list of available domain folders so the user can change the target
+    available_folders = list(
+        Folder.objects.filter(
+            id__in=accessible_folder_ids,
+            content_type=Folder.ContentType.DOMAIN,
+        )
+        .order_by("name")
+        .values("id", "name")[:20]
+    )
+
     return {
         "type": "propose_create",
         "model_key": model_key,
@@ -814,6 +833,10 @@ def _build_create_proposal(
         "display_name": display_name,
         "url_slug": url_slug,
         "folder_id": folder_id,
+        "folder_name": folder_name,
+        "available_folders": [
+            {"id": str(f["id"]), "name": f["name"]} for f in available_folders
+        ],
         "items": proposal_items,
     }
 

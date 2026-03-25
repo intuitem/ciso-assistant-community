@@ -14,13 +14,14 @@ Steps:
 """
 
 import json
-import structlog
 import re
+import structlog
 from typing import Iterator
 
 from django.apps import apps
-from django.db.models import Q
 
+from iam.models import Folder
+from ..page_context import ParsedContext
 from .base import Workflow, WorkflowContext, SSEEvent
 
 logger = structlog.get_logger(__name__)
@@ -67,9 +68,6 @@ class EbiosRMAssistWorkflow(Workflow):
     # ── Resume from checkpoints ──────────────────────────────────────
 
     def _resume_domain_choice(self, ctx) -> Iterator[SSEEvent]:
-        from iam.models import Folder
-        from ..page_context import ParsedContext
-
         folders = list(
             Folder.objects.filter(
                 id__in=ctx.accessible_folder_ids,
@@ -88,8 +86,6 @@ class EbiosRMAssistWorkflow(Workflow):
         yield from self._run_from_folder(ctx)
 
     def _resume_matrix_choice(self, ctx, data) -> Iterator[SSEEvent]:
-        from ..page_context import ParsedContext
-
         RiskMatrix = apps.get_model("core", "RiskMatrix")
         matrices = list(RiskMatrix.objects.filter(is_enabled=True))
         picked = self._match_choice(ctx.user_message, matrices)
@@ -104,8 +100,6 @@ class EbiosRMAssistWorkflow(Workflow):
         yield from self._run_from_folder(ctx, forced_matrix=picked)
 
     def _resume_framing(self, ctx, data) -> Iterator[SSEEvent]:
-        from ..page_context import ParsedContext
-
         RiskMatrix = apps.get_model("core", "RiskMatrix")
         matrix = RiskMatrix.objects.filter(id=data.get("risk_matrix_id")).first()
         ctx.parsed_context = ParsedContext(
@@ -124,9 +118,6 @@ class EbiosRMAssistWorkflow(Workflow):
     # ── Entry point: from a general page ─────────────────────────────
 
     def _run_from_general(self, ctx: WorkflowContext) -> Iterator[SSEEvent]:
-        from iam.models import Folder
-        from ..page_context import ParsedContext
-
         folders = list(
             Folder.objects.filter(
                 id__in=ctx.accessible_folder_ids,
@@ -164,7 +155,6 @@ class EbiosRMAssistWorkflow(Workflow):
         self, ctx: WorkflowContext, forced_matrix=None
     ) -> Iterator[SSEEvent]:
         """Drive a full EBIOS RM study from a domain page."""
-        from iam.models import Folder
 
         yield self._thinking("Looking up domain and existing assets...")
 

@@ -367,7 +367,10 @@ async function streamResponse(userMessage: string) {
 									displayName: data.display_name,
 									items: data.items,
 									status: 'pending',
-									selectedIndices: indices
+									selectedIndices: indices,
+									folderId: data.folder_id,
+									folderName: data.folder_name,
+									availableFolders: data.available_folders
 								};
 							}
 							messages = [...messages];
@@ -654,6 +657,19 @@ export function toggleAllSelection(messageId: string) {
 		msg.pendingAction.selectedIndices = new Set(msg.pendingAction.items.map((_, i) => i));
 	}
 	messages = [...messages];
+}
+
+export function changeActionFolder(messageId: string, folderId: string, folderName: string) {
+	const msg = messages.find((m) => m.id === messageId);
+	if (!msg?.pendingAction || msg.pendingAction.status !== 'pending') return;
+	msg.pendingAction.folderId = folderId;
+	msg.pendingAction.folderName = folderName;
+	// Update all items' folder field
+	for (const item of msg.pendingAction.items) {
+		item.folder = folderId;
+	}
+	messages = [...messages];
+	saveState();
 }
 
 export function rejectAction(messageId: string) {

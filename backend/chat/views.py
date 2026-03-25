@@ -1,7 +1,10 @@
 import json
+import re
 import structlog
 import time
 
+from django.apps import apps
+from django.contrib.contenttypes.models import ContentType
 from django.http import StreamingHttpResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
@@ -10,27 +13,26 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
+from .constants import LANG_MAP, LLM_HISTORY_LIMIT
+from .context import ContextBuilder
 from .models import ChatSession, ChatMessage, IndexedDocument
+from .page_context import parse_page_context
+from .providers import get_llm, is_ollama_available
 from .serializers import (
     ChatSessionListSerializer,
     SendMessageSerializer,
 )
-from .providers import get_llm, is_ollama_available
-
-from .constants import LANG_MAP, LLM_HISTORY_LIMIT
 
 logger = structlog.get_logger(__name__)
 
-import re as _re
-
 # Patterns that attempt to impersonate system/assistant roles or override instructions
-_INJECTION_PATTERNS = _re.compile(
+_INJECTION_PATTERNS = re.compile(
     r"(?:"
     r"\[/?(?:SYSTEM|CONTEXT|INST)\]"  # Fake delimiter tags
     r"|<\|(?:im_start|im_end|system)\|>"  # ChatML role markers
     r"|```\s*(?:system|tool_call)"  # Fenced role blocks
     r")",
-    _re.IGNORECASE,
+    re.IGNORECASE,
 )
 
 
@@ -113,7 +115,6 @@ class ChatSessionViewSet(BaseModelViewSet):
             ATTACHABLE_RELATIONS,
             MODEL_MAP,
         )
-        from .page_context import parse_page_context
 
         accessible_folders = get_accessible_folder_ids(request.user)
         context_refs = []
@@ -235,8 +236,6 @@ class ChatSessionViewSet(BaseModelViewSet):
                             yield event.encode()
 
                         # Strip the JSON recommendation block before saving
-                        import re
-
                         saved_response = re.sub(
                             r"\s*```json\s*\{[^}]*\"recommended\"[^}]*\}\s*```\s*",
                             "",
@@ -485,8 +484,6 @@ class ChatSessionViewSet(BaseModelViewSet):
         history_messages = history_messages[-LLM_HISTORY_LIMIT:]
 
         # Assemble context with structured priorities
-        from .context import ContextBuilder
-
         user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
         lang_name = LANG_MAP.get(user_lang, "English")
 
@@ -659,8 +656,6 @@ class ChatSessionViewSet(BaseModelViewSet):
             return Response(
                 {"detail": "No file provided."}, status=status.HTTP_400_BAD_REQUEST
             )
-
-        from django.contrib.contenttypes.models import ContentType
 
         doc = IndexedDocument.objects.create(
             folder=session.folder,
@@ -839,8 +834,6 @@ def _enrich_context(parsed_context, accessible_folder_ids: list[str]) -> str:
     For example, when on a risk assessment page, include the domain's assets
     so the LLM can reason about additional risks.
     """
-    from django.apps import apps
-
     from .tools import MODEL_MAP
 
     # Determine the parent object's folder

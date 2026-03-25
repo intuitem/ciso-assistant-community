@@ -25,6 +25,7 @@
 		setPageContext,
 		confirmAction,
 		rejectAction,
+		changeActionFolder,
 		toggleItemSelection,
 		toggleAllSelection,
 		selectChoice,
@@ -275,6 +276,37 @@
 					{pa.displayName}
 				{/if}
 			</div>
+		</div>
+		<!-- Target folder indicator/selector -->
+		{#if pa.action === 'create' && pa.status === 'pending'}
+			<div class="mb-2 flex items-center gap-2 text-[11px]">
+				<i class="fa-solid fa-folder text-gray-400"></i>
+				{#if pa.availableFolders && pa.availableFolders.length > 1}
+					<select
+						value={pa.folderId}
+						onchange={(e) => {
+							const target = e.currentTarget;
+							const selected = pa.availableFolders?.find((f) => f.id === target.value);
+							if (selected) changeActionFolder(message.id, selected.id, selected.name);
+						}}
+						class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] text-gray-600
+							focus:border-violet-400 focus:ring-1 focus:ring-violet-100 outline-none"
+					>
+						{#each pa.availableFolders as folder}
+							<option value={folder.id}>{folder.name}</option>
+						{/each}
+					</select>
+				{:else if pa.folderName}
+					<span class="text-gray-500">{pa.folderName}</span>
+				{/if}
+			</div>
+		{:else if pa.folderName}
+			<div class="mb-2 flex items-center gap-2 text-[11px] text-gray-400">
+				<i class="fa-solid fa-folder"></i>
+				<span>{pa.folderName}</span>
+			</div>
+		{/if}
+		<div class="flex items-center justify-between">
 			{#if pa.status === 'pending' && pa.items.length > 1}
 				<button
 					onclick={() => toggleAllSelection(message.id)}

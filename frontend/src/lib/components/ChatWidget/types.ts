@@ -10,6 +10,10 @@ export interface PendingAction {
 	status: 'pending' | 'creating' | 'created' | 'error' | 'rejected';
 	selectedIndices?: Set<number>;
 	results?: { name: string; id?: string; error?: string }[];
+	// Folder targeting
+	folderId?: string;
+	folderName?: string;
+	availableFolders?: { id: string; name: string }[];
 	// Attach-specific fields
 	parentModelKey?: string;
 	parentId?: string;
