@@ -863,18 +863,18 @@ class AppliedControlRecordConsumer(RecordConsumer[AppliedControlContext]):
                     record.get("amortization_period") or 1
                 ),
                 "build": {
-                    "fixed_cost": float(
+                    "fixed_cost": int(
                         record.get("build_fixed_cost") or 0
                     ),
-                    "people_days": float(
+                    "people_days": int(
                         record.get("build_people_days") or 0
                     ),
                 },
                 "run": {
-                    "fixed_cost": float(
+                    "fixed_cost": int(
                         record.get("run_fixed_cost") or 0
                     ),
-                    "people_days": float(
+                    "people_days": int(
                         record.get("run_people_days") or 0
                     ),
                 },
