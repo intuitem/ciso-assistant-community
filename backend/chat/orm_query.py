@@ -180,7 +180,7 @@ def execute_tool_query(
             qs = qs.filter(rf_q["q"]).distinct()
             filters_applied.append(rf_q["label"])
 
-    # Text search
+    # Text search — also searches through related object names (e.g., framework name)
     search = arguments.get("search")
     if search:
         search_q = Q()
@@ -190,6 +190,9 @@ def execute_tool_query(
             search_q |= Q(description__icontains=search)
         if hasattr(model_class, "ref_id"):
             search_q |= Q(ref_id__icontains=search)
+        # Search through FK names for richer matching
+        if hasattr(model_class, "framework"):
+            search_q |= Q(framework__name__icontains=search)
         if search_q:
             qs = qs.filter(search_q)
             filters_applied.append(f"search = '{search}'")

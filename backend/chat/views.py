@@ -795,8 +795,11 @@ def _build_context_prompt(page_context: dict, parsed_context) -> str:
 
     parts.append(
         f"The user is currently viewing: {', '.join(info_parts)}.\n"
-        "NOTE: The page title above is for context only — do NOT use it as a search filter. "
-        "When querying child objects of this page, rely on the automatic parent scoping (no search needed)."
+        "NOTE: The page title and path above are for context only.\n"
+        "- Do NOT use them as search filters or domain filters in query_objects.\n"
+        "- When querying child objects of this page, rely on automatic parent scoping (no search/domain needed).\n"
+        "- For follow-up questions ('dessus', 'on it', 'about that'), refer to the CONVERSATION HISTORY, "
+        "not the current page."
     )
 
     # Add contextual action hints when on a detail/edit page
