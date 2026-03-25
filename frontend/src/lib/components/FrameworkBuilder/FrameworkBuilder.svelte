@@ -36,8 +36,19 @@
 	} = builder;
 
 	let urnCopied = $state(false);
+	let showSettings = $state(false);
 	let showScoringSettings = $state(false);
 	let showScalesEditor = $state(false);
+
+	// Settings summary for the collapsed state
+	let settingsSummary = $derived.by(() => {
+		const parts: string[] = [];
+		const rules = ($frameworkStore.outcomes_definition ?? []).length;
+		const groups = ($frameworkStore.implementation_groups_definition ?? []).length;
+		if (rules > 0) parts.push(`${rules} outcome rule${rules > 1 ? 's' : ''}`);
+		if (groups > 0) parts.push(`${groups} group${groups > 1 ? 's' : ''}`);
+		return parts.length > 0 ? parts.join(', ') : 'No rules or groups configured';
+	});
 
 	interface ScaleEntry {
 		score: number;
@@ -232,15 +243,6 @@
 					builder.updateFramework({ description: e.currentTarget.value || null });
 				}}
 			></textarea>
-			<textarea
-				value={$frameworkStore.annotation ?? ''}
-				placeholder="Framework annotation (optional guidance text)"
-				rows="2"
-				class="w-full text-sm text-gray-500 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none py-1"
-				onblur={(e) => {
-					builder.updateFramework({ annotation: e.currentTarget.value || null });
-				}}
-			></textarea>
 			{#if $frameworkStore.urn}
 				<button
 					type="button"
@@ -263,6 +265,38 @@
 				<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
 			{/if}
 		</div>
+
+		<!-- Framework Settings (collapsed by default) -->
+		<div class="border border-gray-200 rounded-lg overflow-hidden">
+			<button
+				type="button"
+				class="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors text-left"
+				onclick={() => (showSettings = !showSettings)}
+			>
+				<div class="flex items-center gap-2">
+					<i class="fa-solid {showSettings ? 'fa-chevron-down' : 'fa-chevron-right'} text-[10px] text-gray-400"></i>
+					<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Framework Settings</span>
+					{#if !showSettings}
+						<span class="text-xs text-gray-400">{settingsSummary}</span>
+					{/if}
+				</div>
+				<i class="fa-solid fa-gear text-xs text-gray-400"></i>
+			</button>
+			{#if showSettings}
+				<div class="px-4 py-4 space-y-6 border-t border-gray-200">
+					<!-- Annotation -->
+					<div>
+						<span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Annotation</span>
+						<textarea
+							value={$frameworkStore.annotation ?? ''}
+							placeholder="Framework annotation (optional guidance text)"
+							rows="2"
+							class="mt-1 w-full text-sm text-gray-500 bg-transparent border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 transition-colors resize-none"
+							onblur={(e) => {
+								builder.updateFramework({ annotation: e.currentTarget.value || null });
+							}}
+						></textarea>
+					</div>
 
 		<!-- Scoring settings -->
 		<div class="space-y-1.5">
@@ -421,6 +455,9 @@
 			}))}
 			onupdate={(groups) => builder.updateFramework({ implementation_groups_definition: groups })}
 		/>
+				</div>
+			{/if}
+		</div>
 
 		<!-- Sections -->
 		{#each $sectionsStore as section, sectionIndex (section.node.id)}
