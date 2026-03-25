@@ -24,7 +24,8 @@
 		// or returns the existing one (idempotent)
 		draftLoading = true;
 		try {
-			editingDraft = await apiStartEditing(data.framework.id);
+			const result = await apiStartEditing(data.framework.id);
+			editingDraft = result.draft;
 			draftReady = true;
 		} catch (e) {
 			draftError = (e as Error).message;

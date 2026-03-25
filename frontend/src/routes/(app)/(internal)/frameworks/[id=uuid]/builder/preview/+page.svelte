@@ -37,8 +37,8 @@
 
 	onMount(async () => {
 		try {
-			const draft = await apiStartEditing(data.framework.id);
-			const { frameworkPatch, nodes, questions } = hydrateDraft(draft, data.framework.id);
+			const result = await apiStartEditing(data.framework.id);
+			const { frameworkPatch, nodes, questions } = hydrateDraft(result.draft, data.framework.id);
 			sections = buildTree(nodes, questions);
 
 			// Merge implementation_groups_definition from draft meta or framework data

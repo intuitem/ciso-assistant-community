@@ -494,7 +494,9 @@ export function createBuilderState(
 	const activeSection = writable<string>(initialSections[0]?.node.id ?? '');
 	const hasPendingFlush = writable(false);
 	const unsaved = writable(false); // local edits not yet saved to draft
-	const unpublished = writable(false); // draft differs from live DB
+	// Check if the draft was marked dirty by a prior save-draft call
+	const draftMarkedDirty = editingDraft && (editingDraft as any)._dirty === true;
+	const unpublished = writable(!!draftMarkedDirty);
 
 	function markDirty() {
 		unsaved.set(true);
@@ -548,6 +550,7 @@ export function createBuilderState(
 		saving.set(true);
 		try {
 			const draft = serializeDraft(get(framework), get(sections));
+			(draft as any)._dirty = true; // mark draft as having user changes
 			await apiSaveDraft(frameworkId, draft);
 			unsaved.set(false); // saved to draft, but still unpublished
 			clearError('save-draft');
@@ -575,7 +578,7 @@ export function createBuilderState(
 			// Clear the draft on the server
 			await apiDiscardDraft(frameworkId);
 			// Re-create a fresh draft from live relational data
-			const freshDraft = await apiStartEditing(frameworkId);
+			const { draft: freshDraft } = await apiStartEditing(frameworkId);
 			// Re-hydrate stores from the fresh draft
 			const hydrated = hydrateDraft(freshDraft, frameworkId);
 			const freshFramework = { ...frameworkData, ...hydrated.frameworkPatch } as Framework;

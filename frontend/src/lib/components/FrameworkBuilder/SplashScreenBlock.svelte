@@ -19,6 +19,11 @@
 
 	let description = $state(requirement.node.description ?? '');
 
+	// Sync local description when the prop changes (e.g., after discard)
+	$effect(() => {
+		description = requirement.node.description ?? '';
+	});
+
 	// Resolve the framework ID for building absolute proxy URLs
 	const frameworkId =
 		typeof requirement.node.framework === 'string'

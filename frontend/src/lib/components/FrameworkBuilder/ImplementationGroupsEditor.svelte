@@ -111,9 +111,7 @@
 					class="ml-auto text-gray-400 hover:text-gray-600 text-xs"
 					onclick={() => (expandedIndex = expandedIndex === index ? null : index)}
 				>
-					<i
-						class="fa-solid {expandedIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}"
-					></i>
+					<i class="fa-solid {expandedIndex === index ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
 				</button>
 
 				{#if confirmDeleteIndex === index}

@@ -61,16 +61,16 @@
 		if (!def) return [];
 		if (Array.isArray(def)) {
 			return def.map((e) => ({
-				score: (e as Record<string, unknown>).score as number ?? 0,
-				name: (e as Record<string, unknown>).name as string ?? '',
-				description: (e as Record<string, unknown>).description as string ?? ''
+				score: ((e as Record<string, unknown>).score as number) ?? 0,
+				name: ((e as Record<string, unknown>).name as string) ?? '',
+				description: ((e as Record<string, unknown>).description as string) ?? ''
 			}));
 		}
 		if ('scale' in def && Array.isArray(def.scale)) {
 			return (def.scale as Record<string, unknown>[]).map((e) => ({
-				score: e.score as number ?? 0,
-				name: e.name as string ?? '',
-				description: e.description as string ?? ''
+				score: (e.score as number) ?? 0,
+				name: (e.name as string) ?? '',
+				description: (e.description as string) ?? ''
 			}));
 		}
 		return [];
@@ -274,8 +274,14 @@
 				onclick={() => (showSettings = !showSettings)}
 			>
 				<div class="flex items-center gap-2">
-					<i class="fa-solid {showSettings ? 'fa-chevron-down' : 'fa-chevron-right'} text-[10px] text-gray-400"></i>
-					<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Framework Settings</span>
+					<i
+						class="fa-solid {showSettings
+							? 'fa-chevron-down'
+							: 'fa-chevron-right'} text-[10px] text-gray-400"
+					></i>
+					<span class="text-xs font-semibold text-gray-600 uppercase tracking-wider"
+						>Framework Settings</span
+					>
 					{#if !showSettings}
 						<span class="text-xs text-gray-400">{settingsSummary}</span>
 					{/if}
@@ -286,7 +292,9 @@
 				<div class="px-4 py-4 space-y-6 border-t border-gray-200">
 					<!-- Annotation -->
 					<div>
-						<span class="text-xs font-medium text-gray-500 uppercase tracking-wider">Annotation</span>
+						<span class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+							>Annotation</span
+						>
 						<textarea
 							value={$frameworkStore.annotation ?? ''}
 							placeholder="Framework annotation (optional guidance text)"
@@ -298,163 +306,178 @@
 						></textarea>
 					</div>
 
-		<!-- Scoring settings -->
-		<div class="space-y-1.5">
-			<button
-				type="button"
-				class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
-				onclick={() => (showScoringSettings = !showScoringSettings)}
-			>
-				<i
-					class="fa-solid {showScoringSettings ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px]"
-				></i>
-				Scoring settings
-			</button>
-			{#if showScoringSettings}
-				<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
-					<div class="grid grid-cols-3 gap-3">
-						<label class="block">
-							<span class="text-xs text-gray-500">Min score</span>
-							<input
-								type="number"
-								value={$frameworkStore.min_score}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									builder.updateFramework({ min_score: parseInt(e.currentTarget.value) || 0 });
-								}}
-							/>
-						</label>
-						<label class="block">
-							<span class="text-xs text-gray-500">Max score</span>
-							<input
-								type="number"
-								value={$frameworkStore.max_score}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-								onblur={(e) => {
-									builder.updateFramework({ max_score: parseInt(e.currentTarget.value) || 100 });
-								}}
-							/>
-						</label>
-						<label class="block">
-							<span class="text-xs text-gray-500">Aggregation</span>
-							<select
-								value={getAggregation()}
-								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
-								onchange={(e) => setAggregation(e.currentTarget.value)}
-							>
-								<option value="average">Average</option>
-								<option value="sum">Sum</option>
-							</select>
-						</label>
-					</div>
-					<p class="text-xs text-gray-400">
-						<strong>Average</strong> divides total score by number of questions.
-						<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
-					</p>
-
-					<!-- Scale entries editor -->
-					<div class="border-t border-gray-200 pt-3 space-y-2">
+					<!-- Scoring settings -->
+					<div class="space-y-1.5">
 						<button
 							type="button"
-							class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-							onclick={() => (showScalesEditor = !showScalesEditor)}
+							class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+							onclick={() => (showScoringSettings = !showScoringSettings)}
 						>
-							<i class="fa-solid {showScalesEditor ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px]"></i>
-							Score scale ({getScaleEntries().length} {getScaleEntries().length === 1 ? 'level' : 'levels'})
+							<i
+								class="fa-solid {showScoringSettings
+									? 'fa-chevron-down'
+									: 'fa-chevron-right'} text-[9px]"
+							></i>
+							Scoring settings
 						</button>
-						{#if showScalesEditor}
-							{@const scaleEntries = getScaleEntries()}
-							<div class="space-y-1.5">
-								{#each scaleEntries as entry, idx}
-									<div class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5">
-										<label class="block w-16 shrink-0">
-											<span class="text-[10px] text-gray-400">Score</span>
-											<input
-												type="number"
-												value={entry.score}
-												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-												onblur={(e) => {
-													const entries = getScaleEntries();
-													entries[idx].score = parseInt(e.currentTarget.value) || 0;
-													setScaleEntries(entries);
-												}}
-											/>
-										</label>
-										<label class="block flex-1 min-w-0">
-											<span class="text-[10px] text-gray-400">Name</span>
-											<input
-												type="text"
-												value={entry.name}
-												placeholder="e.g. Partial"
-												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-												onblur={(e) => {
-													const entries = getScaleEntries();
-													entries[idx].name = e.currentTarget.value;
-													setScaleEntries(entries);
-												}}
-											/>
-										</label>
-										<label class="block flex-1 min-w-0">
-											<span class="text-[10px] text-gray-400">Description</span>
-											<input
-												type="text"
-												value={entry.description}
-												placeholder="Optional"
-												class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
-												onblur={(e) => {
-													const entries = getScaleEntries();
-													entries[idx].description = e.currentTarget.value;
-													setScaleEntries(entries);
-												}}
-											/>
-										</label>
-										<button
-											type="button"
-											class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
-											onclick={() => {
-												const entries = getScaleEntries();
-												entries.splice(idx, 1);
-												setScaleEntries(entries);
+						{#if showScoringSettings}
+							<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
+								<div class="grid grid-cols-3 gap-3">
+									<label class="block">
+										<span class="text-xs text-gray-500">Min score</span>
+										<input
+											type="number"
+											value={$frameworkStore.min_score}
+											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+											onblur={(e) => {
+												builder.updateFramework({
+													min_score: parseInt(e.currentTarget.value) || 0
+												});
 											}}
+										/>
+									</label>
+									<label class="block">
+										<span class="text-xs text-gray-500">Max score</span>
+										<input
+											type="number"
+											value={$frameworkStore.max_score}
+											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+											onblur={(e) => {
+												builder.updateFramework({
+													max_score: parseInt(e.currentTarget.value) || 100
+												});
+											}}
+										/>
+									</label>
+									<label class="block">
+										<span class="text-xs text-gray-500">Aggregation</span>
+										<select
+											value={getAggregation()}
+											class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+											onchange={(e) => setAggregation(e.currentTarget.value)}
 										>
-											<i class="fa-solid fa-trash"></i>
-										</button>
-									</div>
-								{/each}
-								<button
-									type="button"
-									class="text-xs text-blue-600 hover:text-blue-700 font-medium"
-									onclick={() => {
-										const entries = getScaleEntries();
-										entries.push({ score: 0, name: '', description: '' });
-										setScaleEntries(entries);
-									}}
-								>
-									<i class="fa-solid fa-plus mr-1"></i>Add scale level
-								</button>
+											<option value="average">Average</option>
+											<option value="sum">Sum</option>
+										</select>
+									</label>
+								</div>
+								<p class="text-xs text-gray-400">
+									<strong>Average</strong> divides total score by number of questions.
+									<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
+								</p>
+
+								<!-- Scale entries editor -->
+								<div class="border-t border-gray-200 pt-3 space-y-2">
+									<button
+										type="button"
+										class="flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+										onclick={() => (showScalesEditor = !showScalesEditor)}
+									>
+										<i
+											class="fa-solid {showScalesEditor
+												? 'fa-chevron-down'
+												: 'fa-chevron-right'} text-[9px]"
+										></i>
+										Score scale ({getScaleEntries().length}
+										{getScaleEntries().length === 1 ? 'level' : 'levels'})
+									</button>
+									{#if showScalesEditor}
+										{@const scaleEntries = getScaleEntries()}
+										<div class="space-y-1.5">
+											{#each scaleEntries as entry, idx}
+												<div
+													class="flex items-start gap-2 bg-white border border-gray-200 rounded px-2 py-1.5"
+												>
+													<label class="block w-16 shrink-0">
+														<span class="text-[10px] text-gray-400">Score</span>
+														<input
+															type="number"
+															value={entry.score}
+															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onblur={(e) => {
+																const entries = getScaleEntries();
+																entries[idx].score = parseInt(e.currentTarget.value) || 0;
+																setScaleEntries(entries);
+															}}
+														/>
+													</label>
+													<label class="block flex-1 min-w-0">
+														<span class="text-[10px] text-gray-400">Name</span>
+														<input
+															type="text"
+															value={entry.name}
+															placeholder="e.g. Partial"
+															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onblur={(e) => {
+																const entries = getScaleEntries();
+																entries[idx].name = e.currentTarget.value;
+																setScaleEntries(entries);
+															}}
+														/>
+													</label>
+													<label class="block flex-1 min-w-0">
+														<span class="text-[10px] text-gray-400">Description</span>
+														<input
+															type="text"
+															value={entry.description}
+															placeholder="Optional"
+															class="w-full text-sm border border-gray-200 rounded px-1.5 py-0.5 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+															onblur={(e) => {
+																const entries = getScaleEntries();
+																entries[idx].description = e.currentTarget.value;
+																setScaleEntries(entries);
+															}}
+														/>
+													</label>
+													<button
+														type="button"
+														class="mt-4 text-gray-300 hover:text-red-500 text-xs transition-colors"
+														onclick={() => {
+															const entries = getScaleEntries();
+															entries.splice(idx, 1);
+															setScaleEntries(entries);
+														}}
+													>
+														<i class="fa-solid fa-trash"></i>
+													</button>
+												</div>
+											{/each}
+											<button
+												type="button"
+												class="text-xs text-blue-600 hover:text-blue-700 font-medium"
+												onclick={() => {
+													const entries = getScaleEntries();
+													entries.push({ score: 0, name: '', description: '' });
+													setScaleEntries(entries);
+												}}
+											>
+												<i class="fa-solid fa-plus mr-1"></i>Add scale level
+											</button>
+										</div>
+									{/if}
+								</div>
 							</div>
 						{/if}
 					</div>
-				</div>
-			{/if}
-		</div>
 
-		<!-- Outcome rules -->
-		<OutcomesEditor
-			outcomes={$frameworkStore.outcomes_definition ?? []}
-			onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
-		/>
+					<!-- Outcome rules -->
+					<OutcomesEditor
+						outcomes={$frameworkStore.outcomes_definition ?? []}
+						onupdate={(rules) => builder.updateFramework({ outcomes_definition: rules })}
+					/>
 
-		<!-- Implementation groups -->
-		<ImplementationGroupsEditor
-			groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
-				ref_id: (g as Record<string, string>).ref_id ?? '',
-				name: (g as Record<string, string>).name ?? '',
-				description: (g as Record<string, string>).description ?? '',
-				default_selected: (g as Record<string, unknown>).default_selected as boolean ?? false
-			}))}
-			onupdate={(groups) => builder.updateFramework({ implementation_groups_definition: groups })}
-		/>
+					<!-- Implementation groups -->
+					<ImplementationGroupsEditor
+						groups={($frameworkStore.implementation_groups_definition ?? []).map((g) => ({
+							ref_id: (g as Record<string, string>).ref_id ?? '',
+							name: (g as Record<string, string>).name ?? '',
+							description: (g as Record<string, string>).description ?? '',
+							default_selected:
+								((g as Record<string, unknown>).default_selected as boolean) ?? false
+						}))}
+						onupdate={(groups) =>
+							builder.updateFramework({ implementation_groups_definition: groups })}
+					/>
 				</div>
 			{/if}
 		</div>
