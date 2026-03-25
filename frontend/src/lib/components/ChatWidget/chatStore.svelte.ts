@@ -241,6 +241,13 @@ async function streamResponse(userMessage: string) {
 
 		// Create the assistant message placeholder for streaming
 		const assistantMessageId = generateId();
+		// Resolve any spinning pending choices from previous messages
+		for (const msg of messages) {
+			if (msg.pendingChoice?.status === 'selected') {
+				msg.pendingChoice.status = 'done';
+			}
+		}
+
 		messages.push({
 			id: assistantMessageId,
 			role: 'assistant',
@@ -311,6 +318,12 @@ async function streamResponse(userMessage: string) {
 							msg.thinking = (msg.thinking || '') + data.content;
 							needsFlush = true;
 							scheduleFlush();
+						}
+					} else if (data.type === 'navigate') {
+						// Workflow wants to redirect — navigate without closing the chat
+						if (data.url) {
+							const { goto } = await import('$lib/utils/breadcrumbs');
+							goto(data.url, { label: '', breadcrumbAction: 'push' });
 						}
 					} else if (data.type === 'pending_choice') {
 						const msg = messages.find((m) => m.id === assistantMessageId);

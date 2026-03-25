@@ -22,7 +22,7 @@ export interface PendingChoice {
 	field: string;
 	label: string;
 	items: { id: string; name: string; description?: string }[];
-	status: 'pending' | 'selected';
+	status: 'pending' | 'selected' | 'done';
 	selectedId?: string;
 }
 

@@ -263,6 +263,9 @@ class EbiosRMAssistWorkflow(Workflow):
             risk_matrix=risk_matrix,
         )
 
+        # Navigate the user to the new study page for better context
+        yield self._navigate(f"/ebios-rm/{study_obj.id}")
+
         study = {
             "id": str(study_obj.id),
             "name": study_obj.name,

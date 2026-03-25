@@ -144,6 +144,10 @@ class Workflow:
             content={"field": field, "label": label, "items": items},
         )
 
+    def _navigate(self, url: str) -> SSEEvent:
+        """Emit a navigation event — frontend will redirect to this URL."""
+        return SSEEvent(type="navigate", content={"url": url})
+
     def _error(self, message: str) -> SSEEvent:
         """Emit an error event."""
         return SSEEvent(type="error", content=message)
