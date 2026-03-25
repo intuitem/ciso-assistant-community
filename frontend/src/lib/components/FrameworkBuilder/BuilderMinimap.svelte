@@ -73,7 +73,7 @@
 	class="sticky z-40 bg-white border-b border-gray-200 shadow-sm rounded-t-lg"
 	style="top: {topOffset}px"
 >
-	<div class="flex items-center gap-3 py-2 px-4">
+	<div class="flex items-center gap-3 py-2 px-4 overflow-x-auto">
 		<a
 			href="/frameworks/{frameworkId}"
 			class="text-sm text-gray-400 hover:text-gray-600 transition-colors shrink-0"
