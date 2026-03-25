@@ -3787,7 +3787,7 @@
 	"searchEllipsis": "Rechercher...",
 	"commandPaletteOpen": "ouvrir",
 	"commandPaletteActions": "Actions",
-	"openAssistant": "Assistant IA",
+	"openAssistant": "Chat Assistant IA",
 	"searchPagesAndActions": "Rechercher des pages et actions...",
 	"matrixEditor": "Éditeur de matrice",
 	"matrixEditorDescription": "Créez et modifiez visuellement des matrices de risques avec un éditeur interactif",
@@ -3897,5 +3897,6 @@
 	"chatDeselectAll": "Tout désélectionner",
 	"chatQuickActions": "Actions rapides",
 	"chatScrollToBottom": "Nouveaux messages",
-	"chatRetry": "Réessayer"
+	"chatRetry": "Réessayer",
+	"chatNoConversations": "Aucune conversation"
 }

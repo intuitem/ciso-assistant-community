@@ -371,13 +371,18 @@ class OpenAICompatibleLLM:
         model: str = "",
         base_url: str = "http://localhost:1234/v1",
         system_prompt: str = "",
+        api_key: str = "",
     ):
         import httpx
 
         self.model = model
         self.base_url = base_url.rstrip("/")
         self.system_prompt = system_prompt or DEFAULT_SYSTEM_PROMPT
-        self.client = httpx.Client(timeout=120)
+        headers = {}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+        self.client = httpx.Client(timeout=120, headers=headers)
+        self._api_key = api_key
 
     def _chat_url(self) -> str:
         return f"{self.base_url}/chat/completions"
@@ -403,10 +408,14 @@ class OpenAICompatibleLLM:
         if self.model:
             body["model"] = self.model
 
+        headers = {}
+        if self._api_key:
+            headers["Authorization"] = f"Bearer {self._api_key}"
         with httpx.stream(
             "POST",
             self._chat_url(),
             json=body,
+            headers=headers,
             timeout=120,
         ) as resp:
             for line in resp.iter_lines():
@@ -593,6 +602,7 @@ def get_chat_settings() -> dict:
                     "openai_api_base", "http://localhost:1234/v1"
                 ),
                 "openai_model": gs.value.get("openai_model", ""),
+                "openai_api_key": gs.value.get("openai_api_key", ""),
             }
     except Exception:
         pass
@@ -605,11 +615,27 @@ def get_chat_settings() -> dict:
         "chat_system_prompt": "",
         "openai_api_base": "http://localhost:1234/v1",
         "openai_model": "",
+        "openai_api_key": "",
     }
 
 
+_cached_embedder: Embedder | None = None
+_cached_llm: "LLM | None" = None
+
+
+def clear_provider_cache():
+    """Clear cached LLM and embedder. Call when chat settings change."""
+    global _cached_llm, _cached_embedder
+    _cached_llm = None
+    _cached_embedder = None
+    logger.info("provider_cache_cleared")
+
+
 def get_embedder() -> Embedder:
-    """Get the configured embedder based on global settings."""
+    """Get the configured embedder, cached after first init."""
+    global _cached_embedder
+    if _cached_embedder is not None:
+        return _cached_embedder
     settings = get_chat_settings()
 
     if settings["embedding_backend"] == "ollama":
@@ -619,17 +645,23 @@ def get_embedder() -> Embedder:
                 base_url=settings["ollama_base_url"],
             )
             _ = embedder.dimensions  # Test connection
+            _cached_embedder = embedder
             return embedder
         except Exception as e:
             logger.warning(
                 "Ollama embedder failed (%s), falling back to sentence-transformers", e
             )
 
-    return SentenceTransformerEmbedder()
+    _cached_embedder = SentenceTransformerEmbedder()
+    return _cached_embedder
 
 
 def get_llm() -> LLM:
-    """Get the configured LLM based on global settings."""
+    """Get the configured LLM, cached after first successful init."""
+    global _cached_llm
+    if _cached_llm is not None:
+        return _cached_llm
+
     settings = get_chat_settings()
     provider = settings.get("llm_provider", "ollama")
 
@@ -638,36 +670,71 @@ def get_llm() -> LLM:
         try:
             import httpx
 
-            # Quick health check — try /models endpoint
-            resp = httpx.get(f"{base_url.rstrip('/')}/models", timeout=5)
+            api_key = settings.get("openai_api_key", "")
+            health_headers = {}
+            if api_key:
+                health_headers["Authorization"] = f"Bearer {api_key}"
+            resp = httpx.get(
+                f"{base_url.rstrip('/')}/models",
+                timeout=5,
+                headers=health_headers,
+            )
             if resp.status_code == 200:
-                return OpenAICompatibleLLM(
+                _cached_llm = OpenAICompatibleLLM(
                     model=settings.get("openai_model", ""),
                     base_url=base_url,
                     system_prompt=settings["chat_system_prompt"],
+                    api_key=api_key,
                 )
-        except Exception:
-            pass
-        logger.debug(
-            "OpenAI-compatible server not available at %s, trying Ollama fallback",
-            base_url,
+                logger.info(
+                    "llm_initialized",
+                    provider="openai_compatible",
+                    base_url=base_url,
+                    model=settings.get("openai_model", ""),
+                    has_api_key=bool(api_key),
+                )
+                return _cached_llm
+            else:
+                logger.warning(
+                    "openai_compatible_health_check_failed",
+                    base_url=base_url,
+                    status=resp.status_code,
+                )
+        except Exception as e:
+            logger.warning(
+                "openai_compatible_connection_failed",
+                base_url=base_url,
+                error=str(e),
+            )
+        # Don't fall through to Ollama — user explicitly chose openai_compatible
+        logger.info(
+            "no_llm_available", provider="openai_compatible", mode="retrieval-only"
         )
+        return StubLLM()
 
-    # Default: Ollama
+    # Provider: Ollama
     try:
         import httpx
 
         resp = httpx.get(f"{settings['ollama_base_url']}/api/tags", timeout=5)
         if resp.status_code == 200:
-            return OllamaLLM(
+            _cached_llm = OllamaLLM(
                 model=settings["ollama_model"],
                 base_url=settings["ollama_base_url"],
                 system_prompt=settings["chat_system_prompt"],
             )
+            logger.info(
+                "llm_initialized",
+                provider="ollama",
+                base_url=settings["ollama_base_url"],
+                model=settings["ollama_model"],
+            )
+            return _cached_llm
     except Exception:
         pass
 
     logger.info("no_llm_available", mode="retrieval-only")
+    # Don't cache StubLLM — retry on next request in case LLM comes back
     return StubLLM()
 
 

@@ -566,6 +566,13 @@
 						label={m.openaiModel()}
 						helpText={m.openaiModelHelpText()}
 					/>
+					<TextField
+						{form}
+						field="openai_api_key"
+						label={m.openaiApiKey()}
+						helpText={m.openaiApiKeyHelpText()}
+						type="password"
+					/>
 				{:else}
 					<TextField
 						{form}

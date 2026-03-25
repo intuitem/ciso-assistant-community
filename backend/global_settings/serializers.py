@@ -31,6 +31,7 @@ GENERAL_SETTINGS_KEYS = [
     "chat_system_prompt",
     "openai_api_base",
     "openai_model",
+    "openai_api_key",
 ]
 
 

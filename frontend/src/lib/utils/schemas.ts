@@ -571,7 +571,8 @@ export const GeneralSettingsSchema = z.object({
 	embedding_backend: z.string().default('sentence-transformers').optional(),
 	chat_system_prompt: z.string().default('').optional(),
 	openai_api_base: z.string().default('http://localhost:1234/v1').optional(),
-	openai_model: z.string().default('').optional()
+	openai_model: z.string().default('').optional(),
+	openai_api_key: z.string().default('').optional()
 });
 
 export const FeatureFlagsSchema = z.object({

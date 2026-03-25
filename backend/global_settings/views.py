@@ -122,6 +122,13 @@ class GeneralSettingsViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
+        # Clear cached LLM/embedder so new settings take effect immediately
+        try:
+            from chat.providers import clear_provider_cache
+
+            clear_provider_cache()
+        except ImportError:
+            pass
         return Response(serializer.data)
 
     def get_object(self):

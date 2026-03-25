@@ -29,8 +29,18 @@
 		toggleItemSelection,
 		toggleAllSelection,
 		selectChoice,
-		getSuggestedActions
+		getSuggestedActions,
+		getSessionHistory,
+		getLoadingHistory,
+		getSessionId,
+		loadSessionHistory,
+		switchToSession,
+		deleteSession
 	} from './chatStore.svelte';
+
+	const sessionHistory = $derived(getSessionHistory());
+	const loadingHistory = $derived(getLoadingHistory());
+	const currentSessionId = $derived(getSessionId());
 
 	let copiedId = $state<string | null>(null);
 	let expandedThinking = $state<Set<string>>(new Set());
@@ -80,6 +90,13 @@
 	$effect(() => {
 		if (isTyping) {
 			userScrolledUp = false;
+		}
+	});
+
+	// Load session history when expanding to full panel
+	$effect(() => {
+		if (view === 'expanded') {
+			loadSessionHistory();
 		}
 	});
 
@@ -664,81 +681,132 @@
 	>
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
-			class="flex h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+			class="flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-2xl bg-white shadow-2xl"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 		>
-			<!-- Header -->
-			<div
-				class="flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-700 px-5 py-4"
-			>
-				<div class="flex items-center gap-3">
-					<div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-						<i class="fa-solid fa-robot text-white"></i>
-					</div>
-					<div>
-						<div class="font-semibold text-white">CISO Assistant</div>
-						<div class="text-sm text-violet-200">{m.chatSubtitle()}</div>
-					</div>
+			<!-- Session history sidebar -->
+			<div class="w-64 shrink-0 flex flex-col border-r border-gray-200 bg-gray-50">
+				<div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+					<span class="text-xs font-semibold text-gray-500 uppercase tracking-wider"
+						>{m.timeline()}</span
+					>
+					<button
+						onclick={() => {
+							startNewSession();
+							loadSessionHistory();
+						}}
+						class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400
+							transition-colors hover:bg-gray-200 hover:text-gray-600"
+						title="New conversation"
+					>
+						<i class="fa-solid fa-plus text-xs"></i>
+					</button>
 				</div>
-				<div class="flex items-center gap-1">
-					<button
-						onclick={startNewSession}
-						class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
-							transition-colors hover:bg-white/20 hover:text-white"
-						aria-label="New conversation"
-					>
-						<i class="fa-solid fa-plus text-sm"></i>
-					</button>
-					<button
-						onclick={collapseChat}
-						class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
-							transition-colors hover:bg-white/20 hover:text-white"
-						aria-label="Collapse chat"
-					>
-						<i class="fa-solid fa-compress text-sm"></i>
-					</button>
-					<button
-						onclick={closeChat}
-						class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
-							transition-colors hover:bg-white/20 hover:text-white"
-						aria-label="Close chat"
-					>
-						<i class="fa-solid fa-xmark text-sm"></i>
-					</button>
+				<div class="flex-1 overflow-y-auto">
+					{#if loadingHistory}
+						<div class="flex justify-center py-6">
+							<i class="fa-solid fa-spinner fa-spin text-gray-400"></i>
+						</div>
+					{:else if sessionHistory.length === 0}
+						<div class="px-4 py-6 text-xs text-gray-400 text-center">{m.chatNoConversations()}</div>
+					{:else}
+						{#each sessionHistory as session}
+							<div
+								class="group/session flex items-center border-l-2 transition-colors hover:bg-gray-100
+								{session.id === currentSessionId ? 'border-violet-500 bg-violet-50/50' : 'border-transparent'}"
+							>
+								<button
+									onclick={() => switchToSession(session.id)}
+									class="flex-1 flex flex-col gap-0.5 px-4 py-2.5 text-left min-w-0"
+								>
+									<span class="text-sm text-gray-700 truncate">{session.title}</span>
+									<span class="text-[10px] text-gray-400">
+										{new Date(session.created_at).toLocaleDateString()} · {session.message_count} msg
+									</span>
+								</button>
+								<button
+									onclick={() => deleteSession(session.id)}
+									class="shrink-0 mr-2 flex h-6 w-6 items-center justify-center rounded text-gray-300
+										opacity-0 transition-opacity hover:bg-red-50 hover:text-red-500
+										group-hover/session:opacity-100"
+									title="Delete"
+								>
+									<i class="fa-solid fa-trash text-[10px]"></i>
+								</button>
+							</div>
+						{/each}
+					{/if}
 				</div>
 			</div>
 
-			<!-- Messages -->
-			<div
-				bind:this={messagesContainer}
-				onscroll={handleMessagesScroll}
-				class="relative flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-4"
-			>
-				{#each messages as message (message.id)}
-					{#if message.role === 'assistant'}
-						{@render assistantMessage(message)}
-					{:else}
-						{@render userMessage(message)}
-					{/if}
-				{/each}
-				{@render typingIndicator()}
-				{#if !hasUserMessages}
-					<div class="mt-3 grid grid-cols-2 gap-3">
-						{#each getSuggestedActions() as action}
-							<button
-								onclick={() => sendMessage(action.prompt)}
-								class="flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-left text-sm text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100"
-							>
-								<i class="{action.icon} text-violet-500"></i>
-								{action.label}
-							</button>
-						{/each}
+			<!-- Main chat column -->
+			<div class="flex flex-1 flex-col overflow-hidden">
+				<!-- Header -->
+				<div
+					class="flex items-center justify-between bg-gradient-to-r from-violet-600 to-purple-700 px-5 py-4"
+				>
+					<div class="flex items-center gap-3">
+						<div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
+							<i class="fa-solid fa-robot text-white"></i>
+						</div>
+						<div>
+							<div class="font-semibold text-white">CISO Assistant</div>
+							<div class="text-sm text-violet-200">{m.chatSubtitle()}</div>
+						</div>
 					</div>
-				{/if}
+					<div class="flex items-center gap-1">
+						<button
+							onclick={collapseChat}
+							class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
+							transition-colors hover:bg-white/20 hover:text-white"
+							aria-label="Collapse chat"
+						>
+							<i class="fa-solid fa-compress text-sm"></i>
+						</button>
+						<button
+							onclick={closeChat}
+							class="flex h-9 w-9 items-center justify-center rounded-lg text-white/80
+							transition-colors hover:bg-white/20 hover:text-white"
+							aria-label="Close chat"
+						>
+							<i class="fa-solid fa-xmark text-sm"></i>
+						</button>
+					</div>
+				</div>
+
+				<!-- Messages -->
+				<div
+					bind:this={messagesContainer}
+					onscroll={handleMessagesScroll}
+					class="relative flex flex-1 flex-col gap-4 overflow-y-auto px-6 py-4"
+				>
+					{#each messages as message (message.id)}
+						{#if message.role === 'assistant'}
+							{@render assistantMessage(message)}
+						{:else}
+							{@render userMessage(message)}
+						{/if}
+					{/each}
+					{@render typingIndicator()}
+					{#if !hasUserMessages}
+						<div class="mt-3 grid grid-cols-2 gap-3">
+							{#each getSuggestedActions() as action}
+								<button
+									onclick={() => sendMessage(action.prompt)}
+									class="flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-left text-sm text-violet-700 transition-colors hover:border-violet-300 hover:bg-violet-100"
+								>
+									<i class="{action.icon} text-violet-500"></i>
+									{action.label}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
+				{@render scrollIndicator()}
+				{@render chatInputArea(false)}
 			</div>
-			{@render scrollIndicator()}
-			{@render chatInputArea(false)}
+			<!-- /Main chat column -->
 		</div>
 	</div>
 {/if}

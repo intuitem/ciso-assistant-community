@@ -10,7 +10,12 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import UserRateThrottle
+
+
+class ChatMessageThrottle(UserRateThrottle):
+    rate = "120/hour"
+
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .constants import LANG_MAP, LLM_HISTORY_LIMIT
@@ -59,8 +64,6 @@ class ChatSessionViewSet(BaseModelViewSet):
     """ViewSet for chat sessions with streaming message endpoint."""
 
     model = ChatSession
-    throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "chat"
 
     def get_queryset(self):
         # Users can only see their own sessions
@@ -74,7 +77,12 @@ class ChatSessionViewSet(BaseModelViewSet):
         serializer = ChatSessionListSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"], url_path="message")
+    @action(
+        detail=True,
+        methods=["post"],
+        url_path="message",
+        throttle_classes=[ChatMessageThrottle],
+    )
     def send_message(self, request, pk=None):
         """
         Send a message and get a streaming SSE response.

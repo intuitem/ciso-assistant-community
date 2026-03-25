@@ -83,6 +83,8 @@ let isTyping = $state(false);
 let isStreaming = $state(false);
 let sessionId = $state<string | null>(restored?.sessionId ?? null);
 let abortController = $state<AbortController | null>(null);
+let sessionHistory = $state<ChatSession[]>([]);
+let loadingHistory = $state(false);
 
 function getDefaultActions(): SuggestedAction[] {
 	return [
@@ -460,6 +462,10 @@ export function getIsStreaming(): boolean {
 	return isStreaming;
 }
 
+export function getSessionId(): string | null {
+	return sessionId;
+}
+
 export function stopStreaming() {
 	if (abortController) {
 		abortController.abort();
@@ -745,5 +751,83 @@ export function startNewSession() {
 
 	// Reset messages to welcome state
 	messages = [getWelcomeMessage()];
+	saveState();
+}
+
+export function getSessionHistory() {
+	return sessionHistory;
+}
+
+export function getLoadingHistory() {
+	return loadingHistory;
+}
+
+export async function loadSessionHistory() {
+	loadingHistory = true;
+	try {
+		const res = await fetch(`${CHAT_API}/sessions`);
+		if (res.ok) {
+			const data = await res.json();
+			sessionHistory = (data.results ?? data)
+				.map((s: any) => ({
+					id: s.id,
+					title: s.title || `Chat ${new Date(s.created_at).toLocaleDateString()}`,
+					folder: s.folder?.str ?? '',
+					message_count: s.message_count ?? 0,
+					created_at: s.created_at
+				}))
+				.sort(
+					(a: ChatSession, b: ChatSession) =>
+						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+				)
+				.slice(0, 30);
+		}
+	} catch {
+		// Ignore — sidebar just stays empty
+	}
+	loadingHistory = false;
+}
+
+export async function deleteSession(targetSessionId: string) {
+	try {
+		await fetch(`${CHAT_API}/sessions/${targetSessionId}`, { method: 'DELETE' });
+	} catch {
+		// Ignore
+	}
+	// Remove from local list
+	sessionHistory = sessionHistory.filter((s) => s.id !== targetSessionId);
+	// If we deleted the active session, start fresh
+	if (sessionId === targetSessionId) {
+		sessionId = null;
+		messages = [getWelcomeMessage()];
+		saveState();
+	}
+}
+
+export async function switchToSession(targetSessionId: string) {
+	if (abortController) {
+		abortController.abort();
+		abortController = null;
+	}
+	isTyping = false;
+	isStreaming = false;
+
+	try {
+		const res = await fetch(`${CHAT_API}/sessions/${targetSessionId}`);
+		if (!res.ok) return;
+		const data = await res.json();
+		const loadedMessages: ChatMessage[] = (data.messages ?? []).map((msg: any) => ({
+			id: msg.id,
+			role: msg.role as 'user' | 'assistant',
+			content: msg.content,
+			timestamp: new Date(msg.created_at),
+			contextRefs: msg.context_refs
+		}));
+		messages = loadedMessages.length > 0 ? loadedMessages : [getWelcomeMessage()];
+	} catch {
+		messages = [getWelcomeMessage()];
+	}
+
+	sessionId = targetSessionId;
 	saveState();
 }
