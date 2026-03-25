@@ -1118,8 +1118,8 @@
 														{/if}
 													</td>
 													<td class="px-3 py-2 text-sm">
-														{#if control.owner}
-															{control.owner.str}
+														{#if control.owner?.length}
+															{control.owner.map((o) => o.str).join(', ')}
 														{:else}
 															--
 														{/if}
@@ -1201,8 +1201,8 @@
 													{/if}
 												</td>
 												<td class="px-3 py-2 text-sm">
-													{#if control.owner}
-														{control.owner.str}
+													{#if control.owner?.length}
+														{control.owner.map((o) => o.str).join(', ')}
 													{:else}
 														--
 													{/if}
@@ -1279,8 +1279,8 @@
 											{/if}
 										</td>
 										<td class="px-3 py-2 text-sm">
-											{#if control.owner}
-												{control.owner.str}
+											{#if control.owner?.length}
+												{control.owner.map((o) => o.str).join(', ')}
 											{:else}
 												--
 											{/if}
