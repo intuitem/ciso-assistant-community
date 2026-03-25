@@ -66,20 +66,12 @@
 				/>
 
 				<footer class="modal-footer {parent.regionFooter}">
-					<button
-						type="button"
-						class="btn {parent.buttonNeutral}"
-						onclick={parent.onClose}
-					>
+					<button type="button" class="btn {parent.buttonNeutral}" onclick={parent.onClose}>
 						{m.cancel()}
 					</button>
 					<input type="hidden" name="urlmodel" value={URLModel} />
 					<input type="hidden" name="id" value={id} />
-					<button
-						class="btn preset-filled-error-500"
-						type="submit"
-						onclick={parent.onConfirm}
-					>
+					<button class="btn preset-filled-error-500" type="submit" onclick={parent.onConfirm}>
 						{m.submit()}
 					</button>
 				</footer>

@@ -157,7 +157,6 @@ export const actions: Actions = {
 						method: 'POST'
 					};
 
-					
 		const res = await fetch(endpoint, requestInitOptions);
 		if (!res.ok) {
 			const response = await res.json();
