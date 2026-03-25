@@ -7,6 +7,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 
 from core.views import BaseModelViewSet as AbstractBaseModelViewSet
 from .models import ChatSession, ChatMessage, IndexedDocument
@@ -42,6 +43,34 @@ _LANG_MAP = {
 }
 
 
+import re as _re
+
+# Patterns that attempt to impersonate system/assistant roles or override instructions
+_INJECTION_PATTERNS = _re.compile(
+    r"(?:"
+    r"\[/?(?:SYSTEM|CONTEXT|INST)\]"  # Fake delimiter tags
+    r"|<\|(?:im_start|im_end|system)\|>"  # ChatML role markers
+    r"|```\s*(?:system|tool_call)"  # Fenced role blocks
+    r")",
+    _re.IGNORECASE,
+)
+
+
+def _sanitize_user_input(text: str) -> str:
+    """
+    Neutralize prompt injection patterns in user messages.
+    Strips characters that could be interpreted as role markers or
+    delimiter tags by the LLM, while preserving the user's intent.
+    """
+    # Remove injection patterns
+    text = _INJECTION_PATTERNS.sub("", text)
+    # Strip null bytes and other control characters (keep newlines/tabs)
+    text = "".join(
+        c for c in text if c == "\n" or c == "\t" or (c >= " " and c <= "\U0010ffff")
+    )
+    return text.strip()
+
+
 class BaseModelViewSet(AbstractBaseModelViewSet):
     serializers_module = "chat.serializers"
 
@@ -50,6 +79,8 @@ class ChatSessionViewSet(BaseModelViewSet):
     """ViewSet for chat sessions with streaming message endpoint."""
 
     model = ChatSession
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "chat"
 
     def get_queryset(self):
         # Users can only see their own sessions
@@ -73,7 +104,7 @@ class ChatSessionViewSet(BaseModelViewSet):
 
         serializer = SendMessageSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user_content = serializer.validated_data["content"]
+        user_content = _sanitize_user_input(serializer.validated_data["content"])
         page_context = serializer.validated_data.get("page_context", {})
 
         # Save user message
@@ -615,13 +646,21 @@ class ChatSessionViewSet(BaseModelViewSet):
 
             except Exception as e:
                 logger.error("Chat stream error: %s", e)
-                error_msg = "Sorry, I encountered an error generating a response. Please check that the LLM service is configured and running."
+                # Save whatever was generated before the failure
+                saved_content = full_response.strip()
+                if saved_content:
+                    saved_content += "\n\n---\n*Response interrupted due to an error.*"
+                else:
+                    saved_content = (
+                        "Sorry, I encountered an error generating a response. "
+                        "Please check that the LLM service is configured and running."
+                    )
                 ChatMessage.objects.create(
                     session=session,
                     role=ChatMessage.Role.ASSISTANT,
-                    content=error_msg,
+                    content=saved_content,
                 )
-                error_data = json.dumps({"type": "error", "content": error_msg})
+                error_data = json.dumps({"type": "error", "content": saved_content})
                 yield f"data: {error_data}\n\n"
 
         response = StreamingHttpResponse(

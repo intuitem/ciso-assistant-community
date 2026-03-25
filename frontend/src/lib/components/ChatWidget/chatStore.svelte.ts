@@ -276,8 +276,16 @@ async function streamResponse(userMessage: string) {
 			}, 30);
 		}
 
+		const STREAM_TIMEOUT_MS = 120_000; // 2 minutes with no data → abort
+
 		while (true) {
-			const { done, value } = await reader.read();
+			const readResult = await Promise.race([
+				reader.read(),
+				new Promise<never>((_, reject) =>
+					setTimeout(() => reject(new Error('Stream timeout')), STREAM_TIMEOUT_MS)
+				)
+			]);
+			const { done, value } = readResult;
 			if (done) break;
 
 			buffer += decoder.decode(value, { stream: true });

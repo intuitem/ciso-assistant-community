@@ -235,13 +235,22 @@ def _build_messages(
     context: str,
     history: list[dict] | None = None,
 ) -> list[dict]:
-    """Build the message array for LLM calls."""
+    """Build the message array for LLM calls.
+
+    Uses explicit delimiters to separate system context from user input,
+    making it harder for prompt injection in user messages to be interpreted
+    as system instructions.
+    """
     messages = [{"role": "system", "content": system_prompt}]
     if history:
         for msg in history:
             messages.append({"role": msg["role"], "content": msg["content"]})
-    user_msg = f"Context:\n{context}\n\nQuestion: {prompt}" if context else prompt
-    messages.append({"role": "user", "content": user_msg})
+    if context:
+        # Context goes in a separate system message so it's clearly not user input
+        messages.append(
+            {"role": "system", "content": f"[CONTEXT]\n{context}\n[/CONTEXT]"}
+        )
+    messages.append({"role": "user", "content": prompt})
     return messages
 
 

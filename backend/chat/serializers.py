@@ -29,7 +29,7 @@ class ChatSessionReadSerializer(BaseModelSerializer):
 class ChatSessionWriteSerializer(BaseModelSerializer):
     class Meta:
         model = ChatSession
-        exclude = ["created_at", "updated_at", "owner"]
+        exclude = ["created_at", "updated_at", "owner", "workflow_state"]
 
 
 class ChatSessionListSerializer(BaseModelSerializer):
@@ -60,6 +60,18 @@ class SendMessageSerializer(serializers.Serializer):
 
     content = serializers.CharField(max_length=10000)
     page_context = serializers.DictField(required=False, default=dict)
+
+    def validate_page_context(self, value):
+        """Whitelist page_context keys and sanitize values."""
+        if not value:
+            return {}
+        allowed_keys = {"path", "model", "title"}
+        sanitized = {}
+        for key in allowed_keys:
+            if key in value and isinstance(value[key], str):
+                # Strip control characters and limit length
+                sanitized[key] = value[key][:200].strip()
+        return sanitized
 
 
 class IndexedDocumentReadSerializer(BaseModelSerializer):
