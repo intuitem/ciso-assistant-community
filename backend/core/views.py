@@ -5820,8 +5820,7 @@ class RiskAcceptanceViewSet(BaseModelViewSet):
             )
             raise PermissionDenied(
                 {"error": "Only the approver can accept the risk acceptance"}
-            )        
-        
+            )
 
         acceptance = self.get_object()
         acceptance.set_state("accepted")
