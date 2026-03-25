@@ -364,6 +364,16 @@ class ChatSessionViewSet(BaseModelViewSet):
                     "items": query_result["items"],
                 }
             )
+        elif query_result and query_result.get("type") == "multi_query":
+            parts = [
+                "INSTRUCTIONS: Multiple queries were executed to answer your question. "
+                "Present ALL results to the user in a clear, structured way. "
+                "Do NOT hallucinate additional information.\n"
+            ]
+            for i, sub in enumerate(query_result.get("results", []), 1):
+                parts.append(f"--- Query {i}: {sub.get('display_name', '')} ---")
+                parts.append(format_query_result(sub))
+            context = "\n\n".join(parts)
         elif query_result and query_result.get("type") == "search_library":
             context = (
                 "INSTRUCTIONS: The following data comes from the frameworks knowledge base. "

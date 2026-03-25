@@ -26,6 +26,28 @@ from .base import Workflow, WorkflowContext, SSEEvent
 
 logger = structlog.get_logger(__name__)
 
+# Validation schemas for LLM-generated objects
+ASSET_SCHEMA = {
+    "required": ["name"],
+    "types": {"name": str, "description": str, "type": str},
+}
+FEARED_EVENT_SCHEMA = {
+    "required": ["name", "description"],
+    "types": {"name": str, "description": str, "asset_names": list},
+}
+ROTO_SCHEMA = {
+    "required": ["risk_origin", "target_objective"],
+    "types": {"motivation": int, "resources": int, "activity": int},
+}
+STRATEGIC_SCENARIO_SCHEMA = {
+    "required": ["name", "roto_index"],
+    "types": {"name": str, "description": str, "roto_index": int},
+}
+ATTACK_PATH_SCHEMA = {
+    "required": ["name", "scenario_index"],
+    "types": {"name": str, "description": str, "scenario_index": int},
+}
+
 
 class EbiosRMAssistWorkflow(Workflow):
     name = "ebios_rm_assist"
@@ -613,7 +635,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Example:\n"
             f'[{{"name": "Patient records", "description": "Electronic health records database", "type": "PR"}}]'
         )
-        return self._parse_json_array(self._call_llm(ctx, prompt))
+        return self._generate_validated(ctx, prompt, ASSET_SCHEMA)
 
     def _create_assets(self, study: dict, assets: list[dict]) -> list[dict]:
         """Create Asset objects and link them to the study."""
@@ -661,7 +683,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"(confidentiality breach, availability loss, integrity compromise, etc.). "
             f"Return ONLY the JSON array, no other text."
         )
-        return self._parse_json_array(self._call_llm(ctx, prompt))
+        return self._generate_validated(ctx, prompt, FEARED_EVENT_SCHEMA)
 
     def _create_feared_events(
         self, study: dict, feared_events: list[dict], assets: list[dict]
@@ -742,7 +764,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Generate 3-5 relevant RoTo couples with realistic profiles. "
             f"Return ONLY the JSON array, no other text."
         )
-        return self._parse_json_array(self._call_llm(ctx, prompt))
+        return self._generate_validated(ctx, prompt, ROTO_SCHEMA)
 
     def _create_rotos(
         self, study: dict, rotos: list[dict], feared_events: list[dict]
@@ -827,7 +849,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Generate one strategic scenario per RoTo couple. "
             f"Return ONLY the JSON array, no other text."
         )
-        return self._parse_json_array(self._call_llm(ctx, prompt))
+        return self._generate_validated(ctx, prompt, STRATEGIC_SCENARIO_SCHEMA)
 
     def _create_strategic_scenarios(
         self,
@@ -889,7 +911,7 @@ class EbiosRMAssistWorkflow(Workflow):
             f"Generate 1-2 attack paths per strategic scenario. "
             f"Return ONLY the JSON array, no other text."
         )
-        return self._parse_json_array(self._call_llm(ctx, prompt))
+        return self._generate_validated(ctx, prompt, ATTACK_PATH_SCHEMA)
 
     def _create_attack_paths(
         self,
@@ -1025,17 +1047,4 @@ class EbiosRMAssistWorkflow(Workflow):
                 return option
         return None
 
-    def _parse_json_array(self, text: str) -> list[dict]:
-        """Extract a JSON array from LLM output."""
-        try:
-            # Try to find JSON array in code fence
-            match = re.search(r"```(?:json)?\s*(\[.*?\])\s*```", text, re.DOTALL)
-            if match:
-                return json.loads(match.group(1))
-            # Try the raw text as JSON
-            match = re.search(r"\[.*\]", text, re.DOTALL)
-            if match:
-                return json.loads(match.group(0))
-        except (json.JSONDecodeError, TypeError) as e:
-            logger.warning("Failed to parse JSON array from LLM: %s", e)
-        return []
+    # _parse_json_array is inherited from Workflow base class

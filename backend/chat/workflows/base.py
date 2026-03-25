@@ -229,6 +229,103 @@ class Workflow:
             logger.error("call_llm_failed", workflow=self.name, error=e)
             return ""
 
+    # ── Generation with validation ─────────────────────────────────
+
+    def _parse_json_array(self, text: str) -> list[dict]:
+        """Extract a JSON array from LLM output (code fence or raw)."""
+        import json as _json
+
+        try:
+            import re as _re
+
+            match = _re.search(r"```(?:json)?\s*(\[.*?\])\s*```", text, _re.DOTALL)
+            if match:
+                return _json.loads(match.group(1))
+            match = _re.search(r"\[.*\]", text, _re.DOTALL)
+            if match:
+                return _json.loads(match.group(0))
+        except (_json.JSONDecodeError, TypeError) as e:
+            logger.warning("json_array_parse_failed", error=e)
+        return []
+
+    def _validate_items(
+        self, items: list[dict], schema: dict
+    ) -> tuple[list[dict], list[str]]:
+        """
+        Validate items against a field schema.
+        Returns (valid_items, error_messages).
+
+        Schema format:
+            {"required": ["name"], "types": {"name": str, "type": str}}
+        """
+        valid = []
+        errors = []
+        required = schema.get("required", [])
+        type_checks = schema.get("types", {})
+
+        for i, item in enumerate(items):
+            if not isinstance(item, dict):
+                errors.append(f"Item {i + 1}: not a dict")
+                continue
+            missing = [f for f in required if not item.get(f)]
+            if missing:
+                errors.append(f"Item {i + 1} missing: {', '.join(missing)}")
+                continue
+            type_ok = True
+            for field, expected in type_checks.items():
+                if field in item and not isinstance(item[field], expected):
+                    errors.append(
+                        f"Item {i + 1} field '{field}': expected {expected.__name__}"
+                    )
+                    type_ok = False
+            if type_ok:
+                valid.append(item)
+
+        return valid, errors
+
+    def _generate_validated(
+        self,
+        ctx: WorkflowContext,
+        prompt: str,
+        schema: dict,
+        max_retries: int = 1,
+    ) -> list[dict]:
+        """
+        Generate a JSON array via LLM, validate against schema, retry with
+        feedback if validation fails. Returns the valid items.
+        """
+        for attempt in range(max_retries + 1):
+            raw = self._call_llm(ctx, prompt)
+            parsed = self._parse_json_array(raw)
+            valid, errors = self._validate_items(parsed, schema)
+
+            if not errors or attempt == max_retries:
+                if errors:
+                    logger.warning(
+                        "generation_validation_errors",
+                        workflow=self.name,
+                        errors=errors[:5],
+                        valid_count=len(valid),
+                        attempt=attempt + 1,
+                    )
+                return valid
+
+            # Retry with feedback
+            logger.info(
+                "generation_retry",
+                workflow=self.name,
+                errors=len(errors),
+                attempt=attempt + 1,
+            )
+            feedback = (
+                f"\n\nFEEDBACK: Previous output had {len(errors)} issues:\n"
+                + "\n".join(errors[:5])
+                + "\nPlease fix and regenerate the JSON array."
+            )
+            prompt = prompt + feedback
+
+        return valid
+
     def _stream_llm(
         self,
         ctx: WorkflowContext,

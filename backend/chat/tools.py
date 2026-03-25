@@ -612,6 +612,50 @@ def _build_tools() -> tuple[list[dict], dict]:
         propose_create_tool,
         attach_existing_tool,
         search_library_tool,
+        # Multi-query: combine multiple ORM queries in one call
+        {
+            "type": "function",
+            "function": {
+                "name": "multi_query",
+                "description": (
+                    "Run 2-3 queries at once for complex questions that need data from "
+                    "different models. Use when a single query_objects call isn't enough. "
+                    "Examples: 'What's our weakest compliance area?' needs compliance_assessment "
+                    "summary + requirement_assessment gaps. 'Compare risk across domains' needs "
+                    "risk_scenario summary per domain."
+                ),
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "queries": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "model": {
+                                        "type": "string",
+                                        "enum": sorted(MODEL_MAP.keys()),
+                                    },
+                                    "action": {
+                                        "type": "string",
+                                        "enum": ["list", "count", "summary"],
+                                    },
+                                    "search": {"type": "string"},
+                                    "status": {"type": "string"},
+                                    "has_no_related": {
+                                        "type": "array",
+                                        "items": {"type": "string"},
+                                    },
+                                },
+                                "required": ["model"],
+                            },
+                            "maxItems": 3,
+                        },
+                    },
+                    "required": ["queries"],
+                },
+            },
+        },
     ]
 
     return tools, valid_values
@@ -980,8 +1024,37 @@ def dispatch_tool_call(
     if tool_name == "attach_existing":
         return _build_attach_proposal(cleaned, accessible_folder_ids, parsed_context)
 
+    if tool_name == "multi_query":
+        return _execute_multi_query(arguments, accessible_folder_ids, parsed_context)
+
     logger.warning("Unknown tool: %s", tool_name)
     return None
+
+
+def _execute_multi_query(
+    arguments: dict, accessible_folder_ids: list[str], parsed_context=None
+) -> dict | None:
+    """Execute multiple ORM queries and return combined results."""
+    from .orm_query import execute_tool_query, format_query_result
+
+    queries = arguments.get("queries", [])
+    if not queries:
+        return None
+
+    results = []
+    for q in queries[:3]:  # Max 3 sub-queries
+        cleaned = _sanitize_arguments(q)
+        result = execute_tool_query(cleaned, accessible_folder_ids, parsed_context)
+        if result:
+            results.append(result)
+
+    if not results:
+        return None
+
+    return {
+        "type": "multi_query",
+        "results": results,
+    }
 
 
 def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | None:
