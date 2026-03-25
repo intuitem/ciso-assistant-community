@@ -261,6 +261,14 @@
 			<div>
 				<span class="text-gray-700">requirements["urn:..."].status</span> — requirement status
 			</div>
+			<div class="pt-1 border-t border-gray-200 mt-1">
+				<span class="text-gray-700">ref_ids["REF_ID"].score</span> — requirement score (by ref ID, works
+				across copies)
+			</div>
+			<div>
+				<span class="text-gray-700">ref_ids["REF_ID"].max_score / .result / .status</span> — same fields
+				as above
+			</div>
 		</div>
 	{/if}
 </div>

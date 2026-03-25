@@ -83,7 +83,9 @@
 
 		<!-- Draft badge (only when changes have been made) -->
 		{#if $dirtyStore}
-			<span class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+			<span
+				class="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700"
+			>
 				Draft
 			</span>
 		{/if}
@@ -166,41 +168,41 @@
 		{/if}
 
 		{#if $dirtyStore}
-		<div class="h-4 w-px bg-gray-200 shrink-0"></div>
+			<div class="h-4 w-px bg-gray-200 shrink-0"></div>
 
-		<!-- Publish button -->
-		{#if confirmPublish}
-			<span class="shrink-0 text-xs text-blue-600 font-medium">Publish to live?</span>
-			<button
-				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 transition-colors"
-				disabled={publishing}
-				onclick={handlePublish}
-			>
-				{#if publishing}
-					<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Publishing...
-				{:else}
-					Confirm
-				{/if}
-			</button>
-			<button
-				type="button"
-				class="shrink-0 text-xs text-gray-500 px-2 py-1"
-				onclick={() => (confirmPublish = false)}
-			>
-				Cancel
-			</button>
-		{:else}
-			<button
-				type="button"
-				class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
-				title="Publish draft to live framework"
-				onclick={() => (confirmPublish = true)}
-			>
-				<i class="fa-solid fa-rocket text-[10px]"></i>
-				Publish
-			</button>
-		{/if}
+			<!-- Publish button -->
+			{#if confirmPublish}
+				<span class="shrink-0 text-xs text-blue-600 font-medium">Publish to live?</span>
+				<button
+					type="button"
+					class="shrink-0 text-xs text-white font-medium px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 transition-colors"
+					disabled={publishing}
+					onclick={handlePublish}
+				>
+					{#if publishing}
+						<i class="fa-solid fa-circle-notch fa-spin mr-1"></i>Publishing...
+					{:else}
+						Confirm
+					{/if}
+				</button>
+				<button
+					type="button"
+					class="shrink-0 text-xs text-gray-500 px-2 py-1"
+					onclick={() => (confirmPublish = false)}
+				>
+					Cancel
+				</button>
+			{:else}
+				<button
+					type="button"
+					class="shrink-0 text-xs text-white font-medium px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors flex items-center gap-1.5"
+					title="Publish draft to live framework"
+					onclick={() => (confirmPublish = true)}
+				>
+					<i class="fa-solid fa-rocket text-[10px]"></i>
+					Publish
+				</button>
+			{/if}
 		{/if}
 	</div>
 </div>

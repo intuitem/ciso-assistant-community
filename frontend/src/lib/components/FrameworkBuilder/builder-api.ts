@@ -12,7 +12,7 @@ export interface DraftJSON {
 		description: string | null;
 		min_score: number;
 		max_score: number;
-		scores_definition: Record<string, unknown>[] | null;
+		scores_definition: Record<string, unknown> | null;
 		implementation_groups_definition: Record<string, unknown>[] | null;
 		outcomes_definition: Record<string, unknown>[] | null;
 	};

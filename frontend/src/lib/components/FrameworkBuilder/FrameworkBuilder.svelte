@@ -35,6 +35,29 @@
 	} = builder;
 
 	let urnCopied = $state(false);
+	let showScoringSettings = $state(false);
+
+	function getAggregation(): string {
+		const def = $frameworkStore.scores_definition;
+		if (def && typeof def === 'object' && 'aggregation' in def) {
+			return (def as Record<string, unknown>).aggregation as string;
+		}
+		return 'average';
+	}
+
+	function setAggregation(value: string) {
+		const current = $frameworkStore.scores_definition ?? {};
+		if (value === 'average') {
+			const { aggregation: _, ...rest } = current as Record<string, unknown>;
+			builder.updateFramework({
+				scores_definition: Object.keys(rest).length > 0 ? rest : null
+			});
+		} else {
+			builder.updateFramework({
+				scores_definition: { ...current, aggregation: value }
+			});
+		}
+	}
 
 	// Drag state for sections
 	let draggedSectionIndex: number | null = $state(null);
@@ -173,6 +196,63 @@
 			{/if}
 			{#if $errorsStore.has('framework')}
 				<p class="text-xs text-red-600">{$errorsStore.get('framework')}</p>
+			{/if}
+		</div>
+
+		<!-- Scoring settings -->
+		<div class="space-y-1.5">
+			<button
+				type="button"
+				class="flex items-center gap-1.5 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700 transition-colors"
+				onclick={() => (showScoringSettings = !showScoringSettings)}
+			>
+				<i
+					class="fa-solid {showScoringSettings ? 'fa-chevron-down' : 'fa-chevron-right'} text-[9px]"
+				></i>
+				Scoring settings
+			</button>
+			{#if showScoringSettings}
+				<div class="border border-gray-200 rounded-lg bg-gray-50/50 px-3 py-3 space-y-3">
+					<div class="grid grid-cols-3 gap-3">
+						<label class="block">
+							<span class="text-xs text-gray-500">Min score</span>
+							<input
+								type="number"
+								value={$frameworkStore.min_score}
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => {
+									builder.updateFramework({ min_score: parseInt(e.currentTarget.value) || 0 });
+								}}
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs text-gray-500">Max score</span>
+							<input
+								type="number"
+								value={$frameworkStore.max_score}
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40"
+								onblur={(e) => {
+									builder.updateFramework({ max_score: parseInt(e.currentTarget.value) || 100 });
+								}}
+							/>
+						</label>
+						<label class="block">
+							<span class="text-xs text-gray-500">Aggregation</span>
+							<select
+								value={getAggregation()}
+								class="w-full text-sm border border-gray-200 rounded px-2 py-1 focus:border-blue-500 outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 bg-white"
+								onchange={(e) => setAggregation(e.currentTarget.value)}
+							>
+								<option value="average">Average</option>
+								<option value="sum">Sum</option>
+							</select>
+						</label>
+					</div>
+					<p class="text-xs text-gray-400">
+						<strong>Average</strong> divides total score by number of questions.
+						<strong>Sum</strong> adds all scores directly. Use Sum for binary (0/1) scoring.
+					</p>
+				</div>
 			{/if}
 		</div>
 
