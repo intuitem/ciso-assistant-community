@@ -116,7 +116,6 @@ Unless marked as mandatory, ref\_id fields can be left blank but the column must
   * `XL`
   * full names also accepted, e.g. `Extra Small`
 * control\_impact - integer 1–5; also accepted as `impact`
-*
 * start\_date - date (YYYY-MM-DD)
 * eta - estimated completion date (YYYY-MM-DD)
 * expiry\_date - expiry date (YYYY-MM-DD)
