@@ -982,11 +982,6 @@ def _dispatch_search_library(arguments: dict, user_message: str = "") -> dict | 
     # vs find_frameworks — the graph detection is deterministic.
     if action != "compare_frameworks":
         detected = _detect_framework_names(user_message or query)
-        logger.info(
-            "framework_detection",
-            user_message=user_message[:100] if user_message else "",
-            detected=detected,
-        )
         if len(detected) >= 2:
             logger.info(
                 "auto_upgrade_to_compare",
@@ -1056,12 +1051,10 @@ def _detect_framework_names(text: str) -> list[str]:
             phrase = " ".join(tokens[i : i + length])
             urn = _resolve_framework(G, phrase)
             if urn and urn not in found:
-                logger.info("framework_token_match", phrase=phrase, urn=urn)
                 found.append(urn)
                 skip_until = i + length
                 break
         if len(found) >= 2:
             break
 
-    logger.info("framework_detection_tokens", tokens=tokens, found=found)
     return found

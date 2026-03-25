@@ -17,6 +17,7 @@ Edge types: has_requirement, parent_child, addresses_threat,
 
 import structlog
 import threading
+import time
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -99,27 +100,83 @@ class DiGraph:
 _graph: DiGraph | None = None
 _graph_lock = threading.Lock()
 
+_CACHE_DIR = Path(__file__).resolve().parent.parent / "db" / "cache"
+_CACHE_FILE = _CACHE_DIR / "knowledge_graph.pkl"
+
 
 def get_graph() -> DiGraph:
-    """Get or build the singleton knowledge graph."""
+    """Get or build the singleton knowledge graph, using disk cache when available."""
     global _graph
     if _graph is None:
         with _graph_lock:
             if _graph is None:
-                _graph = _build_graph()
+                _graph = _load_or_build()
     return _graph
 
 
 def rebuild_graph() -> DiGraph:
-    """Force rebuild of the knowledge graph."""
+    """Force rebuild of the knowledge graph (invalidates cache)."""
     global _graph
     with _graph_lock:
         _graph = _build_graph()
+        _save_cache(_graph)
     return _graph
 
 
 def _get_library_dir() -> Path:
     return Path(__file__).resolve().parent.parent / "library" / "libraries"
+
+
+def _get_library_mtime() -> float:
+    """Get the most recent modification time across all YAML library files."""
+    lib_dir = _get_library_dir()
+    if not lib_dir.exists():
+        return 0.0
+    mtime = lib_dir.stat().st_mtime
+    for f in lib_dir.glob("*.yaml"):
+        mtime = max(mtime, f.stat().st_mtime)
+    return mtime
+
+
+def _load_or_build() -> DiGraph:
+    """Try loading from disk cache; rebuild from YAML if stale or missing."""
+    import pickle
+
+    try:
+        if _CACHE_FILE.exists():
+            cache_mtime = _CACHE_FILE.stat().st_mtime
+            lib_mtime = _get_library_mtime()
+            if cache_mtime >= lib_mtime:
+                t0 = time.time()
+                with open(_CACHE_FILE, "rb") as f:
+                    graph = pickle.load(f)
+                logger.info(
+                    "knowledge_graph_loaded_from_cache",
+                    duration=round(time.time() - t0, 2),
+                    nodes=graph.number_of_nodes(),
+                )
+                return graph
+            else:
+                logger.info("knowledge_graph_cache_stale")
+    except Exception as e:
+        logger.warning("knowledge_graph_cache_load_failed", error=str(e))
+
+    graph = _build_graph()
+    _save_cache(graph)
+    return graph
+
+
+def _save_cache(graph: DiGraph) -> None:
+    """Persist the graph to disk for fast loading."""
+    import pickle
+
+    try:
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        with open(_CACHE_FILE, "wb") as f:
+            pickle.dump(graph, f, protocol=pickle.HIGHEST_PROTOCOL)
+        logger.info("knowledge_graph_cache_saved", path=str(_CACHE_FILE))
+    except Exception as e:
+        logger.warning("knowledge_graph_cache_save_failed", error=str(e))
 
 
 def _build_graph() -> DiGraph:
@@ -681,12 +738,6 @@ def _resolve_framework(G: DiGraph, identifier: str) -> str | None:
     # Threshold is low (0.25) because short abbreviations like "3CF"
     # score 0.3 against "3CF-ed1-v1". Callers filter tokens < 3 chars
     # to prevent common words from matching.
-    logger.info(
-        "resolve_framework_result",
-        identifier=identifier,
-        best_score=round(best_score, 3),
-        best_match=best_match,
-    )
     if best_score < 0.25:
         return None
     return best_match

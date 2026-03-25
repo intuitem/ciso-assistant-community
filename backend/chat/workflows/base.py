@@ -231,16 +231,21 @@ class Workflow:
         """
         Non-streaming LLM call. Returns the full response text.
         Use for structured output (JSON generation) that shouldn't be shown to the user.
+        Returns empty string on failure.
         """
-        t0 = time.time()
-        result = ctx.llm.generate(prompt, context, history=ctx.history)
-        logger.info(
-            "call_llm_complete",
-            workflow=self.name,
-            duration=round(time.time() - t0, 2),
-            chars=len(result),
-        )
-        return result
+        try:
+            t0 = time.time()
+            result = ctx.llm.generate(prompt, context, history=ctx.history)
+            logger.info(
+                "call_llm_complete",
+                workflow=self.name,
+                duration=round(time.time() - t0, 2),
+                chars=len(result),
+            )
+            return result
+        except Exception as e:
+            logger.error("call_llm_failed", workflow=self.name, error=str(e))
+            return ""
 
     def _stream_llm(
         self,

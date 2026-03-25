@@ -140,11 +140,13 @@ class SuggestControlsWorkflow(Workflow):
                 "ra_result": ra.result or "",
             }
 
-            if ra.compliance_assessment and ra.compliance_assessment.framework:
-                result["framework"] = ra.compliance_assessment.framework.name or ""
-                result["framework_ref"] = (
-                    getattr(ra.compliance_assessment.framework, "ref_id", "") or ""
-                )
+            if ra.compliance_assessment:
+                if ra.compliance_assessment.framework:
+                    result["framework"] = ra.compliance_assessment.framework.name or ""
+                    result["framework_ref"] = (
+                        getattr(ra.compliance_assessment.framework, "ref_id", "") or ""
+                    )
+                result["folder_id"] = str(ra.compliance_assessment.folder_id)
 
             # Get existing attached controls count
             result["existing_controls_count"] = ra.applied_controls.count()
@@ -157,54 +159,158 @@ class SuggestControlsWorkflow(Workflow):
     def _search_controls(
         self, ctx: WorkflowContext, requirement_info: dict
     ) -> list[dict]:
-        """Search for controls that might match the requirement."""
+        """
+        Search for controls that might match the requirement.
+
+        Strategy:
+        1. First search in the same domain (folder) as the compliance assessment
+        2. Use meaningful keywords from the requirement (skip stop words)
+        3. If not enough results, broaden to all accessible folders
+        4. Score results by keyword match count for better ranking
+        """
         AppliedControl = apps.get_model("core", "AppliedControl")
 
-        # Build search query from requirement text
-        search_text = requirement_info.get("description", "") or requirement_info.get(
-            "name", ""
-        )
+        # Build meaningful keywords from requirement name + description
+        req_name = requirement_info.get("name", "")
+        req_desc = requirement_info.get("description", "")
+        search_text = f"{req_name} {req_desc}".strip()
 
-        qs = AppliedControl.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+        # Filter out stop words and short words to get meaningful terms
+        _STOP_WORDS = {
+            "the",
+            "and",
+            "for",
+            "are",
+            "not",
+            "that",
+            "this",
+            "with",
+            "from",
+            "have",
+            "has",
+            "been",
+            "must",
+            "shall",
+            "should",
+            "will",
+            "can",
+            "may",
+            "all",
+            "any",
+            "each",
+            "they",
+            "them",
+            "their",
+            "its",
+            "which",
+            "when",
+            "where",
+            "what",
+            "how",
+            "les",
+            "des",
+            "une",
+            "pour",
+            "dans",
+            "par",
+            "sur",
+            "aux",
+            "est",
+            "sont",
+            "être",
+            "avec",
+            "qui",
+            "que",
+            "tout",
+            "tous",
+            "doit",
+            "doivent",
+            "peut",
+            "cette",
+            "ces",
+        }
+        words = []
+        for w in search_text.split():
+            clean = w.strip(".,;:!?()[]{}\"'").lower()
+            if len(clean) > 3 and clean not in _STOP_WORDS:
+                words.append(clean)
+        # Deduplicate while preserving order
+        seen = set()
+        keywords = []
+        for w in words:
+            if w not in seen:
+                seen.add(w)
+                keywords.append(w)
+        keywords = keywords[:15]
 
-        if search_text:
-            # Extract meaningful keywords (skip short words)
-            words = [w for w in search_text.split() if len(w) > 3][:10]
-            if words:
-                q = Q()
-                for word in words:
-                    q |= Q(name__icontains=word) | Q(description__icontains=word)
-                qs = qs.filter(q)
+        if not keywords:
+            return []
 
-        # Prefer active controls, order by relevance signals
-        qs = qs.order_by("-status", "name")[:20]
+        # Build the keyword filter
+        keyword_filter = Q()
+        for word in keywords:
+            keyword_filter |= Q(name__icontains=word) | Q(description__icontains=word)
 
+        # Search 1: Same domain first (controls in the compliance assessment's folder)
+        folder_id = requirement_info.get("folder_id")
         results = []
-        for ctrl in qs:
-            results.append(
-                {
-                    "id": str(ctrl.id),
-                    "name": str(ctrl),
-                    "ref_id": ctrl.ref_id or "",
-                    "description": (
-                        ctrl.description[:200] + "..."
-                        if ctrl.description and len(ctrl.description) > 200
-                        else ctrl.description or ""
-                    ),
-                    "status": (
-                        ctrl.get_status_display()
-                        if hasattr(ctrl, "get_status_display")
-                        else ctrl.status or ""
-                    ),
-                    "category": (
-                        ctrl.get_category_display()
-                        if hasattr(ctrl, "get_category_display")
-                        else ctrl.category or ""
-                    ),
-                }
-            )
+        seen_ids = set()
 
-        return results
+        if folder_id:
+            domain_qs = (
+                AppliedControl.objects.filter(folder_id=folder_id)
+                .filter(keyword_filter)
+                .order_by("name")[:20]
+            )
+            for ctrl in domain_qs:
+                results.append(self._serialize_control(ctrl))
+                seen_ids.add(str(ctrl.id))
+
+        # Search 2: Broaden to all accessible folders if not enough results
+        if len(results) < 10:
+            broad_qs = (
+                AppliedControl.objects.filter(folder_id__in=ctx.accessible_folder_ids)
+                .filter(keyword_filter)
+                .exclude(id__in=seen_ids)
+                .order_by("name")[: 20 - len(results)]
+            )
+            for ctrl in broad_qs:
+                results.append(self._serialize_control(ctrl))
+
+        # Score and sort by keyword match count (more matches = more relevant)
+        for item in results:
+            text = f"{item['name']} {item['description']}".lower()
+            item["_score"] = sum(1 for kw in keywords if kw in text)
+        results.sort(key=lambda x: x["_score"], reverse=True)
+
+        # Remove scoring key before returning
+        for item in results:
+            del item["_score"]
+
+        return results[:20]
+
+    @staticmethod
+    def _serialize_control(ctrl) -> dict:
+        return {
+            "id": str(ctrl.id),
+            "name": str(ctrl),
+            "ref_id": ctrl.ref_id or "",
+            "description": (
+                ctrl.description[:200] + "..."
+                if ctrl.description and len(ctrl.description) > 200
+                else ctrl.description or ""
+            ),
+            "status": (
+                ctrl.get_status_display()
+                if hasattr(ctrl, "get_status_display")
+                else ctrl.status or ""
+            ),
+            "category": (
+                ctrl.get_category_display()
+                if hasattr(ctrl, "get_category_display")
+                else ctrl.category or ""
+            ),
+        }
 
     def _get_attached_control_ids(self, ctx: WorkflowContext) -> set[str]:
         """Get IDs of controls already attached to this requirement assessment."""

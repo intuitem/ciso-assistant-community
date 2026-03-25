@@ -401,14 +401,6 @@ class OpenAICompatibleLLM:
                 try:
                     data = json.loads(payload)
                     delta = data["choices"][0].get("delta", {})
-                    # Log first delta to see what fields the server sends
-                    if not hasattr(self, "_logged_first_delta"):
-                        self._logged_first_delta = True
-                        logger.info(
-                            "first_stream_delta",
-                            delta_keys=list(delta.keys()),
-                            delta=delta,
-                        )
                     # Servers put thinking in different fields:
                     # - "reasoning_content" (DeepSeek API)
                     # - "reasoning" (LM Studio)

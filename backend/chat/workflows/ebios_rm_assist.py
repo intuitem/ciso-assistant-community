@@ -415,6 +415,12 @@ class EbiosRMAssistWorkflow(Workflow):
                     yield self._thinking(
                         f"Created {len(created['feared_events'])} feared events."
                     )
+                else:
+                    yield self._token(
+                        "I couldn't generate feared events. "
+                        "Please provide more detail about the scope and try again."
+                    )
+                    return
 
         all_feared_events = self._get_all_feared_events(study)
 
@@ -432,6 +438,10 @@ class EbiosRMAssistWorkflow(Workflow):
                     )
                     yield self._thinking(
                         f"Created {len(created['rotos'])} RoTo couples."
+                    )
+                else:
+                    yield self._token(
+                        "I couldn't generate RoTo couples. The LLM may be unavailable."
                     )
 
         all_rotos = self._get_all_rotos(study)
@@ -451,6 +461,10 @@ class EbiosRMAssistWorkflow(Workflow):
                     yield self._thinking(
                         f"Created {len(created['strategic_scenarios'])} strategic scenarios."
                     )
+                else:
+                    yield self._token(
+                        "I couldn't generate strategic scenarios. The LLM may be unavailable."
+                    )
 
         all_strategic_scenarios = self._get_all_strategic_scenarios(study)
 
@@ -468,6 +482,10 @@ class EbiosRMAssistWorkflow(Workflow):
                     )
                     yield self._thinking(
                         f"Created {len(created['attack_paths'])} attack paths."
+                    )
+                else:
+                    yield self._token(
+                        "I couldn't generate attack paths. The LLM may be unavailable."
                     )
 
         all_attack_paths = self._get_all_attack_paths(study)

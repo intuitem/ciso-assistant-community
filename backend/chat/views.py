@@ -475,24 +475,29 @@ class ChatSessionViewSet(BaseModelViewSet):
         # Keep only the last 20 messages to stay within context limits
         history_messages = history_messages[-20:]
 
-        # Enrich context with domain objects when on a detail page.
-        # This gives the LLM visibility into related objects (e.g., assets
-        # in the domain) so it can reason about suggestions like "what other
-        # risks should I consider based on my assets?"
+        # Assemble context with structured priorities
+        from .context import ContextBuilder
+
+        user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
+        lang_name = _LANG_MAP.get(user_lang, "English")
+
+        ctx_builder = ContextBuilder(max_chars=12000)
+        ctx_builder.add(
+            "language",
+            f"LANGUAGE: You MUST respond in {lang_name}.",
+            priority=10,
+        )
+        if page_context_prefix and not query_result:
+            ctx_builder.add("page_context", page_context_prefix, priority=8)
+        ctx_builder.add("main_context", context, priority=9)
+
+        # Enrich context with domain objects when on a detail page
         if parsed_context and parsed_context.object_id:
             enrichment = _enrich_context(parsed_context, accessible_folders)
             if enrichment:
-                context += "\n\n" + enrichment
+                ctx_builder.add("enrichment", enrichment, priority=5)
 
-        # Inject explicit language instruction based on the user's locale
-        # This is more reliable than the system prompt for small models
-        user_lang = request.META.get("HTTP_ACCEPT_LANGUAGE", "en")[:2]
-        lang_name = _LANG_MAP.get(user_lang, "English")
-        context = f"LANGUAGE: You MUST respond in {lang_name}.\n\n" + context
-
-        # Prepend page context to the LLM context so it knows where the user is
-        if page_context_prefix and not query_result:
-            context = page_context_prefix + context
+        context = ctx_builder.build()
 
         logger.info(
             "llm_context_size",
@@ -500,8 +505,8 @@ class ChatSessionViewSet(BaseModelViewSet):
             if hasattr(llm, "system_prompt")
             else 0,
             context_chars=len(context),
+            sections=ctx_builder.section_names(),
             history_messages=len(history_messages),
-            history_chars=sum(len(m.get("content", "")) for m in history_messages),
             total_prompt_chars=(
                 (len(llm.system_prompt) if hasattr(llm, "system_prompt") else 0)
                 + len(context)
