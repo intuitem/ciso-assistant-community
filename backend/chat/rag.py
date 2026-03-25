@@ -1,10 +1,12 @@
 """
 RAG retrieval layer with permission-aware filtering.
-Handles vector search, graph expansion via ORM, and context formatting.
+Handles vector search, cross-encoder re-ranking, graph expansion via ORM,
+and context formatting.
 """
 
 import structlog
 import os
+import time
 from typing import Any
 
 from iam.models import Folder, RoleAssignment
@@ -13,6 +15,24 @@ logger = structlog.get_logger(__name__)
 
 COLLECTION_NAME = "ciso_assistant"
 QDRANT_URL = os.environ.get("QDRANT_URL", "http://localhost:6333")
+
+# Cross-encoder re-ranker (cached singleton)
+_reranker = None
+_RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+
+def _get_reranker():
+    """Get the cross-encoder re-ranker, loading on first use."""
+    global _reranker
+    if _reranker is None:
+        try:
+            from sentence_transformers import CrossEncoder
+
+            _reranker = CrossEncoder(_RERANKER_MODEL)
+            logger.info("reranker_loaded", model=_RERANKER_MODEL)
+        except Exception as e:
+            logger.warning("reranker_load_failed", error=str(e))
+    return _reranker
 
 
 def get_qdrant_client():
@@ -59,6 +79,9 @@ def search(
     query_vector = embedder.embed_query(query)
     all_results = []
 
+    # Over-fetch to have enough candidates for re-ranking
+    fetch_limit = top_k * 3
+
     # --- Search 1: User data (permission-filtered) ---
     if source_type != "library":
         accessible_folders = get_accessible_folder_ids(user)
@@ -81,7 +104,7 @@ def search(
             user_results = client.query_points(
                 collection_name=COLLECTION_NAME,
                 query=query_vector,
-                limit=top_k,
+                limit=fetch_limit,
                 query_filter=Filter(must=user_conditions),
             )
             all_results.extend(user_results.points)
@@ -102,14 +125,14 @@ def search(
             library_results = client.query_points(
                 collection_name=COLLECTION_NAME,
                 query=query_vector,
-                limit=top_k,
+                limit=fetch_limit,
                 query_filter=Filter(must=library_conditions),
             )
             all_results.extend(library_results.points)
         except Exception as e:
             logger.error("qdrant_library_search_failed", error=str(e))
 
-    # Merge, deduplicate, sort by score, take top_k
+    # Merge and deduplicate
     seen_ids = set()
     merged = []
     for r in sorted(all_results, key=lambda x: x.score, reverse=True):
@@ -117,8 +140,27 @@ def search(
         if rid not in seen_ids:
             seen_ids.add(rid)
             merged.append(r)
-        if len(merged) >= top_k:
-            break
+
+    # Re-rank with cross-encoder for better relevance
+    reranker = _get_reranker()
+    if reranker and len(merged) > top_k:
+        t0 = time.time()
+        pairs = [(query, r.payload.get("text", "")[:512]) for r in merged]
+        try:
+            scores = reranker.predict(pairs)
+            ranked = sorted(zip(scores, merged), key=lambda x: x[0], reverse=True)
+            merged = [r for _, r in ranked[:top_k]]
+            logger.info(
+                "reranker_complete",
+                candidates=len(pairs),
+                kept=len(merged),
+                duration=round(time.time() - t0, 2),
+            )
+        except Exception as e:
+            logger.warning("reranker_failed", error=str(e))
+            merged = merged[:top_k]
+    else:
+        merged = merged[:top_k]
 
     return [
         {
