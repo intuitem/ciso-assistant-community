@@ -45,7 +45,7 @@ def build_cel_context(compliance_assessment) -> dict:
         RequirementNode.objects.filter(
             framework=framework,
             assessable=True,
-        ).values("id", "urn", "implementation_groups")
+        ).values("id", "urn", "ref_id", "implementation_groups")
     )
 
     # Implementation-groups filtering (Python-side for DB portability)
@@ -79,28 +79,34 @@ def build_cel_context(compliance_assessment) -> dict:
     answered_count = 0
     total_count = len(in_scope)
     requirements: dict[str, dict] = {}
+    ref_ids: dict[str, dict] = {}
 
     for node in in_scope:
         urn = node["urn"]
+        ref_id = node.get("ref_id")
         ra = ra_rows.get(urn)
         score_max += max_score
 
         if ra and ra["is_scored"] and ra["result"] != "not_applicable":
             score_sum += ra["score"] or 0
             answered_count += 1
-            requirements[urn] = {
+            entry = {
                 "score": ra["score"] or 0,
                 "max_score": max_score,
                 "result": ra["result"],
                 "status": ra["status"],
             }
         else:
-            requirements[urn] = {
+            entry = {
                 "score": 0,
                 "max_score": max_score,
                 "result": ra["result"] if ra else "not_assessed",
                 "status": ra["status"] if ra else "to_do",
             }
+
+        requirements[urn] = entry
+        if ref_id:
+            ref_ids[ref_id] = entry
 
     return {
         "assessment": {
@@ -110,6 +116,7 @@ def build_cel_context(compliance_assessment) -> dict:
             "total_count": total_count,
         },
         "requirements": requirements,
+        "ref_ids": ref_ids,
     }
 
 
